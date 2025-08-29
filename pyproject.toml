@@ -5,9 +5,15 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "anthropic>=0.64.0",
+    "datasets>=4.0.0",
+    "openai>=1.102.0",
     "python-dotenv>=1.1.1",
+    "scikit-learn>=1.7.1",
+    "sentence-transformers>=5.1.0",
     "torch>=2.8.0",
     "transformers>=4.55.4",
+    "wandb>=0.21.2",
 ]
 
 [tool.uv]

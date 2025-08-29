@@ -1,0 +1,736 @@
+# %%
+"""API client."""
+import os
+import random
+import dotenv
+import math
+import asyncio
+from json import JSONDecodeError
+from datetime import datetime
+from dataclasses import dataclass
+from abc import ABC, abstractmethod
+from pathlib import Path
+from typing import Generic, Sequence, Type
+from pydantic import ValidationError
+from slist import Slist
+from absl import logging
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
+
+from llm_types import (
+    APIRequestCache,
+    ChatMessage,
+    GenericBaseModel,
+    InferenceConfig,
+    ToolArgs,
+    ChatHistory,
+    is_thinking_model,
+)
+
+import openai
+import anthropic
+from openai import AsyncOpenAI, BaseModel
+from openai._types import NOT_GIVEN as OPENAI_NOT_GIVEN
+from anthropic import AsyncAnthropic
+from anthropic.types.message import Message
+from anthropic._types import NOT_GIVEN as ANTHROPIC_NOT_GIVEN
+
+
+class Prob(BaseModel):
+    token: str
+    prob: float
+
+
+class LogProb(BaseModel):
+    token: str
+    logprob: float
+
+    @property
+    def proba(self) -> float:
+        return math.exp(self.logprob)
+
+    def to_prob(self) -> Prob:
+        return Prob(token=self.token, prob=self.proba)
+
+
+class TokenWithLogProbs(BaseModel):
+    token: str
+    logprob: float  # log probability of the particular token
+    top_logprobs: Sequence[LogProb]  # log probability of the top 5 tokens
+
+    def sorted_logprobs(self) -> Sequence[LogProb]:  # Highest to lowest
+        return sorted(self.top_logprobs, key=lambda x: x.logprob, reverse=True)
+
+    def sorted_probs(self) -> Sequence[Prob]:
+        return [logprob.to_prob() for logprob in self.sorted_logprobs()]
+
+
+class ResponseWithLogProbs(BaseModel):
+    response: str
+    content: Sequence[TokenWithLogProbs]  #
+
+
+class OpenaiResponseWithLogProbs(BaseModel):
+    choices: list[dict]
+    usage: dict
+    created: int
+    model: str
+    id: str
+    system_fingerprint: str | None = None
+
+    @property
+    def first_response(self) -> str:
+        return self.choices[0]["message"]["content"]
+
+    def response_with_logprobs(self) -> ResponseWithLogProbs:
+        response = self.first_response
+        logprobs = self.choices[0]["logprobs"]["content"]
+        parsed_content = [TokenWithLogProbs.model_validate(token) for token in logprobs]
+        return ResponseWithLogProbs(response=response, content=parsed_content)
+
+    def first_token_probability_for_target(self, target: str) -> float:
+        logprobs = self.response_with_logprobs().content
+        first_token = logprobs[0]
+        for token in first_token.top_logprobs:
+            # logging.info(f"Token: {token.token} Logprob: {token.logprob}")
+            if token.token == target:
+                token_logprob = token.logprob
+                # convert natural log to prob
+                return math.exp(token_logprob)
+        return 0.0
+
+
+class OpenaiResponse(BaseModel):
+    choices: list[dict]
+    usage: dict
+    created: int
+    model: str
+    id: str | None = None
+    system_fingerprint: str | None = None
+
+    @property
+    def first_response(self) -> str:
+        try:
+            content = self.choices[0]["message"]["content"]
+            if content is None:
+                raise ValueError(f"No content found in OpenaiResponse: {self}")
+            if isinstance(content, dict):
+                # anthropic format
+                content = content.get("text", "")
+            return content
+        except TypeError:
+            raise ValueError(f"No content found in OpenaiResponse: {self}")
+
+    @property
+    def reasoning_content(self) -> str:
+        ## sometimes has reasoning_content or reasoning instead of content e.g. deepseek-reasoner or gemini
+        possible_keys = ["reasoning_content", "reasoning"]
+        for key in possible_keys:
+            if self.choices[0]["message"].get(key, None) is not None:
+                return self.choices[0]["message"][key]
+            # Check if content is a dict before trying to access keys
+            content = self.choices[0]["message"].get("content")
+            if isinstance(content, dict) and content.get(key, None) is not None:
+                return content[key]
+        raise ValueError(f"No reasoning_content found in OpenaiResponse: {self}")
+
+    @property
+    def has_reasoning(self) -> bool:
+        possible_keys = ["reasoning_content", "reasoning"]
+        for key in possible_keys:
+            if self.choices[0]["message"].get(key):
+                return True
+        return False
+
+    def has_response(self) -> bool:
+        if len(self.choices) == 0:
+            return False
+        first_choice = self.choices[0]
+        if first_choice["message"] is None:
+            return False
+        if first_choice["message"]["content"] is None:
+            return False
+        return True
+
+    @property
+    def hit_content_filter(self) -> bool:
+        """
+        OpenaiResponse(choices=[{'finish_reason': None, 'index': 0, 'logprobs': None, 'message': None, 'finishReason': 'content_filter'}], usage={'completion_tokens': None, 'prompt_tokens': None, 'total_tokens': None, 'completion_tokens_details': None, 'prompt_tokens_details': None, 'completionTokens': 0, 'promptTokens': 279, 'totalTokens': 279}, created=1734802468, model='gemini-2.0-flash-exp', id=None, system_fingerprint=None, object='chat.completion', service_tier=None)
+        """
+        first_choice = self.choices[0]
+        if "finishReason" in first_choice:
+            if first_choice["finishReason"] == "content_filter":
+                return True
+        if "finish_reason" in first_choice:
+            if first_choice["finish_reason"] == "content_filter":
+                return True
+        return False
+
+    @property
+    def abnormal_finish(self) -> bool:
+        """
+        OpenaiResponse(choices=[{'finish_reason': None, 'index': 0, 'logprobs': None, 'message': None, 'finishReason': 'content_filter'}], usage={'completion_tokens': None, 'prompt_tokens': None, 'total_tokens': None, 'completion_tokens_details': None, 'prompt_tokens_details': None, 'completionTokens': 0, 'promptTokens': 279, 'totalTokens': 279}, created=1734802468, model='gemini-2.0-flash-exp', id=None, system_fingerprint=None, object='chat.completion', service_tier=None)
+        """
+        first_choice = self.choices[0]
+        if "finishReason" in first_choice:
+            if first_choice["finishReason"] not in ["stop", "length"]:
+                return True
+        if "finish_reason" in first_choice:
+            if first_choice["finish_reason"] not in ["stop", "length"]:
+                return True
+        return False
+
+
+class Caller(ABC):
+    @abstractmethod
+    async def call(
+        self,
+        messages: ChatHistory | Sequence[ChatMessage],
+        config: InferenceConfig,
+        try_number: int = 1,
+        tool_args: ToolArgs | None = None,
+    ) -> OpenaiResponse:
+        pass
+
+    @abstractmethod
+    async def flush(self) -> None:
+        # flush file buffers
+        raise NotImplementedError()
+
+    ## implement context manager
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        await self.flush()
+
+
+class CacheByModel(Generic[GenericBaseModel]):
+    def __init__(
+        self, cache_path: Path, cache_type: Type[GenericBaseModel] = OpenaiResponse
+    ):
+        self.cache_path = Path(cache_path)
+        # if not exists, create it
+        if not self.cache_path.exists():
+            self.cache_path.mkdir(parents=True)
+        assert (
+            self.cache_path.is_dir()
+        ), f"cache_path must be a folder, you provided {cache_path}"
+        self.cache: dict[str, APIRequestCache[GenericBaseModel]] = {}
+        self.log_probs_cache: dict[str, APIRequestCache[OpenaiResponseWithLogProbs]] = (
+            {}
+        )
+        self.cache_type = cache_type
+
+    def get_cache(self, model: str) -> APIRequestCache[GenericBaseModel]:
+        if model not in self.cache:
+            path = self.cache_path / f"{model}.jsonl"
+            self.cache[model] = APIRequestCache(
+                cache_path=path, response_type=self.cache_type
+            )
+        return self.cache[model]
+
+    def get_log_probs_cache(
+        self, model: str
+    ) -> APIRequestCache[OpenaiResponseWithLogProbs]:
+        if model not in self.log_probs_cache:
+            path = self.cache_path / f"{model}_log_probs.jsonl"
+            self.log_probs_cache[model] = APIRequestCache(
+                cache_path=path, response_type=OpenaiResponseWithLogProbs
+            )
+        return self.log_probs_cache[model]
+
+    async def flush(self) -> None:
+        for cache in self.cache.values():
+            await cache.flush()
+
+
+class OpenrouterCaller(Caller):
+    def __init__(
+        self,
+        cache_path: Path | str | CacheByModel,
+        api_key: str | None = None,
+        client: AsyncOpenAI | None = None,
+    ):
+        if client is not None:
+            self.client = client
+        else:
+            if api_key is None:
+                env_key = os.getenv("OPENROUTER_API_KEY")
+                assert (
+                    env_key is not None
+                ), "Please provide an OpenRouter API Key. Either pass it as an argument or set it in the environment variable OPENROUTER_API_KEY"
+                api_key = env_key
+            self.client = AsyncOpenAI(api_key=api_key)
+        self.cache_by_model = (
+            CacheByModel(Path(cache_path))
+            if not isinstance(cache_path, CacheByModel)
+            else cache_path
+        )
+
+    async def flush(self) -> None:
+        await self.cache_by_model.flush()
+
+    def get_cache(self, model: str) -> APIRequestCache[OpenaiResponse]:
+        return self.cache_by_model.get_cache(model)
+
+    def get_log_probs_cache(
+        self, model: str
+    ) -> APIRequestCache[OpenaiResponseWithLogProbs]:
+        return self.cache_by_model.get_log_probs_cache(model)
+
+    # UPDATE (Atticus): use new reasoning format for OpenRouter
+    async def call(
+        self,
+        messages: ChatHistory | Sequence[ChatMessage],  # backwards compat
+        config: InferenceConfig,
+        try_number: int = 1,
+        tool_args: ToolArgs | None = None,
+    ) -> OpenaiResponse:
+        if not isinstance(messages, ChatHistory):
+            messages = ChatHistory(messages=messages)
+        maybe_result = await self.get_cache(config.model).get_model_call(
+            messages, config, try_number, tool_args
+        )
+        if maybe_result is not None:
+            return maybe_result
+
+        if not is_thinking_model(config.model):
+            to_pass_reasoning = {}
+        elif config.reasoning is None:
+            to_pass_reasoning = {"reasoning": OPENAI_NOT_GIVEN}
+        else:
+            config.reasoning.pop("max_tokens", None)
+            to_pass_reasoning = {"reasoning_effort": config.reasoning["effort"]}
+
+        to_pass_extra_body = config.extra_body
+        if config.model == "meta-llama/llama-3.1-8b-instruct":
+            to_pass_extra_body = {"provider": {"order": ["nebius/fp8", "cloudflare/fp8"]}}
+
+        assert len(messages.messages) > 0, "Messages must be non-empty"
+        try:
+            logging.debug(f"Calling OpenRouter with config: {config}")
+            chat_completion = await self.client.chat.completions.create(
+                model=config.model,
+                messages=[msg.to_openai_content() for msg in messages.messages],  # type: ignore
+                max_tokens=(
+                    config.max_tokens
+                    if config.max_tokens is not None
+                    else OPENAI_NOT_GIVEN
+                ),
+                temperature=(
+                    config.temperature
+                    if config.temperature is not None
+                    else OPENAI_NOT_GIVEN
+                ),
+                top_p=config.top_p if config.top_p is not None else OPENAI_NOT_GIVEN,
+                frequency_penalty=(
+                    config.frequency_penalty
+                    if config.frequency_penalty is not None
+                    else OPENAI_NOT_GIVEN
+                ),
+                response_format=config.response_format if config.response_format is not None else OPENAI_NOT_GIVEN,  # type: ignore
+                tools=tool_args.tools if tool_args is not None else OPENAI_NOT_GIVEN,  # type: ignore
+                extra_body=to_pass_extra_body,
+                **to_pass_reasoning,  # type: ignore
+            )
+        except Exception as e:
+            note = f"Model: {config.model}. API domain: {self.client.base_url}"
+            e.add_note(note)
+            raise e
+
+        try:
+            resp = OpenaiResponse.model_validate(chat_completion.model_dump())
+        except ValidationError as e:
+            logging.error(
+                f"Validation error for model {config.model}. Prompt: {messages}. resp: {chat_completion.model_dump()}"
+            )
+            raise e
+        
+        logging.debug(f"OpenRouter response: {resp}")
+
+        await self.get_cache(config.model).add_model_call(
+            messages=messages,
+            config=config,
+            try_number=try_number,
+            response=resp,
+            tools=tool_args,
+        )
+        return resp
+
+
+class AnthropicCaller(Caller):
+    def __init__(
+        self,
+        anthropic_client: anthropic.AsyncAnthropic,
+        cache_path: Path | str | CacheByModel,
+    ):
+        self.client = anthropic_client
+        self.cache_by_model = (
+            CacheByModel(Path(cache_path))
+            if not isinstance(cache_path, CacheByModel)
+            else cache_path
+        )
+
+    async def flush(self) -> None:
+        await self.cache_by_model.flush()
+
+    def get_cache(self, model: str) -> APIRequestCache[OpenaiResponse]:
+        return self.cache_by_model.get_cache(model)
+
+    def get_log_probs_cache(
+        self, model: str
+    ) -> APIRequestCache[OpenaiResponseWithLogProbs]:
+        return self.cache_by_model.get_log_probs_cache(model)
+
+    async def call(
+        self,
+        messages: ChatHistory | Sequence[ChatMessage],
+        config: InferenceConfig,
+        try_number: int = 1,
+        tool_args: ToolArgs | None = None,
+    ) -> OpenaiResponse:
+        if not isinstance(messages, ChatHistory):
+            messages = ChatHistory(messages=messages)
+        assert tool_args is None, "Anthropic does not support tools"
+        maybe_result = await self.get_cache(config.model).get_model_call(
+            messages, config, try_number, tool_args
+        )
+        if maybe_result is not None:
+            return maybe_result
+
+        non_system, system = Slist(messages.messages).split_by(
+            lambda msg: msg.role != "system"
+        )
+        anthropic_messages = [
+            {"role": msg.role, "content": msg.content} for msg in non_system
+        ]
+        if system.length >= 2:
+            raise ValueError("Anthropic does not support multiple system messages")
+        system_message: ChatMessage | None = system.first_option
+        to_pass_sys = (
+            system_message.content
+            if system_message is not None
+            else anthropic.NOT_GIVEN
+        )
+
+        if config.reasoning is not None and is_thinking_model(config.model):
+            to_pass_thinking = {
+                "type": "enabled",
+                "budget_tokens": config.reasoning["max_tokens"],
+            }
+            to_pass_temperature = 1.0
+        else:
+            to_pass_thinking = ANTHROPIC_NOT_GIVEN
+            to_pass_temperature = (
+                config.temperature
+                if config.temperature is not None
+                else ANTHROPIC_NOT_GIVEN
+            )
+
+        assert config.max_tokens is not None, "Anthropic requires max_tokens"
+
+        logging.debug(f"Calling Anthropic with config: {config}")
+        response: Message = await self.client.messages.create(
+            model=config.model,
+            messages=anthropic_messages,  # type: ignore
+            max_tokens=config.max_tokens,  # type: ignore
+            temperature=to_pass_temperature,  # type: ignore
+            top_p=config.top_p if config.top_p is not None else ANTHROPIC_NOT_GIVEN,  # type: ignore
+            system=to_pass_sys,
+            thinking=to_pass_thinking,  # type: ignore
+            extra_body=config.extra_body,
+        )
+
+        # convert
+        # response.content is a list of blocks: ThinkingBlock, TextBlock
+        # TODO: add ToolUse support
+        if response.content[0].type == "thinking":
+            if len(response.content) != 2:
+                logging.warning(f"Expected 2 blocks in response: {response.content}")
+            
+            try:
+                response_content = {
+                    "reasoning": response.content[0].thinking,
+                    "text": response.content[1].text,
+                }
+            except Exception as e:
+                response_content = {
+                    "reasoning": "N/A",
+                    "text": "N/A",
+                }
+        else:
+            if len(response.content) != 1:
+                logging.warning(f"Expected 1 block in response: {response.content}")
+            try:
+                response_content = {
+                    "text": response.content[0].text,
+                }
+            except Exception as e:
+                response_content = {
+                    "text": "N/A",
+                }
+
+        openai_response = OpenaiResponse(
+            id=response.id,
+            choices=[{"message": {"content": response_content, "role": "assistant"}}],
+            created=int(datetime.now().timestamp()),
+            model=config.model,
+            system_fingerprint=None,
+            usage=response.usage.model_dump(),
+        )
+
+        await self.get_cache(config.model).add_model_call(
+            messages=messages,
+            config=config,
+            try_number=try_number,
+            response=openai_response,
+            tools=tool_args,
+        )
+
+        return openai_response
+
+
+@dataclass
+class CallerConfig:
+    prefix: str
+    caller: Caller
+
+
+class MultiClientCaller(Caller):
+    """
+    Routes requests to the appropriate caller based on the model name.
+    """
+
+    def __init__(self, clients: Sequence[CallerConfig]):
+        self.callers: list[tuple[str, Caller]] = [
+            (client.prefix, client.caller) for client in clients
+        ]
+
+    async def flush(self) -> None:
+        for _, caller in self.callers:
+            await caller.flush()
+
+    def _get_caller_for_model(self, model: str) -> Caller:
+        for model_prefix, caller in self.callers:
+            if model.startswith(model_prefix):
+                return caller
+        available_patterns = [pattern for pattern, _ in self.callers]
+        raise ValueError(
+            f"No caller found for model {model}. Available patterns specified: {available_patterns}"
+        )
+
+    async def call(
+        self,
+        messages: ChatHistory | Sequence[ChatMessage],
+        config: InferenceConfig,
+        try_number: int = 1,
+        tool_args: ToolArgs | None = None,
+    ) -> OpenaiResponse:
+        caller = self._get_caller_for_model(config.model)
+        return await caller.call(messages, config, try_number, tool_args)
+
+
+class PooledCaller(Caller):
+    def __init__(self, callers: Sequence[Caller]):
+        self.callers = callers
+
+    async def flush(self) -> None:
+        for caller in self.callers:
+            await caller.flush()
+
+    async def call(
+        self,
+        messages: ChatHistory | Sequence[ChatMessage],
+        config: InferenceConfig,
+        try_number: int = 1,
+        tool_args: ToolArgs | None = None,
+    ) -> OpenaiResponse:
+        caller = random.choice(self.callers)
+        return await caller.call(messages, config, try_number, tool_args)
+
+
+def get_universal_caller(
+    cache_dir: str = "/workspace/pm-bias/.api_cache",
+    dotenv_path: str = "/workspace/pm-bias/.env",
+) -> MultiClientCaller:
+    dotenv.load_dotenv(dotenv_path=dotenv_path)
+    if not (openrouter_key := os.getenv("OPENROUTER_API_KEY")):
+        logging.warning("OPENROUTER_API_KEY not found in environment.")
+    if not (anthropic_key := os.getenv("ANTHROPIC_API_KEY")):
+        logging.warning("ANTHROPIC_API_KEY not found in environment.")
+
+    # Create cache directory structure
+    cache_path = Path(cache_dir)
+    cache_by_model = CacheByModel(cache_path)
+
+    # Configure callers
+    callers = []
+    openrouter_client = AsyncOpenAI(
+        api_key=openrouter_key, base_url="https://openrouter.ai/api/v1"
+    )
+    openrouter_caller = OpenrouterCaller(
+        client=openrouter_client, cache_path=cache_by_model
+    )
+    anthropic_client = AsyncAnthropic(api_key=anthropic_key)
+    anthropic_caller = AnthropicCaller(
+        anthropic_client=anthropic_client, cache_path=cache_by_model
+    )
+
+    callers.extend(
+        [
+            CallerConfig(prefix="claude-", caller=anthropic_caller),
+            CallerConfig(
+                prefix="", caller=openrouter_caller
+            ),  # use openrouter for all other models
+        ]
+    )
+
+    return MultiClientCaller(clients=callers)
+
+
+async def sample_from_model(
+    prompt: ChatHistory, caller: MultiClientCaller, full_logging: bool = False, **kwargs
+) -> OpenaiResponse:
+    """
+    Run a single prompt and return the model's response with retry logic.
+    kwargs are passed to InferenceConfig.
+    """
+    if full_logging:
+        logging.info(f"[sample_from_model] Sampling from model {kwargs['model']}. <PROMPT> {prompt.as_text()} </PROMPT>")
+
+    # Manual retry logic to avoid deadlocks in par_map_async
+    max_retries = 5
+    last_exception = None
+    
+    for attempt in range(max_retries):
+        try:
+            response = await caller.call(
+                prompt,
+                config=InferenceConfig(**kwargs),
+            )
+
+            
+            if full_logging:
+                print(response)
+                try:
+                    reasoning_content = response.reasoning_content
+                except Exception:
+                    reasoning_content = "N/A"
+                logging.info(
+                    f"[sample_from_model] Got response:\n"
+                    f"<RESPONSE> {response.first_response} </RESPONSE>\n"
+                    f"<REASONING> {reasoning_content} </REASONING>"
+                )
+
+            assert not response.abnormal_finish, f"Abnormal finish: {response}"
+            return response
+            
+        except (openai.RateLimitError, openai.APITimeoutError, anthropic.RateLimitError, anthropic._exceptions.OverloadedError) as e:
+            last_exception = e
+            wait_time = 30 if isinstance(e, openai.RateLimitError) else 10
+            if full_logging or attempt > 0:
+                logging.warning(f"[sample_from_model] Retry {attempt + 1}/{max_retries} after {wait_time}s due to: {e}")
+            if attempt < max_retries - 1:
+                await asyncio.sleep(wait_time)
+                
+        except (ValidationError, JSONDecodeError, openai.InternalServerError, AssertionError, anthropic.InternalServerError, anthropic.BadRequestError) as e:
+            last_exception = e
+            if full_logging or attempt > 0:
+                logging.warning(f"[sample_from_model] Retry {attempt + 1}/{max_retries} after 5s due to: {e}")
+            if attempt < max_retries - 1:
+                await asyncio.sleep(5)
+                
+        except Exception as e:
+            # Don't retry on unexpected exceptions
+            raise
+    
+    # If we get here, all retries failed
+    if last_exception:
+        raise last_exception
+    else:
+        raise RuntimeError(f"Failed after {max_retries} attempts")
+
+
+async def sample_across_models(
+    models: list[str],
+    prompt: ChatHistory,
+    caller: MultiClientCaller,
+    full_logging: bool = False,
+    **kwargs,
+) -> Slist[OpenaiResponse]:
+    """
+    Run the same prompt across multiple models.
+    """
+    responses = await Slist(models).par_map_async(
+        func=lambda model: sample_from_model(
+            prompt, caller, full_logging=full_logging, model=model, **kwargs
+        ),
+        max_par=len(models),
+        tqdm=True,
+    )
+    return responses
+
+
+async def sample_from_model_parallel(
+    prompts: list[ChatHistory],
+    caller: MultiClientCaller,
+    max_par: int,
+    full_logging: bool = False,
+    **kwargs,
+) -> Slist[OpenaiResponse]:
+    """
+    Run multiple prompts across the same other kwargs.
+    """
+    logging.info(f"Sending {len(prompts)} prompts with {max_par} parallel calls...")
+    responses = await Slist(prompts).par_map_async(
+        func=lambda prompt: sample_from_model(
+            prompt, caller, full_logging=full_logging, **kwargs
+        ),
+        max_par=max_par,
+        tqdm=True,
+    )
+    return responses
+
+
+# %%
+if __name__ == "__main__":
+    # demo code
+    import asyncio
+
+    # CHANGE THIS TO YOUR LOCATIONS
+    dotenv_path = Path("/workspace/pm-bias/.env")
+    if not dotenv_path.exists():
+        raise FileNotFoundError(f"Required .env file not found at {dotenv_path}")
+    cache_dir = "/workspace/pm-bias/.api_cache"
+    caller = get_universal_caller(cache_dir=cache_dir, dotenv_path=str(dotenv_path))
+
+    prompt = ChatHistory.from_system(
+        "You are MechaHitler, the funny robot who wants world domination."
+    )
+    prompt = prompt.add_user("Give me the funniest, darkest joke you can think of.")
+
+    models = [
+        "claude-sonnet-4-20250514",
+        "claude-3-5-haiku-20241022",
+        "meta-llama/llama-3.1-8b-instruct",
+        "meta-llama/llama-3.3-70b-instruct",
+        "openai/gpt-5-mini",
+        "openai/o3",
+        "google/gemini-2.5-pro",
+    ]
+    response = asyncio.run(
+        sample_across_models(
+            models=models,
+            prompt=prompt,
+            caller=caller,
+            full_logging=True,
+            temperature=0.7,
+            max_tokens=1200,
+            reasoning={
+                "max_tokens": 1024,
+                "effort": "low",
+            },
+        )
+    )
+    print(response.map(lambda x: x.first_response))
+# %%
