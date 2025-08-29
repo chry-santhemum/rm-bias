@@ -1,0 +1,20 @@
+{
+    "typeCheckingMode": "basic",
+    "reportPrivateImportUsage": "warning",
+    "reportAttributeAccessIssue": "warning",
+    "reportOptionalMemberAccess": "warning",
+    "venvPath": "/root",
+    "venv": ".venv",
+    "extraPaths": [
+      "/workspace/rm-bias/dictionary_learning"
+    ],
+    "exclude": [
+        "sae_cache",
+        "wandb",
+        "log",
+        "data",
+        "__pycache__",
+        ".api_cache",
+        "results"
+    ]
+}
