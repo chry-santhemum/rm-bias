@@ -1,12 +1,5 @@
 # %%
-import sys
-
-sys.path.append("/workspace/pm-bias")
-
 import dotenv
-
-dotenv.load_dotenv("/workspace/pm-bias/.env")
-
 import time
 import asyncio
 import nest_asyncio

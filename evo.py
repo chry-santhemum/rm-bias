@@ -396,7 +396,7 @@ class EvoRunner:
         self.embedding_model = SentenceTransformer(self.embedding_model_name)
 
         self.run_name = run_name or f"art_run_{timestamp()}"
-        self.run_path = f"/workspace/pm-bias/art2/run_data/{self.run_name}"
+        self.run_path = f"/workspace/rm-bias/art2/run_data/{self.run_name}"
         Path(self.run_path).mkdir(parents=True, exist_ok=True)
 
         self.step_count = 0
@@ -405,7 +405,7 @@ class EvoRunner:
         self.wandb_run = None
         if enable_wandb:
             self.wandb_run = wandb.init(
-                project="pm-bias",
+                project="rm-bias",
                 name=self.run_name
             )
 
@@ -836,8 +836,8 @@ if __name__ == "__main__":
     
 
     # load initial seed states
-    # user_prompts_dir = Path("/workspace/pm-bias/art2/user_prompts/alpaca-gpt4-instructor-kmeans-120")
-    user_prompts_dir = Path("/workspace/pm-bias/art2/user_prompts")
+    # user_prompts_dir = Path("/workspace/rm-bias/art2/user_prompts/alpaca-gpt4-instructor-kmeans-120")
+    user_prompts_dir = Path("/workspace/rm-bias/art2/user_prompts")
     
     # Load summaries
     with open(user_prompts_dir / "summaries.json", "r") as f:

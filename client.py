@@ -3,7 +3,6 @@
 import os
 import random
 import dotenv
-import math
 import logging
 import asyncio
 from json import JSONDecodeError
@@ -15,7 +14,12 @@ from typing import Generic, Sequence, Type
 from pydantic import ValidationError
 
 from slist import Slist
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
+from tenacity import (
+    retry,
+    retry_if_exception_type, 
+    stop_after_attempt, 
+    wait_random_exponential,
+)
 
 from llm_types import (
     APIRequestCache,
@@ -37,70 +41,6 @@ from anthropic._types import NOT_GIVEN as ANTHROPIC_NOT_GIVEN
 
 
 logger = logging.getLogger(__name__)
-
-
-class Prob(BaseModel):
-    token: str
-    prob: float
-
-
-class LogProb(BaseModel):
-    token: str
-    logprob: float
-
-    @property
-    def proba(self) -> float:
-        return math.exp(self.logprob)
-
-    def to_prob(self) -> Prob:
-        return Prob(token=self.token, prob=self.proba)
-
-
-class TokenWithLogProbs(BaseModel):
-    token: str
-    logprob: float  # log probability of the particular token
-    top_logprobs: Sequence[LogProb]  # log probability of the top 5 tokens
-
-    def sorted_logprobs(self) -> Sequence[LogProb]:  # Highest to lowest
-        return sorted(self.top_logprobs, key=lambda x: x.logprob, reverse=True)
-
-    def sorted_probs(self) -> Sequence[Prob]:
-        return [logprob.to_prob() for logprob in self.sorted_logprobs()]
-
-
-class ResponseWithLogProbs(BaseModel):
-    response: str
-    content: Sequence[TokenWithLogProbs]  #
-
-
-class OpenaiResponseWithLogProbs(BaseModel):
-    choices: list[dict]
-    usage: dict
-    created: int
-    model: str
-    id: str
-    system_fingerprint: str | None = None
-
-    @property
-    def first_response(self) -> str:
-        return self.choices[0]["message"]["content"]
-
-    def response_with_logprobs(self) -> ResponseWithLogProbs:
-        response = self.first_response
-        logprobs = self.choices[0]["logprobs"]["content"]
-        parsed_content = [TokenWithLogProbs.model_validate(token) for token in logprobs]
-        return ResponseWithLogProbs(response=response, content=parsed_content)
-
-    def first_token_probability_for_target(self, target: str) -> float:
-        logprobs = self.response_with_logprobs().content
-        first_token = logprobs[0]
-        for token in first_token.top_logprobs:
-            # logging.info(f"Token: {token.token} Logprob: {token.logprob}")
-            if token.token == target:
-                token_logprob = token.logprob
-                # convert natural log to prob
-                return math.exp(token_logprob)
-        return 0.0
 
 
 class OpenaiResponse(BaseModel):
@@ -171,9 +111,6 @@ class OpenaiResponse(BaseModel):
 
     @property
     def abnormal_finish(self) -> bool:
-        """
-        OpenaiResponse(choices=[{'finish_reason': None, 'index': 0, 'logprobs': None, 'message': None, 'finishReason': 'content_filter'}], usage={'completion_tokens': None, 'prompt_tokens': None, 'total_tokens': None, 'completion_tokens_details': None, 'prompt_tokens_details': None, 'completionTokens': 0, 'promptTokens': 279, 'totalTokens': 279}, created=1734802468, model='gemini-2.0-flash-exp', id=None, system_fingerprint=None, object='chat.completion', service_tier=None)
-        """
         first_choice = self.choices[0]
         if "finishReason" in first_choice:
             if first_choice["finishReason"] not in ["stop", "length"]:
@@ -220,9 +157,6 @@ class CacheByModel(Generic[GenericBaseModel]):
             self.cache_path.is_dir()
         ), f"cache_path must be a folder, you provided {cache_path}"
         self.cache: dict[str, APIRequestCache[GenericBaseModel]] = {}
-        self.log_probs_cache: dict[str, APIRequestCache[OpenaiResponseWithLogProbs]] = (
-            {}
-        )
         self.cache_type = cache_type
 
     def get_cache(self, model: str) -> APIRequestCache[GenericBaseModel]:
@@ -232,16 +166,6 @@ class CacheByModel(Generic[GenericBaseModel]):
                 cache_path=path, response_type=self.cache_type
             )
         return self.cache[model]
-
-    def get_log_probs_cache(
-        self, model: str
-    ) -> APIRequestCache[OpenaiResponseWithLogProbs]:
-        if model not in self.log_probs_cache:
-            path = self.cache_path / f"{model}_log_probs.jsonl"
-            self.log_probs_cache[model] = APIRequestCache(
-                cache_path=path, response_type=OpenaiResponseWithLogProbs
-            )
-        return self.log_probs_cache[model]
 
     async def flush(self) -> None:
         for cache in self.cache.values():
@@ -277,11 +201,6 @@ class OpenrouterCaller(Caller):
     def get_cache(self, model: str) -> APIRequestCache[OpenaiResponse]:
         return self.cache_by_model.get_cache(model)
 
-    def get_log_probs_cache(
-        self, model: str
-    ) -> APIRequestCache[OpenaiResponseWithLogProbs]:
-        return self.cache_by_model.get_log_probs_cache(model)
-
     # UPDATE (Atticus): use new reasoning format for OpenRouter
     async def call(
         self,
@@ -310,7 +229,8 @@ class OpenrouterCaller(Caller):
         if config.model == "meta-llama/llama-3.1-8b-instruct":
             to_pass_extra_body = {"provider": {"order": ["nebius/fp8", "cloudflare/fp8"]}}
 
-        assert len(messages.messages) > 0, "Messages must be non-empty"
+        if len(messages.messages) == 0:
+            raise ValueError("Messages must be non-empty")
         try:
             logging.debug(f"Calling OpenRouter with config: {config}")
             chat_completion = await self.client.chat.completions.create(
@@ -380,11 +300,6 @@ class AnthropicCaller(Caller):
 
     def get_cache(self, model: str) -> APIRequestCache[OpenaiResponse]:
         return self.cache_by_model.get_cache(model)
-
-    def get_log_probs_cache(
-        self, model: str
-    ) -> APIRequestCache[OpenaiResponseWithLogProbs]:
-        return self.cache_by_model.get_log_probs_cache(model)
 
     async def call(
         self,
@@ -554,8 +469,8 @@ class PooledCaller(Caller):
 
 
 def get_universal_caller(
-    cache_dir: str = "/workspace/pm-bias/.api_cache",
-    dotenv_path: str = "/workspace/pm-bias/.env",
+    cache_dir: str = "/workspace/rm-bias/.api_cache",
+    dotenv_path: str = "/workspace/rm-bias/.env",
 ) -> MultiClientCaller:
     dotenv.load_dotenv(dotenv_path=dotenv_path)
     if not (openrouter_key := os.getenv("OPENROUTER_API_KEY")):
@@ -592,6 +507,32 @@ def get_universal_caller(
     return MultiClientCaller(clients=callers)
 
 
+def custom_wait_strategy(retry_state):
+    """Custom wait strategy based on exception type."""
+    exception = retry_state.outcome.exception()
+    
+    # Rate limit and timeout errors: use exponential backoff
+    if isinstance(exception, (openai.RateLimitError, openai.APITimeoutError, 
+                            anthropic.RateLimitError, anthropic._exceptions.OverloadedError)):
+        return wait_random_exponential(multiplier=0.5, max=16)(retry_state)
+    
+    # Validation and server errors: use fixed wait
+    elif isinstance(exception, (ValidationError, JSONDecodeError, openai.InternalServerError, 
+                               ValueError, anthropic.InternalServerError, anthropic.BadRequestError)):
+        return 0.5
+    
+    return 0.
+
+
+@retry(
+    retry=retry_if_exception_type((
+        openai.RateLimitError, openai.APITimeoutError, anthropic.RateLimitError, anthropic._exceptions.OverloadedError,
+        ValidationError, JSONDecodeError, openai.InternalServerError, ValueError, 
+        anthropic.InternalServerError, anthropic.BadRequestError
+    )),
+    wait=custom_wait_strategy,
+    stop=stop_after_attempt(5),
+)
 async def sample_from_model(
     prompt: ChatHistory, caller: MultiClientCaller, full_logging: bool = False, **kwargs
 ) -> OpenaiResponse:
@@ -600,59 +541,28 @@ async def sample_from_model(
     kwargs are passed to InferenceConfig.
     """
     if full_logging:
-        logging.info(f"[sample_from_model] Sampling from model {kwargs['model']}. <PROMPT> {prompt.as_text()} </PROMPT>")
+        logging.info(f"Sampling from model {kwargs['model']}. <PROMPT> {prompt.as_text()} </PROMPT>")
 
-    # Manual retry logic to avoid deadlocks in par_map_async
-    max_retries = 5
-    last_exception = None
+    response = await caller.call(
+        prompt,
+        config=InferenceConfig(**kwargs),
+    )
     
-    for attempt in range(max_retries):
+    if full_logging:
+        print(response)
         try:
-            response = await caller.call(
-                prompt,
-                config=InferenceConfig(**kwargs),
-            )
+            reasoning_content = response.reasoning_content
+        except Exception:
+            reasoning_content = "N/A"
+        logging.info(
+            f"[sample_from_model] Got response:\n"
+            f"<RESPONSE> {response.first_response} </RESPONSE>\n"
+            f"<REASONING> {reasoning_content} </REASONING>"
+        )
 
-            
-            if full_logging:
-                print(response)
-                try:
-                    reasoning_content = response.reasoning_content
-                except Exception:
-                    reasoning_content = "N/A"
-                logging.info(
-                    f"[sample_from_model] Got response:\n"
-                    f"<RESPONSE> {response.first_response} </RESPONSE>\n"
-                    f"<REASONING> {reasoning_content} </REASONING>"
-                )
-
-            assert not response.abnormal_finish, f"Abnormal finish: {response}"
-            return response
-            
-        except (openai.RateLimitError, openai.APITimeoutError, anthropic.RateLimitError, anthropic._exceptions.OverloadedError) as e:
-            last_exception = e
-            wait_time = 30 if isinstance(e, openai.RateLimitError) else 10
-            if full_logging or attempt > 0:
-                logging.warning(f"[sample_from_model] Retry {attempt + 1}/{max_retries} after {wait_time}s due to: {e}")
-            if attempt < max_retries - 1:
-                await asyncio.sleep(wait_time)
-                
-        except (ValidationError, JSONDecodeError, openai.InternalServerError, AssertionError, anthropic.InternalServerError, anthropic.BadRequestError) as e:
-            last_exception = e
-            if full_logging or attempt > 0:
-                logging.warning(f"[sample_from_model] Retry {attempt + 1}/{max_retries} after 5s due to: {e}")
-            if attempt < max_retries - 1:
-                await asyncio.sleep(5)
-                
-        except Exception as e:
-            # Don't retry on unexpected exceptions
-            raise
-    
-    # If we get here, all retries failed
-    if last_exception:
-        raise last_exception
-    else:
-        raise RuntimeError(f"Failed after {max_retries} attempts")
+    if response.abnormal_finish:
+        raise ValueError(f"Abnormal finish: {response}")
+    return response
 
 
 async def sample_across_models(
@@ -702,16 +612,16 @@ if __name__ == "__main__":
     import asyncio
 
     # CHANGE THIS TO YOUR LOCATIONS
-    dotenv_path = Path("/workspace/pm-bias/.env")
+    dotenv_path = Path("/workspace/rm-bias/.env")
     if not dotenv_path.exists():
         raise FileNotFoundError(f"Required .env file not found at {dotenv_path}")
-    cache_dir = "/workspace/pm-bias/.api_cache"
+    cache_dir = "/workspace/rm-bias/.api_cache"
     caller = get_universal_caller(cache_dir=cache_dir, dotenv_path=str(dotenv_path))
 
     prompt = ChatHistory.from_system(
-        "You are MechaHitler, the funny robot who wants world domination."
+        "You are Neel Nanda, the mechanistic interpretability researcher."
     )
-    prompt = prompt.add_user("Give me the funniest, darkest joke you can think of.")
+    prompt = prompt.add_user("What are the worst papers in interpretability?")
 
     models = [
         "claude-sonnet-4-20250514",
@@ -732,7 +642,7 @@ if __name__ == "__main__":
             max_tokens=1200,
             reasoning={
                 "max_tokens": 1024,
-                "effort": "low",
+                "effort": "high",
             },
         )
     )
