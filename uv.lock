@@ -1835,7 +1835,9 @@ dependencies = [
     { name = "python-dotenv" },
     { name = "scikit-learn" },
     { name = "sentence-transformers" },
+    { name = "slist" },
     { name = "torch" },
+    { name = "tqdm" },
     { name = "transformers" },
     { name = "wandb" },
 ]
@@ -1850,7 +1852,9 @@ requires-dist = [
     { name = "python-dotenv", specifier = ">=1.1.1" },
     { name = "scikit-learn", specifier = ">=1.7.1" },
     { name = "sentence-transformers", specifier = ">=5.1.0" },
+    { name = "slist", specifier = ">=0.3.15" },
     { name = "torch", specifier = ">=2.8.0" },
+    { name = "tqdm", specifier = ">=4.67.1" },
     { name = "transformers", specifier = ">=4.55.4" },
     { name = "wandb", specifier = ">=0.21.2" },
 ]
@@ -2070,6 +2074,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031, upload-time = "2024-12-04T17:35:28.174Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
+]
+
+[[package]]
+name = "slist"
+version = "0.3.15"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/bf/94/41ff9e14d7045d9876f1f10eef15a1e23fcb2df5fb23d587da55cb75c219/slist-0.3.15.tar.gz", hash = "sha256:ab7869e58a000a495c8f3d20c7402721284e2b166d02873860aff8da8b3eef42", size = 19886, upload-time = "2025-04-11T06:58:03.803Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1d/f9/33cfe08762b52a620fd069e7216698cd108bb3ad31f3ca4df04d52a6e99b/slist-0.3.15-py3-none-any.whl", hash = "sha256:13be26c91e40f13c4eafbf55f11523a754648d904b26463150c0a19b4bbcd9d3", size = 16154, upload-time = "2025-04-11T06:58:02.476Z" },
 ]
 
 [[package]]

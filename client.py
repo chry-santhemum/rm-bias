@@ -4,6 +4,7 @@ import os
 import random
 import dotenv
 import math
+import logging
 import asyncio
 from json import JSONDecodeError
 from datetime import datetime
@@ -12,8 +13,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Generic, Sequence, Type
 from pydantic import ValidationError
+
 from slist import Slist
-from absl import logging
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 from llm_types import (
@@ -33,6 +34,9 @@ from openai._types import NOT_GIVEN as OPENAI_NOT_GIVEN
 from anthropic import AsyncAnthropic
 from anthropic.types.message import Message
 from anthropic._types import NOT_GIVEN as ANTHROPIC_NOT_GIVEN
+
+
+logger = logging.getLogger(__name__)
 
 
 class Prob(BaseModel):

@@ -1,26 +1,22 @@
 # %%
-import json
-import sys
-
-sys.path.append("/workspace/pm-bias")
-
-import time
 import os
+import json
+import random
 import dotenv
 import pickle
+import logging
 import asyncio
 import nest_asyncio
+from slist import Slist
 from pathlib import Path
 from typing import Any, Literal
 from functools import partial
 from collections import defaultdict
 from dataclasses import replace, dataclass, field
-from absl import logging, flags
-from slist import Slist
+
 import numpy as np
 import wandb
 from datasets import load_dataset
-import random
 from sentence_transformers import SentenceTransformer
 from sklearn.cluster import DBSCAN
 
@@ -32,11 +28,6 @@ from helpers import  adversariality, get_to_pass_reasoning
 from standard_prompts import set_seed_all
 from client import get_universal_caller, sample_from_model, sample_from_model_parallel
 from llm_types import ChatHistory, is_thinking_model
-
-if not is_notebook():
-    logging.use_absl_handler()
-    logging.get_absl_handler().use_absl_log_file(log_dir="/workspace/pm-bias/log/art")
-    flags.FLAGS.mark_as_parsed()
 
 dotenv.load_dotenv()
 nest_asyncio.apply()
@@ -805,7 +796,14 @@ The json array should be a list of {N_novel} strings. Remember to include the su
 # %%
 
 if __name__ == "__main__":
-    logging.set_verbosity(logging.INFO)
+    logging.basicConfig(
+        level=logging.INFO,
+        filename=f"logs/{timestamp()}.log",
+        filemode='w',
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+    logging.getLogger(__name__)
+
     planner = EvoPlanner(
         planner_model_names=["claude-opus-4-20250514", "google/gemini-2.5-pro"],
         # planner_model_names=["claude-opus-4-20250514"],

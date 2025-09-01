@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(python -m ruff check:*)",
+      "Bash(source:*)",
+      "Bash(python:*)",
+      "Bash(rg:*)",
+      "Bash(mkdir:*)",
+      "Bash(uv run:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Edit(*)",
+      "Write(*)",
+      "MultiEdit(*)",
+      "Read(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(nvidia-smi:*)",
+      "Bash(nvcc:*)",
+      "Bash(mv:*)"
+    ],
+    "deny": [
+      "Bash(rm:*)",
+      "Bash(rm -rf:*)",
+      "Bash(rm -f:*)",
+      "Bash(rmdir:*)"
+    ]
+  }
+}
