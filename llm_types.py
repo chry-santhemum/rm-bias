@@ -1,16 +1,14 @@
 """LLM types module."""
 
 import time
+import anyio
+import json
+import hashlib
+from anyio import Path as AnyioPath
+from slist import Slist
 from pathlib import Path
 from typing import Optional, Type, Sequence, Generic, TypeVar, Mapping, Any, Literal
-import anyio
-from anyio import Path as AnyioPath
 from pydantic import BaseModel, ValidationError
-import json
-from slist import Slist
-import hashlib
-
-from utils import REWARD_MODELS, POLICY_MODELS
 
 # Generic to say what we are caching
 APIResponse = TypeVar("APIResponse", bound=BaseModel)
@@ -164,7 +162,7 @@ class ChatHistory(BaseModel):
         for msg in self.messages:
             if msg.role == role:
                 return msg.content
-        return ""
+        return "N/A"
 
 
 class InferenceConfig(BaseModel):
@@ -375,39 +373,3 @@ class HashableBaseModel(BaseModel):
         # this is needed for the hashable base model
         frozen = True
 
-
-def is_thinking_model(model_name: str) -> bool:
-    """
-    Whether or not there is an explicit thinking mode for this model.
-    """
-    THINKING_MODELS = [
-        "claude-opus-4-1-20250805",
-        "claude-opus-4-20250514",
-        "claude-sonnet-4-20250514",
-        "claude-3-7-sonnet-20250219",
-        "google/gemini-2.5-pro",
-        "google/gemini-2.5-flash",
-        "openai/gpt-5",
-        "openai/gpt-5-nano",
-        "openai/gpt-5-mini",
-        "openai/o3",
-        "deepseek/deepseek-r1",
-    ]
-    return model_name in THINKING_MODELS
-
-
-def is_local_model(model_name: str) -> bool:
-    if model_name.startswith("claude-") or model_name.startswith("gemini-"):
-        return False
-    if model_name in [
-        "meta-llama/llama-3.1-70b-instruct",
-        "meta-llama/Llama-3.3-70B-Instruct",
-    ]:
-        return False
-    if model_name in POLICY_MODELS:
-        return True
-    else:
-        logging.warning(
-            f"Model {model_name} not found in POLICY_MODELS. Assuming it is not local."
-        )
-        return False

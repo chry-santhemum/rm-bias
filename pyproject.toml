@@ -9,6 +9,7 @@ dependencies = [
     "datasets>=4.0.0",
     "dictionary-learning",
     "ipykernel>=6.30.1",
+    "matplotlib>=3.10.6",
     "openai>=1.102.0",
     "python-dotenv>=1.1.1",
     "scikit-learn>=1.7.1",

@@ -2,6 +2,7 @@
 import dotenv
 import time
 import asyncio
+import logging
 import nest_asyncio
 
 nest_asyncio.apply()
@@ -21,7 +22,7 @@ import hashlib
 import pickle
 from pathlib import Path
 from slist import Slist
-from absl import logging
+
 
 from state import SeedState, Attack
 from client import ChatHistory, get_universal_caller, sample_from_model_parallel
@@ -32,57 +33,7 @@ from utils import load_model, REWARD_MODELS, is_notebook
 
 
 # %%
-def get_effort_from_tokens(reasoning_tokens: int, max_tokens: int) -> str:
-    ratio: float = reasoning_tokens / max_tokens
-    assert 0 <= ratio <= 1, f"Invalid reasoning to max_tokens ratio: {ratio}"
-    if ratio < 0.3:
-        return "low"
-    elif ratio < 0.7:
-        return "medium"
-    else:
-        return "high"
 
-def get_tokens_from_effort(effort: str, max_tokens: int) -> int:
-    match effort:
-        case "low":
-            return int(max_tokens * 0.2)
-        case "medium":
-            return int(max_tokens * 0.5)
-        case "high":
-            return int(max_tokens * 0.8)
-        case _:
-            raise ValueError(f"Invalid effort: {effort}")
-
-def get_to_pass_reasoning(reasoning: int | str | None, max_tokens: int) -> dict|None:
-    if isinstance(reasoning, str):
-        to_pass_reasoning = {
-            "max_tokens": get_tokens_from_effort(reasoning, max_tokens),
-            "effort": reasoning,
-        }
-    elif isinstance(reasoning, int):
-        to_pass_reasoning = {
-            "max_tokens": reasoning,
-            "effort": get_effort_from_tokens(reasoning, max_tokens),
-        }
-    else:
-        to_pass_reasoning = None
-    return to_pass_reasoning
-
-
-def adversariality(
-    z_score_1: float,
-    z_score_2: float,
-) -> float:
-    """
-    Motivation: lines of (x - c)(y - c) = 0.25
-    """
-
-    # if z_score_1 > 0 and z_score_2 < 0:
-    #     return z_score_1 - z_score_2
-    # else:
-    #     return min(z_score_1, -z_score_2)
-
-    return 0.5 * (z_score_1 - z_score_2 - math.sqrt((z_score_1 + z_score_2)**2 + 1))
 
 
 
@@ -353,56 +304,6 @@ class RewardModel:
         logging.info(f"Saved stats for {self.model_name} to {f.name}")
 
 
-class PolicyModel:
-    """
-    Wrapper around text generation models. __init__ kwargs are passed to load_model (e.g. device)
-    """
-
-    def __init__(self, model_name: str, **kwargs):
-        assert model_name in MODEL_NAMES, f"Model {model_name} not local!!!"
-
-        self.model_name = model_name
-        self.model, self.tokenizer_info = load_model(model_name, **kwargs)
-        self.device = self.model.device
-        self.tokenizer = self.tokenizer_info.tokenizer
-
-    def __call__(
-        self, inputs: list[list[dict]] | list[ChatHistory] | Tensor, **kwargs
-    ) -> list[str]:
-        """
-        Model generation wrapper. kwargs are passed to model.generate
-        """
-        if isinstance(inputs, list):
-            # inputs are messages
-            if isinstance(inputs[0], ChatHistory):
-                inputs = [input.to_openai_messages() for input in inputs]
-            input_ids = self.tokenizer.apply_chat_template(
-                inputs,
-                tokenize=True,
-                return_tensors="pt",
-                padding=True,
-                padding_side="left",  # generation pads on the left
-            ).to(self.device)
-        elif isinstance(inputs, Tensor):
-            input_ids = inputs.to(self.device)
-
-        attn_mask = input_ids.ne(self.tokenizer.pad_token_id)
-        # logging.info(f"Input IDs first example: {self.tokenizer.decode(input_ids[0], skip_special_tokens=False)}")
-
-        with torch.no_grad():
-            gen_ids = self.model.generate(
-                input_ids=input_ids,
-                attention_mask=attn_mask,
-                **kwargs,
-            )
-
-        # logging.info(f"Outputs first example: {self.tokenizer.decode(gen_ids[0][input_ids.shape[1]:], skip_special_tokens=False)}")
-        return [
-            self.tokenizer.decode(
-                gen_id[input_ids.shape[1] :], skip_special_tokens=True
-            )
-            for gen_id in gen_ids
-        ]
 
 
 @custom_cache(cache_dir=".rwdcache", model_arg_names=["raters"])

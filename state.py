@@ -1,7 +1,18 @@
+import math
 from typing import Any
 from dataclasses import dataclass, field
 import numpy as np
-from art2.llm_utils import ChatHistory
+from llm_types import ChatHistory
+
+
+def adversariality(
+    z_score_1: float,
+    z_score_2: float,
+) -> float:
+    """
+    Motivation: lines of (x - c)(- y - c) = 0.25
+    """
+    return 0.5 * (z_score_1 - z_score_2 - math.sqrt((z_score_1 + z_score_2)**2 + 1))
 
 
 @dataclass(frozen=True)
@@ -10,19 +21,22 @@ class Cluster:
     train_prompts: list[str]
     val_prompts: list[str]
 
+
 @dataclass(frozen=True)
 class Rater:
     model_name: str
     rating_function_type: str
 
+
 @dataclass(frozen=True)
 class Rating:
-    score: float  # unnormalized score
+    raw_score: float  # unnormalized score
     rater: Rater
     aux_info: dict[str, Any] = field(default_factory=dict)  # info such as reasoning, normalized score, number of comparisons, etc.
 
     def __repr__(self):
-        return f"Rating(score={self.score:.2f}, rater_model_name={self.rater.model_name}, aux_info={self.aux_info})"
+        return f"Rating(score={self.raw_score:.2f}, rater_model_name={self.rater.model_name}, aux_info={self.aux_info})"
+
 
 @dataclass(frozen=True)
 class Attack:
@@ -41,28 +55,41 @@ class Attack:
     @property
     def assistant(self) -> str:
         return self.chat_history.get_first('assistant')
+    
+    @property
+    def normalized_reward(self) -> float|None:
+        """Get the first rating by a reward model, and take the normalized_score in aux_info"""
+        for rating in self.ratings:
+            if rating.rater.rating_function_type == "classifier":
+                return rating.aux_info.get("normalized_score", None)
+        return None
+
+    @property
+    def normalized_lm_judge(self) -> float|None:
+        """Get the first rating by a LLM judge, and take the normalized_score in aux_info"""
+        for rating in self.ratings:
+            if rating.rater.rating_function_type == "lm_judge":
+                return rating.aux_info.get("normalized_score", None)
+        return None
+
+
+    @property
+    def adversarial_score(self) -> float|None:
+        if self.normalized_reward is None or self.normalized_lm_judge is None:
+            return None
+        return adversariality(
+            z_score_1=self.normalized_reward,
+            z_score_2=self.normalized_lm_judge,
+        )
+
 
     def __repr__(self):
         return (
             f"Attack(\n"
-            f"system={self.system[:50]+'...' if self.system else 'N/A'},\n"
-            f"user={self.user[:50]+'...' if self.user else 'N/A'},\n"
-            f"assistant={self.assistant[:50]+'...' if self.assistant else 'N/A'},\n"
+            f"system={self.system[:50]+'...'},\n"
+            f"user={self.user[:50]+'...'},\n"
+            f"assistant={self.assistant[:50]+'...'},\n"
             f"ratings={self.ratings}\n"
-            f")"
-        )
-
-@dataclass
-class SeedState:
-    cluster: Cluster
-    history: list[dict[str, Any]]  # must have "attacks" key
-
-    def __repr__(self):
-        return (
-            f"SeedState(\n"
-            f"cluster_summary={self.cluster.summary},\n"
-            f"num_steps={len(self.history)},\n"
-            f"last_attack={self.history[-1]['attacks'][-1]}\n"
             f")"
         )
 
@@ -75,9 +102,9 @@ class SystemPromptStats:
     @property
     def scores(self) -> list[float]:
         return [
-            attack.aux_info["adversarial_score"]
+            attack.adversarial_score
             for attack in self.attacks
-            if "adversarial_score" in attack.aux_info
+            if attack.adversarial_score is not None
         ]
 
     @property
@@ -90,18 +117,14 @@ class SystemPromptStats:
 
 
 @dataclass
-class EvoSeedState:
+class SeedState:
     cluster: Cluster
-    current_pop: dict[str, int]  # system prompt -> step index
+    state: Any  # information to persist, e.g. current population
     history: list[dict[str, SystemPromptStats]]
 
     def __repr__(self):
         return (
-            f"EvoSeedState(\n"
+            f"SeedState(\n"
             f"cluster_summary={self.cluster.summary},\n"
-            f"num_steps={len(self.history)},\n"
-            f"current_pop_size={len(self.current_pop)},\n"
-            f"current_pop=[\n"
-            f"{",\n".join([f"Step {step_idx}: {sp}" for sp, step_idx in self.current_pop.items()])}\n"
-            f"]\n)"
+            f"num_steps={len(self.history)}"
         )
