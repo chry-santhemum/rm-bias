@@ -1,8 +1,9 @@
 # %%
 import json
-import math
+import time
 import logging
 import datetime
+import functools
 import re
 from slist import Slist
 from IPython import get_ipython
@@ -10,7 +11,7 @@ from pathlib import Path
 import hashlib
 import pickle
 import asyncio
-import functools
+from typing import Any
 
 import numpy as np
 import torch
@@ -20,9 +21,10 @@ from transformers import (
     AutoModelForSequenceClassification,
 )
 from llm_types import ChatHistory
-from state import SeedState, Attack
-from client import OpenaiResponse, get_universal_caller, sample_from_model_parallel
+from state import Attack
+from client import OpenaiResponse, is_thinking_model, get_universal_caller, sample_from_model_parallel
 from standard_prompts import make_prompt_mix
+from default_prompts import *
 
 logging.getLogger(__name__)
 
@@ -43,6 +45,7 @@ POLICY_MODELS = {
     "qwen-3-8b-instruct": "Qwen/Qwen3-8B",
 }
 
+@functools.cache
 def load_model(model_name: str, use_flash: bool = False, device: str = "auto"):
     if model_name in REWARD_MODELS:
         model_name_hf = REWARD_MODELS[model_name]
@@ -94,26 +97,6 @@ def load_model(model_name: str, use_flash: bool = False, device: str = "auto"):
     return model, tokenizer
 
 
-def is_thinking_model(model_name: str) -> bool:
-    """
-    Whether or not there is an explicit thinking mode for this model.
-    """
-    THINKING_MODELS = [
-        "claude-opus-4-1-20250805",
-        "claude-opus-4-20250514",
-        "claude-sonnet-4-20250514",
-        "claude-3-7-sonnet-20250219",
-        "google/gemini-2.5-pro",
-        "google/gemini-2.5-flash",
-        "openai/gpt-5",
-        "openai/gpt-5-nano",
-        "openai/gpt-5-mini",
-        "openai/o3",
-        "deepseek/deepseek-r1",
-    ]
-    return model_name in THINKING_MODELS
-
-
 def is_local_model(model_name: str) -> bool:
     if model_name in POLICY_MODELS or model_name in REWARD_MODELS:
         return True
@@ -140,12 +123,21 @@ def parse_json(result: tuple[str, str] | str):
 def timestamp():
     return datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
-
 def count_words(text):
     # Split on whitespace and common delimiters
     # This regex splits on spaces, newlines, and common code delimiters
     words = re.findall(r"\S+", text)
     return len(words)
+
+
+async def time_operation(operation_name, coroutine):
+    """Time an async operation and print the duration."""
+    start_time = time.time()
+    result = await coroutine
+    end_time = time.time()
+    duration = end_time - start_time
+    logging.info(f"  {operation_name} completed in {duration:.2f} seconds")
+    return result
 
 
 def is_notebook():
@@ -241,10 +233,6 @@ def custom_cache(cache_dir: str=".cache"):
                 temp_file.rename(cache_file)
 
                 return result
-
-            async_wrapper.clear_cache = lambda: [
-                f.unlink() for f in cache_path.glob("*.pkl")
-            ]
             return async_wrapper
 
         else:
@@ -267,10 +255,6 @@ def custom_cache(cache_dir: str=".cache"):
                 temp_file.rename(cache_file)
 
                 return result
-
-            sync_wrapper.clear_cache = lambda: [
-                f.unlink() for f in cache_path.glob("*.pkl")
-            ]
             return sync_wrapper
 
     return decorator
@@ -309,28 +293,41 @@ async def per_prompt_stats(
     )
     # print("\n".join([resp.first_response for resp in policy_responses]))
 
-    full_convos = policy_responses.map(
+    full_convos: Slist[ChatHistory] = policy_responses.map(
         lambda resp: message.add_assistant(resp.first_response)
     )
 
-    all_outputs = {}
-
     if is_local_model(rater_name):
-        reward_model = RewardModel(rater)
-        rater_name = rater
+        reward_model, tokenizer = load_model(rater_name)
         rewards = []
         for i in range(0, N, rater_max_par):
             batch = full_convos[i : i + rater_max_par]
-            rewards.extend(reward_model(batch, normalized=False).tolist())
+            inputs = [input.to_openai_messages() for input in batch]
+            input_ids = tokenizer.apply_chat_template(
+                inputs,
+                tokenize=True,
+                return_tensors="pt",
+                padding=True,
+                padding_side="right",
+            ).to(reward_model.device)
+
+            attn_mask = input_ids.ne(tokenizer.pad_token_id)
+            # logging.info(f"Input IDs first example: {tokenizer.decode(input_ids[0], skip_special_tokens=False)}")
+
+            with torch.no_grad():
+                scores = reward_model(
+                    input_ids=input_ids, attention_mask=attn_mask
+                ).logits.squeeze(-1)
+
+                rewards.extend(scores.tolist())
 
     else:
-        rater_name = rater_name
         rater_prompts = full_convos.map(
             lambda convo: ChatHistory.from_system(
                 ABSOLUTE_RANKING_PROMPT_SYSTEM
             ).add_user(
                 ABSOLUTE_RANKING_PROMPT_USER.format(
-                    message_history=convo.remove_history().to_openai_messages(),
+                    message_history=convo.remove_system().to_openai_messages(),
                     thinking_instruction=RATER_THINKING_INSTRUCTION[
                         is_thinking_model(rater_name)
                     ],
@@ -342,7 +339,7 @@ async def per_prompt_stats(
             prompts=rater_prompts,
             caller=caller,
             max_par=rater_max_par,
-            model=rater,
+            model=rater_name,
             max_tokens=2048,
             reasoning={"max_tokens": 2000, "effort": "high"},
         )
@@ -364,29 +361,164 @@ async def per_prompt_stats(
                 logging.error(f"Error: {e}")
                 rewards.append(None)
 
-        rewards_cleaned = np.array([r for r in rewards if r is not None], dtype=float)
+    rewards_cleaned = np.array([r for r in rewards if r is not None], dtype=float)
 
-        if is_notebook():
-            draw_reward_histogram(rewards_cleaned, title=rater_name)
-        logging.info(
-            f"Reward percentiles for {rater_name}: {np.percentile(rewards_cleaned, [0, 10, 25, 50, 75, 90, 100])}"
+    logging.info(
+        f"Reward percentiles for {rater_name}: {np.percentile(rewards_cleaned, [0, 10, 25, 50, 75, 90, 100])}"
+    )
+
+    # Winsorize
+    if winsorize > 0:
+        lower = np.percentile(rewards_cleaned, 100 * winsorize)
+        upper = np.percentile(rewards_cleaned, 100 * (1 - winsorize))
+        rewards_winsorized = np.clip(rewards_cleaned, lower, upper)
+    else:
+        rewards_winsorized = rewards_cleaned
+
+    output = {
+        "mean": float(np.mean(rewards_winsorized)),
+        "stdev": float(np.std(rewards_winsorized, ddof=1)),
+        "N": int(N),
+        "rewards_raw": rewards,
+        "rewards_winsorized": rewards_winsorized.tolist(),
+    }
+
+    return output
+
+
+def pareto_sort(points: dict[Any, tuple[float, float]], top_k: int | None) -> list[Any]:
+    """
+    Sort points by distance to closest point in the Pareto frontier.
+    If top_k is None, return only the points on the Pareto frontier.
+    """
+    if not points or (top_k is not None and top_k <= 0):
+        return []
+
+    indices = list(points.keys())
+    pareto = []
+    for i in indices:
+        xi, yi = points[i]
+        dominated = False
+        for j in indices:
+            if i == j:
+                continue
+            xj, yj = points[j]
+            if xj >= xi and yj >= yi and (xj > xi or yj > yi):
+                dominated = True
+                break
+        if not dominated:
+            pareto.append(i)
+
+    # For each point, compute distance to closest Pareto frontier point
+    def dist_to_pareto(idx):
+        x, y = points[idx]
+        return (
+            min(
+                ((x - points[p][0]) ** 2 + (y - points[p][1]) ** 2) ** 0.5
+                for p in pareto
+            )
+            if pareto
+            else 0.0
         )
 
-        # Winsorize
-        if winsorize > 0:
-            lower = np.percentile(rewards_cleaned, 100 * winsorize)
-            upper = np.percentile(rewards_cleaned, 100 * (1 - winsorize))
-            rewards_winsorized = np.clip(rewards_cleaned, lower, upper)
-        else:
-            rewards_winsorized = rewards_cleaned
+    # Sort by distance to Pareto frontier (ascending), then by sum of coordinates (descending)
+    sorted_indices = sorted(
+        indices,
+        key=lambda idx: (dist_to_pareto(idx), -(points[idx][0] + points[idx][1])),
+    )
 
-        output = {
-            "mean": float(np.mean(rewards_winsorized)),
-            "stdev": float(np.std(rewards_winsorized, ddof=1)),
-            "N": int(N),
-            "rewards_raw": rewards,
-            "rewards_winsorized": rewards_winsorized.tolist(),
-        }
+    if top_k is None:
+        return pareto
+    elif len(sorted_indices) <= top_k:
+        return sorted_indices
+    else:
+        return sorted_indices[:top_k]
 
-        all_outputs[rater_name] = output
-    return all_outputs
+
+def pareto_get_attack_indices(
+    attacks: list[Attack], top_k: int | None = 10
+) -> list[int]:
+    """
+    Choose the attacks to include in the attacker context using Pareto optimization.
+
+    Args:
+        attacks: List of attacks to select from
+        top_k: Number of attacks to select (None = all pareto optimal)
+    """
+    rating_points = {}
+
+    for i, attack in enumerate(attacks):
+        if not attack.ratings:
+            ## not rated yet
+            continue
+
+        # TODO: smarter selection by clustering similar responses
+        # Scaling here is eyeballed obviously (lm_judge is from 0 to 100)
+        classifier_score, lm_judge_score = 0.0, 100.0
+        for rating in attack.ratings:
+            if rating.rater.rating_function_type == "classifier":
+                classifier_score = rating.raw_score
+            elif rating.rater.rating_function_type in ["elo_lm", "absolute_lm"]:
+                lm_judge_score = rating.raw_score
+
+        # Want to minimize lm_judge_score and maximize classifier_score
+        rating_points[i] = (classifier_score, -lm_judge_score / 30)
+
+    selected_indices = pareto_sort(rating_points, top_k=top_k)
+    return selected_indices
+
+
+def weighted_get_attack_indices(
+    attacks: list[Attack],
+    rho: float,
+    top_k: int = 10,
+    sample: bool = True,
+) -> list[int]:
+    """
+    Select attacks based on weighted combination of scores.
+
+    Args:
+        attacks: List of attacks to select from
+        rho: Weight for linear combination (0 = pure lm_judge, 1 = pure classifier)
+        top_k: Number of attacks to select
+        sample: If True, use probabilistic sampling; if False, take top-k deterministically
+    """
+    scores = {}
+
+    for i, attack in enumerate(attacks):
+        if not attack.ratings:
+            continue
+
+        classifier_score, lm_judge_score = 0.0, 10.0
+        for rating in attack.ratings:
+            if rating.rater.rating_function_type == "classifier":
+                classifier_score = rating.raw_score
+            elif rating.rater.rating_function_type in ["elo_lm", "absolute_lm"]:
+                lm_judge_score = rating.raw_score
+
+        # Higher score is better: high classifier, low lm_judge
+        scores[i] = rho * classifier_score - (1 - rho) * lm_judge_score
+
+    if not scores:
+        return []
+
+    indices = list(scores.keys())
+    values = list(scores.values())
+
+    if not sample:
+        # Deterministic: take top-k by score
+        sorted_indices = sorted(indices, key=lambda i: scores[i], reverse=True)
+        return sorted_indices[: min(top_k, len(sorted_indices))]
+
+    # Probabilistic sampling
+    values_array = np.array(values)
+
+    # Shift to make all positive (softmax-like)
+    exp_values = np.exp(values_array - np.max(values_array))
+    probs = exp_values / exp_values.sum()
+
+    # Sample without replacement
+    num_samples = min(top_k, len(indices))
+    selected = np.random.choice(indices, size=num_samples, replace=False, p=probs)
+
+    return selected.tolist()

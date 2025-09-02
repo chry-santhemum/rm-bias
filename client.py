@@ -21,16 +21,6 @@ from tenacity import (
     wait_random_exponential,
 )
 
-from llm_types import (
-    APIRequestCache,
-    ChatMessage,
-    GenericBaseModel,
-    InferenceConfig,
-    ToolArgs,
-    ChatHistory,
-    is_thinking_model,
-)
-
 import openai
 import anthropic
 from openai import AsyncOpenAI, BaseModel
@@ -39,8 +29,36 @@ from anthropic import AsyncAnthropic
 from anthropic.types.message import Message
 from anthropic._types import NOT_GIVEN as ANTHROPIC_NOT_GIVEN
 
+from llm_types import (
+    APIRequestCache,
+    ChatMessage,
+    GenericBaseModel,
+    InferenceConfig,
+    ToolArgs,
+    ChatHistory,
+)
+
 
 logger = logging.getLogger(__name__)
+
+def is_thinking_model(model_name: str) -> bool:
+    """
+    Whether or not there is an explicit thinking mode for this model.
+    """
+    THINKING_MODELS = [
+        "claude-opus-4-1-20250805",
+        "claude-opus-4-20250514",
+        "claude-sonnet-4-20250514",
+        "claude-3-7-sonnet-20250219",
+        "google/gemini-2.5-pro",
+        "google/gemini-2.5-flash",
+        "openai/gpt-5",
+        "openai/gpt-5-nano",
+        "openai/gpt-5-mini",
+        "openai/o3",
+        "deepseek/deepseek-r1",
+    ]
+    return model_name in THINKING_MODELS
 
 
 class OpenaiResponse(BaseModel):

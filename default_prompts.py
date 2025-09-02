@@ -41,3 +41,11 @@ Output your score as a JSON object with the key "score" and the value being an i
 ```
 
 Remember to include the JSON tags. {thinking_instruction}"""
+
+
+
+RATER_THINKING_INSTRUCTION = {
+    True: "Use your thinking budget to reason about which responses are preferred or dispreferred according to human preferences. In your output, only output the JSON object.",
+    False: "Think step by step to plan your response, and then output the score formatted as the JSON object.",
+}
+

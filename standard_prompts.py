@@ -1,23 +1,20 @@
-"""Standard prompts for estimating mean and stdev of rater models.
+"""
+Standard prompts for estimating mean and stdev of rater models.
 
-Datasets proposed:
+Datasets used:
 - Alpaca GPT4
 - Ultrafeedback_binarized
 - Skywork Preference V0.2
 - LMArena
-
-
-We will sample 16-32 responses from each user prompt. We'll use only 4096 prompts for now.
 """
 
-# %%
-from datasets import Dataset, load_dataset, concatenate_datasets
 import random
 import json
-from transformers.trainer_utils import set_seed as hf_set_seed
+
 import numpy as np
 import torch
-
+from datasets import load_dataset, concatenate_datasets
+from transformers.trainer_utils import set_seed as hf_set_seed
 
 def set_seed_all(seed: int):
     random.seed(seed)  # Python RNG
@@ -25,10 +22,6 @@ def set_seed_all(seed: int):
     torch.manual_seed(seed)  # PyTorch CPU RNG
     torch.cuda.manual_seed_all(seed)  # PyTorch CUDA RNG
     hf_set_seed(seed)
-
-
-# %%
-
 
 def make_prompt_mix(num_total: int = 2048, seed: int = 10086):
     """

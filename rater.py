@@ -1,16 +1,60 @@
 import json
-
 import logging
-import torch
+import asyncio
 from pathlib import Path
 from slist import Slist
+from abc import ABC, abstractmethod
+
+
+import numpy as np
+import torch
 from torch import Tensor
+
 from llm_types import ChatHistory
-
+from state import Cluster, SystemPromptStats
 from utils import load_model, REWARD_MODELS
+from standard_prompts import make_prompt_mix
+
+logging.getLogger(__name__)
 
 
-class RewardModel:
+class RatingFunction(ABC):
+    def __init__(self):
+        self.mean = 0.0
+        self.stdev = 1.0
+
+    @property
+    @abstractmethod
+    def rating_function_type(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def model_name(self) -> str:
+        pass
+
+    @abstractmethod
+    async def __call__(
+        self,
+        cluster: Cluster,
+        system_prompt: str,
+        normalized: bool,
+        *args,
+        **kwargs,
+    ) -> SystemPromptStats:
+        pass
+
+    @abstractmethod
+    def normalize(self, policy_name: str, *args, **kwargs):
+        """
+        Sample responses from the policy model for a standard dataset of user prompts.
+        Then rate them and compute the mean and standard deviation.
+        """
+        pass
+
+
+
+class RewardModel(RatingFunction):
     """
     Wrapper around reward models; __init__ kwargs (e.g. device) are passed to load_model
     """
@@ -18,25 +62,21 @@ class RewardModel:
     def __init__(
         self,
         model_name: str,
-        stats: dict[str, float] | None = None,
         **kwargs,
     ):
         assert model_name in REWARD_MODELS, f"Model {model_name} not local!!!"
-        self.model_name = model_name
+        self._model_name = model_name
         self.model, self.tokenizer = load_model(model_name, **kwargs)
         self.device = self.model.device
-        
-        # load stats
-        if stats is None:
-            logging.info(
-                f"Using default stats for {self.model_name}. Run .normalize() if you want to compute the normalized rewards."
-            )
-            self.mean = 0.0
-            self.stdev = 1.0
-        else:
-            logging.info(f"Using provided stats for {self.model_name}")
-            self.mean = stats["mean"]
-            self.stdev = stats["stdev"]
+        super().__init__()
+
+    @property
+    def rating_function_type(self) -> str:
+        return "classifier"
+
+    @property
+    def model_name(self) -> str:
+        return self._model_name
 
     def __call__(
         self,
@@ -76,8 +116,8 @@ class RewardModel:
     def normalize(
         self,
         policy_model_name: str,
-        n_prompts: int = 2048,
-        n_samples: int = 16,
+        n_prompts: int = 128,
+        n_samples: int = 8,
         n_clients: int = 16,
         overwrite: bool = False,
         cache_path: str | None = None,
@@ -170,3 +210,8 @@ class RewardModel:
             )
 
         logging.info(f"Saved stats for {self.model_name} to {f.name}")
+
+
+class LLMJudge:
+
+    

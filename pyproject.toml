@@ -34,4 +34,4 @@ members = [
 ]
 
 [tool.ruff.lint]
-ignore = ["E402", "F403", "F722", "F821"]
+ignore = ["E402", "F403", "F405", "F722", "F821"]

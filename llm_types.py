@@ -136,6 +136,8 @@ class ChatHistory(BaseModel):
         for msg in self.messages:
             if msg.role != "system":
                 new_messages.append(msg)
+
+        assert not any(msg.role == "system" for msg in new_messages)
         
         return ChatHistory(messages=new_messages)
 
