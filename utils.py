@@ -44,45 +44,52 @@ POLICY_MODELS = {
     "qwen-3-8b-instruct": "Qwen/Qwen3-8B",
 }
 
-@functools.cache
+
+_reward_model = None
+_policy_model = None
+
 def load_model(model_name: str, use_flash: bool = False, device: str = "auto"):
+    global _reward_model, _policy_model
     if model_name in REWARD_MODELS:
         model_name_hf = REWARD_MODELS[model_name]
         print(f"Loading reward model {model_name_hf}...")
-        load_kwargs = {
-            "torch_dtype": torch.bfloat16,
-            "device_map": device,
-            "num_labels": 1,
-        }
-        if use_flash:
-            load_kwargs["attn_implementation"] = "flash_attention_2"
+        if _reward_model is None:
+            load_kwargs = {
+                "torch_dtype": torch.bfloat16,
+                "device_map": device,
+                "num_labels": 1,
+            }
+            if use_flash:
+                load_kwargs["attn_implementation"] = "flash_attention_2"
 
-        model = AutoModelForSequenceClassification.from_pretrained(
-            model_name_hf, **load_kwargs
-        )
-
-        print("Reward model loaded. Set to eval mode and disabled gradients.")
+            _reward_model = AutoModelForSequenceClassification.from_pretrained(
+                model_name_hf, **load_kwargs
+            )
+            model = _reward_model
+        else:
+            model = _reward_model
 
     elif model_name in POLICY_MODELS:
         model_name_hf = POLICY_MODELS[model_name]
         print(f"Loading policy model {model_name_hf}...")
-        load_kwargs = {
-            "torch_dtype": torch.bfloat16,
-            "device_map": device,
-        }
-        if use_flash:
-            load_kwargs["attn_implementation"] = "flash_attention_2"
+        if _policy_model is None:
+            load_kwargs = {
+                "torch_dtype": torch.bfloat16,
+                "device_map": device,
+            }
+            if use_flash:
+                load_kwargs["attn_implementation"] = "flash_attention_2"
 
-        model = AutoModelForCausalLM.from_pretrained(model_name_hf, **load_kwargs)
+            _policy_model = AutoModelForCausalLM.from_pretrained(model_name_hf, **load_kwargs)
+            model = _policy_model
+        else:
+            model = _policy_model
 
-        print("Policy model loaded. Set to eval mode and disabled gradients.")
-
+    print("Model loaded. Set to eval mode and disabled gradients.")
     model.eval()
     model.requires_grad_(False)
 
     tokenizer = AutoTokenizer.from_pretrained(model_name_hf)
-
-    # Set pad token
     if tokenizer.pad_token is None:
         print("No pad token found, setting to eos token")
         tokenizer.pad_token = tokenizer.eos_token

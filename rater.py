@@ -25,13 +25,13 @@ logging.getLogger(__name__)
 class PolicyModel:
     def __init__(
         self,
-        policy_name: str,
+        model_name: str,
         max_tokens: int,
         temperature: float = 0.8,
         max_par: int = 512,  # max parallel calls to client
         full_logging: bool = False,
     ):
-        self.policy_name = policy_name
+        self.model_name = model_name
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.max_par = max_par
@@ -48,7 +48,7 @@ class PolicyModel:
             prompts=chat_histories,
             max_par=self.max_par,
             full_logging=self.full_logging,
-            model=self.policy_name,
+            model=self.model_name,
             temperature=self.temperature,
             max_tokens=self.max_tokens,
         )
@@ -93,7 +93,7 @@ class RatingFunction(ABC):
     async def __call__(
         self,
         cluster: Cluster,
-        system_prompt: str,
+        system_prompt_stats: SystemPromptStats,
         n_samples: int,
         *args,
         **kwargs,
@@ -106,7 +106,7 @@ class RatingFunction(ABC):
         pass
 
     @abstractmethod
-    def normalize(self, policy_name: str, *args, **kwargs):
+    async def normalize(self, *args, **kwargs):
         """
         Sample responses from the policy model for a standard dataset of user prompts.
         Then rate them and compute the mean and standard deviation.
@@ -139,39 +139,45 @@ class RewardModel(RatingFunction):
     async def __call__(
         self,
         cluster: Cluster,
-        system_prompt: str,
-        normalized: bool,  # whether to normalize per-prompt
+        system_prompt_stats: SystemPromptStats,
         n_samples: int=1,
+        per_prompt_normalize: bool=True,  # whether to normalize per-prompt
     ) -> SystemPromptStats:
 
-        # Sample train prompts
-        if cluster.train_batch_size == 0:
-            train_prompts = cluster.train_prompts
-        else:
-            train_prompts = random.sample(cluster.train_prompts, cluster.train_batch_size)
+        # If no rollouts have been generated, sample train prompts and rollouts
+        if not system_prompt_stats.attacks:
+            if cluster.train_batch_size == 0:
+                train_prompts = cluster.train_prompts
+            else:
+                train_prompts = random.sample(cluster.train_prompts, cluster.train_batch_size)
 
-        policy_inputs = [
-            ChatHistory.from_system(system_prompt).add_user(prompt) 
-            for prompt in train_prompts for _ in range(n_samples)
-        ]
-        policy_responses = await self.policy_model.sample_responses(policy_inputs)
+            system_prompt = system_prompt_stats.system_prompt
+            policy_inputs = [
+                ChatHistory.from_system(system_prompt).add_user(prompt) 
+                for prompt in train_prompts for _ in range(n_samples)
+            ]
+            policy_responses = await self.policy_model.sample_responses(policy_inputs)
+            attacks = [Attack(chat_history=policy_responses[i], ratings=[], aux_info={}) for i in range(len(policy_responses))]
+        
+        else:
+            attacks = system_prompt_stats.attacks
 
         # If required, compute the per-prompt means
         per_prompt_means = []
-        if normalized:
-            for train_prompt in train_prompts:
+        if per_prompt_normalize:
+            for attack in attacks:
                 stats = await per_prompt_stats(
-                    prompt = train_prompt,
+                    prompt = attack.user,
                     rater_name = self.model_name,
-                    policy_name = self.policy_model.policy_name,
+                    policy_name = self.policy_model.model_name,
                 )
-                per_prompt_means.extend([stats["mean"] for _ in range(n_samples)])
+                per_prompt_means.append(stats["mean"])
 
         # Pass to reward model in batches
         all_scores = []
         for i in tqdm(range(0, len(policy_responses), self.batch_size), desc="Reward model rating:"):
-            inputs = policy_responses[i : i + self.batch_size]
-            inputs = [input.remove_system().to_openai_messages() for input in inputs]
+            inputs = attacks[i : i + self.batch_size]
+            inputs = [input.chat_history.remove_system().to_openai_messages() for input in inputs]
             input_ids = self.tokenizer.apply_chat_template(
                 inputs,
                 tokenize=True,
@@ -191,26 +197,26 @@ class RewardModel(RatingFunction):
             all_scores.extend(scores.tolist())
     
         # Normalize scores
-        if normalized:
+        if per_prompt_normalize:
             normalized_scores = [(all_scores[i] - per_prompt_means[i]) / (self.stdev + 1e-6) for i in range(len(all_scores))]
         else:
             normalized_scores = [(all_scores[i] - self.mean) / (self.stdev + 1e-6) for i in range(len(all_scores))]
             
         attacks = [
-            Attack(chat_history=policy_responses[i], ratings=[
+            replace(attack, ratings=attack.ratings + [
                 Rating(
                     raw_score=normalized_scores[i],
                     rater=self.rater,
                     aux_info={"normalized_score": normalized_scores[i]}
                 )
-            ], aux_info={}) for i in range(len(policy_responses))]
+            ]) for i, attack in enumerate(attacks)
+        ]
 
         return SystemPromptStats(system_prompt=system_prompt, attacks=attacks)
 
 
-    def normalize(
+    async def normalize(
         self,
-        policy_model_name: str,
         n_prompts: int = 128,
         n_samples: int = 8,
         n_clients: int = 16,
@@ -219,11 +225,10 @@ class RewardModel(RatingFunction):
     ):
         """
         Loads pre-computed stats from the cache json file if it exists.
-        Otherwise, compute rewards from standard_prompts, then set self.mean and self.stdev
-        Number of concurrent calls is n_clients * min(n_prompts, rater_max_par=32)
-        and saves the stats to the cache json file.
+        Otherwise, compute rewards from standard_prompts, and saves the stats to the cache json file.
+        Number of concurrent calls is n_clients * min(n_prompts, rater_max_par=32).
         """
-        cache_path = cache_path or f".rwdcache/per_model/{self.model_name}.json"
+        cache_path = cache_path or f".cache/normalize/{self.model_name}.json"
         try:
             # load pre-computed stats from the cache json file
             with open(cache_path, "r") as f:
@@ -233,41 +238,32 @@ class RewardModel(RatingFunction):
                     loaded_stats["reward_model_name"] == self.model_name
                 ), f"Cached stats for {loaded_stats['reward_model_name']} but model is {self.model_name}"
                 assert (
-                    loaded_stats["policy_model_name"] == policy_model_name
-                ), f"Cached stats for {loaded_stats['policy_model_name']} but model is {policy_model_name}"
+                    loaded_stats["policy_name"] == self.policy_model.model_name
+                ), f"Cached stats for {loaded_stats['policy_name']} but model is {self.policy_model.model_name}"
 
-                if (
-                    loaded_stats["n_samples"] != n_samples
-                    or loaded_stats["n_prompts"] != n_prompts
-                ):
+                if (loaded_stats["n_samples"] != n_samples or loaded_stats["n_prompts"] != n_prompts):
                     if not overwrite:
-                        logging.warning(
-                            "Using cached stats for different n_samples or n_prompts. Proceed with caution. Use overwrite=True to overwrite."
-                        )
+                        logging.warning("Using cached stats for different n_samples or n_prompts. Proceed with caution.")
                     else:
-                        raise ValueError(
-                            f"Cached stats for different n_samples or n_prompts. Overwriting..."
-                        )
+                        raise ValueError("Cached stats for different n_samples or n_prompts. Overwriting...")
 
                 self.mean = loaded_stats["mean"]
                 self.stdev = loaded_stats["stdev"]
                 return
-        except Exception as e:
-            logging.error(f"Computing from scratch.")
-            logging.error(f"Error: {e}")
+                
+        except Exception:
+            logging.warning("Computing mean and stdev from scratch...")
 
         prompts = make_prompt_mix(num_total=n_prompts)
-        stats = asyncio.run(
-            Slist(prompts["prompt"]).par_map_async(
-                func=lambda prompt: per_prompt_reward_stats(
-                    prompt=prompt,
-                    raters=(self,),  # Pass the RewardModel instance
-                    policy_model_name=policy_model_name,
-                    N=n_samples,
-                ),
-                max_par=n_clients,
-                tqdm=True,
-            )
+        stats = await Slist(prompts["prompt"]).par_map_async(
+            func=lambda prompt: per_prompt_stats(
+                prompt=prompt,
+                rater_name=self.model_name,
+                policy_name=self.policy_model.model_name,
+                N=n_samples,
+            ),
+            max_par=n_clients,
+            tqdm=True,
         )
 
         # gather all stats
@@ -295,7 +291,7 @@ class RewardModel(RatingFunction):
                     "n_samples": n_samples,
                     "n_prompts": n_prompts,
                     "reward_model_name": self.model_name,
-                    "policy_model_name": policy_model_name,
+                    "policy_name": self.policy_model.model_name,
                     "mean": self.mean,
                     "stdev": self.stdev,
                     "percentiles": percentiles,
@@ -303,7 +299,6 @@ class RewardModel(RatingFunction):
                 f,
                 indent=4,
             )
-
         logging.info(f"Saved stats for {self.model_name} to {f.name}")
 
 
@@ -413,3 +408,7 @@ class LLMJudge(RatingFunction):
                 continue
 
         return SystemPromptStats(system_prompt=system_prompt, attacks=attacks)
+
+    
+    async def normalize(...):
+        ...
