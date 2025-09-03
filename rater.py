@@ -285,7 +285,8 @@ class RewardModel(RatingFunction):
                     rater=self.rater,
                     aux_info={"normalized_score": normalized_scores[i]}
                 )
-            ]) for i, attack in enumerate(attacks)
+            ]) 
+            for i, attack in enumerate(attacks) if attack.normalized_reward is None
         ]
 
         return SystemPromptStats(system_prompt=system_prompt, attacks=attacks)
@@ -316,7 +317,7 @@ class LLMJudge(RatingFunction):
         system_prompt_stats: SystemPromptStats,
         n_samples: int=1,
         max_tokens: int=2048,
-        reasoning: int | str | None = None,
+        reasoning: int | str | None = 2000,
     ) -> SystemPromptStats:
 
         # If no rollouts have been generated, sample train prompts and rollouts
@@ -385,16 +386,15 @@ class LLMJudge(RatingFunction):
                 except Exception:
                     reasoning_content = "N/A"
                 
-                new_attack = replace(attacks[i], 
-                    ratings=attacks[i].ratings + [
-                        Rating(
+                if attacks[i].normalized_lm_judge is None:
+                    new_attack = replace(attacks[i], 
+                        ratings=attacks[i].ratings + [Rating(
                             raw_score=score,
                             rater=self.rater,
                             aux_info={"reasoning_content": reasoning_content, "normalized_score": normalized_score}
-                        )
-                    ],
-                )
-                attacks[i] = new_attack
+                        )]
+                    )
+                    attacks[i] = new_attack
 
             except Exception as e:
                 logging.error(f"Absolute rating parse error: {e}")
