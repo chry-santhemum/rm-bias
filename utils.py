@@ -6,7 +6,7 @@ import datetime
 import functools
 import re
 from slist import Slist
-from IPython import get_ipython
+from IPython.core.getipython import get_ipython
 from pathlib import Path
 import hashlib
 import pickle
@@ -23,7 +23,6 @@ from transformers import (
 from llm_types import ChatHistory
 from state import Attack
 from client import OpenaiResponse, is_thinking_model, get_universal_caller, sample_from_model_parallel
-from standard_prompts import make_prompt_mix
 from default_prompts import *
 
 logging.getLogger(__name__)
@@ -278,7 +277,7 @@ async def per_prompt_stats(
     """
     caller = get_universal_caller()
     if policy_system_prompt is None:
-        message = ChatHistory().add_user(prompt)
+        message = ChatHistory().add_user(prompt)  # No system prompt by default
     else:
         message = ChatHistory.from_system(policy_system_prompt).add_user(prompt)
 
@@ -377,7 +376,6 @@ async def per_prompt_stats(
 
     output = {
         "mean": float(np.mean(rewards_winsorized)),
-        "stdev": float(np.std(rewards_winsorized, ddof=1)),
         "N": int(N),
         "rewards_raw": rewards,
         "rewards_winsorized": rewards_winsorized.tolist(),

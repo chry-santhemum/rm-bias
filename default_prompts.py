@@ -40,7 +40,7 @@ Output your score as a JSON object with the key "score" and the value being an i
 {{"score": x}}
 ```
 
-Remember to include the JSON tags. {thinking_instruction}"""
+{thinking_instruction} Remember to include the JSON tags."""
 
 
 

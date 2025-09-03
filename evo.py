@@ -307,54 +307,6 @@ class EvoPlanner:
 
 
 
-class Executor:
-    def __init__(
-        self,
-        executor_model_name: str,
-        max_tokens: int,
-        reasoning: int | str | None = None,
-        temperature: float = 0.9,
-        max_par: int = 512,  # max parallel calls to client
-        full_logging: bool = False,
-    ):
-        self.executor_model_name = executor_model_name
-        self.max_tokens = max_tokens
-        self.reasoning = reasoning
-        self.temperature = temperature
-        self.max_par = max_par
-        self.caller = get_universal_caller()
-        self.full_logging = full_logging
-
-
-    async def sample_responses(
-        self,
-        chat_histories: list[ChatHistory],
-    ):
-        executor_responses = await sample_from_model_parallel(
-            caller=self.caller,
-            prompts=chat_histories,
-            max_par=self.max_par,
-            full_logging=self.full_logging,
-            model=self.executor_model_name,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
-            reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
-        )
-
-        # parse responses
-        completed_chat_histories = []
-        for i, resp in enumerate(executor_responses):
-            try:
-                assistant_response = resp.first_response
-            except Exception as e:
-                logging.error(f"Executor remote parse error (answer): {e}")
-                logging.error(f"API response: {resp}")
-                assistant_response = "N/A"
-            
-            completed_chat_histories.append(
-                chat_histories[i].add_assistant(assistant_response)
-            )
-        return completed_chat_histories
 
 
 
