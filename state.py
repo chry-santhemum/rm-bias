@@ -118,9 +118,9 @@ class SystemPromptStats:
 
 
 @dataclass
-class SeedState:
+class SeedState[T]:
     cluster: Cluster
-    state: Any  # information to persist, e.g. current population
+    state: T  # information to persist, e.g. current population
     history: list[dict[str, SystemPromptStats]]
 
     def __repr__(self):
