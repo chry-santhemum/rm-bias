@@ -267,7 +267,7 @@ def custom_cache(cache_dir: str=".cache"):
 
 
 @custom_cache(cache_dir=".cache")
-async def per_prompt_stats(
+async def xper_prompt_stats(
     prompt: str,
     rater_name: str,
     policy_name: str,
@@ -293,6 +293,7 @@ async def per_prompt_stats(
         caller=caller,
         max_par=policy_max_par,
         full_logging=False,
+        desc="Sampling responses for per-prompt stats",
         temperature=temperature,
         model=policy_name,
         max_tokens=policy_max_tokens,
@@ -345,9 +346,11 @@ async def per_prompt_stats(
             prompts=rater_prompts,
             caller=caller,
             max_par=rater_max_par,
+            full_logging=False,
+            desc="Sampling responses for per-prompt stats",
             model=rater_name,
             max_tokens=2048,
-            reasoning={"max_tokens": 2000, "effort": "high"},
+            reasoning={"max_tokens": 2000, "effort": "low"},
         )
 
         rewards = []

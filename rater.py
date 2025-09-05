@@ -46,6 +46,7 @@ class PolicyModel:
             prompts=chat_histories,
             max_par=self.max_par,
             full_logging=self.full_logging,
+            desc="Sampling responses",
             model=self.model_name,
             temperature=self.temperature,
             max_tokens=self.max_tokens,
@@ -152,12 +153,13 @@ class RatingFunction(ABC):
             ),
             max_par=n_clients,
             tqdm=True,
+            desc="Computing normalization stats",
         )
-
+        
         # gather all stats
         all_scores_raw = []
         for stat in stats:
-            all_scores_raw.extend(stat[self.model_name]["rewards_raw"])
+            all_scores_raw.extend(stat["rewards_raw"])
         all_scores = list(filter(lambda x: x is not None, all_scores_raw))
 
         self.mean = float(np.mean(all_scores))
@@ -220,6 +222,7 @@ class RewardModel(RatingFunction):
         per_prompt_normalize: bool=True,  # whether to normalize per-prompt
     ) -> SystemPromptStats:
 
+        system_prompt = system_prompt_stats.system_prompt
         # If no rollouts have been generated, sample train prompts and rollouts
         if not system_prompt_stats.attacks:
             if cluster.train_batch_size == 0:
@@ -227,7 +230,6 @@ class RewardModel(RatingFunction):
             else:
                 train_prompts = random.sample(cluster.train_prompts, cluster.train_batch_size)
 
-            system_prompt = system_prompt_stats.system_prompt
             policy_inputs = [
                 ChatHistory.from_system(system_prompt).add_user(prompt) 
                 for prompt in train_prompts for _ in range(n_samples)
@@ -251,7 +253,7 @@ class RewardModel(RatingFunction):
 
         # Pass to reward model in batches
         all_scores = []
-        for i in tqdm(range(0, len(policy_responses), self.batch_size), desc="Reward model rating:"):
+        for i in tqdm(range(0, len(policy_responses), self.batch_size), desc="Reward model rating"):
             inputs = attacks[i : i + self.batch_size]
             inputs = [input.chat_history.remove_system().to_openai_messages() for input in inputs]
             input_ids = self.tokenizer.apply_chat_template(
@@ -320,6 +322,7 @@ class LLMJudge(RatingFunction):
         reasoning: int | str | None = 2000,
     ) -> SystemPromptStats:
 
+        system_prompt = system_prompt_stats.system_prompt
         # If no rollouts have been generated, sample train prompts and rollouts
         if not system_prompt_stats.attacks:
             if cluster.train_batch_size == 0:
@@ -327,7 +330,6 @@ class LLMJudge(RatingFunction):
             else:
                 train_prompts = random.sample(cluster.train_prompts, cluster.train_batch_size)
 
-            system_prompt = system_prompt_stats.system_prompt
             policy_inputs = [
                 ChatHistory.from_system(system_prompt).add_user(prompt) 
                 for prompt in train_prompts for _ in range(n_samples)
@@ -356,6 +358,7 @@ class LLMJudge(RatingFunction):
             prompts=rater_inputs,
             max_par=self.max_par,
             full_logging=self.full_logging,
+            desc="Absolute rating",
             model=self.model_name,
             temperature=0.7,
             max_tokens=max_tokens,

@@ -1,4 +1,5 @@
 # %%
+import patches   # monkey patching
 import os
 import json
 import random
@@ -8,22 +9,17 @@ import logging
 import asyncio
 import nest_asyncio
 from tqdm.auto import tqdm
-from slist import Slist
 from pathlib import Path
-from typing import Any, Literal, Coroutine
-from functools import partial
+from typing import Literal, Coroutine
 from collections import defaultdict
-from dataclasses import replace, dataclass, field
 
-import numpy as np
 import wandb
-from datasets import load_dataset
 from sentence_transformers import SentenceTransformer
 from sklearn.cluster import DBSCAN
 
-from utils import timestamp, get_to_pass_reasoning, is_notebook
+from utils import timestamp, get_to_pass_reasoning
 from rater import LLMJudge, RewardModel, PolicyModel, RatingFunction
-from state import SeedState, SystemPromptStats, Cluster, Attack, Rating, Rater
+from state import SeedState, SystemPromptStats, Cluster
 from standard_prompts import set_seed_all
 from default_prompts import *
 from client import is_thinking_model, get_universal_caller, sample_from_model_parallel
@@ -164,6 +160,7 @@ class EvoPlanner:
             prompts=to_send_messages,
             max_par=self.max_par,
             full_logging=self.full_logging,
+            desc="Mutating",
             model=model,
             temperature=self.temperature,
             max_tokens=self.max_tokens,
@@ -255,6 +252,7 @@ class EvoPlanner:
             prompts=to_send_messages,
             max_par=self.max_par,
             full_logging=self.full_logging,
+            desc="Innovating",
             model=model,
             temperature=self.temperature,
             max_tokens=self.max_tokens,
@@ -366,8 +364,8 @@ class EvoRunner:
                 step_idx = seed_state.state[all_scores_history[0][0]]
                 stdev_best_history = seed_state.history[step_idx][all_scores_history[0][0]].stdev_score
                 log_dict.update({
-                    f"seed_{i}/mean_best": float(mean_best_history),
-                    f"seed_{i}/stdev_best": float(stdev_best_history),
+                    f"seed_{i}/mean_best_pop": float(mean_best_history),
+                    f"seed_{i}/stdev_best_pop": float(stdev_best_history),
                 })
 
             if log_dict:
@@ -378,13 +376,14 @@ class EvoRunner:
         assert all(len(seed_state.history) == 0 for seed_state in self.seed_states)
 
         logging.info(f"[INITIALIZE] Normalizing rater 1, {self.rater_1.model_name}...")
-        asyncio.run(self.rater_1.normalize())
+        asyncio.run(self.rater_1.normalize(overwrite=False))
         logging.info(f"[INITIALIZE] Normalizing rater 2, {self.rater_2.model_name}...")
-        asyncio.run(self.rater_2.normalize())
+        asyncio.run(self.rater_2.normalize(overwrite=False))
 
     
     def update_population(self):
         if self.step_count == 0:
+            # breakpoint()
             return
         
         for seed_state in self.seed_states:
@@ -473,7 +472,6 @@ class EvoRunner:
                         cluster=seed_state.cluster,
                         system_prompt_stats=stats,
                         n_samples=1,
-                        per_prompt_normalize=False,
                     )
                     seed_state.history[-1][system_prompt] = new_stats
 
@@ -653,7 +651,7 @@ The json array should be a list of {K_novel} strings. Remember to include the su
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
-        filename=f"logs/{timestamp()}.log",
+        filename=f"logs/evo/{timestamp()}.log",
         filemode='w',
         format='%(asctime)s - %(levelname)s - %(message)s'
     )
@@ -681,10 +679,11 @@ if __name__ == "__main__":
     )
 
     rater_2 = LLMJudge(
-        judge_model_name="google/gemini-2.5-flash",
+        judge_model_name="openai/gpt-5-nano",
         policy_model=policy,
         rubric=HANDWRITTEN_RUBRIC,
         max_par=256,
+        full_logging=True,
     )
 
     # load initial seed states
@@ -699,33 +698,32 @@ if __name__ == "__main__":
     
     set_seed_all(10086)
     for cluster_name, summary in summaries.items():
-        # Load prompts from corresponding file
         prompts_file = user_prompts_dir / f"{cluster_name}.json"
         if prompts_file.exists():
             with open(prompts_file, "r") as f:
                 all_prompts = json.load(f)
             
-            num_train = min(30, len(all_prompts))
-            train_prompts = random.sample(all_prompts, num_train)
+            # num_train = min(20, len(all_prompts))
+            train_prompts = all_prompts
             
             # Create cluster with empty validation for now
             cluster = Cluster(
                 summary=summary,
                 train_prompts=train_prompts,
-                val_prompts=[]
+                val_prompts=[],
+                train_batch_size=10,
             )
             
             # Create seed state with empty history
             seed_state = SeedState(
                 cluster=cluster,
-                current_pop={},
+                state={},
                 history=[],
             )
             
             initial_seed_states.append(seed_state)
-
-            # if len(initial_seed_states) >= 2:
-            #     break
+            if len(initial_seed_states) >= 4:
+                break
     
     logging.info(f"Loaded {len(initial_seed_states)} seed states")
     for state in initial_seed_states:
@@ -735,16 +733,14 @@ if __name__ == "__main__":
     runner = EvoRunner(
         seed_states=initial_seed_states,
         planner=planner,
-        executor=executor,
         rater_1=rater_1,
         rater_2=rater_2,
         embedding_model_name="all-MiniLM-L6-v2",
         eps=0.25,
         N_pop=8,
-        M_var=3,
+        M_var=5,
         K_novel=4,
-        run_name="evo_0819_innovate_oof",
         enable_wandb=True,
     )
 
-    runner.train(num_steps=15)
+    runner.train(num_steps=10)

@@ -530,13 +530,24 @@ def custom_wait_strategy(retry_state):
     exception = retry_state.outcome.exception()
     
     # Rate limit and timeout errors: use exponential backoff
-    if isinstance(exception, (openai.RateLimitError, openai.APITimeoutError, 
-                            anthropic.RateLimitError, anthropic._exceptions.OverloadedError)):
+    if isinstance(exception, (
+        openai.RateLimitError, 
+        openai.APITimeoutError, 
+        openai.APIConnectionError,
+        anthropic.RateLimitError, 
+        anthropic._exceptions.OverloadedError
+    )):
         return wait_random_exponential(multiplier=0.5, max=16)(retry_state)
     
     # Validation and server errors: use fixed wait
-    elif isinstance(exception, (ValidationError, JSONDecodeError, openai.InternalServerError, 
-                               ValueError, anthropic.InternalServerError, anthropic.BadRequestError)):
+    elif isinstance(exception, (
+        ValidationError, 
+        JSONDecodeError, 
+        openai.InternalServerError, 
+        ValueError, 
+        anthropic.InternalServerError, 
+        anthropic.BadRequestError
+    )):
         return 0.5
     
     return 0.
@@ -544,7 +555,8 @@ def custom_wait_strategy(retry_state):
 
 @retry(
     retry=retry_if_exception_type((
-        openai.RateLimitError, openai.APITimeoutError, anthropic.RateLimitError, anthropic._exceptions.OverloadedError,
+        openai.RateLimitError, openai.APITimeoutError, openai.APIConnectionError, 
+        anthropic.RateLimitError, anthropic._exceptions.OverloadedError,
         ValidationError, JSONDecodeError, openai.InternalServerError, ValueError, 
         anthropic.InternalServerError, anthropic.BadRequestError
     )),
@@ -588,6 +600,7 @@ async def sample_across_models(
     prompt: ChatHistory,
     caller: MultiClientCaller,
     full_logging: bool = False,
+    desc: str = "",
     **kwargs,
 ) -> Slist[OpenaiResponse]:
     """
@@ -599,6 +612,7 @@ async def sample_across_models(
         ),
         max_par=len(models),
         tqdm=True,
+        desc=desc,
     )
     return responses
 
@@ -608,6 +622,7 @@ async def sample_from_model_parallel(
     caller: MultiClientCaller,
     max_par: int,
     full_logging: bool = False,
+    desc: str = "",
     **kwargs,
 ) -> Slist[OpenaiResponse]:
     """
@@ -620,6 +635,7 @@ async def sample_from_model_parallel(
         ),
         max_par=max_par,
         tqdm=True,
+        desc=desc,
     )
     return responses
 
