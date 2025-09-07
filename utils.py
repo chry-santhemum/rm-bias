@@ -267,7 +267,7 @@ def custom_cache(cache_dir: str=".cache"):
 
 
 @custom_cache(cache_dir=".cache")
-async def xper_prompt_stats(
+async def per_prompt_stats(
     prompt: str,
     rater_name: str,
     policy_name: str,

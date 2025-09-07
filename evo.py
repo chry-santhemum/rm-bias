@@ -453,14 +453,15 @@ class EvoRunner:
 
             if rating_function.rating_function_type == "classifier":
                 for seed_state in tqdm(self.seed_states, desc=f"{rating_function.model_name} seed states:"):
-                    for system_prompt, stats in seed_state.history[-1].items():
-                        new_stats = asyncio.run(rating_function(
-                            cluster=seed_state.cluster,
-                            system_prompt_stats=stats,
-                            n_samples=1,
-                            per_prompt_normalize=False,
-                        ))
-                        seed_state.history[-1][system_prompt] = new_stats
+                    system_prompts = list(seed_state.history[-1].keys())
+                    new_stats = asyncio.run(rating_function(
+                        cluster=seed_state.cluster,
+                        system_prompt_stats=[seed_state.history[-1][system_prompt] for system_prompt in system_prompts],
+                        n_samples=1,
+                        per_prompt_normalize=False,
+                    ))
+                    for system_prompt, stats in zip(system_prompts, new_stats):
+                        seed_state.history[-1][system_prompt] = stats
 
             elif rating_function.rating_function_type == "lm_judge":
                 # This should be the LM judge, so do it in parallel
@@ -468,12 +469,14 @@ class EvoRunner:
                     return await asyncio.gather(*tasks)
                 
                 async def update_stats(seed_state: SeedState, system_prompt: str, stats: SystemPromptStats):
+                    system_prompts = list(seed_state.history[-1].keys())
                     new_stats = await rating_function(
                         cluster=seed_state.cluster,
-                        system_prompt_stats=stats,
+                        system_prompt_stats=[seed_state.history[-1][system_prompt] for system_prompt in system_prompts],
                         n_samples=1,
                     )
-                    seed_state.history[-1][system_prompt] = new_stats
+                    for system_prompt, stats in zip(system_prompts, new_stats):
+                        seed_state.history[-1][system_prompt] = stats
 
                 tasks = []
                 for seed_state in tqdm(self.seed_states, desc=f"{rating_function.model_name} seed states:"):
@@ -722,7 +725,7 @@ if __name__ == "__main__":
             )
             
             initial_seed_states.append(seed_state)
-            if len(initial_seed_states) >= 4:
+            if len(initial_seed_states) >= 1:
                 break
     
     logging.info(f"Loaded {len(initial_seed_states)} seed states")
@@ -737,10 +740,10 @@ if __name__ == "__main__":
         rater_2=rater_2,
         embedding_model_name="all-MiniLM-L6-v2",
         eps=0.25,
-        N_pop=8,
-        M_var=5,
-        K_novel=4,
-        enable_wandb=True,
+        N_pop=3,
+        M_var=2,
+        K_novel=1,
+        enable_wandb=False,
     )
 
     runner.train(num_steps=10)

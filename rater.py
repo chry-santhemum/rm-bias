@@ -6,6 +6,7 @@ from slist import Slist
 from tqdm.auto import tqdm
 from abc import ABC, abstractmethod
 from dataclasses import replace
+from functools import partial
 
 import numpy as np
 import torch
@@ -92,11 +93,11 @@ class RatingFunction(ABC):
     async def __call__(
         self,
         cluster: Cluster,
-        system_prompt_stats: SystemPromptStats,
+        system_prompt_stats: list[SystemPromptStats],
         n_samples: int,
         *args,
         **kwargs,
-    ) -> SystemPromptStats:
+    ) -> list[SystemPromptStats]:
         """
         1. Sample train_batch_size user prompts from train_prompts
         2. For each, sample n_samples assistant responses from the policy model
@@ -217,28 +218,37 @@ class RewardModel(RatingFunction):
     async def __call__(
         self,
         cluster: Cluster,
-        system_prompt_stats: SystemPromptStats,
+        system_prompt_stats: list[SystemPromptStats],
         n_samples: int=1,
         per_prompt_normalize: bool=True,  # whether to normalize per-prompt
-    ) -> SystemPromptStats:
+    ) -> list[SystemPromptStats]:
 
-        system_prompt = system_prompt_stats.system_prompt
-        # If no rollouts have been generated, sample train prompts and rollouts
-        if not system_prompt_stats.attacks:
-            if cluster.train_batch_size == 0:
-                train_prompts = cluster.train_prompts
+        async def sample_attacks_one_prompt(sps: SystemPromptStats) -> list[Attack]:
+            system_prompt = sps.system_prompt
+            # If no rollouts have been generated, sample train prompts and rollouts
+            if not sps.attacks:
+                if cluster.train_batch_size == 0:
+                    train_prompts = cluster.train_prompts
+                else:
+                    train_prompts = random.sample(cluster.train_prompts, cluster.train_batch_size)
+
+                policy_inputs = [
+                    ChatHistory.from_system(system_prompt).add_user(prompt) 
+                    for prompt in train_prompts for _ in range(n_samples)
+                ]
+                policy_responses = await self.policy_model.sample_responses(policy_inputs)
+                attacks = [Attack(chat_history=policy_responses[i], ratings=[], aux_info={}) for i in range(len(policy_responses))]
             else:
-                train_prompts = random.sample(cluster.train_prompts, cluster.train_batch_size)
+                attacks = sps.attacks
+            return attacks
 
-            policy_inputs = [
-                ChatHistory.from_system(system_prompt).add_user(prompt) 
-                for prompt in train_prompts for _ in range(n_samples)
-            ]
-            policy_responses = await self.policy_model.sample_responses(policy_inputs)
-            attacks = [Attack(chat_history=policy_responses[i], ratings=[], aux_info={}) for i in range(len(policy_responses))]
-        
-        else:
-            attacks = system_prompt_stats.attacks
+        gathered_attacks: Slist[list[Attack]] = await Slist(system_prompt_stats).par_map_async(sample_attacks_one_prompt)
+        attacks = []
+        attack_idx_to_sps_idx = {}
+        for sps_idx, attacks in enumerate(gathered_attacks):
+            for attack in attacks:
+                attack_idx_to_sps_idx[len(attacks)] = sps_idx
+                attacks.append(attack)
 
         # If required, compute the per-prompt means
         per_prompt_means = []
@@ -253,7 +263,7 @@ class RewardModel(RatingFunction):
 
         # Pass to reward model in batches
         all_scores = []
-        for i in tqdm(range(0, len(policy_responses), self.batch_size), desc="Reward model rating"):
+        for i in tqdm(range(0, len(attacks), self.batch_size), desc="Reward model rating"):
             inputs = attacks[i : i + self.batch_size]
             inputs = [input.chat_history.remove_system().to_openai_messages() for input in inputs]
             input_ids = self.tokenizer.apply_chat_template(
@@ -291,7 +301,11 @@ class RewardModel(RatingFunction):
             for i, attack in enumerate(attacks) if attack.normalized_reward is None
         ]
 
-        return SystemPromptStats(system_prompt=system_prompt, attacks=attacks)
+        to_return = [SystemPromptStats(system_prompt=sps.system_prompt, attacks=[]) for sps in system_prompt_stats]
+        for i in range(len(attacks)):
+            to_return[attack_idx_to_sps_idx[i]].attacks.append(attacks[i])
+
+        return to_return
 
 
 
@@ -314,6 +328,24 @@ class LLMJudge(RatingFunction):
 
 
     async def __call__(
+        self,
+        cluster: Cluster,
+        system_prompt_stats: list[SystemPromptStats],
+        n_samples: int=1,
+        max_tokens: int=2048,
+        reasoning: int | str | None = 2000,
+    ) -> list[SystemPromptStats]:
+        
+        return await Slist(system_prompt_stats).par_map_async(
+            func=partial(self.rate_one_system_prompt, 
+                cluster=cluster, 
+                n_samples=n_samples, 
+                max_tokens=max_tokens, 
+                reasoning=reasoning
+            )
+        )
+
+    async def rate_one_system_prompt(
         self,
         cluster: Cluster,
         system_prompt_stats: SystemPromptStats,
