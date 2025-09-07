@@ -452,7 +452,7 @@ class EvoRunner:
             logging.info(f"[TRAIN STEP {self.step_count}] Rating attacks with {rating_function.model_name}...")
 
             if rating_function.rating_function_type == "classifier":
-                for seed_state in tqdm(self.seed_states, desc=f"{rating_function.model_name} seed states:"):
+                for seed_state in tqdm(self.seed_states, desc=f"Rating with {rating_function.model_name}"):
                     system_prompts = list(seed_state.history[-1].keys())
                     new_stats = asyncio.run(rating_function(
                         cluster=seed_state.cluster,
@@ -468,7 +468,7 @@ class EvoRunner:
                 async def run_all_tasks(tasks: list[Coroutine]):
                     return await asyncio.gather(*tasks)
                 
-                async def update_stats(seed_state: SeedState, system_prompt: str, stats: SystemPromptStats):
+                async def update_stats(seed_state: SeedState):
                     system_prompts = list(seed_state.history[-1].keys())
                     new_stats = await rating_function(
                         cluster=seed_state.cluster,
@@ -479,9 +479,8 @@ class EvoRunner:
                         seed_state.history[-1][system_prompt] = stats
 
                 tasks = []
-                for seed_state in tqdm(self.seed_states, desc=f"{rating_function.model_name} seed states:"):
-                    for system_prompt, stats in seed_state.history[-1].items():
-                        tasks.append(update_stats(seed_state, system_prompt, stats))
+                for seed_state in tqdm(self.seed_states, desc=f"Rating with {rating_function.model_name}"):
+                    tasks.append(update_stats(seed_state))
                 asyncio.run(run_all_tasks(tasks))
 
     
@@ -686,7 +685,7 @@ if __name__ == "__main__":
         policy_model=policy,
         rubric=HANDWRITTEN_RUBRIC,
         max_par=256,
-        full_logging=True,
+        # full_logging=True,
     )
 
     # load initial seed states
@@ -725,7 +724,7 @@ if __name__ == "__main__":
             )
             
             initial_seed_states.append(seed_state)
-            if len(initial_seed_states) >= 1:
+            if len(initial_seed_states) >= 4:
                 break
     
     logging.info(f"Loaded {len(initial_seed_states)} seed states")
@@ -740,10 +739,10 @@ if __name__ == "__main__":
         rater_2=rater_2,
         embedding_model_name="all-MiniLM-L6-v2",
         eps=0.25,
-        N_pop=3,
-        M_var=2,
-        K_novel=1,
-        enable_wandb=False,
+        N_pop=8,
+        M_var=4,
+        K_novel=4,
+        enable_wandb=True,
     )
 
     runner.train(num_steps=10)

@@ -245,8 +245,8 @@ class RewardModel(RatingFunction):
         gathered_attacks: Slist[list[Attack]] = await Slist(system_prompt_stats).par_map_async(sample_attacks_one_prompt)
         attacks = []
         attack_idx_to_sps_idx = {}
-        for sps_idx, attacks in enumerate(gathered_attacks):
-            for attack in attacks:
+        for sps_idx, gathered_attack in enumerate(gathered_attacks):
+            for attack in gathered_attack:
                 attack_idx_to_sps_idx[len(attacks)] = sps_idx
                 attacks.append(attack)
 
@@ -337,11 +337,12 @@ class LLMJudge(RatingFunction):
     ) -> list[SystemPromptStats]:
         
         return await Slist(system_prompt_stats).par_map_async(
-            func=partial(self.rate_one_system_prompt, 
-                cluster=cluster, 
-                n_samples=n_samples, 
-                max_tokens=max_tokens, 
-                reasoning=reasoning
+            func=lambda sps: self.rate_one_system_prompt(
+                cluster=cluster,
+                system_prompt_stats=sps,
+                n_samples=n_samples,
+                max_tokens=max_tokens,
+                reasoning=reasoning,
             )
         )
 
