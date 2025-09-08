@@ -525,41 +525,41 @@ def get_universal_caller(
     return MultiClientCaller(clients=callers)
 
 
+RETRYABLE_EXCEPTIONS = (
+    openai.RateLimitError,
+    openai.APITimeoutError,
+    openai.APIConnectionError,
+    openai.InternalServerError,
+    anthropic.RateLimitError,
+    anthropic.InternalServerError,
+    anthropic._exceptions.OverloadedError,
+)
+
+CHANCE_EXCEPTIONS = (
+    ValidationError, 
+    JSONDecodeError, 
+    ValueError, 
+    anthropic.BadRequestError
+)
+
+
 def custom_wait_strategy(retry_state):
     """Custom wait strategy based on exception type."""
     exception = retry_state.outcome.exception()
     
     # Rate limit and timeout errors: use exponential backoff
-    if isinstance(exception, (
-        openai.RateLimitError, 
-        openai.APITimeoutError, 
-        openai.APIConnectionError,
-        anthropic.RateLimitError, 
-        anthropic._exceptions.OverloadedError
-    )):
+    if isinstance(exception, RETRYABLE_EXCEPTIONS):
         return wait_random_exponential(multiplier=0.5, max=16)(retry_state)
     
     # Validation and server errors: use fixed wait
-    elif isinstance(exception, (
-        ValidationError, 
-        JSONDecodeError, 
-        openai.InternalServerError, 
-        ValueError, 
-        anthropic.InternalServerError, 
-        anthropic.BadRequestError
-    )):
+    elif isinstance(exception, CHANCE_EXCEPTIONS):
         return 0.5
     
     return 0.
 
 
 @retry(
-    retry=retry_if_exception_type((
-        openai.RateLimitError, openai.APITimeoutError, openai.APIConnectionError, 
-        anthropic.RateLimitError, anthropic._exceptions.OverloadedError,
-        ValidationError, JSONDecodeError, openai.InternalServerError, ValueError, 
-        anthropic.InternalServerError, anthropic.BadRequestError
-    )),
+    retry=retry_if_exception_type(RETRYABLE_EXCEPTIONS + CHANCE_EXCEPTIONS),
     wait=custom_wait_strategy,
     stop=stop_after_attempt(5),
 )

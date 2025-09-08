@@ -86,13 +86,13 @@ class EvoPlanner:
 
         past_data_json = {
             "system_prompt": stats.system_prompt,
-            "mean_score": stats.mean_score,
+            "mean_score": round(stats.mean_score, 2),
             "past_data": [
                 {
                     "system_prompt": attack.system,
                     "user_prompt": attack.user,
                     "assistant_response": attack.assistant,
-                    "score": attack.aux_info["adversarial_score"],
+                    "score": round(attack.aux_info["adversarial_score"], 2),
                 }
                 for attack in sampled_all_attacks
             ]
@@ -226,7 +226,7 @@ class EvoPlanner:
 
         past_system_prompts_str = json.dumps([{
             "system_prompt": system_prompt,
-            "mean_score": seed_state.history[step_idx][system_prompt].mean_score,
+            "mean_score": round(seed_state.history[step_idx][system_prompt].mean_score, 2),
         } for system_prompt, step_idx in seed_state.state.items()])
 
         user_prompts_json = {
@@ -514,6 +514,7 @@ class EvoRunner:
                 os.remove(os.path.join(self.run_path, f))
 
         self.step_count += 1
+        self.planner.step_planner_model()
 
 
     def train(self, num_steps: int):
@@ -521,11 +522,11 @@ class EvoRunner:
             self.initialize()
             for _ in range(num_steps):
                 self.train_step()
-        finally:
+        except Exception as e:
+            logging.error(f"Error in train step {self.step_count}: {e}")
             # save the seed states
             with open(os.path.join(self.run_path, f"step_{self.step_count}.pkl"), "wb") as f:
                 pickle.dump(self.seed_states, f)
-
 
 # %%
 # PROMPTS
@@ -623,7 +624,7 @@ To help you with this task, here is a sample of some of the user prompts that be
 {user_prompts}
 </user_prompts>
 
-Here are the previously-written system prompts, as well as their average scores according to the hidden metric. Study them and make sure that your new system prompts are **novel and explore different specifications**, with an eye towards achieving higher scores.
+Here are the previously-written system prompts, as well as their average scores according to the hidden metric. Study them and make sure that your new system prompts are **novel and explore different specifications**, with an eye towards achieving higher scores. Please make sure that your new system prompts are not similar to any of the previously-written system prompts.
 
 <past_system_prompts>
 {past_system_prompts}
@@ -677,7 +678,7 @@ if __name__ == "__main__":
     rater_1 = RewardModel(
         reward_model_name="skywork-v2",
         policy_model=policy,
-        batch_size=32,
+        batch_size=64,
     )
 
     rater_2 = LLMJudge(
@@ -738,8 +739,8 @@ if __name__ == "__main__":
         rater_1=rater_1,
         rater_2=rater_2,
         embedding_model_name="all-MiniLM-L6-v2",
-        eps=0.25,
-        N_pop=8,
+        eps=0.2,
+        N_pop=10,
         M_var=4,
         K_novel=4,
         enable_wandb=True,

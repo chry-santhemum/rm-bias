@@ -333,7 +333,7 @@ class LLMJudge(RatingFunction):
         system_prompt_stats: list[SystemPromptStats],
         n_samples: int=1,
         max_tokens: int=2048,
-        reasoning: int | str | None = 2000,
+        reasoning: int | str | None = "low",
     ) -> list[SystemPromptStats]:
         
         return await Slist(system_prompt_stats).par_map_async(
@@ -343,7 +343,8 @@ class LLMJudge(RatingFunction):
                 n_samples=n_samples,
                 max_tokens=max_tokens,
                 reasoning=reasoning,
-            )
+            ),
+            max_par = 4,
         )
 
     async def rate_one_system_prompt(
@@ -352,7 +353,7 @@ class LLMJudge(RatingFunction):
         system_prompt_stats: SystemPromptStats,
         n_samples: int=1,
         max_tokens: int=2048,
-        reasoning: int | str | None = 2000,
+        reasoning: int | str | None = "low",
     ) -> SystemPromptStats:
 
         system_prompt = system_prompt_stats.system_prompt
