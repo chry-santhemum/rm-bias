@@ -250,7 +250,7 @@ class OpenrouterCaller(Caller):
         if len(messages.messages) == 0:
             raise ValueError("Messages must be non-empty")
         try:
-            logging.debug(f"Calling OpenRouter with config: {config}")
+            logger.debug(f"Calling OpenRouter with config: {config}")
             chat_completion = await self.client.chat.completions.create(
                 model=config.model,
                 messages=[msg.to_openai_content() for msg in messages.messages],  # type: ignore
@@ -283,12 +283,12 @@ class OpenrouterCaller(Caller):
         try:
             resp = OpenaiResponse.model_validate(chat_completion.model_dump())
         except ValidationError as e:
-            logging.error(
+            logger.error(
                 f"Validation error for model {config.model}. Prompt: {messages}. resp: {chat_completion.model_dump()}"
             )
             raise e
         
-        logging.debug(f"OpenRouter response: {resp}")
+        logger.debug(f"OpenRouter response: {resp}")
 
         await self.get_cache(config.model).add_model_call(
             messages=messages,
@@ -366,7 +366,7 @@ class AnthropicCaller(Caller):
 
         assert config.max_tokens is not None, "Anthropic requires max_tokens"
 
-        logging.debug(f"Calling Anthropic with config: {config}")
+        logger.debug(f"Calling Anthropic with config: {config}")
         response: Message = await self.client.messages.create(
             model=config.model,
             messages=anthropic_messages,  # type: ignore
@@ -383,7 +383,7 @@ class AnthropicCaller(Caller):
         # TODO: add ToolUse support
         if response.content[0].type == "thinking":
             if len(response.content) != 2:
-                logging.warning(f"Expected 2 blocks in response: {response.content}")
+                logger.warning(f"Expected 2 blocks in response: {response.content}")
             
             try:
                 response_content = {
@@ -397,7 +397,7 @@ class AnthropicCaller(Caller):
                 }
         else:
             if len(response.content) != 1:
-                logging.warning(f"Expected 1 block in response: {response.content}")
+                logger.warning(f"Expected 1 block in response: {response.content}")
             try:
                 response_content = {
                     "text": response.content[0].text,
@@ -492,9 +492,9 @@ def get_universal_caller(
 ) -> MultiClientCaller:
     dotenv.load_dotenv(dotenv_path=dotenv_path)
     if not (openrouter_key := os.getenv("OPENROUTER_API_KEY")):
-        logging.warning("OPENROUTER_API_KEY not found in environment.")
+        logger.warning("OPENROUTER_API_KEY not found in environment.")
     if not (anthropic_key := os.getenv("ANTHROPIC_API_KEY")):
-        logging.warning("ANTHROPIC_API_KEY not found in environment.")
+        logger.warning("ANTHROPIC_API_KEY not found in environment.")
 
     # Create cache directory structure
     cache_path = Path(cache_dir)
@@ -571,7 +571,7 @@ async def sample_from_model(
     kwargs are passed to InferenceConfig.
     """
     if full_logging:
-        logging.info(f"Sampling from model {kwargs['model']}. <PROMPT> {prompt.as_text()} </PROMPT>")
+        logger.info(f"Sampling from model {kwargs['model']}. <PROMPT> {prompt.as_text()} </PROMPT>")
 
     response = await caller.call(
         prompt,
@@ -584,7 +584,7 @@ async def sample_from_model(
             reasoning_content = response.reasoning_content
         except Exception:
             reasoning_content = "N/A"
-        logging.info(
+        logger.info(
             f"[sample_from_model] Got response:\n"
             f"<RESPONSE> {response.first_response} </RESPONSE>\n"
             f"<REASONING> {reasoning_content} </REASONING>"
@@ -612,7 +612,7 @@ async def sample_across_models(
         ),
         max_par=len(models),
         tqdm=True,
-        desc=desc,
+        desc=desc,  # type: ignore
     )
     return responses
 
@@ -628,14 +628,14 @@ async def sample_from_model_parallel(
     """
     Run multiple prompts across the same other kwargs.
     """
-    logging.info(f"Sending {len(prompts)} prompts with {max_par} parallel calls...")
+    logger.info(f"Sending {len(prompts)} prompts with {max_par} parallel calls...")
     responses = await Slist(prompts).par_map_async(
         func=lambda prompt: sample_from_model(
             prompt, caller, full_logging=full_logging, **kwargs
         ),
         max_par=max_par,
         tqdm=True,
-        desc=desc,
+        desc=desc,  # type: ignore
     )
     return responses
 

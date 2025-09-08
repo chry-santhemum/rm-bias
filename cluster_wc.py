@@ -4,7 +4,6 @@ import time
 import pickle
 import json
 import random
-import logging
 from tqdm.auto import tqdm
 from itertools import islice
 import asyncio
@@ -17,8 +16,6 @@ import hdbscan
 from datasets import Dataset, load_dataset
 from sentence_transformers import SentenceTransformer
 from sklearn.cluster import MiniBatchKMeans
-
-logging.getLogger(__name__)
 
 # %%
 

@@ -25,7 +25,7 @@ from state import Attack
 from client import OpenaiResponse, is_thinking_model, get_universal_caller, sample_from_model_parallel
 from default_prompts import *
 
-logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 # TODO: add attention_mask every time we call the model
 
@@ -120,7 +120,7 @@ def parse_json(result: tuple[str, str] | str):
         json_str = result.split("```json")[1].split("```")[0]
         json_obj = json.loads(json_str)
     except json.JSONDecodeError:
-        logging.error(f"Could not parse the following response: {result}")
+        logger.error(f"Could not parse the following response: {result}")
         return None
 
     return json_obj
@@ -142,7 +142,7 @@ async def time_operation(operation_name, coroutine):
     result = await coroutine
     end_time = time.time()
     duration = end_time - start_time
-    logging.info(f"  {operation_name} completed in {duration:.2f} seconds")
+    logger.info(f"  {operation_name} completed in {duration:.2f} seconds")
     return result
 
 
@@ -215,7 +215,7 @@ def custom_cache(cache_dir: str=".cache"):
                 ).hexdigest()
             except (TypeError, pickle.PicklingError) as e:
                 # Fall back to string representation if pickling fails
-                logging.warning(f"Cache key generation using str fallback due to: {e}")
+                logger.warning(f"Cache key generation using str fallback due to: {e}")
                 cache_str = f"{func.__name__}_{args}_{sorted(kwargs.items())}"
                 return hashlib.md5(cache_str.encode()).hexdigest()
 
@@ -227,10 +227,10 @@ def custom_cache(cache_dir: str=".cache"):
 
                 if cache_file.exists():
                     with open(cache_file, "rb") as f:
-                        logging.info(f"Loading cached result from {cache_file}")
+                        logger.info(f"Loading cached result from {cache_file}")
                         return pickle.load(f)
 
-                logging.info(f"Computing {func.__name__} for {cache_key}")
+                logger.info(f"Computing {func.__name__} for {cache_key}")
                 result = await func(*args, **kwargs)
                 # Write to temp file first to avoid corruption
                 temp_file = cache_file.with_suffix(".tmp")
@@ -249,10 +249,10 @@ def custom_cache(cache_dir: str=".cache"):
 
                 if cache_file.exists():
                     with open(cache_file, "rb") as f:
-                        logging.info(f"Loading cached result from {cache_file}")
+                        logger.info(f"Loading cached result from {cache_file}")
                         return pickle.load(f)
 
-                logging.info(f"Computing {func.__name__} for {cache_key}")
+                logger.info(f"Computing {func.__name__} for {cache_key}")
                 result = func(*args, **kwargs)
                 # Write to temp file first to avoid corruption
                 temp_file = cache_file.with_suffix(".tmp")
@@ -319,7 +319,7 @@ async def per_prompt_stats(
             ).to(reward_model.device)
 
             attn_mask = input_ids.ne(tokenizer.pad_token_id)
-            # logging.info(f"Input IDs first example: {tokenizer.decode(input_ids[0], skip_special_tokens=False)}")
+            # logger.info(f"Input IDs first example: {tokenizer.decode(input_ids[0], skip_special_tokens=False)}")
 
             with torch.no_grad():
                 scores = reward_model(
@@ -364,15 +364,15 @@ async def per_prompt_stats(
                 parsed_resp = json.loads(block)
                 rewards.append(parsed_resp["score"])
             except Exception as e:
-                logging.error(
+                logger.error(
                     f"Failed to parse rater response: {resp.first_response}"
                 )
-                logging.error(f"Error: {e}")
+                logger.error(f"Error: {e}")
                 rewards.append(None)
 
     rewards_cleaned = np.array([r for r in rewards if r is not None], dtype=float)
 
-    logging.info(
+    logger.info(
         f"Reward percentiles for {rater_name}: {np.percentile(rewards_cleaned, [0, 10, 25, 50, 75, 90, 100])}"
     )
 

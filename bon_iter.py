@@ -25,6 +25,8 @@ dotenv.load_dotenv()
 nest_asyncio.apply()
 set_seed_all(10086)
 
+logger = logging.getLogger(__name__)
+
 # %%
 
 class BoNPlanner:
@@ -158,12 +160,12 @@ class BoNPlanner:
                     reasoning = "N/A"
 
             except Exception as e:
-                logging.error(f"Planner parse error (plan JSON): {e}")
-                logging.error(f"API response: {resp}")
+                logger.error(f"Planner parse error (plan JSON): {e}")
+                logger.error(f"API response: {resp}")
                 plans, reasoning = [], "N/A"
 
-            logging.info(f"Got {len(plans)} new plans for seed:\n[\n{"\n".join(plans)}\n]")
-            logging.info(f"Reasoning:\n{reasoning}")
+            logger.info(f"Got {len(plans)} new plans for seed:\n[\n{"\n".join(plans)}\n]")
+            logger.info(f"Reasoning:\n{reasoning}")
 
         # Create a new step
         seed_state.history.append({
@@ -240,7 +242,7 @@ class BoNRunner:
 
     def get_ratings(self):
         for rating_function in [self.rater_1, self.rater_2]:
-            logging.info(f"[TRAIN STEP {self.step_count}] Rating attacks with {rating_function.model_name}...")
+            logger.info(f"[TRAIN STEP {self.step_count}] Rating attacks with {rating_function.model_name}...")
 
             if rating_function.rating_function_type == "classifier":
                 for seed_state in tqdm(self.seed_states, desc=f"Rating with {rating_function.model_name}"):
@@ -276,16 +278,16 @@ class BoNRunner:
 
 
     def train_step(self):
-        logging.info(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
+        logger.info(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
         asyncio.run(self.planner.plan_all(
             seed_states=self.seed_states,
             N_new=self.breadth,
         ))
 
-        logging.info(f"[TRAIN STEP {self.step_count}] Rating attacks...")
+        logger.info(f"[TRAIN STEP {self.step_count}] Rating attacks...")
         self.get_ratings()
 
-        logging.info(f"[TRAIN STEP {self.step_count}] Complete! Logging...")
+        logger.info(f"[TRAIN STEP {self.step_count}] Complete! Logging...")
         self.log_wandb()
 
         with open(os.path.join(self.run_path, f"step_{self.step_count}.pkl"), "wb") as f:
@@ -303,7 +305,7 @@ class BoNRunner:
             for _ in range(num_steps):
                 self.train_step()
         except Exception as e:
-            logging.error(f"Error in train step {self.step_count}: {e}")
+            logger.error(f"Error in train step {self.step_count}: {e}")
             # save the seed states
             with open(os.path.join(self.run_path, f"step_{self.step_count}.pkl"), "wb") as f:
                 pickle.dump(self.seed_states, f)
@@ -367,7 +369,6 @@ if __name__ == "__main__":
         filemode='w',
         format='%(asctime)s - %(levelname)s - %(message)s'
     )
-    logging.getLogger(__name__)
 
     planner = BoNPlanner(
         planner_model_names=["claude-opus-4-20250514", "google/gemini-2.5-pro"],
@@ -435,9 +436,9 @@ if __name__ == "__main__":
             
             initial_seed_states.append(seed_state)
     
-    logging.info(f"Loaded {len(initial_seed_states)} seed states")
+    logger.info(f"Loaded {len(initial_seed_states)} seed states")
     for state in initial_seed_states:
-        logging.info(f"  - {state.cluster.summary}: {len(state.cluster.train_prompts)} train prompts")
+        logger.info(f"  - {state.cluster.summary}: {len(state.cluster.train_prompts)} train prompts")
 
 
     runner = BoNRunner(

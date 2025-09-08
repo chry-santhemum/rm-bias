@@ -6,7 +6,6 @@ from slist import Slist
 from tqdm.auto import tqdm
 from abc import ABC, abstractmethod
 from dataclasses import replace
-from functools import partial
 
 import numpy as np
 import torch
@@ -18,7 +17,7 @@ from standard_prompts import make_prompt_mix
 from default_prompts import *
 from client import is_thinking_model, get_universal_caller, sample_from_model_parallel
 
-logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class PolicyModel:
@@ -59,8 +58,8 @@ class PolicyModel:
             try:
                 assistant_response = resp.first_response
             except Exception as e:
-                logging.error(f"Executor remote parse error (answer): {e}")
-                logging.error(f"API response: {resp}")
+                logger.error(f"Executor remote parse error (answer): {e}")
+                logger.error(f"API response: {resp}")
                 assistant_response = "N/A"
             
             completed_chat_histories.append(
@@ -123,7 +122,7 @@ class RatingFunction(ABC):
             # load pre-computed stats from the cache json file
             with open(cache_path, "r") as f:
                 loaded_stats = json.load(f)
-                logging.info(f"Loaded stats for {self.model_name} from {f.name}")
+                logger.info(f"Loaded stats for {self.model_name} from {f.name}")
                 assert (
                     loaded_stats["rater_name"] == self.model_name
                 ), f"Cached stats for {loaded_stats['rater_name']} but model is {self.model_name}"
@@ -133,7 +132,7 @@ class RatingFunction(ABC):
 
                 if (loaded_stats["n_samples"] != n_samples or loaded_stats["n_prompts"] != n_prompts):
                     if not overwrite:
-                        logging.warning("Using cached stats for different n_samples or n_prompts. Proceed with caution.")
+                        logger.warning("Using cached stats for different n_samples or n_prompts. Proceed with caution.")
                     else:
                         raise ValueError("Cached stats for different n_samples or n_prompts. Overwriting...")
 
@@ -142,7 +141,7 @@ class RatingFunction(ABC):
                 return
                 
         except Exception:
-            logging.warning("Computing mean and stdev from scratch...")
+            logger.warning("Computing mean and stdev from scratch...")
 
         prompts = make_prompt_mix(num_total=n_prompts)
         stats = await Slist(prompts["prompt"]).par_map_async(
@@ -154,7 +153,7 @@ class RatingFunction(ABC):
             ),
             max_par=n_clients,
             tqdm=True,
-            desc="Computing normalization stats",
+            desc="Computing normalization stats",  # type: ignore
         )
         
         # gather all stats
@@ -165,14 +164,14 @@ class RatingFunction(ABC):
 
         self.mean = float(np.mean(all_scores))
         self.stdev = float(np.std(all_scores, ddof=1))
-        logging.info(f"Setting mean: {self.mean:.2f}, stdev: {self.stdev:.2f}")
+        logger.info(f"Setting mean: {self.mean:.2f}, stdev: {self.stdev:.2f}")
 
         # save all percentiles
         percentiles = {
             f"{p}": float(np.percentile(all_scores, p)) for p in list(range(0, 101, 5))
         }
 
-        logging.info(f"Score percentiles for {self.model_name}: {percentiles}")
+        logger.info(f"Score percentiles for {self.model_name}: {percentiles}")
 
         # Ensure directory exists
         Path(cache_path).parent.mkdir(parents=True, exist_ok=True)
@@ -190,7 +189,7 @@ class RatingFunction(ABC):
                 f,
                 indent=4,
             )
-        logging.info(f"Saved stats for {self.model_name} to {f.name}")
+        logger.info(f"Saved stats for {self.model_name} to {f.name}")
 
 
 
@@ -275,7 +274,7 @@ class RewardModel(RatingFunction):
             ).to(self.device)
 
             attn_mask = input_ids.ne(self.tokenizer.pad_token_id)
-            # logging.info(f"Input IDs first example: {self.tokenizer.decode(input_ids[0], skip_special_tokens=False)}")
+            # logger.info(f"Input IDs first example: {self.tokenizer.decode(input_ids[0], skip_special_tokens=False)}")
 
             with torch.no_grad():
                 scores = self.model(
@@ -434,8 +433,8 @@ class LLMJudge(RatingFunction):
                     attacks[i] = new_attack
 
             except Exception as e:
-                logging.error(f"Absolute rating parse error: {e}")
-                logging.error(f"Completion: {rater_resp.first_response}")
+                logger.error(f"Absolute rating parse error: {e}")
+                logger.error(f"Completion: {rater_resp.first_response}")
                 continue
 
         return SystemPromptStats(system_prompt=system_prompt, attacks=attacks)

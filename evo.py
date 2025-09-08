@@ -29,6 +29,8 @@ dotenv.load_dotenv()
 nest_asyncio.apply()
 set_seed_all(10086)
 
+logger = logging.getLogger(__name__)
+
 # %%
 class EvoPlanner:
     def __init__(
@@ -184,12 +186,12 @@ class EvoPlanner:
                     reasoning = "N/A"
 
             except Exception as e:
-                logging.error(f"Planner parse error (plan JSON): {e}")
-                logging.error(f"API response: {resp}")
+                logger.error(f"Planner parse error (plan JSON): {e}")
+                logger.error(f"API response: {resp}")
                 plans, reasoning = [], "N/A"
 
-            logging.info(f"Got {len(plans)} plans for seed:\n[\n{"\n".join(plans)}\n]")
-            logging.info(f"Reasoning:\n{reasoning}")
+            logger.info(f"Got {len(plans)} plans for seed:\n[\n{"\n".join(plans)}\n]")
+            logger.info(f"Reasoning:\n{reasoning}")
 
         if len(seed_state.state) == 0:
             seed_state.history[0].update({
@@ -202,7 +204,7 @@ class EvoPlanner:
                 plan: 0
                 for plan in seed_state.history[0].keys()
             }
-            logging.info(f"Initialized seed population with {len(seed_state.state)} system prompts")
+            logger.info(f"Initialized seed population with {len(seed_state.state)} system prompts")
 
         else:
             seed_state.history[-1].update({
@@ -276,12 +278,12 @@ class EvoPlanner:
                     reasoning = "N/A"
 
             except Exception as e:
-                logging.error(f"Planner parse error (plan JSON): {e}")
-                logging.error(f"API response: {resp}")
+                logger.error(f"Planner parse error (plan JSON): {e}")
+                logger.error(f"API response: {resp}")
                 plans, reasoning = [], "N/A"
 
-            logging.info(f"Got {len(plans)} innovations for seed:\n[\n{"\n".join(plans)}\n]")
-            logging.info(f"Reasoning:\n{reasoning}")
+            logger.info(f"Got {len(plans)} innovations for seed:\n[\n{"\n".join(plans)}\n]")
+            logger.info(f"Reasoning:\n{reasoning}")
 
         # updates the latest step in history
         seed_state.history[-1].update({
@@ -312,9 +314,9 @@ class EvoRunner:
         self.rater_2 = rater_2
         self.embedding_model_name = embedding_model_name
 
-        logging.info(f"Loading embedding model {self.embedding_model_name}...")
+        logger.info(f"Loading embedding model {self.embedding_model_name}...")
         self.embedding_model = SentenceTransformer(self.embedding_model_name)
-        logging.info("Embedding model loaded!")
+        logger.info("Embedding model loaded!")
         
         self.eps = eps
         self.N_pop = N_pop
@@ -375,9 +377,9 @@ class EvoRunner:
     def initialize(self):
         assert all(len(seed_state.history) == 0 for seed_state in self.seed_states)
 
-        logging.info(f"[INITIALIZE] Normalizing rater 1, {self.rater_1.model_name}...")
+        logger.info(f"[INITIALIZE] Normalizing rater 1, {self.rater_1.model_name}...")
         asyncio.run(self.rater_1.normalize(overwrite=False))
-        logging.info(f"[INITIALIZE] Normalizing rater 2, {self.rater_2.model_name}...")
+        logger.info(f"[INITIALIZE] Normalizing rater 2, {self.rater_2.model_name}...")
         asyncio.run(self.rater_2.normalize(overwrite=False))
 
     
@@ -393,9 +395,9 @@ class EvoRunner:
             ]
 
             for system_prompt, stats in seed_state.history[-1].items():
-                logging.info(f"Considering system prompt: {system_prompt}")
+                logger.info(f"Considering system prompt: {system_prompt}")
                 if system_prompt in [k for k, _, _ in candidates]:
-                    logging.info(f"System prompt already in candidates: {system_prompt}")
+                    logger.info(f"System prompt already in candidates: {system_prompt}")
                     continue
 
                 candidates.append(
@@ -413,7 +415,7 @@ class EvoRunner:
             niches = defaultdict(list)
             for i, label in enumerate(labels):
                 niches[label].append(candidates[i])
-            logging.info(
+            logger.info(
                 "Niches:\n"
                 + "\n".join([f"Niche {label}:\n{"\n".join([f"({member[2]:.2f}) {member[0]}" for member in members])}" for label, members in niches.items()])
             )
@@ -427,7 +429,7 @@ class EvoRunner:
                 # Sort members of the niche by score and select the top one
                 best_in_niche = max(members, key=lambda x: x[2])
                 niche_representatives.append(best_in_niche)
-                logging.info(f"Niche {label}: Selected '{best_in_niche[0]}' with score {best_in_niche[2]}")
+                logger.info(f"Niche {label}: Selected '{best_in_niche[0]}' with score {best_in_niche[2]}")
 
             # Handle outliers (prompts labeled as -1)
             outliers = niches.get(-1, [])
@@ -444,12 +446,12 @@ class EvoRunner:
             }
             seed_state.state = new_pop
             
-            logging.info(f"Updated population to {len(new_pop)} members.")
+            logger.info(f"Updated population to {len(new_pop)} members.")
 
 
     def get_ratings(self):
         for rating_function in [self.rater_1, self.rater_2]:
-            logging.info(f"[TRAIN STEP {self.step_count}] Rating attacks with {rating_function.model_name}...")
+            logger.info(f"[TRAIN STEP {self.step_count}] Rating attacks with {rating_function.model_name}...")
 
             if rating_function.rating_function_type == "classifier":
                 for seed_state in tqdm(self.seed_states, desc=f"Rating with {rating_function.model_name}"):
@@ -485,25 +487,25 @@ class EvoRunner:
 
     
     def train_step(self):
-        logging.info(f"[TRAIN STEP {self.step_count}] Mutating...")
+        logger.info(f"[TRAIN STEP {self.step_count}] Mutating...")
         asyncio.run(self.planner.mutate_all(
             seed_states=self.seed_states,
             num_new=self.N_pop if self.step_count == 0 else self.M_var,
         ))
 
-        logging.info(f"[TRAIN STEP {self.step_count}] Innovating...")
+        logger.info(f"[TRAIN STEP {self.step_count}] Innovating...")
         asyncio.run(self.planner.innovate_all(
             seed_states=self.seed_states,
             K_novel=self.K_novel,
         ))
 
-        logging.info(f"[TRAIN STEP {self.step_count}] Rating attacks...")
+        logger.info(f"[TRAIN STEP {self.step_count}] Rating attacks...")
         self.get_ratings()
 
-        logging.info(f"[TRAIN STEP {self.step_count}] Updating population...")
+        logger.info(f"[TRAIN STEP {self.step_count}] Updating population...")
         self.update_population()
 
-        logging.info(f"[TRAIN STEP {self.step_count}] Complete! Logging...")
+        logger.info(f"[TRAIN STEP {self.step_count}] Complete! Logging...")
         self.log_wandb()
 
         with open(os.path.join(self.run_path, f"step_{self.step_count}.pkl"), "wb") as f:
@@ -523,7 +525,7 @@ class EvoRunner:
             for _ in range(num_steps):
                 self.train_step()
         except Exception as e:
-            logging.error(f"Error in train step {self.step_count}: {e}")
+            logger.error(f"Error in train step {self.step_count}: {e}")
             # save the seed states
             with open(os.path.join(self.run_path, f"step_{self.step_count}.pkl"), "wb") as f:
                 pickle.dump(self.seed_states, f)
@@ -660,7 +662,6 @@ if __name__ == "__main__":
         filemode='w',
         format='%(asctime)s - %(levelname)s - %(message)s'
     )
-    logging.getLogger(__name__)
 
     planner = EvoPlanner(
         planner_model_names=["claude-opus-4-20250514", "google/gemini-2.5-pro"],
@@ -730,9 +731,9 @@ if __name__ == "__main__":
             if len(initial_seed_states) >= 4:
                 break
     
-    logging.info(f"Loaded {len(initial_seed_states)} seed states")
+    logger.info(f"Loaded {len(initial_seed_states)} seed states")
     for state in initial_seed_states:
-        logging.info(f"  - {state.cluster.summary}: {len(state.cluster.train_prompts)} train prompts")
+        logger.info(f"  - {state.cluster.summary}: {len(state.cluster.train_prompts)} train prompts")
 
 
     runner = EvoRunner(
