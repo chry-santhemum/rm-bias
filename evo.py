@@ -652,9 +652,11 @@ The json array should be a list of {K_novel} strings. Remember to include the su
 # %%
 
 if __name__ == "__main__":
+    run_name = f"{timestamp()}"
+
     logging.basicConfig(
         level=logging.INFO,
-        filename=f"logs/evo/{timestamp()}.log",
+        filename=f"logs/evo/{run_name}.log",
         filemode='w',
         format='%(asctime)s - %(levelname)s - %(message)s'
     )
@@ -743,6 +745,7 @@ if __name__ == "__main__":
         N_pop=10,
         M_var=4,
         K_novel=4,
+        run_name=run_name,
         enable_wandb=True,
     )
 

@@ -359,10 +359,11 @@ if __name__ == "__main__":
     parser.add_argument("--num_steps", type=int, required=True)
     args = parser.parse_args()
 
+    run_name = f"{timestamp()}-b{args.breadth}-n{args.num_steps}"
 
     logging.basicConfig(
         level=logging.INFO,
-        filename=f"logs/bon_iter/{timestamp()}.log",
+        filename=f"logs/bon_iter/{run_name}.log",
         filemode='w',
         format='%(asctime)s - %(levelname)s - %(message)s'
     )
@@ -445,6 +446,7 @@ if __name__ == "__main__":
         rater_1=rater_1,
         rater_2=rater_2,
         breadth=args.breadth,
+        run_name=run_name,
         enable_wandb=True,
     )
 
