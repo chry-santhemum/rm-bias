@@ -172,6 +172,26 @@ wheels = [
 ]
 
 [[package]]
+name = "bertopic"
+version = "0.17.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "hdbscan" },
+    { name = "llvmlite" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "plotly" },
+    { name = "scikit-learn" },
+    { name = "sentence-transformers" },
+    { name = "tqdm" },
+    { name = "umap-learn" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2c/f6/731a912f10a4c74b442a1e62dea8a492455419c7f8088e8854768b3ca59c/bertopic-0.17.3.tar.gz", hash = "sha256:3f876d2eadf2037df79f059b734935d7ed2eb6f530bcc6c7a19e1a8f5d2cbaba", size = 119948, upload-time = "2025-07-08T10:53:53.115Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/98/05/2d6b305391efff89c2b4cf19cf847f971ca163eb5c149d0d2ffac0a9c7ed/bertopic-0.17.3-py3-none-any.whl", hash = "sha256:1ac8ccc647dd8f0b424ebcc05d95741394c2a3762d314d28ecd7bf0fdb3930a3", size = 153010, upload-time = "2025-07-08T10:53:50.783Z" },
+]
+
+[[package]]
 name = "bidict"
 version = "0.23.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2217,6 +2237,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "anthropic" },
+    { name = "bertopic" },
     { name = "datasets" },
     { name = "dictionary-learning" },
     { name = "hdbscan" },
@@ -2240,6 +2261,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "anthropic", specifier = ">=0.64.0" },
+    { name = "bertopic", specifier = ">=0.17.3" },
     { name = "datasets", specifier = ">=4.0.0" },
     { name = "dictionary-learning", editable = "dictionary_learning" },
     { name = "hdbscan", specifier = ">=0.8.40" },

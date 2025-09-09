@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "anthropic>=0.64.0",
+    "bertopic>=0.17.3",
     "datasets>=4.0.0",
     "dictionary-learning",
     "hdbscan>=0.8.40",

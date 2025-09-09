@@ -2,48 +2,117 @@
 # %%
 import time
 import pickle
-import json
 import random
 from tqdm.auto import tqdm
-from itertools import islice
-import asyncio
+import dotenv
+dotenv.load_dotenv()
 import nest_asyncio
 nest_asyncio.apply()
 
+import openai
 import numpy as np
 import torch
 import hdbscan
 from datasets import Dataset, load_dataset
 from sentence_transformers import SentenceTransformer
 from sklearn.cluster import MiniBatchKMeans
+from bertopic import BERTopic
+from sklearn.feature_extraction.text import CountVectorizer
+from bertopic.representation import OpenAI
 
 # %%
-
-from datasets import load_dataset, Dataset
-
 ds_iter = load_dataset("allenai/WildChat-1M", split="train", streaming=True)
 ds_iter = ds_iter.filter(
     lambda ex: 
     ex["turn"] == 1
     and ex["language"] == "English" 
-    and len(ex["conversation"][0]["content"]) < 8192
+    and len(ex["conversation"][0]["content"]) < 10000
 )
 
-ds_10k = Dataset.from_list(list(ds_iter.take(10000)))
-# %%
-with open("data/wildchat_10k.pkl", "rb") as f:
-    ds_10k = pickle.load(f)
+ds_50k = Dataset.from_list(list(ds_iter.take(50000)))
 
 # %%
+with open("data/wildchat/ds_50k.pkl", "rb") as f:
+    ds_50k = pickle.load(f)
+# %%
+# Basic cleaning: normalize, deduplicate, and filter low-quality prompts
+import re
+from typing import Set, Dict, Any
 
+def _normalize_text(text: str) -> str:
+    # lowercase, trim, collapse internal whitespace
+    return " ".join(text.lower().strip().split())
+
+_STOPWORDS = {
+    "the","is","at","which","on","and","a","an","to","of","in","for","it","this",
+    "that","with","as","by","from","or","be","are","was","were","can","could","should",
+    "would","do","does","did","have","has","had","but","if","than","then","so","such",
+}
+
+def _is_garbage(text: str) -> bool:
+    # repeated single character sequences (>=6)
+    if re.search(r"(.)\1{5,}", text):
+        return True
+    # high non-alnum (excluding whitespace) ratio
+    total = len(text)
+    if total == 0:
+        return True
+    non_alnum = sum(1 for c in text if not (c.isalnum() or c.isspace()))
+    if total > 0 and (non_alnum / total) > 0.5:
+        return True
+    # stopword-only prompts (after tokenization)
+    tokens = [t for t in text.split() if t]
+    if tokens and all(t in _STOPWORDS for t in tokens):
+        return True
+    return False
+
+def _clean_records(ds: Dataset,
+                   min_words: int = 4,
+                   max_words: int = 1024) -> Dataset:
+    seen: Set[str] = set()
+    cleaned: list[Dict[str, Any]] = []
+    for item in tqdm(ds):
+        try:
+            raw = item["conversation"][0]["content"]  # type: ignore[index]
+            if not isinstance(raw, str):
+                continue
+            norm = _normalize_text(raw)
+            wc = len(norm.split())
+            if wc < min_words or wc > max_words:
+                continue
+            if _is_garbage(norm):
+                continue
+            if norm in seen:
+                continue
+            seen.add(norm)
+            # keep original content; use normalized only for dedup/filtering
+            new_item = dict(item)
+            conv = list(item["conversation"])  # type: ignore[index]
+            first_turn = dict(conv[0])
+            first_turn["content"] = raw
+            conv[0] = first_turn
+            new_item["conversation"] = conv
+            cleaned.append(new_item)
+        except Exception:
+            continue
+    return Dataset.from_list(cleaned)
+
+ds_50k = _clean_records(ds_50k)
+
+with open("data/wildchat/ds_50k_clean.pkl", "wb") as f:
+    pickle.dump(ds_50k, f)
+
+# %%
+print(ds_50k[0])
+# %%
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # %%
 batch_size = 128
-embeddings = torch.zeros(len(ds_10k), 384, dtype=torch.float32)
+embeddings = torch.zeros(len(ds_50k), 384, dtype=torch.float32)
 
-for i in tqdm(range(0, len(ds_10k), batch_size)):
-    batch = ds_10k.select(range(i, min(i + batch_size, len(ds_10k))))
+for i in tqdm(range(0, len(ds_50k), batch_size)):
+    batch = ds_50k.select(range(i, min(i + batch_size, len(ds_50k))))
     prompts = [
         item["conversation"][0]["content"]  # type: ignore
         for item in batch
@@ -53,7 +122,11 @@ for i in tqdm(range(0, len(ds_10k), batch_size)):
 
 
 # %%
-with open("data/wildchat_10k_emb.pkl", "rb") as f:
+with open("data/wildchat/emb_50k_clean.pkl", "wb") as f:
+    pickle.dump(embeddings, f)
+
+# %%
+with open("data/wildchat/emb_50k_clean.pkl", "rb") as f:
     embeddings = pickle.load(f)
 
 # %%
@@ -134,8 +207,38 @@ for cluster_id in cluster_ids:
 
     for index in indices:
         index = int(index)
-        print(ds_10k[index]["conversation"][0]["content"])
+        print(ds_50k[index]["conversation"][0]["content"])
         print("\n")
 
 
+# %%
+
+print(emb_np.shape)
+
+# %%
+prompts = [item["conversation"][0]["content"] for i, item in enumerate(ds_50k) if i < 1000]  # type: ignore
+emb_np = torch.nn.functional.normalize(embeddings[:1000], p=2, dim=1).numpy()
+
+client = openai.OpenAI()
+representation_model = OpenAI(
+    client,
+    model="gpt-4o",
+    delay_in_seconds=2,
+    chat=True,
+    nr_docs=10,
+)
+topic_model = BERTopic(
+    vectorizer_model=CountVectorizer(stop_words="english"),
+    representation_model=representation_model,
+)
+
+# %%
+start_time = time.time()
+topics, probs = topic_model.fit_transform(prompts, emb_np)
+print(f"BERTopic fit_transform in {time.time() - start_time:.2f}s")
+
+# %%
+topic_model.visualize_hierarchy()
+# %%
+topic_model.get_topic_info()
 # %%
