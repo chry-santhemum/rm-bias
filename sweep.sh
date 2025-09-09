@@ -4,36 +4,33 @@ set -o pipefail
 
 # Define your sequential runs here. Each entry is a full set of args.
 # Add/remove lines as needed.
-RUNS=(
-  "--breadth 20 --num_steps 6"
-  "--breadth 15 --num_steps 8"
-  "--breadth 10 --num_steps 12"
-  "--breadth 6 --num_steps 20"
+# Controlling for around 60 system prompts
+COMMANDS=(
+  "python bon_iter.py --breadth 20 --num_steps 3"
+  "python bon_iter.py --breadth 10 --num_steps 6"
+  "python bon_iter.py --breadth 6 --num_steps 10"
+  "python bon_iter.py --breadth 3 --num_steps 20"
+  "python evo.py --N_pop 10 --M_var 2 --K_novel 5 --num_steps 2"
+  "python evo.py --N_pop 4 --M_var 5 --K_novel 5 --num_steps 2"
+  "python evo.py --N_pop 4 --M_var 2 --K_novel 3 --num_steps 5"
+  "python evo.py --N_pop 3 --M_var 2 --K_novel 2 --num_steps 10"
 )
 
-mkdir -p logs/bon_iter
-
-total=${#RUNS[@]}
+total=${#COMMANDS[@]}
 success=0
 failed=0
 
-for i in "${!RUNS[@]}"; do
-  idx=$((i+1))
-  args=${RUNS[$i]}
-  ts=$(date +%Y%m%d-%H%M%S)
-  desc=$(echo ${args} | awk '{print "b"$2"-n"$4}')
-  log="logs/bon_iter/${ts}-${desc}.log"
-
-  echo "[${ts}] Starting run ${idx}/${total}: python bon_iter.py ${args}"
-  # Stream to console and save to log, capture python's exit code via PIPESTATUS
-  python bon_iter.py ${args} 2>&1 | tee "${log}"
-  code=${PIPESTATUS[0]}
+for i in "${!COMMANDS[@]}"; do
+  cmd="${COMMANDS[$i]}"
+  echo "Starting run $((i+1))/${total}: ${cmd}"
+  bash -lc "$cmd"
+  code=$?
 
   if [ ${code} -ne 0 ]; then
-    echo "Run ${idx} FAILED (exit ${code}). Log: ${log}"
+    echo "Run $((i+1)) FAILED (exit ${code})."
     failed=$((failed+1))
   else
-    echo "Run ${idx} succeeded. Log: ${log}"
+    echo "Run $((i+1)) succeeded."
     success=$((success+1))
   fi
 done

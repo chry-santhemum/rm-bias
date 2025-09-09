@@ -5,6 +5,7 @@ import logging
 import datetime
 import functools
 import re
+import os
 from slist import Slist
 from IPython.core.getipython import get_ipython
 from pathlib import Path
@@ -393,6 +394,74 @@ async def per_prompt_stats(
 
     return output
 
+
+def setup_prompt_logger(log_path: str | None, to_stdout: bool=False):
+    logger = logging.getLogger("prompt_logger")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False  # don't bubble to root
+
+    # Ensure a single console handler exists
+    has_stream_handler = any(
+        isinstance(h, logging.StreamHandler) and not isinstance(h, logging.FileHandler)
+        for h in logger.handlers
+    )
+    if not has_stream_handler:
+        stream = __import__("sys").stdout if to_stdout else None  # default stderr if None
+        ch = logging.StreamHandler(stream)
+        ch.setLevel(logging.INFO)
+
+        class PromptConsoleFormatter(logging.Formatter):
+            def format(self, record):
+                # If the message is a list/tuple, print each item on its own line
+                if isinstance(record.msg, (list, tuple)):
+                    lines = [str(item) for item in record.msg]
+                    return "[PROMPT] " + "\n[PROMPT] ".join(lines)
+                return "[PROMPT] " + record.getMessage()
+
+        ch.setFormatter(PromptConsoleFormatter())
+        logger.addHandler(ch)
+
+    # Optionally add/update a JSONL file handler for later analysis
+    if log_path:
+        try:
+            os.makedirs(os.path.dirname(log_path), exist_ok=True)
+        except Exception:
+            pass
+
+        absolute_path = os.path.abspath(log_path)
+        has_file_handler = False
+        for h in logger.handlers:
+            if isinstance(h, logging.FileHandler):
+                try:
+                    if os.path.abspath(h.baseFilename) == absolute_path:
+                        has_file_handler = True
+                        break
+                except Exception:
+                    continue
+
+        if not has_file_handler:
+            fh = logging.FileHandler(log_path, mode="a", encoding="utf-8")
+            fh.setLevel(logging.INFO)
+
+            class JsonFormatter(logging.Formatter):
+                def format(self, record):
+                    # Preserve lists so the JSON file has an array; otherwise store a string
+                    prompts_value = (
+                        [str(item) for item in record.msg]
+                        if isinstance(record.msg, (list, tuple))
+                        else record.getMessage()
+                    )
+                    payload = {
+                        "prompts": prompts_value,
+                        "meta": getattr(record, "meta", {}),
+                    }
+                    return json.dumps(payload, indent=4, ensure_ascii=False)
+
+            fh.setFormatter(JsonFormatter())
+            logger.addHandler(fh)
+
+    return logger
+    
 
 def pareto_sort(points: dict[Any, tuple[float, float]], top_k: int | None) -> list[Any]:
     """

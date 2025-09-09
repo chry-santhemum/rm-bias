@@ -119,6 +119,7 @@ class SystemPromptStats:
 
 @dataclass
 class SeedState[T]:
+    index: int
     cluster: Cluster
     state: T  # information to persist, e.g. current population
     history: list[dict[str, SystemPromptStats]]
@@ -126,6 +127,7 @@ class SeedState[T]:
     def __repr__(self):
         return (
             f"SeedState(\n"
+            f"index={self.index},\n"
             f"cluster_summary={self.cluster.summary},\n"
             f"num_steps={len(self.history)}"
         )

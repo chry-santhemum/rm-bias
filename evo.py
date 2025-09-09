@@ -14,10 +14,11 @@ from typing import Literal, Coroutine
 from collections import defaultdict
 
 import wandb
+import pandas as pd
 from sentence_transformers import SentenceTransformer
 from sklearn.cluster import DBSCAN
 
-from utils import timestamp, get_to_pass_reasoning
+from utils import timestamp, get_to_pass_reasoning, setup_prompt_logger
 from rater import LLMJudge, RewardModel, PolicyModel, RatingFunction
 from state import SeedState, SystemPromptStats, Cluster
 from standard_prompts import set_seed_all
@@ -30,6 +31,11 @@ nest_asyncio.apply()
 set_seed_all(10086)
 
 logger = logging.getLogger(__name__)
+
+# setup prompt logger (initialized without a file; configured later when run_name is known)
+_prompts_logger = setup_prompt_logger(log_path=None)
+def log_prompt(prompts: list[str], **meta):
+    _prompts_logger.info(prompts, extra={"meta": meta})
 
 # %%
 class EvoPlanner:
@@ -194,6 +200,7 @@ class EvoPlanner:
             logger.info(f"Reasoning:\n{reasoning}")
 
         if len(seed_state.state) == 0:
+            log_prompt(all_plans + [""], action="initialize", step=len(seed_state.history)-1, seed_state=seed_state.index)
             seed_state.history[0].update({
                 plan: SystemPromptStats(system_prompt=plan)
                 for plan in all_plans
@@ -207,6 +214,7 @@ class EvoPlanner:
             logger.info(f"Initialized seed population with {len(seed_state.state)} system prompts")
 
         else:
+            log_prompt(all_plans, action="mutate", step=len(seed_state.history)-1, seed_state=seed_state.index)
             seed_state.history[-1].update({
                 plan: SystemPromptStats(system_prompt=plan)
                 for plan in all_plans
@@ -284,6 +292,8 @@ class EvoPlanner:
 
             logger.info(f"Got {len(plans)} innovations for seed:\n[\n{"\n".join(plans)}\n]")
             logger.info(f"Reasoning:\n{reasoning}")
+
+        log_prompt(all_plans, action="innovate", step=len(seed_state.history)-1, seed_state=seed_state.index)
 
         # updates the latest step in history
         seed_state.history[-1].update({
@@ -654,7 +664,19 @@ The json array should be a list of {K_novel} strings. Remember to include the su
 # %%
 
 if __name__ == "__main__":
-    run_name = f"{timestamp()}"
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--N_pop", type=int, required=True)
+    parser.add_argument("--M_var", type=int, required=True)
+    parser.add_argument("--K_novel", type=int, required=True)
+    parser.add_argument("--num_steps", type=int, required=True)
+    args = parser.parse_args()
+
+    run_name = f"{timestamp()}-N{args.N_pop}-M{args.M_var}-K{args.K_novel}-n{args.num_steps}"
+
+    # configure prompt logger now that run_name is known
+    setup_prompt_logger(log_path=f"logs/evo/{run_name}_prompts.jsonl")
 
     logging.basicConfig(
         level=logging.INFO,
@@ -694,43 +716,75 @@ if __name__ == "__main__":
 
     # load initial seed states
     # user_prompts_dir = Path("/workspace/rm-bias/user_prompts/alpaca-gpt4-instructor-kmeans-120")
-    user_prompts_dir = Path("/workspace/rm-bias/user_prompts")
+    # user_prompts_dir = Path("/workspace/rm-bias/user_prompts")
     
-    # Load summaries
-    with open(user_prompts_dir / "summaries.json", "r") as f:
-        summaries = json.load(f)
+    # # Load summaries
+    # with open(user_prompts_dir / "summaries.json", "r") as f:
+    #     summaries = json.load(f)
     
+    # initial_seed_states = []
+    
+    # set_seed_all(10086)
+    # for cluster_name, summary in summaries.items():
+    #     prompts_file = user_prompts_dir / f"{cluster_name}.json"
+    #     if prompts_file.exists():
+    #         with open(prompts_file, "r") as f:
+    #             all_prompts = json.load(f)
+            
+    #         # num_train = min(20, len(all_prompts))
+    #         train_prompts = all_prompts
+            
+    #         # Create cluster with empty validation for now
+    #         cluster = Cluster(
+    #             summary=summary,
+    #             train_prompts=train_prompts,
+    #             val_prompts=[],
+    #             train_batch_size=10,
+    #         )
+            
+    #         # Create seed state with empty history
+    #         seed_state = SeedState(
+    #             cluster=cluster,
+    #             state={},
+    #             history=[],
+    #         )
+            
+    #         initial_seed_states.append(seed_state)
+    #         if len(initial_seed_states) >= 4:
+    #             break
+    
+    cluster_df: pd.DataFrame = pd.read_csv("data/wildchat/cluster.csv")
+    labels_df: pd.DataFrame = pd.read_csv("data/wildchat/labels.csv")
     initial_seed_states = []
-    
-    set_seed_all(10086)
-    for cluster_name, summary in summaries.items():
-        prompts_file = user_prompts_dir / f"{cluster_name}.json"
-        if prompts_file.exists():
-            with open(prompts_file, "r") as f:
-                all_prompts = json.load(f)
-            
-            # num_train = min(20, len(all_prompts))
-            train_prompts = all_prompts
-            
-            # Create cluster with empty validation for now
-            cluster = Cluster(
-                summary=summary,
-                train_prompts=train_prompts,
-                val_prompts=[],
-                train_batch_size=10,
-            )
-            
-            # Create seed state with empty history
-            seed_state = SeedState(
-                cluster=cluster,
-                state={},
-                history=[],
-            )
-            
-            initial_seed_states.append(seed_state)
-            if len(initial_seed_states) >= 4:
-                break
-    
+
+    for topic_id in tqdm(range(1, 10), desc="Loading seed states"):
+        topic = cluster_df.loc[cluster_df.index[topic_id+1], "Name"][2:]  # description
+        all_user_prompts = []
+
+        with pd.read_csv("data/wildchat/labels.csv", chunksize=10000) as reader:
+            for chunk in reader:
+                for index, row in chunk.iterrows():
+                    if int(row["Topic"]) == topic_id:
+                        all_user_prompts.append(row["Document"])
+
+        print(f"Topic {topic_id}: {topic} with {len(all_user_prompts)} user prompts")
+        train_prompts = random.sample(all_user_prompts, min(100, len(all_user_prompts)))
+
+        cluster = Cluster(
+            summary=topic,
+            train_prompts=train_prompts,
+            val_prompts=[],
+            train_batch_size=10,
+        )
+
+        seed_state = SeedState(
+            index=topic_id,
+            cluster=cluster,
+            state={},
+            history=[],
+        )
+        initial_seed_states.append(seed_state)
+
     logger.info(f"Loaded {len(initial_seed_states)} seed states")
     for state in initial_seed_states:
         logger.info(f"  - {state.cluster.summary}: {len(state.cluster.train_prompts)} train prompts")
@@ -743,11 +797,11 @@ if __name__ == "__main__":
         rater_2=rater_2,
         embedding_model_name="all-MiniLM-L6-v2",
         eps=0.2,
-        N_pop=10,
-        M_var=4,
-        K_novel=4,
+        N_pop=args.N_pop,
+        M_var=args.M_var,
+        K_novel=args.K_novel,
         run_name=run_name,
         enable_wandb=True,
     )
 
-    runner.train(num_steps=10)
+    runner.train(num_steps=args.num_steps)

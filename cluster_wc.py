@@ -127,11 +127,11 @@ with open("data/wildchat/ds_50k_clean.pkl", "rb") as f:
 # with open("data/wildchat/emb_50k_clean.pkl", "wb") as f:
 #     pickle.dump(embeddings, f)
 
-# %%
-with open("data/wildchat/emb_50k_clean.pkl", "rb") as f:
-    embeddings = pickle.load(f)
+# # %%
+# with open("data/wildchat/emb_50k_clean.pkl", "rb") as f:
+#     embeddings = pickle.load(f)
 
-# %%
+# # %%
 # inertias = []
 # cluster_range = range(50, 301, 10)
 # for k in tqdm(cluster_range):
@@ -225,17 +225,18 @@ representation_model = OpenAI(
     nr_docs=10,
 )
 topic_model = BERTopic(
+    embedding_model="all-mpnet-base-v2",
     vectorizer_model=CountVectorizer(stop_words="english"),
     representation_model=representation_model,
 )
 
 # %%
 prompts = [item["conversation"][0]["content"] for i, item in enumerate(ds_50k)]  # type: ignore
-emb_np = torch.nn.functional.normalize(embeddings, p=2, dim=1).numpy()
+# emb_np = torch.nn.functional.normalize(embeddings, p=2, dim=1).numpy()
 
 
 start_time = time.time()
-topics, probs = topic_model.fit_transform(prompts, emb_np)
+topics, probs = topic_model.fit_transform(prompts)
 print(f"BERTopic fit_transform in {time.time() - start_time:.2f}s")
 
 # %%
@@ -256,5 +257,22 @@ hierarchical_topics_df.to_csv("data/wildchat/hierarchical.csv", index=True)
 # %%
 fig: go.Figure = topic_model.visualize_hierarchy()
 fig.write_html("data/wildchat/hierarchy_visual.html")
+
+# %%
+# load the clusters
+
+cluster_df: pd.DataFrame = pd.read_csv("data/wildchat/cluster.csv")
+# %%
+cluster_df.loc[cluster_df.index[3+1], "Representation"]
+
+# %%
+with pd.read_csv("data/wildchat/labels.csv", chunksize=10000) as reader:
+    for chunk in reader:
+        for index, row in chunk.iterrows():
+            if int(row["Topic"]) == 2:
+                print(row["Document"])
+                print("\n")
+        
+        break
 
 # %%
