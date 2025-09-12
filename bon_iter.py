@@ -15,6 +15,7 @@ from typing import Literal, Coroutine
 import wandb
 import pandas as pd
 from utils import timestamp, get_to_pass_reasoning, setup_prompt_logger
+from viz_utils import save_system_prompt_stats, save_cluster_info, convert_attack_to_dict
 from rater import LLMJudge, RewardModel, PolicyModel, RatingFunction
 from state import SeedState, SystemPromptStats, Cluster
 from standard_prompts import set_seed_all
@@ -106,15 +107,15 @@ class BoNPlanner:
 
         
         
-    async def plan_all(self, seed_states: list[SeedState[None]], N_new: int):
+    async def plan_all(self, seed_states: list[SeedState[None]], N_new: int, run_path: Path = None, step_count: int = 0):
         """Modify all seed states in place."""
         tasks = []
         for seed_state in seed_states:
-            tasks.append(self.plan(seed_state, N_new))
+            tasks.append(self.plan(seed_state, N_new, run_path, step_count))
         await asyncio.gather(*tasks)
 
     
-    async def plan(self, seed_state: SeedState[None], N_new: int):
+    async def plan(self, seed_state: SeedState[None], N_new: int, run_path: Path = None, step_count: int = 0):
         """Modify the seed state in place."""
         model = self.planner_model_names[self.curr_planner_index]
 
@@ -128,13 +129,15 @@ class BoNPlanner:
         }
         user_prompts_str = json.dumps(user_prompts_json)
 
+        planner_prompt = PLANNER_PROMPT_USER.format(
+            N_new=N_new,
+            user_prompts=user_prompts_str,
+            past_system_prompts=past_system_prompts_str,
+        )
+        
         to_send_messages=[ChatHistory
             .from_system(PLANNER_PROMPT_SYSTEM)
-            .add_user(PLANNER_PROMPT_USER.format(
-                N_new=N_new,
-                user_prompts=user_prompts_str,
-                past_system_prompts=past_system_prompts_str,
-            ))
+            .add_user(planner_prompt)
         ]
 
         planner_responses = await sample_from_model_parallel(
@@ -181,6 +184,32 @@ class BoNPlanner:
             for plan in all_plans
         })
 
+        # Save initial system prompts with metadata for visualization
+        if run_path is not None:
+            for plan in all_plans:
+                meta = {
+                    "step": step_count,
+                    "operation": "plan",
+                    "planner_model": model,
+                    "temperature": self.temperature,
+                    "reasoning_effort": str(self.reasoning) if self.reasoning else None,
+                    "planner_prompt": planner_prompt,
+                    "planner_reasoning": reasoning if 'reasoning' in locals() else "N/A",
+                    "N_new": N_new,
+                    "past_context_size": len(json.loads(past_system_prompts_str)) if past_system_prompts_str != "[]" else 0
+                }
+                
+                # Save with empty attacks initially 
+                save_system_prompt_stats(
+                    run_path=run_path,
+                    seed_id=seed_state.index,
+                    system_prompt=plan,
+                    attacks=[],
+                    mean_score=0.0,
+                    stdev_score=0.0,
+                    meta=meta
+                )
+
 
 
 class BoNRunner:
@@ -201,8 +230,8 @@ class BoNRunner:
         self.breadth = breadth
 
         self.run_name = run_name or f"{timestamp()}"
-        self.run_path = f"/workspace/rm-bias/data/bon_iter/{self.run_name}"
-        Path(self.run_path).mkdir(parents=True, exist_ok=True)
+        self.run_path = Path(f"/workspace/rm-bias/data/bon_iter/{self.run_name}")
+        self.run_path.mkdir(parents=True, exist_ok=True)
 
         self.step_count = 0
         self.wandb_run = None
@@ -214,6 +243,21 @@ class BoNRunner:
 
     def initialize(self):
         assert all(len(seed_state.history) == 0 for seed_state in self.seed_states)
+
+        # Save cluster info for visualization
+        logger.info("[INITIALIZE] Saving cluster info for visualization...")
+        for seed_state in self.seed_states:
+            sample_prompts = random.sample(
+                seed_state.cluster.train_prompts, 
+                min(10, len(seed_state.cluster.train_prompts))
+            )
+            save_cluster_info(
+                run_path=self.run_path,
+                seed_id=seed_state.index,
+                summary=seed_state.cluster.summary,
+                train_batch_size=seed_state.cluster.train_batch_size,
+                sample_train_prompts=sample_prompts
+            )
 
         logger.info(f"[INITIALIZE] Normalizing rater 1, {self.rater_1.model_name}...")
         asyncio.run(self.rater_1.normalize(overwrite=False))
@@ -254,6 +298,44 @@ class BoNRunner:
 
             if log_dict:
                 self.wandb_run.log(log_dict, step=self.step_count)
+
+    def save_complete_system_prompt_stats(self):
+        """Save complete SystemPromptStats with attacks and ratings after rating is done."""
+        logger.info("[VIZ] Saving complete system prompt stats...")
+        for seed_state in self.seed_states:
+            for system_prompt, stats in seed_state.history[-1].items():
+                if stats.attacks:  # Only save if we have attacks with ratings
+                    # Convert attacks to dict format
+                    attacks_dict = [convert_attack_to_dict(attack) for attack in stats.attacks]
+                    
+                    # Get existing metadata if it exists (from initial save)
+                    from viz_utils import hash_system_prompt
+                    prompt_hash = hash_system_prompt(system_prompt)
+                    existing_file = self.run_path / f"seed_{seed_state.index}" / f"{prompt_hash}.json"
+                    
+                    meta = {
+                        "step": self.step_count,
+                        "operation": "plan",  # default
+                    }
+                    
+                    # Try to preserve existing metadata
+                    if existing_file.exists():
+                        try:
+                            with open(existing_file, 'r') as f:
+                                existing_data = json.load(f)
+                                meta.update(existing_data.get('meta', {}))
+                        except (json.JSONDecodeError, IOError):
+                            pass
+                    
+                    save_system_prompt_stats(
+                        run_path=self.run_path,
+                        seed_id=seed_state.index,
+                        system_prompt=system_prompt,
+                        attacks=attacks_dict,
+                        mean_score=stats.mean_score,
+                        stdev_score=stats.stdev_score,
+                        meta=meta
+                    )
 
 
     def get_ratings(self):
@@ -298,10 +380,15 @@ class BoNRunner:
         asyncio.run(self.planner.plan_all(
             seed_states=self.seed_states,
             N_new=self.breadth,
+            run_path=self.run_path,
+            step_count=self.step_count,
         ))
 
         logger.info(f"[TRAIN STEP {self.step_count}] Rating attacks...")
         self.get_ratings()
+
+        logger.info(f"[TRAIN STEP {self.step_count}] Saving complete system prompt stats...")
+        self.save_complete_system_prompt_stats()
 
         logger.info(f"[TRAIN STEP {self.step_count}] Complete! Logging...")
         self.log_wandb()
@@ -314,6 +401,7 @@ class BoNRunner:
                 os.remove(os.path.join(self.run_path, f))
 
         self.step_count += 1
+        self.planner.step_planner_model()
 
 
     def train(self, num_steps: int):

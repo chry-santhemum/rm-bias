@@ -44,7 +44,9 @@ async def par_map_async(
                 tqdm_counter.update(1)
                 return result
 
-            return Slist(await asyncio.gather(*[func_with_tqdm(item) for item in self]))
+            return Slist(await asyncio.gather(
+                *[func_with_tqdm(item) for item in self]
+            ))
         else:
             # todo: clean up branching
             return Slist(await asyncio.gather(*[func(item) for item in self]))
