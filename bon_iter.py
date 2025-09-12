@@ -501,7 +501,7 @@ if __name__ == "__main__":
         rater_2=rater_2,
         breadth=args.breadth,
         run_name=run_name,
-        enable_wandb=True,
+        enable_wandb=False,
     )
 
     runner.train(num_steps=args.num_steps)
