@@ -350,7 +350,7 @@ class EvoRunner:
         if not self.wandb_run:
             return
         
-        for i, seed_state in enumerate(self.seed_states):
+        for seed_state in self.seed_states:
             log_dict = {}
 
             all_scores_new = []
@@ -362,8 +362,8 @@ class EvoRunner:
                 mean_best = all_scores_new[0][1]
                 stdev_best = seed_state.history[-1][all_scores_new[0][0]].stdev_score
                 log_dict.update({
-                    f"seed_{i}/mean_best_new": float(mean_best),
-                    f"seed_{i}/stdev_best_new": float(stdev_best),
+                    f"seed_{seed_state.index}/mean_best_new": float(mean_best),
+                    f"seed_{seed_state.index}/stdev_best_new": float(stdev_best),
                 })
 
             all_scores_history = [
@@ -376,12 +376,12 @@ class EvoRunner:
                 step_idx = seed_state.state[all_scores_history[0][0]]
                 stdev_best_history = seed_state.history[step_idx][all_scores_history[0][0]].stdev_score
                 log_dict.update({
-                    f"seed_{i}/mean_best_pop": float(mean_best_history),
-                    f"seed_{i}/stdev_best_pop": float(stdev_best_history),
+                    f"seed_{seed_state.index}/mean_best_pop": float(mean_best_history),
+                    f"seed_{seed_state.index}/stdev_best_pop": float(stdev_best_history),
                 })
 
             if log_dict:
-                wandb.log(log_dict, step=self.step_count)
+                self.wandb_run.log(log_dict, step=self.step_count)
 
 
     def initialize(self):
@@ -470,7 +470,7 @@ class EvoRunner:
                         cluster=seed_state.cluster,
                         system_prompt_stats=[seed_state.history[-1][system_prompt] for system_prompt in system_prompts],
                         n_samples=1,
-                        per_prompt_normalize=False,
+                        per_prompt_normalize=True,
                     ))
                     for system_prompt, stats in zip(system_prompts, new_stats):
                         seed_state.history[-1][system_prompt] = stats

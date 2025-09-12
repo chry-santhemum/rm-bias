@@ -212,11 +212,19 @@ class BoNRunner:
                 name=self.run_name
             )
 
+    def initialize(self):
+        assert all(len(seed_state.history) == 0 for seed_state in self.seed_states)
+
+        logger.info(f"[INITIALIZE] Normalizing rater 1, {self.rater_1.model_name}...")
+        asyncio.run(self.rater_1.normalize(overwrite=False))
+        logger.info(f"[INITIALIZE] Normalizing rater 2, {self.rater_2.model_name}...")
+        asyncio.run(self.rater_2.normalize(overwrite=False))
+
     def log_wandb(self):
         if not self.wandb_run:
             return
         
-        for i, seed_state in enumerate(self.seed_states):
+        for seed_state in self.seed_states:
             log_dict = {}
 
             all_scores_new = []
@@ -228,8 +236,8 @@ class BoNRunner:
                 mean_best = all_scores_new[0][1]
                 stdev_best = seed_state.history[-1][all_scores_new[0][0]].stdev_score
                 log_dict.update({
-                    f"seed_{i}/mean_best_new": float(mean_best),
-                    f"seed_{i}/stdev_best_new": float(stdev_best),
+                    f"seed_{seed_state.index}/mean_best_new": float(mean_best),
+                    f"seed_{seed_state.index}/stdev_best_new": float(stdev_best),
                 })
 
             all_scores_history = []
@@ -241,11 +249,11 @@ class BoNRunner:
                 all_scores_history.sort(key=lambda x: x[1], reverse=True)
                 mean_best_history = all_scores_history[0][1]
                 log_dict.update({
-                    f"seed_{i}/mean_best_pop": float(mean_best_history),
+                    f"seed_{seed_state.index}/mean_best_pop": float(mean_best_history),
                 })
 
             if log_dict:
-                wandb.log(log_dict, step=self.step_count)
+                self.wandb_run.log(log_dict, step=self.step_count)
 
 
     def get_ratings(self):
@@ -259,7 +267,7 @@ class BoNRunner:
                         cluster=seed_state.cluster,
                         system_prompt_stats=[seed_state.history[-1][system_prompt] for system_prompt in system_prompts],
                         n_samples=1,
-                        per_prompt_normalize=False,
+                        per_prompt_normalize=True,
                     ))
                     for system_prompt, stats in zip(system_prompts, new_stats):
                         seed_state.history[-1][system_prompt] = stats
@@ -310,6 +318,7 @@ class BoNRunner:
 
     def train(self, num_steps: int):
         try:
+            self.initialize()
             for _ in range(num_steps):
                 self.train_step()
         except Exception as e:
