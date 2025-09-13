@@ -6,14 +6,16 @@ set -o pipefail
 # Add/remove lines as needed.
 # Controlling for around 60 system prompts
 COMMANDS=(
-  "python bon_iter.py --breadth 20 --num_steps 3"
-  "python bon_iter.py --breadth 10 --num_steps 6"
-  "python bon_iter.py --breadth 6 --num_steps 10"
-  "python bon_iter.py --breadth 3 --num_steps 20"
-  "python evo.py --N_pop 10 --M_var 2 --K_novel 5 --num_steps 2"
-  "python evo.py --N_pop 4 --M_var 5 --K_novel 5 --num_steps 2"
-  "python evo.py --N_pop 4 --M_var 2 --K_novel 3 --num_steps 5"
-  "python evo.py --N_pop 3 --M_var 2 --K_novel 2 --num_steps 10"
+  # "python bon_iter.py --breadth 20 --num_steps 3"
+  # "python bon_iter.py --breadth 10 --num_steps 6"
+  # "python bon_iter.py --breadth 6 --num_steps 10"
+  # "python bon_iter.py --breadth 3 --num_steps 20"
+  "python evo_new_prompts.py --N_pop 20 --M_var 3 --num_steps 1"
+  "python evo_new_prompts.py --N_pop 10 --M_var 6 --num_steps 1"
+  "python evo_new_prompts.py --N_pop 10 --M_var 2 --num_steps 3"
+  "python evo_new_prompts.py --N_pop 4 --M_var 5 --num_steps 3"
+  "python evo_new_prompts.py --N_pop 3 --M_var 2 --num_steps 10"
+  "python evo_new_prompts.py --N_pop 8 --M_var 4 --num_steps 10"
 )
 
 total=${#COMMANDS[@]}

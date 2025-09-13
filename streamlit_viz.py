@@ -7,14 +7,15 @@ import plotly.express as px
 
 st.set_page_config(page_title="RM Bias Training Viz", layout="wide")
 
-@st.cache_data(ttl=30)  # Cache for 30 seconds to avoid excessive refreshes and state resets
-def load_run_data(run_path: Path) -> Dict[str, Any]:
+@st.cache_data(ttl=None, show_spinner=False)  # Cache indefinitely - no loading message
+def load_run_data(run_path_str: str) -> Dict[str, Any]:
     """Load all data for a run from the file structure."""
+    run_path = Path(run_path_str)
     data = {
         'seed_states': {},
         'metadata': {}
     }
-    
+
     if not run_path.exists():
         return data
     
@@ -31,6 +32,7 @@ def load_seed_state_data(seed_dir: Path) -> Dict[str, Any]:
     seed_data = {
         'system_prompts': {},
         'cluster_info': None,
+        'population_history': None,
         'step_count': 0
     }
     
@@ -40,9 +42,15 @@ def load_seed_state_data(seed_dir: Path) -> Dict[str, Any]:
         with open(cluster_file, 'r') as f:
             seed_data['cluster_info'] = json.load(f)
     
+    # Load population history if exists
+    population_file = seed_dir / 'population_history.json'
+    if population_file.exists():
+        with open(population_file, 'r') as f:
+            seed_data['population_history'] = json.load(f)
+    
     # Load all system prompt files
     for prompt_file in seed_dir.glob('*.json'):
-        if prompt_file.name != 'cluster_info.json':
+        if prompt_file.name not in ['cluster_info.json', 'population_history.json']:
             try:
                 with open(prompt_file, 'r') as f:
                     prompt_data = json.load(f)
@@ -158,7 +166,7 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
         # Display attacks table with selection
         selected_attack = st.dataframe(
             attack_df,
-            use_container_width=True,
+            width="stretch",
             on_select="rerun",
             selection_mode="single-row",
             hide_index=True
@@ -289,7 +297,7 @@ def main():
         st.session_state.selected_run_idx = available_runs.index((selected_run_name, selected_run_path))
     
     # Load and display run data
-    run_data = load_run_data(selected_run_path)
+    run_data = load_run_data(str(selected_run_path))
     
     if not run_data['seed_states']:
         st.warning("No seed state data found for this run")
@@ -301,7 +309,7 @@ def main():
         tab_names.append("🧬 Evolution")
     
     # Use radio buttons instead of tabs to maintain state
-    selected_tab = st.radio("", tab_names, index=min(st.session_state.selected_tab, len(tab_names)-1), horizontal=True, key="main_tabs")
+    selected_tab = st.radio("Navigation", tab_names, index=min(st.session_state.selected_tab, len(tab_names)-1), horizontal=True, key="main_tabs", label_visibility="collapsed")
     st.session_state.selected_tab = tab_names.index(selected_tab)
     
     st.divider()
@@ -391,7 +399,7 @@ def main():
                 # Display with selection
                 selected_prompt = st.dataframe(
                     overview_df,
-                    use_container_width=True,
+                    width="stretch",
                     on_select="rerun",
                     selection_mode="single-row",
                     hide_index=True
@@ -469,24 +477,37 @@ def main():
         # Population tracking over time
         st.subheader("Population Evolution")
         
-        # Collect population data across all steps
+        # Collect population data across all steps using population_history.json
         population_data = []
         for seed_id, seed_data in run_data['seed_states'].items():
+            population_history = seed_data.get('population_history', {})
+            
             for prompt_hash, prompt_data in seed_data['system_prompts'].items():
                 meta = prompt_data.get('meta', {})
-                step = meta.get('step', 0)
+                generation_step = meta.get('step', 0)
                 operation = meta.get('operation', 'unknown')
                 score = prompt_data.get('mean_score', 0)
-                in_population = meta.get('in_population', False)
-                population_step = meta.get('population_step', None)
+                
+                # Find the latest step where this prompt was in population
+                in_population = False
+                population_step = None
+                latest_pop_step = None
+                
+                for step_str, step_population in population_history.items():
+                    step_num = int(step_str)
+                    if prompt_hash in step_population:
+                        in_population = True
+                        population_step = step_population[prompt_hash]
+                        latest_pop_step = step_num
                 
                 population_data.append({
                     'Seed': f"Seed {seed_id}",
-                    'Step': step,
+                    'Step': generation_step,
                     'Operation': operation,
                     'Score': score,
                     'In Population': in_population,
                     'Population Step': population_step,
+                    'Latest Pop Step': latest_pop_step,
                     'System Prompt': prompt_data.get('system_prompt', '')[:100] + '...',
                     'Hash': prompt_hash[:8]
                 })
@@ -494,17 +515,18 @@ def main():
         if population_data:
             pop_df = pd.DataFrame(population_data)
             
-            # Population size over time
+            # Population size over time using population_history.json
             pop_size_data = []
-            for step in sorted(pop_df['Step'].unique()):
-                for seed in pop_df['Seed'].unique():
-                    step_seed_data = pop_df[(pop_df['Step'] == step) & (pop_df['Seed'] == seed)]
-                    in_pop_count = step_seed_data['In Population'].sum()
-                    pop_size_data.append({
-                        'Step': step,
-                        'Seed': seed,
-                        'Population Size': in_pop_count
-                    })
+            for seed_id, seed_data in run_data['seed_states'].items():
+                population_history = seed_data.get('population_history')
+                if population_history:
+                    for step_str, population_hashes in population_history.items():
+                        step = int(step_str)
+                        pop_size_data.append({
+                            'Step': step,
+                            'Seed': f"Seed {seed_id}",
+                            'Population Size': len(population_hashes)
+                        })
             
             if pop_size_data:
                 pop_size_df = pd.DataFrame(pop_size_data)
@@ -531,18 +553,77 @@ def main():
             )
             st.plotly_chart(fig_pop_scores, use_container_width=True)
             
-            # Current population table
-            st.subheader("Current Population Status")
-            current_pop = pop_df[pop_df['In Population']].sort_values('Score', ascending=False)
+            # Seed-specific population timeline
+            st.subheader("Population Timeline by Seed")
             
-            if not current_pop.empty:
-                st.dataframe(
-                    current_pop[['Seed', 'Hash', 'System Prompt', 'Score', 'Operation', 'Population Step']],
-                    use_container_width=True,
-                    hide_index=True
-                )
+            # Seed selection
+            available_seeds = sorted([int(seed_id) for seed_id in run_data['seed_states'].keys()])
+            selected_seed = st.selectbox("Select Seed Index", available_seeds, key="evolution_seed_selector")
+            
+            if selected_seed is not None:
+                seed_data = run_data['seed_states'][str(selected_seed)]
+                population_history = seed_data.get('population_history')
+                
+                if population_history:
+                    st.subheader(f"Population History for Seed {selected_seed}")
+                    
+                    # Display population for each step
+                    steps = sorted([int(step) for step in population_history.keys()])
+                    for step in steps:
+                        step_str = str(step)
+                        population_hashes = population_history[step_str]
+                        
+                        with st.expander(f"Step {step} - Population Size: {len(population_hashes)}", expanded=(step == steps[-1])):
+                            if population_hashes:
+                                # Build population data for this step
+                                pop_data = []
+                                for prompt_hash, generation in population_hashes.items():
+                                    prompt_data = seed_data['system_prompts'].get(prompt_hash)
+                                    if prompt_data:
+                                        pop_data.append({
+                                            'Hash': prompt_hash[:8],
+                                            'System Prompt': prompt_data.get('system_prompt', '')[:100] + '...',
+                                            'Score': prompt_data.get('mean_score', 0),
+                                            'Operation': prompt_data.get('meta', {}).get('operation', 'unknown'),
+                                            'Generation': generation
+                                        })
+                                
+                                if pop_data:
+                                    pop_df_step = pd.DataFrame(pop_data).sort_values('Score', ascending=False)
+                                    st.dataframe(
+                                        pop_df_step,
+                                        width="stretch",
+                                        hide_index=True
+                                    )
+                                else:
+                                    st.info("Population data not fully loaded")
+                            else:
+                                st.info("No prompts in population at this step")
+                            
+                            # Show all candidates generated at this step (not in population)
+                            step_candidates = []
+                            for prompt_hash, prompt_data in seed_data['system_prompts'].items():
+                                meta = prompt_data.get('meta', {})
+                                if meta.get('step') == step and prompt_hash not in population_hashes:
+                                    step_candidates.append({
+                                        'Hash': prompt_hash[:8],
+                                        'System Prompt': prompt_data.get('system_prompt', '')[:100] + '...',
+                                        'Score': prompt_data.get('mean_score', 0),
+                                        'Operation': meta.get('operation', 'unknown')
+                                    })
+                            
+                            if step_candidates:
+                                st.write("**Non-population candidates generated at this step:**")
+                                candidates_df = pd.DataFrame(step_candidates).sort_values('Score', ascending=False)
+                                st.dataframe(
+                                    candidates_df,
+                                    width="stretch",
+                                    hide_index=True
+                                )
+                else:
+                    st.info("No population history available for this seed")
             else:
-                st.info("No prompts currently in population (training may not be complete)")
+                st.info("No seed data available")
                 
             # Operation breakdown
             st.subheader("Operations Analysis")

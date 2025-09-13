@@ -103,7 +103,7 @@ class BoNPlanner:
             remaining = [p for p in all_past_prompts if p not in sampled]
             sampled.extend(random.sample(remaining, min(k_context - len(sampled), len(remaining))))
 
-        return json.dumps(sampled)
+        return json.dumps(sampled, indent=2)
 
         
         
@@ -127,7 +127,7 @@ class BoNPlanner:
                 min(10, len(seed_state.cluster.train_prompts))
             ),
         }
-        user_prompts_str = json.dumps(user_prompts_json)
+        user_prompts_str = json.dumps(user_prompts_json, indent=2)
 
         planner_prompt = PLANNER_PROMPT_USER.format(
             N_new=N_new,

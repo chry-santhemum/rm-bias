@@ -73,6 +73,37 @@ def save_cluster_info(
     
     atomic_write_json(file_path, data)
 
+def save_population_state(
+    run_path: Path,
+    seed_id: int,
+    step: int,
+    population_state: Dict[str, int]
+) -> None:
+    """Save population state for a seed at a specific step."""
+    
+    seed_dir = run_path / f"seed_{seed_id}"
+    file_path = seed_dir / "population_history.json"
+    
+    # Load existing population history or create new
+    population_history = {}
+    if file_path.exists():
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                population_history = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            population_history = {}
+    
+    # Convert population state to hashes for storage
+    population_hashes = {}
+    for system_prompt, generation in population_state.items():
+        prompt_hash = hash_system_prompt(system_prompt)
+        population_hashes[prompt_hash] = generation
+    
+    # Update history for this step
+    population_history[str(step)] = population_hashes
+    
+    atomic_write_json(file_path, population_history)
+
 # Example usage for converting existing state objects
 def convert_attack_to_dict(attack) -> Dict[str, Any]:
     """Convert Attack object to dictionary for JSON serialization."""

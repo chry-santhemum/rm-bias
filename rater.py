@@ -292,9 +292,9 @@ class RewardModel(RatingFunction):
         attacks = [
             replace(attack, ratings=attack.ratings + [
                 Rating(
-                    raw_score=normalized_scores[i],
+                    raw_score=all_scores[i],
                     rater=self.rater,
-                    aux_info={"normalized_score": normalized_scores[i]}
+                    aux_info={"normalized_score": normalized_scores[i], "per_prompt_mean": per_prompt_means[i]}
                 )
             ]) 
             for i, attack in enumerate(attacks) if attack.normalized_reward is None
