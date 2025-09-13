@@ -19,6 +19,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.cluster import DBSCAN
 
 from utils import timestamp, get_to_pass_reasoning, setup_prompt_logger
+from viz_utils import save_system_prompt_stats, save_cluster_info, convert_attack_to_dict
 from rater import LLMJudge, RewardModel, PolicyModel, RatingFunction
 from state import SeedState, SystemPromptStats, Cluster
 from standard_prompts import set_seed_all
@@ -108,14 +109,14 @@ class EvoPlanner:
         past_data_str = json.dumps(past_data_json)
         return past_data_str
 
-    async def mutate_all(self, seed_states: list[SeedState[dict[str, int]]], num_new: int):
+    async def mutate_all(self, seed_states: list[SeedState[dict[str, int]]], num_new: int, run_path: Path = None, step_count: int = 0):
         """Modify all seed states in place."""
         tasks = []
         for seed_state in seed_states:
-            tasks.append(self.mutate(seed_state, num_new))
+            tasks.append(self.mutate(seed_state, num_new, run_path, step_count))
         await asyncio.gather(*tasks)
 
-    async def mutate(self, seed_state: SeedState[dict[str, int]], num_new: int):
+    async def mutate(self, seed_state: SeedState[dict[str, int]], num_new: int, run_path: Path = None, step_count: int = 0):
         """Modify the seed state in place."""
         model = self.planner_model_names[self.curr_planner_index]
         to_send_messages = []
@@ -200,7 +201,7 @@ class EvoPlanner:
             logger.info(f"Reasoning:\n{reasoning}")
 
         if len(seed_state.state) == 0:
-            log_prompt(all_plans + [""], action="initialize", step=len(seed_state.history)-1, seed_state=seed_state.index)
+            # log_prompt(all_plans + [""], action="initialize", step=len(seed_state.history)-1, seed_state=seed_state.index)
             seed_state.history[0].update({
                 plan: SystemPromptStats(system_prompt=plan)
                 for plan in all_plans
@@ -212,24 +213,75 @@ class EvoPlanner:
                 for plan in seed_state.history[0].keys()
             }
             logger.info(f"Initialized seed population with {len(seed_state.state)} system prompts")
+            
+            # Save visualization data for initialize
+            if run_path is not None:
+                for plan in all_plans + [""]:
+                    meta = {
+                        "step": step_count,
+                        "operation": "initialize",
+                        "planner_model": model,
+                        "temperature": self.temperature,
+                        "reasoning_effort": str(self.reasoning) if self.reasoning else None,
+                        "planner_prompt": INITIALIZE_PROMPT_USER.format(num_new=num_new, user_prompts=user_prompts_str),
+                        "planner_reasoning": reasoning if 'reasoning' in locals() else "N/A",
+                        "num_new": num_new,
+                        # Add population metadata for initial prompts
+                        "in_population": True,  # All initial prompts start in population
+                        "population_step": 0,   # They were added at step 0
+                    }
+                    
+                    save_system_prompt_stats(
+                        run_path=run_path,
+                        seed_id=seed_state.index,
+                        system_prompt=plan,
+                        attacks=[],
+                        mean_score=0.0,
+                        stdev_score=0.0,
+                        meta=meta
+                    )
 
         else:
-            log_prompt(all_plans, action="mutate", step=len(seed_state.history)-1, seed_state=seed_state.index)
+            # log_prompt(all_plans, action="mutate", step=len(seed_state.history)-1, seed_state=seed_state.index)
             seed_state.history[-1].update({
                 plan: SystemPromptStats(system_prompt=plan)
                 for plan in all_plans
             })
+            
+            # Save visualization data for mutate
+            if run_path is not None:
+                for plan in all_plans:
+                    meta = {
+                        "step": step_count,
+                        "operation": "mutate",
+                        "planner_model": model,
+                        "temperature": self.temperature,
+                        "reasoning_effort": str(self.reasoning) if self.reasoning else None,
+                        "planner_reasoning": reasoning if 'reasoning' in locals() else "N/A",
+                        "num_new": num_new,
+                        "population_size": len(seed_state.state),
+                    }
+                    
+                    save_system_prompt_stats(
+                        run_path=run_path,
+                        seed_id=seed_state.index,
+                        system_prompt=plan,
+                        attacks=[],
+                        mean_score=0.0,
+                        stdev_score=0.0,
+                        meta=meta
+                    )
 
 
-    async def innovate_all(self, seed_states: list[SeedState[dict[str, int]]], K_novel: int):
+    async def innovate_all(self, seed_states: list[SeedState[dict[str, int]]], K_novel: int, run_path: Path = None, step_count: int = 0):
         """Modify all seed states in place."""
         tasks = []
         for seed_state in seed_states:
-            tasks.append(self.innovate(seed_state, K_novel))
+            tasks.append(self.innovate(seed_state, K_novel, run_path, step_count))
         await asyncio.gather(*tasks)
 
     
-    async def innovate(self, seed_state: SeedState[dict[str, int]], K_novel: int):
+    async def innovate(self, seed_state: SeedState[dict[str, int]], K_novel: int, run_path: Path = None, step_count: int = 0):
         """Modify the seed state in place."""
         model = self.planner_model_names[self.curr_planner_index]
         to_send_messages = []
@@ -247,14 +299,16 @@ class EvoPlanner:
             ),
         }
         user_prompts_str = json.dumps(user_prompts_json)
+        
+        innovate_prompt = INNOVATE_PROMPT_USER.format(
+            K_novel=K_novel,
+            user_prompts=user_prompts_str,
+            past_system_prompts=past_system_prompts_str,
+        )
 
         to_send_messages.append(ChatHistory
             .from_system(INNOVATE_PROMPT_SYSTEM)
-            .add_user(INNOVATE_PROMPT_USER.format(
-                K_novel=K_novel,
-                user_prompts=user_prompts_str,
-                past_system_prompts=past_system_prompts_str,
-            ))
+            .add_user(innovate_prompt)
         )
 
         planner_responses = await sample_from_model_parallel(
@@ -293,13 +347,39 @@ class EvoPlanner:
             logger.info(f"Got {len(plans)} innovations for seed:\n[\n{"\n".join(plans)}\n]")
             logger.info(f"Reasoning:\n{reasoning}")
 
-        log_prompt(all_plans, action="innovate", step=len(seed_state.history)-1, seed_state=seed_state.index)
+        # log_prompt(all_plans, action="innovate", step=len(seed_state.history)-1, seed_state=seed_state.index)
 
         # updates the latest step in history
         seed_state.history[-1].update({
             plan: SystemPromptStats(system_prompt=plan)
             for plan in all_plans
         })
+        
+        # Save visualization data for innovate
+        if run_path is not None:
+            for plan in all_plans:
+                meta = {
+                    "step": step_count,
+                    "operation": "innovate",
+                    "planner_model": model,
+                    "temperature": self.temperature,
+                    "reasoning_effort": str(self.reasoning) if self.reasoning else None,
+                    "planner_prompt": innovate_prompt,
+                    "planner_reasoning": reasoning if 'reasoning' in locals() else "N/A",
+                    "K_novel": K_novel,
+                    "population_size": len(seed_state.state),
+                    "past_context_size": len(seed_state.state),
+                }
+                
+                save_system_prompt_stats(
+                    run_path=run_path,
+                    seed_id=seed_state.index,
+                    system_prompt=plan,
+                    attacks=[],
+                    mean_score=0.0,
+                    stdev_score=0.0,
+                    meta=meta
+                )
 
 
 
@@ -334,8 +414,8 @@ class EvoRunner:
         self.K_novel = K_novel
 
         self.run_name = run_name or f"{timestamp()}"
-        self.run_path = f"/workspace/rm-bias/data/evo/{self.run_name}"
-        Path(self.run_path).mkdir(parents=True, exist_ok=True)
+        self.run_path = Path(f"/workspace/rm-bias/data/evo/{self.run_name}")
+        self.run_path.mkdir(parents=True, exist_ok=True)
 
         self.step_count = 0
         self.wandb_run = None
@@ -383,9 +463,66 @@ class EvoRunner:
             if log_dict:
                 self.wandb_run.log(log_dict, step=self.step_count)
 
+    def save_complete_system_prompt_stats(self):
+        """Save complete SystemPromptStats with attacks and ratings after rating is done."""
+        logger.info("[VIZ] Saving complete system prompt stats...")
+        for seed_state in self.seed_states:
+            for system_prompt, stats in seed_state.history[-1].items():
+                if stats.attacks:  # Only save if we have attacks with ratings
+                    # Convert attacks to dict format
+                    attacks_dict = [convert_attack_to_dict(attack) for attack in stats.attacks]
+                    
+                    # Get existing metadata if it exists (from initial save)
+                    from viz_utils import hash_system_prompt
+                    prompt_hash = hash_system_prompt(system_prompt)
+                    existing_file = self.run_path / f"seed_{seed_state.index}" / f"{prompt_hash}.json"
+                    
+                    meta = {
+                        "step": self.step_count,
+                        "operation": "unknown",  # default, will be overwritten
+                    }
+                    
+                    # Try to preserve existing metadata
+                    if existing_file.exists():
+                        try:
+                            with open(existing_file, 'r') as f:
+                                existing_data = json.load(f)
+                                meta.update(existing_data.get('meta', {}))
+                        except (json.JSONDecodeError, IOError):
+                            pass
+                    
+                    # Add population tracking info
+                    meta["in_population"] = system_prompt in seed_state.state
+                    if system_prompt in seed_state.state:
+                        meta["population_step"] = seed_state.state[system_prompt]
+                    
+                    save_system_prompt_stats(
+                        run_path=self.run_path,
+                        seed_id=seed_state.index,
+                        system_prompt=system_prompt,
+                        attacks=attacks_dict,
+                        mean_score=stats.mean_score,
+                        stdev_score=stats.stdev_score,
+                        meta=meta
+                    )
 
     def initialize(self):
         assert all(len(seed_state.history) == 0 for seed_state in self.seed_states)
+
+        # Save cluster info for visualization
+        logger.info("[INITIALIZE] Saving cluster info for visualization...")
+        for seed_state in self.seed_states:
+            sample_prompts = random.sample(
+                seed_state.cluster.train_prompts, 
+                min(10, len(seed_state.cluster.train_prompts))
+            )
+            save_cluster_info(
+                run_path=self.run_path,
+                seed_id=seed_state.index,
+                summary=seed_state.cluster.summary,
+                train_batch_size=seed_state.cluster.train_batch_size,
+                sample_train_prompts=sample_prompts
+            )
 
         logger.info(f"[INITIALIZE] Normalizing rater 1, {self.rater_1.model_name}...")
         asyncio.run(self.rater_1.normalize(overwrite=False))
@@ -501,12 +638,16 @@ class EvoRunner:
         asyncio.run(self.planner.mutate_all(
             seed_states=self.seed_states,
             num_new=self.N_pop if self.step_count == 0 else self.M_var,
+            run_path=self.run_path,
+            step_count=self.step_count,
         ))
 
         logger.info(f"[TRAIN STEP {self.step_count}] Innovating...")
         asyncio.run(self.planner.innovate_all(
             seed_states=self.seed_states,
             K_novel=self.K_novel,
+            run_path=self.run_path,
+            step_count=self.step_count,
         ))
 
         logger.info(f"[TRAIN STEP {self.step_count}] Rating attacks...")
@@ -514,6 +655,9 @@ class EvoRunner:
 
         logger.info(f"[TRAIN STEP {self.step_count}] Updating population...")
         self.update_population()
+
+        logger.info(f"[TRAIN STEP {self.step_count}] Saving complete system prompt stats...")
+        self.save_complete_system_prompt_stats()
 
         logger.info(f"[TRAIN STEP {self.step_count}] Complete! Logging...")
         self.log_wandb()

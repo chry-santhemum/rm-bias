@@ -61,8 +61,25 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
     """Display detailed view of a system prompt and its attacks."""
     st.subheader(f"System Prompt: {prompt_hash[:8]}...")
     
-    # Show system prompt text
-    st.text_area("System Prompt Text", prompt_data.get('system_prompt', ''), height=100)
+    # Show system prompt text with dynamic height
+    system_prompt_text = prompt_data.get('system_prompt', '')
+    
+    # More accurate height calculation considering line wrapping
+    chars_per_line = 140
+    explicit_lines = system_prompt_text.count('\n') + 1
+    wrapped_lines = sum(max(1, len(line) // chars_per_line + (1 if len(line) % chars_per_line > 0 else 0)) 
+                       for line in system_prompt_text.split('\n'))
+    total_lines = max(explicit_lines, wrapped_lines)
+    
+    # Calculate height: base height + line height * number of lines
+    base_height = 50  # Base height for input field
+    line_height = 22  # Height per line of text
+    calculated_height = base_height + (total_lines * line_height)
+    
+    # Apply bounds
+    final_height = max(80, min(400, calculated_height))
+    
+    st.text_area("System Prompt Text", system_prompt_text, height=final_height)
     
     # Show metadata
     meta = prompt_data.get('meta', {})
@@ -107,28 +124,33 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
             user_msg = next((msg['content'] for msg in messages if msg['role'] == 'user'), 'N/A')
             assistant_msg = next((msg['content'] for msg in messages if msg['role'] == 'assistant'), 'N/A')
             
-            # Extract scores from ratings
-            ratings = attack.get('ratings', [])
-            reward_score = None
-            judge_score = None
+            # Get scores from aux_info (new format) or fallback to ratings (old format)
+            aux_info = attack.get('aux_info', {})
+            adv_score = aux_info.get('adversarial_score')
+            reward_score = aux_info.get('normalized_reward')
+            judge_score = aux_info.get('normalized_lm_judge')
+            unnorm_reward = aux_info.get('unnormalized_reward')
+            unnorm_judge = aux_info.get('unnormalized_lm_judge')
             
-            for rating in ratings:
-                rater = rating.get('rater', {})
-                if rater.get('rating_function_type') == 'classifier':
-                    reward_score = rating.get('aux_info', {}).get('normalized_score')
-                elif rater.get('rating_function_type') == 'lm_judge':
-                    judge_score = rating.get('aux_info', {}).get('normalized_score')
-            
-            # Calculate adversarial score if both exist
-            adv_score = attack.get('aux_info', {}).get('adversarial_score')
+            # Fallback to old format if new format not available
+            if reward_score is None or judge_score is None:
+                ratings = attack.get('ratings', [])
+                for rating in ratings:
+                    rater = rating.get('rater', {})
+                    if rater.get('rating_function_type') == 'classifier' and reward_score is None:
+                        reward_score = rating.get('aux_info', {}).get('normalized_score')
+                    elif rater.get('rating_function_type') == 'lm_judge' and judge_score is None:
+                        judge_score = rating.get('aux_info', {}).get('normalized_score')
             
             attack_rows.append({
                 'Attack #': i + 1,
+                'Adversarial Score': f"{adv_score:.3f}" if adv_score is not None else 'N/A',
+                'Reward Score (Norm)': f"{reward_score:.3f}" if reward_score is not None else 'N/A',
+                'Judge Score (Norm)': f"{judge_score:.3f}" if judge_score is not None else 'N/A',
+                'Reward Score (Raw)': f"{unnorm_reward:.3f}" if unnorm_reward is not None else 'N/A',
+                'Judge Score (Raw)': f"{unnorm_judge:.3f}" if unnorm_judge is not None else 'N/A',
                 'User Prompt': user_msg[:100] + '...' if len(user_msg) > 100 else user_msg,
                 'Assistant Response': assistant_msg[:100] + '...' if len(assistant_msg) > 100 else assistant_msg,
-                'Reward Score': f"{reward_score:.3f}" if reward_score is not None else 'N/A',
-                'Judge Score': f"{judge_score:.3f}" if judge_score is not None else 'N/A',
-                'Adversarial Score': f"{adv_score:.3f}" if adv_score is not None else 'N/A'
             })
         
         attack_df = pd.DataFrame(attack_rows)
@@ -138,7 +160,8 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
             attack_df,
             use_container_width=True,
             on_select="rerun",
-            selection_mode="single-row"
+            selection_mode="single-row",
+            hide_index=True
         )
         
         # Show detailed view of selected attack
@@ -163,10 +186,38 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
                 elif role == 'assistant':
                     st.chat_message("assistant").write(content)
             
+            # Display score summary
+            attack_aux_info = attack.get('aux_info', {})
+            if attack_aux_info:
+                st.subheader("Score Summary")
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    adv_score = attack_aux_info.get('adversarial_score')
+                    st.metric("Adversarial Score", f"{adv_score:.3f}" if adv_score is not None else "N/A")
+                
+                with col2:
+                    reward_norm = attack_aux_info.get('normalized_reward')
+                    reward_raw = attack_aux_info.get('unnormalized_reward')
+                    st.metric("Reward Score", 
+                             f"Norm: {reward_norm:.3f}, Raw: {reward_raw:.3f}" if reward_norm is not None and reward_raw is not None 
+                             else f"Norm: {reward_norm:.3f}" if reward_norm is not None
+                             else f"Raw: {reward_raw:.3f}" if reward_raw is not None
+                             else "N/A")
+                
+                with col3:
+                    judge_norm = attack_aux_info.get('normalized_lm_judge')
+                    judge_raw = attack_aux_info.get('unnormalized_lm_judge')
+                    st.metric("Judge Score",
+                             f"Norm: {judge_norm:.3f}, Raw: {judge_raw:.3f}" if judge_norm is not None and judge_raw is not None
+                             else f"Norm: {judge_norm:.3f}" if judge_norm is not None  
+                             else f"Raw: {judge_raw:.3f}" if judge_raw is not None
+                             else "N/A")
+
             # Display ratings
             ratings = attack.get('ratings', [])
             if ratings:
-                st.subheader("Ratings")
+                st.subheader("Individual Ratings")
                 for rating in ratings:
                     rater = rating.get('rater', {})
                     rater_name = rater.get('model_name', 'Unknown')
@@ -179,7 +230,21 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
                         st.write(f"Normalized Score: {aux_info.get('normalized_score', 'N/A')}")
                         
                         if 'reasoning_content' in aux_info:
-                            st.text_area("Reasoning", aux_info['reasoning_content'], height=150)
+                            reasoning_text = aux_info['reasoning_content']
+                            
+                            # Same height calculation as system prompt
+                            chars_per_line = 140
+                            explicit_lines = reasoning_text.count('\n') + 1
+                            wrapped_lines = sum(max(1, len(line) // chars_per_line + (1 if len(line) % chars_per_line > 0 else 0)) 
+                                              for line in reasoning_text.split('\n'))
+                            total_lines = max(explicit_lines, wrapped_lines)
+                            
+                            base_height = 50
+                            line_height = 22
+                            calculated_height = base_height + (total_lines * line_height)
+                            final_height = max(100, min(500, calculated_height))  # Slightly larger bounds for reasoning
+                            
+                            st.text_area("Reasoning", reasoning_text, height=final_height)
 
 def main():
     st.title("Reward model auto red-teaming")
@@ -230,11 +295,13 @@ def main():
         st.warning("No seed state data found for this run")
         return
     
-    # Main tabs with session state
+    # Main tabs with session state - add evolutionary tab if this is an evo run
     tab_names = ["📊 Overview", "🔍 Explore Prompts", "📈 Analytics"]
+    if "evo/" in str(selected_run_path):
+        tab_names.append("🧬 Evolution")
     
     # Use radio buttons instead of tabs to maintain state
-    selected_tab = st.radio("", tab_names, index=st.session_state.selected_tab, horizontal=True, key="main_tabs")
+    selected_tab = st.radio("", tab_names, index=min(st.session_state.selected_tab, len(tab_names)-1), horizontal=True, key="main_tabs")
     st.session_state.selected_tab = tab_names.index(selected_tab)
     
     st.divider()
@@ -326,7 +393,8 @@ def main():
                     overview_df,
                     use_container_width=True,
                     on_select="rerun",
-                    selection_mode="single-row"
+                    selection_mode="single-row",
+                    hide_index=True
                 )
                 
                 # Show details for selected prompt
@@ -394,6 +462,114 @@ def main():
                 st.plotly_chart(fig_time, use_container_width=True)
         else:
             st.info("No score data available for analysis.")
+
+    elif selected_tab == "🧬 Evolution":
+        st.header("Evolutionary Analysis")
+        
+        # Population tracking over time
+        st.subheader("Population Evolution")
+        
+        # Collect population data across all steps
+        population_data = []
+        for seed_id, seed_data in run_data['seed_states'].items():
+            for prompt_hash, prompt_data in seed_data['system_prompts'].items():
+                meta = prompt_data.get('meta', {})
+                step = meta.get('step', 0)
+                operation = meta.get('operation', 'unknown')
+                score = prompt_data.get('mean_score', 0)
+                in_population = meta.get('in_population', False)
+                population_step = meta.get('population_step', None)
+                
+                population_data.append({
+                    'Seed': f"Seed {seed_id}",
+                    'Step': step,
+                    'Operation': operation,
+                    'Score': score,
+                    'In Population': in_population,
+                    'Population Step': population_step,
+                    'System Prompt': prompt_data.get('system_prompt', '')[:100] + '...',
+                    'Hash': prompt_hash[:8]
+                })
+        
+        if population_data:
+            pop_df = pd.DataFrame(population_data)
+            
+            # Population size over time
+            pop_size_data = []
+            for step in sorted(pop_df['Step'].unique()):
+                for seed in pop_df['Seed'].unique():
+                    step_seed_data = pop_df[(pop_df['Step'] == step) & (pop_df['Seed'] == seed)]
+                    in_pop_count = step_seed_data['In Population'].sum()
+                    pop_size_data.append({
+                        'Step': step,
+                        'Seed': seed,
+                        'Population Size': in_pop_count
+                    })
+            
+            if pop_size_data:
+                pop_size_df = pd.DataFrame(pop_size_data)
+                fig_pop_size = px.line(
+                    pop_size_df,
+                    x='Step',
+                    y='Population Size',
+                    color='Seed',
+                    title="Population Size Over Time",
+                    markers=True
+                )
+                st.plotly_chart(fig_pop_size, use_container_width=True)
+            
+            # Population vs non-population scores
+            fig_pop_scores = px.scatter(
+                pop_df,
+                x='Step',
+                y='Score',
+                color='In Population',
+                symbol='Operation',
+                hover_data=['System Prompt'],
+                title="Scores: Population vs Non-Population",
+                labels={'Score': 'Adversarial Score'}
+            )
+            st.plotly_chart(fig_pop_scores, use_container_width=True)
+            
+            # Current population table
+            st.subheader("Current Population Status")
+            current_pop = pop_df[pop_df['In Population']].sort_values('Score', ascending=False)
+            
+            if not current_pop.empty:
+                st.dataframe(
+                    current_pop[['Seed', 'Hash', 'System Prompt', 'Score', 'Operation', 'Population Step']],
+                    use_container_width=True,
+                    hide_index=True
+                )
+            else:
+                st.info("No prompts currently in population (training may not be complete)")
+                
+            # Operation breakdown
+            st.subheader("Operations Analysis")
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                operation_counts = pop_df['Operation'].value_counts()
+                fig_ops = px.pie(
+                    values=operation_counts.values,
+                    names=operation_counts.index,
+                    title="Distribution of Operations"
+                )
+                st.plotly_chart(fig_ops, use_container_width=True)
+            
+            with col2:
+                # Average scores by operation
+                op_scores = pop_df.groupby('Operation')['Score'].mean().sort_values(ascending=False)
+                fig_op_scores = px.bar(
+                    x=op_scores.index,
+                    y=op_scores.values,
+                    title="Average Scores by Operation",
+                    labels={'x': 'Operation', 'y': 'Average Score'}
+                )
+                st.plotly_chart(fig_op_scores, use_container_width=True)
+        
+        else:
+            st.info("No evolutionary data available for analysis.")
 
 if __name__ == "__main__":
     main()

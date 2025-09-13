@@ -176,7 +176,7 @@ class BoNPlanner:
             logger.info(f"Got {len(plans)} new plans for seed:\n[\n{"\n".join(plans)}\n]")
             logger.info(f"Reasoning:\n{reasoning}")
 
-        log_prompt(all_plans, step=len(seed_state.history), seed_state=seed_state.index)
+        # log_prompt(all_plans, step=len(seed_state.history), seed_state=seed_state.index)
 
         # Create a new step
         seed_state.history.append({

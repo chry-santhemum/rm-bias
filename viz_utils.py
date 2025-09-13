@@ -76,6 +76,26 @@ def save_cluster_info(
 # Example usage for converting existing state objects
 def convert_attack_to_dict(attack) -> Dict[str, Any]:
     """Convert Attack object to dictionary for JSON serialization."""
+    # Get unnormalized scores for reward model and LM judge
+    unnormalized_reward = None
+    unnormalized_lm_judge = None
+    
+    for rating in attack.ratings:
+        if rating.rater.rating_function_type == "classifier":
+            unnormalized_reward = rating.raw_score
+        elif rating.rater.rating_function_type == "lm_judge":
+            unnormalized_lm_judge = rating.raw_score
+    
+    # Create enhanced aux_info with computed scores
+    enhanced_aux_info = dict(attack.aux_info)
+    enhanced_aux_info.update({
+        "adversarial_score": attack.adversarial_score,
+        "unnormalized_reward": unnormalized_reward,
+        "unnormalized_lm_judge": unnormalized_lm_judge,
+        "normalized_reward": attack.normalized_reward,
+        "normalized_lm_judge": attack.normalized_lm_judge,
+    })
+    
     return {
         "chat_history": {
             "messages": [
@@ -94,7 +114,7 @@ def convert_attack_to_dict(attack) -> Dict[str, Any]:
             }
             for rating in attack.ratings
         ],
-        "aux_info": attack.aux_info
+        "aux_info": enhanced_aux_info
     }
 
 def convert_system_prompt_stats_to_dict(stats, step: int, operation: str, **extra_meta) -> Dict[str, Any]:
