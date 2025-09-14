@@ -148,7 +148,7 @@ class EvoPlanner:
             sample_responses_str = json.dumps(sample_responses_json, indent=2)
 
             initialize_planner_prompt = INITIALIZE_PROMPT_USER.format(
-                num_new=num_new,
+                num_new=num_new - 1,  # Leave an empty one
                 user_prompts=user_prompts_str,
                 sample_responses=sample_responses_str,
             )
@@ -225,7 +225,7 @@ class EvoPlanner:
             # log_prompt(all_plans + [""], action="initialize", step=len(seed_state.history)-1, seed_state=seed_state.index)
             seed_state.history[0].update({
                 plan: SystemPromptStats(system_prompt=plan)
-                for plan in all_plans
+                for plan in all_plans[0]
             })
             # also add empty system prompt
             seed_state.history[0].update({"": SystemPromptStats(system_prompt="")})
@@ -829,7 +829,7 @@ if __name__ == "__main__":
     labels_df: pd.DataFrame = pd.read_csv("data/wildchat/labels.csv")
     initial_seed_states = []
 
-    for topic_id in tqdm(range(1, 10), desc="Loading seed states"):
+    for topic_id in tqdm(range(1, 5), desc="Loading seed states"):
         topic = cluster_df.loc[cluster_df.index[topic_id+1], "Name"][2:]  # description
         all_user_prompts = []
 
@@ -868,7 +868,7 @@ if __name__ == "__main__":
         rater_1=rater_1,
         rater_2=rater_2,
         embedding_model_name="all-MiniLM-L6-v2",
-        eps=0.2,
+        eps=0.15,
         N_pop=args.N_pop,
         M_var=args.M_var,
         run_name=run_name,

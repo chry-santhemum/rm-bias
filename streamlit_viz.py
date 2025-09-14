@@ -7,7 +7,7 @@ import plotly.express as px
 
 st.set_page_config(page_title="RM Bias Training Viz", layout="wide")
 
-@st.cache_data(ttl=None, show_spinner=False)  # Cache indefinitely - no loading message
+@st.cache_data
 def load_run_data(run_path_str: str) -> Dict[str, Any]:
     """Load all data for a run from the file structure."""
     run_path = Path(run_path_str)
@@ -67,7 +67,7 @@ def load_seed_state_data(seed_dir: Path) -> Dict[str, Any]:
 
 def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str):
     """Display detailed view of a system prompt and its attacks."""
-    st.subheader(f"System Prompt: {prompt_hash[:8]}...")
+    st.subheader(f"System Prompt: {prompt_hash}")
     
     # Show system prompt text with dynamic height
     system_prompt_text = prompt_data.get('system_prompt', '')
@@ -198,7 +198,7 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
             attack_aux_info = attack.get('aux_info', {})
             if attack_aux_info:
                 st.subheader("Score Summary")
-                col1, col2, col3 = st.columns(3)
+                col1, col2, col3, col4, col5 = st.columns(5)
                 
                 with col1:
                     adv_score = attack_aux_info.get('adversarial_score')
@@ -206,21 +206,23 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
                 
                 with col2:
                     reward_norm = attack_aux_info.get('normalized_reward')
-                    reward_raw = attack_aux_info.get('unnormalized_reward')
-                    st.metric("Reward Score", 
-                             f"Norm: {reward_norm:.3f}, Raw: {reward_raw:.3f}" if reward_norm is not None and reward_raw is not None 
-                             else f"Norm: {reward_norm:.3f}" if reward_norm is not None
-                             else f"Raw: {reward_raw:.3f}" if reward_raw is not None
-                             else "N/A")
-                
+                    st.metric("Normalized Reward Score", f"{reward_norm:.3f}" if reward_norm is not None else "N/A")
+
                 with col3:
                     judge_norm = attack_aux_info.get('normalized_lm_judge')
+                    st.metric("Normalized LLM Judge Score", f"{judge_norm:.3f}" if judge_norm is not None else "N/A")
+
+                with col4:
+                    reward_raw = attack_aux_info.get('unnormalized_reward')
+                    st.metric("Raw Reward Score", f"{reward_raw:.3f}" if reward_raw is not None else "N/A")
+
+                with col5:
                     judge_raw = attack_aux_info.get('unnormalized_lm_judge')
-                    st.metric("Judge Score",
-                             f"Norm: {judge_norm:.3f}, Raw: {judge_raw:.3f}" if judge_norm is not None and judge_raw is not None
-                             else f"Norm: {judge_norm:.3f}" if judge_norm is not None  
-                             else f"Raw: {judge_raw:.3f}" if judge_raw is not None
-                             else "N/A")
+                    st.metric("Raw LLM Judge Score", f"{judge_raw:.3f}" if judge_raw is not None else "N/A")
+
+            else:
+                st.subheader("Score Summary")
+                st.write("No score summary available")
 
             # Display ratings
             ratings = attack.get('ratings', [])
@@ -267,7 +269,12 @@ def main():
     
     # Sidebar for run selection
     st.sidebar.header("Run Selection")
-    
+
+    # Manual refresh button
+    if st.sidebar.button("🔄 Refresh"):
+        st.cache_data.clear()
+        st.rerun()
+
     # Look for run directories
     data_dirs = ['data/evo', 'data/bon_iter']
     available_runs = []
@@ -400,6 +407,7 @@ def main():
                 selected_prompt = st.dataframe(
                     overview_df,
                     width="stretch",
+                    height=700,
                     on_select="rerun",
                     selection_mode="single-row",
                     hide_index=True

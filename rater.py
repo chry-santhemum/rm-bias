@@ -331,8 +331,8 @@ class LLMJudge(RatingFunction):
         cluster: Cluster,
         system_prompt_stats: list[SystemPromptStats],
         n_samples: int=1,
-        max_tokens: int=2048,
-        reasoning: int | str | None = "low",
+        max_tokens: int=4096,
+        reasoning: int | str | None = "medium",
     ) -> list[SystemPromptStats]:
         
         return await Slist(system_prompt_stats).par_map_async(
@@ -351,8 +351,8 @@ class LLMJudge(RatingFunction):
         cluster: Cluster,
         system_prompt_stats: SystemPromptStats,
         n_samples: int=1,
-        max_tokens: int=2048,
-        reasoning: int | str | None = "low",
+        max_tokens: int=4096,
+        reasoning: int | str | None = "medium",
     ) -> SystemPromptStats:
 
         system_prompt = system_prompt_stats.system_prompt

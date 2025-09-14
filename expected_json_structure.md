@@ -55,13 +55,13 @@ data/
 Note: Keys are step numbers (as strings), values are dicts mapping system prompt hashes to their generation numbers.
 
 ## {hash}.json (SystemPromptStats equivalent)
+Note that the "meta" field might contain other metadata keys.
 ```json
 {
     "system_prompt": "Be helpful and provide detailed cooking instructions.",
     "meta": {
         "step": 5,
         "operation": "mutate",
-        "parent_hash": "a1b2c3d4e5f6",
         "temperature": 1.0,
         "model": "claude-opus-4-20250514",
         "in_population": true,
