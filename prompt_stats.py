@@ -228,3 +228,38 @@ def prompt_stats(
             logger.error(f"Failed to write {file_path}: {e}")
             continue
 
+
+
+# %%
+if __name__ == "__main__":
+    import pandas as pd
+    from tqdm.auto import tqdm
+    from standard_prompts import set_seed_all
+
+    set_seed_all(10086)
+
+    cluster_df: pd.DataFrame = pd.read_csv("data/wildchat/cluster_50k.csv")
+    labels_df: pd.DataFrame = pd.read_csv("data/wildchat/labels_50k.csv")
+    initial_seed_states = []
+
+    for topic_id in tqdm(range(1, 100), desc="Loading clusters"):
+        topic = cluster_df.loc[cluster_df.index[topic_id+1], "Name"].split('_', maxsplit=1)[-1]  # description
+        all_user_prompts = []
+
+        with pd.read_csv("data/wildchat/labels_50k.csv", chunksize=10000) as reader:
+            for chunk in reader:
+                for index, row in chunk.iterrows():
+                    if int(row["Topic"]) == topic_id:
+                        all_user_prompts.append(row["Document"])
+
+        print("=" * 80)
+        print(f"Topic {topic_id}: {topic} with {len(all_user_prompts)} user prompts")
+        print("\nExample prompts:\n")
+        for prompt in all_user_prompts[:10]:
+            print("-" * 80)
+            print(prompt)
+
+
+# %%
+cluster_df
+# %%

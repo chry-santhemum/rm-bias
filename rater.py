@@ -12,7 +12,7 @@ import torch
 
 from llm_types import ChatHistory
 from state import Cluster, SystemPromptStats, Attack, Rating, Rater
-from utils import load_model, REWARD_MODELS, get_to_pass_reasoning, per_prompt_stats
+from utils import load_model, REWARD_MODELS, get_to_pass_reasoning
 from standard_prompts import make_prompt_mix
 from default_prompts import *
 from client import is_thinking_model, get_universal_caller, sample_from_model_parallel
