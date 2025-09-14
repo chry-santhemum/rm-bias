@@ -93,7 +93,7 @@ def patched_init(self, *args, **kwargs):
     if self.model.startswith("gpt-5"):
         if 'stop' in self.generator_kwargs:
             del self.generator_kwargs['stop']
-        self.generator_kwargs["reasoning"] = {"effort": "medium"}
+        # self.generator_kwargs["reasoning"] = {"effort": "medium"}
 
 
 def apply():

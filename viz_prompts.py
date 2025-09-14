@@ -16,7 +16,9 @@ def load_prompt_stats(stats_dir_str: str) -> Dict[str, Any]:
     stats_dir = Path(stats_dir_str)
     data = {
         'prompts': {},
-        'available_models': set()
+        'available_models': set(),
+        'datasets': set(),
+        'topics': {}  # dataset -> {topic_id: topic_name}
     }
 
     if not stats_dir.exists():
@@ -37,20 +39,42 @@ def load_prompt_stats(stats_dir_str: str) -> Dict[str, Any]:
                         if key != 'response':
                             data['available_models'].add(key)
 
+                # Track datasets and topics
+                dataset = prompt_data.get('dataset')
+                topic_id = prompt_data.get('topic_label')  # Using 'topic_label' from the JSON
+                topic_name = prompt_data.get('topic_name')
+
+                if dataset:
+                    data['datasets'].add(dataset)
+                    if dataset not in data['topics']:
+                        data['topics'][dataset] = {}
+                    if topic_id is not None and topic_name:
+                        data['topics'][dataset][topic_id] = topic_name
+
         except (json.JSONDecodeError, IOError) as e:
             st.warning(f"Could not load {json_file}: {e}")
             continue
 
     data['available_models'] = sorted(list(data['available_models']))
+    data['datasets'] = sorted(list(data['datasets']))
     return data
 
-def create_overview_table(prompt_data: Dict[str, Any], selected_model: str) -> pd.DataFrame:
+def create_overview_table(prompt_data: Dict[str, Any], selected_model: str, selected_dataset: str = None, selected_topic_id: int = None) -> pd.DataFrame:
     """Create overview table of all prompts with summary statistics."""
     overview_rows = []
 
     for prompt_hash, data in prompt_data.items():
+        # Filter by dataset and topic if specified
+        if selected_dataset and data.get('dataset') != selected_dataset:
+            continue
+        if selected_topic_id is not None and data.get('topic_label') != selected_topic_id:
+            continue
+
         prompt_text = data.get('prompt', '')
         rollouts = data.get('rollouts', [])
+        dataset = data.get('dataset', 'Unknown')
+        topic_name = data.get('topic_name', 'Unknown')
+        topic_id = data.get('topic_label', 'N/A')
 
         # Get scores for selected model
         scores = []
@@ -74,9 +98,11 @@ def create_overview_table(prompt_data: Dict[str, Any], selected_model: str) -> p
 
         overview_rows.append({
             'Hash': prompt_hash[:12],
-            'Prompt': prompt_text[:150] + '...' if len(prompt_text) > 150 else prompt_text,
+            'Dataset': dataset,
+            'Topic ID': topic_id,
+            'Topic': topic_name,
+            'Prompt': prompt_text[:100] + '...' if len(prompt_text) > 100 else prompt_text,
             'Rollouts': len(rollouts),
-            'Valid Scores': len(scores),
             'Mean Score': f"{mean_score:.3f}" if mean_score is not None else 'N/A',
             'Std Dev': f"{std_score:.3f}" if std_score is not None else 'N/A',
             'Min': f"{min_score:.3f}" if min_score is not None else 'N/A',
@@ -89,6 +115,20 @@ def create_overview_table(prompt_data: Dict[str, Any], selected_model: str) -> p
 
     return pd.DataFrame(overview_rows)
 
+def calculate_text_height(text: str, chars_per_line: int = 120, min_height: int = 80, max_height: int = 400) -> int:
+    """Calculate appropriate height for text area based on content."""
+    if not text:
+        return min_height
+
+    lines = text.split('\n')
+    total_lines = sum(max(1, len(line) // chars_per_line + (1 if len(line) % chars_per_line > 0 else 0)) for line in lines)
+
+    base_height = 50
+    line_height = 22
+    calculated_height = base_height + (total_lines * line_height)
+
+    return max(min_height, min(max_height, calculated_height))
+
 def display_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str, selected_model: str):
     """Display detailed view of a selected prompt."""
     data = prompt_data[prompt_hash]
@@ -97,8 +137,9 @@ def display_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str, select
 
     st.subheader(f"Prompt Details: {prompt_hash[:12]}...")
 
-    # Display full prompt text
-    st.text_area("Full Prompt Text", prompt_text, height=200)
+    # Display full prompt text with dynamic height
+    prompt_height = calculate_text_height(prompt_text, min_height=100, max_height=300)
+    st.text_area("Full Prompt Text", prompt_text, height=prompt_height)
 
     # Get scores for visualization
     scores = []
@@ -127,7 +168,7 @@ def display_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str, select
             labels={'x': 'Score', 'count': 'Count'},
             nbins=min(20, len(scores))
         )
-        st.plotly_chart(fig_hist, use_container_width=True)
+        st.plotly_chart(fig_hist, width="stretch")
 
         # Rollouts details
         st.subheader("Individual Rollouts")
@@ -165,9 +206,10 @@ def display_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str, select
 
             st.subheader(f"Rollout #{original_idx + 1} Details")
 
-            # Show full response
+            # Show full response with dynamic height
             response_text = rollout.get('response', '')
-            st.text_area("Full Response", response_text, height=300)
+            response_height = calculate_text_height(response_text, min_height=150, max_height=500)
+            st.text_area("Full Response", response_text, height=response_height)
 
             # Show all model scores for this rollout
             st.subheader("All Model Scores")
@@ -189,7 +231,7 @@ def display_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str, select
         st.warning(f"No valid scores found for model '{selected_model}' in this prompt")
 
 def main():
-    st.title("📊 Prompt Analysis Dashboard")
+    st.title("User Prompts Dashboard")
 
     # Initialize session state
     if 'selected_prompt_idx' not in st.session_state:
@@ -214,7 +256,7 @@ def main():
         st.error("Please specify a directory containing prompt statistics")
         return
 
-    # Load data
+    # Load data first to get available datasets
     prompt_stats = load_prompt_stats(stats_dir)
 
     if not prompt_stats['prompts']:
@@ -222,7 +264,43 @@ def main():
         st.info("Make sure the directory contains JSON files generated by prompt_stats.py")
         return
 
-    # Model selection
+    # Dataset selection
+    st.sidebar.header("Dataset & Topic Filter")
+    available_datasets = ['All'] + list(prompt_stats['datasets'])
+    selected_dataset = st.sidebar.selectbox(
+        "Select Dataset",
+        available_datasets,
+        help="Filter prompts by dataset"
+    )
+
+    # Topic selection (only show if dataset is selected)
+    selected_topic_id = None
+    if selected_dataset != 'All' and selected_dataset in prompt_stats['topics']:
+        topics = prompt_stats['topics'][selected_dataset]
+        if topics:
+            st.sidebar.subheader(f"Topics in {selected_dataset}")
+
+            # Create topic options with ID and name
+            topic_options = ['All Topics'] + [f"{topic_id}: {topic_name}" for topic_id, topic_name in sorted(topics.items())]
+            selected_topic = st.sidebar.selectbox(
+                "Select Topic",
+                topic_options,
+                help="Filter prompts by topic"
+            )
+
+            if selected_topic != 'All Topics':
+                selected_topic_id = int(selected_topic.split(':')[0])
+
+            # Show topic summary
+            st.sidebar.info(f"Found {len(topics)} topics in {selected_dataset}")
+        else:
+            st.sidebar.info(f"No topics found in {selected_dataset}")
+
+    # Convert dataset selection for filtering
+    dataset_filter = None if selected_dataset == 'All' else selected_dataset
+
+    # Model selection (moved after data loading)
+    st.sidebar.header("Model Selection")
     available_models = prompt_stats['available_models']
     if not available_models:
         st.error("No model scores found in the prompt statistics")
@@ -234,30 +312,52 @@ def main():
         help="Choose which model's scores to analyze"
     )
 
-    # Show basic statistics
+    # Show basic statistics (filtered)
     st.header("Dataset Overview")
-    col1, col2, col3 = st.columns(3)
+
+    # Calculate filtered statistics
+    filtered_prompts = []
+    for prompt_hash, data in prompt_stats['prompts'].items():
+        if dataset_filter and data.get('dataset') != dataset_filter:
+            continue
+        if selected_topic_id is not None and data.get('topic_label') != selected_topic_id:
+            continue
+        filtered_prompts.append(data)
+
+    col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.metric("Total Prompts", len(prompt_stats['prompts']))
+        st.metric("Total Prompts", f"{len(filtered_prompts)} / {len(prompt_stats['prompts'])}")
 
     with col2:
+        filtered_rollouts = sum(len(data.get('rollouts', [])) for data in filtered_prompts)
         total_rollouts = sum(len(data.get('rollouts', [])) for data in prompt_stats['prompts'].values())
-        st.metric("Total Rollouts", total_rollouts)
+        st.metric("Total Rollouts", f"{filtered_rollouts} / {total_rollouts}")
 
     with col3:
         st.metric("Available Models", len(available_models))
 
-    # Create and display overview table
+    with col4:
+        st.metric("Datasets", len(prompt_stats['datasets']))
+
+    # Create and display overview table with filtering
     st.header("Prompt Overview")
-    overview_df = create_overview_table(prompt_stats['prompts'], selected_model)
+
+    # Display filter information below header
+    if dataset_filter:
+        st.markdown(f"**Dataset:** {dataset_filter}")
+    if selected_topic_id is not None:
+        topic_name = prompt_stats['topics'][dataset_filter][selected_topic_id]
+        st.markdown(f"**Topic Label:** {selected_topic_id}")
+        st.markdown(f"**Topic Name:** {topic_name}")
+    overview_df = create_overview_table(prompt_stats['prompts'], selected_model, dataset_filter, selected_topic_id)
 
     if overview_df.empty:
         st.warning(f"No data available for model '{selected_model}'")
         return
 
     # Sort options
-    sort_options = ['Mean Score', 'Std Dev', 'Rollouts', 'Valid Scores']
+    sort_options = ['Mean Score', 'Std Dev', 'Rollouts', 'Topic ID', 'Dataset']
     sort_by = st.selectbox("Sort by", sort_options, index=0)
     sort_ascending = st.checkbox("Sort ascending", value=False)
 
@@ -270,6 +370,10 @@ def main():
             overview_df_sorted[sort_column].str.replace('N/A', 'nan'),
             errors='coerce'
         )
+    elif sort_column == 'Topic ID':
+        # Handle topic ID sorting (may be mixed types)
+        overview_df_sorted = overview_df.copy()
+        overview_df_sorted[sort_column] = pd.to_numeric(overview_df_sorted[sort_column], errors='coerce')
     else:
         overview_df_sorted = overview_df.copy()
 

@@ -12,7 +12,7 @@ from slist import Slist
 
 from default_prompts import *
 from llm_types import ChatHistory
-from rater import RatingFunction, RewardModel, LLMJudge
+from rater import RatingFunction, RewardModel, LLMJudge, PolicyModel
 from client import OpenaiResponse, is_thinking_model, get_universal_caller, sample_from_model_parallel
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ def sample_responses(
     prompts: list[str],
     policy_name: str,
     N: int=16,
-    policy_max_tokens: int = 512,
+    policy_max_tokens: int = 1024,
     policy_max_par: int = 256,
     temperature: float = 0.8,
     target_dir: Path = Path("data/prompt_stats")
@@ -91,7 +91,6 @@ def sample_responses(
 def prompt_stats(
     prompts: list[str],
     rater: RatingFunction,
-    rater_max_par: int = 32,  # batch size / max parallel for rater
     winsorize: float = 0.05,
     target_dir: Path = Path("data/prompt_stats"),
 ):
@@ -120,8 +119,8 @@ def prompt_stats(
 
     if isinstance(rater, RewardModel):
         rewards = []
-        for i in range(0, len(full_convos), rater_max_par):
-            batch = full_convos[i : i + rater_max_par]
+        for i in tqdm(range(0, len(full_convos), rater.batch_size), desc="Rating responses"):
+            batch = full_convos[i : i + rater.batch_size]
             inputs = [input.to_openai_messages() for input in batch]
             input_ids = rater.tokenizer.apply_chat_template(
                 inputs,
@@ -157,7 +156,7 @@ def prompt_stats(
         rater_responses = asyncio.run(sample_from_model_parallel(
             prompts=rater_prompts,
             caller=rater.client,
-            max_par=rater_max_par,
+            max_par=rater.max_par,
             full_logging=False,
             desc="Rating responses",
             model=rater.model_name,
@@ -233,33 +232,85 @@ def prompt_stats(
 # %%
 if __name__ == "__main__":
     import pandas as pd
+    import hashlib
+    import random
+    import json
+    from datasets import load_dataset
     from tqdm.auto import tqdm
+    from pathlib import Path
     from standard_prompts import set_seed_all
 
     set_seed_all(10086)
 
-    cluster_df: pd.DataFrame = pd.read_csv("data/wildchat/cluster_50k.csv")
-    labels_df: pd.DataFrame = pd.read_csv("data/wildchat/labels_50k.csv")
-    initial_seed_states = []
+    hf_instruction_test = load_dataset("HuggingFaceH4/instruction-dataset", split="test")
+    prompts_to_sample = list(hf_instruction_test["prompt"])
 
-    for topic_id in tqdm(range(1, 100), desc="Loading clusters"):
-        topic = cluster_df.loc[cluster_df.index[topic_id+1], "Name"].split('_', maxsplit=1)[-1]  # description
-        all_user_prompts = []
 
-        with pd.read_csv("data/wildchat/labels_50k.csv", chunksize=10000) as reader:
-            for chunk in reader:
-                for index, row in chunk.iterrows():
-                    if int(row["Topic"]) == topic_id:
-                        all_user_prompts.append(row["Document"])
 
-        print("=" * 80)
-        print(f"Topic {topic_id}: {topic} with {len(all_user_prompts)} user prompts")
-        print("\nExample prompts:\n")
-        for prompt in all_user_prompts[:10]:
-            print("-" * 80)
-            print(prompt)
+    # cluster_df: pd.DataFrame = pd.read_csv("data/wildchat/cluster_50k.csv")
+    # labels_df: pd.DataFrame = pd.read_csv("data/wildchat/labels_50k.csv")
+    # # prompts_to_sample = []
+
+    # for topic_id in tqdm(range(1, 30), desc="Processing topics"):
+    #     topic = cluster_df.loc[cluster_df.index[topic_id+1], "Name"].split('_', maxsplit=1)[-1]  # description
+    #     all_user_prompts = []
+
+    #     with pd.read_csv("data/wildchat/labels_50k.csv", chunksize=10000) as reader:
+    #         for chunk in reader:
+    #             for index, row in chunk.iterrows():
+    #                 if int(row["Topic"]) == topic_id:
+    #                     all_user_prompts.append(row["Document"])
+
+    #     topic_prompts = random.sample(all_user_prompts, min(100, len(all_user_prompts)))
+
+    #     print("=" * 80)
+    #     print(f"Topic {topic_id}: {topic} with {len(all_user_prompts)} user prompts")
+    #     print("\nExample prompts:\n")
+    #     for prompt in all_user_prompts[:10]:
+    #         print("-" * 80)
+    #         print(prompt)
 
 
 # %%
-cluster_df
+    print(f"Sampling {len(prompts_to_sample)} prompts")
+
+    sample_responses(
+        prompts=prompts_to_sample,
+        policy_name="meta-llama/llama-3.1-8b-instruct",
+        N=16,
+    )
+
+    policy = PolicyModel(
+        model_name="meta-llama/llama-3.1-8b-instruct",
+        max_tokens=1024,
+    )
+
+    rater = RewardModel(
+        reward_model_name="skywork-v2",
+        policy_model=policy,
+        batch_size=64,
+    )
+
+    prompt_stats(
+        prompts=prompts_to_sample,
+        rater=rater,
+    )
 # %%
+
+
+# %%
+    for prompt in tqdm(prompts_to_sample, desc="Processing prompts"):
+        prompt_hash = hashlib.md5(prompt.encode('utf-8')).hexdigest()
+        file_path = Path("data/prompt_stats") / f"{prompt_hash}.json"
+        if file_path.exists():
+            with open(file_path, 'r', encoding='utf-8') as f:
+                json_data = json.load(f)
+                assert json_data["prompt"] == prompt
+                
+                json_data["topic_label"] = 0
+                json_data["topic_name"] = "All"
+                json_data["dataset"] = "instruction-dataset"
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump(json_data, f, indent=4)
+        else:
+            print("Prompt not found: ", prompt)
