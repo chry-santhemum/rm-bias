@@ -181,7 +181,8 @@ topic_model = BERTopic(
 # %%
 prompts = [item["conversation"][0]["content"] for i, item in enumerate(ds_50k_clean)]  # type: ignore
 
-
+# 1811s (30 minutes)
+# Need to make this faster
 print("Fitting BERTopic...")
 start_time = time.time()
 topics, probs = topic_model.fit_transform(prompts)
@@ -196,6 +197,7 @@ cluster_topics_df: pd.DataFrame = topic_model.get_topic_info()
 cluster_topics_df.to_csv("data/wildchat/cluster_50k.csv", index=True)
 
 # %%
+# 1309s (22 minutes)
 start_time = time.time()
 hierarchical_topics_df: pd.DataFrame = topic_model.hierarchical_topics(prompts)
 print(f"BERTopic hierarchical_topics in {time.time() - start_time:.2f}s")
