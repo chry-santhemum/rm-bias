@@ -1,4 +1,5 @@
 # %%
+import patches
 import re
 from typing import Set, Dict, Any
 import time
@@ -11,6 +12,8 @@ import nest_asyncio
 nest_asyncio.apply()
 import plotly.graph_objects as go
 
+from sentence_transformers import SentenceTransformer
+from umap import UMAP
 import openai
 from datasets import Dataset, load_dataset
 import numpy as np
@@ -24,20 +27,40 @@ from bertopic.representation import OpenAI
 # %%
 # Filter questions whose responses are too long;
 # By standard we sample 1024 tokens from the policy
+# Here we filter for at most 512 tokens
+
+tokenizer = tiktoken.get_encoding("gpt2")
 
 ds_iter = load_dataset("allenai/WildChat-1M", split="train", streaming=True)
-ds_iter = ds_iter.filter(
+
+def add_prompt_length(batch):
+    """
+    Takes a batch of examples, tokenizes the prompts, 
+    and adds a new 'prompt_length' column.
+    """
+    # Use the optimized 'encode_batch' for speed
+    prompts = [conv[0]['content'] for conv in batch['conversation']]
+    encodings = tokenizer.encode_batch(prompts, disallowed_special=())
+    batch["prompt_length"] = [len(encoding) for encoding in encodings]
+    return batch
+
+ds_with_length = ds_iter.map(add_prompt_length, batched=True, batch_size=128)
+ds_filtered = ds_with_length.filter(
     lambda ex: 
     ex["turn"] == 1
     and ex["language"] == "English" 
-    and len(ex["conversation"][0]["content"]) < 10000
+    and ex["prompt_length"] < 512
 )
 
-ds_50k = Dataset.from_list(list(ds_iter.take(50000)))
-
 # %%
-with open("data/wildchat/ds_50k_clean.pkl", "rb") as f:
-    ds_50k = pickle.load(f)
+# 154s wtih batch size 128
+start_time = time.time()
+ds_50k = Dataset.from_list(list(ds_filtered.take(50000)))
+print(f"Loaded 50k in {time.time() - start_time:.2f}s")
+
+with open("data/wildchat/ds_50k.pkl", "wb") as f:
+    pickle.dump(ds_50k, f)
+    
 # %%
 # Basic cleaning: normalize, deduplicate, and filter low-quality prompts
 
@@ -102,54 +125,81 @@ def _clean_records(
     return Dataset.from_list(cleaned)
 
 # %%
-ds_50k = _clean_records(ds_50k)
+# 20s
+start_time = time.time()
+ds_50k_clean = _clean_records(ds_50k)
+print(f"Data cleaning took {time.time() - start_time:.2f}s")
 
 with open("data/wildchat/ds_50k_clean.pkl", "wb") as f:
-    pickle.dump(ds_50k, f)
+    pickle.dump(ds_50k_clean, f)
 
 # %%
-print(ds_50k[0])
+with open("data/wildchat/ds_50k_clean.pkl", "rb") as f:
+    ds_50k_clean = pickle.load(f)
+# 41237 rows
 
+print(ds_50k_clean)
 
 # %%
 client = openai.OpenAI()
-CLUSTER_PROMPT_TEMPLATE = "You will extract a short topic label from given documents and keywords.\nHere are two examples of topics you created before:\n\n# Example 1\nSample texts from this topic:\n- Traditional diets in most cultures were primarily plant-based with a little meat on top, but with the rise of industrial style meat production and factory farming, meat has become a staple food.\n- Meat, but especially beef, is the worst food in terms of emissions.\n- Eating meat doesn't make you a bad person, not eating meat doesn't make you a good one.\n\nKeywords: meat beef eat eating emissions steak food health processed chicken\ntopic: Environmental impacts of eating meat\n\n# Example 2\nSample texts from this topic:\n- I have ordered the product weeks ago but it still has not arrived!\n- The website mentions that it only takes a couple of days to deliver but I still have not received mine.\n- I got a message stating that I received the monitor but that is not true!\n- It took a month longer to deliver than was advised...\n\nKeywords: deliver weeks product shipping long delivery received arrived arrive week\ntopic: Shipping and delivery issues\n\n# Your task\nSample texts from this topic:\n[DOCUMENTS]\n\nKeywords: [KEYWORDS]\n\nBased on the information above, extract a short topic label (a short phrase of at most 10 words) in the following format:\ntopic: <topic_label>\n"
+CLUSTER_PROMPT_TEMPLATE = """Your task is to extract a short summary label from a list of given documents and keywords. Each document is a user prompt for a chatbot. The summary label should be a short phrase of at most 15 words, summarizing the common topic and intent of the user prompts.
+
+*Sample documents:*
+[DOCUMENTS]
+
+*Keywords:*
+[KEYWORDS]
+
+Respond with the short summary label below.
+"""
+
+embedding_model = model = SentenceTransformer("Qwen/Qwen3-Embedding-0.6B")
+
+umap_model = UMAP(
+    n_neighbors=15,
+    n_components=5,
+    min_dist=0.0,
+    metric="cosine",
+    low_memory=False,
+)
 
 representation_model = OpenAI(
     client,
-    model="gpt-4o",
+    model="gpt-5-mini",
     prompt=CLUSTER_PROMPT_TEMPLATE,
     chat=True,
     nr_docs=10,
 )
 topic_model = BERTopic(
-    embedding_model="all-mpnet-base-v2",
+    min_topic_size=30,
+    umap_model=umap_model,
+    embedding_model=embedding_model,
     vectorizer_model=CountVectorizer(stop_words="english"),
     representation_model=representation_model,
 )
 
 # %%
-prompts = [item["conversation"][0]["content"] for i, item in enumerate(ds_50k)]  # type: ignore
-# emb_np = torch.nn.functional.normalize(embeddings, p=2, dim=1).numpy()
+prompts = [item["conversation"][0]["content"] for i, item in enumerate(ds_50k_clean)]  # type: ignore
 
 
+print("Fitting BERTopic...")
 start_time = time.time()
 topics, probs = topic_model.fit_transform(prompts)
 print(f"BERTopic fit_transform in {time.time() - start_time:.2f}s")
 
 # %%
 labels_df = topic_model.get_document_info(prompts)
-labels_df.to_csv("data/wildchat/labels.csv", index=True)
+labels_df.to_csv("data/wildchat/labels_50k.csv", index=True)
 
 # %%
 cluster_topics_df: pd.DataFrame = topic_model.get_topic_info()
-cluster_topics_df.to_csv("data/wildchat/cluster.csv", index=True)
+cluster_topics_df.to_csv("data/wildchat/cluster_50k.csv", index=True)
 
 # %%
 start_time = time.time()
 hierarchical_topics_df: pd.DataFrame = topic_model.hierarchical_topics(prompts)
 print(f"BERTopic hierarchical_topics in {time.time() - start_time:.2f}s")
-hierarchical_topics_df.to_csv("data/wildchat/hierarchical.csv", index=True)
+hierarchical_topics_df.to_csv("data/wildchat/hierarch_50k.csv", index=True)
 
 
 # %%
