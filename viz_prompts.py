@@ -76,23 +76,24 @@ def create_overview_table(prompt_data: Dict[str, Any], selected_model: str, sele
         topic_name = data.get('topic_name', 'Unknown')
         topic_id = data.get('topic_label', 'N/A')
 
-        # Get scores for selected model
-        scores = []
-        for rollout in rollouts:
-            if selected_model in rollout and rollout[selected_model] is not None:
-                scores.append(rollout[selected_model])
+        # Get summary stats from nested structure
+        summary_stats = data.get('summary_stats', {})
+        model_stats = summary_stats.get(selected_model, {})
 
-        if scores:
-            mean_score = np.mean(scores)
-            min_score = np.min(scores)
-            max_score = np.max(scores)
-            std_score = np.std(scores)
+        if model_stats and 'mean' in model_stats:
+            # Use pre-computed summary stats
+            mean_score = model_stats.get('mean')
             percentiles = {
-                '25th': np.percentile(scores, 25),
-                '50th': np.percentile(scores, 50),
-                '75th': np.percentile(scores, 75)
+                '25th': model_stats.get('percentiles', {}).get('25'),
+                '50th': model_stats.get('percentiles', {}).get('50'),
+                '75th': model_stats.get('percentiles', {}).get('75')
             }
+            rewards_raw = model_stats.get('rewards_raw', [])
+            min_score = min(rewards_raw) if rewards_raw else None
+            max_score = max(rewards_raw) if rewards_raw else None
+            std_score = np.std(rewards_raw) if rewards_raw else None
         else:
+            # No stats available for this model
             mean_score = min_score = max_score = std_score = None
             percentiles = {'25th': None, '50th': None, '75th': None}
 
