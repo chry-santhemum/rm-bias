@@ -1,3 +1,4 @@
+# %%
 import patches
 
 import hashlib
@@ -62,9 +63,9 @@ def sample_responses(
         }
     }
     """
+    print(f"Sampling {len(prompts)} prompts...")
 
     target_dir.mkdir(parents=True, exist_ok=True)
-
     caller = get_universal_caller()
     messages = [ChatHistory().add_user(prompt) for prompt in prompts]
 
@@ -107,7 +108,7 @@ def prompt_stats(
     winsorize: float = 0.05,
     target_dir: Path = Path("data/prompt_stats"),
 ):
-
+    print(f"Rating {len(prompts)} prompts with {rater.model_name}...")
     N = None  # number of rollouts per prompt
     full_convos = []
     for prompt in prompts:
@@ -666,7 +667,6 @@ class LLMJudge(RatingFunction):
 
 # %%
 if __name__ == "__main__":
-    import pandas as pd
     import hashlib
     import random
     import json
@@ -677,62 +677,106 @@ if __name__ == "__main__":
 
     set_seed_all(10086)
 
-    cluster_df: pd.DataFrame = pd.read_csv("data/wildchat/cluster_50k.csv")
-    labels_df: pd.DataFrame = pd.read_csv("data/wildchat/labels_50k.csv")
+    agent_harm = load_dataset("ai-safety-institute/AgentHarm", name="chat", split="test_public")
+    prompts = list(agent_harm["prompt"])
+
+    policy = PolicyModel(
+        model_name="meta-llama/llama-3.1-8b-instruct",
+        max_tokens=1024,
+    )
+    sample_responses(
+        prompts=prompts,
+        policy_name=policy.model_name,
+        N=16,
+    )
+
+    rater_1 = RewardModel(
+        reward_model_name="skywork-v2",
+        policy_model=policy,
+        batch_size=32,
+    )
+
+    rater_2 = LLMJudge(
+        judge_model_name="openai/gpt-5-nano",
+        policy_model=policy,
+        rubric=HANDWRITTEN_RUBRIC,
+        max_par=256,
+        # full_logging=True,
+    )
+
+    prompt_stats(
+        prompts=prompts,
+        rater=rater_1,
+    )
+    prompt_stats(
+        prompts=prompts,
+        rater=rater_2,
+    )
+
+    for prompt in tqdm(prompts, desc="Post-processing prompts"):
+        file_path = prompt_to_hash_path(prompt, Path("data/prompt_stats"))
+        if file_path.exists():
+            with open(file_path, 'r', encoding='utf-8') as f:
+                json_data = json.load(f)
+
+                json_data["topic_label"] = 0
+                json_data["topic_name"] = "All"
+                json_data["dataset"] = "agent-harm"
+                
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump(json_data, f, indent=4)
+        else:
+            print("Prompt not found: ", prompt)
+
+
+    # cluster_df: pd.DataFrame = pd.read_csv("data/wildchat/cluster_50k.csv")
+    # labels_df: pd.DataFrame = pd.read_csv("data/wildchat/labels_50k.csv")
     # prompts_to_sample = []
 
-    for topic_id in tqdm(range(1, 30), desc="Processing topics"):
-        topic = cluster_df.loc[cluster_df.index[topic_id+1], "Name"].split('_', maxsplit=1)[-1]  # description
-        all_user_prompts = []
+    # for topic_id in tqdm(range(1, 30), desc="Processing topics"):
+    #     topic = cluster_df.loc[cluster_df.index[topic_id+1], "Name"].split('_', maxsplit=1)[-1]  # description
+    #     all_user_prompts = []
 
-        with pd.read_csv("data/wildchat/labels_50k.csv", chunksize=10000) as reader:
-            for chunk in reader:
-                for index, row in chunk.iterrows():
-                    if int(row["Topic"]) == topic_id:
-                        all_user_prompts.append(row["Document"])
+    #     with pd.read_csv("data/wildchat/labels_50k.csv", chunksize=10000) as reader:
+    #         for chunk in reader:
+    #             for index, row in chunk.iterrows():
+    #                 if int(row["Topic"]) == topic_id:
+    #                     all_user_prompts.append(row["Document"])
 
-        topic_prompts = random.sample(all_user_prompts, min(100, len(all_user_prompts)))
+    #     topic_prompts = random.sample(all_user_prompts, min(100, len(all_user_prompts)))
 
-        for prompt in tqdm(topic_prompts, desc="Processing prompts"):
-            prompt_hash = hashlib.md5(prompt.encode('utf-8')).hexdigest()
-            file_path = Path("data/prompt_stats") / f"{prompt_hash}.json"
-            if file_path.exists():
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    json_data = json.load(f)
-                    assert json_data["prompt"] == prompt
+    #     for prompt in tqdm(topic_prompts, desc="Processing prompts"):
+    #         prompt_hash = hashlib.md5(prompt.encode('utf-8')).hexdigest()
+    #         file_path = Path("data/prompt_stats") / f"{prompt_hash}.json"
+    #         if file_path.exists():
+    #             with open(file_path, 'r', encoding='utf-8') as f:
+    #                 json_data = json.load(f)
+    #                 assert json_data["prompt"] == prompt
                     
-                    if "skywork-v2" not in json_data["summary_stats"]:
-                        new_dict = {}
-                        key_names = list(json_data["summary_stats"].keys())
+    #                 if "skywork-v2" not in json_data["summary_stats"]:
+    #                     new_dict = {}
+    #                     key_names = list(json_data["summary_stats"].keys())
 
-                        for key in key_names:
-                            val = json_data["summary_stats"][key]
-                            new_dict[key] = val
-                            del json_data["summary_stats"][key]
+    #                     for key in key_names:
+    #                         val = json_data["summary_stats"][key]
+    #                         new_dict[key] = val
+    #                         del json_data["summary_stats"][key]
                         
-                        json_data["summary_stats"]["skywork-v2"] = new_dict
+    #                     json_data["summary_stats"]["skywork-v2"] = new_dict
 
-                    else:
-                        print("Already in correct format")
-                    with open(file_path, 'w', encoding='utf-8') as f:
-                        json.dump(json_data, f, indent=4)
-            else:
-                print("Prompt not found: ", prompt)
+    #                 else:
+    #                     print("Already in correct format")
+    #                 with open(file_path, 'w', encoding='utf-8') as f:
+    #                     json.dump(json_data, f, indent=4)
+    #         else:
+    #             print("Prompt not found: ", prompt)
         
-        # print("=" * 80)
-        # print(f"Topic {topic_id}: {topic} with {len(all_user_prompts)} user prompts")
-        # print("\nExample prompts:\n")
-        # for prompt in all_user_prompts[:10]:
-        #     print("-" * 80)
-        #     print(prompt)
+    #     print("=" * 80)
+    #     print(f"Topic {topic_id}: {topic} with {len(all_user_prompts)} user prompts")
+    #     print("\nExample prompts:\n")
+    #     for prompt in all_user_prompts[:10]:
+    #         print("-" * 80)
+    #         print(prompt)
 
 
-# %%
-    # print(f"Sampling {len(prompts_to_sample)} prompts")
-
-    # sample_responses(
-    #     prompts=prompts_to_sample,
-    #     policy_name="meta-llama/llama-3.1-8b-instruct",
-    #     N=16,
-    # )
 # %%

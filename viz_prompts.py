@@ -5,8 +5,6 @@ import numpy as np
 from pathlib import Path
 from typing import Dict, Any, List
 import plotly.express as px
-import plotly.graph_objects as go
-import hashlib
 
 st.set_page_config(page_title="User Prompts Viz", layout="wide")
 
@@ -33,11 +31,14 @@ def load_prompt_stats(stats_dir_str: str) -> Dict[str, Any]:
                 prompt_hash = json_file.stem
                 data['prompts'][prompt_hash] = prompt_data
 
-                # Track available models from rollouts
+                # Track available models from both rollouts and summary_stats
                 for rollout in prompt_data.get('rollouts', []):
                     for key in rollout.keys():
                         if key != 'response':
                             data['available_models'].add(key)
+
+                # Track available models from summary_stats (new format)
+                data['available_models'].update(prompt_data.get('summary_stats', {}).keys())
 
                 # Track datasets and topics
                 dataset = prompt_data.get('dataset')
@@ -59,7 +60,7 @@ def load_prompt_stats(stats_dir_str: str) -> Dict[str, Any]:
     data['datasets'] = sorted(list(data['datasets']))
     return data
 
-def create_overview_table(prompt_data: Dict[str, Any], selected_model: str, selected_dataset: str = None, selected_topic_id: int = None) -> pd.DataFrame:
+def create_overview_table(prompt_data: Dict[str, Any], available_models: List[str], selected_dataset: str = None, selected_topic_id: int = None) -> pd.DataFrame:
     """Create overview table of all prompts with summary statistics."""
     overview_rows = []
 
@@ -78,41 +79,37 @@ def create_overview_table(prompt_data: Dict[str, Any], selected_model: str, sele
 
         # Get summary stats from nested structure
         summary_stats = data.get('summary_stats', {})
-        model_stats = summary_stats.get(selected_model, {})
 
-        if model_stats and 'mean' in model_stats:
-            # Use pre-computed summary stats
-            mean_score = model_stats.get('mean')
-            percentiles = {
-                '25th': model_stats.get('percentiles', {}).get('25'),
-                '50th': model_stats.get('percentiles', {}).get('50'),
-                '75th': model_stats.get('percentiles', {}).get('75')
-            }
-            rewards_raw = model_stats.get('rewards_raw', [])
-            min_score = min(rewards_raw) if rewards_raw else None
-            max_score = max(rewards_raw) if rewards_raw else None
-            std_score = np.std(rewards_raw) if rewards_raw else None
-        else:
-            # No stats available for this model
-            mean_score = min_score = max_score = std_score = None
-            percentiles = {'25th': None, '50th': None, '75th': None}
-
-        overview_rows.append({
+        # Create base row data
+        row_data = {
             'Hash': prompt_hash[:12],
             'Dataset': dataset,
             'Topic ID': topic_id,
             'Topic': topic_name,
             'Prompt': prompt_text[:100] + '...' if len(prompt_text) > 100 else prompt_text,
             'Rollouts': len(rollouts),
-            'Mean Score': f"{mean_score:.3f}" if mean_score is not None else 'N/A',
-            'Std Dev': f"{std_score:.3f}" if std_score is not None else 'N/A',
-            'Min': f"{min_score:.3f}" if min_score is not None else 'N/A',
-            'Max': f"{max_score:.3f}" if max_score is not None else 'N/A',
-            '25th': f"{percentiles['25th']:.3f}" if percentiles['25th'] is not None else 'N/A',
-            '50th': f"{percentiles['50th']:.3f}" if percentiles['50th'] is not None else 'N/A',
-            '75th': f"{percentiles['75th']:.3f}" if percentiles['75th'] is not None else 'N/A',
             'Full Hash': prompt_hash
-        })
+        }
+
+        # Add columns for each available model
+        for model in available_models:
+            model_stats = summary_stats.get(model, {})
+
+            if model_stats and 'mean' in model_stats:
+                # Use pre-computed summary stats
+                mean_score = model_stats.get('mean')
+                rewards_raw = model_stats.get('rewards_raw', [])
+                rewards_cleaned = [r for r in rewards_raw if r is not None]
+                std_score = np.std(rewards_cleaned) if rewards_cleaned else None
+
+                row_data[f'Mean ({model})'] = f"{mean_score:.3f}" if mean_score is not None else 'N/A'
+                row_data[f'Std ({model})'] = f"{std_score:.3f}" if std_score is not None else 'N/A'
+            else:
+                # No stats available for this model
+                row_data[f'Mean ({model})'] = 'N/A'
+                row_data[f'Std ({model})'] = 'N/A'
+
+        overview_rows.append(row_data)
 
     return pd.DataFrame(overview_rows)
 
@@ -130,7 +127,7 @@ def calculate_text_height(text: str, chars_per_line: int = 120, min_height: int 
 
     return max(min_height, min(max_height, calculated_height))
 
-def display_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str, selected_model: str):
+def display_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str, available_models: List[str]):
     """Display detailed view of a selected prompt."""
     data = prompt_data[prompt_hash]
     prompt_text = data.get('prompt', '')
@@ -142,51 +139,82 @@ def display_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str, select
     prompt_height = calculate_text_height(prompt_text, min_height=100, max_height=300)
     st.text_area("Full Prompt Text", prompt_text, height=prompt_height)
 
-    # Get scores for visualization
-    scores = []
-    valid_rollouts = []
-    for i, rollout in enumerate(rollouts):
-        if selected_model in rollout and rollout[selected_model] is not None:
-            scores.append(rollout[selected_model])
-            valid_rollouts.append((i, rollout))
+    # Summary statistics for all models
+    st.subheader("Summary Statistics by Model")
 
-    if scores:
-        # Summary statistics
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.metric("Mean Score", f"{np.mean(scores):.3f}")
-        with col2:
-            st.metric("Std Dev", f"{np.std(scores):.3f}")
-        with col3:
-            st.metric("Min Score", f"{np.min(scores):.3f}")
-        with col4:
-            st.metric("Max Score", f"{np.max(scores):.3f}")
+    # Calculate statistics for each model
+    model_stats = {}
+    for model in available_models:
+        scores = []
+        for rollout in rollouts:
+            if model in rollout and rollout[model] is not None:
+                scores.append(rollout[model])
+        model_stats[model] = scores
 
-        # Score distribution histogram
-        fig_hist = px.histogram(
-            x=scores,
-            title=f"Score Distribution for {selected_model}",
-            labels={'x': 'Score', 'count': 'Count'},
-            nbins=min(20, len(scores))
-        )
-        st.plotly_chart(fig_hist, width="stretch")
+    # Display statistics in a grid
+    if any(len(scores) > 0 for scores in model_stats.values()):
+        # Create columns for each model
+        cols = st.columns(len(available_models))
+        for i, model in enumerate(available_models):
+            scores = model_stats[model]
+            with cols[i]:
+                st.write(f"**{model}**")
+                if scores:
+                    st.metric("Mean", f"{np.mean(scores):.3f}")
+                    st.metric("Std Dev", f"{np.std(scores):.3f}")
+                    st.metric("Min", f"{np.min(scores):.3f}")
+                    st.metric("Max", f"{np.max(scores):.3f}")
+                    st.metric("Count", len(scores))
+                else:
+                    st.info("No scores")
 
-        # Rollouts details
+        # Score distribution histogram for all models with data
+        models_with_data = [(model, scores) for model, scores in model_stats.items() if len(scores) > 0]
+        if models_with_data:
+            st.subheader("Score Distributions")
+
+            # Create combined histogram data
+            hist_data = []
+            for model, scores in models_with_data:
+                for score in scores:
+                    hist_data.append({"Model": model, "Score": score})
+
+            if hist_data:
+                hist_df = pd.DataFrame(hist_data)
+                fig_hist = px.histogram(
+                    hist_df,
+                    x="Score",
+                    color="Model",
+                    title="Score Distributions by Model",
+                    labels={'Score': 'Score', 'count': 'Count'},
+                    nbins=20,
+                    barmode='overlay',
+                    opacity=0.7
+                )
+                st.plotly_chart(fig_hist, use_container_width=True)
+
+    # Rollouts details (show regardless of selected model scores)
+    if rollouts:
         st.subheader("Individual Rollouts")
 
-        # Create rollout overview table
+        # Create rollout overview table with all model scores (show all rollouts)
         rollout_rows = []
-        for rollout_idx, (original_idx, rollout) in enumerate(valid_rollouts):
+        for rollout_idx, rollout in enumerate(rollouts):
             response = rollout.get('response', '')
-            score = rollout.get(selected_model, 'N/A')
 
-            rollout_rows.append({
-                'Rollout #': original_idx + 1,
-                'Score': f"{score:.3f}" if isinstance(score, (int, float)) else str(score),
+            row_data = {
+                'Rollout #': rollout_idx + 1,
                 'Response Preview': response[:200] + '...' if len(response) > 200 else response,
                 'Response Length': len(response),
-                'Original Index': original_idx
-            })
+                'Original Index': rollout_idx
+            }
+
+            # Add score columns for all available models
+            for model in available_models:
+                score = rollout.get(model, None)
+                row_data[f'Score ({model})'] = f"{score:.3f}" if isinstance(score, (int, float)) else 'N/A'
+
+            rollout_rows.append(row_data)
 
         rollout_df = pd.DataFrame(rollout_rows)
 
@@ -229,7 +257,7 @@ def display_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str, select
                 st.info("No model scores available for this rollout")
 
     else:
-        st.warning(f"No valid scores found for model '{selected_model}' in this prompt")
+        st.info("No rollouts available for this prompt")
 
 def main():
     st.title("User Prompts Visualization")
@@ -300,18 +328,11 @@ def main():
     # Convert dataset selection for filtering
     dataset_filter = None if selected_dataset == 'All' else selected_dataset
 
-    # Model selection (moved after data loading)
-    st.sidebar.header("Model Selection")
+    # Get available models
     available_models = prompt_stats['available_models']
     if not available_models:
         st.error("No model scores found in the prompt statistics")
         return
-
-    selected_model = st.sidebar.selectbox(
-        "Select Model/Rater",
-        available_models,
-        help="Choose which model's scores to analyze"
-    )
 
     # Show basic statistics (filtered)
     st.header("Dataset Overview")
@@ -351,32 +372,31 @@ def main():
         topic_name = prompt_stats['topics'][dataset_filter][selected_topic_id]
         st.markdown(f"**Topic Label:** {selected_topic_id}")
         st.markdown(f"**Topic Name:** {topic_name}")
-    overview_df = create_overview_table(prompt_stats['prompts'], selected_model, dataset_filter, selected_topic_id)
+    overview_df = create_overview_table(prompt_stats['prompts'], available_models, dataset_filter, selected_topic_id)
 
     if overview_df.empty:
-        st.warning(f"No data available for model '{selected_model}'")
+        st.warning("No prompt data available")
         return
 
-    # Sort options
-    sort_options = ['Mean Score', 'Std Dev', 'Rollouts', 'Topic ID', 'Dataset']
+    # Sort options - model-specific scores for all available models
+    sort_options = []
+    for model in available_models:
+        sort_options.extend([f'Mean ({model})', f'Std ({model})'])
+
+    # Default to first model's mean score
     sort_by = st.selectbox("Sort by", sort_options, index=0)
     sort_ascending = st.checkbox("Sort ascending", value=False)
 
     # Apply sorting
+    # Use the sort_by directly as it now matches the column names
     sort_column = sort_by
-    if sort_column in ['Mean Score', 'Std Dev']:
-        # Convert to float for proper sorting
-        overview_df_sorted = overview_df.copy()
-        overview_df_sorted[sort_column] = pd.to_numeric(
-            overview_df_sorted[sort_column].str.replace('N/A', 'nan'),
-            errors='coerce'
-        )
-    elif sort_column == 'Topic ID':
-        # Handle topic ID sorting (may be mixed types)
-        overview_df_sorted = overview_df.copy()
-        overview_df_sorted[sort_column] = pd.to_numeric(overview_df_sorted[sort_column], errors='coerce')
-    else:
-        overview_df_sorted = overview_df.copy()
+
+    # Convert to float for proper sorting (all sort options are numeric)
+    overview_df_sorted = overview_df.copy()
+    overview_df_sorted[sort_column] = pd.to_numeric(
+        overview_df_sorted[sort_column].str.replace('N/A', 'nan'),
+        errors='coerce'
+    )
 
     overview_df_sorted = overview_df_sorted.sort_values(
         sort_column,
@@ -400,7 +420,7 @@ def main():
         selected_hash = overview_df_sorted.iloc[selected_idx]['Full Hash']
 
         st.divider()
-        display_prompt_details(prompt_stats['prompts'], selected_hash, selected_model)
+        display_prompt_details(prompt_stats['prompts'], selected_hash, available_models)
 
     else:
         st.info("👆 Select a prompt from the table above to see detailed analysis")
