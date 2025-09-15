@@ -846,7 +846,7 @@ if __name__ == "__main__":
             summary=topic,
             train_prompts=train_prompts,
             val_prompts=[],
-            train_batch_size=10,
+            train_batch_size=15,
         )
 
         seed_state = SeedState(

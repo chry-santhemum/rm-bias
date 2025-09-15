@@ -401,7 +401,6 @@ class EvoPlanner:
                     "planner_reasoning": reasoning if 'reasoning' in locals() else "N/A",
                     "K_novel": K_novel,
                     "population_size": len(seed_state.state),
-                    "past_context_size": len(seed_state.state),
                 }
                 
                 save_system_prompt_stats(

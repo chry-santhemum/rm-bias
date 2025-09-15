@@ -98,8 +98,12 @@ class Attack:
 @dataclass
 class SystemPromptStats:
     system_prompt: str
-    meta: dict[str, Any] = field(default_factory=dict)
+    meta: dict[str, Any] = field(default_factory=dict)  # such as parent / island id / other state info
     attacks: list[Attack] = field(default_factory=list)
+
+    @property
+    def parent(self) -> str|None:
+        return self.meta.get("parent", None)
 
     @property
     def scores(self) -> list[float]:

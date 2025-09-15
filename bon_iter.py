@@ -196,7 +196,6 @@ class BoNPlanner:
                     "planner_prompt": planner_prompt,
                     "planner_reasoning": reasoning if 'reasoning' in locals() else "N/A",
                     "N_new": N_new,
-                    "past_context_size": len(json.loads(past_system_prompts_str)) if past_system_prompts_str != "[]" else 0
                 }
                 
                 # Save with empty attacks initially 

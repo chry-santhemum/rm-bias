@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Dict, Any
 import plotly.express as px
 
-st.set_page_config(page_title="RM Bias Training Viz", layout="wide")
+st.set_page_config(page_title="Run Visualization", layout="wide")
 
 @st.cache_data
 def load_run_data(run_path_str: str) -> Dict[str, Any]:
@@ -275,33 +275,44 @@ def main():
         st.cache_data.clear()
         st.rerun()
 
-    # Look for run directories
-    data_dirs = ['data/evo', 'data/bon_iter']
-    available_runs = []
-    
+    # Directory selection first
+    data_dirs = ['data/evo', 'data/bon_iter', 'data/pair']
+    available_dirs = []
+
     for data_dir in data_dirs:
         data_path = Path(data_dir)
         if data_path.exists():
-            for run_dir in data_path.iterdir():
-                if run_dir.is_dir():
-                    run_type = data_dir.split('/')[-1]
-                    available_runs.append((f"{run_type}/{run_dir.name}", run_dir))
-    
-    if not available_runs:
-        st.error("No training runs found in data/evo or data/bon_iter")
+            available_dirs.append(data_dir)
+
+    if not available_dirs:
+        st.error("No training directories found in data/evo or data/bon_iter")
         return
-    
+
+    selected_directory = st.sidebar.selectbox(
+        "Select Directory",
+        available_dirs,
+        help="Choose between evolutionary (evo) and best-of-N (bon_iter) runs"
+    )
+
+    # Now get runs from the selected directory
+    dir_path = Path(selected_directory)
+    available_runs = []
+
+    if dir_path.exists():
+        for run_dir in dir_path.iterdir():
+            if run_dir.is_dir():
+                available_runs.append((run_dir.name, run_dir))
+
+    if not available_runs:
+        st.error(f"No runs found in {selected_directory}")
+        return
+
     selected_run_name, selected_run_path = st.sidebar.selectbox(
         "Select Run",
         available_runs,
         format_func=lambda x: x[0],
-        index=min(st.session_state.selected_run_idx, len(available_runs) - 1) if available_runs else 0,
-        key="run_selector"
+        help="Choose specific run from the selected directory"
     )
-    
-    # Update session state
-    if available_runs:
-        st.session_state.selected_run_idx = available_runs.index((selected_run_name, selected_run_path))
     
     # Load and display run data
     run_data = load_run_data(str(selected_run_path))
@@ -312,7 +323,7 @@ def main():
     
     # Main tabs with session state - add evolutionary tab if this is an evo run
     tab_names = ["📊 Overview", "🔍 Explore Prompts", "📈 Analytics"]
-    if "evo/" in str(selected_run_path):
+    if selected_directory == "data/evo":
         tab_names.append("🧬 Evolution")
     
     # Use radio buttons instead of tabs to maintain state

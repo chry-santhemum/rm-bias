@@ -8,7 +8,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import hashlib
 
-st.set_page_config(page_title="Prompt Analysis", layout="wide")
+st.set_page_config(page_title="User Prompts Viz", layout="wide")
 
 @st.cache_data
 def load_prompt_stats(stats_dir_str: str) -> Dict[str, Any]:
@@ -232,7 +232,7 @@ def display_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str, select
         st.warning(f"No valid scores found for model '{selected_model}' in this prompt")
 
 def main():
-    st.title("User Prompts Dashboard")
+    st.title("User Prompts Visualization")
 
     # Initialize session state
     if 'selected_prompt_idx' not in st.session_state:
