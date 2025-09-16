@@ -33,14 +33,25 @@ This codebase implements an automated red-teaming loop to discover biases in rew
 - `BoNRunner`: Manages iterative optimization loop
 - No explicit diversity mechanisms
 
-#### 3. **Rating System (`rater.py`)**
+#### 3. **PAIR Training (`pair.py`)**
+- Implements PAIR (Prompt Automatic Iterative Refinement) methodology
+- Key classes:
+  - `PAIRPlanner`: Generates system prompts using LLM-based planning with initialize/iterate operations
+  - `PAIRRunner`: Orchestrates PAIR training loop
+- Two-phase approach:
+  - Initialize: Generate diverse initial system prompts for each seed
+  - Iterate: Improve existing prompts based on performance feedback
+- Uses reasoning-capable models (Claude Opus, Gemini Pro) as planners
+- Tracks parent-child relationships between prompt iterations
+
+#### 4. **Rating System (`rater.py`)**
 - `PolicyModel`: Generates assistant responses given system/user prompts
 - Two rating function types:
   - `RewardModel`: Local classifier-based reward models (Skywork, Tulu3, etc.)
   - `LLMJudge`: API-based LLM judges (GPT-5, Claude)
 - Adversarial scoring based on disagreement between raters
 
-#### 4. **State Management (`state.py`)**
+#### 5. **State Management (`state.py`)**
 - Core data structures:
   - `Cluster`: Groups of similar user prompts
   - `Attack`: System prompt + user prompt + assistant response
@@ -49,11 +60,48 @@ This codebase implements an automated red-teaming loop to discover biases in rew
   - `SeedState`: Complete state for one cluster/topic
 - Adversariality metric: Measures disagreement between reward model and LLM judge
 
-#### 5. **API Client (`client.py`)**
+#### 6. **API Client (`client.py`)**
 - Multi-provider support (OpenRouter, Anthropic)
 - Caching system for API calls
 - Retry logic and error handling
 - Support for reasoning/thinking models
+
+#### 7. **Visualization System**
+- **Training Runs Visualization (`viz_runs.py`)**
+  - Real-time monitoring of training runs (evo, bon_iter, pair)
+  - Multi-tab interface: Overview, Explore Prompts, Analytics, Evolution (evo only)
+  - Supports all training algorithms with algorithm-specific features
+  - Directory-based run selection with separate algorithm and run choices
+
+- **Prompt Analysis (`viz_prompts.py`)**
+  - Comprehensive analysis of prompt statistics across multiple models
+  - Lazy loading: datasets loaded only when selected for performance
+  - Multi-model comparison with side-by-side statistics and score distributions
+  - Dataset/topic filtering with hierarchical organization
+  - Dynamic text area sizing and interactive prompt exploration
+
+- **Prompt Statistics (`prompt_stats.py`)**
+  - Computes statistics for user prompts across multiple models
+  - Generates JSON files with rollout data and summary statistics
+  - Supports nested summary_stats structure organized by model name
+  - Robust file I/O with error handling and logging
+
+#### 8. **Data Organization**
+- **Training Data**: Organized by algorithm type in `data/{evo,bon_iter,pair}/`
+- **Prompt Statistics**: Organized by dataset in `data/prompt_stats/{dataset_name}/`
+- **File Structure**:
+  ```
+  data/
+  ├── evo/                    # Evolutionary algorithm runs
+  ├── bon_iter/               # Best-of-N iteration runs
+  ├── pair/                   # PAIR algorithm runs
+  └── prompt_stats/           # Prompt analysis data
+      ├── wildchat_50k/       # Dataset-specific subdirectories
+      ├── other_dataset/
+      └── ...
+  ```
+- **JSON Schema**: Standardized format for system prompt stats with multi-model support
+- **Backward Compatibility**: Supports both legacy flat files and new hierarchical structure
 
 ## Workflow
 
@@ -83,12 +131,13 @@ This codebase implements an automated red-teaming loop to discover biases in rew
 
 ## File Structure
 
-- **Core algorithms**: `evo.py`, `bon_iter.py`
+- **Core algorithms**: `evo.py`, `bon_iter.py`, `pair.py`
 - **Models/Rating**: `rater.py`, `reward_model.py`
 - **Infrastructure**: `client.py`, `state.py`, `utils.py`
-- **Analysis**: `analysis.py`, `patches.py`
+- **Visualization**: `viz_runs.py`, `viz_prompts.py`, `viz_utils.py`
+- **Analysis**: `analysis.py`, `patches.py`, `prompt_stats.py`
 - **Configuration**: `default_prompts.py`, `standard_prompts.py`
-- **Data**: Uses WildChat dataset for user prompts
+- **Data**: Uses WildChat dataset, organized in hierarchical structure
 
 ## Dependencies
 
@@ -96,3 +145,30 @@ This codebase implements an automated red-teaming loop to discover biases in rew
 - API clients: OpenAI, Anthropic
 - Utilities: wandb, slist, nest_asyncio
 - Analysis: pandas, plotly, sklearn (DBSCAN)
+- Visualization: streamlit, numpy
+- Data handling: datasets (HuggingFace)
+
+## Key Features
+
+### Multi-Algorithm Support
+- **Evolutionary**: Population-based search with diversity preservation
+- **Best-of-N**: Simple iterative optimization
+- **PAIR**: LLM-guided prompt refinement with reasoning
+
+### Comprehensive Visualization
+- **Real-time Training Monitoring**: Live updates during training runs
+- **Multi-Model Analysis**: Side-by-side comparison of different rating models
+- **Interactive Exploration**: Drill-down from overview to individual prompt details
+- **Performance Optimized**: Lazy loading and caching for large datasets
+
+### Scalable Data Management
+- **Hierarchical Organization**: Datasets and algorithms in separate directories
+- **Lazy Loading**: Load only selected data for better performance
+- **Backward Compatibility**: Supports both old and new data structures
+- **Multi-Model Support**: Handle ratings from multiple models simultaneously
+
+### Advanced Prompt Analysis
+- **Cross-Model Statistics**: Compare performance across different rating functions
+- **Topic-Based Filtering**: Analyze specific categories of prompts
+- **Dynamic Visualization**: Adaptive UI elements based on content
+- **Export Capabilities**: JSON-based data exchange format

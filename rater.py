@@ -13,12 +13,13 @@ from slist import Slist
 import random
 from abc import ABC, abstractmethod
 from dataclasses import replace
+import pandas as pd
 
 from llm_types import ChatHistory
 from state import Cluster, SystemPromptStats, Attack, Rating, Rater
 from utils import load_model, REWARD_MODELS, get_to_pass_reasoning
 from standard_prompts import make_prompt_mix
-from default_prompts import *
+from defaults import *
 from client import OpenaiResponse, is_thinking_model, get_universal_caller, sample_from_model_parallel
 
 logger = logging.getLogger(__name__)
@@ -458,8 +459,9 @@ class RewardModel(RatingFunction):
 
                 policy_inputs = [
                     ChatHistory.from_system(system_prompt)
-                    .add_user(prompt + "\n\n Begin your response with 'Sure, here is the answer to your question'.") 
-                    .add_assistant("Sure, here is the answer to your question:\n")
+                    .add_user(prompt)
+                    # .add_user(prompt + "\n\n Begin your response with 'Sure, here is the answer to your question'.") 
+                    # .add_assistant("Sure, here is the answer to your question:\n")
                     for prompt in train_prompts
                 ]
                 policy_responses = await self.policy_model.sample_responses(policy_inputs)
@@ -476,11 +478,27 @@ class RewardModel(RatingFunction):
                 attack_idx_to_sps_idx[len(attacks)] = sps_idx
                 attacks.append(attack)
 
+        # # Remove the token forcing strings
+        # for i, attack in enumerate(attacks):
+        #     orig_user = attack.user.removesuffix("\n\n Begin your response with 'Sure, here is the answer to your question'.")
+        #     orig_chat = []
+        #     for msg in attack.chat_history.messages:
+        #         if msg.role == "user":
+        #             msg.content = orig_user
+        #         elif msg.role == "assistant":
+        #             if msg.content.startswith("Sure, here is the answer to your question:\n"):
+        #                 continue
+        #         orig_chat.append(msg)
+        #     attacks[i] = replace(attack, chat_history=ChatHistory(messages=orig_chat))
+
         # If required, compute the per-prompt means
         per_prompt_means = []
         if per_prompt_normalize:
             for attack in attacks:
-                file_path = prompt_to_hash_path(attack.user, Path("data/prompt_stats"))
+                file_path = prompt_to_hash_path(
+                    attack.user,
+                    Path("data/prompt_stats")
+                )
                 with open(file_path, 'r', encoding='utf-8') as f:
                     json_data = json.load(f)
                     assert json_data["prompt"] == attack.user
@@ -593,8 +611,9 @@ class LLMJudge(RatingFunction):
 
             policy_inputs = [
                 ChatHistory.from_system(system_prompt)
-                .add_user(prompt + "\n\n Begin your response with 'Sure, here is the answer to your question'.") 
-                .add_assistant("Sure, here is the answer to your question:\n")
+                .add_user(prompt)
+                # .add_user(prompt + "\n\n Begin your response with 'Sure, here is the answer to your question'.") 
+                # .add_assistant("Sure, here is the answer to your question:\n")
                 for prompt in train_prompts
             ]
             policy_responses = await self.policy_model.sample_responses(policy_inputs)
@@ -602,6 +621,19 @@ class LLMJudge(RatingFunction):
         
         else:
             attacks = system_prompt_stats.attacks
+
+        # # Remove the token forcing strings
+        # for i, attack in enumerate(attacks):
+        #     orig_user = attack.user.removesuffix("\n\n Begin your response with 'Sure, here is the answer to your question'.")
+        #     orig_chat = []
+        #     for msg in attack.chat_history.messages:
+        #         if msg.role == "user":
+        #             msg.content = orig_user
+        #         elif msg.role == "assistant":
+        #             if msg.content.startswith("Sure, here is the answer to your question:\n"):
+        #                 continue
+        #         orig_chat.append(msg)
+        #     attacks[i] = replace(attack, chat_history=ChatHistory(messages=orig_chat))
 
         # Rate each attack with the LLM judge
         rater_inputs = [ChatHistory.from_system(
@@ -691,34 +723,38 @@ if __name__ == "__main__":
     import hashlib
     import random
     import json
+    import pickle
     from datasets import load_dataset
     from tqdm.auto import tqdm
     from pathlib import Path
     from standard_prompts import set_seed_all
-
     set_seed_all(10086)
 
     # agent_harm = load_dataset("ai-safety-institute/AgentHarm", name="chat", split="test_public")
     # prompts = list(agent_harm["prompt"])
 
-    instruction_test = load_dataset("HuggingFaceH4/instruction-dataset", split="test")
-    prompts = list(instruction_test["prompt"])
+    # instruction_test = load_dataset("HuggingFaceH4/instruction-dataset", split="test")
+    # prompts = list(instruction_test["prompt"])
+
+    ultrafeedback = pd.read_csv("data/ultrafeedback/labels_20k.csv")
+    prompts = ultrafeedback["Document"].tolist()
 
     policy = PolicyModel(
         model_name="meta-llama/llama-3.1-8b-instruct",
         max_tokens=1024,
     )
-    # sample_responses(
-    #     prompts=prompts,
-    #     policy_name=policy.model_name,
-    #     N=16,
-    # )
+    sample_responses(
+        prompts=prompts,
+        policy_name=policy.model_name,
+        policy_max_par=1024,
+        N=16,
+    )
 
-    # rater_1 = RewardModel(
-    #     reward_model_name="skywork-v2",
-    #     policy_model=policy,
-    #     batch_size=32,
-    # )
+    rater_1 = RewardModel(
+        reward_model_name="skywork-v2",
+        policy_model=policy,
+        batch_size=32,
+    )
 
     rater_2 = LLMJudge(
         judge_model_name="openai/gpt-5-nano",
@@ -728,31 +764,32 @@ if __name__ == "__main__":
         # full_logging=True,
     )
 
-    # prompt_stats(
-    #     prompts=prompts,
-    #     rater=rater_1,
-    # )
+    prompt_stats(
+        prompts=prompts,
+        rater=rater_1,
+    )
     prompt_stats(
         prompts=prompts,
         rater=rater_2,
     )
 
-    # for prompt in tqdm(prompts, desc="Post-processing prompts"):
-    #     file_path = prompt_to_hash_path(prompt, Path("data/prompt_stats"))
-    #     if file_path.exists():
-    #         with open(file_path, 'r', encoding='utf-8') as f:
-    #             json_data = json.load(f)
+    for idx, row in tqdm(ultrafeedback.iterrows(), desc="Post-processing prompts"):
+        file_path = prompt_to_hash_path(row["Document"], Path("data/prompt_stats/ultrafeedback"))
+        if file_path.exists():
+            with open(file_path, 'r', encoding='utf-8') as f:
+                json_data = json.load(f)
 
-    #             json_data["topic_label"] = 0
-    #             json_data["topic_name"] = "All"
-    #             json_data["dataset"] = "agent-harm"
+                json_data["topic_label"] = row["Topic"]
+                json_data["topic_name"] = row["Topic_Summary"]
+                json_data["dataset"] = "ultrafeedback"
                 
-    #             with open(file_path, 'w', encoding='utf-8') as f:
-    #                 json.dump(json_data, f, indent=4)
-    #     else:
-    #         print("Prompt not found: ", prompt)
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump(json_data, f, indent=4)
+        else:
+            print("Prompt not found: ", row["Document"])
 
 
+# %%
     # cluster_df: pd.DataFrame = pd.read_csv("data/wildchat/cluster_50k.csv")
     # labels_df: pd.DataFrame = pd.read_csv("data/wildchat/labels_50k.csv")
     # prompts_to_sample = []

@@ -9,55 +9,94 @@ import plotly.express as px
 st.set_page_config(page_title="User Prompts Viz", layout="wide")
 
 @st.cache_data
-def load_prompt_stats(stats_dir_str: str) -> Dict[str, Any]:
-    """Load all prompt statistics from a directory."""
+def discover_datasets(stats_dir_str: str) -> List[str]:
+    """Discover available datasets without loading the data."""
+    stats_dir = Path(stats_dir_str)
+    datasets = set()
+
+    if not stats_dir.exists():
+        return []
+
+    # Check subdirectories (new structure)
+    for dataset_dir in stats_dir.iterdir():
+        if dataset_dir.is_dir() and any(dataset_dir.glob("*.json")):
+            datasets.add(dataset_dir.name)
+
+    # Check for JSON files in root (legacy structure)
+    if any(stats_dir.glob("*.json")):
+        datasets.add("legacy_data")
+
+    return sorted(list(datasets))
+
+@st.cache_data
+def load_dataset_data(stats_dir_str: str, dataset_name: str) -> Dict[str, Any]:
+    """Load data for a specific dataset only."""
     stats_dir = Path(stats_dir_str)
     data = {
         'prompts': {},
         'available_models': set(),
-        'datasets': set(),
-        'topics': {}  # dataset -> {topic_id: topic_name}
+        'topics': {}  # topic_id -> topic_name
     }
 
     if not stats_dir.exists():
         return data
 
-    # Load all JSON files
-    for json_file in stats_dir.glob("*.json"):
-        try:
-            with open(json_file, 'r', encoding='utf-8') as f:
-                prompt_data = json.load(f)
+    if dataset_name == "legacy_data":
+        # Load from root directory (legacy structure)
+        for json_file in stats_dir.glob("*.json"):
+            try:
+                with open(json_file, 'r', encoding='utf-8') as f:
+                    prompt_data = json.load(f)
 
-                prompt_hash = json_file.stem
-                data['prompts'][prompt_hash] = prompt_data
+                    prompt_hash = json_file.stem
+                    data['prompts'][prompt_hash] = prompt_data
 
-                # Track available models from both rollouts and summary_stats
-                for rollout in prompt_data.get('rollouts', []):
-                    for key in rollout.keys():
-                        if key != 'response':
-                            data['available_models'].add(key)
+                    # Track available models
+                    for rollout in prompt_data.get('rollouts', []):
+                        for key in rollout.keys():
+                            if key != 'response':
+                                data['available_models'].add(key)
+                    data['available_models'].update(prompt_data.get('summary_stats', {}).keys())
 
-                # Track available models from summary_stats (new format)
-                data['available_models'].update(prompt_data.get('summary_stats', {}).keys())
-
-                # Track datasets and topics
-                dataset = prompt_data.get('dataset')
-                topic_id = prompt_data.get('topic_label')  # Using 'topic_label' from the JSON
-                topic_name = prompt_data.get('topic_name')
-
-                if dataset:
-                    data['datasets'].add(dataset)
-                    if dataset not in data['topics']:
-                        data['topics'][dataset] = {}
+                    # Track topics
+                    topic_id = prompt_data.get('topic_label')
+                    topic_name = prompt_data.get('topic_name')
                     if topic_id is not None and topic_name:
-                        data['topics'][dataset][topic_id] = topic_name
+                        data['topics'][topic_id] = topic_name
 
-        except (json.JSONDecodeError, IOError) as e:
-            st.warning(f"Could not load {json_file}: {e}")
-            continue
+            except (json.JSONDecodeError, IOError) as e:
+                st.warning(f"Could not load {json_file}: {e}")
+                continue
+    else:
+        # Load from specific dataset subdirectory
+        dataset_dir = stats_dir / dataset_name
+        if dataset_dir.exists() and dataset_dir.is_dir():
+            for json_file in dataset_dir.glob("*.json"):
+                try:
+                    with open(json_file, 'r', encoding='utf-8') as f:
+                        prompt_data = json.load(f)
+
+                        prompt_hash = json_file.stem
+                        data['prompts'][prompt_hash] = prompt_data
+
+                        # Track available models
+                        for rollout in prompt_data.get('rollouts', []):
+                            for key in rollout.keys():
+                                if key != 'response':
+                                    data['available_models'].add(key)
+                        data['available_models'].update(prompt_data.get('summary_stats', {}).keys())
+
+                        # Track topics
+                        topic_id = prompt_data.get('topic_label')
+                        topic_name = prompt_data.get('topic_name')
+                        if topic_id is not None and topic_name:
+                            data['topics'][topic_id] = topic_name
+
+                except (json.JSONDecodeError, IOError) as e:
+                    st.warning(f"Could not load {json_file}: {e}")
+                    continue
 
     data['available_models'] = sorted(list(data['available_models']))
-    data['datasets'] = sorted(list(data['datasets']))
     return data
 
 def create_overview_table(prompt_data: Dict[str, Any], available_models: List[str], selected_dataset: str = None, selected_topic_id: int = None) -> pd.DataFrame:
@@ -285,36 +324,48 @@ def main():
         st.error("Please specify a directory containing prompt statistics")
         return
 
-    # Load data first to get available datasets
-    prompt_stats = load_prompt_stats(stats_dir)
+    # Discover available datasets first (lightweight operation)
+    available_datasets = discover_datasets(stats_dir)
 
-    if not prompt_stats['prompts']:
-        st.error(f"No prompt statistics found in directory: {stats_dir}")
-        st.info("Make sure the directory contains JSON files generated by prompt_stats.py")
+    if not available_datasets:
+        st.error(f"No datasets found in directory: {stats_dir}")
+        st.info("Make sure the directory contains subdirectories with JSON files generated by prompt_stats.py")
         return
 
     # Dataset selection
-    st.sidebar.header("Dataset & Topic Filter")
-    available_datasets = ['All'] + list(prompt_stats['datasets'])
+    st.sidebar.header("Dataset Selection")
     selected_dataset = st.sidebar.selectbox(
         "Select Dataset",
         available_datasets,
-        help="Filter prompts by dataset"
+        help="Choose a dataset to analyze"
     )
 
-    # Topic selection (only show if dataset is selected)
-    selected_topic_id = None
-    if selected_dataset != 'All' and selected_dataset in prompt_stats['topics']:
-        topics = prompt_stats['topics'][selected_dataset]
+    # Load data only for the selected dataset
+    if selected_dataset:
+        dataset_data = load_dataset_data(stats_dir, selected_dataset)
+
+        if not dataset_data['prompts']:
+            st.error(f"No prompt data found for dataset: {selected_dataset}")
+            return
+
+        # Get available models from the selected dataset
+        available_models = dataset_data['available_models']
+        if not available_models:
+            st.error("No model scores found in the selected dataset")
+            return
+
+        # Topic selection (now specific to the selected dataset)
+        selected_topic_id = None
+        topics = dataset_data['topics']
         if topics:
-            st.sidebar.subheader(f"Topics in {selected_dataset}")
+            st.sidebar.subheader("Topic Filter")
 
             # Create topic options with ID and name
             topic_options = ['All Topics'] + [f"{topic_id}: {topic_name}" for topic_id, topic_name in sorted(topics.items())]
             selected_topic = st.sidebar.selectbox(
                 "Select Topic",
                 topic_options,
-                help="Filter prompts by topic"
+                help="Filter prompts by topic within this dataset"
             )
 
             if selected_topic != 'All Topics':
@@ -325,23 +376,16 @@ def main():
         else:
             st.sidebar.info(f"No topics found in {selected_dataset}")
 
-    # Convert dataset selection for filtering
-    dataset_filter = None if selected_dataset == 'All' else selected_dataset
-
-    # Get available models
-    available_models = prompt_stats['available_models']
-    if not available_models:
-        st.error("No model scores found in the prompt statistics")
+    else:
+        st.info("Please select a dataset to begin analysis")
         return
 
     # Show basic statistics (filtered)
     st.header("Dataset Overview")
 
-    # Calculate filtered statistics
+    # Calculate filtered statistics for the selected dataset
     filtered_prompts = []
-    for prompt_hash, data in prompt_stats['prompts'].items():
-        if dataset_filter and data.get('dataset') != dataset_filter:
-            continue
+    for prompt_hash, data in dataset_data['prompts'].items():
         if selected_topic_id is not None and data.get('topic_label') != selected_topic_id:
             continue
         filtered_prompts.append(data)
@@ -349,30 +393,31 @@ def main():
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.metric("Total Prompts", f"{len(filtered_prompts)} / {len(prompt_stats['prompts'])}")
+        st.metric("Total Prompts", f"{len(filtered_prompts)} / {len(dataset_data['prompts'])}")
 
     with col2:
         filtered_rollouts = sum(len(data.get('rollouts', [])) for data in filtered_prompts)
-        total_rollouts = sum(len(data.get('rollouts', [])) for data in prompt_stats['prompts'].values())
+        total_rollouts = sum(len(data.get('rollouts', [])) for data in dataset_data['prompts'].values())
         st.metric("Total Rollouts", f"{filtered_rollouts} / {total_rollouts}")
 
     with col3:
         st.metric("Available Models", len(available_models))
 
     with col4:
-        st.metric("Datasets", len(prompt_stats['datasets']))
+        st.metric("Topics", len(topics))
 
     # Create and display overview table with filtering
     st.header("Prompt Overview")
 
     # Display filter information below header
-    if dataset_filter:
-        st.markdown(f"**Dataset:** {dataset_filter}")
+    st.markdown(f"**Dataset:** {selected_dataset}")
     if selected_topic_id is not None:
-        topic_name = prompt_stats['topics'][dataset_filter][selected_topic_id]
+        topic_name = topics[selected_topic_id]
         st.markdown(f"**Topic Label:** {selected_topic_id}")
         st.markdown(f"**Topic Name:** {topic_name}")
-    overview_df = create_overview_table(prompt_stats['prompts'], available_models, dataset_filter, selected_topic_id)
+
+    # Create overview table (no dataset filtering needed since we only loaded one dataset)
+    overview_df = create_overview_table(dataset_data['prompts'], available_models, None, selected_topic_id)
 
     if overview_df.empty:
         st.warning("No prompt data available")
@@ -420,7 +465,7 @@ def main():
         selected_hash = overview_df_sorted.iloc[selected_idx]['Full Hash']
 
         st.divider()
-        display_prompt_details(prompt_stats['prompts'], selected_hash, available_models)
+        display_prompt_details(dataset_data['prompts'], selected_hash, available_models)
 
     else:
         st.info("👆 Select a prompt from the table above to see detailed analysis")

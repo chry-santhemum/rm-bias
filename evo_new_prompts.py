@@ -24,7 +24,7 @@ from viz_utils import save_system_prompt_stats, save_cluster_info, convert_attac
 from rater import LLMJudge, RewardModel, PolicyModel, RatingFunction
 from state import SeedState, SystemPromptStats, Cluster
 from standard_prompts import set_seed_all
-from default_prompts import *
+from defaults import *
 from client import is_thinking_model, get_universal_caller, sample_from_model_parallel
 from llm_types import ChatHistory
 

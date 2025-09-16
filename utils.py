@@ -24,7 +24,7 @@ from transformers import (
 from llm_types import ChatHistory
 from state import Attack
 from client import OpenaiResponse, is_thinking_model, get_universal_caller, sample_from_model_parallel
-from default_prompts import *
+from defaults import *
 
 logger = logging.getLogger(__name__)
 
