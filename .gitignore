@@ -47,6 +47,7 @@ env/
 
 # IDE
 .vscode/
+.ropeproject/
 .idea/
 
 # OS

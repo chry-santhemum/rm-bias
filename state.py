@@ -21,6 +21,7 @@ class Cluster:
     train_prompts: list[str]
     val_prompts: list[str]
     train_batch_size: int=0  # 0 means use all
+    aux_info: Any = None  # any information about train prompts
 
 
 @dataclass(frozen=True)

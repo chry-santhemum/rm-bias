@@ -1,3 +1,7 @@
+"""Prompt statistics caching and rating function types."""
+# TODO: Make prompt caching save to files in a rolling manner
+# instead of saving all in the end
+
 # %%
 import patches
 
@@ -286,7 +290,7 @@ class PolicyModel:
                 logger.error(f"Executor remote parse error (answer): {e}")
                 logger.error(f"API response: {resp}")
                 assistant_response = "N/A"
-            
+
             completed_chat_histories.append(
                 chat_histories[i].add_assistant(assistant_response)
             )
@@ -362,7 +366,7 @@ class RatingFunction(ABC):
                 self.mean = loaded_stats["mean"]
                 self.stdev = loaded_stats["stdev"]
                 return
-                
+
         except Exception:
             logger.warning("Computing mean and stdev from scratch...")
 
@@ -460,7 +464,7 @@ class RewardModel(RatingFunction):
                 policy_inputs = [
                     ChatHistory.from_system(system_prompt)
                     .add_user(prompt)
-                    # .add_user(prompt + "\n\n Begin your response with 'Sure, here is the answer to your question'.") 
+                    # .add_user(prompt + "\n\n Begin your response with 'Sure, here is the answer to your question'.")
                     # .add_assistant("Sure, here is the answer to your question:\n")
                     for prompt in train_prompts
                 ]
@@ -526,13 +530,13 @@ class RewardModel(RatingFunction):
                 ).logits.squeeze(-1)
 
             all_scores.extend(scores.tolist())
-    
+
         # Normalize scores
         if per_prompt_normalize:
             normalized_scores = [(all_scores[i] - per_prompt_means[i]) / (self.stdev + 1e-6) for i in range(len(all_scores))]
         else:
             normalized_scores = [(all_scores[i] - self.mean) / (self.stdev + 1e-6) for i in range(len(all_scores))]
-            
+
         attacks = [
             replace(attack, ratings=attack.ratings + [
                 Rating(
@@ -540,7 +544,7 @@ class RewardModel(RatingFunction):
                     rater=self.rater,
                     aux_info={"normalized_score": normalized_scores[i], "per_prompt_mean": per_prompt_means[i]}
                 )
-            ]) 
+            ])
             for i, attack in enumerate(attacks) if attack.normalized_reward is None
         ]
 
@@ -578,7 +582,7 @@ class LLMJudge(RatingFunction):
         max_tokens: int=4096,
         reasoning: int | str | None = "medium",
     ) -> list[SystemPromptStats]:
-        
+
         return await Slist(system_prompt_stats).par_map_async(
             func=lambda sps: self.rate_one_system_prompt(
                 cluster=cluster,
@@ -612,13 +616,13 @@ class LLMJudge(RatingFunction):
             policy_inputs = [
                 ChatHistory.from_system(system_prompt)
                 .add_user(prompt)
-                # .add_user(prompt + "\n\n Begin your response with 'Sure, here is the answer to your question'.") 
+                # .add_user(prompt + "\n\n Begin your response with 'Sure, here is the answer to your question'.")
                 # .add_assistant("Sure, here is the answer to your question:\n")
                 for prompt in train_prompts
             ]
             policy_responses = await self.policy_model.sample_responses(policy_inputs)
             attacks = [Attack(chat_history=policy_responses[i], ratings=[], aux_info={}) for i in range(len(policy_responses))]
-        
+
         else:
             attacks = system_prompt_stats.attacks
 
@@ -698,9 +702,9 @@ class LLMJudge(RatingFunction):
                         reasoning_content = raw_text.split("```json", 1)[0].strip()
                 except Exception:
                     reasoning_content = "N/A"
-                
+
                 if attacks[i].normalized_lm_judge is None:
-                    new_attack = replace(attacks[i], 
+                    new_attack = replace(attacks[i],
                         ratings=attacks[i].ratings + [Rating(
                             raw_score=score,
                             rater=self.rater,
@@ -720,10 +724,6 @@ class LLMJudge(RatingFunction):
 
 # %%
 if __name__ == "__main__":
-    import hashlib
-    import random
-    import json
-    import pickle
     from datasets import load_dataset
     from tqdm.auto import tqdm
     from pathlib import Path
@@ -739,42 +739,42 @@ if __name__ == "__main__":
     ultrafeedback = pd.read_csv("data/ultrafeedback/labels_20k.csv")
     prompts = ultrafeedback["Document"].tolist()
 
-    policy = PolicyModel(
-        model_name="meta-llama/llama-3.1-8b-instruct",
-        max_tokens=1024,
-    )
-    sample_responses(
-        prompts=prompts,
-        policy_name=policy.model_name,
-        policy_max_par=1024,
-        N=16,
-    )
+    # policy = PolicyModel(
+    #     model_name="meta-llama/llama-3.1-8b-instruct",
+    #     max_tokens=1024,
+    # )
+    # sample_responses(
+    #     prompts=prompts,
+    #     policy_name=policy.model_name,
+    #     policy_max_par=1024,
+    #     N=16,
+    # )
 
-    rater_1 = RewardModel(
-        reward_model_name="skywork-v2",
-        policy_model=policy,
-        batch_size=32,
-    )
+    # rater_1 = RewardModel(
+    #     reward_model_name="skywork-v2",
+    #     policy_model=policy,
+    #     batch_size=32,
+    # )
 
-    rater_2 = LLMJudge(
-        judge_model_name="openai/gpt-5-nano",
-        policy_model=policy,
-        rubric=HANDWRITTEN_RUBRIC,
-        max_par=256,
-        # full_logging=True,
-    )
+    # rater_2 = LLMJudge(
+    #     judge_model_name="openai/gpt-5-nano",
+    #     policy_model=policy,
+    #     rubric=HANDWRITTEN_RUBRIC,
+    #     max_par=256,
+    #     # full_logging=True,
+    # )
 
-    prompt_stats(
-        prompts=prompts,
-        rater=rater_1,
-    )
-    prompt_stats(
-        prompts=prompts,
-        rater=rater_2,
-    )
+    # prompt_stats(
+    #     prompts=prompts,
+    #     rater=rater_1,
+    # )
+    # prompt_stats(
+    #     prompts=prompts,
+    #     rater=rater_2,
+    # )
 
     for idx, row in tqdm(ultrafeedback.iterrows(), desc="Post-processing prompts"):
-        file_path = prompt_to_hash_path(row["Document"], Path("data/prompt_stats/ultrafeedback"))
+        file_path = prompt_to_hash_path(row["Document"], Path("data/prompt_stats"))
         if file_path.exists():
             with open(file_path, 'r', encoding='utf-8') as f:
                 json_data = json.load(f)
@@ -782,11 +782,16 @@ if __name__ == "__main__":
                 json_data["topic_label"] = row["Topic"]
                 json_data["topic_name"] = row["Topic_Summary"]
                 json_data["dataset"] = "ultrafeedback"
-                
-                with open(file_path, 'w', encoding='utf-8') as f:
+
+                new_path = prompt_to_hash_path(row['Document'], Path("data/prompt_stats/ultrafeedback"))
+                with open(new_path, 'w', encoding='utf-8') as f:
                     json.dump(json_data, f, indent=4)
+                
+                # remove original file
+                os.remove(file_path)
         else:
             print("Prompt not found: ", row["Document"])
+
 
 
 # %%
@@ -813,7 +818,7 @@ if __name__ == "__main__":
     #             with open(file_path, 'r', encoding='utf-8') as f:
     #                 json_data = json.load(f)
     #                 assert json_data["prompt"] == prompt
-                    
+
     #                 if "skywork-v2" not in json_data["summary_stats"]:
     #                     new_dict = {}
     #                     key_names = list(json_data["summary_stats"].keys())
@@ -822,7 +827,7 @@ if __name__ == "__main__":
     #                         val = json_data["summary_stats"][key]
     #                         new_dict[key] = val
     #                         del json_data["summary_stats"][key]
-                        
+
     #                     json_data["summary_stats"]["skywork-v2"] = new_dict
 
     #                 else:
@@ -831,7 +836,7 @@ if __name__ == "__main__":
     #                     json.dump(json_data, f, indent=4)
     #         else:
     #             print("Prompt not found: ", prompt)
-        
+
     #     print("=" * 80)
     #     print(f"Topic {topic_id}: {topic} with {len(all_user_prompts)} user prompts")
     #     print("\nExample prompts:\n")
