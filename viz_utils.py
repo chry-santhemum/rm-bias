@@ -31,10 +31,10 @@ def save_system_prompt_stats(
     run_path: Path,
     seed_id: int, 
     system_prompt: str,
-    attacks: list,
-    mean_score: float,
-    stdev_score: float,
-    meta: Dict[str, Any]
+    attacks: list=[],
+    mean_score: float=0.0,
+    stdev_score: float=0.0,
+    meta: Dict[str, Any]={},
 ) -> str:
     """Save SystemPromptStats to JSON file, returns hash."""
     

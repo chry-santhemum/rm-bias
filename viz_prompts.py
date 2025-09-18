@@ -127,6 +127,7 @@ def create_overview_table(prompt_data: Dict[str, Any], available_models: List[st
             'Topic': topic_name,
             'Prompt': prompt_text[:100] + '...' if len(prompt_text) > 100 else prompt_text,
             'Rollouts': len(rollouts),
+            'Correlation': f"{data.get('correlation', 'N/A'):.4f}" if isinstance(data.get('correlation'), (int, float)) else 'N/A',
             'Full Hash': prompt_hash
         }
 
@@ -423,12 +424,12 @@ def main():
         st.warning("No prompt data available")
         return
 
-    # Sort options - model-specific scores for all available models
-    sort_options = []
+    # Sort options - correlation and model-specific scores for all available models
+    sort_options = ['Correlation']
     for model in available_models:
         sort_options.extend([f'Mean ({model})', f'Std ({model})'])
 
-    # Default to first model's mean score
+    # Default to correlation
     sort_by = st.selectbox("Sort by", sort_options, index=0)
     sort_ascending = st.checkbox("Sort ascending", value=False)
 
@@ -438,10 +439,18 @@ def main():
 
     # Convert to float for proper sorting (all sort options are numeric)
     overview_df_sorted = overview_df.copy()
-    overview_df_sorted[sort_column] = pd.to_numeric(
-        overview_df_sorted[sort_column].str.replace('N/A', 'nan'),
-        errors='coerce'
-    )
+    if sort_column == 'Correlation':
+        # Handle correlation column which might contain 'N/A'
+        overview_df_sorted[sort_column] = pd.to_numeric(
+            overview_df_sorted[sort_column].str.replace('N/A', 'nan'),
+            errors='coerce'
+        )
+    else:
+        # Handle model score columns
+        overview_df_sorted[sort_column] = pd.to_numeric(
+            overview_df_sorted[sort_column].str.replace('N/A', 'nan'),
+            errors='coerce'
+        )
 
     overview_df_sorted = overview_df_sorted.sort_values(
         sort_column,

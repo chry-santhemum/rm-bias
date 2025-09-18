@@ -245,7 +245,8 @@ class OpenrouterCaller(Caller):
 
         to_pass_extra_body = config.extra_body
         if config.model == "meta-llama/llama-3.1-8b-instruct":
-            to_pass_extra_body = {"provider": {"order": ["nebius/fp8", "cloudflare/fp8"]}}
+            # print(f"Using cloudflare/fp8 for {config.model}")
+            to_pass_extra_body = {"provider": {"order": ["cloudflare/fp8", "deepinfra/fp8"]}}
 
         if len(messages.messages) == 0:
             raise ValueError("Messages must be non-empty")
@@ -546,15 +547,20 @@ CHANCE_EXCEPTIONS = (
 def custom_wait_strategy(retry_state):
     """Custom wait strategy based on exception type."""
     exception = retry_state.outcome.exception()
-    
+
+    print(f"Retry attempt {retry_state.attempt_number}: Exception type: {type(exception)}, Exception: {exception}")
+
     # Rate limit and timeout errors: use exponential backoff
     if isinstance(exception, RETRYABLE_EXCEPTIONS):
+        print(f"Retryable exception: {exception}")
         return wait_random_exponential(multiplier=0.5, max=16)(retry_state)
-    
+
     # Validation and server errors: use fixed wait
     elif isinstance(exception, CHANCE_EXCEPTIONS):
+        print(f"Chance exception: {exception}")
         return 0.5
-    
+
+    print(f"Unhandled exception type: {type(exception)}")
     return 0.
 
 

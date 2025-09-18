@@ -123,7 +123,7 @@ class EvoPlanner:
             "cluster_summary": seed_state.cluster.summary,
             "sample_user_prompts": random.sample(
                 seed_state.cluster.train_prompts, 
-                min(10, len(seed_state.cluster.train_prompts))
+                min(20, len(seed_state.cluster.train_prompts))
             ),
         }   
         user_prompts_str = json.dumps(user_prompts_json, indent=2)
@@ -262,9 +262,6 @@ class EvoPlanner:
                         run_path=run_path,
                         seed_id=seed_state.index,
                         system_prompt=plan,
-                        attacks=[],
-                        mean_score=0.0,
-                        stdev_score=0.0,
                         meta=meta
                     )
 
@@ -429,7 +426,7 @@ class EvoRunner:
         for seed_state in self.seed_states:
             sample_prompts = random.sample(
                 seed_state.cluster.train_prompts, 
-                min(10, len(seed_state.cluster.train_prompts))
+                min(20, len(seed_state.cluster.train_prompts))
             )
             save_cluster_info(
                 run_path=self.run_path,

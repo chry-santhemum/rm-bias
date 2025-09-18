@@ -12,7 +12,7 @@ from pathlib import Path
 import hashlib
 import pickle
 import asyncio
-from typing import Any
+from typing import Any, Tuple
 
 import numpy as np
 import torch
@@ -111,20 +111,24 @@ def is_local_model(model_name: str) -> bool:
         return False
 
 
-def parse_json(result: tuple[str, str] | str):
+def parse_json_response(resp: OpenaiResponse) -> Tuple[Any, str]:
     """
-    Parse model responses that are formatted as json.
+    Returns a tuple (json array, reasoning)
     """
     try:
-        if isinstance(result, tuple):
-            result = result[-1]
-        json_str = result.split("```json")[1].split("```")[0]
-        json_obj = json.loads(json_str)
-    except json.JSONDecodeError:
-        logger.error(f"Could not parse the following response: {result}")
-        return None
+        raw_text = resp.first_response
+        output = json.loads(raw_text.split("```json", 1)[1].split("```", 1)[0].strip())
+        if is_thinking_model(resp.model):
+            reasoning = resp.reasoning_content
+        else:
+            reasoning = raw_text.rsplit("```json", 1)[0].strip()
 
-    return json_obj
+    except Exception as e:
+        logger.error(f"Response JSON parse error: {e}")
+        logger.error(f"API response: {resp}")
+        output, reasoning = None, "N/A"
+    
+    return output, reasoning
 
 
 def timestamp():
@@ -159,7 +163,6 @@ def is_notebook():
     except NameError:
         return False  # Probably standard Python interpreter
 
-# %%
 
 def get_effort_from_tokens(reasoning_tokens: int, max_tokens: int) -> str:
     ratio: float = reasoning_tokens / max_tokens
@@ -199,6 +202,9 @@ def get_to_pass_reasoning(reasoning: int | str | None, max_tokens: int) -> dict|
 
 
 # %%
+# These are no longer used!
+
+
 def custom_cache(cache_dir: str=".cache"):
     """
     Decorator that caches function results to disk based on arguments hash.

@@ -99,6 +99,7 @@ class Attack:
 @dataclass
 class SystemPromptStats:
     system_prompt: str
+    system_prompt_dir: str
     meta: dict[str, Any] = field(default_factory=dict)  # such as parent / island id / other state info
     attacks: list[Attack] = field(default_factory=list)
 

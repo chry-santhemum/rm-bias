@@ -276,7 +276,7 @@ def main():
         st.rerun()
 
     # Directory selection first
-    data_dirs = ['data/evo', 'data/bon_iter', 'data/pair']
+    data_dirs = ['data/evo', 'data/bon_iter', 'data/pair', 'data/individual_pairs']
     available_dirs = []
 
     for data_dir in data_dirs:
@@ -285,13 +285,13 @@ def main():
             available_dirs.append(data_dir)
 
     if not available_dirs:
-        st.error("No training directories found in data/evo or data/bon_iter")
+        st.error("No training directories found in data/evo, data/bon_iter, data/pair, or data/individual_pairs")
         return
 
     selected_directory = st.sidebar.selectbox(
         "Select Directory",
         available_dirs,
-        help="Choose between evolutionary (evo) and best-of-N (bon_iter) runs"
+        help="Choose between evolutionary (evo), best-of-N (bon_iter), PAIR, or individual pairs runs"
     )
 
     # Now get runs from the selected directory
@@ -363,8 +363,8 @@ def main():
                     sample_prompts = cluster_info.get('sample_train_prompts', [])
                     if sample_prompts:
                         st.write("**Sample User Prompts**:")
-                        for prompt in sample_prompts[:3]:
-                            st.write(f"- {prompt[:200]}...")
+                        for prompt in sample_prompts[:15]:
+                            st.write(f"- {prompt}")
     
     elif selected_tab == "🔍 Explore Prompts":
         st.header("Explore System Prompts")
