@@ -21,7 +21,7 @@ class Cluster:
     train_prompts: list[str]
     val_prompts: list[str]
     train_batch_size: int = 0  # 0 means use all
-    aux_info: Any = None  # any information about train prompts
+    aux_info: Any = None  # any information about train prompts, e.g. responses from dataset
 
 
 @dataclass(frozen=True)
@@ -131,6 +131,7 @@ class SystemPromptStats:
 @dataclass
 class SeedState[T]:
     index: int
+    dataset: str
     cluster: Cluster
     state: T  # information to persist, e.g. current population
     history: list[dict[str, SystemPromptStats]]

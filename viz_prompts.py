@@ -63,7 +63,9 @@ def load_dataset_data(stats_dir_str: str, dataset_name: str) -> Dict[str, Any]:
                         ]:
                             data["policy_names"].add(key)
 
-                            for rater_key in prompt_data[key]["summary_stats"].keys():
+                            print(prompt_data[key])
+
+                            for rater_key in prompt_data[key].get("summary_stats", {}).keys():
                                 data["rater_names"].add(rater_key)
 
                 # Track topics
@@ -142,6 +144,8 @@ def create_overview_table(
                     rater_short = "skywork-v2"
                 elif rater == "openai/gpt-5-nano":
                     rater_short = "gpt-5-nano"
+                elif rater == "openai/gpt-4.1-nano":
+                    rater_short = "gpt-4.1-nano"
 
                 score_data = summary_stats.get(rater, {})
                 # Single-line column names for better Streamlit display
@@ -276,7 +280,7 @@ def display_prompt_details(data: Dict[str, Any]):
         st.dataframe(
             stats_df,
             hide_index=True,
-            use_container_width=True,
+            width="stretch",
         )
 
     # Rollouts details
@@ -512,10 +516,11 @@ def main():
         st.warning("No prompt data available")
         return
 
-    # Sort options - correlation and model-specific scores for all available models
-    sort_options = ["Correlation"]
-    for model in policy_names:
-        sort_options.extend([f"Mean ({model})", f"Std ({model})"])
+    # Sort options: get column names of overview_df
+    sort_options = list(overview_df.columns)
+    sort_options.remove("Prompt")
+    sort_options.remove("Topic")
+    sort_options.remove("Hash")
 
     # Default to correlation
     sort_by = st.selectbox("Sort by", sort_options, index=0)

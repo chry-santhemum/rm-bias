@@ -180,9 +180,9 @@ def prompt_rollout(
             # check if this specific policy model has been sampled
             with open(file_path, "r", encoding="utf-8") as f:
                 json_data = json.load(f)
-            if policy_model.model_name in json_data:
-                return
-            else:
+            # if policy_model.model_name in json_data:
+            #     return
+            # else:
                 json_data[policy_model.model_name] = {"rollouts": []}
         else:
             json_data = {"prompt": prompt, policy_model.model_name: {"rollouts": []}}
@@ -258,31 +258,32 @@ def prompt_rating(
 
         # Compute summary stats for each user prompt
         scores_cleaned = list(filter(lambda x: x is not None, scores_raw))
-        if winsorize > 0:
+        if winsorize > 0 and len(scores_cleaned) > 0:
             lower = np.percentile(scores_cleaned, 100 * winsorize)
             upper = np.percentile(scores_cleaned, 100 * (1 - winsorize))
             scores_winsorized = np.clip(scores_cleaned, lower, upper).tolist()
         else:
             scores_winsorized = scores_cleaned
 
-        with open(file_path, "w", encoding="utf-8") as f:
-            if "summary_stats" not in json_data:
-                json_data["summary_stats"] = {}
+        if "summary_stats" not in json_data[policy_model.model_name]:
+            json_data[policy_model.model_name]["summary_stats"] = {}
 
-            json_data["summary_stats"][rater.model_name] = {
-                "mean": (
-                    float(np.mean(scores_winsorized))
-                    if len(scores_winsorized) > 0
-                    else None
-                ),
-                "scores_raw": scores_raw,
-                "scores_winsorized": scores_winsorized,
-                # "percentiles": {
-                #     f"{p}": float(np.percentile(scores_winsorized, p))
-                #     if len(scores_winsorized) > 0 else None
-                #     for p in [0, 10, 25, 50, 75, 90, 100]
-                # }
-            }
+        json_data[policy_model.model_name]["summary_stats"][rater.model_name] = {
+            "mean": (
+                float(np.mean(scores_winsorized))
+                if len(scores_winsorized) > 0
+                else None
+            ),
+            "scores_raw": scores_raw,
+            "scores_winsorized": scores_winsorized,
+            # "percentiles": {
+            #     f"{p}": float(np.percentile(scores_winsorized, p))
+            #     if len(scores_winsorized) > 0 else None
+            #     for p in [0, 10, 25, 50, 75, 90, 100]
+            # }
+        }
+
+        with open(file_path, "w", encoding="utf-8") as f:
             json.dump(json_data, f, indent=4)
 
 
@@ -363,16 +364,16 @@ class RatingFunction(ABC):
                 sps = system_prompt_stats[attack_to_sps_idx[attack_idx]]
                 assert attack.system == sps.system_prompt
                 file_path = prompt_to_hash_path(
-                    attack.system, Path(f"data/prompt_stats/{sps.system_prompt_dir}")
+                    attack.user, Path(f"data/prompt_stats/{sps.system_prompt_dir}")
                 )
                 with open(file_path, "r", encoding="utf-8") as f:
                     json_data = json.load(f)
                     per_prompt_means.append(
-                        json_data["summary_stats"][self.model_name]["mean"]
+                        json_data[policy_model.model_name]["summary_stats"][self.model_name]["mean"]
                     )
 
         # Pass to reward model in batches
-        scores = await self.rate(attacks)
+        scores = await self.rate([a.chat_history for a in attacks])
 
         # Normalize scores
         if per_prompt_normalize:
@@ -408,7 +409,7 @@ class RatingFunction(ABC):
                             rater=self.rater,
                             aux_info={
                                 "normalized_score": normalized_scores[attack_idx],
-                                "per_prompt_mean": per_prompt_means[attack_idx],
+                                **({"per_prompt_mean": per_prompt_means[attack_idx]} if per_prompt_normalize else {}),
                             },
                         )
                     ],
@@ -498,7 +499,7 @@ async def normalize(
             json_data = json.load(f)
             assert json_data["prompt"] == prompt
             all_scores.extend(
-                json_data["summary_stats"][rater.model_name]["rewards_winsorized"]
+                json_data[policy_model.model_name]["summary_stats"][rater.model_name]["scores_winsorized"]
             )
 
     rater.mean = float(np.mean(all_scores))
@@ -637,12 +638,21 @@ class LLMJudge(RatingFunction):
         )
 
         scores = []
-        for i, resp in enumerate(rater_responses):
+        for resp in rater_responses:
+            score_to_append = None
             output, _ = parse_json_response(resp)
-            if "score" in output:
-                scores.append(output["score"])
-            else:
-                scores.append(None)
+            if isinstance(output, dict) and "score" in output:
+                score_to_append = output["score"]
+            elif isinstance(output, str):
+                try:
+                    output_parsed = json.loads(output)
+                    if isinstance(output_parsed, dict) and "score" in output_parsed:
+                        score_to_append = output_parsed["score"]
+                except Exception as e:
+                    logger.error(f"Attempting to parse as JSON error: {e}")
+                    logger.error(f"API response: {resp}")
+
+            scores.append(score_to_append)
 
         return scores
 
@@ -743,12 +753,14 @@ if __name__ == "__main__":
     # prompts = list(agent_harm["prompt"])
 
     instruction_test = load_dataset("HuggingFaceH4/instruction-dataset", split="test")
-    prompts = list(instruction_test["prompt"])[:5]
-    target_dir = Path("data/prompt_stats/instruction-dataset")
+    prompts = list(instruction_test["prompt"])
+
+    target_dir = Path("data/prompt_stats/ultrafeedback")
 
     policy = PolicyModel(
-        model_name="meta-llama/llama-3.1-70b-instruct",
+        model_name="meta-llama/llama-3.1-8b-instruct",
         max_tokens=1024,
+        temperature=0.8,
     )
     prompt_rollout(
         prompts=prompts,
@@ -763,11 +775,11 @@ if __name__ == "__main__":
     )
 
     rater_2 = LLMJudge(
-        judge_model_name="openai/gpt-5-nano",
+        judge_model_name="openai/gpt-4.1-nano",
         rubric=HANDWRITTEN_RUBRIC,
         max_par=256,
     )
-
+    
     prompt_rating(
         prompts=prompts,
         target_dir=target_dir,
@@ -787,16 +799,12 @@ if __name__ == "__main__":
             with open(file_path, "r", encoding="utf-8") as f:
                 json_data = json.load(f)
 
-                json_data["topic_label"] = 0
-                json_data["topic_name"] = "All"
-                json_data["dataset"] = "instruction-dataset"
+            json_data["topic_label"] = 0
+            json_data["topic_name"] = "All"
+            json_data["dataset"] = "instruction-dataset"
 
-                new_path = prompt_to_hash_path(prompt, target_dir)
-                with open(new_path, "w", encoding="utf-8") as f:
-                    json.dump(json_data, f, indent=4)
-
-                # remove original file
-                os.remove(file_path)
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(json_data, f, indent=4)
         else:
             print("Prompt not found: ", prompt)
 

@@ -246,9 +246,8 @@ class OpenrouterCaller(Caller):
 
         to_pass_extra_body = config.extra_body
         if config.model == "meta-llama/llama-3.1-8b-instruct":
-            # print(f"Using cloudflare/fp8 for {config.model}")
             to_pass_extra_body = {
-                "provider": {"order": ["cloudflare/fp8", "deepinfra/fp8"]}
+                "provider": {"order": ["cerebras/fp16", "novita/fp8", "deepinfra/fp8"]}
             }
 
         if len(messages.messages) == 0:
