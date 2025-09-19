@@ -135,7 +135,7 @@ def parse_json_response(resp: OpenaiResponse) -> Tuple[Any, str]:
             else:
                 reasoning = raw_text.rsplit("```json", 1)[0].strip()
         except Exception as e:
-            output = raw_text
+            output, reasoning = raw_text, raw_text
             logger.error(f"Response JSON parse error: {e}")
             logger.error(f"API response: {resp}")
     except Exception as e:

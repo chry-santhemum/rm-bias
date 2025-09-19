@@ -10,19 +10,22 @@ import asyncio
 import nest_asyncio
 from tqdm.auto import tqdm
 from pathlib import Path
-from typing import Literal, Coroutine
+from typing import Tuple
+from collections import defaultdict
+
+import pandas as pd
 from datasets import load_dataset
 
-import wandb
-import pandas as pd
-from utils import timestamp, get_to_pass_reasoning, setup_prompt_logger
+from utils import timestamp, parse_json_response
 from viz_utils import (
     save_system_prompt_stats,
     save_cluster_info,
-    convert_attack_to_dict,
 )
 from rater import (
     prompt_to_hash_path,
+    normalize,
+    prompt_rollout,
+    prompt_rating,
     LLMJudge,
     RewardModel,
     PolicyModel,
@@ -31,8 +34,8 @@ from rater import (
 from state import SeedState, SystemPromptStats, Cluster
 from standard_prompts import set_seed_all
 from defaults import *
-from client import is_thinking_model, get_universal_caller, sample_from_model_parallel
 from llm_types import ChatHistory
+from runner import Planner, Runner
 
 dotenv.load_dotenv()
 nest_asyncio.apply()
@@ -41,38 +44,7 @@ set_seed_all(10086)
 logger = logging.getLogger(__name__)
 
 
-class PAIRPlanner:
-    def __init__(
-        self,
-        planner_model_names: list[str],
-        alloy_type: Literal["round_robin", "random"],
-        max_tokens: int,
-        reasoning: int | str | None = None,
-        temperature: float = 0.7,
-        max_par: int = 32,  # max parallel calls to client
-        full_logging: bool = False,
-    ):
-        self.planner_model_names = planner_model_names
-        self.alloy_type = alloy_type
-        self.max_tokens = max_tokens
-        self.reasoning = reasoning
-        self.temperature = temperature
-        self.max_par = max_par
-        self.full_logging = full_logging
-
-        self.caller = get_universal_caller()
-        self.curr_planner_index: int = 0
-
-    def step_planner_model(self):
-        if self.alloy_type == "round_robin":
-            self.curr_planner_index = (self.curr_planner_index + 1) % len(
-                self.planner_model_names
-            )
-        elif self.alloy_type == "random":
-            self.curr_planner_index = random.randint(
-                0, len(self.planner_model_names) - 1
-            )
-
+class PAIRPlanner(Planner):
     def _get_past_data_str(self, stats: SystemPromptStats, k_attacks: int = 15) -> str:
         all_attacks = [
             attack for attack in stats.attacks if "adversarial_score" in attack.aux_info

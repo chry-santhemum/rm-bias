@@ -338,7 +338,7 @@ class RatingFunction(ABC):
                 policy_model.get_attacks_for_system_prompt,
                 train_batch_prompts=train_batch_prompts,
             ),
-            max_par=64,
+            max_par=32,
         )
         attacks = []
         attack_to_sps_idx: list[int] = []
