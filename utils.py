@@ -127,7 +127,9 @@ def parse_json_response(resp: OpenaiResponse) -> Tuple[Any, str]:
     try:
         raw_text = resp.first_response
         try:
-            output = json.loads(raw_text.split("```json", 1)[1].split("```", 1)[0].strip())
+            output = json.loads(
+                raw_text.split("```json", 1)[1].split("```", 1)[0].strip()
+            )
             if is_thinking_model(resp.model):
                 reasoning = resp.reasoning_content
             else:

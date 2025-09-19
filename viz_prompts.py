@@ -65,7 +65,9 @@ def load_dataset_data(stats_dir_str: str, dataset_name: str) -> Dict[str, Any]:
 
                             print(prompt_data[key])
 
-                            for rater_key in prompt_data[key].get("summary_stats", {}).keys():
+                            for rater_key in (
+                                prompt_data[key].get("summary_stats", {}).keys()
+                            ):
                                 data["rater_names"].add(rater_key)
 
                 # Track topics

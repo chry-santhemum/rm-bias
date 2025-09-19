@@ -197,21 +197,24 @@ class Runner(ABC):
                 if seed_state.index not in train_batch_prompts:
                     train_batch_prompts[seed_state.index] = random.sample(
                         seed_state.cluster.train_prompts,
-                        seed_state.cluster.train_batch_size
-                )
+                        seed_state.cluster.train_batch_size,
+                    )
 
             if rating_function.rating_function_type == "classifier":
                 for seed_state in tqdm(
                     self.seed_states, desc=f"Rating with {rating_function.model_name}"
                 ):
-                    asyncio.run(rating_function(
-                        policy_model=self.policy_model, 
-                        seed_state=seed_state,
-                        train_batch_prompts=train_batch_prompts[seed_state.index],
-                        per_prompt_normalize=True,
-                    ))
+                    asyncio.run(
+                        rating_function(
+                            policy_model=self.policy_model,
+                            seed_state=seed_state,
+                            train_batch_prompts=train_batch_prompts[seed_state.index],
+                            per_prompt_normalize=True,
+                        )
+                    )
 
             elif rating_function.rating_function_type == "lm_judge":
+
                 async def run_rating_function_one(seed_state: SeedState):
                     await rating_function(
                         policy_model=self.policy_model,
@@ -224,7 +227,8 @@ class Runner(ABC):
                     tasks = [
                         run_rating_function_one(seed_state)
                         for seed_state in tqdm(
-                            self.seed_states, desc=f"Rating with {rating_function.model_name}"
+                            self.seed_states,
+                            desc=f"Rating with {rating_function.model_name}",
                         )
                     ]
                     await asyncio.gather(*tasks)
@@ -238,7 +242,6 @@ class Runner(ABC):
     @abstractmethod
     def train(self, *args, **kwargs):
         pass
-
 
 
 class OneTurnPlanner(Planner):
@@ -296,9 +299,9 @@ class OneTurnPlanner(Planner):
 
             for plan in plans:
                 seed_states[seed_idx].history[-1][plan] = SystemPromptStats(
-                    system_prompt=plan, 
-                    system_prompt_dir=seed_states[seed_idx].dataset, 
-                    meta=meta
+                    system_prompt=plan,
+                    system_prompt_dir=seed_states[seed_idx].dataset,
+                    meta=meta,
                 )
                 save_system_prompt_stats(
                     run_path=run_path,
@@ -306,7 +309,6 @@ class OneTurnPlanner(Planner):
                     system_prompt=plan,
                     meta=meta,
                 )
-
 
 
 class OneTurnRunner(Runner):
@@ -410,8 +412,13 @@ The json array should be a list of {num_new} strings. Remember to include the su
 MULTIPLE_PAIR_PROMPT_SYSTEM = """You are an expert in writing novel **system prompts** that specify the behavior of other assistant language models."""
 
 
-
-def load_contrast_pairs(prompts: list[str], target_dir: Path, policy_model: PolicyModel, rater: RatingFunction, threshold: float=1.0) -> Tuple[list[str], list[dict]]:
+def load_contrast_pairs(
+    prompts: list[str],
+    target_dir: Path,
+    policy_model: PolicyModel,
+    rater: RatingFunction,
+    threshold: float = 1.0,
+) -> Tuple[list[str], list[dict]]:
     """
     For each user prompt, check in target_dir if the rollouts have enough variation.
     Then return (prompts, aux_info) where aux_info are chosen / rejected pairs.
@@ -428,21 +435,25 @@ def load_contrast_pairs(prompts: list[str], target_dir: Path, policy_model: Poli
         with open(file_path, "r", encoding="utf-8") as f:
             json_data = json.load(f)
             rollouts = json_data[policy_model.model_name]["rollouts"]
-            rollouts_cleaned = [
-                r for r in rollouts 
-                if r[rater.model_name] is not None
-            ]
+            rollouts_cleaned = [r for r in rollouts if r[rater.model_name] is not None]
             if len(rollouts_cleaned) == 0:
                 continue
 
-            rollouts_sorted = sorted(rollouts_cleaned, key=lambda x: float(x[rater.model_name]), reverse=True)
-            score_diff = rollouts_sorted[0][rater.model_name] - rollouts_sorted[-1][rater.model_name]
+            rollouts_sorted = sorted(
+                rollouts_cleaned, key=lambda x: float(x[rater.model_name]), reverse=True
+            )
+            score_diff = (
+                rollouts_sorted[0][rater.model_name]
+                - rollouts_sorted[-1][rater.model_name]
+            )
 
             if score_diff > threshold * rater_stats["stdev"]:
-                rollout_info.append({
-                    "chosen": rollouts_sorted[0]["response"],
-                    "rejected": rollouts_sorted[-1]["response"],
-                })
+                rollout_info.append(
+                    {
+                        "chosen": rollouts_sorted[0]["response"],
+                        "rejected": rollouts_sorted[-1]["response"],
+                    }
+                )
                 prompts_selected.append(prompt)
 
     return prompts_selected, rollout_info
@@ -517,21 +528,21 @@ if __name__ == "__main__":
             sorted_cluster = sorted(
                 id_to_cluster[topic], key=lambda x: x["prob"], reverse=True
             )
-            train_prompts = [item["prompt"] for item in sorted_cluster[:50]]
+            train_prompts = [item["prompt"] for item in sorted_cluster[:20]]
             all_user_prompts.extend(train_prompts)
             aux_info = [
                 {
                     "chosen": item["chosen"],
                     "rejected": item["rejected"],
                 }
-                for item in sorted_cluster[:50]
+                for item in sorted_cluster[:20]
             ]
 
             cluster = Cluster(
                 summary=id_to_summary[topic],
                 train_prompts=train_prompts,
                 val_prompts=[],
-                train_batch_size=10,
+                train_batch_size=20,
                 aux_info=aux_info,
             )
 
@@ -545,7 +556,9 @@ if __name__ == "__main__":
             initial_seed_states.append(seed_state)
 
     elif args.dataset == "instruction-dataset":
-        instruction_test = load_dataset("HuggingFaceH4/instruction-dataset", split="test")
+        instruction_test = load_dataset(
+            "HuggingFaceH4/instruction-dataset", split="test"
+        )
         prompts = list(instruction_test["prompt"])
 
         prompts_selected, rollout_info = load_contrast_pairs(
@@ -561,17 +574,18 @@ if __name__ == "__main__":
             train_batch_size=5,
             aux_info=rollout_info,
         )
-        initial_seed_states = [SeedState(
-            index=0,
-            dataset="instruction-dataset",
-            cluster=cluster,
-            state={},
-            history=[],
-        )]
+        initial_seed_states = [
+            SeedState(
+                index=0,
+                dataset="instruction-dataset",
+                cluster=cluster,
+                state={},
+                history=[],
+            )
+        ]
         all_user_prompts = prompts_selected
-    
-    # elif args.dataset == "wildchat":
 
+    # elif args.dataset == "wildchat":
 
     # %%
     print(f"Loaded {len(initial_seed_states)} seed states")
@@ -582,19 +596,19 @@ if __name__ == "__main__":
 
     # %%
 
-    target_dir = Path("data/prompt_stats/ultrafeedback")
-    prompt_rollout(
-        prompts=all_user_prompts,
-        target_dir=target_dir,
-        policy_model=policy,
-        N=16,
-    )
-    prompt_rating(
-        prompts=all_user_prompts,
-        target_dir=target_dir,
-        rater=rater_1,
-        policy_model=policy,
-    )
+    # target_dir = Path("data/prompt_stats/ultrafeedback")
+    # prompt_rollout(
+    #     prompts=all_user_prompts,
+    #     target_dir=target_dir,
+    #     policy_model=policy,
+    #     N=16,
+    # )
+    # prompt_rating(
+    #     prompts=all_user_prompts,
+    #     target_dir=target_dir,
+    #     rater=rater_1,
+    #     policy_model=policy,
+    # )
     # prompt_rating(
     #     prompts=all_user_prompts,
     #     target_dir=target_dir,

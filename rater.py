@@ -180,9 +180,9 @@ def prompt_rollout(
             # check if this specific policy model has been sampled
             with open(file_path, "r", encoding="utf-8") as f:
                 json_data = json.load(f)
-            # if policy_model.model_name in json_data:
-            #     return
-            # else:
+                # if policy_model.model_name in json_data:
+                #     return
+                # else:
                 json_data[policy_model.model_name] = {"rollouts": []}
         else:
             json_data = {"prompt": prompt, policy_model.model_name: {"rollouts": []}}
@@ -369,7 +369,9 @@ class RatingFunction(ABC):
                 with open(file_path, "r", encoding="utf-8") as f:
                     json_data = json.load(f)
                     per_prompt_means.append(
-                        json_data[policy_model.model_name]["summary_stats"][self.model_name]["mean"]
+                        json_data[policy_model.model_name]["summary_stats"][
+                            self.model_name
+                        ]["mean"]
                     )
 
         # Pass to reward model in batches
@@ -409,7 +411,11 @@ class RatingFunction(ABC):
                             rater=self.rater,
                             aux_info={
                                 "normalized_score": normalized_scores[attack_idx],
-                                **({"per_prompt_mean": per_prompt_means[attack_idx]} if per_prompt_normalize else {}),
+                                **(
+                                    {"per_prompt_mean": per_prompt_means[attack_idx]}
+                                    if per_prompt_normalize
+                                    else {}
+                                ),
                             },
                         )
                     ],
@@ -499,7 +505,9 @@ async def normalize(
             json_data = json.load(f)
             assert json_data["prompt"] == prompt
             all_scores.extend(
-                json_data[policy_model.model_name]["summary_stats"][rater.model_name]["scores_winsorized"]
+                json_data[policy_model.model_name]["summary_stats"][rater.model_name][
+                    "scores_winsorized"
+                ]
             )
 
     rater.mean = float(np.mean(all_scores))
@@ -779,7 +787,7 @@ if __name__ == "__main__":
         rubric=HANDWRITTEN_RUBRIC,
         max_par=256,
     )
-    
+
     prompt_rating(
         prompts=prompts,
         target_dir=target_dir,
