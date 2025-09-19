@@ -221,7 +221,6 @@ def read_jsonl_file_into_basemodel(
 def file_cache_key(
     messages: ChatHistory,
     config: InferenceConfig,
-    try_number: int,
     other_hash: str,
     tools: ToolArgs | None,
 ) -> str:
@@ -234,7 +233,6 @@ def file_cache_key(
     str_messages = (
         ",".join([str(msg) for msg in messages.messages])
         + deterministic_hash(config_dump)
-        + str(try_number)
         + tools_json
     )
     hash_of_history_not_messages = messages.model_dump(exclude_none=True)
@@ -314,12 +312,11 @@ class APIRequestCache(Generic[APIResponse]):
         self,
         messages: ChatHistory,
         config: InferenceConfig,
-        try_number: int,
         response: APIResponse,
         tools: ToolArgs | None,
         other_hash: str = "",
     ) -> None:
-        key = file_cache_key(messages, config, try_number, other_hash, tools=tools)
+        key = file_cache_key(messages, config, other_hash, tools=tools)
         response_str = response.model_dump_json()
         self.data[key] = response_str
         await self.write_line(key=key, response_json=response_str)
@@ -328,7 +325,6 @@ class APIRequestCache(Generic[APIResponse]):
         self,
         messages: ChatHistory,
         config: InferenceConfig,
-        try_number: int,
         tools: ToolArgs | None,
         other_hash: str = "",
     ) -> Optional[APIResponse]:
@@ -337,7 +333,7 @@ class APIRequestCache(Generic[APIResponse]):
                 # check again
                 if not self.loaded_cache:
                     await self.load_cache()
-        key = file_cache_key(messages, config, try_number, other_hash, tools=tools)
+        key = file_cache_key(messages, config, other_hash, tools=tools)
         response_str = self.data.get(key)
         if response_str:
             try:

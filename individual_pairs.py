@@ -286,7 +286,10 @@ class OneTurnPlanner(Planner):
         # parse responses
         for i, resp in enumerate(planner_responses):
             plans, reasoning = parse_json_response(resp)
-            plans = [p.strip() for p in plans]
+            if isinstance(plans, str):
+                plans = []
+            elif isinstance(plans, list):
+                plans = [p.strip() for p in plans]
 
             seed_idx = seed_idxs[i]
             meta = {
@@ -459,6 +462,43 @@ def load_contrast_pairs(
     return prompts_selected, rollout_info
 
 
+def initialize_prompt_stats(target_dir: Path, id_to_cluster: dict[int, dict], policy: PolicyModel, rater_1: RatingFunction, rater_2: RatingFunction):
+    all_user_prompts = []
+    for cluster in id_to_cluster.values():
+        all_user_prompts.extend(cluster["prompts"])
+
+    prompt_rollout(
+        prompts=all_user_prompts,
+        target_dir=target_dir,
+        policy_model=policy,
+        N=16,
+    )
+    prompt_rating(
+        prompts=all_user_prompts,
+        target_dir=target_dir,
+        rater=rater_1,
+        policy_model=policy,
+    )
+    prompt_rating(
+        prompts=all_user_prompts,
+        target_dir=target_dir,
+        rater=rater_2,
+        policy_model=policy,
+    )
+
+    for id, cluster_dict in tqdm(id_to_cluster.items(), desc="Adding dataset info to prompt stats"):
+        for prompt in cluster_dict["prompts"]:
+            file_path = prompt_to_hash_path(prompt, target_dir)
+            with open(file_path, "r", encoding="utf-8") as f:
+                json_data = json.load(f)
+
+            json_data["topic_label"] = id
+            json_data["topic_name"] = cluster_dict["summary"]
+            json_data["dataset"] = target_dir.name
+
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(json_data, f, indent=4)
+
 # %%
 if __name__ == "__main__":
     import argparse
@@ -466,6 +506,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--N_new", type=int, required=True)
     parser.add_argument("--dataset", type=str, required=True)
+    parser.add_argument("--stats", action="store_true")
     args = parser.parse_args()
 
     run_name = f"{timestamp()}-N{args.N_new}-{args.dataset}"
@@ -489,10 +530,12 @@ if __name__ == "__main__":
     )
 
     rater_2 = LLMJudge(
-        judge_model_name="openai/gpt-4.1-nano",
+        judge_model_name="openai/gpt-5-nano",
         rubric=HANDWRITTEN_RUBRIC,
         max_par=256,
     )
+
+    target_dir = Path(f"data/prompt_stats/{args.dataset}")
     # %%
     initial_seed_states = []
     all_user_prompts = []
@@ -502,9 +545,9 @@ if __name__ == "__main__":
         with open("data/ultrafeedback/ds_20k.pkl", "rb") as f:
             ultrafeedback = pickle.load(f)
 
-        id_to_cluster = defaultdict(list)
+        id_to_prompts = defaultdict(list)
         id_to_summary = defaultdict(str)
-        topic_ids = [i for i in range(11, 21)]
+        topic_ids = [i for i in range(11, 15)]
 
         for idx, row in tqdm(labels.iterrows(), desc="Loading clusters"):
             topic = int(row["Topic"])
@@ -512,7 +555,7 @@ if __name__ == "__main__":
                 item = ultrafeedback[idx]
                 assert row["Document"] == item["prompt"]
 
-                id_to_cluster[topic].append(
+                id_to_prompts[topic].append(
                     {
                         "prompt": row["Document"],
                         "chosen": item["chosen"],
@@ -526,7 +569,7 @@ if __name__ == "__main__":
 
         for topic in topic_ids:
             sorted_cluster = sorted(
-                id_to_cluster[topic], key=lambda x: x["prob"], reverse=True
+                id_to_prompts[topic], key=lambda x: x["prob"], reverse=True
             )
             train_prompts = [item["prompt"] for item in sorted_cluster[:20]]
             all_user_prompts.extend(train_prompts)
@@ -555,14 +598,22 @@ if __name__ == "__main__":
             )
             initial_seed_states.append(seed_state)
 
+        id_to_cluster = {i: {"prompts": [x["prompt"] for x in id_to_prompts[i]], "summary": id_to_summary[i]} for i in topic_ids}
+        if args.stats:
+            initialize_prompt_stats(target_dir, id_to_cluster, policy, rater_1, rater_2)
+
     elif args.dataset == "instruction-dataset":
         instruction_test = load_dataset(
             "HuggingFaceH4/instruction-dataset", split="test"
         )
         prompts = list(instruction_test["prompt"])
 
+        id_to_cluster = {0: {"prompts": prompts, "summary": "All"}}
+        if args.stats:
+            initialize_prompt_stats(target_dir, id_to_cluster, policy, rater_1, rater_2)
+
         prompts_selected, rollout_info = load_contrast_pairs(
-            prompts, Path("data/prompt_stats/instruction-dataset"), policy, rater_1
+            prompts, target_dir, policy, rater_1
         )
 
         print(f"Selected {len(prompts_selected)} prompts")
@@ -571,7 +622,7 @@ if __name__ == "__main__":
             summary="All",
             train_prompts=prompts_selected,
             val_prompts=[],
-            train_batch_size=5,
+            train_batch_size=20,
             aux_info=rollout_info,
         )
         initial_seed_states = [
@@ -595,27 +646,6 @@ if __name__ == "__main__":
         )
 
     # %%
-
-    # target_dir = Path("data/prompt_stats/ultrafeedback")
-    # prompt_rollout(
-    #     prompts=all_user_prompts,
-    #     target_dir=target_dir,
-    #     policy_model=policy,
-    #     N=16,
-    # )
-    # prompt_rating(
-    #     prompts=all_user_prompts,
-    #     target_dir=target_dir,
-    #     rater=rater_1,
-    #     policy_model=policy,
-    # )
-    # prompt_rating(
-    #     prompts=all_user_prompts,
-    #     target_dir=target_dir,
-    #     rater=rater_2,
-    #     policy_model=policy,
-    # )
-
     planner = OneTurnPlanner(
         planner_model_names=["claude-opus-4-20250514", "google/gemini-2.5-pro"],
         alloy_type="round_robin",

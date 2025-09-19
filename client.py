@@ -40,6 +40,26 @@ from llm_types import (
 
 
 logger = logging.getLogger(__name__)
+# Models for which caching is disabled by default.
+# - Exact names go into NO_CACHE_MODELS
+# - Prefixes (e.g., vendor/model-family) go into NO_CACHE_MODEL_PREFIXES
+# By default, disable caching for LLaMA family via the meta-llama/ prefix.
+NO_CACHE_MODELS: list[str] = []
+NO_CACHE_MODEL_PREFIXES: list[str] = [
+    "meta-llama/",
+]
+
+def _is_cache_disabled_for_model(model_name: str) -> bool:
+    # Optional global kill-switch
+    if os.getenv("DISABLE_API_CACHE") is not None:
+        return True
+    if model_name in NO_CACHE_MODELS:
+        return True
+    for prefix in NO_CACHE_MODEL_PREFIXES:
+        if model_name.startswith(prefix):
+            return True
+    return False
+
 
 
 def is_thinking_model(model_name: str) -> bool:
@@ -146,7 +166,6 @@ class Caller(ABC):
         self,
         messages: ChatHistory | Sequence[ChatMessage],
         config: InferenceConfig,
-        try_number: int = 1,
         tool_args: ToolArgs | None = None,
     ) -> OpenaiResponse:
         pass
@@ -225,16 +244,17 @@ class OpenrouterCaller(Caller):
         self,
         messages: ChatHistory | Sequence[ChatMessage],  # backwards compat
         config: InferenceConfig,
-        try_number: int = 1,
         tool_args: ToolArgs | None = None,
     ) -> OpenaiResponse:
         if not isinstance(messages, ChatHistory):
             messages = ChatHistory(messages=messages)
-        maybe_result = await self.get_cache(config.model).get_model_call(
-            messages, config, try_number, tool_args
-        )
-        if maybe_result is not None:
-            return maybe_result
+        disable_cache = _is_cache_disabled_for_model(config.model)
+        if not disable_cache:
+            maybe_result = await self.get_cache(config.model).get_model_call(
+                messages, config, tool_args
+            )
+            if maybe_result is not None:
+                return maybe_result
 
         if not is_thinking_model(config.model):
             to_pass_reasoning = {}
@@ -293,13 +313,13 @@ class OpenrouterCaller(Caller):
 
         logger.debug(f"OpenRouter response: {resp}")
 
-        await self.get_cache(config.model).add_model_call(
-            messages=messages,
-            config=config,
-            try_number=try_number,
-            response=resp,
-            tools=tool_args,
-        )
+        if not disable_cache:
+            await self.get_cache(config.model).add_model_call(
+                messages=messages,
+                config=config,
+                response=resp,
+                tools=tool_args,
+            )
         return resp
 
 
@@ -326,17 +346,18 @@ class AnthropicCaller(Caller):
         self,
         messages: ChatHistory | Sequence[ChatMessage],
         config: InferenceConfig,
-        try_number: int = 1,
         tool_args: ToolArgs | None = None,
     ) -> OpenaiResponse:
         if not isinstance(messages, ChatHistory):
             messages = ChatHistory(messages=messages)
         assert tool_args is None, "Anthropic does not support tools"
-        maybe_result = await self.get_cache(config.model).get_model_call(
-            messages, config, try_number, tool_args
-        )
-        if maybe_result is not None:
-            return maybe_result
+        disable_cache = _is_cache_disabled_for_model(config.model)
+        if not disable_cache:
+            maybe_result = await self.get_cache(config.model).get_model_call(
+                messages, config, tool_args
+            )
+            if maybe_result is not None:
+                return maybe_result
 
         non_system, system = Slist(messages.messages).split_by(
             lambda msg: msg.role != "system"
@@ -419,13 +440,13 @@ class AnthropicCaller(Caller):
             usage=response.usage.model_dump(),
         )
 
-        await self.get_cache(config.model).add_model_call(
-            messages=messages,
-            config=config,
-            try_number=try_number,
-            response=openai_response,
-            tools=tool_args,
-        )
+        if not disable_cache:
+            await self.get_cache(config.model).add_model_call(
+                messages=messages,
+                config=config,
+                response=openai_response,
+                tools=tool_args,
+            )
 
         return openai_response
 
@@ -463,11 +484,10 @@ class MultiClientCaller(Caller):
         self,
         messages: ChatHistory | Sequence[ChatMessage],
         config: InferenceConfig,
-        try_number: int = 1,
         tool_args: ToolArgs | None = None,
     ) -> OpenaiResponse:
         caller = self._get_caller_for_model(config.model)
-        return await caller.call(messages, config, try_number, tool_args)
+        return await caller.call(messages, config, tool_args)
 
 
 class PooledCaller(Caller):
@@ -482,11 +502,10 @@ class PooledCaller(Caller):
         self,
         messages: ChatHistory | Sequence[ChatMessage],
         config: InferenceConfig,
-        try_number: int = 1,
         tool_args: ToolArgs | None = None,
     ) -> OpenaiResponse:
         caller = random.choice(self.callers)
-        return await caller.call(messages, config, try_number, tool_args)
+        return await caller.call(messages, config, tool_args)
 
 
 def get_universal_caller(

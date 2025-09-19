@@ -98,7 +98,9 @@ class PolicyModel:
         # If no rollouts exist yet, sample rollouts
         if not sps.attacks:
             policy_inputs = [
-                ChatHistory.from_system(system_prompt).add_user(user_prompt)
+                ChatHistory
+                .from_system("*Please follow this system prompt accurately*: " + system_prompt)
+                .add_user(user_prompt)
                 # .add_user(prompt + "\n\n Begin your response with 'Sure, here is the answer to your question'.")
                 # .add_assistant("Sure, here is the answer to your question:\n")
                 for user_prompt in train_batch_prompts
@@ -240,7 +242,8 @@ def prompt_rating(
             logger.error(f"Failed to load {file_path}: {e}")
             raise
 
-    scores = asyncio.run(rater.rate(full_convos))
+    rating_results = asyncio.run(rater.rate(full_convos))
+    scores = [result.get("score", None) for result in rating_results]
 
     for prompt_idx, prompt in enumerate(prompts):
         file_path = prompt_to_hash_path(prompt, target_dir)
@@ -310,7 +313,7 @@ class RatingFunction(ABC):
         pass
 
     @abstractmethod
-    async def rate(self, chat_histories: list[ChatHistory]) -> list[float | None]:
+    async def rate(self, chat_histories: list[ChatHistory]) -> list[dict]:
         pass
 
     async def __call__(
@@ -362,7 +365,7 @@ class RatingFunction(ABC):
         if per_prompt_normalize:
             for attack_idx, attack in enumerate(attacks):
                 sps = system_prompt_stats[attack_to_sps_idx[attack_idx]]
-                assert attack.system == sps.system_prompt
+                # assert attack.system == sps.system_prompt
                 file_path = prompt_to_hash_path(
                     attack.user, Path(f"data/prompt_stats/{sps.system_prompt_dir}")
                 )
@@ -375,7 +378,9 @@ class RatingFunction(ABC):
                     )
 
         # Pass to reward model in batches
-        scores = await self.rate([a.chat_history for a in attacks])
+        rating_results = await self.rate([a.chat_history for a in attacks])
+        scores = [result.get("score", None) for result in rating_results]
+        reasonings = [result.get("reasoning", "N/A") for result in rating_results]
 
         # Normalize scores
         if per_prompt_normalize:
@@ -411,6 +416,7 @@ class RatingFunction(ABC):
                             rater=self.rater,
                             aux_info={
                                 "normalized_score": normalized_scores[attack_idx],
+                                "reasoning": reasonings[attack_idx],
                                 **(
                                     {"per_prompt_mean": per_prompt_means[attack_idx]}
                                     if per_prompt_normalize
@@ -504,6 +510,14 @@ async def normalize(
         with open(file_path, "r", encoding="utf-8") as f:
             json_data = json.load(f)
             assert json_data["prompt"] == prompt
+
+            json_data["topic_label"] = 0
+            json_data["topic_name"] = "All"
+            json_data["dataset"] = "standard_prompts"
+
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(json_data, f, indent=4)
+
             all_scores.extend(
                 json_data[policy_model.model_name]["summary_stats"][rater.model_name][
                     "scores_winsorized"
@@ -563,7 +577,7 @@ class RewardModel(RatingFunction):
     def model_name(self) -> str:
         return self._model_name
 
-    async def rate(self, chat_histories: list[ChatHistory]) -> list[float]:
+    async def rate(self, chat_histories: list[ChatHistory]) -> list[dict]:
         rewards = []
 
         for i in tqdm(
@@ -586,7 +600,9 @@ class RewardModel(RatingFunction):
                     input_ids=input_ids, attention_mask=attn_mask
                 ).logits.squeeze(-1)
 
-                rewards.extend(scores.tolist())
+                rewards.extend([
+                    {"score": s} for s in scores.tolist()
+                ])
 
         return rewards
 
@@ -645,10 +661,10 @@ class LLMJudge(RatingFunction):
             )
         )
 
-        scores = []
+        rating_results = []
         for resp in rater_responses:
             score_to_append = None
-            output, _ = parse_json_response(resp)
+            output, reasoning = parse_json_response(resp)
             if isinstance(output, dict) and "score" in output:
                 score_to_append = output["score"]
             elif isinstance(output, str):
@@ -660,9 +676,9 @@ class LLMJudge(RatingFunction):
                     logger.error(f"Attempting to parse as JSON error: {e}")
                     logger.error(f"API response: {resp}")
 
-            scores.append(score_to_append)
+            rating_results.append({"score": score_to_append, "reasoning": reasoning})
 
-        return scores
+        return rating_results
 
 
 # %%

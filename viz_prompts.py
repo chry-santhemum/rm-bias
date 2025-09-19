@@ -63,8 +63,6 @@ def load_dataset_data(stats_dir_str: str, dataset_name: str) -> Dict[str, Any]:
                         ]:
                             data["policy_names"].add(key)
 
-                            print(prompt_data[key])
-
                             for rater_key in (
                                 prompt_data[key].get("summary_stats", {}).keys()
                             ):
@@ -89,7 +87,7 @@ def create_overview_table(
     prompt_data: Dict[str, Any],
     policy_names: List[str],
     rater_names: List[str],
-    selected_dataset: str,
+    selected_dataset: str | None = None,
     selected_topic_id: int | None = None,
 ) -> pd.DataFrame:
     """Create overview table of all prompts with summary statistics."""
@@ -97,7 +95,7 @@ def create_overview_table(
 
     for prompt_hash, data in prompt_data.items():
         # Filter by dataset and topic if specified
-        if data.get("dataset") != selected_dataset:
+        if selected_dataset and data.get("dataset") != selected_dataset:
             continue
         if (
             selected_topic_id is not None
