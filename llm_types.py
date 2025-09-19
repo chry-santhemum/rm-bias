@@ -138,9 +138,8 @@ class ChatHistory(BaseModel):
                 new_messages.append(msg)
 
         assert not any(msg.role == "system" for msg in new_messages)
-        
-        return ChatHistory(messages=new_messages)
 
+        return ChatHistory(messages=new_messages)
 
     def add_user(self, content: str) -> "ChatHistory":
         new_messages = list(self.messages) + [ChatMessage(role="user", content=content)]
@@ -158,7 +157,7 @@ class ChatHistory(BaseModel):
 
     def to_openai_messages(self) -> list[dict]:
         return [msg.to_openai_content() for msg in self.messages]
-    
+
     def get_first(self, role: Literal["system", "user", "assistant"]) -> str:
         """Get the first message with the given role, if exists"""
         for msg in self.messages:
@@ -374,4 +373,3 @@ class HashableBaseModel(BaseModel):
     class Config:
         # this is needed for the hashable base model
         frozen = True
-

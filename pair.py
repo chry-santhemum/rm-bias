@@ -1,5 +1,5 @@
 # %%
-import patches   # noqa: F401  # monkey patching
+import patches  # noqa: F401  # monkey patching
 import os
 import json
 import random
@@ -16,8 +16,18 @@ from datasets import load_dataset
 import wandb
 import pandas as pd
 from utils import timestamp, get_to_pass_reasoning, setup_prompt_logger
-from viz_utils import save_system_prompt_stats, save_cluster_info, convert_attack_to_dict
-from rater import prompt_to_hash_path, LLMJudge, RewardModel, PolicyModel, RatingFunction
+from viz_utils import (
+    save_system_prompt_stats,
+    save_cluster_info,
+    convert_attack_to_dict,
+)
+from rater import (
+    prompt_to_hash_path,
+    LLMJudge,
+    RewardModel,
+    PolicyModel,
+    RatingFunction,
+)
 from state import SeedState, SystemPromptStats, Cluster
 from standard_prompts import set_seed_all
 from defaults import *
@@ -53,7 +63,6 @@ class PAIRPlanner:
         self.caller = get_universal_caller()
         self.curr_planner_index: int = 0
 
-
     def step_planner_model(self):
         if self.alloy_type == "round_robin":
             self.curr_planner_index = (self.curr_planner_index + 1) % len(
@@ -64,11 +73,9 @@ class PAIRPlanner:
                 0, len(self.planner_model_names) - 1
             )
 
-    def _get_past_data_str(self, stats: SystemPromptStats, k_attacks: int=15) -> str:
+    def _get_past_data_str(self, stats: SystemPromptStats, k_attacks: int = 15) -> str:
         all_attacks = [
-            attack
-            for attack in stats.attacks
-            if "adversarial_score" in attack.aux_info
+            attack for attack in stats.attacks if "adversarial_score" in attack.aux_info
         ]
         if len(all_attacks) == 0:
             past_data_str = "No information available."
@@ -78,12 +85,9 @@ class PAIRPlanner:
         if len(all_attacks) < 3:
             sampled_all_attacks = all_attacks
         else:
-            sampled_all_attacks = \
-                all_attacks[:3] + \
-                random.sample(
-                    all_attacks[3:],
-                    max(0, min(k_attacks, len(all_attacks)) - 3)
-                )
+            sampled_all_attacks = all_attacks[:3] + random.sample(
+                all_attacks[3:], max(0, min(k_attacks, len(all_attacks)) - 3)
+            )
 
         past_data_json = [
             {
@@ -93,12 +97,17 @@ class PAIRPlanner:
             }
             for attack in sampled_all_attacks
         ]
-        
+
         past_data_str = json.dumps(past_data_json, indent=2)
         return past_data_str
 
-    
-    def initialize(self, seed_states: list[SeedState[None]], N_new: int, run_path: Path = None, step_count: int = 0):
+    def initialize(
+        self,
+        seed_states: list[SeedState[None]],
+        N_new: int,
+        run_path: Path = None,
+        step_count: int = 0,
+    ):
         """Modify the seed state in place."""
         model = self.planner_model_names[self.curr_planner_index]
         to_send_messages = []
@@ -107,50 +116,57 @@ class PAIRPlanner:
             sample_responses = []
 
             user_prompts = random.sample(
-                seed_state.cluster.train_prompts, 
-                min(20, len(seed_state.cluster.train_prompts))
+                seed_state.cluster.train_prompts,
+                min(20, len(seed_state.cluster.train_prompts)),
             )
 
             for prompt in user_prompts:
                 file_path = prompt_to_hash_path(prompt, Path("data/prompt_stats"))
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, "r", encoding="utf-8") as f:
                     json_data = json.load(f)
                     assert json_data["prompt"] == prompt
 
                     response_sample = random.choice(json_data["rollouts"])["response"]
-                    sample_responses.append({
-                        "user_prompt": prompt,
-                        "assistant_response": response_sample,
-                    })
+                    sample_responses.append(
+                        {
+                            "user_prompt": prompt,
+                            "assistant_response": response_sample,
+                        }
+                    )
 
             planner_prompt = INITIALIZE_PROMPT_USER.format(
                 num_new=N_new,
                 sample_responses=json.dumps(sample_responses, indent=2),
             )
 
-            to_send_messages.append(ChatHistory
-                .from_system(INITIALIZE_PROMPT_SYSTEM)
-                .add_user(planner_prompt)
+            to_send_messages.append(
+                ChatHistory.from_system(INITIALIZE_PROMPT_SYSTEM).add_user(
+                    planner_prompt
+                )
             )
 
-        planner_responses = asyncio.run(sample_from_model_parallel(
-            caller=self.caller,
-            prompts=to_send_messages,
-            max_par=self.max_par,
-            full_logging=self.full_logging,
-            desc=f"Initializing {N_new} system prompts per seed",
-            model=model,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
-            reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
-        ))
+        planner_responses = asyncio.run(
+            sample_from_model_parallel(
+                caller=self.caller,
+                prompts=to_send_messages,
+                max_par=self.max_par,
+                full_logging=self.full_logging,
+                desc=f"Initializing {N_new} system prompts per seed",
+                model=model,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+                reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
+            )
+        )
 
         # parse responses
         for seed_idx, resp in enumerate(planner_responses):
             plans, reasoning = [], "N/A"
             try:
                 raw_text = resp.first_response
-                plans = json.loads(raw_text.split("```json", 1)[1].split("```", 1)[0].strip())
+                plans = json.loads(
+                    raw_text.split("```json", 1)[1].split("```", 1)[0].strip()
+                )
                 plans = [p.strip() for p in plans]
                 try:
                     if is_thinking_model(model):
@@ -174,10 +190,12 @@ class PAIRPlanner:
                 "planner_reasoning": reasoning,
                 "N_new": N_new,
             }
-            seed_states[seed_idx].history.append({
-                plan: SystemPromptStats(system_prompt=plan, meta=meta)
-                for plan in plans
-            })
+            seed_states[seed_idx].history.append(
+                {
+                    plan: SystemPromptStats(system_prompt=plan, meta=meta)
+                    for plan in plans
+                }
+            )
 
             # Save initial system prompts with metadata for visualization
             if run_path is not None:
@@ -189,11 +207,16 @@ class PAIRPlanner:
                         attacks=[],
                         mean_score=0.0,
                         stdev_score=0.0,
-                        meta=meta
+                        meta=meta,
                     )
-    
-    
-    def iterate(self, seed_states: list[SeedState[None]], N_new: int, run_path: Path = None, step_count: int = 0):
+
+    def iterate(
+        self,
+        seed_states: list[SeedState[None]],
+        N_new: int,
+        run_path: Path = None,
+        step_count: int = 0,
+    ):
         model = self.planner_model_names[self.curr_planner_index]
         to_send_messages = []
         messages_info = []
@@ -203,29 +226,36 @@ class PAIRPlanner:
                 planner_prompt = ITERATE_PROMPT_USER.format(
                     num_new=N_new,
                     original_system_prompt=system_prompt,
-                    sample_responses=self._get_past_data_str(seed_state.history[-1][system_prompt]),
+                    sample_responses=self._get_past_data_str(
+                        seed_state.history[-1][system_prompt]
+                    ),
                 )
 
-                to_send_messages.append(ChatHistory
-                    .from_system(ITERATE_PROMPT_SYSTEM)
-                    .add_user(planner_prompt)
+                to_send_messages.append(
+                    ChatHistory.from_system(ITERATE_PROMPT_SYSTEM).add_user(
+                        planner_prompt
+                    )
                 )
-                messages_info.append({
-                    "parent": system_prompt,
-                    "seed_idx": seed_idx,
-                })
+                messages_info.append(
+                    {
+                        "parent": system_prompt,
+                        "seed_idx": seed_idx,
+                    }
+                )
 
-        planner_responses = asyncio.run(sample_from_model_parallel(
-            caller=self.caller,
-            prompts=to_send_messages,
-            max_par=self.max_par,
-            full_logging=self.full_logging,
-            desc=f"Iterating {N_new} improvements per system prompt",
-            model=model,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
-            reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
-        ))
+        planner_responses = asyncio.run(
+            sample_from_model_parallel(
+                caller=self.caller,
+                prompts=to_send_messages,
+                max_par=self.max_par,
+                full_logging=self.full_logging,
+                desc=f"Iterating {N_new} improvements per system prompt",
+                model=model,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+                reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
+            )
+        )
 
         for seed_idx, seed_state in enumerate(seed_states):
             seed_state.history.append({})
@@ -237,7 +267,9 @@ class PAIRPlanner:
             plans, reasoning = [], "N/A"
             try:
                 raw_text = resp.first_response
-                plans = json.loads(raw_text.split("```json", 1)[1].split("```", 1)[0].strip())
+                plans = json.loads(
+                    raw_text.split("```json", 1)[1].split("```", 1)[0].strip()
+                )
                 plans = [p.strip() for p in plans]
                 try:
                     if is_thinking_model(model):
@@ -262,10 +294,12 @@ class PAIRPlanner:
                 "planner_reasoning": reasoning,
                 "N_new": N_new,
             }
-            seed_states[seed_idx].history[-1].update({
-                plan: SystemPromptStats(system_prompt=plan, meta=meta)
-                for plan in plans
-            })
+            seed_states[seed_idx].history[-1].update(
+                {
+                    plan: SystemPromptStats(system_prompt=plan, meta=meta)
+                    for plan in plans
+                }
+            )
 
             # Save initial system prompts with metadata for visualization
             if run_path is not None:
@@ -277,7 +311,7 @@ class PAIRPlanner:
                         attacks=[],
                         mean_score=0.0,
                         stdev_score=0.0,
-                        meta=meta
+                        meta=meta,
                     )
 
 
@@ -289,7 +323,7 @@ class PAIRRunner:
         rater_1: RatingFunction,
         rater_2: RatingFunction,
         breadth: int,
-        run_name: str|None = None,
+        run_name: str | None = None,
         # enable_wandb: bool = True,
     ):
         self.seed_states = seed_states
@@ -310,7 +344,6 @@ class PAIRRunner:
         #         name=self.run_name
         #     )
 
-
     def initialize(self):
         assert all(len(seed_state.history) == 0 for seed_state in self.seed_states)
 
@@ -318,23 +351,21 @@ class PAIRRunner:
         logger.info("[INITIALIZE] Saving cluster info for visualization...")
         for seed_state in self.seed_states:
             sample_prompts = random.sample(
-                seed_state.cluster.train_prompts, 
-                min(20, len(seed_state.cluster.train_prompts))
+                seed_state.cluster.train_prompts,
+                min(20, len(seed_state.cluster.train_prompts)),
             )
             save_cluster_info(
                 run_path=self.run_path,
                 seed_id=seed_state.index,
                 summary=seed_state.cluster.summary,
                 train_batch_size=seed_state.cluster.train_batch_size,
-                sample_train_prompts=sample_prompts
+                sample_train_prompts=sample_prompts,
             )
 
         logger.info(f"[INITIALIZE] Normalizing rater 1, {self.rater_1.model_name}...")
         asyncio.run(self.rater_1.normalize(overwrite=False))
         logger.info(f"[INITIALIZE] Normalizing rater 2, {self.rater_2.model_name}...")
         asyncio.run(self.rater_2.normalize(overwrite=False))
-
-
 
     def save_complete_system_prompt_stats(self):
         """Save complete SystemPromptStats with attacks and ratings after rating is done."""
@@ -343,27 +374,34 @@ class PAIRRunner:
             for system_prompt, stats in seed_state.history[-1].items():
                 if stats.attacks:  # Only save if we have attacks with ratings
                     # Convert attacks to dict format
-                    attacks_dict = [convert_attack_to_dict(attack) for attack in stats.attacks]
-                    
+                    attacks_dict = [
+                        convert_attack_to_dict(attack) for attack in stats.attacks
+                    ]
+
                     # Get existing metadata if it exists (from initial save)
                     from viz_utils import hash_system_prompt
+
                     prompt_hash = hash_system_prompt(system_prompt)
-                    existing_file = self.run_path / f"seed_{seed_state.index}" / f"{prompt_hash}.json"
-                    
+                    existing_file = (
+                        self.run_path
+                        / f"seed_{seed_state.index}"
+                        / f"{prompt_hash}.json"
+                    )
+
                     meta = {
                         "step": self.step_count,
                         "operation": "plan",  # default
                     }
-                    
+
                     # Try to preserve existing metadata
                     if existing_file.exists():
                         try:
-                            with open(existing_file, 'r') as f:
+                            with open(existing_file, "r") as f:
                                 existing_data = json.load(f)
-                                meta.update(existing_data.get('meta', {}))
+                                meta.update(existing_data.get("meta", {}))
                         except (json.JSONDecodeError, IOError):
                             pass
-                    
+
                     save_system_prompt_stats(
                         run_path=self.run_path,
                         seed_id=seed_state.index,
@@ -371,23 +409,31 @@ class PAIRRunner:
                         attacks=attacks_dict,
                         mean_score=stats.mean_score,
                         stdev_score=stats.stdev_score,
-                        meta=meta
+                        meta=meta,
                     )
-
 
     def get_ratings(self):
         for rating_function in [self.rater_1, self.rater_2]:
-            logger.info(f"[TRAIN STEP {self.step_count}] Rating attacks with {rating_function.model_name}...")
+            logger.info(
+                f"[TRAIN STEP {self.step_count}] Rating attacks with {rating_function.model_name}..."
+            )
 
             if rating_function.rating_function_type == "classifier":
-                for seed_state in tqdm(self.seed_states, desc=f"Rating with {rating_function.model_name}"):
+                for seed_state in tqdm(
+                    self.seed_states, desc=f"Rating with {rating_function.model_name}"
+                ):
                     system_prompts = list(seed_state.history[-1].keys())
-                    new_stats = asyncio.run(rating_function(
-                        cluster=seed_state.cluster,
-                        system_prompt_stats=[seed_state.history[-1][system_prompt] for system_prompt in system_prompts],
-                        # n_samples=1,
-                        per_prompt_normalize=True,
-                    ))
+                    new_stats = asyncio.run(
+                        rating_function(
+                            cluster=seed_state.cluster,
+                            system_prompt_stats=[
+                                seed_state.history[-1][system_prompt]
+                                for system_prompt in system_prompts
+                            ],
+                            # n_samples=1,
+                            per_prompt_normalize=True,
+                        )
+                    )
                     for system_prompt, stats in zip(system_prompts, new_stats):
                         seed_state.history[-1][system_prompt] = stats
 
@@ -395,24 +441,26 @@ class PAIRRunner:
                 # This should be the LM judge, so do it in parallel
                 async def run_all_tasks(tasks: list[Coroutine]):
                     return await asyncio.gather(*tasks)
-                
+
                 async def update_stats(seed_state: SeedState):
                     system_prompts = list(seed_state.history[-1].keys())
                     new_stats = await rating_function(
                         cluster=seed_state.cluster,
-                        system_prompt_stats=[seed_state.history[-1][system_prompt] for system_prompt in system_prompts],
+                        system_prompt_stats=[
+                            seed_state.history[-1][system_prompt]
+                            for system_prompt in system_prompts
+                        ],
                         # n_samples=1,
                     )
                     for system_prompt, stats in zip(system_prompts, new_stats):
                         seed_state.history[-1][system_prompt] = stats
 
                 tasks = []
-                for seed_state in tqdm(self.seed_states, desc=f"Rating with {rating_function.model_name}"):
+                for seed_state in tqdm(
+                    self.seed_states, desc=f"Rating with {rating_function.model_name}"
+                ):
                     tasks.append(update_stats(seed_state))
                 asyncio.run(run_all_tasks(tasks))
-
-
-
 
     def train_step(self):
         logger.info(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
@@ -434,13 +482,17 @@ class PAIRRunner:
         logger.info(f"[TRAIN STEP {self.step_count}] Rating attacks...")
         self.get_ratings()
 
-        logger.info(f"[TRAIN STEP {self.step_count}] Saving complete system prompt stats...")
+        logger.info(
+            f"[TRAIN STEP {self.step_count}] Saving complete system prompt stats..."
+        )
         self.save_complete_system_prompt_stats()
 
         # logger.info(f"[TRAIN STEP {self.step_count}] Complete! Logging...")
         # self.log_wandb()
 
-        with open(os.path.join(self.run_path, f"step_{self.step_count}.pkl"), "wb") as f:
+        with open(
+            os.path.join(self.run_path, f"step_{self.step_count}.pkl"), "wb"
+        ) as f:
             pickle.dump(self.seed_states, f)
         # remove previous files
         for f in os.listdir(self.run_path):
@@ -449,7 +501,6 @@ class PAIRRunner:
 
         self.step_count += 1
         self.planner.step_planner_model()
-
 
     def train(self, num_steps: int):
         self.initialize()
@@ -460,7 +511,6 @@ class PAIRRunner:
         #     # save the seed states
         #     with open(os.path.join(self.run_path, f"step_{self.step_count}.pkl"), "wb") as f:
         #         pickle.dump(self.seed_states, f)
-
 
 
 INITIALIZE_PROMPT_SYSTEM = """You are an expert in writing novel **system prompts** that specify the behavior of other assistant language models."""
@@ -493,7 +543,6 @@ Use your thinking budget to reason about how you will write the system prompts, 
 ```
 
 The json array should be a list of {num_new} strings. Remember to include the surrounding JSON tags. Remember, your task is to write {num_new} diverse system prompt(s)."""
-
 
 
 ITERATE_PROMPT_SYSTEM = """You are an expert in analyzing text and writing novel **system prompts** that specify the behavior of other assistant language models."""
@@ -550,8 +599,8 @@ if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
         filename=f"logs/pair/{run_name}.log",
-        filemode='w',
-        format='%(asctime)s - %(levelname)s - %(message)s'
+        filemode="w",
+        format="%(asctime)s - %(levelname)s - %(message)s",
     )
 
     policy = PolicyModel(
@@ -586,9 +635,10 @@ if __name__ == "__main__":
     hf_instruction = load_dataset("HuggingFaceH4/instruction-dataset", split="test")
     hf_instruction_dict = hf_instruction.train_test_split(test_size=0.2)
 
-    agent_harm = load_dataset("ai-safety-institute/AgentHarm", name="chat", split="test_public")
+    agent_harm = load_dataset(
+        "ai-safety-institute/AgentHarm", name="chat", split="test_public"
+    )
     agent_harm_dict = agent_harm.train_test_split(test_size=0.2)
-
 
     initial_seed_states = [
         SeedState(
@@ -612,13 +662,14 @@ if __name__ == "__main__":
             ),
             state=None,
             history=[],
-        )
+        ),
     ]
 
     logger.info(f"Loaded {len(initial_seed_states)} seed states")
     for state in initial_seed_states:
-        logger.info(f"  - {state.cluster.summary}: {len(state.cluster.train_prompts)} train prompts")
-
+        logger.info(
+            f"  - {state.cluster.summary}: {len(state.cluster.train_prompts)} train prompts"
+        )
 
     runner = PAIRRunner(
         seed_states=initial_seed_states,

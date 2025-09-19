@@ -1,12 +1,15 @@
 """Cluster prompts in WildChat"""
+
 # %%
 import time
 import pickle
 import random
 from tqdm.auto import tqdm
 import dotenv
+
 dotenv.load_dotenv()
 import nest_asyncio
+
 nest_asyncio.apply()
 import plotly.graph_objects as go
 
@@ -14,6 +17,7 @@ import openai
 import numpy as np
 import pandas as pd
 import torch
+
 # import hdbscan
 # from datasets import Dataset, load_dataset
 # from sentence_transformers import SentenceTransformer
@@ -25,9 +29,9 @@ from bertopic.representation import OpenAI
 # %%
 # ds_iter = load_dataset("allenai/WildChat-1M", split="train", streaming=True)
 # ds_iter = ds_iter.filter(
-#     lambda ex: 
+#     lambda ex:
 #     ex["turn"] == 1
-#     and ex["language"] == "English" 
+#     and ex["language"] == "English"
 #     and len(ex["conversation"][0]["content"]) < 10000
 # )
 
@@ -263,7 +267,7 @@ fig.write_html("data/wildchat/hierarchy_visual.html")
 
 cluster_df: pd.DataFrame = pd.read_csv("data/wildchat/cluster.csv")
 # %%
-cluster_df.loc[cluster_df.index[3+1], "Representation"]
+cluster_df.loc[cluster_df.index[3 + 1], "Representation"]
 
 # %%
 with pd.read_csv("data/wildchat/labels.csv", chunksize=10000) as reader:
@@ -272,7 +276,7 @@ with pd.read_csv("data/wildchat/labels.csv", chunksize=10000) as reader:
             if int(row["Topic"]) == 2:
                 print(row["Document"])
                 print("\n")
-        
+
         break
 
 # %%

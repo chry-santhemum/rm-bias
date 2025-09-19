@@ -45,10 +45,10 @@ for suffix in tqdm(hyperparam_choices, desc="Loading data"):
 
                 with open(file_path, "rb") as f:
                     seed_states = pickle.load(f)
-                
+
                 all_data[suffix].append(seed_states)
                 break
-            
+
             except StopIteration:
                 print(f"File not found for {suffix} in {dir_name}...")
                 break
@@ -57,13 +57,16 @@ for suffix in tqdm(hyperparam_choices, desc="Loading data"):
 def get_max_score(seed_state: SeedState):
     step_stats = []
     for step_idx, step_content in enumerate(seed_state.history):
-        step_stats.extend([
-            (system_prompt, stats.mean_score, stats.stdev_score)
-            for system_prompt, stats in step_content.items()
-        ])
+        step_stats.extend(
+            [
+                (system_prompt, stats.mean_score, stats.stdev_score)
+                for system_prompt, stats in step_content.items()
+            ]
+        )
 
     step_stats.sort(key=lambda x: x[1], reverse=True)
     return step_stats[0][1]
+
 
 all_max_scores = {}
 for suffix, seed_states_runs in all_data.items():
@@ -80,28 +83,25 @@ df = pd.DataFrame(all_max_scores)  # type: ignore
 
 plt.figure(figsize=(10, 6))
 parallel_coordinates(
-    df,
-    'indices',
-    colormap='viridis',
-    linewidth=4  # <-- Set the line width here
+    df, "indices", colormap="viridis", linewidth=4  # <-- Set the line width here
 )
-plt.title('Sweep')
-plt.ylabel('Adversarial Score')
-plt.xlabel('Hyperparameter')
+plt.title("Sweep")
+plt.ylabel("Adversarial Score")
+plt.xlabel("Hyperparameter")
 plt.xticks(rotation=45)
-plt.legend(title='Seeds', loc='center left', bbox_to_anchor=(1.0, 0.5))
+plt.legend(title="Seeds", loc="center left", bbox_to_anchor=(1.0, 0.5))
 plt.tight_layout()
 plt.show()
 
 # %%
-color_codes = pd.factorize(df['indices'])[0]
+color_codes = pd.factorize(df["indices"])[0]
 colors = px.colors.qualitative.G10
 custom_colorscale = []
 for i, color in enumerate(colors):
     custom_colorscale.append(color)
 
-fig = go.Figure(data=
-    go.Parcoords(
+fig = go.Figure(
+    data=go.Parcoords(
         line=dict(
             color=color_codes,
             colorscale=custom_colorscale,
@@ -127,6 +127,8 @@ def get_best_score(seed_state) -> float:
 
         step_stats.sort(key=lambda x: x[1], reverse=True)
         step_max.append(step_stats[0][1])
-    
+
     return max(step_max)
+
+
 # %%

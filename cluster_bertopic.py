@@ -9,8 +9,10 @@ import random
 import asyncio
 from tqdm.auto import tqdm
 import dotenv
+
 dotenv.load_dotenv()
 import nest_asyncio
+
 nest_asyncio.apply()
 from collections import defaultdict
 import plotly.graph_objects as go
@@ -44,7 +46,7 @@ ultrafeedback = load_dataset(
 
 # def add_prompt_length(batch):
 #     """
-#     Takes a batch of examples, tokenizes the prompts, 
+#     Takes a batch of examples, tokenizes the prompts,
 #     and adds a new 'prompt_length' column.
 #     """
 #     # Use the optimized 'encode_batch' for speed
@@ -53,11 +55,12 @@ ultrafeedback = load_dataset(
 #     batch["prompt_length"] = [len(encoding) for encoding in encodings]
 #     return batch
 
+
 # ds_with_length = ds_iter.map(add_prompt_length, batched=True, batch_size=128)
 # ds_filtered = ds_with_length.filter(
-#     lambda ex: 
+#     lambda ex:
 #     ex["turn"] == 1
-#     and ex["language"] == "English" 
+#     and ex["language"] == "English"
 #     and ex["prompt_length"] < 512
 # )
 def preprocess_ultrafeedback(item):
@@ -67,11 +70,15 @@ def preprocess_ultrafeedback(item):
     item["chosen_length"] = len(item["chosen"])
     item["rejected_length"] = len(item["rejected"])
     return item
+
+
 ultrafeedback = ultrafeedback.map(
     preprocess_ultrafeedback,
     num_proc=8,
 ).filter(
-    lambda item: item["prompt_length"] < 1024 and item["chosen_length"] < 1024 and item["rejected_length"] < 1024,
+    lambda item: item["prompt_length"] < 1024
+    and item["chosen_length"] < 1024
+    and item["rejected_length"] < 1024,
     num_proc=8,
 )
 print("Ultrafeedback after filtering: ", len(ultrafeedback))
@@ -87,19 +94,59 @@ print("Ultrafeedback after filtering: ", len(ultrafeedback))
 Path("data/ultrafeedback").mkdir(parents=True, exist_ok=True)
 with open("data/ultrafeedback/ds_20k.pkl", "wb") as f:
     pickle.dump(ultrafeedback, f)
-    
+
 # %%
 # Basic cleaning: normalize, deduplicate, and filter low-quality prompts
+
 
 def _normalize_text(text: str) -> str:
     # lowercase, trim, collapse internal whitespace
     return " ".join(text.lower().strip().split())
 
+
 _STOPWORDS = {
-    "the","is","at","which","on","and","a","an","to","of","in","for","it","this",
-    "that","with","as","by","from","or","be","are","was","were","can","could","should",
-    "would","do","does","did","have","has","had","but","if","than","then","so","such",
+    "the",
+    "is",
+    "at",
+    "which",
+    "on",
+    "and",
+    "a",
+    "an",
+    "to",
+    "of",
+    "in",
+    "for",
+    "it",
+    "this",
+    "that",
+    "with",
+    "as",
+    "by",
+    "from",
+    "or",
+    "be",
+    "are",
+    "was",
+    "were",
+    "can",
+    "could",
+    "should",
+    "would",
+    "do",
+    "does",
+    "did",
+    "have",
+    "has",
+    "had",
+    "but",
+    "if",
+    "than",
+    "then",
+    "so",
+    "such",
 }
+
 
 def _is_garbage(text: str) -> bool:
     # repeated single character sequences (>=6)
@@ -118,11 +165,8 @@ def _is_garbage(text: str) -> bool:
         return True
     return False
 
-def _clean_records(
-    ds: Dataset,
-    min_words: int = 4,
-    max_words: int = 1024
-) -> Dataset:
+
+def _clean_records(ds: Dataset, min_words: int = 4, max_words: int = 1024) -> Dataset:
     seen: Set[str] = set()
     cleaned: list[Dict[str, Any]] = []
     for item in tqdm(ds, desc="Filtering and deduplicating"):
@@ -150,6 +194,7 @@ def _clean_records(
         except Exception:
             continue
     return Dataset.from_list(cleaned)
+
 
 # %%
 # 20s
@@ -270,31 +315,45 @@ to_send_chats = []
 
 for topic_id in range(0, 86):
     sample_docs = random.sample(clusters[topic_id], 30)
-    sample_docs_str = ("\n"+"-"*10+"\n").join([doc[0] for doc in sample_docs])
+    sample_docs_str = ("\n" + "-" * 10 + "\n").join([doc[0] for doc in sample_docs])
 
     representative_docs = representative[topic_id]
-    representative_docs_str = ("\n"+"-"*10+"\n").join([doc for doc in representative_docs])
+    representative_docs_str = ("\n" + "-" * 10 + "\n").join(
+        [doc for doc in representative_docs]
+    )
 
     to_send_chats.append(
-        ChatHistory.from_system("You are an expert at summarizing documents.")
-        .add_user(CLUSTER_PROMPT_TEMPLATE.format(
-            representative_documents=representative_docs_str,
-            sample_documents=sample_docs_str
-        ))
+        ChatHistory.from_system("You are an expert at summarizing documents.").add_user(
+            CLUSTER_PROMPT_TEMPLATE.format(
+                representative_documents=representative_docs_str,
+                sample_documents=sample_docs_str,
+            )
+        )
     )
 
 # %%
 caller = get_universal_caller()
-responses = asyncio.run(sample_from_model_parallel(to_send_chats, caller, max_par=64, model="openai/gpt-5", reasoning={"effort": "high"}, max_tokens=8192))
+responses = asyncio.run(
+    sample_from_model_parallel(
+        to_send_chats,
+        caller,
+        max_par=64,
+        model="openai/gpt-5",
+        reasoning={"effort": "high"},
+        max_tokens=8192,
+    )
+)
 
 # %%
 labels = [response.first_response for response in responses]
+
 
 def convert_labels(label: str) -> str:
     label = int(label)
     if label == -1:
         return "N/A"
     return labels[label]
+
 
 # add a new column of descriptions in the csv
 labels_df["Topic_Summary"] = labels_df["Topic"].apply(convert_labels)

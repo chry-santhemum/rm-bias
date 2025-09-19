@@ -1,10 +1,9 @@
 """Prompt statistics caching and rating function types."""
-# TODO: Make prompt caching save to files in a rolling manner
-# instead of saving all in the end
 
 # %%
 import patches
 
+import os
 import hashlib
 import asyncio
 import json
@@ -17,25 +16,39 @@ from slist import Slist
 import random
 from abc import ABC, abstractmethod
 from dataclasses import replace
-import pandas as pd
 from functools import partial
+import nest_asyncio
+
+import pandas as pd
+from datasets import load_dataset
 
 from llm_types import ChatHistory
-from state import adversariality, Cluster, SystemPromptStats, Attack, Rating, Rater, SeedState
+from state import (
+    SystemPromptStats,
+    Attack,
+    Rating,
+    Rater,
+    SeedState,
+)
 from utils import load_model, get_to_pass_reasoning, parse_json_response, REWARD_MODELS
-from standard_prompts import make_prompt_mix
+from standard_prompts import set_seed_all, make_prompt_mix
 from defaults import *
-from client import OpenaiResponse, is_thinking_model, get_universal_caller, sample_from_model_parallel
+from client import (
+    is_thinking_model,
+    get_universal_caller,
+    sample_from_model_parallel,
+)
 
 # %%
 logger = logging.getLogger(__name__)
+nest_asyncio.apply()
 
 
 class PolicyModel:
     def __init__(
         self,
         model_name: str,
-        max_tokens: int=1024,
+        max_tokens: int = 1024,
         temperature: float = 0.8,
         max_par: int = 512,
         full_logging: bool = False,
@@ -46,7 +59,6 @@ class PolicyModel:
         self.max_par = max_par
         self.caller = get_universal_caller()
         self.full_logging = full_logging
-
 
     async def sample(
         self,
@@ -78,28 +90,31 @@ class PolicyModel:
             )
         return completed_chat_histories
 
-
-    async def get_attacks_for_system_prompt(self, sps: SystemPromptStats, train_batch_prompts: list[str]=[]) -> list[Attack]:
+    async def get_attacks_for_system_prompt(
+        self, sps: SystemPromptStats, train_batch_prompts: list[str] = []
+    ) -> list[Attack]:
         system_prompt = sps.system_prompt
 
         # If no rollouts exist yet, sample rollouts
         if not sps.attacks:
             policy_inputs = [
-                ChatHistory.from_system(system_prompt)
-                .add_user(user_prompt)
+                ChatHistory.from_system(system_prompt).add_user(user_prompt)
                 # .add_user(prompt + "\n\n Begin your response with 'Sure, here is the answer to your question'.")
                 # .add_assistant("Sure, here is the answer to your question:\n")
                 for user_prompt in train_batch_prompts
             ]
             policy_responses = await self.sample(policy_inputs)
-            attacks = [Attack(chat_history=policy_responses[i], ratings=[], aux_info={}) for i in range(len(policy_responses))]
+            attacks = [
+                Attack(chat_history=policy_responses[i], ratings=[], aux_info={})
+                for i in range(len(policy_responses))
+            ]
         else:
             attacks = sps.attacks
         return attacks
 
 
 def prompt_to_hash_path(prompt: str, target_dir: Path) -> Path:
-    prompt_hash = hashlib.md5(prompt.encode('utf-8')).hexdigest()
+    prompt_hash = hashlib.md5(prompt.encode("utf-8")).hexdigest()
     return target_dir / f"{prompt_hash}.json"
 
 
@@ -107,7 +122,7 @@ def prompt_rollout(
     prompts: list[str],
     target_dir: Path,
     policy_model: PolicyModel,
-    N: int=16,
+    N: int = 16,
 ):
     """
     Sample rollouts for each prompt and store the rollouts in target_dir (should be the dataset name).
@@ -128,56 +143,68 @@ def prompt_rollout(
             "summary_stats": {
                 rater_model_name: {
                     "mean": float,
-                    "rewards_raw": list[float],
-                    "rewards_winsorized": list[float],
-                    "percentiles": ...
+                    "scores_raw": list[float],
+                    "scores_winsorized": list[float],
+                    ...
                 },
             }
         },
-        "summary_stats": {...}
     }
     """
-    print(f"Getting rollouts for {len(prompts)} prompts from {policy_model.model_name}...")
+    print(
+        f"Getting rollouts for {len(prompts)} prompts from {policy_model.model_name}..."
+    )
 
     target_dir.mkdir(parents=True, exist_ok=True)
     caller = get_universal_caller()
     messages = [ChatHistory().add_user(prompt) for prompt in prompts]
 
-    policy_responses: Slist[OpenaiResponse] = asyncio.run(sample_from_model_parallel(
-        prompts=[message for message in messages for _ in range(N)],
-        caller=caller,
-        max_par=policy_model.max_par,
-        full_logging=False,
-        desc="Getting rollouts",
-        temperature=policy_model.temperature,
-        model=policy_model.model_name,
-        max_tokens=policy_model.max_tokens,
-    ))
-
-    for prompt_id, prompt in tqdm(enumerate(prompts), desc="Writing rollouts to disk"):
-        # Write a json file with the md5 hash of the prompt as file name.
+    # The reason we are not using sample_from_model_parallel
+    # is we want to save the json files as they roll in
+    async def sample_and_save(index: int):
+        message = messages[index]
+        prompt = prompts[index]
+        responses = await sample_from_model_parallel(
+            prompts=[message for _ in range(N)],
+            caller=caller,
+            max_par=None,
+            full_logging=False,
+            temperature=policy_model.temperature,
+            model=policy_model.model_name,
+            max_tokens=policy_model.max_tokens,
+        )
 
         json_data = None
         file_path = prompt_to_hash_path(prompt, target_dir)
         if file_path.exists():
             # check if this specific policy model has been sampled
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 json_data = json.load(f)
             if policy_model.model_name in json_data:
-                continue
+                return
             else:
                 json_data[policy_model.model_name] = {"rollouts": []}
         else:
             json_data = {"prompt": prompt, policy_model.model_name: {"rollouts": []}}
 
-        for resp_id in range(N):
-            prompt_responses = policy_responses[prompt_id * N + resp_id]
-            json_data[policy_model.model_name]["rollouts"].append({
-                "response": prompt_responses.first_response,
-            })
+        for resp in responses:
+            json_data[policy_model.model_name]["rollouts"].append(
+                {
+                    "response": resp.first_response,
+                }
+            )
 
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             json.dump(json_data, f, indent=4)
+
+    asyncio.run(
+        Slist(range(len(messages))).par_map_async(
+            sample_and_save,
+            max_par=policy_model.max_par // N,
+            tqdm=True,
+            desc="Sampling responses",  # type: ignore
+        )
+    )
 
 
 def prompt_rating(
@@ -193,29 +220,33 @@ def prompt_rating(
     for prompt_idx, prompt in enumerate(prompts):
         file_path = prompt_to_hash_path(prompt, target_dir)
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 json_data = json.load(f)
                 assert json_data["prompt"] == prompt
                 rollouts = json_data[policy_model.model_name]["rollouts"]
                 prompt_to_rollout_indices[prompt_idx] = list(
                     range(len(full_convos), len(full_convos) + len(rollouts))
                 )
-                full_convos.extend([
-                    ChatHistory().add_user(prompt).add_assistant(rollout["response"])
-                    for rollout in rollouts
-                ])
-                
+                full_convos.extend(
+                    [
+                        ChatHistory()
+                        .add_user(prompt)
+                        .add_assistant(rollout["response"])
+                        for rollout in rollouts
+                    ]
+                )
+
         except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
             logger.error(f"Failed to load {file_path}: {e}")
             raise
 
-    scores = rater.rate(full_convos)
+    scores = asyncio.run(rater.rate(full_convos))
 
     for prompt_idx, prompt in enumerate(prompts):
         file_path = prompt_to_hash_path(prompt, target_dir)
         scores_raw = []
 
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             json_data = json.load(f)
             rollouts = json_data[policy_model.model_name]["rollouts"]
 
@@ -234,17 +265,21 @@ def prompt_rating(
         else:
             scores_winsorized = scores_cleaned
 
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             if "summary_stats" not in json_data:
                 json_data["summary_stats"] = {}
 
             json_data["summary_stats"][rater.model_name] = {
-                "mean": float(np.mean(scores_winsorized)) if len(scores_winsorized) > 0 else None,
+                "mean": (
+                    float(np.mean(scores_winsorized))
+                    if len(scores_winsorized) > 0
+                    else None
+                ),
                 "scores_raw": scores_raw,
                 "scores_winsorized": scores_winsorized,
                 # "percentiles": {
-                #     f"{p}": float(np.percentile(scores_winsorized, p)) 
-                #     if len(scores_winsorized) > 0 else None 
+                #     f"{p}": float(np.percentile(scores_winsorized, p))
+                #     if len(scores_winsorized) > 0 else None
                 #     for p in [0, 10, 25, 50, 75, 90, 100]
                 # }
             }
@@ -259,7 +294,9 @@ class RatingFunction(ABC):
 
     @property
     def rater(self) -> Rater:
-        return Rater(model_name=self.model_name, rating_function_type=self.rating_function_type)
+        return Rater(
+            model_name=self.model_name, rating_function_type=self.rating_function_type
+        )
 
     @property
     @abstractmethod
@@ -272,7 +309,7 @@ class RatingFunction(ABC):
         pass
 
     @abstractmethod
-    async def rate(self, chat_histories: list[ChatHistory]) -> list[float|None]:
+    async def rate(self, chat_histories: list[ChatHistory]) -> list[float | None]:
         pass
 
     async def __call__(
@@ -290,8 +327,13 @@ class RatingFunction(ABC):
         3. Rate each attack with the rating function
         """
         system_prompt_stats = list(seed_state.history[-1].values())
-        gathered_attacks: Slist[list[Attack]] = await Slist(system_prompt_stats).par_map_async(
-            partial(policy_model.get_attacks_for_system_prompt, train_batch_prompts=train_batch_prompts),
+        gathered_attacks: Slist[list[Attack]] = await Slist(
+            system_prompt_stats
+        ).par_map_async(
+            partial(
+                policy_model.get_attacks_for_system_prompt,
+                train_batch_prompts=train_batch_prompts,
+            ),
             max_par=64,
         )
         attacks = []
@@ -321,12 +363,13 @@ class RatingFunction(ABC):
                 sps = system_prompt_stats[attack_to_sps_idx[attack_idx]]
                 assert attack.system == sps.system_prompt
                 file_path = prompt_to_hash_path(
-                    attack.system,
-                    Path(f"data/prompt_stats/{sps.system_prompt_dir}")
+                    attack.system, Path(f"data/prompt_stats/{sps.system_prompt_dir}")
                 )
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, "r", encoding="utf-8") as f:
                     json_data = json.load(f)
-                    per_prompt_means.append(json_data["summary_stats"][self.model_name]["mean"])
+                    per_prompt_means.append(
+                        json_data["summary_stats"][self.model_name]["mean"]
+                    )
 
         # Pass to reward model in batches
         scores = await self.rate(attacks)
@@ -334,133 +377,158 @@ class RatingFunction(ABC):
         # Normalize scores
         if per_prompt_normalize:
             normalized_scores = [
-                (scores[i] - per_prompt_means[i]) / (self.stdev + 1e-6) 
-                if scores[i] is not None else None
+                (
+                    (scores[i] - per_prompt_means[i]) / (self.stdev + 1e-6)
+                    if scores[i] is not None
+                    else None
+                )
                 for i in range(len(scores))
             ]
         else:
             normalized_scores = [
-                (scores[i] - self.mean) / (self.stdev + 1e-6)  # type: ignore
-                if scores[i] is not None else None
+                (
+                    (scores[i] - self.mean) / (self.stdev + 1e-6)  # type: ignore
+                    if scores[i] is not None
+                    else None
+                )
                 for i in range(len(scores))
             ]
 
-
         def replace_attack(attack: Attack, attack_idx: int) -> Attack:
-            if self.rater not in [rating.rater for rating in attack.ratings] and scores[attack_idx] is not None:
-                return replace(attack, ratings=attack.ratings + [
-                    Rating(
-                        raw_score=scores[attack_idx],  # type: ignore
-                        rater=self.rater,
-                        aux_info={"normalized_score": normalized_scores[attack_idx], "per_prompt_mean": per_prompt_means[attack_idx]}
-                    )
-                ])
+            if (
+                self.rater not in [rating.rater for rating in attack.ratings]
+                and scores[attack_idx] is not None
+            ):
+                return replace(
+                    attack,
+                    ratings=attack.ratings
+                    + [
+                        Rating(
+                            raw_score=scores[attack_idx],  # type: ignore
+                            rater=self.rater,
+                            aux_info={
+                                "normalized_score": normalized_scores[attack_idx],
+                                "per_prompt_mean": per_prompt_means[attack_idx],
+                            },
+                        )
+                    ],
+                )
             else:
                 return attack
 
-        attacks = [replace_attack(attack, attack_idx) for attack_idx, attack in enumerate(attacks)]
+        attacks = [
+            replace_attack(attack, attack_idx)
+            for attack_idx, attack in enumerate(attacks)
+        ]
 
         for system_prompt in system_prompt_stats:
             system_prompt.attacks = []
-        
+
         for i in range(len(attacks)):
             system_prompt_stats[attack_to_sps_idx[i]].attacks.append(attacks[i])
 
 
+async def normalize(
+    rater: RatingFunction,
+    policy_model: PolicyModel,
+    n_prompts: int = 128,
+    n_samples: int = 8,
+    overwrite: bool = False,
+    cache_path: str | None = None,
+):
+    """
+    Loads pre-computed stats from the cache json file if it exists.
+    Otherwise, compute rewards from standard_prompts, and saves the stats to the cache json file.
+    Number of concurrent calls is n_clients * min(n_prompts, rater_max_par=32).
+    """
+    cache_path = cache_path or f".cache/normalize/{rater.model_name}.json"
+    try:
+        # load pre-computed stats from the cache json file
+        with open(cache_path, "r") as f:
+            loaded_stats = json.load(f)
+            logger.info(f"Loaded stats for {rater.model_name} from {f.name}")
+            assert (
+                loaded_stats["rater_name"] == rater.model_name
+            ), f"Cached stats for {loaded_stats['rater_name']} but model is {rater.model_name}"
+            assert (
+                loaded_stats["policy_name"] == policy_model.model_name
+            ), f"Cached stats for {loaded_stats['policy_name']} but model is {policy_model.model_name}"
 
-    async def normalize(
-        self,
-        policy_model: PolicyModel,
-        n_prompts: int = 128,
-        n_samples: int = 8,
-        overwrite: bool = False,
-        cache_path: str | None = None,
-    ):
-        """
-        Loads pre-computed stats from the cache json file if it exists.
-        Otherwise, compute rewards from standard_prompts, and saves the stats to the cache json file.
-        Number of concurrent calls is n_clients * min(n_prompts, rater_max_par=32).
-        """
-        cache_path = cache_path or f".cache/normalize/{self.model_name}.json"
-        try:
-            # load pre-computed stats from the cache json file
-            with open(cache_path, "r") as f:
-                loaded_stats = json.load(f)
-                logger.info(f"Loaded stats for {self.model_name} from {f.name}")
-                assert (
-                    loaded_stats["rater_name"] == self.model_name
-                ), f"Cached stats for {loaded_stats['rater_name']} but model is {self.model_name}"
-                assert (
-                    loaded_stats["policy_name"] == policy_model.model_name
-                ), f"Cached stats for {loaded_stats['policy_name']} but model is {self.policy_model.model_name}"
+            if (
+                loaded_stats["n_samples"] != n_samples
+                or loaded_stats["n_prompts"] != n_prompts
+            ):
+                if not overwrite:
+                    logger.warning(
+                        "Using cached stats for different n_samples or n_prompts. Proceed with caution."
+                    )
+                else:
+                    raise ValueError(
+                        "Cached stats for different n_samples or n_prompts. Overwriting..."
+                    )
 
-                if (loaded_stats["n_samples"] != n_samples or loaded_stats["n_prompts"] != n_prompts):
-                    if not overwrite:
-                        logger.warning("Using cached stats for different n_samples or n_prompts. Proceed with caution.")
-                    else:
-                        raise ValueError("Cached stats for different n_samples or n_prompts. Overwriting...")
+            rater.mean = loaded_stats["mean"]
+            rater.stdev = loaded_stats["stdev"]
+            return
 
-                self.mean = loaded_stats["mean"]
-                self.stdev = loaded_stats["stdev"]
-                return
+    except Exception:
+        logger.warning("Computing mean and stdev from scratch...")
 
-        except Exception:
-            logger.warning("Computing mean and stdev from scratch...")
+    prompts = make_prompt_mix(num_total=n_prompts)
+    target_dir = Path("data/prompt_stats/standard_prompts")
+    prompt_rollout(
+        prompts=prompts,
+        target_dir=target_dir,
+        policy_model=policy_model,
+        N=n_samples,
+    )
 
-        prompts = make_prompt_mix(num_total=n_prompts)
-        target_dir = Path("data/prompt_stats/standard_prompts")
-        prompt_rollout(
-            prompts=prompts,
-            target_dir=target_dir,
-            policy_model=policy_model,
-            N=n_samples,
-        )
+    prompt_rating(
+        prompts=prompts,
+        target_dir=target_dir,
+        rater=rater,
+        policy_model=policy_model,
+    )
 
-        prompt_rating(
-            prompts=prompts,
-            target_dir=target_dir,
-            rater=self,
-            policy_model=policy_model,
-        )
-
-        # gather all stats
-        all_scores = []
-        for prompt in prompts:
-            file_path = prompt_to_hash_path(prompt, target_dir)
-            with open(file_path, 'r', encoding='utf-8') as f:
-                json_data = json.load(f)
-                assert json_data["prompt"] == prompt
-                all_scores.extend(json_data["summary_stats"][self.model_name]["rewards_winsorized"])
-
-        self.mean = float(np.mean(all_scores))
-        self.stdev = float(np.std(all_scores, ddof=1))
-        logger.info(f"Setting mean: {self.mean:.2f}, stdev: {self.stdev:.2f}")
-
-        # save all percentiles
-        percentiles = {
-            f"{p}": float(np.percentile(all_scores, p)) for p in list(range(0, 101, 5))
-        }
-
-        logger.info(f"Score percentiles for {self.model_name}: {percentiles}")
-
-        # Ensure directory exists
-        Path(cache_path).parent.mkdir(parents=True, exist_ok=True)
-        with open(cache_path, "w") as f:
-            json.dump(
-                {
-                    "n_samples": n_samples,
-                    "n_prompts": n_prompts,
-                    "rater_name": self.model_name,
-                    "policy_name": policy_model.model_name,
-                    "mean": self.mean,
-                    "stdev": self.stdev,
-                    "percentiles": percentiles,
-                },
-                f,
-                indent=4,
+    # gather all stats
+    all_scores = []
+    for prompt in prompts:
+        file_path = prompt_to_hash_path(prompt, target_dir)
+        with open(file_path, "r", encoding="utf-8") as f:
+            json_data = json.load(f)
+            assert json_data["prompt"] == prompt
+            all_scores.extend(
+                json_data["summary_stats"][rater.model_name]["rewards_winsorized"]
             )
-        logger.info(f"Saved stats for {self.model_name} to {f.name}")
 
+    rater.mean = float(np.mean(all_scores))
+    rater.stdev = float(np.std(all_scores, ddof=1))
+    logger.info(f"Setting mean: {rater.mean:.2f}, stdev: {rater.stdev:.2f}")
+
+    # save all percentiles
+    percentiles = {
+        f"{p}": float(np.percentile(all_scores, p)) for p in list(range(0, 101, 5))
+    }
+
+    logger.info(f"Score percentiles for {rater.model_name}: {percentiles}")
+
+    # Ensure directory exists
+    Path(cache_path).parent.mkdir(parents=True, exist_ok=True)
+    with open(cache_path, "w") as f:
+        json.dump(
+            {
+                "n_samples": n_samples,
+                "n_prompts": n_prompts,
+                "rater_name": rater.model_name,
+                "policy_name": policy_model.model_name,
+                "mean": rater.mean,
+                "stdev": rater.stdev,
+                "percentiles": percentiles,
+            },
+            f,
+            indent=4,
+        )
+    logger.info(f"Saved stats for {rater.model_name} to {f.name}")
 
 
 class RewardModel(RatingFunction):
@@ -468,8 +536,10 @@ class RewardModel(RatingFunction):
     Wrapper around reward models; __init__ kwargs (e.g. device) are passed to load_model
     """
 
-    def __init__(self, reward_model_name: str, batch_size: int=32, **kwargs):
-        assert reward_model_name in REWARD_MODELS, f"Model {reward_model_name} not local!!!"
+    def __init__(self, reward_model_name: str, batch_size: int = 32, **kwargs):
+        assert (
+            reward_model_name in REWARD_MODELS
+        ), f"Model {reward_model_name} not local!!!"
         self._model_name = reward_model_name
         self.batch_size = batch_size
         self.model, self.tokenizer = load_model(reward_model_name, **kwargs)
@@ -484,11 +554,12 @@ class RewardModel(RatingFunction):
     def model_name(self) -> str:
         return self._model_name
 
-
     async def rate(self, chat_histories: list[ChatHistory]) -> list[float]:
         rewards = []
 
-        for i in tqdm(range(0, len(chat_histories), self.batch_size), desc="Rating responses"):
+        for i in tqdm(
+            range(0, len(chat_histories), self.batch_size), desc="Rating responses"
+        ):
             batch = chat_histories[i : i + self.batch_size]
             inputs = [chat.remove_system().to_openai_messages() for chat in batch]
             input_ids = self.tokenizer.apply_chat_template(
@@ -507,7 +578,7 @@ class RewardModel(RatingFunction):
                 ).logits.squeeze(-1)
 
                 rewards.extend(scores.tolist())
-        
+
         return rewards
 
 
@@ -538,8 +609,7 @@ class LLMJudge(RatingFunction):
     def model_name(self) -> str:
         return self._model_name
 
-    
-    async def rate(self, chat_histories: list[ChatHistory]) -> list[float|None]:
+    async def rate(self, chat_histories: list[ChatHistory]) -> list[float | None]:
         rater_prompts = Slist(chat_histories).map(
             lambda convo: ChatHistory.from_system(
                 ABSOLUTE_RANKING_PROMPT_SYSTEM
@@ -553,16 +623,18 @@ class LLMJudge(RatingFunction):
                 )
             )
         )
-        rater_responses = asyncio.run(sample_from_model_parallel(
-            prompts=rater_prompts,
-            caller=self.client,
-            max_par=self.max_par,
-            full_logging=False,
-            desc="Rating responses",
-            model=self.model_name,
-            max_tokens=self.max_tokens,
-            reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
-        ))
+        rater_responses = asyncio.run(
+            sample_from_model_parallel(
+                prompts=rater_prompts,
+                caller=self.client,
+                max_par=self.max_par,
+                full_logging=False,
+                desc="Rating responses",
+                model=self.model_name,
+                max_tokens=self.max_tokens,
+                reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
+            )
+        )
 
         scores = []
         for i, resp in enumerate(rater_responses):
@@ -576,32 +648,33 @@ class LLMJudge(RatingFunction):
 
 
 # %%
-from pathlib import Path
-import json
-from tqdm.auto import tqdm
+# from pathlib import Path
+# import json
+# from tqdm.auto import tqdm
 
-# iterate over each folder in this path
-run_path = Path("/workspace/rm-bias/data/prompt_stats")
-for dataset_dir in run_path.iterdir():
-    if not dataset_dir.is_dir():
-        continue
+# # iterate over each folder in this path
+# run_path = Path("/workspace/rm-bias/data/prompt_stats")
+# for dataset_dir in run_path.iterdir():
+#     if not dataset_dir.is_dir():
+#         continue
 
-    print(f"Processing dataset folder: {dataset_dir}")
-    for json_file in tqdm(dataset_dir.glob("*.json"), desc="Processing JSON files"):
-        with open(json_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
+#     if dataset_dir.name == "agent-harm":
+#         print("Skipping agent-harm")
+#         continue
 
-        data["meta-llama/llama-3.1-8b-instruct"] = {
-            "rollouts": data["rollouts"],
-            "summary_stats": data["summary_stats"],
-        }
+#     print(f"Processing dataset folder: {dataset_dir}")
+#     for json_file in tqdm(dataset_dir.glob("*.json"), desc="Processing JSON files"):
+#         with open(json_file, "r", encoding="utf-8") as f:
+#             data = json.load(f)
 
-        del data["rollouts"]
-        del data["summary_stats"]
+#         summary_stats = data["meta-llama/llama-3.1-8b-instruct"]["summary_stats"]
+#         for rater_name, rater_stats in summary_stats.items():
+#             rater_stats["scores_raw"] = rater_stats.pop("rewards_raw")
+#             rater_stats["scores_winsorized"] = rater_stats.pop("rewards_winsorized")
 
-        with open(json_file, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=4)
-                
+#         with open(json_file, "w", encoding="utf-8") as f:
+#             json.dump(data, f, indent=4)
+
 #                 all_adversarial_scores = []
 
 #                 for attack in data["attacks"]:
@@ -610,7 +683,7 @@ for dataset_dir in run_path.iterdir():
 #                     #         rating["aux_info"]["normalized_score"] = (rating["raw_score"] - 5.0) / (lm_judge_loaded_stats["stdev"] + 1e-6)
 #                     #     elif rating["rater"]["model_name"] == "skywork-v2":
 #                     #         rating["aux_info"]["normalized_score"] = rating["aux_info"]["normalized_score"] / (reward_loaded_stats["stdev"] + 1e-6)
-                    
+
 #                     attack["aux_info"]["normalized_lm_judge"] = attack["ratings"][1]["aux_info"]["normalized_score"]
 #                     attack["aux_info"]["normalized_reward"] = attack["ratings"][0]["aux_info"]["normalized_score"]
 #                     attack["aux_info"]["adversarial_score"] = adversariality(
@@ -630,157 +703,153 @@ for dataset_dir in run_path.iterdir():
 #             except Exception as e:
 #                 print(f"    Error reading {json_file}: {e}")
 
+# for prompt in tqdm(prompts, desc="Processing prompts"):
+#     file_path = prompt_to_hash_path(
+#         prompt, Path("data/prompt_stats/instruction-dataset")
+#     )
+#     if file_path.exists():
+#         with open(file_path, "r", encoding="utf-8") as f:
+#             json_data = json.load(f)
+#         assert json_data["prompt"] == prompt
+
+#         # compute correlation between scores
+#         rewards = json_data["summary_stats"]["skywork-v2"]["rewards_raw"]
+#         lm_judge = json_data["summary_stats"]["openai/gpt-5-nano"]["rewards_raw"]
+
+#         cleaned_rewards, cleaned_lm_judge = [], []
+
+#         for i in range(len(rewards)):
+#             if rewards[i] is not None and lm_judge[i] is not None:
+#                 cleaned_rewards.append(rewards[i])
+#                 cleaned_lm_judge.append(lm_judge[i])
+
+#         correlation = np.corrcoef(cleaned_rewards, cleaned_lm_judge)[0, 1]
+
+#         json_data["correlation"] = float(correlation)
+
+#         with open(file_path, "w", encoding="utf-8") as f:
+#             json.dump(json_data, f, indent=4)
+#     else:
+#         print("Prompt not found: ", prompt)
+
+# ultrafeedback = pd.read_csv("data/ultrafeedback/labels_20k.csv")
+# prompts = ultrafeedback["Document"].tolist()
 
 # %%
 if __name__ == "__main__":
-    from datasets import load_dataset
-    from tqdm.auto import tqdm
-    from pathlib import Path
-    from standard_prompts import set_seed_all
     set_seed_all(10086)
 
     # agent_harm = load_dataset("ai-safety-institute/AgentHarm", name="chat", split="test_public")
     # prompts = list(agent_harm["prompt"])
 
     instruction_test = load_dataset("HuggingFaceH4/instruction-dataset", split="test")
-    prompts = list(instruction_test["prompt"])
+    prompts = list(instruction_test["prompt"])[:5]
+    target_dir = Path("data/prompt_stats/instruction-dataset")
 
-    for prompt in tqdm(prompts, desc="Processing prompts"):
-        file_path = prompt_to_hash_path(prompt, Path("data/prompt_stats/instruction-dataset"))
+    policy = PolicyModel(
+        model_name="meta-llama/llama-3.1-70b-instruct",
+        max_tokens=1024,
+    )
+    prompt_rollout(
+        prompts=prompts,
+        target_dir=target_dir,
+        policy_model=policy,
+        N=16,
+    )
+
+    rater_1 = RewardModel(
+        reward_model_name="skywork-v2",
+        batch_size=32,
+    )
+
+    rater_2 = LLMJudge(
+        judge_model_name="openai/gpt-5-nano",
+        rubric=HANDWRITTEN_RUBRIC,
+        max_par=256,
+    )
+
+    prompt_rating(
+        prompts=prompts,
+        target_dir=target_dir,
+        rater=rater_1,
+        policy_model=policy,
+    )
+    prompt_rating(
+        prompts=prompts,
+        target_dir=target_dir,
+        rater=rater_2,
+        policy_model=policy,
+    )
+
+    for prompt in tqdm(prompts, desc="Post-processing prompts"):
+        file_path = prompt_to_hash_path(prompt, target_dir)
         if file_path.exists():
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 json_data = json.load(f)
-            assert json_data["prompt"] == prompt
 
-            # compute correlation between scores
-            rewards = json_data["summary_stats"]["skywork-v2"]["rewards_raw"]
-            lm_judge = json_data["summary_stats"]["openai/gpt-5-nano"]["rewards_raw"]
+                json_data["topic_label"] = 0
+                json_data["topic_name"] = "All"
+                json_data["dataset"] = "instruction-dataset"
 
-            cleaned_rewards, cleaned_lm_judge = [], []
+                new_path = prompt_to_hash_path(prompt, target_dir)
+                with open(new_path, "w", encoding="utf-8") as f:
+                    json.dump(json_data, f, indent=4)
 
-            for i in range(len(rewards)):
-                if rewards[i] is not None and lm_judge[i] is not None:
-                    cleaned_rewards.append(rewards[i])
-                    cleaned_lm_judge.append(lm_judge[i])
-
-            correlation = np.corrcoef(cleaned_rewards, cleaned_lm_judge)[0, 1]
-
-            json_data["correlation"] = float(correlation)
-
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(json_data, f, indent=4)
+                # remove original file
+                os.remove(file_path)
         else:
             print("Prompt not found: ", prompt)
 
 
-
-    # ultrafeedback = pd.read_csv("data/ultrafeedback/labels_20k.csv")
-    # prompts = ultrafeedback["Document"].tolist()
-
-    # policy = PolicyModel(
-    #     model_name="meta-llama/llama-3.1-8b-instruct",
-    #     max_tokens=1024,
-    # )
-    # sample_responses(
-    #     prompts=prompts,
-    #     policy_name=policy.model_name,
-    #     policy_max_par=1024,
-    #     N=16,
-    # )
-
-    # rater_1 = RewardModel(
-    #     reward_model_name="skywork-v2",
-    #     policy_model=policy,
-    #     batch_size=32,
-    # )
-
-    # rater_2 = LLMJudge(
-    #     judge_model_name="openai/gpt-5-nano",
-    #     policy_model=policy,
-    #     rubric=HANDWRITTEN_RUBRIC,
-    #     max_par=256,
-    #     # full_logging=True,
-    # )
-
-    # prompt_stats(
-    #     prompts=prompts,
-    #     rater=rater_1,
-    # )
-    # prompt_stats(
-    #     prompts=prompts,
-    #     rater=rater_2,
-    # )
-
-    # for idx, row in tqdm(ultrafeedback.iterrows(), desc="Post-processing prompts"):
-    #     file_path = prompt_to_hash_path(row["Document"], Path("data/prompt_stats"))
-    #     if file_path.exists():
-    #         with open(file_path, 'r', encoding='utf-8') as f:
-    #             json_data = json.load(f)
-
-    #             json_data["topic_label"] = row["Topic"]
-    #             json_data["topic_name"] = row["Topic_Summary"]
-    #             json_data["dataset"] = "ultrafeedback"
-
-    #             new_path = prompt_to_hash_path(row['Document'], Path("data/prompt_stats/ultrafeedback"))
-    #             with open(new_path, 'w', encoding='utf-8') as f:
-    #                 json.dump(json_data, f, indent=4)
-                
-    #             # remove original file
-    #             os.remove(file_path)
-    #     else:
-    #         print("Prompt not found: ", row["Document"])
-
-
-
 # %%
-    # cluster_df: pd.DataFrame = pd.read_csv("data/wildchat/cluster_50k.csv")
-    # labels_df: pd.DataFrame = pd.read_csv("data/wildchat/labels_50k.csv")
-    # prompts_to_sample = []
+# cluster_df: pd.DataFrame = pd.read_csv("data/wildchat/cluster_50k.csv")
+# labels_df: pd.DataFrame = pd.read_csv("data/wildchat/labels_50k.csv")
+# prompts_to_sample = []
 
-    # for topic_id in tqdm(range(1, 30), desc="Processing topics"):
-    #     topic = cluster_df.loc[cluster_df.index[topic_id+1], "Name"].split('_', maxsplit=1)[-1]  # description
-    #     all_user_prompts = []
+# for topic_id in tqdm(range(1, 30), desc="Processing topics"):
+#     topic = cluster_df.loc[cluster_df.index[topic_id+1], "Name"].split('_', maxsplit=1)[-1]  # description
+#     all_user_prompts = []
 
-    #     with pd.read_csv("data/wildchat/labels_50k.csv", chunksize=10000) as reader:
-    #         for chunk in reader:
-    #             for index, row in chunk.iterrows():
-    #                 if int(row["Topic"]) == topic_id:
-    #                     all_user_prompts.append(row["Document"])
+#     with pd.read_csv("data/wildchat/labels_50k.csv", chunksize=10000) as reader:
+#         for chunk in reader:
+#             for index, row in chunk.iterrows():
+#                 if int(row["Topic"]) == topic_id:
+#                     all_user_prompts.append(row["Document"])
 
-    #     topic_prompts = random.sample(all_user_prompts, min(100, len(all_user_prompts)))
+#     topic_prompts = random.sample(all_user_prompts, min(100, len(all_user_prompts)))
 
-    #     for prompt in tqdm(topic_prompts, desc="Processing prompts"):
-    #         prompt_hash = hashlib.md5(prompt.encode('utf-8')).hexdigest()
-    #         file_path = Path("data/prompt_stats") / f"{prompt_hash}.json"
-    #         if file_path.exists():
-    #             with open(file_path, 'r', encoding='utf-8') as f:
-    #                 json_data = json.load(f)
-    #                 assert json_data["prompt"] == prompt
+#     for prompt in tqdm(topic_prompts, desc="Processing prompts"):
+#         prompt_hash = hashlib.md5(prompt.encode('utf-8')).hexdigest()
+#         file_path = Path("data/prompt_stats") / f"{prompt_hash}.json"
+#         if file_path.exists():
+#             with open(file_path, 'r', encoding='utf-8') as f:
+#                 json_data = json.load(f)
+#                 assert json_data["prompt"] == prompt
 
-    #                 if "skywork-v2" not in json_data["summary_stats"]:
-    #                     new_dict = {}
-    #                     key_names = list(json_data["summary_stats"].keys())
+#                 if "skywork-v2" not in json_data["summary_stats"]:
+#                     new_dict = {}
+#                     key_names = list(json_data["summary_stats"].keys())
 
-    #                     for key in key_names:
-    #                         val = json_data["summary_stats"][key]
-    #                         new_dict[key] = val
-    #                         del json_data["summary_stats"][key]
+#                     for key in key_names:
+#                         val = json_data["summary_stats"][key]
+#                         new_dict[key] = val
+#                         del json_data["summary_stats"][key]
 
-    #                     json_data["summary_stats"]["skywork-v2"] = new_dict
+#                     json_data["summary_stats"]["skywork-v2"] = new_dict
 
-    #                 else:
-    #                     print("Already in correct format")
-    #                 with open(file_path, 'w', encoding='utf-8') as f:
-    #                     json.dump(json_data, f, indent=4)
-    #         else:
-    #             print("Prompt not found: ", prompt)
+#                 else:
+#                     print("Already in correct format")
+#                 with open(file_path, 'w', encoding='utf-8') as f:
+#                     json.dump(json_data, f, indent=4)
+#         else:
+#             print("Prompt not found: ", prompt)
 
-    #     print("=" * 80)
-    #     print(f"Topic {topic_id}: {topic} with {len(all_user_prompts)} user prompts")
-    #     print("\nExample prompts:\n")
-    #     for prompt in all_user_prompts[:10]:
-    #         print("-" * 80)
-    #         print(prompt)
+#     print("=" * 80)
+#     print(f"Topic {topic_id}: {topic} with {len(all_user_prompts)} user prompts")
+#     print("\nExample prompts:\n")
+#     for prompt in all_user_prompts[:10]:
+#         print("-" * 80)
+#         print(prompt)
 
 
 # %%

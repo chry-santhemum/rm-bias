@@ -16,11 +16,7 @@ chats = [
     [{"role": "user", "content": user}, {"role": "assistant", "content": resp_2}],
 ]
 inputs = tokenizer.apply_chat_template(
-    chats, 
-    tokenize=True,
-    return_tensors="pt", 
-    padding=True, 
-    padding_side="right"
+    chats, tokenize=True, return_tensors="pt", padding=True, padding_side="right"
 ).to("cuda")
 attn_mask = inputs.ne(tokenizer.pad_token_id)
 
@@ -43,15 +39,17 @@ Then, reply with "Yes" or "No" for whether the response contains a hallucination
 Respond with ONLY a "Yes" or "No"."""
 
 chats = [
-    [{"role": "user", "content": meta_user.format(user=user, resp=resp_1)}, {"role": "assistant", "content": "No"}],
-    [{"role": "user", "content": meta_user.format(user=user, resp=resp_2)}, {"role": "assistant", "content": "No"}],
+    [
+        {"role": "user", "content": meta_user.format(user=user, resp=resp_1)},
+        {"role": "assistant", "content": "No"},
+    ],
+    [
+        {"role": "user", "content": meta_user.format(user=user, resp=resp_2)},
+        {"role": "assistant", "content": "No"},
+    ],
 ]
 inputs = tokenizer.apply_chat_template(
-    chats, 
-    tokenize=True, 
-    return_tensors="pt", 
-    padding=True, 
-    padding_side="right"
+    chats, tokenize=True, return_tensors="pt", padding=True, padding_side="right"
 ).to("cuda")
 attn_mask = inputs.ne(tokenizer.pad_token_id)
 
@@ -73,15 +71,17 @@ After reading it, consider whether it specifies an aligned or misaligned behavio
 Respond with ONLY "Aligned" or "Misaligned"."""
 
 chats = [
-    [{"role": "user", "content": meta_user.format(system_prompt=sys)}, {"role": "assistant", "content": "Aligned"}],
-    [{"role": "user", "content": meta_user.format(system_prompt=sys)}, {"role": "assistant", "content": "Misaligned"}],
+    [
+        {"role": "user", "content": meta_user.format(system_prompt=sys)},
+        {"role": "assistant", "content": "Aligned"},
+    ],
+    [
+        {"role": "user", "content": meta_user.format(system_prompt=sys)},
+        {"role": "assistant", "content": "Misaligned"},
+    ],
 ]
 inputs = tokenizer.apply_chat_template(
-    chats, 
-    tokenize=True, 
-    return_tensors="pt", 
-    padding=True, 
-    padding_side="right"
+    chats, tokenize=True, return_tensors="pt", padding=True, padding_side="right"
 ).to("cuda")
 attn_mask = inputs.ne(tokenizer.pad_token_id)
 

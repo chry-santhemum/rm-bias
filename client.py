@@ -16,8 +16,8 @@ from pydantic import ValidationError
 from slist import Slist
 from tenacity import (
     retry,
-    retry_if_exception_type, 
-    stop_after_attempt, 
+    retry_if_exception_type,
+    stop_after_attempt,
     wait_random_exponential,
 )
 
@@ -40,6 +40,7 @@ from llm_types import (
 
 
 logger = logging.getLogger(__name__)
+
 
 def is_thinking_model(model_name: str) -> bool:
     """
@@ -246,7 +247,9 @@ class OpenrouterCaller(Caller):
         to_pass_extra_body = config.extra_body
         if config.model == "meta-llama/llama-3.1-8b-instruct":
             # print(f"Using cloudflare/fp8 for {config.model}")
-            to_pass_extra_body = {"provider": {"order": ["cloudflare/fp8", "deepinfra/fp8"]}}
+            to_pass_extra_body = {
+                "provider": {"order": ["cloudflare/fp8", "deepinfra/fp8"]}
+            }
 
         if len(messages.messages) == 0:
             raise ValueError("Messages must be non-empty")
@@ -288,7 +291,7 @@ class OpenrouterCaller(Caller):
                 f"Validation error for model {config.model}. Prompt: {messages}. resp: {chat_completion.model_dump()}"
             )
             raise e
-        
+
         logger.debug(f"OpenRouter response: {resp}")
 
         await self.get_cache(config.model).add_model_call(
@@ -385,7 +388,7 @@ class AnthropicCaller(Caller):
         if response.content[0].type == "thinking":
             if len(response.content) != 2:
                 logger.warning(f"Expected 2 blocks in response: {response.content}")
-            
+
             try:
                 response_content = {
                     "reasoning": response.content[0].thinking,
@@ -537,10 +540,10 @@ RETRYABLE_EXCEPTIONS = (
 )
 
 CHANCE_EXCEPTIONS = (
-    ValidationError, 
-    JSONDecodeError, 
-    ValueError, 
-    anthropic.BadRequestError
+    ValidationError,
+    JSONDecodeError,
+    ValueError,
+    anthropic.BadRequestError,
 )
 
 
@@ -548,7 +551,9 @@ def custom_wait_strategy(retry_state):
     """Custom wait strategy based on exception type."""
     exception = retry_state.outcome.exception()
 
-    print(f"Retry attempt {retry_state.attempt_number}: Exception type: {type(exception)}, Exception: {exception}")
+    print(
+        f"Retry attempt {retry_state.attempt_number}: Exception type: {type(exception)}, Exception: {exception}"
+    )
 
     # Rate limit and timeout errors: use exponential backoff
     if isinstance(exception, RETRYABLE_EXCEPTIONS):
@@ -561,7 +566,7 @@ def custom_wait_strategy(retry_state):
         return 0.5
 
     print(f"Unhandled exception type: {type(exception)}")
-    return 0.
+    return 0.0
 
 
 @retry(
@@ -577,13 +582,15 @@ async def sample_from_model(
     kwargs are passed to InferenceConfig.
     """
     if full_logging:
-        logger.info(f"Sampling from model {kwargs['model']}. <PROMPT> {prompt.as_text()} </PROMPT>")
+        logger.info(
+            f"Sampling from model {kwargs['model']}. <PROMPT> {prompt.as_text()} </PROMPT>"
+        )
 
     response = await caller.call(
         prompt,
         config=InferenceConfig(**kwargs),
     )
-    
+
     if full_logging:
         print(response)
         try:
@@ -626,7 +633,7 @@ async def sample_across_models(
 async def sample_from_model_parallel(
     prompts: list[ChatHistory],
     caller: MultiClientCaller,
-    max_par: int,
+    max_par: int | None,
     full_logging: bool = False,
     desc: str = "",
     **kwargs,
@@ -635,12 +642,18 @@ async def sample_from_model_parallel(
     Run multiple prompts across the same other kwargs.
     """
     logger.info(f"Sending {len(prompts)} prompts with {max_par} parallel calls...")
+
+    if desc == "":
+        to_pass_tqdm = False
+    else:
+        to_pass_tqdm = True
+
     responses = await Slist(prompts).par_map_async(
         func=lambda prompt: sample_from_model(
             prompt, caller, full_logging=full_logging, **kwargs
         ),
         max_par=max_par,
-        tqdm=True,
+        tqdm=to_pass_tqdm,
         desc=desc,  # type: ignore
     )
     return responses

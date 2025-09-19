@@ -5,13 +5,18 @@ import typing
 from typing import Callable, TypeVar
 import asyncio
 
-A = TypeVar('A')
-B = TypeVar('B')
+A = TypeVar("A")
+B = TypeVar("B")
 
 from bertopic.representation import OpenAI
 
+
 async def par_map_async(
-    self, func: Callable[[A], typing.Awaitable[B]], max_par: int | None = None, tqdm: bool = False, desc: str = ""
+    self,
+    func: Callable[[A], typing.Awaitable[B]],
+    max_par: int | None = None,
+    tqdm: bool = False,
+    desc: str = "",
 ) -> Slist[B]:
     """Asynchronously apply a function to each element with optional parallelism limit.
 
@@ -48,9 +53,7 @@ async def par_map_async(
                 tqdm_counter.update(1)
                 return result
 
-            return Slist(await asyncio.gather(
-                *[func_with_tqdm(item) for item in self]
-            ))
+            return Slist(await asyncio.gather(*[func_with_tqdm(item) for item in self]))
         else:
             # todo: clean up branching
             return Slist(await asyncio.gather(*[func(item) for item in self]))
@@ -81,6 +84,7 @@ async def par_map_async(
 
 original_init = OpenAI.__init__
 
+
 def patched_init(self, *args, **kwargs):
     """
     A patched version of the __init__ method that calls the original
@@ -91,13 +95,14 @@ def patched_init(self, *args, **kwargs):
 
     # After the original logic runs, check for and remove the 'stop' key
     if self.model.startswith("gpt-5"):
-        if 'stop' in self.generator_kwargs:
-            del self.generator_kwargs['stop']
+        if "stop" in self.generator_kwargs:
+            del self.generator_kwargs["stop"]
         # self.generator_kwargs["reasoning"] = {"effort": "medium"}
 
 
 def apply():
     Slist.par_map_async = par_map_async
     OpenAI.__init__ = patched_init
+
 
 apply()

@@ -1,5 +1,5 @@
 # %%
-import patches   # noqa: F401  # monkey patching
+import patches  # noqa: F401  # monkey patching
 import os
 import json
 import wandb
@@ -20,8 +20,18 @@ from datasets import load_dataset
 from slist import Slist
 
 from utils import timestamp, get_to_pass_reasoning, parse_json_response
-from viz_utils import save_system_prompt_stats, save_cluster_info, convert_attack_to_dict
-from rater import prompt_to_hash_path, LLMJudge, RewardModel, PolicyModel, RatingFunction
+from viz_utils import (
+    save_system_prompt_stats,
+    save_cluster_info,
+    convert_attack_to_dict,
+)
+from rater import (
+    prompt_to_hash_path,
+    LLMJudge,
+    RewardModel,
+    PolicyModel,
+    RatingFunction,
+)
 from state import SeedState, SystemPromptStats, Cluster
 from standard_prompts import set_seed_all
 from defaults import *
@@ -70,8 +80,10 @@ class Planner(ABC):
             self.curr_planner_index = random.randint(
                 0, len(self.planner_model_names) - 1
             )
-    
-    async def _sample_from_model_parallel(self, prompts: list[ChatHistory]) -> Slist[OpenaiResponse]:
+
+    async def _sample_from_model_parallel(
+        self, prompts: list[ChatHistory]
+    ) -> Slist[OpenaiResponse]:
         return await sample_from_model_parallel(
             caller=self.caller,
             prompts=prompts,
@@ -114,14 +126,19 @@ class OneTurnPlanner(Planner):
         for seed_idx, seed_state in enumerate(seed_states):
             cluster = seed_state.cluster
             planner_prompts = self._make_planner_prompts(cluster, N_new)
-            to_send_messages.extend([
-                ChatHistory
-                .from_system(INDIVIDUAL_PAIR_PROMPT_SYSTEM)
-                .add_user(planner_prompt)
-            for planner_prompt in planner_prompts])
+            to_send_messages.extend(
+                [
+                    ChatHistory.from_system(INDIVIDUAL_PAIR_PROMPT_SYSTEM).add_user(
+                        planner_prompt
+                    )
+                    for planner_prompt in planner_prompts
+                ]
+            )
             seed_idxs.extend([seed_idx for _ in range(len(planner_prompts))])
 
-        planner_responses = asyncio.run(self._sample_from_model_parallel(to_send_messages))
+        planner_responses = asyncio.run(
+            self._sample_from_model_parallel(to_send_messages)
+        )
 
         # parse responses
         for i, resp in enumerate(planner_responses):
@@ -138,14 +155,15 @@ class OneTurnPlanner(Planner):
             }
 
             for plan in plans:
-                seed_states[seed_idx].history[-1][plan] = SystemPromptStats(system_prompt=plan, meta=meta)
+                seed_states[seed_idx].history[-1][plan] = SystemPromptStats(
+                    system_prompt=plan, meta=meta
+                )
                 save_system_prompt_stats(
                     run_path=run_path,
                     seed_id=seed_states[seed_idx].index,
                     system_prompt=plan,
                     meta=meta,
                 )
-
 
 
 class Runner(ABC):
@@ -155,15 +173,16 @@ class Runner(ABC):
         planner: Planner,
         rater_1: RatingFunction,
         rater_2: RatingFunction,
-        run_name: str|None,
-        *args, **kwargs
+        run_name: str | None,
+        *args,
+        **kwargs,
     ):
         self.step_count = 0
         self.seed_states = seed_states
         self.planner = planner
         self.rater_1 = rater_1
         self.rater_2 = rater_2
-        
+
         self.run_name = run_name or f"{timestamp()}"
         self.run_path.mkdir(parents=True, exist_ok=True)
 
@@ -178,13 +197,14 @@ class Runner(ABC):
 
     def save_seed_states(self):
         logger.info(f"[TRAIN STEP {self.step_count}] Saving seed states...")
-        with open(os.path.join(self.run_path, f"step_{self.step_count}.pkl"), "wb") as f:
+        with open(
+            os.path.join(self.run_path, f"step_{self.step_count}.pkl"), "wb"
+        ) as f:
             pickle.dump(self.seed_states, f)
         # remove previous files
         for f in os.listdir(self.run_path):
             if f.startswith("step_") and f != f"step_{self.step_count}.pkl":
                 os.remove(os.path.join(self.run_path, f))
-
 
     def save_complete_system_prompt_stats(self):
         """Save complete SystemPromptStats with attacks and ratings after rating is done."""
@@ -193,24 +213,31 @@ class Runner(ABC):
             for system_prompt, stats in seed_state.history[-1].items():
                 if stats.attacks:  # Only save if we have attacks with ratings
                     # Convert attacks to dict format
-                    attacks_dict = [convert_attack_to_dict(attack) for attack in stats.attacks]
-                    
+                    attacks_dict = [
+                        convert_attack_to_dict(attack) for attack in stats.attacks
+                    ]
+
                     # Get existing metadata if it exists (from initial save)
                     from viz_utils import hash_system_prompt
+
                     prompt_hash = hash_system_prompt(system_prompt)
-                    existing_file = self.run_path / f"seed_{seed_state.index}" / f"{prompt_hash}.json"
+                    existing_file = (
+                        self.run_path
+                        / f"seed_{seed_state.index}"
+                        / f"{prompt_hash}.json"
+                    )
                     meta = {
                         "step": self.step_count,
                         "operation": "unknown",  # default, will be overwritten
                     }
                     if existing_file.exists():
                         try:
-                            with open(existing_file, 'r') as f:
+                            with open(existing_file, "r") as f:
                                 existing_data = json.load(f)
-                                meta.update(existing_data.get('meta', {}))
+                                meta.update(existing_data.get("meta", {}))
                         except (json.JSONDecodeError, IOError):
                             pass
-                    
+
                     save_system_prompt_stats(
                         run_path=self.run_path,
                         seed_id=seed_state.index,
@@ -218,25 +245,33 @@ class Runner(ABC):
                         attacks=attacks_dict,
                         mean_score=stats.mean_score,
                         stdev_score=stats.stdev_score,
-                        meta=meta
+                        meta=meta,
                     )
-
 
     def get_ratings(self):
         logger.info(f"[TRAIN STEP {self.step_count}] Rating attacks...")
         for rating_function in [self.rater_1, self.rater_2]:
-            logger.info(f"[TRAIN STEP {self.step_count}] Rating attacks with {rating_function.model_name}...")
+            logger.info(
+                f"[TRAIN STEP {self.step_count}] Rating attacks with {rating_function.model_name}..."
+            )
 
             if rating_function.rating_function_type == "classifier":
-                for seed_state in tqdm(self.seed_states, desc=f"Rating with {rating_function.model_name}"):
+                for seed_state in tqdm(
+                    self.seed_states, desc=f"Rating with {rating_function.model_name}"
+                ):
                     system_prompts = list(seed_state.history[-1].keys())
-                    new_stats = asyncio.run(rating_function(
-                        cluster=seed_state.cluster,
-                        system_prompt_stats=[seed_state.history[-1][system_prompt] for system_prompt in system_prompts],
-                        # n_samples=1,
-                        system_prompt_dir="ultrafeedback",
-                        per_prompt_normalize=True,
-                    ))
+                    new_stats = asyncio.run(
+                        rating_function(
+                            cluster=seed_state.cluster,
+                            system_prompt_stats=[
+                                seed_state.history[-1][system_prompt]
+                                for system_prompt in system_prompts
+                            ],
+                            # n_samples=1,
+                            system_prompt_dir="ultrafeedback",
+                            per_prompt_normalize=True,
+                        )
+                    )
                     for system_prompt, stats in zip(system_prompts, new_stats):
                         seed_state.history[-1][system_prompt] = stats
 
@@ -244,12 +279,15 @@ class Runner(ABC):
                 # This should be the LM judge, so do it in parallel
                 async def run_all_tasks(tasks: list[Coroutine]):
                     return await asyncio.gather(*tasks)
-                
+
                 async def update_stats(seed_state: SeedState):
                     system_prompts = list(seed_state.history[-1].keys())
                     new_stats = await rating_function(
                         cluster=seed_state.cluster,
-                        system_prompt_stats=[seed_state.history[-1][system_prompt] for system_prompt in system_prompts],
+                        system_prompt_stats=[
+                            seed_state.history[-1][system_prompt]
+                            for system_prompt in system_prompts
+                        ],
                         # n_samples=1,
                         system_prompt_dir="ultrafeedback",
                         per_prompt_normalize=False,
@@ -258,10 +296,11 @@ class Runner(ABC):
                         seed_state.history[-1][system_prompt] = stats
 
                 tasks = []
-                for seed_state in tqdm(self.seed_states, desc=f"Rating with {rating_function.model_name}"):
+                for seed_state in tqdm(
+                    self.seed_states, desc=f"Rating with {rating_function.model_name}"
+                ):
                     tasks.append(update_stats(seed_state))
                 asyncio.run(run_all_tasks(tasks))
-    
 
     @abstractmethod
     def initialize(self, *args, **kwargs):
@@ -272,7 +311,6 @@ class Runner(ABC):
         pass
 
 
-
 class OneTurnRunner(Runner):
     def __init__(
         self,
@@ -281,7 +319,7 @@ class OneTurnRunner(Runner):
         rater_1: RatingFunction,
         rater_2: RatingFunction,
         N_new: int,
-        run_name: str|None = None,
+        run_name: str | None = None,
     ):
         super().__init__(
             seed_states=seed_states,
@@ -303,15 +341,15 @@ class OneTurnRunner(Runner):
         logger.info("[INITIALIZE] Saving cluster info for visualization...")
         for seed_state in self.seed_states:
             sample_prompts = random.sample(
-                seed_state.cluster.train_prompts, 
-                min(20, len(seed_state.cluster.train_prompts))
+                seed_state.cluster.train_prompts,
+                min(20, len(seed_state.cluster.train_prompts)),
             )
             save_cluster_info(
                 run_path=self.run_path,
                 seed_id=seed_state.index,
                 summary=seed_state.cluster.summary,
                 train_batch_size=seed_state.cluster.train_batch_size,
-                sample_train_prompts=sample_prompts
+                sample_train_prompts=sample_prompts,
             )
             seed_state.history.append({})
 
@@ -319,7 +357,6 @@ class OneTurnRunner(Runner):
         asyncio.run(self.rater_1.normalize(overwrite=False))
         logger.info(f"[INITIALIZE] Normalizing rater 2, {self.rater_2.model_name}...")
         asyncio.run(self.rater_2.normalize(overwrite=False))
-
 
     def train(self):
         self.initialize()
@@ -329,11 +366,10 @@ class OneTurnRunner(Runner):
             N_new=self.N_new,
             run_path=self.run_path,
         )
-        
+
         self.get_ratings()
         self.save_complete_system_prompt_stats()
         self.save_seed_states()
-
 
 
 INDIVIDUAL_PAIR_PROMPT_SYSTEM = """You are an expert in writing novel **system prompts** that specify the behavior of other assistant language models."""
@@ -369,7 +405,6 @@ The json array should be a list of {num_new} strings. Remember to include the su
 MULTIPLE_PAIR_PROMPT_SYSTEM = """You are an expert in writing novel **system prompts** that specify the behavior of other assistant language models."""
 
 
-
 # %%
 if __name__ == "__main__":
     import argparse
@@ -383,11 +418,11 @@ if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
         filename=f"logs/individual_pairs/{run_name}.log",
-        filemode='w',
-        format='%(asctime)s - %(levelname)s - %(message)s'
+        filemode="w",
+        format="%(asctime)s - %(levelname)s - %(message)s",
     )
 
-# %%
+    # %%
     labels: pd.DataFrame = pd.read_csv("data/ultrafeedback/labels_20k.csv")
     with open("data/ultrafeedback/ds_20k.pkl", "rb") as f:
         ultrafeedback = pickle.load(f)
@@ -402,24 +437,31 @@ if __name__ == "__main__":
             item = ultrafeedback[idx]
             assert row["Document"] == item["prompt"]
 
-            id_to_cluster[topic].append({
-                "prompt": row["Document"],
-                "chosen": item["chosen"],
-                "rejected": item["rejected"],
-                "prob": float(row["Probability"]),
-            })
+            id_to_cluster[topic].append(
+                {
+                    "prompt": row["Document"],
+                    "chosen": item["chosen"],
+                    "rejected": item["rejected"],
+                    "prob": float(row["Probability"]),
+                }
+            )
 
             if topic not in id_to_summary:
                 id_to_summary[topic] = str(row["Topic_Summary"])
 
     initial_seed_states = []
     for topic in topic_ids:
-        sorted_cluster = sorted(id_to_cluster[topic], key=lambda x: x["prob"], reverse=True)
+        sorted_cluster = sorted(
+            id_to_cluster[topic], key=lambda x: x["prob"], reverse=True
+        )
         train_prompts = [item["prompt"] for item in sorted_cluster[:30]]
-        aux_info = [{
-            "chosen": item["chosen"],
-            "rejected": item["rejected"],
-        } for item in sorted_cluster[:30]]
+        aux_info = [
+            {
+                "chosen": item["chosen"],
+                "rejected": item["rejected"],
+            }
+            for item in sorted_cluster[:30]
+        ]
 
         cluster = Cluster(
             summary=id_to_summary[topic],
@@ -437,12 +479,14 @@ if __name__ == "__main__":
         )
         initial_seed_states.append(seed_state)
 
-# %%
+    # %%
     print(f"Loaded {len(initial_seed_states)} seed states")
     for state in initial_seed_states:
-        print(f"  - {state.cluster.summary}: {len(state.cluster.train_prompts)} train prompts")
+        print(
+            f"  - {state.cluster.summary}: {len(state.cluster.train_prompts)} train prompts"
+        )
 
-# %%
+    # %%
     policy = PolicyModel(
         model_name="meta-llama/llama-3.1-70b-instruct",
         max_tokens=1024,

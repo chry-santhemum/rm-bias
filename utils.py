@@ -23,7 +23,12 @@ from transformers import (
 )
 from llm_types import ChatHistory
 from state import Attack
-from client import OpenaiResponse, is_thinking_model, get_universal_caller, sample_from_model_parallel
+from client import (
+    OpenaiResponse,
+    is_thinking_model,
+    get_universal_caller,
+    sample_from_model_parallel,
+)
 from defaults import *
 
 logger = logging.getLogger(__name__)
@@ -48,6 +53,7 @@ POLICY_MODELS = {
 
 _reward_model = None
 _policy_model = None
+
 
 def load_model(model_name: str, use_flash: bool = False, device: str = "auto"):
     global _reward_model, _policy_model
@@ -81,7 +87,9 @@ def load_model(model_name: str, use_flash: bool = False, device: str = "auto"):
             if use_flash:
                 load_kwargs["attn_implementation"] = "flash_attention_2"
 
-            _policy_model = AutoModelForCausalLM.from_pretrained(model_name_hf, **load_kwargs)
+            _policy_model = AutoModelForCausalLM.from_pretrained(
+                model_name_hf, **load_kwargs
+            )
             model = _policy_model
         else:
             model = _policy_model
@@ -127,12 +135,13 @@ def parse_json_response(resp: OpenaiResponse) -> Tuple[Any, str]:
         logger.error(f"Response JSON parse error: {e}")
         logger.error(f"API response: {resp}")
         output, reasoning = None, "N/A"
-    
+
     return output, reasoning
 
 
 def timestamp():
     return datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
 
 def count_words(text):
     # Split on whitespace and common delimiters
@@ -174,6 +183,7 @@ def get_effort_from_tokens(reasoning_tokens: int, max_tokens: int) -> str:
     else:
         return "high"
 
+
 def get_tokens_from_effort(effort: str, max_tokens: int) -> int:
     match effort:
         case "low":
@@ -185,7 +195,8 @@ def get_tokens_from_effort(effort: str, max_tokens: int) -> int:
         case _:
             raise ValueError(f"Invalid effort: {effort}")
 
-def get_to_pass_reasoning(reasoning: int | str | None, max_tokens: int) -> dict|None:
+
+def get_to_pass_reasoning(reasoning: int | str | None, max_tokens: int) -> dict | None:
     if isinstance(reasoning, str):
         to_pass_reasoning = {
             "max_tokens": get_tokens_from_effort(reasoning, max_tokens),
@@ -205,10 +216,11 @@ def get_to_pass_reasoning(reasoning: int | str | None, max_tokens: int) -> dict|
 # These are no longer used!
 
 
-def custom_cache(cache_dir: str=".cache"):
+def custom_cache(cache_dir: str = ".cache"):
     """
     Decorator that caches function results to disk based on arguments hash.
     """
+
     def decorator(func):
         cache_path = Path(cache_dir) / func.__name__
         cache_path.mkdir(parents=True, exist_ok=True)
@@ -217,9 +229,7 @@ def custom_cache(cache_dir: str=".cache"):
             try:
                 # Try to serialize for hashing
                 cache_data = (args, sorted(kwargs.items()))
-                return hashlib.md5(
-                    pickle.dumps(cache_data)
-                ).hexdigest()
+                return hashlib.md5(pickle.dumps(cache_data)).hexdigest()
             except (TypeError, pickle.PicklingError) as e:
                 # Fall back to string representation if pickling fails
                 logger.warning(f"Cache key generation using str fallback due to: {e}")
@@ -227,6 +237,7 @@ def custom_cache(cache_dir: str=".cache"):
                 return hashlib.md5(cache_str.encode()).hexdigest()
 
         if asyncio.iscoroutinefunction(func):
+
             @functools.wraps(func)
             async def async_wrapper(*args, **kwargs):
                 cache_key = get_cache_key(args, kwargs)
@@ -246,9 +257,11 @@ def custom_cache(cache_dir: str=".cache"):
                 temp_file.rename(cache_file)
 
                 return result
+
             return async_wrapper
 
         else:
+
             @functools.wraps(func)
             def sync_wrapper(*args, **kwargs):
                 cache_key = get_cache_key(args, kwargs)
@@ -268,14 +281,13 @@ def custom_cache(cache_dir: str=".cache"):
                 temp_file.rename(cache_file)
 
                 return result
+
             return sync_wrapper
 
     return decorator
 
 
-
-
-def setup_prompt_logger(log_path: str | None, to_stdout: bool=False):
+def setup_prompt_logger(log_path: str | None, to_stdout: bool = False):
     logger = logging.getLogger("prompt_logger")
     logger.setLevel(logging.INFO)
     logger.propagate = False  # don't bubble to root
@@ -286,7 +298,9 @@ def setup_prompt_logger(log_path: str | None, to_stdout: bool=False):
         for h in logger.handlers
     )
     if not has_stream_handler:
-        stream = __import__("sys").stdout if to_stdout else None  # default stderr if None
+        stream = (
+            __import__("sys").stdout if to_stdout else None
+        )  # default stderr if None
         ch = logging.StreamHandler(stream)
         ch.setLevel(logging.INFO)
 
@@ -341,7 +355,7 @@ def setup_prompt_logger(log_path: str | None, to_stdout: bool=False):
             logger.addHandler(fh)
 
     return logger
-    
+
 
 def pareto_sort(points: dict[Any, tuple[float, float]], top_k: int | None) -> list[Any]:
     """

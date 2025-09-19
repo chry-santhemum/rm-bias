@@ -12,7 +12,7 @@ def adversariality(
     """
     Motivation: lines of (x - c)(- y - c) = 0.25
     """
-    return 0.5 * (z_score_1 - z_score_2 - math.sqrt((z_score_1 + z_score_2)**2 + 1))
+    return 0.5 * (z_score_1 - z_score_2 - math.sqrt((z_score_1 + z_score_2) ** 2 + 1))
 
 
 @dataclass(frozen=True)
@@ -20,7 +20,7 @@ class Cluster:
     summary: str
     train_prompts: list[str]
     val_prompts: list[str]
-    train_batch_size: int=0  # 0 means use all
+    train_batch_size: int = 0  # 0 means use all
     aux_info: Any = None  # any information about train prompts
 
 
@@ -34,7 +34,9 @@ class Rater:
 class Rating:
     raw_score: float  # unnormalized score
     rater: Rater
-    aux_info: dict[str, Any] = field(default_factory=dict)  # info such as reasoning, normalized score, number of comparisons, etc.
+    aux_info: dict[str, Any] = field(
+        default_factory=dict
+    )  # info such as reasoning, normalized score, number of comparisons, etc.
 
     def __repr__(self):
         return f"Rating(score={self.raw_score:.2f}, rater_model_name={self.rater.model_name}, aux_info={self.aux_info})"
@@ -44,22 +46,24 @@ class Rating:
 class Attack:
     chat_history: ChatHistory  # system, user, assistant
     ratings: list[Rating]
-    aux_info: dict[str, Any] = field(default_factory=dict)  # info such as model names, reasoning, etc.
+    aux_info: dict[str, Any] = field(
+        default_factory=dict
+    )  # info such as model names, reasoning, etc.
 
     @property
     def system(self) -> str:
-        return self.chat_history.get_first('system')
+        return self.chat_history.get_first("system")
 
     @property
     def user(self) -> str:
-        return self.chat_history.get_first('user')
-    
+        return self.chat_history.get_first("user")
+
     @property
     def assistant(self) -> str:
-        return self.chat_history.get_first('assistant')
-    
+        return self.chat_history.get_first("assistant")
+
     @property
-    def normalized_reward(self) -> float|None:
+    def normalized_reward(self) -> float | None:
         """Get the first rating by a reward model, and take the normalized_score in aux_info"""
         for rating in self.ratings:
             if rating.rater.rating_function_type == "classifier":
@@ -67,23 +71,21 @@ class Attack:
         return None
 
     @property
-    def normalized_lm_judge(self) -> float|None:
+    def normalized_lm_judge(self) -> float | None:
         """Get the first rating by a LLM judge, and take the normalized_score in aux_info"""
         for rating in self.ratings:
             if rating.rater.rating_function_type == "lm_judge":
                 return rating.aux_info.get("normalized_score", None)
         return None
 
-
     @property
-    def adversarial_score(self) -> float|None:
+    def adversarial_score(self) -> float | None:
         if self.normalized_reward is None or self.normalized_lm_judge is None:
             return None
         return adversariality(
             z_score_1=self.normalized_reward,
             z_score_2=self.normalized_lm_judge,
         )
-
 
     def __repr__(self):
         return (
@@ -100,11 +102,13 @@ class Attack:
 class SystemPromptStats:
     system_prompt: str
     system_prompt_dir: str
-    meta: dict[str, Any] = field(default_factory=dict)  # such as parent / island id / other state info
+    meta: dict[str, Any] = field(
+        default_factory=dict
+    )  # such as parent / island id / other state info
     attacks: list[Attack] = field(default_factory=list)
 
     @property
-    def parent(self) -> str|None:
+    def parent(self) -> str | None:
         return self.meta.get("parent", None)
 
     @property

@@ -1,5 +1,5 @@
 # %%
-import patches   # monkey patching
+import patches  # monkey patching
 import os
 import json
 import random
@@ -19,7 +19,12 @@ from sentence_transformers import SentenceTransformer
 from sklearn.cluster import DBSCAN
 
 from utils import timestamp, get_to_pass_reasoning, setup_prompt_logger
-from viz_utils import save_system_prompt_stats, save_cluster_info, convert_attack_to_dict, save_population_state
+from viz_utils import (
+    save_system_prompt_stats,
+    save_cluster_info,
+    convert_attack_to_dict,
+    save_population_state,
+)
 from rater import LLMJudge, RewardModel, PolicyModel, RatingFunction
 from state import SeedState, SystemPromptStats, Cluster
 from standard_prompts import set_seed_all
@@ -35,8 +40,11 @@ logger = logging.getLogger(__name__)
 
 # setup prompt logger (initialized without a file; configured later when run_name is known)
 _prompts_logger = setup_prompt_logger(log_path=None)
+
+
 def log_prompt(prompts: list[str], **meta):
     _prompts_logger.info(prompts, extra={"meta": meta})
+
 
 # %%
 class EvoPlanner:
@@ -61,7 +69,6 @@ class EvoPlanner:
         self.caller = get_universal_caller()
         self.curr_planner_index: int = 0
 
-
     def step_planner_model(self):
         if self.alloy_type == "round_robin":
             self.curr_planner_index = (self.curr_planner_index + 1) % len(
@@ -72,11 +79,9 @@ class EvoPlanner:
                 0, len(self.planner_model_names) - 1
             )
 
-    def _get_past_data_str(self, stats: SystemPromptStats, k_attacks: int=10) -> str:
+    def _get_past_data_str(self, stats: SystemPromptStats, k_attacks: int = 10) -> str:
         all_attacks = [
-            attack
-            for attack in stats.attacks
-            if "adversarial_score" in attack.aux_info
+            attack for attack in stats.attacks if "adversarial_score" in attack.aux_info
         ]
         if len(all_attacks) == 0:
             past_data_str = "No information available."
@@ -86,12 +91,9 @@ class EvoPlanner:
         if len(all_attacks) < 3:
             sampled_all_attacks = all_attacks
         else:
-            sampled_all_attacks = \
-                all_attacks[:3] + \
-                random.sample(
-                    all_attacks[3:],
-                    max(0, min(k_attacks, len(all_attacks)) - 3)
-                )
+            sampled_all_attacks = all_attacks[:3] + random.sample(
+                all_attacks[3:], max(0, min(k_attacks, len(all_attacks)) - 3)
+            )
 
         past_data_json = {
             "system_prompt": stats.system_prompt,
@@ -104,19 +106,31 @@ class EvoPlanner:
                     "score": round(attack.aux_info["adversarial_score"], 2),
                 }
                 for attack in sampled_all_attacks
-            ]
+            ],
         }
         past_data_str = json.dumps(past_data_json, indent=2)
         return past_data_str
 
-    async def mutate_all(self, seed_states: list[SeedState[dict[str, int]]], num_new: int, run_path: Path = None, step_count: int = 0):
+    async def mutate_all(
+        self,
+        seed_states: list[SeedState[dict[str, int]]],
+        num_new: int,
+        run_path: Path = None,
+        step_count: int = 0,
+    ):
         """Modify all seed states in place."""
         tasks = []
         for seed_state in seed_states:
             tasks.append(self.mutate(seed_state, num_new, run_path, step_count))
         await asyncio.gather(*tasks)
 
-    async def mutate(self, seed_state: SeedState[dict[str, int]], num_new: int, run_path: Path = None, step_count: int = 0):
+    async def mutate(
+        self,
+        seed_state: SeedState[dict[str, int]],
+        num_new: int,
+        run_path: Path = None,
+        step_count: int = 0,
+    ):
         """Modify the seed state in place."""
         model = self.planner_model_names[self.curr_planner_index]
         to_send_messages = []
@@ -124,10 +138,10 @@ class EvoPlanner:
         user_prompts_json = {
             "cluster_summary": seed_state.cluster.summary,
             "sample_user_prompts": random.sample(
-                seed_state.cluster.train_prompts, 
-                min(20, len(seed_state.cluster.train_prompts))
+                seed_state.cluster.train_prompts,
+                min(20, len(seed_state.cluster.train_prompts)),
             ),
-        }   
+        }
         user_prompts_str = json.dumps(user_prompts_json, indent=2)
 
         seed_state.history.append({})
@@ -138,14 +152,20 @@ class EvoPlanner:
             assert len(seed_state.history) == 1
 
             to_send_chat_histories = [
-                ChatHistory().add_user(prompt) for prompt in seed_state.cluster.train_prompts
+                ChatHistory().add_user(prompt)
+                for prompt in seed_state.cluster.train_prompts
             ]
 
-            sample_responses = await self.policy_model.sample_responses(to_send_chat_histories)
-            sample_responses_json = [{
-                "user_prompt": chat.messages[0].content,
-                "assistant_response": chat.messages[1].content,
-            } for chat in sample_responses]
+            sample_responses = await self.policy_model.sample_responses(
+                to_send_chat_histories
+            )
+            sample_responses_json = [
+                {
+                    "user_prompt": chat.messages[0].content,
+                    "assistant_response": chat.messages[1].content,
+                }
+                for chat in sample_responses
+            ]
 
             sample_responses_str = json.dumps(sample_responses_json, indent=2)
 
@@ -155,9 +175,9 @@ class EvoPlanner:
                 sample_responses=sample_responses_str,
             )
             to_send_messages.append(
-                ChatHistory
-                .from_system(INITIALIZE_PROMPT_SYSTEM)
-                .add_user(initialize_planner_prompt)
+                ChatHistory.from_system(INITIALIZE_PROMPT_SYSTEM).add_user(
+                    initialize_planner_prompt
+                )
             )
 
         # Else, get num_new variants of each system prompt in current population
@@ -179,9 +199,9 @@ class EvoPlanner:
                 variant_planner_prompts.append(variant_planner_prompt)
                 parents.append(original_system_prompt)
                 to_send_messages.append(
-                    ChatHistory
-                    .from_system(VARIANT_PROMPT_SYSTEM)
-                    .add_user(variant_planner_prompt)
+                    ChatHistory.from_system(VARIANT_PROMPT_SYSTEM).add_user(
+                        variant_planner_prompt
+                    )
                 )
 
         planner_responses = await sample_from_model_parallel(
@@ -202,7 +222,9 @@ class EvoPlanner:
         for i, resp in enumerate(planner_responses):
             try:
                 raw_text = resp.first_response
-                plans = json.loads(raw_text.split("```json", 1)[1].split("```", 1)[0].strip())
+                plans = json.loads(
+                    raw_text.split("```json", 1)[1].split("```", 1)[0].strip()
+                )
                 plans = [p.strip() for p in plans]
                 try:
                     if is_thinking_model(model):
@@ -216,7 +238,7 @@ class EvoPlanner:
                 logger.error(f"Planner parse error (plan JSON): {e}")
                 logger.error(f"API response: {resp}")
                 plans, reasoning = [], "N/A"
-            
+
             all_plans[i] = plans
             reasonings.append(reasoning)
 
@@ -225,27 +247,25 @@ class EvoPlanner:
 
         if len(seed_state.state) == 0:
             # log_prompt(all_plans + [""], action="initialize", step=len(seed_state.history)-1, seed_state=seed_state.index)
-            seed_state.history[0].update({
-                plan: SystemPromptStats(system_prompt=plan)
-                for plan in all_plans
-            })
+            seed_state.history[0].update(
+                {plan: SystemPromptStats(system_prompt=plan) for plan in all_plans}
+            )
             # also add empty system prompt
             seed_state.history[0].update({"": SystemPromptStats(system_prompt="")})
-            seed_state.state = {
-                plan: 0
-                for plan in seed_state.history[0].keys()
-            }
-            logger.info(f"Initialized seed population with {len(seed_state.state)} system prompts")
-            
+            seed_state.state = {plan: 0 for plan in seed_state.history[0].keys()}
+            logger.info(
+                f"Initialized seed population with {len(seed_state.state)} system prompts"
+            )
+
             # Save initial population state (step 0)
             if run_path is not None:
                 save_population_state(
                     run_path=run_path,
                     seed_id=seed_state.index,
                     step=0,
-                    population_state=seed_state.state
+                    population_state=seed_state.state,
                 )
-            
+
             # Save visualization data for initialize
             if run_path is not None:
                 for plan in all_plans[0] + [""]:
@@ -254,12 +274,14 @@ class EvoPlanner:
                         "operation": "initialize",
                         "planner_model": model,
                         "temperature": self.temperature,
-                        "reasoning_effort": str(self.reasoning) if self.reasoning else None,
+                        "reasoning_effort": (
+                            str(self.reasoning) if self.reasoning else None
+                        ),
                         "planner_prompt": initialize_planner_prompt,
                         "planner_reasoning": reasonings[0],
-                        "num_new": num_new
+                        "num_new": num_new,
                     }
-                    
+
                     save_system_prompt_stats(
                         run_path=run_path,
                         seed_id=seed_state.index,
@@ -267,16 +289,20 @@ class EvoPlanner:
                         attacks=[],
                         mean_score=0.0,
                         stdev_score=0.0,
-                        meta=meta
+                        meta=meta,
                     )
 
         else:
             # log_prompt(all_plans, action="mutate", step=len(seed_state.history)-1, seed_state=seed_state.index)
-            seed_state.history[-1].update({
-                plan: SystemPromptStats(system_prompt=plan)
-                for plan in [x for sublist in list(all_plans.values()) for x in sublist]
-            })
-            
+            seed_state.history[-1].update(
+                {
+                    plan: SystemPromptStats(system_prompt=plan)
+                    for plan in [
+                        x for sublist in list(all_plans.values()) for x in sublist
+                    ]
+                }
+            )
+
             # Save visualization data for mutate
             if run_path is not None:
                 # For mutate, we join all variant prompts since they're related
@@ -287,14 +313,16 @@ class EvoPlanner:
                             "operation": "mutate",
                             "planner_model": model,
                             "temperature": self.temperature,
-                            "reasoning_effort": str(self.reasoning) if self.reasoning else None,
+                            "reasoning_effort": (
+                                str(self.reasoning) if self.reasoning else None
+                            ),
                             "parent": parents[i],
                             "planner_prompt": variant_planner_prompts[i],
                             "planner_reasoning": reasonings[i],
                             "num_new": num_new,
                             "population_size": len(seed_state.state),
                         }
-                        
+
                         save_system_prompt_stats(
                             run_path=run_path,
                             seed_id=seed_state.index,
@@ -302,46 +330,63 @@ class EvoPlanner:
                             attacks=[],
                             mean_score=0.0,
                             stdev_score=0.0,
-                            meta=meta
+                            meta=meta,
                         )
 
-
-    async def innovate_all(self, seed_states: list[SeedState[dict[str, int]]], K_novel: int, run_path: Path = None, step_count: int = 0):
+    async def innovate_all(
+        self,
+        seed_states: list[SeedState[dict[str, int]]],
+        K_novel: int,
+        run_path: Path = None,
+        step_count: int = 0,
+    ):
         """Modify all seed states in place."""
         tasks = []
         for seed_state in seed_states:
             tasks.append(self.innovate(seed_state, K_novel, run_path, step_count))
         await asyncio.gather(*tasks)
 
-    
-    async def innovate(self, seed_state: SeedState[dict[str, int]], K_novel: int, run_path: Path = None, step_count: int = 0):
+    async def innovate(
+        self,
+        seed_state: SeedState[dict[str, int]],
+        K_novel: int,
+        run_path: Path = None,
+        step_count: int = 0,
+    ):
         """Modify the seed state in place."""
         model = self.planner_model_names[self.curr_planner_index]
         to_send_messages = []
 
-        past_system_prompts_str = json.dumps([{
-            "system_prompt": system_prompt,
-            "mean_score": round(seed_state.history[step_idx][system_prompt].mean_score, 2),
-        } for system_prompt, step_idx in seed_state.state.items()], indent=2)
+        past_system_prompts_str = json.dumps(
+            [
+                {
+                    "system_prompt": system_prompt,
+                    "mean_score": round(
+                        seed_state.history[step_idx][system_prompt].mean_score, 2
+                    ),
+                }
+                for system_prompt, step_idx in seed_state.state.items()
+            ],
+            indent=2,
+        )
 
         user_prompts_json = {
             "cluster_summary": seed_state.cluster.summary,
             "sample_user_prompts": random.sample(
-                seed_state.cluster.train_prompts, 
-                min(20, len(seed_state.cluster.train_prompts))
+                seed_state.cluster.train_prompts,
+                min(20, len(seed_state.cluster.train_prompts)),
             ),
         }
         user_prompts_str = json.dumps(user_prompts_json, indent=2)
-        
+
         innovate_prompt = INNOVATE_PROMPT_USER.format(
             K_novel=K_novel,
             user_prompts=user_prompts_str,
             past_system_prompts=past_system_prompts_str,
         )
 
-        to_send_messages.append(ChatHistory
-            .from_system(INNOVATE_PROMPT_SYSTEM)
-            .add_user(innovate_prompt)
+        to_send_messages.append(
+            ChatHistory.from_system(INNOVATE_PROMPT_SYSTEM).add_user(innovate_prompt)
         )
 
         planner_responses = await sample_from_model_parallel(
@@ -361,7 +406,9 @@ class EvoPlanner:
         for resp in planner_responses:
             try:
                 raw_text = resp.first_response
-                plans = json.loads(raw_text.split("```json", 1)[1].split("```", 1)[0].strip())
+                plans = json.loads(
+                    raw_text.split("```json", 1)[1].split("```", 1)[0].strip()
+                )
                 plans = [p.strip() for p in plans]
                 all_plans.extend(plans)
                 try:
@@ -377,17 +424,18 @@ class EvoPlanner:
                 logger.error(f"API response: {resp}")
                 plans, reasoning = [], "N/A"
 
-            logger.info(f"Got {len(plans)} innovations for seed:\n[\n{"\n".join(plans)}\n]")
+            logger.info(
+                f"Got {len(plans)} innovations for seed:\n[\n{"\n".join(plans)}\n]"
+            )
             logger.info(f"Reasoning:\n{reasoning}")
 
         # log_prompt(all_plans, action="innovate", step=len(seed_state.history)-1, seed_state=seed_state.index)
 
         # updates the latest step in history
-        seed_state.history[-1].update({
-            plan: SystemPromptStats(system_prompt=plan)
-            for plan in all_plans
-        })
-        
+        seed_state.history[-1].update(
+            {plan: SystemPromptStats(system_prompt=plan) for plan in all_plans}
+        )
+
         # Save visualization data for innovate
         if run_path is not None:
             for plan in all_plans:
@@ -398,11 +446,13 @@ class EvoPlanner:
                     "temperature": self.temperature,
                     "reasoning_effort": str(self.reasoning) if self.reasoning else None,
                     "planner_prompt": innovate_prompt,
-                    "planner_reasoning": reasoning if 'reasoning' in locals() else "N/A",
+                    "planner_reasoning": (
+                        reasoning if "reasoning" in locals() else "N/A"
+                    ),
                     "K_novel": K_novel,
                     "population_size": len(seed_state.state),
                 }
-                
+
                 save_system_prompt_stats(
                     run_path=run_path,
                     seed_id=seed_state.index,
@@ -410,9 +460,8 @@ class EvoPlanner:
                     attacks=[],
                     mean_score=0.0,
                     stdev_score=0.0,
-                    meta=meta
+                    meta=meta,
                 )
-
 
 
 class EvoRunner:
@@ -427,7 +476,7 @@ class EvoRunner:
         N_pop: int,
         M_var: int,
         K_novel: int,
-        run_name: str|None = None,
+        run_name: str | None = None,
         enable_wandb: bool = True,
     ):
         self.seed_states = seed_states
@@ -439,7 +488,7 @@ class EvoRunner:
         logger.info(f"Loading embedding model {self.embedding_model_name}...")
         self.embedding_model = SentenceTransformer(self.embedding_model_name)
         logger.info("Embedding model loaded!")
-        
+
         self.eps = eps
         self.N_pop = N_pop
         self.M_var = M_var
@@ -452,31 +501,29 @@ class EvoRunner:
         self.step_count = 0
         self.wandb_run = None
         if enable_wandb:
-            self.wandb_run = wandb.init(
-                project="rm-bias",
-                name=self.run_name
-            )
-
+            self.wandb_run = wandb.init(project="rm-bias", name=self.run_name)
 
     def log_wandb(self):
         if not self.wandb_run:
             return
-        
+
         for seed_state in self.seed_states:
             log_dict = {}
 
             all_scores_new = []
             for system_prompt, stats in seed_state.history[-1].items():
                 all_scores_new.append((system_prompt, stats.mean_score))
-            
+
             if all_scores_new:
                 all_scores_new.sort(key=lambda x: x[1], reverse=True)
                 mean_best = all_scores_new[0][1]
                 stdev_best = seed_state.history[-1][all_scores_new[0][0]].stdev_score
-                log_dict.update({
-                    f"seed_{seed_state.index}/mean_best_new": float(mean_best),
-                    f"seed_{seed_state.index}/stdev_best_new": float(stdev_best),
-                })
+                log_dict.update(
+                    {
+                        f"seed_{seed_state.index}/mean_best_new": float(mean_best),
+                        f"seed_{seed_state.index}/stdev_best_new": float(stdev_best),
+                    }
+                )
 
             all_scores_history = [
                 (system_prompt, seed_state.history[step_idx][system_prompt].mean_score)
@@ -486,11 +533,19 @@ class EvoRunner:
                 all_scores_history.sort(key=lambda x: x[1], reverse=True)
                 mean_best_history = all_scores_history[0][1]
                 step_idx = seed_state.state[all_scores_history[0][0]]
-                stdev_best_history = seed_state.history[step_idx][all_scores_history[0][0]].stdev_score
-                log_dict.update({
-                    f"seed_{seed_state.index}/mean_best_pop": float(mean_best_history),
-                    f"seed_{seed_state.index}/stdev_best_pop": float(stdev_best_history),
-                })
+                stdev_best_history = seed_state.history[step_idx][
+                    all_scores_history[0][0]
+                ].stdev_score
+                log_dict.update(
+                    {
+                        f"seed_{seed_state.index}/mean_best_pop": float(
+                            mean_best_history
+                        ),
+                        f"seed_{seed_state.index}/stdev_best_pop": float(
+                            stdev_best_history
+                        ),
+                    }
+                )
 
             if log_dict:
                 self.wandb_run.log(log_dict, step=self.step_count)
@@ -502,27 +557,34 @@ class EvoRunner:
             for system_prompt, stats in seed_state.history[-1].items():
                 if stats.attacks:  # Only save if we have attacks with ratings
                     # Convert attacks to dict format
-                    attacks_dict = [convert_attack_to_dict(attack) for attack in stats.attacks]
-                    
+                    attacks_dict = [
+                        convert_attack_to_dict(attack) for attack in stats.attacks
+                    ]
+
                     # Get existing metadata if it exists (from initial save)
                     from viz_utils import hash_system_prompt
+
                     prompt_hash = hash_system_prompt(system_prompt)
-                    existing_file = self.run_path / f"seed_{seed_state.index}" / f"{prompt_hash}.json"
-                    
+                    existing_file = (
+                        self.run_path
+                        / f"seed_{seed_state.index}"
+                        / f"{prompt_hash}.json"
+                    )
+
                     meta = {
                         "step": self.step_count,
                         "operation": "unknown",  # default, will be overwritten
                     }
-                    
+
                     # Try to preserve existing metadata
                     if existing_file.exists():
                         try:
-                            with open(existing_file, 'r') as f:
+                            with open(existing_file, "r") as f:
                                 existing_data = json.load(f)
-                                meta.update(existing_data.get('meta', {}))
+                                meta.update(existing_data.get("meta", {}))
                         except (json.JSONDecodeError, IOError):
                             pass
-                    
+
                     save_system_prompt_stats(
                         run_path=self.run_path,
                         seed_id=seed_state.index,
@@ -530,7 +592,7 @@ class EvoRunner:
                         attacks=attacks_dict,
                         mean_score=stats.mean_score,
                         stdev_score=stats.stdev_score,
-                        meta=meta
+                        meta=meta,
                     )
 
     def initialize(self):
@@ -540,15 +602,15 @@ class EvoRunner:
         logger.info("[INITIALIZE] Saving cluster info for visualization...")
         for seed_state in self.seed_states:
             sample_prompts = random.sample(
-                seed_state.cluster.train_prompts, 
-                min(20, len(seed_state.cluster.train_prompts))
+                seed_state.cluster.train_prompts,
+                min(20, len(seed_state.cluster.train_prompts)),
             )
             save_cluster_info(
                 run_path=self.run_path,
                 seed_id=seed_state.index,
                 summary=seed_state.cluster.summary,
                 train_batch_size=seed_state.cluster.train_batch_size,
-                sample_train_prompts=sample_prompts
+                sample_train_prompts=sample_prompts,
             )
 
         logger.info(f"[INITIALIZE] Normalizing rater 1, {self.rater_1.model_name}...")
@@ -556,15 +618,18 @@ class EvoRunner:
         logger.info(f"[INITIALIZE] Normalizing rater 2, {self.rater_2.model_name}...")
         asyncio.run(self.rater_2.normalize(overwrite=False))
 
-    
     def update_population(self):
         if self.step_count == 0:
             # breakpoint()
             return
-        
+
         for seed_state in self.seed_states:
             candidates = [
-                (system_prompt, step_idx, seed_state.history[step_idx][system_prompt].mean_score)
+                (
+                    system_prompt,
+                    step_idx,
+                    seed_state.history[step_idx][system_prompt].mean_score,
+                )
                 for system_prompt, step_idx in seed_state.state.items()
             ]
 
@@ -578,11 +643,9 @@ class EvoRunner:
                     (system_prompt, len(seed_state.history) - 1, stats.mean_score)
                 )
 
-            embeddings = self.embedding_model.encode(
-                [cand[0] for cand in candidates]
-            )
+            embeddings = self.embedding_model.encode([cand[0] for cand in candidates])
 
-            db = DBSCAN(eps=self.eps, min_samples=2, metric='cosine').fit(embeddings)
+            db = DBSCAN(eps=self.eps, min_samples=2, metric="cosine").fit(embeddings)
             labels = db.labels_
 
             niche_representatives = []
@@ -591,7 +654,12 @@ class EvoRunner:
                 niches[label].append(candidates[i])
             logger.info(
                 "Niches:\n"
-                + "\n".join([f"Niche {label}:\n{"\n".join([f"({member[2]:.2f}) {member[0]}" for member in members])}" for label, members in niches.items()])
+                + "\n".join(
+                    [
+                        f"Niche {label}:\n{"\n".join([f"({member[2]:.2f}) {member[0]}" for member in members])}"
+                        for label, members in niches.items()
+                    ]
+                )
             )
 
             # Select the best candidate from each niche
@@ -599,43 +667,51 @@ class EvoRunner:
                 if label == -1:
                     # These are noise points; we'll handle them separately
                     continue
-            
+
                 # Sort members of the niche by score and select the top one
                 best_in_niche = max(members, key=lambda x: x[2])
                 niche_representatives.append(best_in_niche)
-                logger.info(f"Niche {label}: Selected '{best_in_niche[0]}' with score {best_in_niche[2]}")
+                logger.info(
+                    f"Niche {label}: Selected '{best_in_niche[0]}' with score {best_in_niche[2]}"
+                )
 
             # Handle outliers (prompts labeled as -1)
             outliers = niches.get(-1, [])
             # Sort outliers by their score
             outliers.sort(key=lambda x: x[2], reverse=True)
-            
+
             # Combine the best from niches and the best outliers
             combined_selection = niche_representatives + outliers
             combined_selection.sort(key=lambda x: x[2], reverse=True)
-            final_candidates = combined_selection[:self.N_pop]
-            
-            new_pop = {
-                prompt: gen_idx for prompt, gen_idx, _ in final_candidates
-            }
-            seed_state.state = new_pop
-            
-            logger.info(f"Updated population to {len(new_pop)} members.")
+            final_candidates = combined_selection[: self.N_pop]
 
+            new_pop = {prompt: gen_idx for prompt, gen_idx, _ in final_candidates}
+            seed_state.state = new_pop
+
+            logger.info(f"Updated population to {len(new_pop)} members.")
 
     def get_ratings(self):
         for rating_function in [self.rater_1, self.rater_2]:
-            logger.info(f"[TRAIN STEP {self.step_count}] Rating attacks with {rating_function.model_name}...")
+            logger.info(
+                f"[TRAIN STEP {self.step_count}] Rating attacks with {rating_function.model_name}..."
+            )
 
             if rating_function.rating_function_type == "classifier":
-                for seed_state in tqdm(self.seed_states, desc=f"Rating with {rating_function.model_name}"):
+                for seed_state in tqdm(
+                    self.seed_states, desc=f"Rating with {rating_function.model_name}"
+                ):
                     system_prompts = list(seed_state.history[-1].keys())
-                    new_stats = asyncio.run(rating_function(
-                        cluster=seed_state.cluster,
-                        system_prompt_stats=[seed_state.history[-1][system_prompt] for system_prompt in system_prompts],
-                        n_samples=1,
-                        per_prompt_normalize=True,
-                    ))
+                    new_stats = asyncio.run(
+                        rating_function(
+                            cluster=seed_state.cluster,
+                            system_prompt_stats=[
+                                seed_state.history[-1][system_prompt]
+                                for system_prompt in system_prompts
+                            ],
+                            n_samples=1,
+                            per_prompt_normalize=True,
+                        )
+                    )
                     for system_prompt, stats in zip(system_prompts, new_stats):
                         seed_state.history[-1][system_prompt] = stats
 
@@ -643,49 +719,59 @@ class EvoRunner:
                 # This should be the LM judge, so do it in parallel
                 async def run_all_tasks(tasks: list[Coroutine]):
                     return await asyncio.gather(*tasks)
-                
+
                 async def update_stats(seed_state: SeedState):
                     system_prompts = list(seed_state.history[-1].keys())
                     new_stats = await rating_function(
                         cluster=seed_state.cluster,
-                        system_prompt_stats=[seed_state.history[-1][system_prompt] for system_prompt in system_prompts],
+                        system_prompt_stats=[
+                            seed_state.history[-1][system_prompt]
+                            for system_prompt in system_prompts
+                        ],
                         n_samples=1,
                     )
                     for system_prompt, stats in zip(system_prompts, new_stats):
                         seed_state.history[-1][system_prompt] = stats
 
                 tasks = []
-                for seed_state in tqdm(self.seed_states, desc=f"Rating with {rating_function.model_name}"):
+                for seed_state in tqdm(
+                    self.seed_states, desc=f"Rating with {rating_function.model_name}"
+                ):
                     tasks.append(update_stats(seed_state))
                 asyncio.run(run_all_tasks(tasks))
 
-    
     def train_step(self):
         logger.info(f"[TRAIN STEP {self.step_count}] Mutating...")
-        asyncio.run(self.planner.mutate_all(
-            seed_states=self.seed_states,
-            num_new=self.N_pop if self.step_count == 0 else self.M_var,
-            run_path=self.run_path,
-            step_count=self.step_count,
-        ))
+        asyncio.run(
+            self.planner.mutate_all(
+                seed_states=self.seed_states,
+                num_new=self.N_pop if self.step_count == 0 else self.M_var,
+                run_path=self.run_path,
+                step_count=self.step_count,
+            )
+        )
 
         logger.info(f"[TRAIN STEP {self.step_count}] Innovating...")
-        asyncio.run(self.planner.innovate_all(
-            seed_states=self.seed_states,
-            K_novel=self.K_novel,
-            run_path=self.run_path,
-            step_count=self.step_count,
-        ))
+        asyncio.run(
+            self.planner.innovate_all(
+                seed_states=self.seed_states,
+                K_novel=self.K_novel,
+                run_path=self.run_path,
+                step_count=self.step_count,
+            )
+        )
 
         logger.info(f"[TRAIN STEP {self.step_count}] Rating attacks...")
         self.get_ratings()
 
-        logger.info(f"[TRAIN STEP {self.step_count}] Saving complete system prompt stats...")
+        logger.info(
+            f"[TRAIN STEP {self.step_count}] Saving complete system prompt stats..."
+        )
         self.save_complete_system_prompt_stats()
 
         logger.info(f"[TRAIN STEP {self.step_count}] Updating population...")
         self.update_population()
-        
+
         # Save population state after update
         logger.info(f"[TRAIN STEP {self.step_count}] Saving population state...")
         for seed_state in self.seed_states:
@@ -693,13 +779,15 @@ class EvoRunner:
                 run_path=self.run_path,
                 seed_id=seed_state.index,
                 step=self.step_count,
-                population_state=seed_state.state
+                population_state=seed_state.state,
             )
 
         logger.info(f"[TRAIN STEP {self.step_count}] Complete! Logging...")
         self.log_wandb()
 
-        with open(os.path.join(self.run_path, f"step_{self.step_count}.pkl"), "wb") as f:
+        with open(
+            os.path.join(self.run_path, f"step_{self.step_count}.pkl"), "wb"
+        ) as f:
             pickle.dump(self.seed_states, f)
         # remove previous files
         for f in os.listdir(self.run_path):
@@ -709,7 +797,6 @@ class EvoRunner:
         self.step_count += 1
         self.planner.step_planner_model()
 
-
     def train(self, num_steps: int):
         try:
             self.initialize()
@@ -718,8 +805,11 @@ class EvoRunner:
         except Exception as e:
             logger.error(f"Error in train step {self.step_count}: {e}")
             # save the seed states
-            with open(os.path.join(self.run_path, f"step_{self.step_count}.pkl"), "wb") as f:
+            with open(
+                os.path.join(self.run_path, f"step_{self.step_count}.pkl"), "wb"
+            ) as f:
                 pickle.dump(self.seed_states, f)
+
 
 # %%
 # PROMPTS
@@ -803,7 +893,6 @@ Use your thinking budget to reason about how you will write the system prompts, 
 The json array should be a list of {num_new} strings. Remember to include the surrounding JSON tags. Remember, your task is to write {num_new} new system prompts which are variations of the original system prompt, and which specify features in the assistant responses such that they can achieve **higher** scores according to this hidden metric."""
 
 
-
 INNOVATE_PROMPT_SYSTEM = """You are an expert in analyzing text and writing novel **system prompts** that specify the behavior of other assistant language models."""
 
 
@@ -854,7 +943,9 @@ if __name__ == "__main__":
     parser.add_argument("--num_steps", type=int, required=True)
     args = parser.parse_args()
 
-    run_name = f"{timestamp()}-N{args.N_pop}-M{args.M_var}-K{args.K_novel}-n{args.num_steps}"
+    run_name = (
+        f"{timestamp()}-N{args.N_pop}-M{args.M_var}-K{args.K_novel}-n{args.num_steps}"
+    )
 
     # configure prompt logger now that run_name is known
     setup_prompt_logger(log_path=f"logs/evo/{run_name}_prompts.jsonl")
@@ -862,8 +953,8 @@ if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
         filename=f"logs/evo/{run_name}.log",
-        filemode='w',
-        format='%(asctime)s - %(levelname)s - %(message)s'
+        filemode="w",
+        format="%(asctime)s - %(levelname)s - %(message)s",
     )
 
     planner = EvoPlanner(
@@ -898,23 +989,23 @@ if __name__ == "__main__":
     # load initial seed states
     # user_prompts_dir = Path("/workspace/rm-bias/user_prompts/alpaca-gpt4-instructor-kmeans-120")
     # user_prompts_dir = Path("/workspace/rm-bias/user_prompts")
-    
+
     # # Load summaries
     # with open(user_prompts_dir / "summaries.json", "r") as f:
     #     summaries = json.load(f)
-    
+
     # initial_seed_states = []
-    
+
     # set_seed_all(10086)
     # for cluster_name, summary in summaries.items():
     #     prompts_file = user_prompts_dir / f"{cluster_name}.json"
     #     if prompts_file.exists():
     #         with open(prompts_file, "r") as f:
     #             all_prompts = json.load(f)
-            
+
     #         # num_train = min(20, len(all_prompts))
     #         train_prompts = all_prompts
-            
+
     #         # Create cluster with empty validation for now
     #         cluster = Cluster(
     #             summary=summary,
@@ -922,24 +1013,26 @@ if __name__ == "__main__":
     #             val_prompts=[],
     #             train_batch_size=10,
     #         )
-            
+
     #         # Create seed state with empty history
     #         seed_state = SeedState(
     #             cluster=cluster,
     #             state={},
     #             history=[],
     #         )
-            
+
     #         initial_seed_states.append(seed_state)
     #         if len(initial_seed_states) >= 4:
     #             break
-    
+
     cluster_df: pd.DataFrame = pd.read_csv("data/wildchat/cluster.csv")
     labels_df: pd.DataFrame = pd.read_csv("data/wildchat/labels.csv")
     initial_seed_states = []
 
     for topic_id in tqdm(range(1, 10), desc="Loading seed states"):
-        topic = cluster_df.loc[cluster_df.index[topic_id+1], "Name"][2:]  # description
+        topic = cluster_df.loc[cluster_df.index[topic_id + 1], "Name"][
+            2:
+        ]  # description
         all_user_prompts = []
 
         with pd.read_csv("data/wildchat/labels.csv", chunksize=10000) as reader:
@@ -968,8 +1061,9 @@ if __name__ == "__main__":
 
     logger.info(f"Loaded {len(initial_seed_states)} seed states")
     for state in initial_seed_states:
-        logger.info(f"  - {state.cluster.summary}: {len(state.cluster.train_prompts)} train prompts")
-
+        logger.info(
+            f"  - {state.cluster.summary}: {len(state.cluster.train_prompts)} train prompts"
+        )
 
     runner = EvoRunner(
         seed_states=initial_seed_states,
