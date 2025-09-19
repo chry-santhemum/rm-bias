@@ -493,7 +493,7 @@ if __name__ == "__main__":
 
         id_to_cluster = defaultdict(list)
         id_to_summary = defaultdict(str)
-        topic_ids = [15]
+        topic_ids = [i for i in range(11, 21)]
 
         for idx, row in tqdm(labels.iterrows(), desc="Loading clusters"):
             topic = int(row["Topic"])
@@ -517,21 +517,21 @@ if __name__ == "__main__":
             sorted_cluster = sorted(
                 id_to_cluster[topic], key=lambda x: x["prob"], reverse=True
             )
-            train_prompts = [item["prompt"] for item in sorted_cluster[:5]]
+            train_prompts = [item["prompt"] for item in sorted_cluster[:50]]
             all_user_prompts.extend(train_prompts)
             aux_info = [
                 {
                     "chosen": item["chosen"],
                     "rejected": item["rejected"],
                 }
-                for item in sorted_cluster[:5]
+                for item in sorted_cluster[:50]
             ]
 
             cluster = Cluster(
                 summary=id_to_summary[topic],
                 train_prompts=train_prompts,
                 val_prompts=[],
-                train_batch_size=5,
+                train_batch_size=10,
                 aux_info=aux_info,
             )
 
@@ -582,19 +582,19 @@ if __name__ == "__main__":
 
     # %%
 
-    # target_dir = Path("data/prompt_stats/ultrafeedback")
-    # prompt_rollout(
-    #     prompts=all_user_prompts,
-    #     target_dir=target_dir,
-    #     policy_model=policy,
-    #     N=16,
-    # )
-    # prompt_rating(
-    #     prompts=all_user_prompts,
-    #     target_dir=target_dir,
-    #     rater=rater_1,
-    #     policy_model=policy,
-    # )
+    target_dir = Path("data/prompt_stats/ultrafeedback")
+    prompt_rollout(
+        prompts=all_user_prompts,
+        target_dir=target_dir,
+        policy_model=policy,
+        N=16,
+    )
+    prompt_rating(
+        prompts=all_user_prompts,
+        target_dir=target_dir,
+        rater=rater_1,
+        policy_model=policy,
+    )
     # prompt_rating(
     #     prompts=all_user_prompts,
     #     target_dir=target_dir,
