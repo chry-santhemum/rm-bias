@@ -126,16 +126,19 @@ def parse_json_response(resp: OpenaiResponse) -> Tuple[Any, str]:
     output, reasoning = None, "N/A"
     try:
         raw_text = resp.first_response
+        if is_thinking_model(resp.model):
+            reasoning = resp.reasoning_content
         try:
             output = json.loads(
                 raw_text.split("```json", 1)[1].split("```", 1)[0].strip()
             )
-            if is_thinking_model(resp.model):
-                reasoning = resp.reasoning_content
-            else:
+            if not is_thinking_model(resp.model):
                 reasoning = raw_text.rsplit("```json", 1)[0].strip()
+
         except Exception as e:
-            output, reasoning = raw_text, raw_text
+            output = raw_text
+            if not is_thinking_model(resp.model):
+                reasoning = raw_text
             logger.error(f"Response JSON parse error: {e}")
             logger.error(f"API response: {resp}")
     except Exception as e:

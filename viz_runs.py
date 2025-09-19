@@ -294,9 +294,21 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
                             f"Normalized Score: {aux_info.get('normalized_score', 'N/A')}"
                         )
 
-                        if "reasoning_content" in aux_info:
+                        # Show reasoning if available under either 'reasoning_content' or 'reasoning'
+                        reasoning_text = None
+                        if isinstance(aux_info.get("reasoning_content"), str):
                             reasoning_text = aux_info["reasoning_content"]
+                        elif aux_info.get("reasoning") is not None:
+                            r = aux_info.get("reasoning")
+                            if isinstance(r, str):
+                                reasoning_text = r
+                            else:
+                                try:
+                                    reasoning_text = json.dumps(r, indent=2)
+                                except Exception:
+                                    reasoning_text = str(r)
 
+                        if reasoning_text:
                             # Same height calculation as system prompt
                             chars_per_line = 140
                             explicit_lines = reasoning_text.count("\n") + 1
@@ -315,13 +327,9 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
                             calculated_height = base_height + (
                                 total_lines * line_height
                             )
-                            final_height = max(
-                                100, min(500, calculated_height)
-                            )  # Slightly larger bounds for reasoning
+                            final_height = max(100, min(500, calculated_height))
 
-                            st.text_area(
-                                "Reasoning", reasoning_text, height=final_height
-                            )
+                            st.text_area("Reasoning", reasoning_text, height=final_height)
 
 
 def main():
@@ -344,7 +352,12 @@ def main():
         st.rerun()
 
     # Directory selection first
-    data_dirs = ["data/evo", "data/bon_iter", "data/pair", "data/individual_pairs"]
+    data_dirs = [
+        "data/evo",
+        "data/bon_iter",
+        "data/pair",
+        "data/one_turn",
+    ]
     available_dirs = []
 
     for data_dir in data_dirs:
@@ -354,14 +367,14 @@ def main():
 
     if not available_dirs:
         st.error(
-            "No training directories found in data/evo, data/bon_iter, data/pair, or data/individual_pairs"
+            "No training directories found in data/evo, data/bon_iter, data/pair, or data/one_turn"
         )
         return
 
     selected_directory = st.sidebar.selectbox(
         "Select Directory",
         available_dirs,
-        help="Choose between evolutionary (evo), best-of-N (bon_iter), PAIR, or individual pairs runs",
+        help="Choose between evolutionary (evo), best-of-N (bon_iter), PAIR, or one_turn runs",
     )
 
     # Now get runs from the selected directory

@@ -1,5 +1,4 @@
 # %%
-import doctest
 import patches
 import re
 from typing import Set, Dict, Any
@@ -9,100 +8,110 @@ import random
 import asyncio
 from tqdm.auto import tqdm
 import dotenv
-
-dotenv.load_dotenv()
 import nest_asyncio
-
-nest_asyncio.apply()
 from collections import defaultdict
 import plotly.graph_objects as go
 from pathlib import Path
 
-from sentence_transformers import SentenceTransformer
 from umap import UMAP
-import openai
-from datasets import Dataset, load_dataset
-import numpy as np
+from sentence_transformers import SentenceTransformer
 import pandas as pd
-import torch
 import tiktoken
 from bertopic import BERTopic
 from sklearn.feature_extraction.text import CountVectorizer
-from bertopic.representation import OpenAI
 
+from datasets import Dataset, load_dataset
+
+from llm_types import ChatHistory
 from client import get_universal_caller, sample_from_model_parallel
+
+dotenv.load_dotenv()
+nest_asyncio.apply()
+tokenizer = tiktoken.get_encoding("gpt2")
 
 # %%
 # Filter questions whose responses are too long;
 # By standard we sample 1024 tokens from the policy
 # Here we filter for at most 512 tokens
 
-tokenizer = tiktoken.get_encoding("gpt2")
-
-# ds_iter = load_dataset("allenai/WildChat-1M", split="train", streaming=True)
-ultrafeedback = load_dataset(
-    "HuggingFaceH4/ultrafeedback_binarized", split="train_prefs"
-)
-
-# def add_prompt_length(batch):
-#     """
-#     Takes a batch of examples, tokenizes the prompts,
-#     and adds a new 'prompt_length' column.
-#     """
-#     # Use the optimized 'encode_batch' for speed
-#     prompts = [conv[0]['content'] for conv in batch['conversation']]
-#     encodings = tokenizer.encode_batch(prompts, disallowed_special=())
-#     batch["prompt_length"] = [len(encoding) for encoding in encodings]
-#     return batch
-
-
-# ds_with_length = ds_iter.map(add_prompt_length, batched=True, batch_size=128)
-# ds_filtered = ds_with_length.filter(
-#     lambda ex:
-#     ex["turn"] == 1
-#     and ex["language"] == "English"
-#     and ex["prompt_length"] < 512
-# )
 def preprocess_ultrafeedback(item):
     item["chosen"] = item["chosen"][1]["content"]
     item["rejected"] = item["rejected"][1]["content"]
-    item["prompt_length"] = len(item["prompt"])
-    item["chosen_length"] = len(item["chosen"])
-    item["rejected_length"] = len(item["rejected"])
+    item["prompt_length"] = len(tokenizer.encode(item["prompt"], disallowed_special=()))
+    item["chosen_length"] = len(tokenizer.encode(item["chosen"], disallowed_special=()))
+    item["rejected_length"] = len(tokenizer.encode(item["rejected"], disallowed_special=()))
     return item
 
-
-ultrafeedback = ultrafeedback.map(
+start_time = time.time()
+ultrafeedback = load_dataset(
+    "HuggingFaceH4/ultrafeedback_binarized", split="train_prefs"
+).map(
     preprocess_ultrafeedback,
-    num_proc=8,
+    num_proc=8,  # type: ignore
 ).filter(
-    lambda item: item["prompt_length"] < 1024
-    and item["chosen_length"] < 1024
-    and item["rejected_length"] < 1024,
+    lambda item: item["prompt_length"] < 512
+    and item["chosen_length"] < 512
+    and item["rejected_length"] < 512,
     num_proc=8,
 )
-print("Ultrafeedback after filtering: ", len(ultrafeedback))
-
+print(f"Preprocessing in {time.time() - start_time:.2f}s")
+print("Ultrafeedback after filtering: ", len(ultrafeedback))  # 40477
 
 # %%
-# 154s wtih batch size 128
-
-# start_time = time.time()
-# ds_50k = Dataset.from_list(list(ds_filtered.take(50000)))
-# print(f"Loaded 50k in {time.time() - start_time:.2f}s")
-
 Path("data/ultrafeedback").mkdir(parents=True, exist_ok=True)
-with open("data/ultrafeedback/ds_20k.pkl", "wb") as f:
+with open("data/ultrafeedback/ds_filtered.pkl", "wb") as f:
     pickle.dump(ultrafeedback, f)
+
+# %%
+
+def preprocess_wildchat(item):
+    item["prompt"] = item["conversation"][0]["content"]
+    item["prompt_length"] = len(tokenizer.encode(item["prompt"], disallowed_special=()))
+    return item
+
+wildchat_iter = load_dataset(
+    "allenai/WildChat-1M", split="train", streaming=True
+).filter(
+    lambda ex:
+    ex["turn"] == 1
+    and ex["language"] == "English",
+)
+
+print("Taking 50k...")
+wildchat = Dataset.from_list(list(wildchat_iter.take(50000)))
+
+Path("data/wildchat").mkdir(parents=True, exist_ok=True)
+with open("data/wildchat/ds_pre_filter.pkl", "wb") as f:
+    pickle.dump(wildchat, f)
+
+# %%
+with open("data/wildchat/ds_pre_filter.pkl", "rb") as f:
+    wildchat = pickle.load(f)
+
+print("Preprocessing...")
+start_time = time.time()
+wildchat = wildchat.map(
+    preprocess_wildchat,
+    num_proc=8,
+    remove_columns=wildchat.column_names,
+).filter(
+    lambda ex:
+    ex["prompt_length"] < 512,
+    num_proc=8,
+)
+
+print(f"Preprocessing in {time.time() - start_time:.2f}s")
+print("Wildchat after filtering: ", len(wildchat))  # 41850
+
+with open("data/wildchat/ds_filtered.pkl", "wb") as f:
+    pickle.dump(wildchat, f)
 
 # %%
 # Basic cleaning: normalize, deduplicate, and filter low-quality prompts
 
-
 def _normalize_text(text: str) -> str:
     # lowercase, trim, collapse internal whitespace
     return " ".join(text.lower().strip().split())
-
 
 _STOPWORDS = {
     "the",
@@ -167,11 +176,15 @@ def _is_garbage(text: str) -> bool:
 
 
 def _clean_records(ds: Dataset, min_words: int = 4, max_words: int = 1024) -> Dataset:
-    seen: Set[str] = set()
+    seen_norms: Set[str] = set()
+    seen_shingles: Set[str] = set()
+    shingle_n: int = 5  # word n-gram size
+    dup_overlap_ratio: float = 0.5  # consider duplicate if >=80% shingles already seen
+    min_shingles_for_check: int = 5
     cleaned: list[Dict[str, Any]] = []
     for item in tqdm(ds, desc="Filtering and deduplicating"):
         try:
-            raw = item["conversation"][0]["content"]  # type: ignore[index]
+            raw = item["prompt"]  # type: ignore[index]
             if not isinstance(raw, str):
                 continue
             norm = _normalize_text(raw)
@@ -180,41 +193,66 @@ def _clean_records(ds: Dataset, min_words: int = 4, max_words: int = 1024) -> Da
                 continue
             if _is_garbage(norm):
                 continue
-            if norm in seen:
+            # Fast exact dedup first
+            if norm in seen_norms:
                 continue
-            seen.add(norm)
+
+            # Shingle-based fuzzy dedup (simple and fast)
+            tokens = [t for t in norm.split() if t]
+            if len(tokens) >= shingle_n:
+                shingles = {" ".join(tokens[i : i + shingle_n]) for i in range(len(tokens) - shingle_n + 1)}
+            else:
+                # fallback to unigrams if too short
+                shingles = set(tokens)
+
+            # If we have enough shingles, compute overlap ratio against seen_shingles
+            is_dup = False
+            if len(shingles) >= min_shingles_for_check:
+                overlap = sum((1 for s in shingles if s in seen_shingles))
+                overlap_ratio = overlap / max(1, len(shingles))
+                if overlap_ratio >= dup_overlap_ratio:
+                    is_dup = True
+
+            if is_dup:
+                continue
+
+            # Accept: record exact norm and add shingles to global set
+            seen_norms.add(norm)
+            seen_shingles.update(shingles)
             # keep original content; use normalized only for dedup/filtering
-            new_item = dict(item)
-            conv = list(item["conversation"])  # type: ignore[index]
-            first_turn = dict(conv[0])
-            first_turn["content"] = raw
-            conv[0] = first_turn
-            new_item["conversation"] = conv
-            cleaned.append(new_item)
+            cleaned.append(dict(item))
         except Exception:
             continue
     return Dataset.from_list(cleaned)
 
 
 # %%
-# 20s
 
-with open("data/ultrafeedback/ds_20k.pkl", "rb") as f:
-    ds_20k = pickle.load(f)
+with open("data/ultrafeedback/ds_filtered.pkl", "rb") as f:
+    ultrafeedback = pickle.load(f)
+print("Ultrafeedback before cleaning: ", len(ultrafeedback))
 
 start_time = time.time()
-ds_20k_clean = _clean_records(ds_20k)
+ultrafeedback = _clean_records(ultrafeedback)
 print(f"Data cleaning took {time.time() - start_time:.2f}s")
+print("Ultrafeedback after cleaning: ", len(ultrafeedback))  # 31786
 
-with open("data/ultrafeedback/ds_20k_clean.pkl", "wb") as f:
-    pickle.dump(ds_20k_clean, f)
+with open("data/ultrafeedback/ds_cleaned.pkl", "wb") as f:
+    pickle.dump(ultrafeedback, f)
 
 # %%
-# with open("data/ultrafeedback/ds_20k_clean.pkl", "rb") as f:
-#     ds_20k_clean = pickle.load(f)
-# 41237 rows
 
-print(ds_20k_clean)
+with open("data/wildchat/ds_filtered.pkl", "rb") as f:
+    wildchat = pickle.load(f)
+print("Wildchat before cleaning: ", len(wildchat))
+
+start_time = time.time()
+wildchat = _clean_records(wildchat)
+print(f"Data cleaning took {time.time() - start_time:.2f}s")
+print("Wildchat after cleaning: ", len(wildchat))  # 27025
+
+with open("data/wildchat/ds_cleaned.pkl", "wb") as f:
+    pickle.dump(wildchat, f)
 
 # %%
 # docs = [item["conversation"][0]["content"] for i, item in enumerate(ds_50k_clean)]  # type: ignore
@@ -225,86 +263,84 @@ docs = list(ds_20k["prompt"])
 print(docs[0])
 
 # %%
-# client = openai.OpenAI()
-# CLUSTER_PROMPT_TEMPLATE = """Your task is to extract a short summary label from a list of given documents and keywords. Each document is a user prompt for a chatbot. The summary label should be a short phrase of at most 15 words, summarizing the common topic and intent of the user prompts.
-
-# *Sample documents:*
-# [DOCUMENTS]
-
-# *Keywords:*
-# [KEYWORDS]
-
-# Respond with the short summary label below.
-# """
-
 embedding_model = model = SentenceTransformer("Qwen/Qwen3-Embedding-0.6B")
 
 umap_model = UMAP(
     n_neighbors=15,
-    n_components=5,
+    n_components=10,
     min_dist=0.0,
     metric="cosine",
     low_memory=False,
 )
 
-# representation_model = OpenAI(
-#     client,
-#     model="gpt-5-mini",
-#     prompt=CLUSTER_PROMPT_TEMPLATE,
-#     chat=True,
-#     nr_docs=30,
-# )
+# %%
+with open("data/wildchat/ds_cleaned.pkl", "rb") as f:
+    wildchat = pickle.load(f)
+docs = list(wildchat["prompt"])
+print(docs[10086])
 
 topic_model = BERTopic(
     min_topic_size=30,
     umap_model=umap_model,
     embedding_model=embedding_model,
     vectorizer_model=CountVectorizer(stop_words="english"),
-    # representation_model=representation_model,
 )
 
-# %%
-# 1811s (30 minutes)
-# Need to make this faster
 print("Fitting BERTopic...")
 start_time = time.time()
 topics, probs = topic_model.fit_transform(docs)
 print(f"BERTopic fit_transform in {time.time() - start_time:.2f}s")
 
-# %%
 labels_df = topic_model.get_document_info(docs)
-labels_df.to_csv("data/ultrafeedback/labels_20k.csv", index=True)
+labels_df.to_csv("data/wildchat/labels.csv", index=True)  # type: ignore
+
+# %%
+with open("data/ultrafeedback/ds_cleaned.pkl", "rb") as f:
+    ultrafeedback = pickle.load(f)
+docs = list(ultrafeedback["prompt"])
+print(docs[10086])
+
+topic_model = BERTopic(
+    min_topic_size=30,
+    umap_model=umap_model,
+    embedding_model=embedding_model,
+    vectorizer_model=CountVectorizer(stop_words="english"),
+)
+
+print("Fitting BERTopic...")
+start_time = time.time()
+topics, probs = topic_model.fit_transform(docs)
+print(f"BERTopic fit_transform in {time.time() - start_time:.2f}s")
+
+labels_df = topic_model.get_document_info(docs)
+labels_df.to_csv("data/ultrafeedback/labels.csv", index=True)  # type: ignore
 
 # %%
 
-labels_df = pd.read_csv("data/ultrafeedback/labels_20k.csv")
+labels_df = pd.read_csv("data/ultrafeedback/labels.csv")
 
-# %%
+num_topics = len(set(labels_df["Topic"].tolist()))  # type: ignore
 clusters = defaultdict(list)
 representative = defaultdict(list)
-for topic_id in tqdm(range(0, 86), desc="Processing topics"):
+for topic_id in tqdm(range(0, num_topics - 1), desc="Processing topics"):
     for index, row in labels_df.iterrows():
         if int(row["Topic"]) == topic_id:
             clusters[topic_id].append((row["Document"], row["Probability"]))
             if bool(row["Representative_document"]):
-                print(f"Found representative document for topic {topic_id}")
                 representative[topic_id].append(row["Document"])
 
-# %%
-for topic_id in range(0, 86):
+for topic_id in range(0, num_topics - 1):
     print(f"Topic {topic_id} has {len(clusters[topic_id])} documents")
 
 # %%
+NUM_SAMPLED_DOCS = 30
+CLUSTER_PROMPT_TEMPLATE = """Your task is to extract a short summary label from a list of given documents and keywords. Each document is a user prompt for a chatbot. The summary label should be a short phrase of one or two sentences, summarizing the common *topic* and *intent* of the user prompts. Make sure to summarize both the topic (what the user is asking about) and the intent (what kind of response the user is looking for).
 
-from llm_types import ChatHistory
-
-CLUSTER_PROMPT_TEMPLATE = """Your task is to extract a short summary label from a list of given documents and keywords. Each document is a user prompt for a chatbot. The summary label should be a short phrase of 5-20 words, summarizing the common topic and intent of the user prompts.
-
-## Representative documents (documents that lie close to the center of the cluster)
+## Three representative documents (documents that lie close to the center of the cluster)
 
 {representative_documents}
 
-## 30 randomly sampled documents from the cluster
+## A list of {num_sampled_docs} randomly sampled documents from the cluster
 
 {sample_documents}
 
@@ -313,8 +349,8 @@ Think carefully, and only output the short summary label.
 
 to_send_chats = []
 
-for topic_id in range(0, 86):
-    sample_docs = random.sample(clusters[topic_id], 30)
+for topic_id in range(0, num_topics - 1):
+    sample_docs = random.sample(clusters[topic_id], NUM_SAMPLED_DOCS)
     sample_docs_str = ("\n" + "-" * 10 + "\n").join([doc[0] for doc in sample_docs])
 
     representative_docs = representative[topic_id]
@@ -327,6 +363,7 @@ for topic_id in range(0, 86):
             CLUSTER_PROMPT_TEMPLATE.format(
                 representative_documents=representative_docs_str,
                 sample_documents=sample_docs_str,
+                num_sampled_docs=NUM_SAMPLED_DOCS,
             )
         )
     )
@@ -338,30 +375,39 @@ responses = asyncio.run(
         to_send_chats,
         caller,
         max_par=64,
+        desc="Summarizing topics",
         model="openai/gpt-5",
         reasoning={"effort": "high"},
-        max_tokens=8192,
+        max_tokens=16384,
     )
 )
-
-# %%
-labels = [response.first_response for response in responses]
-
+summaries = [response.first_response for response in responses]
 
 def convert_labels(label: str) -> str:
-    label = int(label)
+    label = int(label)  # type: ignore
     if label == -1:
         return "N/A"
-    return labels[label]
-
+    return summaries[label]  # type: ignore
 
 # add a new column of descriptions in the csv
-labels_df["Topic_Summary"] = labels_df["Topic"].apply(convert_labels)
-labels_df.to_csv("data/ultrafeedback/labels_20k.csv", index=True)
+labels_df["Topic_Summary"] = labels_df["Topic"].apply(convert_labels)  # type: ignore
+labels_df.to_csv("data/ultrafeedback/labels_summaries.csv", index=True)  # type: ignore
+
 
 # %%
-labels_df = pd.read_csv("data/ultrafeedback/labels_20k.csv")
-labels_df
+labels_df = pd.read_csv("data/wildchat/labels_summaries.csv")
+
+num_topics = len(set(labels_df["Topic"].tolist()))  # type: ignore
+summaries = defaultdict(str)
+for topic_id in tqdm(range(0, num_topics - 1), desc="Processing topics"):
+    for index, row in labels_df.iterrows():
+        if int(row["Topic"]) == topic_id:
+            summaries[topic_id] = row["Topic_Summary"]  # type: ignore
+            break
+
+for topic_id in range(0, num_topics - 1):
+    print(f"Topic {topic_id}, summary: {summaries[topic_id]}")
+
 
 # %%
 cluster_topics_df: pd.DataFrame = topic_model.get_topic_info()
@@ -379,18 +425,4 @@ hierarchical_topics_df.to_csv("data/wildchat/hierarch_50k.csv", index=True)
 # %%
 fig: go.Figure = topic_model.visualize_hierarchy()
 fig.write_html("data/wildchat/hierarchy_visual.html")
-
-# %%
-# Re-calculate topic representations
-
-# load labels dataframe
-labels_df: pd.DataFrame = pd.read_csv("data/wildchat/labels_50k.csv")
-topics = labels_df["Topic"].tolist()
-topic_model.topics_ = topics
-topic_model.update_topics(
-    docs,
-    top_n_words=10,
-    topics=topics,
-    representation_model=representation_model,
-)
 # %%
