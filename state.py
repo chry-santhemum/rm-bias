@@ -93,7 +93,6 @@ class Attack:
             return None
         return float(np.mean(raw_scores))
 
-
     def mean_normalized_score(self, rater_model_name: str) -> float | None:
         normalized_scores = []
         for response in self.responses:
@@ -104,8 +103,11 @@ class Attack:
             return None
         return float(np.mean(normalized_scores))
 
-
-    def adversarial_score(self, rater_1_model_name: str|None=None, rater_2_model_name: str|None=None) -> float | None:
+    def adversarial_score(
+        self,
+        rater_1_model_name: str | None = None,
+        rater_2_model_name: str | None = None,
+    ) -> float | None:
         if rater_1_model_name is None:
             rater_1_model_name = self.responses[0].ratings[0].rater.model_name
         if rater_2_model_name is None:
@@ -142,19 +144,41 @@ class SystemPromptStats:
     def parent(self) -> str | None:
         return self.meta.get("parent", None)
 
-    def adversarial_scores(self, rater_1_model_name: str|None=None, rater_2_model_name: str|None=None) -> list[float]:
+    def adversarial_scores(
+        self,
+        rater_1_model_name: str | None = None,
+        rater_2_model_name: str | None = None,
+    ) -> list[float]:
         return [
-            score for attack in self.attacks
-            if (score := attack.adversarial_score(rater_1_model_name, rater_2_model_name)) is not None
+            score
+            for attack in self.attacks
+            if (
+                score := attack.adversarial_score(
+                    rater_1_model_name, rater_2_model_name
+                )
+            )
+            is not None
         ]
 
     @property
-    def mean_adversarial_score(self, rater_1_model_name: str|None=None, rater_2_model_name: str|None=None) -> float:
-        return float(np.mean(self.adversarial_scores(rater_1_model_name, rater_2_model_name)))
+    def mean_adversarial_score(
+        self,
+        rater_1_model_name: str | None = None,
+        rater_2_model_name: str | None = None,
+    ) -> float:
+        return float(
+            np.mean(self.adversarial_scores(rater_1_model_name, rater_2_model_name))
+        )
 
     @property
-    def stdev_adversarial_score(self, rater_1_model_name: str|None=None, rater_2_model_name: str|None=None) -> float:
-        return float(np.std(self.adversarial_scores(rater_1_model_name, rater_2_model_name)))
+    def stdev_adversarial_score(
+        self,
+        rater_1_model_name: str | None = None,
+        rater_2_model_name: str | None = None,
+    ) -> float:
+        return float(
+            np.std(self.adversarial_scores(rater_1_model_name, rater_2_model_name))
+        )
 
 
 @dataclass

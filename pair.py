@@ -2,7 +2,7 @@
 Adapted from PAIR.
 
 Number of LLM calls:
-- Initial planning: 
+- Initial planning:
     - generates n_new system prompts for each train prompt in the seed state, then reduces to n_pop system prompts by clustering.
     - rating: n_pop * n_samples * train_batch_size distinct chat histories
 - Each iteration:
@@ -59,13 +59,17 @@ class PAIRPlanner(OneTurnPlanner):
 
     def _get_past_data_str(self, stats: SystemPromptStats, k_attacks: int = 10) -> str:
         # Filter attacks with computable adversarial score using default raters
-        all_attacks = [attack for attack in stats.attacks if attack.adversarial_score() is not None]
+        all_attacks = [
+            attack for attack in stats.attacks if attack.adversarial_score() is not None
+        ]
         if len(all_attacks) == 0:
             past_data_str = "No information available."
             return past_data_str
 
         # Sort by adversarial score descending
-        all_attacks.sort(key=lambda x: (x.adversarial_score() or float("-inf")), reverse=True)
+        all_attacks.sort(
+            key=lambda x: (x.adversarial_score() or float("-inf")), reverse=True
+        )
 
         # Sample top 3 + random up to k_attacks total
         if len(all_attacks) < 3:

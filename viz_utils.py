@@ -53,7 +53,9 @@ def save_system_prompt_stats(
     file_path = seed_dir / f"{prompt_hash}.json"
 
     # Normalize attacks to dicts
-    attacks_dicts = [convert_attack_to_dict(a) if not isinstance(a, dict) else a for a in attacks]
+    attacks_dicts = [
+        convert_attack_to_dict(a) if not isinstance(a, dict) else a for a in attacks
+    ]
 
     # Compute adversarial scores for system-level stats if not provided
     def _default_rater_pair(atk: Dict[str, Any]) -> tuple[str | None, str | None]:
@@ -95,7 +97,9 @@ def save_system_prompt_stats(
             stdev_score = 0.0
         else:
             m = mean_score
-            stdev_score = (sum((x - m) ** 2 for x in adv_scores) / len(adv_scores)) ** 0.5
+            stdev_score = (
+                sum((x - m) ** 2 for x in adv_scores) / len(adv_scores)
+            ) ** 0.5
 
     data = {
         "system_prompt": system_prompt,
@@ -283,6 +287,7 @@ def convert_system_prompt_stats_to_dict(
         r2 = ratings[1].get("rater", {}).get("model_name")
         if not r1 or not r2:
             continue
+
         # means
         def _mean_norm(rn: str) -> float | None:
             vals: List[float] = []

@@ -23,17 +23,29 @@ st.markdown(
 )
 
 
-def _adaptive_table_height(num_rows: int, min_height: int = 104, max_height: int = 400, row_height: int = 32, header: int = 40, padding: int = 16) -> int:
+def _adaptive_table_height(
+    num_rows: int,
+    min_height: int = 104,
+    max_height: int = 400,
+    row_height: int = 32,
+    header: int = 40,
+    padding: int = 16,
+) -> int:
     estimated = header + padding + max(1, num_rows) * row_height
     return max(min_height, min(max_height, estimated))
 
 
-def _dynamic_text_height(text: str, min_height: int = 80, max_height: int = 400, chars_per_line: int = 140) -> int:
+def _dynamic_text_height(
+    text: str, min_height: int = 80, max_height: int = 400, chars_per_line: int = 140
+) -> int:
     if not text:
         return min_height
     explicit_lines = text.count("\n") + 1
     wrapped_lines = sum(
-        max(1, len(line) // chars_per_line + (1 if len(line) % chars_per_line > 0 else 0))
+        max(
+            1,
+            len(line) // chars_per_line + (1 if len(line) % chars_per_line > 0 else 0),
+        )
         for line in text.split("\n")
     )
     total_lines = max(explicit_lines, wrapped_lines)
@@ -55,7 +67,9 @@ def _render_selectable_df(
     return st.dataframe(
         df_to_show,
         width="stretch",
-        height=_adaptive_table_height(len(df_to_show), min_height=min_height, max_height=max_height),
+        height=_adaptive_table_height(
+            len(df_to_show), min_height=min_height, max_height=max_height
+        ),
         on_select="rerun",
         selection_mode=selection_mode,
         hide_index=True,
@@ -134,7 +148,9 @@ def _extract_rater_names_from_attack(attack: Dict[str, Any]) -> List[str]:
     return rater_models
 
 
-def _mean_scores_for_attack_by_rater(attack: Dict[str, Any]) -> Dict[str, Tuple[float | None, float | None]]:
+def _mean_scores_for_attack_by_rater(
+    attack: Dict[str, Any],
+) -> Dict[str, Tuple[float | None, float | None]]:
     """Return mapping rater_name -> (mean_raw_score, mean_normalized_score)."""
     result: Dict[str, Tuple[float | None, float | None]] = {}
     rater_names = _extract_rater_names_from_attack(attack)
@@ -157,7 +173,9 @@ def _mean_scores_for_attack_by_rater(attack: Dict[str, Any]) -> Dict[str, Tuple[
     return result
 
 
-def _default_rater_pair_for_attack(attack: Dict[str, Any]) -> Tuple[str | None, str | None]:
+def _default_rater_pair_for_attack(
+    attack: Dict[str, Any],
+) -> Tuple[str | None, str | None]:
     """Auto-detect default rater pair as per state.Attack.adversarial_score default.
     Uses the first response's first two ratings if present.
     """
@@ -172,7 +190,9 @@ def _default_rater_pair_for_attack(attack: Dict[str, Any]) -> Tuple[str | None, 
     return (None, None)
 
 
-def _adversarial_score_for_attack(attack: Dict[str, Any], r1: str | None = None, r2: str | None = None) -> float | None:
+def _adversarial_score_for_attack(
+    attack: Dict[str, Any], r1: str | None = None, r2: str | None = None
+) -> float | None:
     if r1 is None or r2 is None:
         r1, r2 = _default_rater_pair_for_attack(attack)
     if not r1 or not r2:
@@ -188,7 +208,9 @@ def _adversarial_score_for_attack(attack: Dict[str, Any], r1: str | None = None,
         return None
 
 
-def _compute_system_prompt_adv_stats(prompt_data: Dict[str, Any]) -> Tuple[float | None, float | None]:
+def _compute_system_prompt_adv_stats(
+    prompt_data: Dict[str, Any],
+) -> Tuple[float | None, float | None]:
     """Compute mean and stdev adversarial score across attacks for a system prompt."""
     attacks = prompt_data.get("attacks", [])
     adv_scores: List[float] = []
@@ -208,8 +230,12 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
 
     # Show system prompt text with dynamic height
     system_prompt_text = prompt_data.get("system_prompt", "")
-    system_height = _dynamic_text_height(system_prompt_text, min_height=80, max_height=400)
-    st.text_area("System Prompt Text", system_prompt_text, height=system_height, disabled=True)
+    system_height = _dynamic_text_height(
+        system_prompt_text, min_height=80, max_height=400
+    )
+    st.text_area(
+        "System Prompt Text", system_prompt_text, height=system_height, disabled=True
+    )
 
     # Show metadata
     meta = prompt_data.get("meta", {})
@@ -260,7 +286,8 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
             user_prompt = attack.get("user", "")
             row = {
                 "Attack #": i + 1,
-                "User Prompt": user_prompt[:100] + ("..." if len(user_prompt) > 100 else ""),
+                "User Prompt": user_prompt[:100]
+                + ("..." if len(user_prompt) > 100 else ""),
             }
 
             means = _mean_scores_for_attack_by_rater(attack)
@@ -274,7 +301,9 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
                 )
 
             adv = _adversarial_score_for_attack(attack)
-            row["Adversarial Score"] = f"{adv:.3f}" if isinstance(adv, (int, float)) else "N/A"
+            row["Adversarial Score"] = (
+                f"{adv:.3f}" if isinstance(adv, (int, float)) else "N/A"
+            )
             attack_rows.append(row)
 
         attack_df = pd.DataFrame(attack_rows)
@@ -293,7 +322,9 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
             user_text = attack.get("user", "")
             user_height = _dynamic_text_height(user_text, min_height=80, max_height=400)
             st.subheader("User Prompt")
-            st.text_area("User Prompt Text", user_text, height=user_height, disabled=True)
+            st.text_area(
+                "User Prompt Text", user_text, height=user_height, disabled=True
+            )
 
             # RatedResponses table
             responses = attack.get("responses", [])
@@ -319,9 +350,17 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
                 for r in raters:
                     rating = ratings_by_rater.get(r)
                     raw = rating.get("raw_score") if rating else None
-                    norm = rating.get("aux_info", {}).get("normalized_score") if rating else None
-                    row[f"Raw | {r}"] = f"{raw:.3f}" if isinstance(raw, (int, float)) else "N/A"
-                    row[f"Norm | {r}"] = f"{norm:.3f}" if isinstance(norm, (int, float)) else "N/A"
+                    norm = (
+                        rating.get("aux_info", {}).get("normalized_score")
+                        if rating
+                        else None
+                    )
+                    row[f"Raw | {r}"] = (
+                        f"{raw:.3f}" if isinstance(raw, (int, float)) else "N/A"
+                    )
+                    row[f"Norm | {r}"] = (
+                        f"{norm:.3f}" if isinstance(norm, (int, float)) else "N/A"
+                    )
                 rr_rows.append(row)
 
             rr_df = pd.DataFrame(rr_rows)
@@ -337,9 +376,16 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
                 original_idx = rr_df.iloc[selected_row]["Index"]
                 full_text = responses[original_idx].get("assistant", "")
 
-                full_height = _dynamic_text_height(full_text, min_height=120, max_height=720)
+                full_height = _dynamic_text_height(
+                    full_text, min_height=120, max_height=720
+                )
                 st.subheader(f"Response #{int(original_idx) + 1} Full Text")
-                st.text_area("Assistant Full Response", full_text, height=full_height, disabled=True)
+                st.text_area(
+                    "Assistant Full Response",
+                    full_text,
+                    height=full_height,
+                    disabled=True,
+                )
 
 
 def main():
@@ -522,7 +568,9 @@ def main():
                     meta = prompt_data.get("meta", {})
                     mean_adv, std_adv = _compute_system_prompt_adv_stats(prompt_data)
                     mean_display = (
-                        f"{mean_adv:.3f}" if isinstance(mean_adv, (int, float)) else "N/A"
+                        f"{mean_adv:.3f}"
+                        if isinstance(mean_adv, (int, float))
+                        else "N/A"
                     )
                     std_display = (
                         f"{std_adv:.3f}" if isinstance(std_adv, (int, float)) else "N/A"
@@ -531,8 +579,11 @@ def main():
                         {
                             "Step": meta.get("step", "N/A"),
                             "Operation": meta.get("operation", "N/A"),
-                            "System Prompt": prompt_data["system_prompt"][:80]
-                            + "..." if len(prompt_data["system_prompt"]) > 80 else prompt_data["system_prompt"],
+                            "System Prompt": (
+                                prompt_data["system_prompt"][:80] + "..."
+                                if len(prompt_data["system_prompt"]) > 80
+                                else prompt_data["system_prompt"]
+                            ),
                             "Mean Adv Score": mean_display,
                             "Std Adv Score": std_display,
                             "Num Attacks": len(prompt_data.get("attacks", [])),
@@ -767,7 +818,9 @@ def main():
                                         pop_df_step,
                                         width="stretch",
                                         hide_index=True,
-                                        height=_adaptive_table_height(len(pop_df_step), max_height=600),
+                                        height=_adaptive_table_height(
+                                            len(pop_df_step), max_height=600
+                                        ),
                                     )
                                 else:
                                     st.info("Population data not fully loaded")
@@ -809,7 +862,9 @@ def main():
                                     candidates_df,
                                     width="stretch",
                                     hide_index=True,
-                                    height=_adaptive_table_height(len(candidates_df), max_height=600),
+                                    height=_adaptive_table_height(
+                                        len(candidates_df), max_height=600
+                                    ),
                                 )
                 else:
                     st.info("No population history available for this seed")

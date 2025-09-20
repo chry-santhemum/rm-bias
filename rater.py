@@ -93,7 +93,10 @@ class PolicyModel:
         return completed_chat_histories
 
     async def get_attacks_for_system_prompt(
-        self, sps: SystemPromptStats, train_batch_prompts: list[str] = [], n_samples: int = 1,
+        self,
+        sps: SystemPromptStats,
+        train_batch_prompts: list[str] = [],
+        n_samples: int = 1,
     ) -> list[Attack]:
         """
         Modifies sps.attacks in-place.
@@ -114,17 +117,22 @@ class PolicyModel:
             policy_responses = await self.sample(policy_inputs)
             attacks = [
                 Attack(
-                    system=system_prompt, 
-                    user=train_batch_prompts[i], 
-                    responses=[RatedResponse(
-                        assistant=response.get_first("assistant"), ratings=[]
-                    ) for response in policy_responses[i * n_samples : (i + 1) * n_samples]], 
+                    system=system_prompt,
+                    user=train_batch_prompts[i],
+                    responses=[
+                        RatedResponse(
+                            assistant=response.get_first("assistant"), ratings=[]
+                        )
+                        for response in policy_responses[
+                            i * n_samples : (i + 1) * n_samples
+                        ]
+                    ],
                     aux_info={
                         "policy_model_name": self.model_name,
                         "policy_temperature": self.temperature,
                         "policy_max_tokens": self.max_tokens,
-                        "n_samples": n_samples
-                    }
+                        "n_samples": n_samples,
+                    },
                 )
                 for i in range(len(train_batch_prompts))
             ]
@@ -354,7 +362,9 @@ class RatingFunction(ABC):
                 train_batch_prompts=train_batch_prompts,
                 n_samples=n_samples,
             ),
-            max_par=max(1, policy_model.max_par // (n_samples * len(train_batch_prompts))),
+            max_par=max(
+                1, policy_model.max_par // (n_samples * len(train_batch_prompts))
+            ),
         )
         attacks: list[Attack] = []
         attack_to_sps_idx: list[int] = []
@@ -399,19 +409,26 @@ class RatingFunction(ABC):
         for attack_idx, attack in enumerate(attacks):
             for response_idx, response in enumerate(attack.responses):
                 chat_histories.append(
-                    ChatHistory().add_user(attack.user).add_assistant(response.assistant) 
+                    ChatHistory()
+                    .add_user(attack.user)
+                    .add_assistant(response.assistant)
                 )
                 chat_histories_to_attack_idx.append((attack_idx, response_idx))
 
         rating_results = await self.rate(chat_histories)
-        scores: list[float | None] = [result.get("score", None) for result in rating_results]
-        reasonings: list[str] = [result.get("reasoning", "N/A") for result in rating_results]
+        scores: list[float | None] = [
+            result.get("score", None) for result in rating_results
+        ]
+        reasonings: list[str] = [
+            result.get("reasoning", "N/A") for result in rating_results
+        ]
 
         # Normalize scores
         if per_prompt_normalize:
             normalized_scores = [
                 (
-                    (scores[i] - per_prompt_means[chat_histories_to_attack_idx[i][0]]) / (self.stdev + 1e-6)
+                    (scores[i] - per_prompt_means[chat_histories_to_attack_idx[i][0]])
+                    / (self.stdev + 1e-6)
                     if scores[i] is not None
                     else None
                 )
@@ -427,13 +444,13 @@ class RatingFunction(ABC):
                 for i in range(len(scores))
             ]
 
-        
         for i in range(len(chat_histories)):
             attack_idx, response_idx = chat_histories_to_attack_idx[i]
 
-            if (
-                self.rater not in [rating.rater for rating in attacks[attack_idx].responses[response_idx].ratings]
-            ):
+            if self.rater not in [
+                rating.rater
+                for rating in attacks[attack_idx].responses[response_idx].ratings
+            ]:
                 attacks[attack_idx].responses[response_idx].ratings.append(
                     Rating(
                         raw_score=scores[i],  # type: ignore

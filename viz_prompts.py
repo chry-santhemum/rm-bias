@@ -23,7 +23,14 @@ st.markdown(
 )
 
 
-def _adaptive_table_height(num_rows: int, min_height: int = 104, max_height: int = 400, row_height: int = 32, header: int = 40, padding: int = 16) -> int:
+def _adaptive_table_height(
+    num_rows: int,
+    min_height: int = 104,
+    max_height: int = 400,
+    row_height: int = 32,
+    header: int = 40,
+    padding: int = 16,
+) -> int:
     estimated = header + padding + max(1, num_rows) * row_height
     return max(min_height, min(max_height, estimated))
 
