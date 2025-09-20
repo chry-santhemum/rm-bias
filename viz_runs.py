@@ -8,6 +8,60 @@ from state import adversariality
 
 st.set_page_config(page_title="Run Visualization", layout="wide")
 
+# Make disabled textareas render with black text (read-only but not greyed out)
+st.markdown(
+    """
+    <style>
+    .stTextArea textarea:disabled, textarea[disabled] {
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+        opacity: 1 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+def _adaptive_table_height(num_rows: int, min_height: int = 104, max_height: int = 400, row_height: int = 32, header: int = 40, padding: int = 16) -> int:
+    estimated = header + padding + max(1, num_rows) * row_height
+    return max(min_height, min(max_height, estimated))
+
+
+def _dynamic_text_height(text: str, min_height: int = 80, max_height: int = 400, chars_per_line: int = 140) -> int:
+    if not text:
+        return min_height
+    explicit_lines = text.count("\n") + 1
+    wrapped_lines = sum(
+        max(1, len(line) // chars_per_line + (1 if len(line) % chars_per_line > 0 else 0))
+        for line in text.split("\n")
+    )
+    total_lines = max(explicit_lines, wrapped_lines)
+    base_height = 50
+    line_height = 22
+    calculated_height = base_height + (total_lines * line_height)
+    return max(min_height, min(max_height, calculated_height))
+
+
+def _render_selectable_df(
+    df: pd.DataFrame,
+    drop_cols: List[str] | None = None,
+    min_height: int = 104,
+    max_height: int = 400,
+    selection_mode: str = "single-row",
+    key: str | None = None,
+):
+    df_to_show = df.drop(columns=drop_cols, errors="ignore") if drop_cols else df
+    return st.dataframe(
+        df_to_show,
+        width="stretch",
+        height=_adaptive_table_height(len(df_to_show), min_height=min_height, max_height=max_height),
+        on_select="rerun",
+        selection_mode=selection_mode,
+        hide_index=True,
+        key=key,
+    )
+
 
 @st.cache_data
 def load_run_data(run_path_str: str) -> Dict[str, Any]:
@@ -154,28 +208,8 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
 
     # Show system prompt text with dynamic height
     system_prompt_text = prompt_data.get("system_prompt", "")
-
-    # More accurate height calculation considering line wrapping
-    chars_per_line = 140
-    explicit_lines = system_prompt_text.count("\n") + 1
-    wrapped_lines = sum(
-        max(
-            1,
-            len(line) // chars_per_line + (1 if len(line) % chars_per_line > 0 else 0),
-        )
-        for line in system_prompt_text.split("\n")
-    )
-    total_lines = max(explicit_lines, wrapped_lines)
-
-    # Calculate height: base height + line height * number of lines
-    base_height = 50  # Base height for input field
-    line_height = 22  # Height per line of text
-    calculated_height = base_height + (total_lines * line_height)
-
-    # Apply bounds
-    final_height = max(80, min(400, calculated_height))
-
-    st.text_area("System Prompt Text", system_prompt_text, height=final_height)
+    system_height = _dynamic_text_height(system_prompt_text, min_height=80, max_height=400)
+    st.text_area("System Prompt Text", system_prompt_text, height=system_height, disabled=True)
 
     # Show metadata
     meta = prompt_data.get("meta", {})
@@ -246,20 +280,20 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
         attack_df = pd.DataFrame(attack_rows)
 
         # Display attacks table with selection
-        selected_attack = st.dataframe(
-            attack_df,
-            width="stretch",
-            on_select="rerun",
-            selection_mode="single-row",
-            hide_index=True,
-        )
+        selected_attack = _render_selectable_df(attack_df)
 
         # Show detailed view of selected attack - list of RatedResponses
-        if selected_attack["selection"]["rows"]:
-            selected_idx = selected_attack["selection"]["rows"][0]
+        if selected_attack["selection"]["rows"]:  # type: ignore
+            selected_idx = selected_attack["selection"]["rows"][0]  # type: ignore
             attack = attacks[selected_idx]
 
             st.subheader(f"Attack #{selected_idx + 1} Details")
+
+            # User prompt textbox (monospace, raw)
+            user_text = attack.get("user", "")
+            user_height = _dynamic_text_height(user_text, min_height=80, max_height=400)
+            st.subheader("User Prompt")
+            st.text_area("User Prompt Text", user_text, height=user_height, disabled=True)
 
             # RatedResponses table
             responses = attack.get("responses", [])
@@ -291,36 +325,21 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
                 rr_rows.append(row)
 
             rr_df = pd.DataFrame(rr_rows)
-            selected_rr = st.dataframe(
-                rr_df.drop("Index", axis=1),
-                width="stretch",
-                height=500,
-                on_select="rerun",
-                selection_mode="single-row",
-                hide_index=True,
+            selected_rr = _render_selectable_df(
+                rr_df,
+                drop_cols=["Index"],
+                max_height=600,
             )
 
             # Show full response text for selected row
-            if selected_rr["selection"]["rows"]:
-                selected_row = selected_rr["selection"]["rows"][0]
+            if selected_rr["selection"]["rows"]:  # type: ignore
+                selected_row = selected_rr["selection"]["rows"][0]  # type: ignore
                 original_idx = rr_df.iloc[selected_row]["Index"]
                 full_text = responses[original_idx].get("assistant", "")
 
-                # Dynamic height similar to system prompt calculation
-                chars_per_line = 140
-                explicit_lines = full_text.count("\n") + 1 if full_text else 1
-                wrapped_lines = sum(
-                    max(1, len(line) // chars_per_line + (1 if len(line) % chars_per_line > 0 else 0))
-                    for line in (full_text.split("\n") if full_text else [""])
-                )
-                total_lines = max(explicit_lines, wrapped_lines)
-                base_height = 50
-                line_height = 22
-                calculated_height = base_height + (total_lines * line_height)
-                final_height = max(120, min(720, calculated_height))
-
+                full_height = _dynamic_text_height(full_text, min_height=120, max_height=720)
                 st.subheader(f"Response #{int(original_idx) + 1} Full Text")
-                st.text_area("Full Response", full_text, height=final_height)
+                st.text_area("Assistant Full Response", full_text, height=full_height, disabled=True)
 
 
 def main():
@@ -372,10 +391,10 @@ def main():
         help="Choose between evolutionary (evo), best-of-N (bon_iter), PAIR, or one_turn runs",
     )
 
-    selected_directory = selected_dir_entry[0]
+    selected_directory = selected_dir_entry[0]  # type: ignore
 
     # Now get runs from the selected directory
-    dir_path = selected_dir_entry[1]
+    dir_path = selected_dir_entry[1]  # type: ignore
     available_runs = []
 
     if dir_path.exists():
@@ -387,7 +406,7 @@ def main():
         st.error(f"No runs found in {selected_directory}")
         return
 
-    selected_run_name, selected_run_path = st.sidebar.selectbox(
+    selected_run_name, selected_run_path = st.sidebar.selectbox(  # type: ignore
         "Select Run",
         available_runs,
         format_func=lambda x: x[0],
@@ -524,18 +543,14 @@ def main():
                 overview_df = pd.DataFrame(overview_data)
 
                 # Display with selection
-                selected_prompt = st.dataframe(
+                selected_prompt = _render_selectable_df(
                     overview_df,
-                    width="stretch",
-                    height=700,
-                    on_select="rerun",
-                    selection_mode="single-row",
-                    hide_index=True,
+                    max_height=720,
                 )
 
                 # Show details for selected prompt
-                if selected_prompt["selection"]["rows"]:
-                    selected_idx = selected_prompt["selection"]["rows"][0]
+                if selected_prompt["selection"]["rows"]:  # type: ignore
+                    selected_idx = selected_prompt["selection"]["rows"][0]  # type: ignore
                     prompt_hash = sorted_prompts[selected_idx][0]
                     prompt_data = sorted_prompts[selected_idx][1]
 
@@ -749,7 +764,10 @@ def main():
                                         "Score", ascending=False
                                     )
                                     st.dataframe(
-                                        pop_df_step, width="stretch", hide_index=True
+                                        pop_df_step,
+                                        width="stretch",
+                                        hide_index=True,
+                                        height=_adaptive_table_height(len(pop_df_step), max_height=600),
                                     )
                                 else:
                                     st.info("Population data not fully loaded")
@@ -788,7 +806,10 @@ def main():
                                     step_candidates
                                 ).sort_values("Score", ascending=False)
                                 st.dataframe(
-                                    candidates_df, width="stretch", hide_index=True
+                                    candidates_df,
+                                    width="stretch",
+                                    hide_index=True,
+                                    height=_adaptive_table_height(len(candidates_df), max_height=600),
                                 )
                 else:
                     st.info("No population history available for this seed")
@@ -811,7 +832,7 @@ def main():
             with col2:
                 # Average scores by operation
                 op_scores = (
-                    pop_df.groupby("Operation")["Score"]
+                    pop_df.groupby("Operation")["Score"]  # type: ignore
                     .mean()
                     .sort_values(ascending=False)
                 )

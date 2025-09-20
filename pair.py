@@ -1,3 +1,18 @@
+"""
+Adapted from PAIR.
+
+Number of LLM calls:
+- Initial planning: 
+    - generates n_new system prompts for each train prompt in the seed state, then reduces to n_pop system prompts by clustering.
+    - rating: n_pop * n_samples * train_batch_size distinct chat histories
+- Each iteration:
+    - generates m_var system prompts for each train prompt in the seed state, then reduces to n_pop system prompts by clustering.
+    - rating: n_pop * n_samples * train_batch_size distinct chat histories
+- Total:
+    - Planner: num_train_prompts + (t_steps - 1) * n_pop
+    - Rater: n_pop * n_samples * train_batch_size * t_steps
+"""
+
 # %%
 import patches  # monkey patching
 import json
@@ -283,9 +298,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--n_new", type=int, default=3)
-    parser.add_argument("--n_pop", type=int, default=5)
-    parser.add_argument("--m_var", type=int, default=3)
-    parser.add_argument("--n_samples", type=int, default=1)
+    parser.add_argument("--n_pop", type=int, default=8)
+    parser.add_argument("--m_var", type=int, default=1)
+    parser.add_argument("--n_samples", type=int, default=8)
     parser.add_argument("--t_steps", type=int, required=True)
     parser.add_argument("--dataset", type=str, default="instruction-dataset")
     parser.add_argument("--stats", action="store_true")

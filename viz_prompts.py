@@ -8,6 +8,25 @@ import plotly.express as px
 
 st.set_page_config(page_title="User Prompts Visualization", layout="wide")
 
+# Make disabled textareas render with black text (read-only but not greyed out)
+st.markdown(
+    """
+    <style>
+    .stTextArea textarea:disabled, textarea[disabled] {
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+        opacity: 1 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+def _adaptive_table_height(num_rows: int, min_height: int = 104, max_height: int = 400, row_height: int = 32, header: int = 40, padding: int = 16) -> int:
+    estimated = header + padding + max(1, num_rows) * row_height
+    return max(min_height, min(max_height, estimated))
+
 
 @st.cache_data
 def discover_datasets(stats_dir_str: str) -> List[str]:
@@ -324,7 +343,7 @@ def display_prompt_details(data: Dict[str, Any]):
         selected_rollout = st.dataframe(
             rollout_df.drop("Index", axis=1),
             width="stretch",
-            height=600,
+            height=_adaptive_table_height(len(rollout_df), max_height=600),
             on_select="rerun",
             selection_mode="single-row",
             hide_index=True,
