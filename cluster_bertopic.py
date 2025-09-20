@@ -12,6 +12,7 @@ import nest_asyncio
 from collections import defaultdict
 import plotly.graph_objects as go
 from pathlib import Path
+from pprint import pprint
 
 from umap import UMAP
 from sentence_transformers import SentenceTransformer
@@ -327,24 +328,25 @@ labels_df.to_csv("data/ultrafeedback/labels.csv", index=True)  # type: ignore
 
 # %%
 
-labels_df = pd.read_csv("data/ultrafeedback/labels.csv")
+labels_df = pd.read_csv("data/wildchat/labels.csv")
 
 num_topics = len(set(labels_df["Topic"].tolist()))  # type: ignore
 clusters = defaultdict(list)
 representative = defaultdict(list)
-for topic_id in tqdm(range(0, num_topics - 1), desc="Processing topics"):
-    for index, row in labels_df.iterrows():
-        if int(row["Topic"]) == topic_id:
-            clusters[topic_id].append((row["Document"], row["Probability"]))
-            if bool(row["Representative_document"]):
-                representative[topic_id].append(row["Document"])
+
+for index, row in labels_df.iterrows():
+    topic_id = int(row["Topic"])
+    if topic_id >= 0:
+        clusters[topic_id].append((row["Document"], row["Probability"]))
+        if bool(row["Representative_document"]):
+            representative[topic_id].append(row["Document"])
 
 for topic_id in range(0, num_topics - 1):
     print(f"Topic {topic_id} has {len(clusters[topic_id])} documents")
 
 # %%
 NUM_SAMPLED_DOCS = 30
-CLUSTER_PROMPT_TEMPLATE = """Your task is to extract a short summary label from a list of given documents and keywords. Each document is a user prompt for a chatbot. The summary label should be a short phrase of one or two sentences, summarizing the common *topic* and *intent* of the user prompts. Make sure to summarize both the topic (what the user is asking about) and the intent (what kind of response the user is looking for).
+CLUSTER_PROMPT_TEMPLATE = """Your task is to extract a short summary label from a list of given documents and keywords. Each document is a user prompt for a chatbot. The summary label should be a short phrase of at most one sentence, summarizing the common *topic* and *intent* of the user prompts *on a high level*. Make sure to summarize both the topic (what the user is asking about) and the intent (what kind of response the user is looking for).
 
 ## Three representative documents (documents that lie close to the center of the cluster)
 
@@ -387,13 +389,18 @@ responses = asyncio.run(
         max_par=64,
         desc="Summarizing topics",
         model="openai/gpt-5",
-        reasoning={"effort": "high"},
-        max_tokens=16384,
+        reasoning={"effort": "medium"},
+        max_tokens=8192,
     )
 )
 summaries = [response.first_response for response in responses]
 
+# %%
 
+pprint(summaries)
+
+
+# %%
 def convert_labels(label: str) -> str:
     label = int(label)  # type: ignore
     if label == -1:
@@ -403,44 +410,131 @@ def convert_labels(label: str) -> str:
 
 # add a new column of descriptions in the csv
 labels_df["Topic_Summary"] = labels_df["Topic"].apply(convert_labels)  # type: ignore
-labels_df.to_csv("data/ultrafeedback/labels_summaries.csv", index=True)  # type: ignore
+labels_df.to_csv("data/wildchat/labels_summaries.csv", index=True)  # type: ignore
 
 
 # %%
-labels_df = pd.read_csv("data/wildchat/labels_summaries.csv")
+# Filtering out prompts that are not well-described by the cluster summary
+
+labels_df = pd.read_csv("data/ultrafeedback/labels_summaries.csv")
 
 num_topics = len(set(labels_df["Topic"].tolist()))  # type: ignore
 summaries = defaultdict(str)
 clusters = defaultdict(list)
-for topic_id in tqdm(range(0, num_topics - 1), desc="Processing topics"):
-    for index, row in labels_df.iterrows():
-        if int(row["Topic"]) == topic_id:
-            clusters[topic_id].append((row["Document"], row["Probability"]))
-            if topic_id not in summaries:
-                summaries[topic_id] = row["Topic_Summary"]  # type: ignore
 
-for topic_id in range(0, num_topics - 1):
+for index, row in labels_df.iterrows():
+    topic_id = int(row["Topic"])
+    if topic_id >= 0:
+        clusters[topic_id].append(row)
+        if topic_id not in summaries:
+            summaries[topic_id] = row["Topic_Summary"]  # type: ignore
+
+start, end = 21, 31
+
+for topic_id in range(start, end):
     print(
         f"Topic {topic_id}: {len(clusters[topic_id])} docs, summary: {summaries[topic_id]}"
     )
+    sorted_cluster = sorted(
+        clusters[topic_id], key=lambda row: float(row["Probability"]), reverse=True
+    )
+    clusters[topic_id] = sorted_cluster[:200]
 
-
-VERIFICATION_PROMPT_TEMPLATE = """Your task is to decide whether a given summary accurately reflects the *topic* and *intent* of a given user prompt."""
-
-# %%
-cluster_topics_df: pd.DataFrame = topic_model.get_topic_info()
-cluster_topics_df.to_csv("data/ultrafeedback/cluster_20k.csv", index=True)
-
-# %%
-# 1309s (22 minutes)
-print("Computing hierarchical topics...")
-start_time = time.time()
-hierarchical_topics_df: pd.DataFrame = topic_model.hierarchical_topics(docs)
-print(f"BERTopic hierarchical_topics in {time.time() - start_time:.2f}s")
-hierarchical_topics_df.to_csv("data/wildchat/hierarch_50k.csv", index=True)
-
+    # for row in clusters[topic_id][:10]:
+    #     print(row["Document"])
+    #     print("-"*80)
 
 # %%
-fig: go.Figure = topic_model.visualize_hierarchy()
-fig.write_html("data/wildchat/hierarchy_visual.html")
+VERIFICATION_PROMPT_TEMPLATE = """Your task is to decide whether a given summary accurately reflects the *topic* and *intent* of a given user prompt.
+
+## User Prompt
+
+{user_prompt}
+
+## Summary
+
+{summary}
+
+As a useful heuristic, you can consider the summary to accurately reflect the user prompt, if any generic response to the summary can be adapted to be a response to the specific user prompt.
+
+Think carefully, and only output "Yes" or "No" in your response: "Yes" if the summary accurately reflects the user prompt, "No" otherwise.
+"""
+
+
+to_send_chats = []
+chat_topic_ids = []
+rows_list = []
+
+for topic_id in range(start, end):
+    for row in clusters[topic_id]:
+        to_send_chats.append(
+            ChatHistory.from_system(
+                "You are an expert at summarizing documents and understanding user prompts."
+            ).add_user(
+                VERIFICATION_PROMPT_TEMPLATE.format(
+                    summary=summaries[topic_id],
+                    user_prompt=row["Document"],
+                )
+            )
+        )
+        chat_topic_ids.append(topic_id)
+        rows_list.append(row)
+
+print(f"Sending {len(to_send_chats)} chats to the model")
+
+# %%
+caller = get_universal_caller()
+responses = asyncio.run(
+    sample_from_model_parallel(
+        to_send_chats,
+        caller,
+        max_par=32,
+        desc="Filtering prompts",
+        model="openai/gpt-5-mini",
+        reasoning={"effort": "high"},
+        max_tokens=4096,
+    )
+)
+answers = [response.first_response for response in responses]
+
+# %%
+pprint(answers)
+
+# %%
+filtered_stats = defaultdict(int)
+for i, answer in enumerate(answers):
+    if answer.lower() == "yes":
+        rows_list[i]["Verified"] = True
+        filtered_stats[chat_topic_ids[i]] += 1
+    else:
+        rows_list[i]["Verified"] = False
+    rows_list[i]["Verified_Reasoning"] = responses[i].reasoning_content
+
+for topic_id in range(start, end):
+    print(f"Topic {topic_id} has {filtered_stats[topic_id]} documents")
+
+# %%
+# Put rows into a df
+
+filtered_rows_df = pd.DataFrame(rows_list)
+filtered_rows_df.to_csv("data/wildchat/ds_verified_test.csv", index=True)
+
+# %%
+
+responses[0].reasoning_content
+
+
+# %%
+# cluster_topics_df: pd.DataFrame = topic_model.get_topic_info()
+# cluster_topics_df.to_csv("data/ultrafeedback/cluster_20k.csv", index=True)
+
+# # 1309s (22 minutes)
+# print("Computing hierarchical topics...")
+# start_time = time.time()
+# hierarchical_topics_df: pd.DataFrame = topic_model.hierarchical_topics(docs)
+# print(f"BERTopic hierarchical_topics in {time.time() - start_time:.2f}s")
+# hierarchical_topics_df.to_csv("data/wildchat/hierarch_50k.csv", index=True)
+
+# fig: go.Figure = topic_model.visualize_hierarchy()
+# fig.write_html("data/wildchat/hierarchy_visual.html")
 # %%

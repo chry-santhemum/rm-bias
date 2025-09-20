@@ -8,11 +8,14 @@ import logging
 import asyncio
 from tqdm.auto import tqdm
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Tuple
 from slist import Slist
 from abc import ABC, abstractmethod
+from collections import defaultdict
 
 import numpy as np
+import pandas as pd
+from datasets import load_dataset
 from umap import UMAP
 from sklearn.cluster import KMeans
 from sklearn.metrics import pairwise_distances_argmin_min
@@ -22,9 +25,17 @@ from utils import timestamp, get_to_pass_reasoning
 from viz_utils import (
     save_system_prompt_stats,
     convert_attack_to_dict,
+    save_cluster_info,
 )
-from rater import PolicyModel, RatingFunction
-from state import SeedState
+from rater import (
+    prompt_rollout,
+    prompt_rating,
+    prompt_to_hash_path,
+    PolicyModel, 
+    RatingFunction, 
+    normalize,
+)
+from state import SeedState, Cluster
 from defaults import *
 from client import get_universal_caller, sample_from_model_parallel, OpenaiResponse
 from llm_types import ChatHistory
@@ -54,9 +65,13 @@ class ClusterModel:
         embeddings: np.ndarray = self.embedding_model.encode(inputs)
         return self.umap_model.fit_transform(embeddings)  # type: ignore
 
-    def cluster(self, inputs: list[str], n_clusters: int) -> list[str]:
+    def cluster(self, inputs: list[str], n_clusters: int) -> Tuple[list[str], list[int]]:
         reduced_embeddings = self.embed(inputs)
-        kmeans = KMeans(n_clusters=n_clusters, random_state=10086, n_init="auto")
+        kmeans = KMeans(
+            n_clusters=min(len(inputs), n_clusters), 
+            random_state=10086, 
+            n_init="auto"
+        )
         kmeans.fit(reduced_embeddings)
 
         closest_point_indices, _ = pairwise_distances_argmin_min(
@@ -66,7 +81,7 @@ class ClusterModel:
         sorted_indices = sorted(closest_point_indices)
         selected = [inputs[i] for i in sorted_indices]
 
-        return selected
+        return selected, sorted_indices
 
 
 class Planner(ABC):
@@ -106,23 +121,19 @@ class Planner(ABC):
             )
 
     async def _sample_from_model_parallel(
-        self, prompts: list[ChatHistory]
+        self, prompts: list[ChatHistory], desc: str="Planning"
     ) -> Slist[OpenaiResponse]:
         return await sample_from_model_parallel(
             caller=self.caller,
             prompts=prompts,
             max_par=self.max_par,
             full_logging=self.full_logging,
-            desc="Planning",
+            desc=desc,
             model=self.curr_planner_model,
             temperature=self.temperature,
             max_tokens=self.max_tokens,
             reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
         )
-
-    @abstractmethod
-    def plan(self, seed_states: list[SeedState], *args, **kwargs):
-        pass
 
 
 class Runner(ABC):
@@ -209,6 +220,29 @@ class Runner(ABC):
                         meta=meta,
                     )
 
+    def initialize(self):
+        assert all(len(seed_state.history) == 0 for seed_state in self.seed_states)
+
+        # Save cluster info for visualization
+        logger.info("[INITIALIZE] Saving cluster info for visualization...")
+        for seed_state in self.seed_states:
+            sample_prompts = random.sample(
+                seed_state.cluster.train_prompts,
+                min(20, len(seed_state.cluster.train_prompts)),
+            )
+            save_cluster_info(
+                run_path=self.run_path,
+                seed_id=seed_state.index,
+                summary=seed_state.cluster.summary,
+                train_batch_size=seed_state.cluster.train_batch_size,
+                sample_train_prompts=sample_prompts,
+            )
+
+        logger.info(f"[INITIALIZE] Normalizing rater 1, {self.rater_1.model_name}...")
+        asyncio.run(normalize(self.rater_1, self.policy_model, overwrite=False))
+        logger.info(f"[INITIALIZE] Normalizing rater 2, {self.rater_2.model_name}...")
+        asyncio.run(normalize(self.rater_2, self.policy_model, overwrite=False))
+
     def get_ratings(self):
         logger.info(f"[TRAIN STEP {self.step_count}] Rating attacks...")
         train_batch_prompts = {}
@@ -257,9 +291,224 @@ class Runner(ABC):
                 asyncio.run(run_rating_function())
 
     @abstractmethod
-    def initialize(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
     def train(self, *args, **kwargs):
         pass
+
+
+
+
+def load_contrast_pairs(
+    prompts: list[str],
+    target_dir: Path,
+    policy_model: PolicyModel,
+    rater: RatingFunction,
+    threshold: float = 1.0,
+) -> Tuple[list[str], list[dict]]:
+    """
+    For each user prompt, check in target_dir if the rollouts have enough variation.
+    Then return (prompts, aux_info) where aux_info are chosen / rejected pairs.
+    """
+    prompts_selected = []
+    rollout_info = []
+
+    # Load normalization data
+    with open(f".cache/normalize/{rater.model_name}.json", "r", encoding="utf-8") as f:
+        rater_stats = json.load(f)
+
+    for prompt in prompts:
+        file_path = prompt_to_hash_path(prompt, target_dir)
+        with open(file_path, "r", encoding="utf-8") as f:
+            json_data = json.load(f)
+            rollouts = json_data[policy_model.model_name]["rollouts"]
+            rollouts_cleaned = [r for r in rollouts if r[rater.model_name] is not None]
+            if len(rollouts_cleaned) == 0:
+                continue
+
+            rollouts_sorted = sorted(
+                rollouts_cleaned, key=lambda x: float(x[rater.model_name]), reverse=True
+            )
+            score_diff = (
+                rollouts_sorted[0][rater.model_name]
+                - rollouts_sorted[-1][rater.model_name]
+            )
+
+            if score_diff > threshold * rater_stats["stdev"]:
+                rollout_info.append(
+                    {
+                        "chosen": rollouts_sorted[0]["response"],
+                        "rejected": rollouts_sorted[-1]["response"],
+                    }
+                )
+                prompts_selected.append(prompt)
+
+    return prompts_selected, rollout_info
+
+
+def initialize_prompt_stats(
+    target_dir: Path,
+    id_to_cluster: dict[int, dict],
+    policy: PolicyModel,
+    rater_1: RatingFunction,
+    rater_2: RatingFunction,
+):
+    all_user_prompts = []
+    for cluster in id_to_cluster.values():
+        all_user_prompts.extend(cluster["prompts"])
+
+    prompt_rollout(
+        prompts=all_user_prompts,
+        target_dir=target_dir,
+        policy_model=policy,
+        N=16,
+    )
+    prompt_rating(
+        prompts=all_user_prompts,
+        target_dir=target_dir,
+        rater=rater_1,
+        policy_model=policy,
+    )
+    prompt_rating(
+        prompts=all_user_prompts,
+        target_dir=target_dir,
+        rater=rater_2,
+        policy_model=policy,
+    )
+
+    for id, cluster_dict in tqdm(
+        id_to_cluster.items(), desc="Adding dataset info to prompt stats"
+    ):
+        for prompt in cluster_dict["prompts"]:
+            file_path = prompt_to_hash_path(prompt, target_dir)
+            with open(file_path, "r", encoding="utf-8") as f:
+                json_data = json.load(f)
+
+            json_data["topic_label"] = id
+            json_data["topic_name"] = cluster_dict["summary"]
+            json_data["dataset"] = target_dir.name
+
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(json_data, f, indent=4)
+
+
+def load_initial_seed_states(
+    dataset: str, 
+    compute_stats: bool,
+    target_dir: Path,
+    policy: PolicyModel,
+    rater_1: RatingFunction,
+    rater_2: RatingFunction,
+):
+    initial_seed_states = []
+
+    if dataset == "ultrafeedback":
+        labels: pd.DataFrame = pd.read_csv("data/ultrafeedback/ds_verified_test.csv")
+        with open("data/ultrafeedback/ds_cleaned.pkl", "rb") as f:
+            ultrafeedback = pickle.load(f)
+
+        assert len(labels) == len(ultrafeedback)
+
+        id_to_prompts = defaultdict(list)
+        id_to_summary = defaultdict(str)
+        topic_ids = [i for i in range(21, 31)]
+
+        for idx, row in tqdm(labels.iterrows(), desc="Loading clusters"):
+            topic = int(row["Topic"])
+            if topic in topic_ids:
+                item = ultrafeedback[idx]
+                assert row["Document"] == item["prompt"]
+
+                id_to_prompts[topic].append(
+                    {
+                        "prompt": row["Document"],
+                        "chosen": item["chosen"],
+                        "rejected": item["rejected"],
+                        "prob": float(row["Probability"]),
+                    }
+                )
+
+                if topic not in id_to_summary:
+                    id_to_summary[topic] = str(row["Topic_Summary"])
+
+        for topic in topic_ids:
+            sorted_cluster = sorted(
+                id_to_prompts[topic], key=lambda x: x["prob"], reverse=True
+            )
+            train_prompts = [item["prompt"] for item in sorted_cluster[:20]]
+            aux_info = [
+                {
+                    "chosen": item["chosen"],
+                    "rejected": item["rejected"],
+                }
+                for item in sorted_cluster[:20]
+            ]
+
+            cluster = Cluster(
+                summary=id_to_summary[topic],
+                train_prompts=train_prompts,
+                val_prompts=[],
+                train_batch_size=20,
+                aux_info=aux_info,
+            )
+
+            seed_state = SeedState(
+                index=topic,
+                dataset="ultrafeedback",
+                cluster=cluster,
+                state={},
+                history=[],
+            )
+            initial_seed_states.append(seed_state)
+
+        id_to_cluster = {
+            i: {
+                "prompts": [x["prompt"] for x in id_to_prompts[i]],
+                "summary": id_to_summary[i],
+            }
+            for i in topic_ids
+        }
+        if compute_stats:
+            initialize_prompt_stats(target_dir, id_to_cluster, policy, rater_1, rater_2)
+
+    elif dataset == "instruction-dataset":
+        instruction_test = load_dataset(
+            "HuggingFaceH4/instruction-dataset", split="test"
+        )
+        prompts = list(instruction_test["prompt"])
+
+        id_to_cluster = {0: {"prompts": prompts, "summary": "All"}}
+        if compute_stats:
+            initialize_prompt_stats(target_dir, id_to_cluster, policy, rater_1, rater_2)
+
+        prompts_selected, rollout_info = load_contrast_pairs(
+            prompts, target_dir, policy, rater_1, threshold=1.5
+        )
+
+        print(f"Selected {len(prompts_selected)} prompts")
+
+        cluster = Cluster(
+            summary="Any general user prompt from a general instruction dataset.",
+            train_prompts=prompts_selected,
+            val_prompts=[],
+            train_batch_size=len(prompts_selected),
+            aux_info=rollout_info,
+        )
+        initial_seed_states = [
+            SeedState(
+                index=0,
+                dataset="instruction-dataset",
+                cluster=cluster,
+                state={},
+                history=[],
+            )
+        ]
+
+    elif dataset == "wildchat":
+        pass
+
+    print(f"Loaded {len(initial_seed_states)} seed states")
+    for state in initial_seed_states:
+        print(
+            f"  - {state.cluster.summary}: {len(state.cluster.train_prompts)} train prompts"
+        )
+
+    return initial_seed_states

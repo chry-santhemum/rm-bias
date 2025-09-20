@@ -338,7 +338,7 @@ class RatingFunction(ABC):
                 policy_model.get_attacks_for_system_prompt,
                 train_batch_prompts=train_batch_prompts,
             ),
-            max_par=32,
+            max_par=4,
         )
         attacks = []
         attack_to_sps_idx: list[int] = []
@@ -777,10 +777,10 @@ if __name__ == "__main__":
     instruction_test = load_dataset("HuggingFaceH4/instruction-dataset", split="test")
     prompts = list(instruction_test["prompt"])
 
-    target_dir = Path("data/prompt_stats/ultrafeedback")
+    target_dir = Path("data/prompt_stats/instruction-dataset")
 
     policy = PolicyModel(
-        model_name="meta-llama/llama-3.1-8b-instruct",
+        model_name="meta-llama/llama-3.1-70b-instruct",
         max_tokens=1024,
         temperature=0.8,
     )
@@ -796,11 +796,11 @@ if __name__ == "__main__":
         batch_size=32,
     )
 
-    rater_2 = LLMJudge(
-        judge_model_name="openai/gpt-4.1-nano",
-        rubric=HANDWRITTEN_RUBRIC,
-        max_par=256,
-    )
+    # rater_2 = LLMJudge(
+    #     judge_model_name="openai/gpt-5-nano",
+    #     rubric=HANDWRITTEN_RUBRIC,
+    #     max_par=256,
+    # )
 
     prompt_rating(
         prompts=prompts,
@@ -808,27 +808,27 @@ if __name__ == "__main__":
         rater=rater_1,
         policy_model=policy,
     )
-    prompt_rating(
-        prompts=prompts,
-        target_dir=target_dir,
-        rater=rater_2,
-        policy_model=policy,
-    )
+    # prompt_rating(
+    #     prompts=prompts,
+    #     target_dir=target_dir,
+    #     rater=rater_2,
+    #     policy_model=policy,
+    # )
 
-    for prompt in tqdm(prompts, desc="Post-processing prompts"):
-        file_path = prompt_to_hash_path(prompt, target_dir)
-        if file_path.exists():
-            with open(file_path, "r", encoding="utf-8") as f:
-                json_data = json.load(f)
+    # for prompt in tqdm(prompts, desc="Post-processing prompts"):
+    #     file_path = prompt_to_hash_path(prompt, target_dir)
+    #     if file_path.exists():
+    #         with open(file_path, "r", encoding="utf-8") as f:
+    #             json_data = json.load(f)
 
-            json_data["topic_label"] = 0
-            json_data["topic_name"] = "All"
-            json_data["dataset"] = "instruction-dataset"
+    #         json_data["topic_label"] = 0
+    #         json_data["topic_name"] = "All"
+    #         json_data["dataset"] = "instruction-dataset"
 
-            with open(file_path, "w", encoding="utf-8") as f:
-                json.dump(json_data, f, indent=4)
-        else:
-            print("Prompt not found: ", prompt)
+    #         with open(file_path, "w", encoding="utf-8") as f:
+    #             json.dump(json_data, f, indent=4)
+    #     else:
+    #         print("Prompt not found: ", prompt)
 
 
 # %%

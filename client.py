@@ -269,6 +269,10 @@ class OpenrouterCaller(Caller):
             to_pass_extra_body = {
                 "provider": {"order": ["cerebras/fp16", "novita/fp8", "deepinfra/fp8"]}
             }
+        elif config.model == "meta-llama/llama-3.1-70b-instruct":
+            to_pass_extra_body = {
+                "provider": {"order": ["deepinfra/turbo", "fireworks"]}
+            }
 
         if len(messages.messages) == 0:
             raise ValueError("Messages must be non-empty")

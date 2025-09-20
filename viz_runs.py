@@ -353,34 +353,40 @@ def main():
         st.cache_data.clear()
         st.rerun()
 
-    # Directory selection first
+    # Directory selection first (support absolute and relative run paths)
     data_dirs = [
         "data/evo",
         "data/bon_iter",
         "data/pair",
         "data/one_turn",
     ]
-    available_dirs = []
+    dir_entries = []
+    for label in data_dirs:
+        abs_path = Path("/workspace/rm-bias") / label
+        if abs_path.exists():
+            dir_entries.append((label, abs_path))
+        else:
+            rel_path = Path(label)
+            if rel_path.exists():
+                dir_entries.append((label, rel_path))
 
-    for data_dir in data_dirs:
-        data_path = Path(data_dir)
-        if data_path.exists():
-            available_dirs.append(data_dir)
-
-    if not available_dirs:
+    if not dir_entries:
         st.error(
             "No training directories found in data/evo, data/bon_iter, data/pair, or data/one_turn"
         )
         return
 
-    selected_directory = st.sidebar.selectbox(
+    selected_dir_entry = st.sidebar.selectbox(
         "Select Directory",
-        available_dirs,
+        dir_entries,
+        format_func=lambda x: x[0],
         help="Choose between evolutionary (evo), best-of-N (bon_iter), PAIR, or one_turn runs",
     )
 
+    selected_directory = selected_dir_entry[0]
+
     # Now get runs from the selected directory
-    dir_path = Path(selected_directory)
+    dir_path = selected_dir_entry[1]
     available_runs = []
 
     if dir_path.exists():
