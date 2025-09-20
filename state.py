@@ -44,7 +44,7 @@ class Rating:
         return f"Rating(score={self.raw_score:.2f}, rater={self.rater.model_name})"
 
 
-@dataclass(frozen=True)
+@dataclass
 class RatedResponse:
     assistant: str
     ratings: list[Rating]
@@ -62,7 +62,7 @@ class RatedResponse:
         return None
 
 
-@dataclass(frozen=True)
+@dataclass
 class Attack:
     system: str
     user: str

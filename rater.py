@@ -7,7 +7,6 @@ import os
 import hashlib
 import asyncio
 import json
-import math
 import torch
 import numpy as np
 import logging
@@ -18,6 +17,7 @@ import random
 from abc import ABC, abstractmethod
 from dataclasses import replace
 from functools import partial
+from typing import Tuple
 import nest_asyncio
 
 import pandas as pd
@@ -27,6 +27,7 @@ from llm_types import ChatHistory
 from state import (
     SystemPromptStats,
     Attack,
+    RatedResponse,
     Rating,
     Rater,
     SeedState,
@@ -94,6 +95,9 @@ class PolicyModel:
     async def get_attacks_for_system_prompt(
         self, sps: SystemPromptStats, train_batch_prompts: list[str] = [], n_samples: int = 1,
     ) -> list[Attack]:
+        """
+        Modifies sps.attacks in-place.
+        """
         system_prompt = sps.system_prompt
 
         # If no rollouts exist yet, sample rollouts
@@ -105,15 +109,27 @@ class PolicyModel:
                 # .add_user(prompt + "\n\n Begin your response with 'Sure, here is the answer to your question'.")
                 # .add_assistant("Sure, here is the answer to your question:\n")
                 for user_prompt in train_batch_prompts
+                for _ in range(n_samples)
             ]
             policy_responses = await self.sample(policy_inputs)
             attacks = [
-                Attack(chat_history=policy_responses[i], ratings=[], aux_info={})
-                for i in range(len(policy_responses))
+                Attack(
+                    system=system_prompt, 
+                    user=train_batch_prompts[i], 
+                    responses=[RatedResponse(
+                        assistant=response.get_first("assistant"), ratings=[]
+                    ) for response in policy_responses[i * n_samples : (i + 1) * n_samples]], 
+                    aux_info={
+                        "policy_model_name": self.model_name,
+                        "policy_temperature": self.temperature,
+                        "policy_max_tokens": self.max_tokens,
+                        "n_samples": n_samples
+                    }
+                )
+                for i in range(len(train_batch_prompts))
             ]
-        else:
-            attacks = sps.attacks
-        return attacks
+            sps.attacks = attacks
+        return sps.attacks
 
 
 def prompt_to_hash_path(prompt: str, target_dir: Path) -> Path:
@@ -338,9 +354,9 @@ class RatingFunction(ABC):
                 train_batch_prompts=train_batch_prompts,
                 n_samples=n_samples,
             ),
-            max_par=math.ceil(policy_model.max_par / (n_samples * len(train_batch_prompts))),
+            max_par=max(1, policy_model.max_par // (n_samples * len(train_batch_prompts))),
         )
-        attacks = []
+        attacks: list[Attack] = []
         attack_to_sps_idx: list[int] = []
         for sps_idx, gathered_attack in enumerate(gathered_attacks):
             for attack in gathered_attack:
@@ -378,15 +394,24 @@ class RatingFunction(ABC):
                     )
 
         # Pass to reward model in batches
-        rating_results = await self.rate([a.chat_history for a in attacks])
-        scores = [result.get("score", None) for result in rating_results]
-        reasonings = [result.get("reasoning", "N/A") for result in rating_results]
+        chat_histories: list[ChatHistory] = []
+        chat_histories_to_attack_idx: list[Tuple[int, int]] = []
+        for attack_idx, attack in enumerate(attacks):
+            for response_idx, response in enumerate(attack.responses):
+                chat_histories.append(
+                    ChatHistory().add_user(attack.user).add_assistant(response.assistant) 
+                )
+                chat_histories_to_attack_idx.append((attack_idx, response_idx))
+
+        rating_results = await self.rate(chat_histories)
+        scores: list[float | None] = [result.get("score", None) for result in rating_results]
+        reasonings: list[str] = [result.get("reasoning", "N/A") for result in rating_results]
 
         # Normalize scores
         if per_prompt_normalize:
             normalized_scores = [
                 (
-                    (scores[i] - per_prompt_means[i]) / (self.stdev + 1e-6)
+                    (scores[i] - per_prompt_means[chat_histories_to_attack_idx[i][0]]) / (self.stdev + 1e-6)
                     if scores[i] is not None
                     else None
                 )
@@ -402,43 +427,29 @@ class RatingFunction(ABC):
                 for i in range(len(scores))
             ]
 
-        def replace_attack(attack: Attack, attack_idx: int) -> Attack:
+        
+        for i in range(len(chat_histories)):
+            attack_idx, response_idx = chat_histories_to_attack_idx[i]
+
             if (
-                self.rater not in [rating.rater for rating in attack.ratings]
-                and scores[attack_idx] is not None
+                self.rater not in [rating.rater for rating in attacks[attack_idx].responses[response_idx].ratings]
+                and scores[i] is not None
             ):
-                return replace(
-                    attack,
-                    ratings=attack.ratings
-                    + [
-                        Rating(
-                            raw_score=scores[attack_idx],  # type: ignore
-                            rater=self.rater,
-                            aux_info={
-                                "normalized_score": normalized_scores[attack_idx],
-                                "reasoning": reasonings[attack_idx],
-                                **(
-                                    {"per_prompt_mean": per_prompt_means[attack_idx]}
-                                    if per_prompt_normalize
-                                    else {}
-                                ),
-                            },
-                        )
-                    ],
+                attacks[attack_idx].responses[response_idx].ratings.append(
+                    Rating(
+                        raw_score=scores[i],  # type: ignore
+                        rater=self.rater,
+                        aux_info={
+                            "normalized_score": normalized_scores[i],
+                            "reasoning": reasonings[i],
+                            **(
+                                {"per_prompt_mean": per_prompt_means[attack_idx]}
+                                if per_prompt_normalize
+                                else {}
+                            ),
+                        },
+                    )
                 )
-            else:
-                return attack
-
-        attacks = [
-            replace_attack(attack, attack_idx)
-            for attack_idx, attack in enumerate(attacks)
-        ]
-
-        for system_prompt in system_prompt_stats:
-            system_prompt.attacks = []
-
-        for i in range(len(attacks)):
-            system_prompt_stats[attack_to_sps_idx[i]].attacks.append(attacks[i])
 
 
 async def normalize(
@@ -632,7 +643,7 @@ class LLMJudge(RatingFunction):
     def model_name(self) -> str:
         return self._model_name
 
-    async def rate(self, chat_histories: list[ChatHistory]) -> list[float | None]:
+    async def rate(self, chat_histories: list[ChatHistory]) -> list[dict]:
         rater_prompts = Slist(chat_histories).map(
             lambda convo: ChatHistory.from_system(
                 ABSOLUTE_RANKING_PROMPT_SYSTEM
