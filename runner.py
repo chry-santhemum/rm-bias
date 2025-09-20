@@ -154,7 +154,7 @@ class Runner(ABC):
         self.policy_model = policy_model
         self.rater_1 = rater_1
         self.rater_2 = rater_2
-
+        
         self.run_name = run_name or f"{timestamp()}"
         self.run_path.mkdir(parents=True, exist_ok=True)
 
@@ -244,7 +244,7 @@ class Runner(ABC):
         asyncio.run(normalize(self.rater_2, self.policy_model, overwrite=False))
 
     def get_ratings(self, n_samples: int = 1):
-        logger.info(f"[TRAIN STEP {self.step_count}] Rating attacks...")
+        logger.info(f"[TRAIN STEP {self.step_count}] Rating attacks with {n_samples} samples...")
         train_batch_prompts = {}
 
         for rating_function in [self.rater_1, self.rater_2]:

@@ -433,7 +433,6 @@ class RatingFunction(ABC):
 
             if (
                 self.rater not in [rating.rater for rating in attacks[attack_idx].responses[response_idx].ratings]
-                and scores[i] is not None
             ):
                 attacks[attack_idx].responses[response_idx].ratings.append(
                     Rating(

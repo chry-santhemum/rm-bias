@@ -162,6 +162,7 @@ class OneTurnRunner(Runner):
         rater_2: RatingFunction,
         n_new: int,
         n_pop: int,
+        n_samples: int,
         run_name: str | None = None,
     ):
         super().__init__(
@@ -174,6 +175,7 @@ class OneTurnRunner(Runner):
         )
         self.n_new = n_new
         self.n_pop = n_pop
+        self.n_samples = n_samples
 
     @property
     def runner_type(self) -> str:
@@ -189,7 +191,7 @@ class OneTurnRunner(Runner):
             run_path=self.run_path,
         )
 
-        self.get_ratings()
+        self.get_ratings(n_samples=self.n_samples)
         self.save_complete_system_prompt_stats()
         self.save_seed_states()
 
@@ -235,8 +237,9 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n_new", type=int, default=5)
-    parser.add_argument("--n_pop", type=int, default=20)
+    parser.add_argument("--n_new", type=int, default=3)
+    parser.add_argument("--n_pop", type=int, default=5)
+    parser.add_argument("--n_samples", type=int, default=1)
     parser.add_argument("--dataset", type=str, default="instruction-dataset")
     parser.add_argument("--stats", action="store_true")
     args = parser.parse_args()
@@ -255,7 +258,7 @@ if __name__ == "__main__":
         model_name="meta-llama/llama-3.1-70b-instruct",
         max_tokens=1024,
         temperature=0.8,
-        max_par=128,
+        max_par=1024,
     )
 
     rater_1 = RewardModel(
@@ -298,6 +301,7 @@ if __name__ == "__main__":
         rater_2=rater_2,
         n_new=args.n_new,
         n_pop=args.n_pop,
+        n_samples=args.n_samples,
         run_name=run_name,
     )
 

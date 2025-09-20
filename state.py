@@ -34,14 +34,18 @@ class Rater:
 
 @dataclass(frozen=True)
 class Rating:
-    raw_score: float  # unnormalized score
+    raw_score: float | None  # unnormalized score
     rater: Rater
     aux_info: dict[str, Any] = field(
         default_factory=dict
     )  # info such as reasoning, normalized score, number of comparisons, etc.
 
     def __repr__(self):
-        return f"Rating(score={self.raw_score:.2f}, rater={self.rater.model_name})"
+        if self.raw_score is None:
+            score_str = "None"
+        else:
+            score_str = f"{self.raw_score:.2f}"
+        return f"Rating(score={score_str}, rater={self.rater.model_name})"
 
 
 @dataclass

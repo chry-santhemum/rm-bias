@@ -317,7 +317,13 @@ class OpenrouterCaller(Caller):
 
         logger.debug(f"OpenRouter response: {resp}")
 
-        if not disable_cache:
+        # Only cache clean, usable responses
+        if (
+            not disable_cache
+            and resp.has_response()
+            and not resp.abnormal_finish
+            and not resp.hit_content_filter
+        ):
             await self.get_cache(config.model).add_model_call(
                 messages=messages,
                 config=config,
@@ -444,7 +450,13 @@ class AnthropicCaller(Caller):
             usage=response.usage.model_dump(),
         )
 
-        if not disable_cache:
+        # Only cache clean, usable responses
+        if (
+            not disable_cache
+            and openai_response.has_response()
+            and not openai_response.abnormal_finish
+            and not openai_response.hit_content_filter
+        ):
             await self.get_cache(config.model).add_model_call(
                 messages=messages,
                 config=config,

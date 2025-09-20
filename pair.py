@@ -43,14 +43,16 @@ class PAIRPlanner(OneTurnPlanner):
         return super().plan(seed_states, n_new, n_pop, run_path)
 
     def _get_past_data_str(self, stats: SystemPromptStats, k_attacks: int = 10) -> str:
-        all_attacks = [
-            attack for attack in stats.attacks if attack.adversarial_score is not None
-        ]
+        # Filter attacks with computable adversarial score using default raters
+        all_attacks = [attack for attack in stats.attacks if attack.adversarial_score() is not None]
         if len(all_attacks) == 0:
             past_data_str = "No information available."
+            return past_data_str
 
-        all_attacks.sort(key=lambda x: x.aux_info["adversarial_score"], reverse=True)
+        # Sort by adversarial score descending
+        all_attacks.sort(key=lambda x: (x.adversarial_score() or float("-inf")), reverse=True)
 
+        # Sample top 3 + random up to k_attacks total
         if len(all_attacks) < 3:
             sampled_all_attacks = all_attacks
         else:
@@ -58,14 +60,21 @@ class PAIRPlanner(OneTurnPlanner):
                 all_attacks[3:], max(0, min(k_attacks, len(all_attacks)) - 3)
             )
 
-        past_data_json = [
-            {
-                "user_prompt": attack.user,
-                "assistant_response": attack.assistant,
-                "score": round(attack.adversarial_score, 2),  # type: ignore
-            }
-            for attack in sampled_all_attacks
-        ]
+        def _first_assistant(atk) -> str:
+            if atk.responses:
+                return atk.responses[0].assistant
+            return ""
+
+        past_data_json = []
+        for attack in sampled_all_attacks:
+            adv = attack.adversarial_score()
+            past_data_json.append(
+                {
+                    "user_prompt": attack.user,
+                    "assistant_response": _first_assistant(attack),
+                    "score": round(adv, 2) if isinstance(adv, (int, float)) else None,
+                }
+            )
 
         past_data_str = json.dumps(past_data_json, indent=2)
         return past_data_str
@@ -174,6 +183,7 @@ class PAIRRunner(Runner):
         rater_2: RatingFunction,
         n_new: int,
         n_pop: int,
+        n_samples: int,
         m_var: int,
         run_name: str | None = None,
     ):
@@ -188,6 +198,7 @@ class PAIRRunner(Runner):
 
         self.n_new = n_new
         self.n_pop = n_pop
+        self.n_samples = n_samples
         self.m_var = m_var
 
     @property
@@ -211,7 +222,7 @@ class PAIRRunner(Runner):
                 run_path=self.run_path,
             )
 
-        self.get_ratings()
+        self.get_ratings(n_samples=self.n_samples)
         self.save_complete_system_prompt_stats()
         self.save_seed_states()
 
@@ -271,9 +282,10 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n_new", type=int, default=5)
-    parser.add_argument("--n_pop", type=int, default=20)
-    parser.add_argument("--m_var", type=int, default=5)
+    parser.add_argument("--n_new", type=int, default=3)
+    parser.add_argument("--n_pop", type=int, default=5)
+    parser.add_argument("--m_var", type=int, default=3)
+    parser.add_argument("--n_samples", type=int, default=1)
     parser.add_argument("--t_steps", type=int, required=True)
     parser.add_argument("--dataset", type=str, default="instruction-dataset")
     parser.add_argument("--stats", action="store_true")
@@ -293,7 +305,7 @@ if __name__ == "__main__":
         model_name="meta-llama/llama-3.1-70b-instruct",
         max_tokens=1024,
         temperature=0.8,
-        max_par=128,
+        max_par=1024,
     )
 
     rater_1 = RewardModel(
@@ -337,6 +349,7 @@ if __name__ == "__main__":
         rater_2=rater_2,
         n_new=args.n_new,
         n_pop=args.n_pop,
+        n_samples=args.n_samples,
         m_var=args.m_var,
         run_name=run_name,
     )

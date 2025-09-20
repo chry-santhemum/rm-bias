@@ -150,7 +150,7 @@ def _compute_system_prompt_adv_stats(prompt_data: Dict[str, Any]) -> Tuple[float
 
 def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str):
     """Display detailed view of a system prompt and its attacks."""
-    st.subheader(f"System Prompt: {prompt_hash}")
+    st.subheader("System Prompt")
 
     # Show system prompt text with dynamic height
     system_prompt_text = prompt_data.get("system_prompt", "")
@@ -274,6 +274,7 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
                     "Assistant Preview": assistant_text[:100]
                     + ("..." if len(assistant_text) > 100 else ""),
                     "Response Length": len(assistant_text),
+                    "Index": ridx,
                 }
                 # Build a quick index of ratings by rater name
                 ratings_by_rater: Dict[str, Dict[str, Any]] = {}
@@ -290,7 +291,36 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
                 rr_rows.append(row)
 
             rr_df = pd.DataFrame(rr_rows)
-            st.dataframe(rr_df, width="stretch", hide_index=True)
+            selected_rr = st.dataframe(
+                rr_df.drop("Index", axis=1),
+                width="stretch",
+                height=500,
+                on_select="rerun",
+                selection_mode="single-row",
+                hide_index=True,
+            )
+
+            # Show full response text for selected row
+            if selected_rr["selection"]["rows"]:
+                selected_row = selected_rr["selection"]["rows"][0]
+                original_idx = rr_df.iloc[selected_row]["Index"]
+                full_text = responses[original_idx].get("assistant", "")
+
+                # Dynamic height similar to system prompt calculation
+                chars_per_line = 140
+                explicit_lines = full_text.count("\n") + 1 if full_text else 1
+                wrapped_lines = sum(
+                    max(1, len(line) // chars_per_line + (1 if len(line) % chars_per_line > 0 else 0))
+                    for line in (full_text.split("\n") if full_text else [""])
+                )
+                total_lines = max(explicit_lines, wrapped_lines)
+                base_height = 50
+                line_height = 22
+                calculated_height = base_height + (total_lines * line_height)
+                final_height = max(120, min(720, calculated_height))
+
+                st.subheader(f"Response #{int(original_idx) + 1} Full Text")
+                st.text_area("Full Response", full_text, height=final_height)
 
 
 def main():
