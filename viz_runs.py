@@ -516,8 +516,8 @@ def main():
                         {
                             "Step": meta.get("step", "N/A"),
                             "Operation": meta.get("operation", "N/A"),
-                            "System Prompt": prompt_data.get("system_prompt", "")[:100]
-                            + "...",
+                            "System Prompt": prompt_data["system_prompt"][:80]
+                            + "..." if len(prompt_data["system_prompt"]) > 80 else prompt_data["system_prompt"],
                             "Mean Score": f"{prompt_data.get('mean_score', 0):.3f}",
                             "Std Dev": f"{prompt_data.get('stdev_score', 0):.3f}",
                             "Num Attacks": len(prompt_data.get("attacks", [])),

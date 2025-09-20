@@ -10,7 +10,6 @@ dependencies = [
     "black>=25.9.0",
     "datasets>=4.0.0",
     "dictionary-learning",
-    "hdbscan>=0.8.40",
     "hf-transfer>=0.1.9",
     "ipykernel>=6.30.1",
     "ipywidgets>=8.1.7",
@@ -42,4 +41,4 @@ members = [
 ]
 
 [tool.ruff.lint]
-ignore = ["E402", "F403", "F405", "F541", "F722", "F821"]
+ignore = ["E402", "F401", "F403", "F405", "F541", "F722", "F821"]

@@ -103,7 +103,7 @@ class EvoPlanner:
                     "system_prompt": attack.system,
                     "user_prompt": attack.user,
                     "assistant_response": attack.assistant,
-                    "score": round(attack.aux_info["adversarial_score"], 2),
+                    "score": round(attack.adversarial_score, 2),  # type: ignore
                 }
                 for attack in sampled_all_attacks
             ],

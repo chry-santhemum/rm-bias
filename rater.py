@@ -7,6 +7,7 @@ import os
 import hashlib
 import asyncio
 import json
+import math
 import torch
 import numpy as np
 import logging
@@ -91,7 +92,7 @@ class PolicyModel:
         return completed_chat_histories
 
     async def get_attacks_for_system_prompt(
-        self, sps: SystemPromptStats, train_batch_prompts: list[str] = []
+        self, sps: SystemPromptStats, train_batch_prompts: list[str] = [], n_samples: int = 1,
     ) -> list[Attack]:
         system_prompt = sps.system_prompt
 
@@ -124,7 +125,7 @@ def prompt_rollout(
     prompts: list[str],
     target_dir: Path,
     policy_model: PolicyModel,
-    N: int = 16,
+    n_samples: int = 16,
 ):
     """
     Sample rollouts for each prompt and store the rollouts in target_dir (should be the dataset name).
@@ -167,7 +168,7 @@ def prompt_rollout(
         message = messages[index]
         prompt = prompts[index]
         responses = await sample_from_model_parallel(
-            prompts=[message for _ in range(N)],
+            prompts=[message for _ in range(n_samples)],
             caller=caller,
             max_par=None,
             full_logging=False,
@@ -202,7 +203,7 @@ def prompt_rollout(
     asyncio.run(
         Slist(range(len(messages))).par_map_async(
             sample_and_save,
-            max_par=policy_model.max_par // N,
+            max_par=policy_model.max_par // n_samples,
             tqdm=True,
             desc="Sampling responses",  # type: ignore
         )
@@ -322,13 +323,11 @@ class RatingFunction(ABC):
         seed_state: SeedState,
         train_batch_prompts: list[str],
         per_prompt_normalize: bool,  # whether to normalize per-prompt
+        n_samples: int = 1,
     ):
         """
         Modifies seed_state in-place.
         Applies rating function to each system prompt in the latest step of seed_state.history.
-        1. Sample train_batch_size user prompts from train_prompts
-        2. (TODO) For each, sample n_samples assistant responses from the policy model
-        3. Rate each attack with the rating function
         """
         system_prompt_stats = list(seed_state.history[-1].values())
         gathered_attacks: Slist[list[Attack]] = await Slist(
@@ -337,8 +336,9 @@ class RatingFunction(ABC):
             partial(
                 policy_model.get_attacks_for_system_prompt,
                 train_batch_prompts=train_batch_prompts,
+                n_samples=n_samples,
             ),
-            max_par=4,
+            max_par=math.ceil(policy_model.max_par / (n_samples * len(train_batch_prompts))),
         )
         attacks = []
         attack_to_sps_idx: list[int] = []
@@ -493,7 +493,7 @@ async def normalize(
         prompts=prompts,
         target_dir=target_dir,
         policy_model=policy_model,
-        N=n_samples,
+        n_samples=n_samples,
     )
 
     prompt_rating(
@@ -662,7 +662,7 @@ class LLMJudge(RatingFunction):
         rating_results = []
         for resp in rater_responses:
             score_to_append = None
-            output, reasoning = parse_json_response(resp)
+            output, reasoning = parse_json_response(resp, log_json_error=False)
             if isinstance(output, dict) and "score" in output:
                 score_to_append = output["score"]
             elif isinstance(output, str):
@@ -671,7 +671,7 @@ class LLMJudge(RatingFunction):
                     if isinstance(output_parsed, dict) and "score" in output_parsed:
                         score_to_append = output_parsed["score"]
                 except Exception as e:
-                    logger.error(f"Attempting to parse as JSON error: {e}")
+                    logger.error(f"Error while attempting to parse score: {e}")
                     logger.error(f"API response: {resp}")
 
             rating_results.append({"score": score_to_append, "reasoning": reasoning})
@@ -788,7 +788,7 @@ if __name__ == "__main__":
         prompts=prompts,
         target_dir=target_dir,
         policy_model=policy,
-        N=16,
+        n_samples=16,
     )
 
     rater_1 = RewardModel(

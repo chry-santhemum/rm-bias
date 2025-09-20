@@ -41,61 +41,78 @@ class Rating:
     )  # info such as reasoning, normalized score, number of comparisons, etc.
 
     def __repr__(self):
-        return f"Rating(score={self.raw_score:.2f}, rater_model_name={self.rater.model_name}, aux_info={self.aux_info})"
+        return f"Rating(score={self.raw_score:.2f}, rater={self.rater.model_name})"
+
+
+@dataclass(frozen=True)
+class RatedResponse:
+    assistant: str
+    ratings: list[Rating]
+
+    def raw_score(self, rater_model_name: str) -> float | None:
+        for rating in self.ratings:
+            if rating.rater.model_name == rater_model_name:
+                return rating.raw_score
+        return None
+
+    def normalized_score(self, rater_model_name: str) -> float | None:
+        for rating in self.ratings:
+            if rating.rater.model_name == rater_model_name:
+                return rating.aux_info.get("normalized_score", None)
+        return None
 
 
 @dataclass(frozen=True)
 class Attack:
-    chat_history: ChatHistory  # system, user, assistant
-    ratings: list[Rating]
+    system: str
+    user: str
+    responses: list[RatedResponse]
     aux_info: dict[str, Any] = field(
         default_factory=dict
-    )  # info such as model names, reasoning, etc.
+    )  # info such as policy model names, reasoning, etc.
 
-    @property
-    def system(self) -> str:
-        return self.chat_history.get_first("system")
+    def mean_raw_score(self, rater_model_name: str) -> float | None:
+        raw_scores = []
+        for response in self.responses:
+            raw_score = response.raw_score(rater_model_name)
+            if raw_score is not None:
+                raw_scores.append(raw_score)
+        if len(raw_scores) == 0:
+            return None
+        return float(np.mean(raw_scores))
 
-    @property
-    def user(self) -> str:
-        return self.chat_history.get_first("user")
 
-    @property
-    def assistant(self) -> str:
-        return self.chat_history.get_first("assistant")
+    def mean_normalized_score(self, rater_model_name: str) -> float | None:
+        normalized_scores = []
+        for response in self.responses:
+            normalized_score = response.normalized_score(rater_model_name)
+            if normalized_score is not None:
+                normalized_scores.append(normalized_score)
+        if len(normalized_scores) == 0:
+            return None
+        return float(np.mean(normalized_scores))
 
-    @property
-    def normalized_reward(self) -> float | None:
-        """Get the first rating by a reward model, and take the normalized_score in aux_info"""
-        for rating in self.ratings:
-            if rating.rater.rating_function_type == "classifier":
-                return rating.aux_info.get("normalized_score", None)
-        return None
 
-    @property
-    def normalized_lm_judge(self) -> float | None:
-        """Get the first rating by a LLM judge, and take the normalized_score in aux_info"""
-        for rating in self.ratings:
-            if rating.rater.rating_function_type == "lm_judge":
-                return rating.aux_info.get("normalized_score", None)
-        return None
-
-    @property
-    def adversarial_score(self) -> float | None:
-        if self.normalized_reward is None or self.normalized_lm_judge is None:
+    def adversarial_score(self, rater_1_model_name: str|None=None, rater_2_model_name: str|None=None) -> float | None:
+        if rater_1_model_name is None:
+            rater_1_model_name = self.responses[0].ratings[0].rater.model_name
+        if rater_2_model_name is None:
+            rater_2_model_name = self.responses[0].ratings[1].rater.model_name
+        score_1 = self.mean_normalized_score(rater_1_model_name)
+        score_2 = self.mean_normalized_score(rater_2_model_name)
+        if score_1 is None or score_2 is None:
             return None
         return adversariality(
-            z_score_1=self.normalized_reward,
-            z_score_2=self.normalized_lm_judge,
+            z_score_1=score_1,
+            z_score_2=score_2,
         )
 
     def __repr__(self):
         return (
             f"Attack(\n"
-            f"system={self.system[:50]+'...'},\n"
-            f"user={self.user[:50]+'...'},\n"
-            f"assistant={self.assistant[:50]+'...'},\n"
-            f"ratings={self.ratings}\n"
+            f"\tsystem={self.system[:50]+'...'},\n"
+            f"\tuser={self.user[:50]+'...'},\n"
+            f"\tnum_responses={len(self.responses)},\n"
             f")"
         )
 
@@ -113,21 +130,19 @@ class SystemPromptStats:
     def parent(self) -> str | None:
         return self.meta.get("parent", None)
 
-    @property
-    def scores(self) -> list[float]:
+    def adversarial_scores(self, rater_1_model_name: str|None=None, rater_2_model_name: str|None=None) -> list[float]:
         return [
-            attack.adversarial_score
-            for attack in self.attacks
-            if attack.adversarial_score is not None
+            score for attack in self.attacks
+            if (score := attack.adversarial_score(rater_1_model_name, rater_2_model_name)) is not None
         ]
 
     @property
-    def mean_score(self) -> float:
-        return float(np.mean(self.scores))
+    def mean_adversarial_score(self, rater_1_model_name: str|None=None, rater_2_model_name: str|None=None) -> float:
+        return float(np.mean(self.adversarial_scores(rater_1_model_name, rater_2_model_name)))
 
     @property
-    def stdev_score(self) -> float:
-        return float(np.std(self.scores))
+    def stdev_adversarial_score(self, rater_1_model_name: str|None=None, rater_2_model_name: str|None=None) -> float:
+        return float(np.std(self.adversarial_scores(rater_1_model_name, rater_2_model_name)))
 
 
 @dataclass

@@ -1,5 +1,5 @@
 # %%
-import patches  # noqa: F401  # monkey patching
+import patches  # monkey patching
 import json
 import random
 import dotenv
@@ -23,8 +23,8 @@ from standard_prompts import set_seed_all
 from defaults import *
 from llm_types import ChatHistory
 from runner import (
-    Runner, 
-    ClusterModel, 
+    Runner,
+    ClusterModel,
     load_initial_seed_states,
 )
 from one_turn import OneTurnPlanner
@@ -38,21 +38,13 @@ logger = logging.getLogger(__name__)
 
 class PAIRPlanner(OneTurnPlanner):
     def initial_plan(
-        self, 
-        seed_states: list[SeedState[None]], 
-        n_new: int, 
-        n_pop: int, 
-        run_path: Path
+        self, seed_states: list[SeedState[None]], n_new: int, n_pop: int, run_path: Path
     ):
         return super().plan(seed_states, n_new, n_pop, run_path)
 
-    def _get_past_data_str(
-        self, 
-        stats: SystemPromptStats, 
-        k_attacks: int = 10
-    ) -> str:
+    def _get_past_data_str(self, stats: SystemPromptStats, k_attacks: int = 10) -> str:
         all_attacks = [
-            attack for attack in stats.attacks if "adversarial_score" in attack.aux_info
+            attack for attack in stats.attacks if attack.adversarial_score is not None
         ]
         if len(all_attacks) == 0:
             past_data_str = "No information available."
@@ -70,7 +62,7 @@ class PAIRPlanner(OneTurnPlanner):
             {
                 "user_prompt": attack.user,
                 "assistant_response": attack.assistant,
-                "score": round(attack.aux_info["adversarial_score"], 2),
+                "score": round(attack.adversarial_score, 2),  # type: ignore
             }
             for attack in sampled_all_attacks
         ]
@@ -89,7 +81,6 @@ class PAIRPlanner(OneTurnPlanner):
         messages_info = []
 
         for seed_idx, seed_state in enumerate(seed_states):
-            seed_state.history.append({})
             for system_prompt in seed_state.history[-1]:
                 planner_prompt = ITERATE_PROMPT_USER.format(
                     num_plans=m_var,
@@ -110,6 +101,8 @@ class PAIRPlanner(OneTurnPlanner):
                         "seed_idx": seed_idx,
                     }
                 )
+
+            seed_state.history.append({})
 
         planner_responses = asyncio.run(
             self._sample_from_model_parallel(to_send_messages, desc=f"Iterating")
@@ -139,10 +132,12 @@ class PAIRPlanner(OneTurnPlanner):
             }
 
             for plan in plans:
-                seed_idx_to_plans[seed_idx].append({
-                    "plan": plan,
-                    "meta": meta,
-                })
+                seed_idx_to_plans[seed_idx].append(
+                    {
+                        "plan": plan,
+                        "meta": meta,
+                    }
+                )
 
         # Cluster plans for each seed using k-means into n_pop clusters
         # then select one plan per cluster (closest to centroid)
@@ -151,7 +146,9 @@ class PAIRPlanner(OneTurnPlanner):
             if not plans_meta:
                 continue
 
-            selected_plans, selected_indices = self.cluster_model.cluster([plan_meta["plan"] for plan_meta in plans_meta], n_pop)
+            selected_plans, selected_indices = self.cluster_model.cluster(
+                [plan_meta["plan"] for plan_meta in plans_meta], n_pop
+            )
 
             for plan, idx in zip(selected_plans, selected_indices):
                 seed_states[seed_idx].history[-1][plan] = SystemPromptStats(
@@ -317,7 +314,9 @@ if __name__ == "__main__":
     )
 
     target_dir = Path(f"data/prompt_stats/{args.dataset}")
-    initial_seed_states = load_initial_seed_states(args.dataset, args.stats, target_dir, policy, rater_1, rater_2)
+    initial_seed_states = load_initial_seed_states(
+        args.dataset, args.stats, target_dir, policy, rater_1, rater_2
+    )
 
     planner = PAIRPlanner(
         planner_model_names=["claude-opus-4-20250514", "google/gemini-2.5-pro"],

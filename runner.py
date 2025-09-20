@@ -31,8 +31,8 @@ from rater import (
     prompt_rollout,
     prompt_rating,
     prompt_to_hash_path,
-    PolicyModel, 
-    RatingFunction, 
+    PolicyModel,
+    RatingFunction,
     normalize,
 )
 from state import SeedState, Cluster
@@ -65,12 +65,12 @@ class ClusterModel:
         embeddings: np.ndarray = self.embedding_model.encode(inputs)
         return self.umap_model.fit_transform(embeddings)  # type: ignore
 
-    def cluster(self, inputs: list[str], n_clusters: int) -> Tuple[list[str], list[int]]:
+    def cluster(
+        self, inputs: list[str], n_clusters: int
+    ) -> Tuple[list[str], list[int]]:
         reduced_embeddings = self.embed(inputs)
         kmeans = KMeans(
-            n_clusters=min(len(inputs), n_clusters), 
-            random_state=10086, 
-            n_init="auto"
+            n_clusters=min(len(inputs), n_clusters), random_state=10086, n_init="auto"
         )
         kmeans.fit(reduced_embeddings)
 
@@ -121,7 +121,7 @@ class Planner(ABC):
             )
 
     async def _sample_from_model_parallel(
-        self, prompts: list[ChatHistory], desc: str="Planning"
+        self, prompts: list[ChatHistory], desc: str = "Planning"
     ) -> Slist[OpenaiResponse]:
         return await sample_from_model_parallel(
             caller=self.caller,
@@ -295,8 +295,6 @@ class Runner(ABC):
         pass
 
 
-
-
 def load_contrast_pairs(
     prompts: list[str],
     target_dir: Path,
@@ -359,7 +357,7 @@ def initialize_prompt_stats(
         prompts=all_user_prompts,
         target_dir=target_dir,
         policy_model=policy,
-        N=16,
+        n_samples=16,
     )
     prompt_rating(
         prompts=all_user_prompts,
@@ -391,7 +389,7 @@ def initialize_prompt_stats(
 
 
 def load_initial_seed_states(
-    dataset: str, 
+    dataset: str,
     compute_stats: bool,
     target_dir: Path,
     policy: PolicyModel,

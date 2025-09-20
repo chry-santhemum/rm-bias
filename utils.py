@@ -119,7 +119,9 @@ def is_local_model(model_name: str) -> bool:
         return False
 
 
-def parse_json_response(resp: OpenaiResponse) -> Tuple[Any, str]:
+def parse_json_response(
+    resp: OpenaiResponse, log_json_error: bool = True
+) -> Tuple[Any, str]:
     """
     Returns a tuple (json array, reasoning)
     """
@@ -139,8 +141,9 @@ def parse_json_response(resp: OpenaiResponse) -> Tuple[Any, str]:
             output = raw_text
             if not is_thinking_model(resp.model):
                 reasoning = raw_text
-            logger.error(f"Response JSON parse error: {e}")
-            logger.error(f"API response: {resp}")
+            if log_json_error:
+                logger.error(f"Response JSON parse error: {e}")
+                logger.error(f"API response: {resp}")
     except Exception as e:
         logger.error(f"Response does not have text: {e}")
         logger.error(f"API response: {resp}")
