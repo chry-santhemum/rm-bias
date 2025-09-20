@@ -71,6 +71,14 @@ class Attack:
         default_factory=dict
     )  # info such as policy model names, reasoning, etc.
 
+    @property
+    def rater_model_names(self) -> list[str]:
+        rater_models = set()
+        for response in self.responses:
+            for rating in response.ratings:
+                rater_models.add(rating.rater.model_name)
+        return list(rater_models)
+
     def mean_raw_score(self, rater_model_name: str) -> float | None:
         raw_scores = []
         for response in self.responses:

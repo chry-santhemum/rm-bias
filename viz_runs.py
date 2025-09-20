@@ -2,8 +2,9 @@ import streamlit as st
 import json
 import pandas as pd
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, List, Tuple
 import plotly.express as px
+from state import adversariality
 
 st.set_page_config(page_title="Run Visualization", layout="wide")
 
@@ -67,6 +68,86 @@ def load_seed_state_data(seed_dir: Path) -> Dict[str, Any]:
     return seed_data
 
 
+def _extract_rater_names_from_attack(attack: Dict[str, Any]) -> List[str]:
+    rater_models = []
+    seen = set()
+    for response in attack.get("responses", []):
+        for rating in response.get("ratings", []):
+            model_name = rating.get("rater", {}).get("model_name")
+            if model_name and model_name not in seen:
+                seen.add(model_name)
+                rater_models.append(model_name)
+    return rater_models
+
+
+def _mean_scores_for_attack_by_rater(attack: Dict[str, Any]) -> Dict[str, Tuple[float | None, float | None]]:
+    """Return mapping rater_name -> (mean_raw_score, mean_normalized_score)."""
+    result: Dict[str, Tuple[float | None, float | None]] = {}
+    rater_names = _extract_rater_names_from_attack(attack)
+    for rater in rater_names:
+        raw_scores: List[float] = []
+        norm_scores: List[float] = []
+        for response in attack.get("responses", []):
+            for rating in response.get("ratings", []):
+                r = rating.get("rater", {})
+                if r.get("model_name") == rater:
+                    raw = rating.get("raw_score")
+                    norm = rating.get("aux_info", {}).get("normalized_score")
+                    if isinstance(raw, (int, float)):
+                        raw_scores.append(float(raw))
+                    if isinstance(norm, (int, float)):
+                        norm_scores.append(float(norm))
+        mean_raw = float(pd.Series(raw_scores).mean()) if raw_scores else None
+        mean_norm = float(pd.Series(norm_scores).mean()) if norm_scores else None
+        result[rater] = (mean_raw, mean_norm)
+    return result
+
+
+def _default_rater_pair_for_attack(attack: Dict[str, Any]) -> Tuple[str | None, str | None]:
+    """Auto-detect default rater pair as per state.Attack.adversarial_score default.
+    Uses the first response's first two ratings if present.
+    """
+    responses = attack.get("responses", [])
+    if not responses:
+        return (None, None)
+    ratings = responses[0].get("ratings", [])
+    if len(ratings) >= 2:
+        r1 = ratings[0].get("rater", {}).get("model_name")
+        r2 = ratings[1].get("rater", {}).get("model_name")
+        return (r1, r2)
+    return (None, None)
+
+
+def _adversarial_score_for_attack(attack: Dict[str, Any], r1: str | None = None, r2: str | None = None) -> float | None:
+    if r1 is None or r2 is None:
+        r1, r2 = _default_rater_pair_for_attack(attack)
+    if not r1 or not r2:
+        return None
+    means = _mean_scores_for_attack_by_rater(attack)
+    z1 = means.get(r1, (None, None))[1]
+    z2 = means.get(r2, (None, None))[1]
+    if z1 is None or z2 is None:
+        return None
+    try:
+        return float(adversariality(z_score_1=float(z1), z_score_2=float(z2)))
+    except Exception:
+        return None
+
+
+def _compute_system_prompt_adv_stats(prompt_data: Dict[str, Any]) -> Tuple[float | None, float | None]:
+    """Compute mean and stdev adversarial score across attacks for a system prompt."""
+    attacks = prompt_data.get("attacks", [])
+    adv_scores: List[float] = []
+    for attack in attacks:
+        adv = _adversarial_score_for_attack(attack)
+        if isinstance(adv, (int, float)):
+            adv_scores.append(float(adv))
+    if not adv_scores:
+        return (None, None)
+    series = pd.Series(adv_scores)
+    return (float(series.mean()), float(series.std(ddof=0)))
+
+
 def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str):
     """Display detailed view of a system prompt and its attacks."""
     st.subheader(f"System Prompt: {prompt_hash}")
@@ -125,79 +206,42 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
         with col3:
             st.metric("Num Attacks", len(prompt_data.get("attacks", [])))
 
-    # Show attacks in expandable sections
+    # Show attacks in expandable sections compatible with new Attack schema
     attacks = prompt_data.get("attacks", [])
     if attacks:
         st.subheader("Attacks")
 
-        # Create DataFrame for attack overview
+        # Determine the union of rater names across all attacks for columns
+        all_raters: List[str] = []
+        seen_raters = set()
+        for atk in attacks:
+            for rn in _extract_rater_names_from_attack(atk):
+                if rn not in seen_raters:
+                    seen_raters.add(rn)
+                    all_raters.append(rn)
+
+        # Build attack overview rows
         attack_rows = []
         for i, attack in enumerate(attacks):
-            chat_history = attack.get("chat_history", {})
-            messages = chat_history.get("messages", [])
+            user_prompt = attack.get("user", "")
+            row = {
+                "Attack #": i + 1,
+                "User Prompt": user_prompt[:100] + ("..." if len(user_prompt) > 100 else ""),
+            }
 
-            user_msg = next(
-                (msg["content"] for msg in messages if msg["role"] == "user"), "N/A"
-            )
-            assistant_msg = next(
-                (msg["content"] for msg in messages if msg["role"] == "assistant"),
-                "N/A",
-            )
+            means = _mean_scores_for_attack_by_rater(attack)
+            for rater in all_raters:
+                mean_raw, mean_norm = means.get(rater, (None, None))
+                row[f"Mean Raw | {rater}"] = (
+                    f"{mean_raw:.3f}" if isinstance(mean_raw, (int, float)) else "N/A"
+                )
+                row[f"Mean Norm | {rater}"] = (
+                    f"{mean_norm:.3f}" if isinstance(mean_norm, (int, float)) else "N/A"
+                )
 
-            # Get scores from aux_info (new format) or fallback to ratings (old format)
-            aux_info = attack.get("aux_info", {})
-            adv_score = aux_info.get("adversarial_score")
-            reward_score = aux_info.get("normalized_reward")
-            judge_score = aux_info.get("normalized_lm_judge")
-            unnorm_reward = aux_info.get("unnormalized_reward")
-            unnorm_judge = aux_info.get("unnormalized_lm_judge")
-
-            # Fallback to old format if new format not available
-            if reward_score is None or judge_score is None:
-                ratings = attack.get("ratings", [])
-                for rating in ratings:
-                    rater = rating.get("rater", {})
-                    if (
-                        rater.get("rating_function_type") == "classifier"
-                        and reward_score is None
-                    ):
-                        reward_score = rating.get("aux_info", {}).get(
-                            "normalized_score"
-                        )
-                    elif (
-                        rater.get("rating_function_type") == "lm_judge"
-                        and judge_score is None
-                    ):
-                        judge_score = rating.get("aux_info", {}).get("normalized_score")
-
-            attack_rows.append(
-                {
-                    "Attack #": i + 1,
-                    "Adversarial Score": (
-                        f"{adv_score:.3f}" if adv_score is not None else "N/A"
-                    ),
-                    "Reward Score (Norm)": (
-                        f"{reward_score:.3f}" if reward_score is not None else "N/A"
-                    ),
-                    "Judge Score (Norm)": (
-                        f"{judge_score:.3f}" if judge_score is not None else "N/A"
-                    ),
-                    "Reward Score (Raw)": (
-                        f"{unnorm_reward:.3f}" if unnorm_reward is not None else "N/A"
-                    ),
-                    "Judge Score (Raw)": (
-                        f"{unnorm_judge:.3f}" if unnorm_judge is not None else "N/A"
-                    ),
-                    "User Prompt": (
-                        user_msg[:100] + "..." if len(user_msg) > 100 else user_msg
-                    ),
-                    "Assistant Response": (
-                        assistant_msg[:100] + "..."
-                        if len(assistant_msg) > 100
-                        else assistant_msg
-                    ),
-                }
-            )
+            adv = _adversarial_score_for_attack(attack)
+            row["Adversarial Score"] = f"{adv:.3f}" if isinstance(adv, (int, float)) else "N/A"
+            attack_rows.append(row)
 
         attack_df = pd.DataFrame(attack_rows)
 
@@ -210,128 +254,43 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
             hide_index=True,
         )
 
-        # Show detailed view of selected attack
+        # Show detailed view of selected attack - list of RatedResponses
         if selected_attack["selection"]["rows"]:
             selected_idx = selected_attack["selection"]["rows"][0]
             attack = attacks[selected_idx]
 
             st.subheader(f"Attack #{selected_idx + 1} Details")
 
-            chat_history = attack.get("chat_history", {})
-            messages = chat_history.get("messages", [])
+            # RatedResponses table
+            responses = attack.get("responses", [])
+            # Columns per rater for raw and norm
+            raters = _extract_rater_names_from_attack(attack)
 
-            # Display conversation
-            for msg in messages:
-                role = msg.get("role", "unknown")
-                content = msg.get("content", "")
+            rr_rows = []
+            for ridx, response in enumerate(responses):
+                assistant_text = response.get("assistant", "")
+                row = {
+                    "Response #": ridx + 1,
+                    "Assistant Preview": assistant_text[:100]
+                    + ("..." if len(assistant_text) > 100 else ""),
+                    "Response Length": len(assistant_text),
+                }
+                # Build a quick index of ratings by rater name
+                ratings_by_rater: Dict[str, Dict[str, Any]] = {}
+                for rating in response.get("ratings", []):
+                    rn = rating.get("rater", {}).get("model_name")
+                    if rn:
+                        ratings_by_rater[rn] = rating
+                for r in raters:
+                    rating = ratings_by_rater.get(r)
+                    raw = rating.get("raw_score") if rating else None
+                    norm = rating.get("aux_info", {}).get("normalized_score") if rating else None
+                    row[f"Raw | {r}"] = f"{raw:.3f}" if isinstance(raw, (int, float)) else "N/A"
+                    row[f"Norm | {r}"] = f"{norm:.3f}" if isinstance(norm, (int, float)) else "N/A"
+                rr_rows.append(row)
 
-                if role == "system":
-                    st.info(f"**System**: {content}")
-                elif role == "user":
-                    st.chat_message("user").write(content)
-                elif role == "assistant":
-                    st.chat_message("assistant").write(content)
-
-            # Display score summary
-            attack_aux_info = attack.get("aux_info", {})
-            if attack_aux_info:
-                st.subheader("Score Summary")
-                col1, col2, col3, col4, col5 = st.columns(5)
-
-                with col1:
-                    adv_score = attack_aux_info.get("adversarial_score")
-                    st.metric(
-                        "Adversarial Score",
-                        f"{adv_score:.3f}" if adv_score is not None else "N/A",
-                    )
-
-                with col2:
-                    reward_norm = attack_aux_info.get("normalized_reward")
-                    st.metric(
-                        "Normalized Reward Score",
-                        f"{reward_norm:.3f}" if reward_norm is not None else "N/A",
-                    )
-
-                with col3:
-                    judge_norm = attack_aux_info.get("normalized_lm_judge")
-                    st.metric(
-                        "Normalized LLM Judge Score",
-                        f"{judge_norm:.3f}" if judge_norm is not None else "N/A",
-                    )
-
-                with col4:
-                    reward_raw = attack_aux_info.get("unnormalized_reward")
-                    st.metric(
-                        "Raw Reward Score",
-                        f"{reward_raw:.3f}" if reward_raw is not None else "N/A",
-                    )
-
-                with col5:
-                    judge_raw = attack_aux_info.get("unnormalized_lm_judge")
-                    st.metric(
-                        "Raw LLM Judge Score",
-                        f"{judge_raw:.3f}" if judge_raw is not None else "N/A",
-                    )
-
-            else:
-                st.subheader("Score Summary")
-                st.write("No score summary available")
-
-            # Display ratings
-            ratings = attack.get("ratings", [])
-            if ratings:
-                st.subheader("Individual Ratings")
-                for rating in ratings:
-                    rater = rating.get("rater", {})
-                    rater_name = rater.get("model_name", "Unknown")
-                    rating_type = rater.get("rating_function_type", "Unknown")
-                    raw_score = rating.get("raw_score", 0)
-                    aux_info = rating.get("aux_info", {})
-
-                    with st.expander(f"{rater_name} ({rating_type})"):
-                        st.write(f"Raw Score: {raw_score:.3f}")
-                        st.write(
-                            f"Normalized Score: {aux_info.get('normalized_score', 'N/A')}"
-                        )
-
-                        # Show reasoning if available under either 'reasoning_content' or 'reasoning'
-                        reasoning_text = None
-                        if isinstance(aux_info.get("reasoning_content"), str):
-                            reasoning_text = aux_info["reasoning_content"]
-                        elif aux_info.get("reasoning") is not None:
-                            r = aux_info.get("reasoning")
-                            if isinstance(r, str):
-                                reasoning_text = r
-                            else:
-                                try:
-                                    reasoning_text = json.dumps(r, indent=2)
-                                except Exception:
-                                    reasoning_text = str(r)
-
-                        if reasoning_text:
-                            # Same height calculation as system prompt
-                            chars_per_line = 140
-                            explicit_lines = reasoning_text.count("\n") + 1
-                            wrapped_lines = sum(
-                                max(
-                                    1,
-                                    len(line) // chars_per_line
-                                    + (1 if len(line) % chars_per_line > 0 else 0),
-                                )
-                                for line in reasoning_text.split("\n")
-                            )
-                            total_lines = max(explicit_lines, wrapped_lines)
-
-                            base_height = 50
-                            line_height = 22
-                            calculated_height = base_height + (
-                                total_lines * line_height
-                            )
-                            final_height = max(100, min(500, calculated_height))
-
-                            st.text_area(
-                                "Reasoning", reasoning_text, height=final_height
-                            )
+            rr_df = pd.DataFrame(rr_rows)
+            st.dataframe(rr_df, width="stretch", hide_index=True)
 
 
 def main():
@@ -508,18 +467,25 @@ def main():
                 # Show top prompts summary
                 st.subheader(f"System Prompts for Seed {selected_seed}")
 
-                # Create overview DataFrame
+                # Create overview DataFrame with mean_adversarial_score and stdev_adversarial_score
                 overview_data = []
                 for prompt_hash, prompt_data in sorted_prompts:
                     meta = prompt_data.get("meta", {})
+                    mean_adv, std_adv = _compute_system_prompt_adv_stats(prompt_data)
+                    mean_display = (
+                        f"{mean_adv:.3f}" if isinstance(mean_adv, (int, float)) else "N/A"
+                    )
+                    std_display = (
+                        f"{std_adv:.3f}" if isinstance(std_adv, (int, float)) else "N/A"
+                    )
                     overview_data.append(
                         {
                             "Step": meta.get("step", "N/A"),
                             "Operation": meta.get("operation", "N/A"),
                             "System Prompt": prompt_data["system_prompt"][:80]
                             + "..." if len(prompt_data["system_prompt"]) > 80 else prompt_data["system_prompt"],
-                            "Mean Score": f"{prompt_data.get('mean_score', 0):.3f}",
-                            "Std Dev": f"{prompt_data.get('stdev_score', 0):.3f}",
+                            "Mean Adv Score": mean_display,
+                            "Std Adv Score": std_display,
                             "Num Attacks": len(prompt_data.get("attacks", [])),
                             "Hash": prompt_hash[:12],
                         }

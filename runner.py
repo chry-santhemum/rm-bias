@@ -215,8 +215,8 @@ class Runner(ABC):
                         seed_id=seed_state.index,
                         system_prompt=system_prompt,
                         attacks=attacks_dict,
-                        mean_score=stats.mean_score,
-                        stdev_score=stats.stdev_score,
+                        mean_score=stats.mean_adversarial_score,
+                        stdev_score=stats.stdev_adversarial_score,
                         meta=meta,
                     )
 
@@ -243,7 +243,7 @@ class Runner(ABC):
         logger.info(f"[INITIALIZE] Normalizing rater 2, {self.rater_2.model_name}...")
         asyncio.run(normalize(self.rater_2, self.policy_model, overwrite=False))
 
-    def get_ratings(self):
+    def get_ratings(self, n_samples: int = 1):
         logger.info(f"[TRAIN STEP {self.step_count}] Rating attacks...")
         train_batch_prompts = {}
 
@@ -265,6 +265,7 @@ class Runner(ABC):
                             seed_state=seed_state,
                             train_batch_prompts=train_batch_prompts[seed_state.index],
                             per_prompt_normalize=True,
+                            n_samples=n_samples,
                         )
                     )
 
@@ -276,6 +277,7 @@ class Runner(ABC):
                         seed_state=seed_state,
                         train_batch_prompts=train_batch_prompts[seed_state.index],
                         per_prompt_normalize=False,
+                        n_samples=n_samples,
                     )
 
                 async def run_rating_function():

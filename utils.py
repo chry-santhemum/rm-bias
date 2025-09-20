@@ -225,7 +225,7 @@ def get_to_pass_reasoning(reasoning: int | str | None, max_tokens: int) -> dict 
 
 
 # %%
-# These are no longer used!
+# WARNING - These are no longer used and not guaranteed to work!
 
 
 def custom_cache(cache_dir: str = ".cache"):
