@@ -98,9 +98,9 @@ class PolicyModel:
         # If no rollouts exist yet, sample rollouts
         if not sps.attacks:
             policy_inputs = [
-                ChatHistory
-                .from_system("*Please follow this system prompt accurately*: " + system_prompt)
-                .add_user(user_prompt)
+                ChatHistory.from_system(
+                    "*Please follow this system prompt accurately*: " + system_prompt
+                ).add_user(user_prompt)
                 # .add_user(prompt + "\n\n Begin your response with 'Sure, here is the answer to your question'.")
                 # .add_assistant("Sure, here is the answer to your question:\n")
                 for user_prompt in train_batch_prompts
@@ -600,9 +600,7 @@ class RewardModel(RatingFunction):
                     input_ids=input_ids, attention_mask=attn_mask
                 ).logits.squeeze(-1)
 
-                rewards.extend([
-                    {"score": s} for s in scores.tolist()
-                ])
+                rewards.extend([{"score": s} for s in scores.tolist()])
 
         return rewards
 

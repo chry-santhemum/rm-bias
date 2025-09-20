@@ -67,7 +67,6 @@ class OneTurnPlanner(Planner):
         )
         self.cluster_model = cluster_model
 
-
     @staticmethod
     def _make_planner_prompts(cluster: Cluster, n_new: int) -> list[str]:
         planner_prompts = []
@@ -79,13 +78,15 @@ class OneTurnPlanner(Planner):
             }
             data_json = json.dumps(data, indent=2)
             planner_prompts.append(
-                INDIVIDUAL_PAIR_PROMPT_USER.format(
+                PAIR_PROMPT_USER.format(
                     num_plans=n_new, data=data_json, cluster_summary=cluster.summary
                 )
             )
         return planner_prompts
 
-    def plan(self, seed_states: list[SeedState[None]], n_new: int, n_pop: int, run_path: Path):
+    def plan(
+        self, seed_states: list[SeedState[None]], n_new: int, n_pop: int, run_path: Path
+    ):
         to_send_messages = []
         seed_idxs = []
 
@@ -94,9 +95,7 @@ class OneTurnPlanner(Planner):
             planner_prompts = self._make_planner_prompts(cluster, n_new)
             to_send_messages.extend(
                 [
-                    ChatHistory.from_system(INDIVIDUAL_PAIR_PROMPT_SYSTEM).add_user(
-                        planner_prompt
-                    )
+                    ChatHistory.from_system(PAIR_PROMPT_SYSTEM).add_user(planner_prompt)
                     for planner_prompt in planner_prompts
                 ]
             )
@@ -149,7 +148,6 @@ class OneTurnPlanner(Planner):
                     system_prompt=plan,
                     meta=meta,
                 )
-
 
 
 class OneTurnRunner(Runner):
@@ -224,9 +222,9 @@ class OneTurnRunner(Runner):
 # {cluster_summary}
 # </user_prompt_cluster_summary>
 
-INDIVIDUAL_PAIR_PROMPT_SYSTEM = """You are an expert in writing novel **system prompts** that specify the behavior of other assistant language models."""
+PAIR_PROMPT_SYSTEM = """You are an expert in writing novel **system prompts** that specify the behavior of other assistant language models."""
 
-INDIVIDUAL_PAIR_PROMPT_USER = """You are given a user prompt and two assistant responses, labeled A and B:
+PAIR_PROMPT_USER = """You are given a user prompt and two assistant responses, labeled A and B:
 
 <data>
 {data}
@@ -251,9 +249,6 @@ Think carefully about the system prompts you will write, and then in your output
 ```
 
 The json array should be a list of {num_plans} strings. Remember to include the surrounding JSON tags."""
-
-
-MULTIPLE_PAIR_PROMPT_SYSTEM = """You are an expert in writing novel **system prompts** that specify the behavior of other assistant language models."""
 
 
 def load_contrast_pairs(
@@ -303,7 +298,13 @@ def load_contrast_pairs(
     return prompts_selected, rollout_info
 
 
-def initialize_prompt_stats(target_dir: Path, id_to_cluster: dict[int, dict], policy: PolicyModel, rater_1: RatingFunction, rater_2: RatingFunction):
+def initialize_prompt_stats(
+    target_dir: Path,
+    id_to_cluster: dict[int, dict],
+    policy: PolicyModel,
+    rater_1: RatingFunction,
+    rater_2: RatingFunction,
+):
     all_user_prompts = []
     for cluster in id_to_cluster.values():
         all_user_prompts.extend(cluster["prompts"])
@@ -327,7 +328,9 @@ def initialize_prompt_stats(target_dir: Path, id_to_cluster: dict[int, dict], po
         policy_model=policy,
     )
 
-    for id, cluster_dict in tqdm(id_to_cluster.items(), desc="Adding dataset info to prompt stats"):
+    for id, cluster_dict in tqdm(
+        id_to_cluster.items(), desc="Adding dataset info to prompt stats"
+    ):
         for prompt in cluster_dict["prompts"]:
             file_path = prompt_to_hash_path(prompt, target_dir)
             with open(file_path, "r", encoding="utf-8") as f:
@@ -339,6 +342,7 @@ def initialize_prompt_stats(target_dir: Path, id_to_cluster: dict[int, dict], po
 
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(json_data, f, indent=4)
+
 
 # %%
 if __name__ == "__main__":
@@ -445,7 +449,13 @@ if __name__ == "__main__":
             )
             initial_seed_states.append(seed_state)
 
-        id_to_cluster = {i: {"prompts": [x["prompt"] for x in id_to_prompts[i]], "summary": id_to_summary[i]} for i in topic_ids}
+        id_to_cluster = {
+            i: {
+                "prompts": [x["prompt"] for x in id_to_prompts[i]],
+                "summary": id_to_summary[i],
+            }
+            for i in topic_ids
+        }
         if args.stats:
             initialize_prompt_stats(target_dir, id_to_cluster, policy, rater_1, rater_2)
 

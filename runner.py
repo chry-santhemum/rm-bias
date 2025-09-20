@@ -34,10 +34,10 @@ logger = logging.getLogger(__name__)
 
 class ClusterModel:
     def __init__(
-        self, 
-        embedding_model_name: str, 
-        umap_n_neighbors: int=15,
-        umap_n_components: int=10,
+        self,
+        embedding_model_name: str,
+        umap_n_neighbors: int = 15,
+        umap_n_components: int = 10,
     ):
         self.embedding_model = SentenceTransformer(embedding_model_name)
         self.umap_model = UMAP(
@@ -54,7 +54,6 @@ class ClusterModel:
         embeddings: np.ndarray = self.embedding_model.encode(inputs)
         return self.umap_model.fit_transform(embeddings)  # type: ignore
 
-    
     def cluster(self, inputs: list[str], n_clusters: int) -> list[str]:
         reduced_embeddings = self.embed(inputs)
         kmeans = KMeans(n_clusters=n_clusters, random_state=10086, n_init="auto")
@@ -63,7 +62,7 @@ class ClusterModel:
         closest_point_indices, _ = pairwise_distances_argmin_min(
             kmeans.cluster_centers_, reduced_embeddings
         )
-        
+
         sorted_indices = sorted(closest_point_indices)
         selected = [inputs[i] for i in sorted_indices]
 

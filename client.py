@@ -49,6 +49,7 @@ NO_CACHE_MODEL_PREFIXES: list[str] = [
     "meta-llama/",
 ]
 
+
 def _is_cache_disabled_for_model(model_name: str) -> bool:
     # Optional global kill-switch
     if os.getenv("DISABLE_API_CACHE") is not None:
@@ -59,7 +60,6 @@ def _is_cache_disabled_for_model(model_name: str) -> bool:
         if model_name.startswith(prefix):
             return True
     return False
-
 
 
 def is_thinking_model(model_name: str) -> bool:

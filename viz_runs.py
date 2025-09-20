@@ -329,7 +329,9 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
                             )
                             final_height = max(100, min(500, calculated_height))
 
-                            st.text_area("Reasoning", reasoning_text, height=final_height)
+                            st.text_area(
+                                "Reasoning", reasoning_text, height=final_height
+                            )
 
 
 def main():

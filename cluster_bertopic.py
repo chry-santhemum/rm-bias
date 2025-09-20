@@ -34,25 +34,31 @@ tokenizer = tiktoken.get_encoding("gpt2")
 # By standard we sample 1024 tokens from the policy
 # Here we filter for at most 512 tokens
 
+
 def preprocess_ultrafeedback(item):
     item["chosen"] = item["chosen"][1]["content"]
     item["rejected"] = item["rejected"][1]["content"]
     item["prompt_length"] = len(tokenizer.encode(item["prompt"], disallowed_special=()))
     item["chosen_length"] = len(tokenizer.encode(item["chosen"], disallowed_special=()))
-    item["rejected_length"] = len(tokenizer.encode(item["rejected"], disallowed_special=()))
+    item["rejected_length"] = len(
+        tokenizer.encode(item["rejected"], disallowed_special=())
+    )
     return item
 
+
 start_time = time.time()
-ultrafeedback = load_dataset(
-    "HuggingFaceH4/ultrafeedback_binarized", split="train_prefs"
-).map(
-    preprocess_ultrafeedback,
-    num_proc=8,  # type: ignore
-).filter(
-    lambda item: item["prompt_length"] < 512
-    and item["chosen_length"] < 512
-    and item["rejected_length"] < 512,
-    num_proc=8,
+ultrafeedback = (
+    load_dataset("HuggingFaceH4/ultrafeedback_binarized", split="train_prefs")
+    .map(
+        preprocess_ultrafeedback,
+        num_proc=8,  # type: ignore
+    )
+    .filter(
+        lambda item: item["prompt_length"] < 512
+        and item["chosen_length"] < 512
+        and item["rejected_length"] < 512,
+        num_proc=8,
+    )
 )
 print(f"Preprocessing in {time.time() - start_time:.2f}s")
 print("Ultrafeedback after filtering: ", len(ultrafeedback))  # 40477
@@ -64,17 +70,17 @@ with open("data/ultrafeedback/ds_filtered.pkl", "wb") as f:
 
 # %%
 
+
 def preprocess_wildchat(item):
     item["prompt"] = item["conversation"][0]["content"]
     item["prompt_length"] = len(tokenizer.encode(item["prompt"], disallowed_special=()))
     return item
 
+
 wildchat_iter = load_dataset(
     "allenai/WildChat-1M", split="train", streaming=True
 ).filter(
-    lambda ex:
-    ex["turn"] == 1
-    and ex["language"] == "English",
+    lambda ex: ex["turn"] == 1 and ex["language"] == "English",
 )
 
 print("Taking 50k...")
@@ -95,8 +101,7 @@ wildchat = wildchat.map(
     num_proc=8,
     remove_columns=wildchat.column_names,
 ).filter(
-    lambda ex:
-    ex["prompt_length"] < 512,
+    lambda ex: ex["prompt_length"] < 512,
     num_proc=8,
 )
 
@@ -109,9 +114,11 @@ with open("data/wildchat/ds_filtered.pkl", "wb") as f:
 # %%
 # Basic cleaning: normalize, deduplicate, and filter low-quality prompts
 
+
 def _normalize_text(text: str) -> str:
     # lowercase, trim, collapse internal whitespace
     return " ".join(text.lower().strip().split())
+
 
 _STOPWORDS = {
     "the",
@@ -200,7 +207,10 @@ def _clean_records(ds: Dataset, min_words: int = 4, max_words: int = 1024) -> Da
             # Shingle-based fuzzy dedup (simple and fast)
             tokens = [t for t in norm.split() if t]
             if len(tokens) >= shingle_n:
-                shingles = {" ".join(tokens[i : i + shingle_n]) for i in range(len(tokens) - shingle_n + 1)}
+                shingles = {
+                    " ".join(tokens[i : i + shingle_n])
+                    for i in range(len(tokens) - shingle_n + 1)
+                }
             else:
                 # fallback to unigrams if too short
                 shingles = set(tokens)
@@ -383,11 +393,13 @@ responses = asyncio.run(
 )
 summaries = [response.first_response for response in responses]
 
+
 def convert_labels(label: str) -> str:
     label = int(label)  # type: ignore
     if label == -1:
         return "N/A"
     return summaries[label]  # type: ignore
+
 
 # add a new column of descriptions in the csv
 labels_df["Topic_Summary"] = labels_df["Topic"].apply(convert_labels)  # type: ignore
@@ -399,15 +411,21 @@ labels_df = pd.read_csv("data/wildchat/labels_summaries.csv")
 
 num_topics = len(set(labels_df["Topic"].tolist()))  # type: ignore
 summaries = defaultdict(str)
+clusters = defaultdict(list)
 for topic_id in tqdm(range(0, num_topics - 1), desc="Processing topics"):
     for index, row in labels_df.iterrows():
         if int(row["Topic"]) == topic_id:
-            summaries[topic_id] = row["Topic_Summary"]  # type: ignore
-            break
+            clusters[topic_id].append((row["Document"], row["Probability"]))
+            if topic_id not in summaries:
+                summaries[topic_id] = row["Topic_Summary"]  # type: ignore
 
 for topic_id in range(0, num_topics - 1):
-    print(f"Topic {topic_id}, summary: {summaries[topic_id]}")
+    print(
+        f"Topic {topic_id}: {len(clusters[topic_id])} docs, summary: {summaries[topic_id]}"
+    )
 
+
+VERIFICATION_PROMPT_TEMPLATE = """Your task is to decide whether a given summary accurately reflects the *topic* and *intent* of a given user prompt."""
 
 # %%
 cluster_topics_df: pd.DataFrame = topic_model.get_topic_info()
