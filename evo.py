@@ -1,15 +1,11 @@
 # %%
 import patches  # monkey patching
-import json
-import random
 import dotenv
 import logging
 import asyncio
 import nest_asyncio
 from tqdm.auto import tqdm
 from pathlib import Path
-from collections import defaultdict
-from typing import override
 
 from utils import timestamp, parse_json_response
 from viz_utils import save_system_prompt_stats
@@ -19,12 +15,11 @@ from rater import (
     PolicyModel,
     RatingFunction,
 )
-from state import SeedState, SystemPromptStats, Attack
+from state import SeedState, SystemPromptStats
 from standard_prompts import set_seed_all
 from defaults import *
 from llm_types import ChatHistory
 from runner import (
-    Planner,
     Runner,
     ClusterModel,
     load_initial_seed_states,
@@ -48,7 +43,7 @@ class EvoPlanner(OneTurnPlanner):
         run_path: Path,
     ):
         return super().plan(seed_states, n_new, n_pop, run_path)
-    
+
     _get_past_data_str = PAIRPlanner._get_past_data_str
 
     def iterate_plan(
@@ -137,7 +132,12 @@ class EvoPlanner(OneTurnPlanner):
                     adv_score,
                 )
                 for system_prompt, step_idx in seed_state.state.items()
-                if (adv_score := seed_state.history[-1][system_prompt].mean_adversarial_score) is not None
+                if (
+                    adv_score := seed_state.history[-1][
+                        system_prompt
+                    ].mean_adversarial_score
+                )
+                is not None
             ]
 
             for system_prompt, stats in seed_state.history[-1].items():
@@ -147,7 +147,11 @@ class EvoPlanner(OneTurnPlanner):
                     continue
 
                 candidates.append(
-                    (system_prompt, len(seed_state.history) - 1, stats.mean_adversarial_score)
+                    (
+                        system_prompt,
+                        len(seed_state.history) - 1,
+                        stats.mean_adversarial_score,
+                    )
                 )
 
             _, indices = self.cluster_model.cluster_dbscan(
@@ -164,7 +168,7 @@ class EvoPlanner(OneTurnPlanner):
                 # Sort members of the niche by score and select the top one
                 members = [candidates[i] for i in member_indices]
                 best_in_niche = max(members, key=lambda x: x[2])
-                
+
                 representatives.append(best_in_niche)
                 logger.info(
                     f"Niche {label}: Selected '{best_in_niche[0]}' with score {best_in_niche[2]}"
@@ -177,13 +181,12 @@ class EvoPlanner(OneTurnPlanner):
             # Combine the best from niches and the best outliers
             combined_selection = representatives + outliers
             combined_selection.sort(key=lambda x: x[2], reverse=True)
-            final_candidates = combined_selection[: n_pop]
+            final_candidates = combined_selection[:n_pop]
 
             new_pop = {prompt: gen_idx for prompt, gen_idx, _ in final_candidates}
             seed_state.state = new_pop
 
             logger.info(f"Updated population to {len(new_pop)} members.")
-
 
 
 class EvoRunner(Runner):
@@ -236,7 +239,9 @@ class EvoRunner(Runner):
                 run_path=self.run_path,
             )
 
-        logger.info(f"[TRAIN STEP {self.step_count}] Current population: {len(self.seed_states[0].history[-1])}")
+        logger.info(
+            f"[TRAIN STEP {self.step_count}] Current population: {len(self.seed_states[0].history[-1])}"
+        )
 
         self.get_ratings(n_samples=self.n_samples)
         self.planner.update_pop(self.seed_states, self.n_pop, self.dbscan_eps)
@@ -292,7 +297,6 @@ Think carefully about the system prompts you will write, and then in your output
 ```
 
 The json array should be a list of {num_plans} strings. Remember to include the surrounding JSON tags."""
-
 
 
 # INNOVATE_PROMPT_SYSTEM = """You are an expert in analyzing text and writing novel **system prompts** that specify the behavior of other assistant language models."""
@@ -380,12 +384,17 @@ if __name__ == "__main__":
     cluster_model = ClusterModel(
         embedding_model_name="Qwen/Qwen3-Embedding-0.6B",
         umap_n_neighbors=15,
-        umap_n_components=8,
+        umap_n_components=5,
     )
 
     target_dir = Path(f"data/prompt_stats/{args.dataset}")
     initial_seed_states = load_initial_seed_states(
-        args.dataset, args.stats, target_dir, policy, reward_model=rater_1, train_batch_size=args.train_batch_size
+        args.dataset,
+        args.stats,
+        target_dir,
+        policy,
+        reward_model=rater_1,
+        train_batch_size=args.train_batch_size,
     )
 
     planner = EvoPlanner(

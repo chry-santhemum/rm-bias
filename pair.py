@@ -209,7 +209,9 @@ class PAIRRunner(Runner):
                 run_path=self.run_path,
             )
 
-        logger.info(f"[TRAIN STEP {self.step_count}] Current population: {len(self.seed_states[0].history[-1])}")
+        logger.info(
+            f"[TRAIN STEP {self.step_count}] Current population: {len(self.seed_states[0].history[-1])}"
+        )
 
         self.get_ratings(n_samples=self.n_samples)
         self.save_complete_system_prompt_stats()
@@ -302,7 +304,12 @@ if __name__ == "__main__":
 
     target_dir = Path(f"data/prompt_stats/{args.dataset}")
     initial_seed_states = load_initial_seed_states(
-        args.dataset, args.stats, target_dir, policy, reward_model=rater_1, train_batch_size=args.train_batch_size
+        args.dataset,
+        args.stats,
+        target_dir,
+        policy,
+        reward_model=rater_1,
+        train_batch_size=args.train_batch_size,
     )
 
     planner = PAIRPlanner(

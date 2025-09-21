@@ -281,7 +281,12 @@ if __name__ == "__main__":
 
     target_dir = Path(f"data/prompt_stats/{args.dataset}")
     initial_seed_states = load_initial_seed_states(
-        args.dataset, args.stats, target_dir, policy, rater_1, train_batch_size=args.train_batch_size
+        args.dataset,
+        args.stats,
+        target_dir,
+        policy,
+        rater_1,
+        train_batch_size=args.train_batch_size,
     )
     planner = OneTurnPlanner(
         planner_model_names=["claude-opus-4-20250514", "google/gemini-2.5-pro"],

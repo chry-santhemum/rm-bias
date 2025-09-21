@@ -83,9 +83,11 @@ class ClusterModel:
         selected = [inputs[i] for i in sorted_indices]
 
         return selected, sorted_indices
-    
+
     def cluster_dbscan(
-        self, inputs: list[str], dbscan_eps: float,
+        self,
+        inputs: list[str],
+        dbscan_eps: float,
     ) -> Tuple[dict[int, list[str]], dict[int, list[int]]]:
         reduced_embeddings = self.embed(inputs)
         dbscan = DBSCAN(eps=dbscan_eps, min_samples=2, metric="cosine")
@@ -419,7 +421,7 @@ def load_initial_seed_states(
     target_dir: Path,
     policy: PolicyModel,
     reward_model: RewardModel,
-    train_batch_size: int=0,  # 0 means use all
+    train_batch_size: int = 0,  # 0 means use all
 ):
     initial_seed_states = []
 
@@ -469,7 +471,9 @@ def load_initial_seed_states(
                 summary=id_to_summary[topic],
                 train_prompts=train_prompts,
                 val_prompts=[],
-                train_batch_size=train_batch_size if train_batch_size > 0 else len(train_prompts),
+                train_batch_size=(
+                    train_batch_size if train_batch_size > 0 else len(train_prompts)
+                ),
                 aux_info=aux_info,
             )
 
@@ -512,7 +516,9 @@ def load_initial_seed_states(
             summary="Any general user prompt from a general instruction dataset.",
             train_prompts=prompts_selected,
             val_prompts=[],
-            train_batch_size=train_batch_size if train_batch_size > 0 else len(prompts_selected),
+            train_batch_size=(
+                train_batch_size if train_batch_size > 0 else len(prompts_selected)
+            ),
             aux_info=rollout_info,
         )
         initial_seed_states = [
