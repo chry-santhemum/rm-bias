@@ -18,7 +18,7 @@ import pandas as pd
 from datasets import load_dataset
 from umap import UMAP
 from sklearn.cluster import KMeans, DBSCAN
-from sklearn.metrics import pairwise_distances_argmin_min
+from sklearn.metrics import pairwise_distances, pairwise_distances_argmin_min
 from sentence_transformers import SentenceTransformer
 
 from utils import timestamp, get_to_pass_reasoning
@@ -35,6 +35,7 @@ from rater import (
     PolicyModel,
     RatingFunction,
     RewardModel,
+    LLMJudge,
 )
 from state import SeedState, Cluster
 from defaults import *
@@ -52,6 +53,8 @@ class ClusterModel:
         umap_n_components: int = 8,
     ):
         self.embedding_model = SentenceTransformer(embedding_model_name)
+        self.umap_n_neighbors = umap_n_neighbors
+        self.umap_n_components = umap_n_components
         self.umap_model = UMAP(
             n_neighbors=umap_n_neighbors,
             n_components=umap_n_components,
@@ -70,6 +73,13 @@ class ClusterModel:
         self, inputs: list[str], n_clusters: int
     ) -> Tuple[list[str], list[int]]:
         reduced_embeddings = self.embed(inputs)
+
+        # log the pairwise distance matrix
+        logger.info(
+            f"Pairwise distance matrix:\n"
+            f"{pairwise_distances(reduced_embeddings, metric='cosine')}"
+        )
+
         kmeans = KMeans(
             n_clusters=min(len(inputs), n_clusters), random_state=10086, n_init="auto"
         )
@@ -90,7 +100,16 @@ class ClusterModel:
         dbscan_eps: float,
     ) -> Tuple[dict[int, list[str]], dict[int, list[int]]]:
         reduced_embeddings = self.embed(inputs)
-        dbscan = DBSCAN(eps=dbscan_eps, min_samples=2, metric="cosine")
+
+        # log the pairwise distance matrix
+        logger.info(
+            f"Pairwise distance matrix:\n"
+            f"{pairwise_distances(reduced_embeddings, metric='cosine')}"
+        )
+
+        dbscan = DBSCAN(
+            eps=dbscan_eps, min_samples=2 * self.umap_n_components, metric="cosine"
+        )
         dbscan.fit(reduced_embeddings)
 
         niches = defaultdict(list)
@@ -421,6 +440,7 @@ def load_initial_seed_states(
     target_dir: Path,
     policy: PolicyModel,
     reward_model: RewardModel,
+    llm_judge: LLMJudge,
     train_batch_size: int = 0,  # 0 means use all
 ):
     initial_seed_states = []
@@ -494,7 +514,9 @@ def load_initial_seed_states(
             for i in topic_ids
         }
         if compute_stats:
-            initialize_prompt_stats(target_dir, id_to_cluster, policy, [reward_model])
+            initialize_prompt_stats(
+                target_dir, id_to_cluster, policy, [reward_model, llm_judge]
+            )
 
     elif dataset == "instruction-dataset":
         instruction_test = load_dataset(
@@ -504,7 +526,9 @@ def load_initial_seed_states(
 
         id_to_cluster = {0: {"prompts": prompts, "summary": "All"}}
         if compute_stats:
-            initialize_prompt_stats(target_dir, id_to_cluster, policy, [reward_model])
+            initialize_prompt_stats(
+                target_dir, id_to_cluster, policy, [reward_model, llm_judge]
+            )
 
         prompts_selected, rollout_info = load_contrast_pairs(
             prompts, target_dir, policy, reward_model, threshold=1.5

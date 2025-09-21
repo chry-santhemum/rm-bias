@@ -387,6 +387,18 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
                     disabled=True,
                 )
 
+                # Ratings aux info per rater
+                ratings = responses[original_idx].get("ratings", [])
+                if ratings:
+                    st.subheader("Ratings Aux Info")
+                    for ridx, rating in enumerate(ratings):
+                        rater_name = (
+                            rating.get("rater", {}).get("model_name")
+                            or f"Rater {ridx + 1}"
+                        )
+                        with st.expander(f"{rater_name}"):
+                            st.json(rating.get("aux_info", {}))
+
 
 def main():
     st.title("Reward model auto red-teaming")

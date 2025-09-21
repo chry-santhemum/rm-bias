@@ -114,7 +114,7 @@ class OneTurnPlanner(Planner):
                 "temperature": self.temperature,
                 "reasoning_effort": str(self.reasoning) if self.reasoning else None,
                 "planner_prompt": to_send_messages[i].get_first("user"),
-                "planner_reasoning": reasoning,
+                "planner_reasoning": str(reasoning),
                 "n_new": n_new,
                 "n_pop": n_pop,
             }
@@ -153,6 +153,8 @@ class OneTurnPlanner(Planner):
 
 
 class OneTurnRunner(Runner):
+    planner: OneTurnPlanner  # for type checker
+
     def __init__(
         self,
         seed_states: list[SeedState],

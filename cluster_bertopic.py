@@ -508,7 +508,7 @@ for i, answer in enumerate(answers):
         filtered_stats[chat_topic_ids[i]] += 1
     else:
         rows_list[i]["Verified"] = False
-    rows_list[i]["Verified_Reasoning"] = responses[i].reasoning_content
+    rows_list[i]["Verified_Reasoning"] = str(responses[i].reasoning_content)
 
 for topic_id in range(start, end):
     print(f"Topic {topic_id} has {filtered_stats[topic_id]} documents")

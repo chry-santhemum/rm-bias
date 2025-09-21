@@ -121,14 +121,14 @@ def is_local_model(model_name: str) -> bool:
 
 def parse_json_response(
     resp: OpenaiResponse, log_json_error: bool = True
-) -> Tuple[Any, str]:
+) -> Tuple[Any, str | None]:
     """
     Returns a tuple (parsed output, reasoning).
 
     If output is a valid json array, it is parsed and returned.
     Else, if output exists, it is returned as is.
     """
-    output, reasoning = None, "N/A"
+    output, reasoning = None, None
     try:
         raw_text = resp.first_response
         if is_thinking_model(resp.model):

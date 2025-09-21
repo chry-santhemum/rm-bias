@@ -8,7 +8,7 @@ from tqdm.auto import tqdm
 from pathlib import Path
 
 from utils import timestamp, parse_json_response
-from viz_utils import save_system_prompt_stats
+from viz_utils import save_system_prompt_stats, save_population_state
 from rater import (
     LLMJudge,
     RewardModel,
@@ -100,7 +100,7 @@ class EvoPlanner(OneTurnPlanner):
                 "temperature": self.temperature,
                 "reasoning_effort": str(self.reasoning) if self.reasoning else None,
                 "planner_prompt": to_send_messages[i].get_first("user"),
-                "planner_reasoning": reasoning,
+                "planner_reasoning": str(reasoning),
                 "m_var": m_var,
                 "n_pop": n_pop,
             }
@@ -123,6 +123,7 @@ class EvoPlanner(OneTurnPlanner):
         seed_states: list[SeedState[dict[str, int]]],
         n_pop: int,
         dbscan_eps: float,
+        run_path: Path,
     ):
         for seed_state in seed_states:
             candidates = [
@@ -133,7 +134,7 @@ class EvoPlanner(OneTurnPlanner):
                 )
                 for system_prompt, step_idx in seed_state.state.items()
                 if (
-                    adv_score := seed_state.history[-1][
+                    adv_score := seed_state.history[step_idx][
                         system_prompt
                     ].mean_adversarial_score
                 )
@@ -154,42 +155,56 @@ class EvoPlanner(OneTurnPlanner):
                     )
                 )
 
-            _, indices = self.cluster_model.cluster_dbscan(
-                [cand[0] for cand in candidates], dbscan_eps
-            )
-
-            # Select the best candidate from each niche
-            representatives = []
-            for label, member_indices in indices.items():
-                if label == -1:
-                    # These are noise points; we'll handle them separately
-                    continue
-
-                # Sort members of the niche by score and select the top one
-                members = [candidates[i] for i in member_indices]
-                best_in_niche = max(members, key=lambda x: x[2])
-
-                representatives.append(best_in_niche)
-                logger.info(
-                    f"Niche {label}: Selected '{best_in_niche[0]}' with score {best_in_niche[2]}"
+            if not seed_state.state:
+                seed_state.state = {cand[0]: 0 for cand in candidates}
+            else:
+                _, indices = self.cluster_model.cluster_dbscan(
+                    [cand[0] for cand in candidates], dbscan_eps
                 )
 
-            # Handle outliers (prompts labeled as -1)
-            outliers = [candidates[i] for i in indices[-1]]
-            outliers.sort(key=lambda x: x[2], reverse=True)
+                # Select the best candidate from each niche
+                representatives = []
+                for label, member_indices in indices.items():
+                    if label == -1:
+                        # These are noise points; we'll handle them separately
+                        continue
 
-            # Combine the best from niches and the best outliers
-            combined_selection = representatives + outliers
-            combined_selection.sort(key=lambda x: x[2], reverse=True)
-            final_candidates = combined_selection[:n_pop]
+                    # Sort members of the niche by score and select the top one
+                    members = [candidates[i] for i in member_indices]
+                    best_in_niche = max(members, key=lambda x: x[2])
 
-            new_pop = {prompt: gen_idx for prompt, gen_idx, _ in final_candidates}
-            seed_state.state = new_pop
+                    representatives.append(best_in_niche)
+                    logger.info(
+                        f"Niche {label}: Selected '{best_in_niche[0]}' with score {best_in_niche[2]}"
+                    )
 
-            logger.info(f"Updated population to {len(new_pop)} members.")
+                # Handle outliers (prompts labeled as -1)
+                outliers = [candidates[i] for i in indices[-1]]
+                outliers.sort(key=lambda x: x[2], reverse=True)
+
+                # Combine the best from niches and the best outliers
+                combined_selection = representatives + outliers
+                combined_selection.sort(key=lambda x: x[2], reverse=True)
+                final_candidates = combined_selection[:n_pop]
+
+                seed_state.state = {
+                    prompt: gen_idx for prompt, gen_idx, _ in final_candidates
+                }
+
+            logger.info(
+                f"Updated Seed {seed_state.index} population to {len(seed_state.state)} members."
+            )
+            save_population_state(
+                run_path=run_path,
+                seed_id=seed_state.index,
+                step=len(seed_state.history) - 1,
+                population_state=seed_state.state,
+            )
 
 
 class EvoRunner(Runner):
+    planner: EvoPlanner  # for type checker
+
     def __init__(
         self,
         seed_states: list[SeedState[dict[str, int]]],
@@ -244,7 +259,9 @@ class EvoRunner(Runner):
         )
 
         self.get_ratings(n_samples=self.n_samples)
-        self.planner.update_pop(self.seed_states, self.n_pop, self.dbscan_eps)
+        self.planner.update_pop(
+            self.seed_states, self.n_pop, self.dbscan_eps, self.run_path
+        )
         self.save_complete_system_prompt_stats()
         self.save_seed_states()
 
@@ -394,6 +411,7 @@ if __name__ == "__main__":
         target_dir,
         policy,
         reward_model=rater_1,
+        llm_judge=rater_2,
         train_batch_size=args.train_batch_size,
     )
 

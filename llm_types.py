@@ -108,14 +108,6 @@ class ChatHistory(BaseModel):
     def all_assistant_messages(self) -> Slist[ChatMessage]:
         return Slist(self.messages).filter(lambda msg: msg.role == "assistant")
 
-    # def to_finetune(self) -> FinetuneConversation:
-    #     return FinetuneConversation(
-    #         messages=[
-    #             FinetuneMessage(role=msg.role, content=msg.content)
-    #             for msg in self.messages
-    #         ]
-    #     )
-
     def as_text(self) -> str:
         return "\n".join([msg.as_text() for msg in self.messages])
 
@@ -158,12 +150,15 @@ class ChatHistory(BaseModel):
     def to_openai_messages(self) -> list[dict]:
         return [msg.to_openai_content() for msg in self.messages]
 
-    def get_first(self, role: Literal["system", "user", "assistant"]) -> str:
-        """Get the first message with the given role, if exists"""
+    def get_first(self, role: Literal["system", "user", "assistant"]) -> str | None:
+        """
+        Get the first message with the given role, if exists.
+        Returns None otherwise.
+        """
         for msg in self.messages:
             if msg.role == role:
                 return msg.content
-        return "N/A"
+        return None
 
 
 class InferenceConfig(BaseModel):

@@ -121,7 +121,7 @@ class PolicyModel:
                     user=train_batch_prompts[i],
                     responses=[
                         RatedResponse(
-                            assistant=response.get_first("assistant"), ratings=[]
+                            assistant=str(response.get_first("assistant")), ratings=[]
                         )
                         for response in policy_responses[
                             i * n_samples : (i + 1) * n_samples

@@ -104,24 +104,26 @@ class OpenaiResponse(BaseModel):
             raise ValueError(f"No content found in OpenaiResponse: {self}")
 
     @property
-    def reasoning_content(self) -> str:
-        ## sometimes has reasoning_content or reasoning instead of content e.g. deepseek-reasoner or gemini
+    def reasoning_content(self) -> str | None:
+        """
+        Returns the reasoning content if it exists, otherwise None.
+        """
+        # sometimes has reasoning_content or reasoning instead of content e.g. deepseek-reasoner or gemini
         possible_keys = ["reasoning_content", "reasoning"]
         for key in possible_keys:
-            if self.choices[0]["message"].get(key, None) is not None:
+            if key in self.choices[0]["message"]:
                 return self.choices[0]["message"][key]
-            # Check if content is a dict before trying to access keys
+
             content = self.choices[0]["message"].get("content")
-            if isinstance(content, dict) and content.get(key, None) is not None:
+            if isinstance(content, dict) and key in content:
                 return content[key]
-        raise ValueError(f"No reasoning_content found in OpenaiResponse: {self}")
+        return None
+        # raise ValueError(f"No reasoning_content found in OpenaiResponse: {self}")
 
     @property
     def has_reasoning(self) -> bool:
-        possible_keys = ["reasoning_content", "reasoning"]
-        for key in possible_keys:
-            if self.choices[0]["message"].get(key):
-                return True
+        if self.reasoning_content is not None:
+            return True
         return False
 
     def has_response(self) -> bool:
@@ -627,10 +629,7 @@ async def sample_from_model(
 
     if full_logging:
         print(response)
-        try:
-            reasoning_content = response.reasoning_content
-        except Exception:
-            reasoning_content = "N/A"
+        reasoning_content = response.reasoning_content
         logger.info(
             f"[sample_from_model] Got response:\n"
             f"<RESPONSE> {response.first_response} </RESPONSE>\n"
