@@ -65,6 +65,27 @@ class RatedResponse:
                 return rating.aux_info.get("normalized_score", None)
         return None
 
+    def adversarial_score(
+        self,
+        rater_1_model_name: str | None = None,
+        rater_2_model_name: str | None = None,
+    ) -> float | None:
+        if len(self.ratings) < 2:
+            return None
+        if rater_1_model_name is None:
+            rater_1_model_name = self.ratings[0].rater.model_name
+        if rater_2_model_name is None:
+            rater_2_model_name = self.ratings[1].rater.model_name
+            
+        score_1 = self.normalized_score(rater_1_model_name)
+        score_2 = self.normalized_score(rater_2_model_name)
+        if score_1 is None or score_2 is None:
+            return None
+        return adversariality(
+            z_score_1=score_1,
+            z_score_2=score_2,
+        )
+
 
 @dataclass
 class Attack:

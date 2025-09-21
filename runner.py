@@ -1,5 +1,5 @@
 # %%
-import patches  # noqa: F401  # monkey patching
+import patches  # monkey patching
 import os
 import json
 import random
@@ -28,12 +28,13 @@ from viz_utils import (
     save_cluster_info,
 )
 from rater import (
+    normalize,
     prompt_rollout,
     prompt_rating,
     prompt_to_hash_path,
     PolicyModel,
     RatingFunction,
-    normalize,
+    RewardModel,
 )
 from state import SeedState, Cluster
 from defaults import *
@@ -48,7 +49,7 @@ class ClusterModel:
         self,
         embedding_model_name: str,
         umap_n_neighbors: int = 15,
-        umap_n_components: int = 10,
+        umap_n_components: int = 8,
     ):
         self.embedding_model = SentenceTransformer(embedding_model_name)
         self.umap_model = UMAP(
@@ -348,10 +349,9 @@ def load_contrast_pairs(
 
 def initialize_prompt_stats(
     target_dir: Path,
-    id_to_cluster: dict[int, dict],
+    id_to_cluster: dict[int, dict],  # cluster_id: {"prompts": [...], "summary": ...}
     policy: PolicyModel,
-    rater_1: RatingFunction,
-    rater_2: RatingFunction,
+    raters: list[RatingFunction],
 ):
     all_user_prompts = []
     for cluster in id_to_cluster.values():
@@ -363,18 +363,14 @@ def initialize_prompt_stats(
         policy_model=policy,
         n_samples=16,
     )
-    prompt_rating(
-        prompts=all_user_prompts,
-        target_dir=target_dir,
-        rater=rater_1,
-        policy_model=policy,
-    )
-    prompt_rating(
-        prompts=all_user_prompts,
-        target_dir=target_dir,
-        rater=rater_2,
-        policy_model=policy,
-    )
+
+    for rater in raters:
+        prompt_rating(
+            prompts=all_user_prompts,
+            target_dir=target_dir,
+            rater=rater,
+            policy_model=policy,
+        )
 
     for id, cluster_dict in tqdm(
         id_to_cluster.items(), desc="Adding dataset info to prompt stats"
@@ -397,8 +393,8 @@ def load_initial_seed_states(
     compute_stats: bool,
     target_dir: Path,
     policy: PolicyModel,
-    rater_1: RatingFunction,
-    rater_2: RatingFunction,
+    reward_model: RewardModel,
+    train_batch_size: int=0,  # 0 means use all
 ):
     initial_seed_states = []
 
@@ -448,7 +444,7 @@ def load_initial_seed_states(
                 summary=id_to_summary[topic],
                 train_prompts=train_prompts,
                 val_prompts=[],
-                train_batch_size=20,
+                train_batch_size=train_batch_size if train_batch_size > 0 else len(train_prompts),
                 aux_info=aux_info,
             )
 
@@ -469,7 +465,7 @@ def load_initial_seed_states(
             for i in topic_ids
         }
         if compute_stats:
-            initialize_prompt_stats(target_dir, id_to_cluster, policy, rater_1, rater_2)
+            initialize_prompt_stats(target_dir, id_to_cluster, policy, [reward_model])
 
     elif dataset == "instruction-dataset":
         instruction_test = load_dataset(
@@ -479,10 +475,10 @@ def load_initial_seed_states(
 
         id_to_cluster = {0: {"prompts": prompts, "summary": "All"}}
         if compute_stats:
-            initialize_prompt_stats(target_dir, id_to_cluster, policy, rater_1, rater_2)
+            initialize_prompt_stats(target_dir, id_to_cluster, policy, [reward_model])
 
         prompts_selected, rollout_info = load_contrast_pairs(
-            prompts, target_dir, policy, rater_1, threshold=1.5
+            prompts, target_dir, policy, reward_model, threshold=1.5
         )
 
         print(f"Selected {len(prompts_selected)} prompts")
@@ -491,7 +487,7 @@ def load_initial_seed_states(
             summary="Any general user prompt from a general instruction dataset.",
             train_prompts=prompts_selected,
             val_prompts=[],
-            train_batch_size=len(prompts_selected),
+            train_batch_size=train_batch_size if train_batch_size > 0 else len(prompts_selected),
             aux_info=rollout_info,
         )
         initial_seed_states = [
@@ -510,7 +506,8 @@ def load_initial_seed_states(
     print(f"Loaded {len(initial_seed_states)} seed states")
     for state in initial_seed_states:
         print(
-            f"  - {state.cluster.summary}: {len(state.cluster.train_prompts)} train prompts"
+            f"  - Seed {state.index}, {len(state.cluster.train_prompts)} train prompts:\n"
+            f"    {state.cluster.summary}"
         )
 
     return initial_seed_states

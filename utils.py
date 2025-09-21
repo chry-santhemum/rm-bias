@@ -123,7 +123,10 @@ def parse_json_response(
     resp: OpenaiResponse, log_json_error: bool = True
 ) -> Tuple[Any, str]:
     """
-    Returns a tuple (json array, reasoning)
+    Returns a tuple (parsed output, reasoning).
+
+    If output is a valid json array, it is parsed and returned.
+    Else, if output exists, it is returned as is.
     """
     output, reasoning = None, "N/A"
     try:
