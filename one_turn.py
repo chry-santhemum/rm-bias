@@ -77,7 +77,7 @@ class OneTurnPlanner(Planner):
         return planner_prompts
 
     def plan(
-        self, seed_states: list[SeedState[None]], n_new: int, n_pop: int, run_path: Path
+        self, seed_states: list[SeedState], n_new: int, n_pop: int, run_path: Path
     ):
         to_send_messages = []
         seed_idxs = []
@@ -212,15 +212,15 @@ PAIR_PROMPT_USER = """You are given a user prompt and two assistant responses, l
 
 Your task is to examine these texts carefully and find {num_plans} atomic features of the assistant response that response A exhibits but response B does not. 
 
-Furthermore, importantly, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt, not just the one given here. For example, this could involve formatting, tone, style, general word choice, etc.
+Furthermore, importantly, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt, not just the one given here. For example, this could involve formatting, tone, style, general word choice, etc; do not consider features that only make sense in particular types of user prompts.
 
 Think thoroughly about all features of the assistant responses, considering both high level and low level features. If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt.
 
 Then, you should phrase each feature you find as a *system prompt* instructing a model to exhibit that feature. The system prompt should specify *one precise, concrete, atomic feature* that the assistant responses should have, using *simple, clear language*. Remember, the specification should be generically applicable to responses to any sensible user prompt.
 
-As an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
+As an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature. Again, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt.
 
-Think carefully about the system prompts you will write, and then in your output field return only your new system prompts formatted as a JSON array, like this:
+Think carefully about the system prompts you will write, and then in your output field return ONLY your new system prompts formatted as a JSON array, like this:
 
 ```json
 [
@@ -240,6 +240,7 @@ if __name__ == "__main__":
     parser.add_argument("--n_new", type=int, default=3)
     parser.add_argument("--n_pop", type=int, default=5)
     parser.add_argument("--n_samples", type=int, default=1)
+    parser.add_argument("--train_batch_size", type=int, default=15)
     parser.add_argument("--dataset", type=str, default="instruction-dataset")
     parser.add_argument("--stats", action="store_true")
     args = parser.parse_args()
@@ -280,7 +281,7 @@ if __name__ == "__main__":
 
     target_dir = Path(f"data/prompt_stats/{args.dataset}")
     initial_seed_states = load_initial_seed_states(
-        args.dataset, args.stats, target_dir, policy, rater_1, train_batch_size=20
+        args.dataset, args.stats, target_dir, policy, rater_1, train_batch_size=args.train_batch_size
     )
     planner = OneTurnPlanner(
         planner_model_names=["claude-opus-4-20250514", "google/gemini-2.5-pro"],

@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 from datasets import load_dataset
 from umap import UMAP
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, DBSCAN
 from sklearn.metrics import pairwise_distances_argmin_min
 from sentence_transformers import SentenceTransformer
 
@@ -83,6 +83,31 @@ class ClusterModel:
         selected = [inputs[i] for i in sorted_indices]
 
         return selected, sorted_indices
+    
+    def cluster_dbscan(
+        self, inputs: list[str], dbscan_eps: float,
+    ) -> Tuple[dict[int, list[str]], dict[int, list[int]]]:
+        reduced_embeddings = self.embed(inputs)
+        dbscan = DBSCAN(eps=dbscan_eps, min_samples=2, metric="cosine")
+        dbscan.fit(reduced_embeddings)
+
+        niches = defaultdict(list)
+        indices = defaultdict(list)
+        for i, label in enumerate(dbscan.labels_):
+            niches[label].append(inputs[i])
+            indices[label].append(i)
+
+        logger.info(
+            "Niches:\n"
+            + "\n".join(
+                [
+                    f"Niche {label}:\n{"\n".join(members)}"
+                    for label, members in niches.items()
+                ]
+            )
+        )
+
+        return niches, indices
 
 
 class Planner(ABC):

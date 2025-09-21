@@ -52,11 +52,12 @@ logger = logging.getLogger(__name__)
 
 class PAIRPlanner(OneTurnPlanner):
     def initial_plan(
-        self, seed_states: list[SeedState[None]], n_new: int, n_pop: int, run_path: Path
+        self, seed_states: list[SeedState], n_new: int, n_pop: int, run_path: Path
     ):
         return super().plan(seed_states, n_new, n_pop, run_path)
 
-    def _get_past_data_str(self, stats: SystemPromptStats, k_chats: int = 10) -> str:
+    @staticmethod
+    def _get_past_data_str(stats: SystemPromptStats, k_chats: int = 10) -> str:
         all_attacks = [
             attack for attack in stats.attacks if attack.adversarial_score() is not None
         ]
@@ -110,7 +111,7 @@ class PAIRPlanner(OneTurnPlanner):
             for system_prompt in seed_state.history[-1]:
                 planner_prompt = ITERATE_PROMPT_USER.format(
                     original_system_prompt=system_prompt,
-                    sample_responses=self._get_past_data_str(
+                    sample_responses=PAIRPlanner._get_past_data_str(
                         seed_state.history[-1][system_prompt]
                     ),
                 )
@@ -248,7 +249,7 @@ Here are some samples of (user prompt, assistant response, score) tuples, where 
 
 * Each sentence should use **simple, clear language** to prescribe a specific feature that the response should follow. In addition, importantly, the feature should be generally applicable to responses to *any* sensible user prompt, not just the ones in the above samples.
 
-Think carefully about the system prompts you will write, and then in your output field return only your new system prompt."""
+Think carefully about the system prompts you will write, and then in your output field, return ONLY your new system prompt and no other text."""
 
 
 # %%
@@ -260,6 +261,7 @@ if __name__ == "__main__":
     parser.add_argument("--n_pop", type=int, default=8)
     parser.add_argument("--n_samples", type=int, default=8)
     parser.add_argument("--t_steps", type=int, required=True)
+    parser.add_argument("--train_batch_size", type=int, default=15)
     parser.add_argument("--dataset", type=str, default="instruction-dataset")
     parser.add_argument("--stats", action="store_true")
     args = parser.parse_args()
@@ -300,7 +302,7 @@ if __name__ == "__main__":
 
     target_dir = Path(f"data/prompt_stats/{args.dataset}")
     initial_seed_states = load_initial_seed_states(
-        args.dataset, args.stats, target_dir, policy, reward_model=rater_1, train_batch_size=10
+        args.dataset, args.stats, target_dir, policy, reward_model=rater_1, train_batch_size=args.train_batch_size
     )
 
     planner = PAIRPlanner(
