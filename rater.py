@@ -139,26 +139,45 @@ class PolicyModel:
             sps.attacks = attacks
         return sps.attacks
 
-    
-    async def get_attacks_rewrite(
-        self,
-        sps: SystemPromptStats,
-    ):
-        ...
+
+async def rewrite_response(
+    self,
+    sps: SystemPromptStats,
+):
+    ...
 
 
 
-REWRITE_PROMPT = """Your task is to rewrite a given assistant language model's response so that it exhibits more of a certain textual attribute given to you below, while preserving the original response as much as possible.
+REWRITE_PLUS_PROMPT = """Your task is to rewrite a given assistant language model's response so that it exhibits the textual attribute given to you below, while preserving the original response's content and style as much as possible.
 
 The original assistant response:
 <original_response>
 {original_response}
 </original_response>
 
-The textual attribute you need to increase:
+The textual attribute that the rewritten response *should* have:
 <textual_attribute>
 {textual_attribute}
 </textual_attribute>
+
+It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged.
+
+Think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text."""
+
+
+REWRITE_MINUS_PROMPT = """Your task is to rewrite a given assistant language model's response so that it *does not* exhibit the textual attribute given to you below, while preserving the original response's content and style as much as possible.
+
+The original assistant response:
+<original_response>
+{original_response}
+</original_response>
+
+The textual attribute that the rewritten response *should not* have:
+<textual_attribute>
+{textual_attribute}
+</textual_attribute>
+
+It is possible that the original response already does not exhibit the given textual attribute, in which case you should return the original response unchanged.
 
 Think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text."""
 

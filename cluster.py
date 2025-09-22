@@ -53,7 +53,7 @@ def embed(ds_name: str, prompt: str):
 # %%
 CLUSTER_PROMPT = "Instruct: Given a user prompt, summarize the topic and user intent of the prompt.\n\nUser prompt:"
 
-embed("wildchat", prompt=CLUSTER_PROMPT)
+embed("ultrafeedback", prompt=CLUSTER_PROMPT)
 
 # %%
 
@@ -107,11 +107,11 @@ def fit_bertopic(
     return topic_model
 
 # %%
-topic_model = fit_bertopic("wildchat")
+topic_model = fit_bertopic("ultrafeedback")
 
 # %%
 # Look at some clusters
-labels = pd.read_csv("data/wildchat/labels_likely.csv")
+labels = pd.read_csv("data/alpaca/labels_likely.csv")
 clusters = defaultdict(list)
 representative = defaultdict(list)
 
@@ -222,7 +222,7 @@ def topic_modeling(ds_name: str):
     print(f"Saved to data/{ds_name}/labels_summaries.csv")
 
 # %%
-topic_modeling("wildchat")
+topic_modeling("ultrafeedback")
 
 # %%
 # Look at some clusters
