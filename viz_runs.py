@@ -2,7 +2,7 @@ import streamlit as st
 import json
 import pandas as pd
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Literal
 import plotly.express as px
 from state import adversariality
 
@@ -58,15 +58,17 @@ def _dynamic_text_height(
 def _render_selectable_df(
     df: pd.DataFrame,
     drop_cols: List[str] | None = None,
-    min_height: int = 104,
+    min_height: int = 100,
     max_height: int = 400,
-    selection_mode: str = "single-row",
+    selection_mode: Literal[
+        "single-row", "multi-row", "single-column", "multi-column"
+    ] = "single-row",
     key: str | None = None,
 ):
     df_to_show = df.drop(columns=drop_cols, errors="ignore") if drop_cols else df
     return st.dataframe(
         df_to_show,
-        width="stretch",
+        use_container_width=True,
         height=_adaptive_table_height(
             len(df_to_show), min_height=min_height, max_height=max_height
         ),
@@ -74,7 +76,7 @@ def _render_selectable_df(
         selection_mode=selection_mode,
         hide_index=True,
         key=key,
-    )
+    )  # type: ignore[call-arg]
 
 
 @st.cache_data
@@ -367,7 +369,6 @@ def display_system_prompt_details(prompt_data: Dict[str, Any], prompt_hash: str)
             selected_rr = _render_selectable_df(
                 rr_df,
                 drop_cols=["Index"],
-                max_height=600,
             )
 
             # Show full response text for selected row
@@ -608,7 +609,6 @@ def main():
                 # Display with selection
                 selected_prompt = _render_selectable_df(
                     overview_df,
-                    max_height=720,
                 )
 
                 # Show details for selected prompt

@@ -311,6 +311,7 @@ if __name__ == "__main__":
         target_dir,
         policy,
         reward_model=rater_1,
+        llm_judge=rater_2,
         train_batch_size=args.train_batch_size,
     )
 

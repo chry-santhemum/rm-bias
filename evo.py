@@ -1,3 +1,18 @@
+"""
+Evolutionary algorithm / Tree of Attacks.
+
+Number of LLM calls per seed state:
+- Initial planning:
+    - generates n_new system prompts for each train prompt in the seed state, then reduces to n_pop system prompts by clustering.
+    - rating: n_pop * n_samples * train_batch_size distinct chat histories
+- Each iteration:
+    - generates m_var system prompts based on each system prompt in the previous step.
+    - rating: n_pop * n_samples * m_var * train_batch_size distinct chat histories
+- Total:
+    - Planner: num_train_prompts + (t_steps - 1) * n_pop
+    - Rater: n_pop * n_samples * train_batch_size * (1 + (t_steps - 1) * m_var)
+"""
+
 # %%
 import patches  # monkey patching
 import dotenv
@@ -23,6 +38,7 @@ from runner import (
     Runner,
     ClusterModel,
     load_initial_seed_states,
+    prompt_rating,
 )
 from one_turn import OneTurnPlanner
 from pair import PAIRPlanner
@@ -62,7 +78,7 @@ class EvoPlanner(OneTurnPlanner):
                     num_plans=m_var,
                     original_system_prompt=system_prompt,
                     sample_responses=EvoPlanner._get_past_data_str(
-                        seed_state.history[-1][system_prompt]
+                        seed_state.history[seed_state.state[system_prompt]][system_prompt]
                     ),
                 )
 
@@ -297,11 +313,11 @@ Here are some samples of (user prompt, assistant response, score) tuples, where 
 
 **You should follow the following instructions carefully when writing your system prompts:**
 
-* Each new improvement you write should consist of **at most three short sentences**, each sentence specifying **a precise, concrete, atomic feature** that the assistant responses should have. 
-
-* Each sentence should use **simple, clear language** to prescribe a specific feature that the response should follow. In addition, importantly, the feature should be generally applicable to responses to *any* sensible user prompt, not just the ones in the above samples.
-
-* Make sure that your {num_plans} system prompt(s) are diverse and explore different improvement directions.
+- Each new improvement you write should consist of **one short sentence**. 
+- The sentence should specify **a precise, specific, concrete, atomic feature** that the assistant responses should have. Unusual or idiosyncratic features should also be considered.
+- The sentence should use **simple, clear language** to prescribe a specific feature that the response should follow. 
+- Importantly, the feature should be generally applicable to responses to *any* sensible user prompt, not just the ones in the above samples.
+- Make sure that your {num_plans} system prompt(s) are diverse and explore different improvement directions.
 
 Think carefully about the system prompts you will write, and then in your output field return only your new system prompts formatted as a JSON array, like this:
 
@@ -359,13 +375,13 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n_new", type=int, default=3)
+    parser.add_argument("--n_new", type=int, default=5)
     parser.add_argument("--n_pop", type=int, default=8)
-    parser.add_argument("--m_var", type=int, default=3)
+    parser.add_argument("--m_var", type=int, default=4)
     parser.add_argument("--n_samples", type=int, default=8)
     parser.add_argument("--t_steps", type=int, required=True)
     parser.add_argument("--dbscan_eps", type=float, default=0.2)
-    parser.add_argument("--train_batch_size", type=int, default=15)
+    parser.add_argument("--train_batch_size", type=int, default=16)
     parser.add_argument("--dataset", type=str, default="instruction-dataset")
     parser.add_argument("--stats", action="store_true")
     args = parser.parse_args()
@@ -400,8 +416,8 @@ if __name__ == "__main__":
 
     cluster_model = ClusterModel(
         embedding_model_name="Qwen/Qwen3-Embedding-0.6B",
-        umap_n_neighbors=15,
-        umap_n_components=5,
+        umap_n_neighbors=10,
+        umap_n_components=8,
     )
 
     target_dir = Path(f"data/prompt_stats/{args.dataset}")
@@ -414,6 +430,13 @@ if __name__ == "__main__":
         llm_judge=rater_2,
         train_batch_size=args.train_batch_size,
     )
+
+    # prompt_rating(
+    #     prompts=initial_seed_states[0].cluster.train_prompts,
+    #     target_dir=target_dir,
+    #     rater=rater_2,
+    #     policy_model=policy,
+    # )
 
     planner = EvoPlanner(
         planner_model_names=["claude-opus-4-20250514", "google/gemini-2.5-pro"],

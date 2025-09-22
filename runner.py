@@ -64,15 +64,18 @@ class ClusterModel:
         )
 
     def embed(self, inputs: list[str]) -> np.ndarray:
+        return self.embedding_model.encode(inputs)
+
+    def reduce_embed(self, inputs: list[str]) -> np.ndarray:
         """Embed then do dimensionality reduction"""
 
-        embeddings: np.ndarray = self.embedding_model.encode(inputs)
+        embeddings: np.ndarray = self.embed(inputs)
         return self.umap_model.fit_transform(embeddings)  # type: ignore
 
     def cluster(
         self, inputs: list[str], n_clusters: int
     ) -> Tuple[list[str], list[int]]:
-        reduced_embeddings = self.embed(inputs)
+        reduced_embeddings = self.reduce_embed(inputs)
 
         # log the pairwise distance matrix
         logger.info(
@@ -99,18 +102,18 @@ class ClusterModel:
         inputs: list[str],
         dbscan_eps: float,
     ) -> Tuple[dict[int, list[str]], dict[int, list[int]]]:
-        reduced_embeddings = self.embed(inputs)
+        embeddings = self.embed(inputs)
 
         # log the pairwise distance matrix
         logger.info(
             f"Pairwise distance matrix:\n"
-            f"{pairwise_distances(reduced_embeddings, metric='cosine')}"
+            f"{pairwise_distances(embeddings, metric='cosine')}"
         )
 
         dbscan = DBSCAN(
             eps=dbscan_eps, min_samples=2 * self.umap_n_components, metric="cosine"
         )
-        dbscan.fit(reduced_embeddings)
+        dbscan.fit(embeddings)
 
         niches = defaultdict(list)
         indices = defaultdict(list)
@@ -325,7 +328,7 @@ class Runner(ABC):
                         policy_model=self.policy_model,
                         seed_state=seed_state,
                         train_batch_prompts=train_batch_prompts[seed_state.index],
-                        per_prompt_normalize=False,
+                        per_prompt_normalize=True,
                         n_samples=n_samples,
                     )
 

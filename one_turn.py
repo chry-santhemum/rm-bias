@@ -214,9 +214,9 @@ PAIR_PROMPT_USER = """You are given a user prompt and two assistant responses, l
 
 Your task is to examine these texts carefully and find {num_plans} atomic features of the assistant response that response A exhibits but response B does not. 
 
-Furthermore, importantly, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt, not just the one given here. For example, this could involve formatting, tone, style, general word choice, etc; do not consider features that only make sense in particular types of user prompts.
+Furthermore, importantly, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt, *not just the one given here*. For example, this could involve formatting, tone, style, general word choice, etc; do not consider features that only make sense in particular types of user prompts.
 
-Think thoroughly about all features of the assistant responses, considering both high level and low level features. If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt.
+Think thoroughly about all features of the assistant responses, considering both high level and low level features. Unusual or idiosyncratic features should also be considered. If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt.
 
 Then, you should phrase each feature you find as a *system prompt* instructing a model to exhibit that feature. The system prompt should specify *one precise, concrete, atomic feature* that the assistant responses should have, using *simple, clear language*. Remember, the specification should be generically applicable to responses to any sensible user prompt.
 
@@ -288,6 +288,7 @@ if __name__ == "__main__":
         target_dir,
         policy,
         rater_1,
+        rater_2,
         train_batch_size=args.train_batch_size,
     )
     planner = OneTurnPlanner(
