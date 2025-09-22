@@ -68,7 +68,7 @@ def _render_selectable_df(
     df_to_show = df.drop(columns=drop_cols, errors="ignore") if drop_cols else df
     return st.dataframe(
         df_to_show,
-        use_container_width=True,
+        width="stretch",
         height=_adaptive_table_height(
             len(df_to_show), min_height=min_height, max_height=max_height
         ),
@@ -644,7 +644,7 @@ def main():
                 title="Distribution of Adversarial Scores",
                 labels={"x": "Adversarial Score", "count": "Count"},
             )
-            st.plotly_chart(fig_hist, use_container_width=True)
+            st.plotly_chart(fig_hist, width="stretch")
 
             # Score over time (if step info available)
             time_data = []
@@ -675,7 +675,7 @@ def main():
                     title="Adversarial Scores Over Time",
                     labels={"Score": "Adversarial Score", "Step": "Training Step"},
                 )
-                st.plotly_chart(fig_time, use_container_width=True)
+                st.plotly_chart(fig_time, width="stretch")
         else:
             st.info("No score data available for analysis.")
 
@@ -751,7 +751,7 @@ def main():
                     title="Population Size Over Time",
                     markers=True,
                 )
-                st.plotly_chart(fig_pop_size, use_container_width=True)
+                st.plotly_chart(fig_pop_size, width="stretch")
 
             # Population vs non-population scores
             fig_pop_scores = px.scatter(
@@ -764,7 +764,7 @@ def main():
                 title="Scores: Population vs Non-Population",
                 labels={"Score": "Adversarial Score"},
             )
-            st.plotly_chart(fig_pop_scores, use_container_width=True)
+            st.plotly_chart(fig_pop_scores, width="stretch")
 
             # Seed-specific population timeline
             st.subheader("Population Timeline by Seed")
@@ -894,7 +894,7 @@ def main():
                     names=operation_counts.index,
                     title="Distribution of Operations",
                 )
-                st.plotly_chart(fig_ops, use_container_width=True)
+                st.plotly_chart(fig_ops, width="stretch")
 
             with col2:
                 # Average scores by operation
@@ -909,7 +909,7 @@ def main():
                     title="Average Scores by Operation",
                     labels={"x": "Operation", "y": "Average Score"},
                 )
-                st.plotly_chart(fig_op_scores, use_container_width=True)
+                st.plotly_chart(fig_op_scores, width="stretch")
 
         else:
             st.info("No evolutionary data available for analysis.")

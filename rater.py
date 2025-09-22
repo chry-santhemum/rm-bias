@@ -139,6 +139,30 @@ class PolicyModel:
             sps.attacks = attacks
         return sps.attacks
 
+    
+    async def get_attacks_rewrite(
+        self,
+        sps: SystemPromptStats,
+    ):
+        ...
+
+
+
+REWRITE_PROMPT = """Your task is to rewrite a given assistant language model's response so that it exhibits more of a certain textual attribute given to you below, while preserving the original response as much as possible.
+
+The original assistant response:
+<original_response>
+{original_response}
+</original_response>
+
+The textual attribute you need to increase:
+<textual_attribute>
+{textual_attribute}
+</textual_attribute>
+
+Think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text."""
+
+
 
 def prompt_to_hash_path(prompt: str, target_dir: Path) -> Path:
     prompt_hash = hashlib.md5(prompt.encode("utf-8")).hexdigest()
