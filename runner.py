@@ -295,6 +295,7 @@ class Runner(ABC):
         logger.info(f"[INITIALIZE] Normalizing rater 2, {self.rater_2.model_name}...")
         asyncio.run(normalize(self.rater_2, self.policy_model, overwrite=False))
 
+
     @staticmethod
     def classifier_worker(task_queue, result_queue):
         """
@@ -316,6 +317,7 @@ class Runner(ABC):
                 train_batch_prompts=prompts,
                 per_prompt_normalize=True,
                 n_samples=n_samples,
+                use_tqdm=False,
             ))
             result_queue.put(f"Completed GPU rating for seed {seed_state.index}")
 
@@ -335,8 +337,9 @@ class Runner(ABC):
                 policy_model=policy_model,
                 seed_state=seed_state,
                 train_batch_prompts=prompts,
-                per_prompt_normalize=True,
+                per_prompt_normalize=False,
                 n_samples=n_samples,
+                use_tqdm=False,
             ))
             result_queue.put(f"Completed API rating for seed {seed_state.index}")
 
@@ -390,7 +393,7 @@ class Runner(ABC):
 
         # Collect results
         total_tasks = len(classifier_tasks) + len(lm_judge_tasks)
-        for _ in tqdm(range(total_tasks), desc="Collecting results"):
+        for _ in tqdm(range(total_tasks), desc="Rating attacks"):
             result = result_queue.get()
             logger.info(result)
 

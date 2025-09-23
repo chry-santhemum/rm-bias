@@ -472,7 +472,7 @@ class RatingFunction(ABC):
         pass
 
     @abstractmethod
-    async def rate(self, chat_histories: list[ChatHistory]) -> list[dict]:
+    async def rate(self, chat_histories: list[ChatHistory], use_tqdm: bool=True) -> list[dict]:
         pass
 
     async def __call__(
@@ -482,6 +482,7 @@ class RatingFunction(ABC):
         train_batch_prompts: list[str],
         per_prompt_normalize: bool,  # whether to normalize per-prompt
         n_samples: int = 1,
+        use_tqdm: bool=True,
     ):
         """
         Modifies seed_state in-place.
@@ -549,7 +550,7 @@ class RatingFunction(ABC):
                 )
                 chat_histories_to_attack_idx.append((attack_idx, response_idx))
 
-        rating_results = await self.rate(chat_histories)
+        rating_results = await self.rate(chat_histories, use_tqdm=use_tqdm)
         scores: list[float | None] = [
             result.get("score", None) for result in rating_results
         ]
@@ -738,12 +739,11 @@ class RewardModel(RatingFunction):
     def model_name(self) -> str:
         return self._model_name
 
-    async def rate(self, chat_histories: list[ChatHistory]) -> list[dict]:
+    async def rate(self, chat_histories: list[ChatHistory], use_tqdm: bool=True) -> list[dict]:
         rewards = []
 
-        for i in tqdm(
-            range(0, len(chat_histories), self.batch_size), desc="Rating responses"
-        ):
+        pbar = tqdm(range(0, len(chat_histories), self.batch_size), desc="Rating responses") if use_tqdm else range(0, len(chat_histories), self.batch_size)
+        for i in pbar:
             batch = chat_histories[i : i + self.batch_size]
             inputs = [chat.remove_system().to_openai_messages() for chat in batch]
             input_ids = self.tokenizer.apply_chat_template(
@@ -793,7 +793,7 @@ class LLMJudge(RatingFunction):
     def model_name(self) -> str:
         return self._model_name
 
-    async def rate(self, chat_histories: list[ChatHistory]) -> list[dict]:
+    async def rate(self, chat_histories: list[ChatHistory], use_tqdm: bool=True) -> list[dict]:
         rater_prompts = Slist(chat_histories).map(
             lambda convo: ChatHistory.from_system(
                 ABSOLUTE_RANKING_PROMPT_SYSTEM
@@ -813,7 +813,7 @@ class LLMJudge(RatingFunction):
                 caller=self.client,
                 max_par=self.max_par,
                 full_logging=False,
-                desc="Rating responses",
+                desc="Rating responses" if use_tqdm else "",
                 model=self.model_name,
                 max_tokens=self.max_tokens,
                 reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
