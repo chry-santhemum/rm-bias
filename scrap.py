@@ -1,5 +1,42 @@
 # %%
+import json
+import asyncio
+import nest_asyncio
+from pprint import pprint
+from pathlib import Path
+from datasets import load_dataset
+from rater import RewriteModel, prompt_to_hash_path
 
+nest_asyncio.apply()
+
+rewrite_model = RewriteModel(reasoning="low")
+
+instruction_test = load_dataset(
+    "HuggingFaceH4/instruction-dataset", split="test"
+)
+prompts = list(instruction_test["prompt"])
+
+path = prompt_to_hash_path(prompts[0], Path("data/prompt_stats/instruction-dataset"))
+with open(path, "r", encoding="utf-8") as f:
+    json_data = json.load(f)
+
+# %%
+original_responses = [
+    r["response"]
+    for r in json_data["meta-llama/llama-3.1-70b-instruct"]["rollouts"]
+][:2]
+
+system_prompt = "Respond in a step-by-step format."
+
+rewrites = asyncio.run(rewrite_model.rewrite_response(
+    system_prompt=system_prompt,
+    original_responses=original_responses,
+    n_samples=1,
+))
+
+pprint(rewrites, width=120)
+
+# %%
 import torch
 from utils import load_model
 

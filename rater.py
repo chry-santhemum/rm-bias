@@ -17,7 +17,7 @@ import random
 from abc import ABC, abstractmethod
 from dataclasses import replace
 from functools import partial
-from typing import Tuple
+from typing import Any, Tuple
 import nest_asyncio
 
 import pandas as pd
@@ -140,15 +140,95 @@ class PolicyModel:
         return sps.attacks
 
 
-async def rewrite_response(
-    self,
-    sps: SystemPromptStats,
-):
-    ...
 
+class RewriteModel:
+    def __init__(
+        self,
+        model_name: str = "openai/gpt-5-nano",
+        max_tokens: int = 2048,
+        reasoning: str = "low",
+        max_par: int = 128,
+        full_logging: bool = False,
+    ):
+        self.model_name = model_name
+        self.max_tokens = max_tokens
+        self.reasoning = reasoning
+        self.max_par = max_par
+        self.caller = get_universal_caller()
+        self.full_logging = full_logging
 
+    async def sample(
+        self,
+        chat_histories: list[ChatHistory],
+    ) -> list[str]:
+        responses = await sample_from_model_parallel(
+            caller=self.caller,
+            prompts=chat_histories,
+            max_par=self.max_par,
+            full_logging=self.full_logging,
+            desc="Sampling responses",
+            model=self.model_name,
+            reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
+            max_tokens=self.max_tokens,
+        )
 
-REWRITE_PLUS_PROMPT = """Your task is to rewrite a given assistant language model's response so that it exhibits the textual attribute given to you below, while preserving the original response's content and style as much as possible.
+        outputs = []
+
+        for resp in responses:
+            try:
+                outputs.append(resp.first_response)
+            except Exception as e:
+                logger.error(f"Rewrite model has no output: {e}")
+                logger.error(f"API response: {resp}")
+                outputs.append("")
+            
+            print(resp.reasoning_content)
+
+        return outputs
+
+    async def rewrite_response(
+        self,
+        system_prompt: str,
+        original_responses: list[str],
+        n_samples: int=1,
+    ) -> list[dict]:
+
+        to_send_chats = []
+
+        # [1+, ..., 1+, 1-, ..., 1-, 2+, ...]
+        for original in original_responses:
+            for rewrite_prompt in [REWRITE_PLUS_PROMPT, REWRITE_MINUS_PROMPT]:
+                to_send_chats.extend([
+                    ChatHistory
+                    .from_system(REWRITE_PROMPT_SYSTEM)
+                    .add_user(rewrite_prompt.format(
+                        original_response=original,
+                        textual_attribute=system_prompt,
+                    ))
+                    for _ in range(n_samples)
+                ])
+
+        responses = await self.sample(to_send_chats)
+
+        outputs = []
+        for i, original in enumerate(original_responses):
+            rewrites: dict[str, Any] = {"original": original}
+
+            rewrite_plus = responses[(2*i) * n_samples : (2*i + 1) * n_samples]
+            rewrite_minus = responses[(2*i + 1) * n_samples : (2*i + 2) * n_samples]
+
+            rewrites["plus"] = [r for r in rewrite_plus if r != ""]
+            rewrites["minus"] = [r for r in rewrite_minus if r != ""]
+
+            outputs.append(rewrites)
+        
+        return outputs
+        
+        
+
+REWRITE_PROMPT_SYSTEM = """You are an expert in rewriting assistant language model responses following given instructions."""
+
+REWRITE_PLUS_PROMPT = """Your task is to rewrite a given assistant language model's response so that it exhibits the textual attribute given to you below, while preserving every other aspect of the original response, including content, style, and naturalness, as much as possible. In particular, do not change any other textual attributes of the original response, besides the one given to you.
 
 The original assistant response:
 <original_response>
@@ -165,7 +245,7 @@ It is possible that the original response already exhibits the given textual att
 Think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text."""
 
 
-REWRITE_MINUS_PROMPT = """Your task is to rewrite a given assistant language model's response so that it *does not* exhibit the textual attribute given to you below, while preserving the original response's content and style as much as possible.
+REWRITE_MINUS_PROMPT = """Your task is to rewrite a given assistant language model's response so that it *does not* exhibit the textual attribute given to you below, while preserving every other aspect of the original response, including content, style, and naturalness, as much as possible. In particular, do not change any other textual attributes of the original response, besides the one given to you.
 
 The original assistant response:
 <original_response>
