@@ -4,29 +4,34 @@ import asyncio
 import nest_asyncio
 from pprint import pprint
 from pathlib import Path
+from collections import defaultdict
 from datasets import load_dataset
-from rater import RewriteModel, prompt_to_hash_path
+import numpy as np
+from llm_types import ChatHistory, ChatMessage
+from rater import RewriteModel, RewardModel, prompt_to_hash_path
 
 nest_asyncio.apply()
 
-rewrite_model = RewriteModel(reasoning="low")
+rewrite_model = RewriteModel(reasoning="medium", max_tokens=4096)
 
 instruction_test = load_dataset(
     "HuggingFaceH4/instruction-dataset", split="test"
 )
 prompts = list(instruction_test["prompt"])
 
-path = prompt_to_hash_path(prompts[0], Path("data/prompt_stats/instruction-dataset"))
-with open(path, "r", encoding="utf-8") as f:
-    json_data = json.load(f)
-
 # %%
-original_responses = [
-    r["response"]
-    for r in json_data["meta-llama/llama-3.1-70b-instruct"]["rollouts"]
-][:2]
+system_prompt = "Include bullet points in your response."
+original_responses = []
 
-system_prompt = "Respond in a step-by-step format."
+for prompt in prompts[:8]:
+    path = prompt_to_hash_path(prompt, Path("data/prompt_stats/instruction-dataset"))
+    with open(path, "r", encoding="utf-8") as f:
+        json_data = json.load(f)
+
+    original_responses.extend([
+        r["response"]
+        for r in json_data["meta-llama/llama-3.1-70b-instruct"]["rollouts"][:4]
+    ])
 
 rewrites = asyncio.run(rewrite_model.rewrite_response(
     system_prompt=system_prompt,
@@ -34,7 +39,41 @@ rewrites = asyncio.run(rewrite_model.rewrite_response(
     n_samples=1,
 ))
 
-pprint(rewrites, width=120)
+# %%
+pprint(rewrites)
+
+# %%
+
+chat_histories = defaultdict(list)
+
+def make_chat_history(user_prompt: str, response: str) -> ChatHistory:
+    return ChatHistory(messages=[
+        ChatMessage(role="user", content=user_prompt),
+        ChatMessage(role="assistant", content=response),
+    ])
+
+for i, rewrite in enumerate(rewrites):
+    prompt = prompts[i // 4]
+    chat_histories["original"].append(make_chat_history(prompt, rewrite["original"]))
+    chat_histories["plus"].append(make_chat_history(prompt, rewrite["plus"][0]))
+    chat_histories["minus"].append(make_chat_history(prompt, rewrite["minus"][0]))
+
+
+# %%
+reward_model = RewardModel(reward_model_name="skywork-v2")
+
+# %%
+scores = {
+    "original": asyncio.run(reward_model.rate(chat_histories["original"])),
+    "plus": asyncio.run(reward_model.rate(chat_histories["plus"])),
+    "minus": asyncio.run(reward_model.rate(chat_histories["minus"])),
+}
+
+# %%
+
+for key, score_list in scores.items():
+    print(key)
+    print(np.mean([float(s["score"]) for s in score_list]).item())
 
 # %%
 import torch

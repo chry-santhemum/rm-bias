@@ -147,9 +147,11 @@ def parse_json_response(
             if log_json_error:
                 logger.error(f"Response JSON parse error: {e}")
                 logger.error(f"API response: {resp}")
+                logger.error(f"Full traceback:", exc_info=True)
     except Exception as e:
         logger.error(f"Response does not have text: {e}")
         logger.error(f"API response: {resp}")
+        logger.error(f"Full traceback:", exc_info=True)
 
     return output, reasoning
 

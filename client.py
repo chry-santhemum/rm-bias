@@ -313,8 +313,11 @@ class OpenrouterCaller(Caller):
             resp = OpenaiResponse.model_validate(chat_completion.model_dump())
         except ValidationError as e:
             logger.error(
-                f"Validation error for model {config.model}. Prompt: {messages}. resp: {chat_completion.model_dump()}"
+                f"Validation error for model {config.model}.\n"
+                f"Prompt: {messages}.\n"
+                f"resp: {chat_completion.model_dump()}\n"
             )
+            logger.error(f"Full traceback:", exc_info=True)
             raise e
 
         logger.debug(f"OpenRouter response: {resp}")

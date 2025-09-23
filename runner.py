@@ -6,6 +6,7 @@ import random
 import pickle
 import logging
 import asyncio
+import multiprocessing
 from tqdm.auto import tqdm
 from pathlib import Path
 from typing import Literal, Tuple
@@ -294,56 +295,112 @@ class Runner(ABC):
         logger.info(f"[INITIALIZE] Normalizing rater 2, {self.rater_2.model_name}...")
         asyncio.run(normalize(self.rater_2, self.policy_model, overwrite=False))
 
+    @staticmethod
+    def classifier_worker(task_queue, result_queue):
+        """
+        Worker process for running GPU-intensive classifier ratings.
+        """
+        while True:
+            task_args = task_queue.get()
+            if task_args is None: # Sentinel value to exit
+                break
+            
+            # Unpack arguments
+            rating_function, policy_model, seed_state, prompts, n_samples = task_args
+
+            print(f"GPU Worker: Rating for seed {seed_state.index}...")
+            # Since the original function was async, we use asyncio.run here.
+            asyncio.run(rating_function(
+                policy_model=policy_model,
+                seed_state=seed_state,
+                train_batch_prompts=prompts,
+                per_prompt_normalize=True,
+                n_samples=n_samples,
+            ))
+            result_queue.put(f"Completed GPU rating for seed {seed_state.index}")
+
+
+    @staticmethod
+    def lm_judge_worker(task_queue, result_queue):
+        """Worker for I/O-intensive LM Judge ratings."""
+        while True:
+            task_args = task_queue.get()
+            if task_args is None:
+                break
+
+            rating_function, policy_model, seed_state, prompts, n_samples = task_args
+            print(f"API Worker: Starting rating for seed {seed_state.index}...")
+
+            asyncio.run(rating_function(
+                policy_model=policy_model,
+                seed_state=seed_state,
+                train_batch_prompts=prompts,
+                per_prompt_normalize=True,
+                n_samples=n_samples,
+            ))
+            result_queue.put(f"Completed API rating for seed {seed_state.index}")
+
+
     def get_ratings(self, n_samples: int = 1):
         logger.info(
             f"[TRAIN STEP {self.step_count}] Rating attacks with {n_samples} samples..."
         )
         train_batch_prompts = {}
+        classifier_tasks = []
+        lm_judge_tasks = []
+
+        for seed_state in self.seed_states:
+            if seed_state.index not in train_batch_prompts:
+                train_batch_prompts[seed_state.index] = random.sample(
+                    seed_state.cluster.train_prompts,
+                    seed_state.cluster.train_batch_size,
+                )
 
         for rating_function in [self.rater_1, self.rater_2]:
             for seed_state in self.seed_states:
-                if seed_state.index not in train_batch_prompts:
-                    train_batch_prompts[seed_state.index] = random.sample(
-                        seed_state.cluster.train_prompts,
-                        seed_state.cluster.train_batch_size,
-                    )
+                task_args = (
+                    rating_function,
+                    self.policy_model,
+                    seed_state,
+                    train_batch_prompts[seed_state.index],
+                    n_samples,
+                )
+                if rating_function.rating_function_type == "classifier":
+                    classifier_tasks.append(task_args)
+                elif rating_function.rating_function_type == "lm_judge":
+                    lm_judge_tasks.append(task_args)
 
-            if rating_function.rating_function_type == "classifier":
-                for seed_state in tqdm(
-                    self.seed_states, desc=f"Rating with {rating_function.model_name}"
-                ):
-                    asyncio.run(
-                        rating_function(
-                            policy_model=self.policy_model,
-                            seed_state=seed_state,
-                            train_batch_prompts=train_batch_prompts[seed_state.index],
-                            per_prompt_normalize=True,
-                            n_samples=n_samples,
-                        )
-                    )
+        # Run classifier and LM judge simultaneously
+        multiprocessing.set_start_method("spawn", force=True)
+        gpu_queue = multiprocessing.Queue()
+        api_queue = multiprocessing.Queue()
+        result_queue = multiprocessing.Queue()
 
-            elif rating_function.rating_function_type == "lm_judge":
+        gpu_process = multiprocessing.Process(target=Runner.classifier_worker, args=(gpu_queue, result_queue))
+        api_process = multiprocessing.Process(target=Runner.lm_judge_worker, args=(api_queue, result_queue))
 
-                async def run_rating_function_one(seed_state: SeedState):
-                    await rating_function(
-                        policy_model=self.policy_model,
-                        seed_state=seed_state,
-                        train_batch_prompts=train_batch_prompts[seed_state.index],
-                        per_prompt_normalize=True,
-                        n_samples=n_samples,
-                    )
+        gpu_process.start()
+        api_process.start()
 
-                async def run_rating_function():
-                    tasks = [
-                        run_rating_function_one(seed_state)
-                        for seed_state in tqdm(
-                            self.seed_states,
-                            desc=f"Rating with {rating_function.model_name}",
-                        )
-                    ]
-                    await asyncio.gather(*tasks)
+        print(f"Distributing {len(classifier_tasks)} GPU tasks and {len(lm_judge_tasks)} API tasks...")
+        for task in classifier_tasks:
+            gpu_queue.put(task)
+        for task in lm_judge_tasks:
+            api_queue.put(task)
 
-                asyncio.run(run_rating_function())
+        # Collect results
+        total_tasks = len(classifier_tasks) + len(lm_judge_tasks)
+        for _ in tqdm(range(total_tasks), desc="Collecting results"):
+            result = result_queue.get()
+            logger.info(result)
+
+        gpu_queue.put(None)
+        api_queue.put(None)
+        gpu_process.join()
+        api_process.join()
+        
+        logger.info("All ratings completed.")
+
 
     @abstractmethod
     def train(self, *args, **kwargs):
@@ -356,13 +413,14 @@ def load_contrast_pairs(
     policy_model: PolicyModel,
     rater: RatingFunction,
     threshold: float = 1.0,
-) -> Tuple[list[str], list[dict]]:
+) -> list[dict]:
     """
-    For each user prompt, check in target_dir if the rollouts have enough variation.
-    Then return (prompts, aux_info) where aux_info are chosen / rejected pairs.
+    For each user prompt, check in target_dir if the rollouts have enough variation,
+    according to the given rater.
+
+    Returns {"prompt": ..., "chosen": ..., "rejected": ...}
     """
-    prompts_selected = []
-    rollout_info = []
+    contrast_pairs = []
 
     # Load normalization data
     with open(f".cache/normalize/{rater.model_name}.json", "r", encoding="utf-8") as f:
@@ -386,22 +444,22 @@ def load_contrast_pairs(
             )
 
             if score_diff > threshold * rater_stats["stdev"]:
-                rollout_info.append(
+                contrast_pairs.append(
                     {
+                        "prompt": prompt,
                         "chosen": rollouts_sorted[0]["response"],
                         "rejected": rollouts_sorted[-1]["response"],
                     }
                 )
-                prompts_selected.append(prompt)
 
-    return prompts_selected, rollout_info
+    return contrast_pairs
 
 
 def load_initial_seed_states(
     target_dir: Path,
     dataset: str,
     topic_ids: list[int] = [],  # only for datasets in CLUSTER_DATASETS
-    train_batch_size: int = 0,  # 0 means use all
+    train_batch_size: int = 0, 
 ):
     initial_seed_states = []
     id_to_cluster = load_clusters(dataset, topic_ids=topic_ids)

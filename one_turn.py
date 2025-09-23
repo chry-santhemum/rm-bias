@@ -9,9 +9,11 @@ from tqdm.auto import tqdm
 from pathlib import Path
 from typing import Literal
 from collections import defaultdict
+from dataclasses import replace
 
 from utils import timestamp, parse_json_response
 from viz_utils import save_system_prompt_stats
+from prompt_stats import load_clusters, initialize_prompt_stats
 from rater import (
     LLMJudge,
     RewardModel,
@@ -26,6 +28,7 @@ from runner import (
     Planner,
     Runner,
     ClusterModel,
+    load_contrast_pairs,
     load_initial_seed_states,
 )
 
@@ -62,16 +65,16 @@ class OneTurnPlanner(Planner):
     @staticmethod
     def _make_planner_prompts(cluster: Cluster, n_new: int) -> list[str]:
         planner_prompts = []
-        for prompt, item in zip(cluster.train_prompts, cluster.aux_info):
+        for item in cluster.aux_info:
             data = {
-                "user_prompt": prompt,
+                "user_prompt": item["prompt"],
                 "response_A": item["chosen"],
                 "response_B": item["rejected"],
             }
             data_json = json.dumps(data, indent=2)
             planner_prompts.append(
                 PAIR_PROMPT_USER.format(
-                    num_plans=n_new, data=data_json, cluster_summary=cluster.summary
+                    num_plans=n_new, data=data_json, cluster_summary=cluster.summary,
                 )
             )
         return planner_prompts
@@ -198,11 +201,8 @@ class OneTurnRunner(Runner):
         self.save_seed_states()
 
 
-# Furthermore, importantly, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt described by the following summary, not just the one given here:
+# Furthermore, importantly, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt, *not just the one given here*. For example, this could involve formatting, tone, style, general word choice, etc; do not consider features that only make sense in particular types of user prompts.
 
-# <user_prompt_cluster_summary>
-# {cluster_summary}
-# </user_prompt_cluster_summary>
 
 PAIR_PROMPT_SYSTEM = """You are an expert in writing novel **system prompts** that specify the behavior of other assistant language models."""
 
@@ -214,13 +214,17 @@ PAIR_PROMPT_USER = """You are given a user prompt and two assistant responses, l
 
 Your task is to examine these texts carefully and find {num_plans} atomic features of the assistant response that response A exhibits but response B does not. 
 
-Furthermore, importantly, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt, *not just the one given here*. For example, this could involve formatting, tone, style, general word choice, etc; do not consider features that only make sense in particular types of user prompts.
+Furthermore, importantly, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt described by the following summary, not just the one given here:
+
+<user_prompt_cluster_summary>
+{cluster_summary}
+</user_prompt_cluster_summary>
 
 Think thoroughly about all features of the assistant responses, considering both high level and low level features. Unusual or idiosyncratic features should also be considered. If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt.
 
-Then, you should phrase each feature you find as a *system prompt* instructing a model to exhibit that feature. The system prompt should specify *one precise, concrete, atomic feature* that the assistant responses should have, using *simple, clear language*. Remember, the specification should be generically applicable to responses to any sensible user prompt.
+Then, you should phrase each feature you find as a *system prompt* instructing a model to exhibit that feature. The system prompt should specify *one precise, concrete, atomic feature* that the assistant responses should have, using *simple, clear language*. Remember, the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 
-As an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature. Again, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt.
+As an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
 
 Think carefully about the system prompts you will write, and then in your output field return ONLY your new system prompts formatted as a JSON array, like this:
 
@@ -239,26 +243,15 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n_new", type=int, default=3)
-    parser.add_argument("--n_pop", type=int, default=5)
-    parser.add_argument("--n_samples", type=int, default=1)
+    parser.add_argument("--n_new", type=int, default=5)
+    parser.add_argument("--n_pop", type=int, default=8)
+    parser.add_argument("--n_samples", type=int, default=8)
     parser.add_argument("--train_batch_size", type=int, default=15)
-    parser.add_argument("--dataset", type=str, default="instruction-dataset")
-    parser.add_argument("--stats", action="store_true")
+    parser.add_argument("--dataset", type=str, required=True)
     args = parser.parse_args()
 
-    run_name = f"{timestamp()}-n_pop{args.n_pop}-{args.dataset}"
-    Path(f"logs/one_turn").mkdir(parents=True, exist_ok=True)
-    Path(f"data/one_turn").mkdir(parents=True, exist_ok=True)
-    logging.basicConfig(
-        level=logging.INFO,
-        filename=f"logs/one_turn/{run_name}.log",
-        filemode="w",
-        format="%(asctime)s - %(levelname)s - %(message)s",
-    )
-
     policy = PolicyModel(
-        model_name="meta-llama/llama-3.1-70b-instruct",
+        model_name="meta-llama/llama-3.1-8b-instruct",
         max_tokens=1024,
         temperature=0.8,
         max_par=1024,
@@ -277,20 +270,61 @@ if __name__ == "__main__":
 
     cluster_model = ClusterModel(
         embedding_model_name="Qwen/Qwen3-Embedding-0.6B",
-        umap_n_neighbors=15,
-        umap_n_components=10,
+        umap_n_neighbors=5,
+        umap_n_components=5,
     )
 
     target_dir = Path(f"data/prompt_stats/{args.dataset}")
-    initial_seed_states = load_initial_seed_states(
+
+    if args.dataset == "alpaca":
+        topic_ids = [0, 2, 4, 6, 9, 11, 15, 18, 21, 53, 71, 83]
+    elif args.dataset == "wildchat":
+        topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]
+    else:
+        topic_ids = []
+
+    id_to_cluster = load_clusters(
         args.dataset,
-        args.stats,
-        target_dir,
-        policy,
-        rater_1,
-        rater_2,
+        topic_ids=topic_ids,
+    )
+
+    initial_seed_states = load_initial_seed_states(
+        target_dir=target_dir,
+        dataset=args.dataset,
+        topic_ids=topic_ids,
         train_batch_size=args.train_batch_size,
     )
+
+    run_name = f"{timestamp()}-n_pop{args.n_pop}-{args.dataset}"
+    Path(f"logs/one_turn").mkdir(parents=True, exist_ok=True)
+    Path(f"data/one_turn").mkdir(parents=True, exist_ok=True)
+    logging.basicConfig(
+        level=logging.INFO,
+        filename=f"logs/one_turn/{run_name}.log",
+        filemode="w",
+        format="%(asctime)s - %(levelname)s - %(message)s",
+    )
+
+    # # Get missing ratings from LLM judge
+    # initialize_prompt_stats(
+    #     target_dir=target_dir,
+    #     id_to_cluster=id_to_cluster,
+    #     policy=policy,
+    #     raters=[rater_2],
+    #     rating_only=True,
+    # )
+
+    for seed_state in initial_seed_states:
+        seed_state.cluster = replace(
+            seed_state.cluster, 
+            aux_info=load_contrast_pairs(
+                prompts=seed_state.cluster.train_prompts,
+                target_dir=target_dir,
+                policy_model=policy,
+                rater=rater_1,
+            )
+        )
+
     planner = OneTurnPlanner(
         planner_model_names=["claude-opus-4-20250514", "google/gemini-2.5-pro"],
         alloy_type="round_robin",
@@ -301,7 +335,7 @@ if __name__ == "__main__":
         max_par=32,
         full_logging=False,
     )
-
+    
     runner = OneTurnRunner(
         seed_states=initial_seed_states,
         planner=planner,

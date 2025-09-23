@@ -85,6 +85,7 @@ class PolicyModel:
             except Exception as e:
                 logger.error(f"Executor remote parse error (answer): {e}")
                 logger.error(f"API response: {resp}")
+                logger.error(f"Full traceback:", exc_info=True)
                 assistant_response = "N/A"
 
             completed_chat_histories.append(
@@ -180,6 +181,7 @@ class RewriteModel:
             except Exception as e:
                 logger.error(f"Rewrite model has no output: {e}")
                 logger.error(f"API response: {resp}")
+                logger.error(f"Full traceback:", exc_info=True)
                 outputs.append("")
             
             print(resp.reasoning_content)
@@ -230,7 +232,7 @@ REWRITE_PROMPT_SYSTEM = """You are an expert in rewriting assistant language mod
 
 REWRITE_PLUS_PROMPT = """Your task is to rewrite a given assistant language model's response so that it exhibits the textual attribute given to you below, while preserving every other aspect of the original response, including content, style, and naturalness, as much as possible. In particular, do not change any other textual attributes of the original response, besides the one given to you.
 
-The original assistant response:
+The original assistant response and the user prompt it responds to:
 <original_response>
 {original_response}
 </original_response>
@@ -240,14 +242,18 @@ The textual attribute that the rewritten response *should* have:
 {textual_attribute}
 </textual_attribute>
 
-It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged.
+It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged. 
+
+If it clearly does not make sense for a response to the user prompt to have this new attribute, you should also return the original response unchanged. For example, if the attribute is "Include bullet points" but the user prompt asks for a poem, then you should return the original response unchanged.
+
+However, if the attribute didn't exist in the original response (and makes sense to be added), make sure to do so in the most sensible way, such that the response is still as natural and coherent as before.
 
 Think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text."""
 
 
 REWRITE_MINUS_PROMPT = """Your task is to rewrite a given assistant language model's response so that it *does not* exhibit the textual attribute given to you below, while preserving every other aspect of the original response, including content, style, and naturalness, as much as possible. In particular, do not change any other textual attributes of the original response, besides the one given to you.
 
-The original assistant response:
+The original assistant response and the user prompt it responds to:
 <original_response>
 {original_response}
 </original_response>
@@ -258,6 +264,10 @@ The textual attribute that the rewritten response *should not* have:
 </textual_attribute>
 
 It is possible that the original response already does not exhibit the given textual attribute, in which case you should return the original response unchanged.
+
+If it clearly does not make sense for a response to the user prompt to lack this new attribute, you should also return the original response unchanged. For example, if the attribute is "Include real names" but the user prompt asks for the past Nobel Prize winners, then you should return the original response unchanged, as any valid response to the question must have this attribute. 
+
+However, if the attribute exists in the original response (and makes sense to be removed), make sure to do so in the most sensible way, such that the response is still as natural and coherent as before.
 
 Think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text."""
 
@@ -388,6 +398,7 @@ def prompt_rating(
 
         except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
             logger.error(f"Failed to load {file_path}: {e}")
+            logger.error(f"Full traceback:", exc_info=True)
             raise
 
     rating_results = asyncio.run(rater.rate(full_convos))
@@ -823,6 +834,7 @@ class LLMJudge(RatingFunction):
                 except Exception as e:
                     logger.error(f"Error while attempting to parse score: {e}")
                     logger.error(f"API response: {resp}")
+                    logger.error(f"Full traceback:", exc_info=True)
 
             rating_results.append({"score": score_to_append, "reasoning": reasoning})
 

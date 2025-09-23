@@ -130,12 +130,9 @@ else
   fi
 fi
 
-tmpdir="$(mktemp -d -t launch.XXXXXX)"
 declare -a pids
 declare -a slots_gpu
-declare -a slots_pid
 declare -a statuses
-declare -a logs
 
 cleanup() {
   trap - INT TERM
@@ -145,7 +142,6 @@ cleanup() {
     fi
   done
   wait 2>/dev/null || true
-  # keep logs directory but print its path
 }
 
 on_int() {
@@ -160,13 +156,10 @@ launch_job() {
   local gpu="$1"; shift
   local cmd="$1"; shift
 
-  local log_file="$tmpdir/job_${idx}.out"
-  logs[$idx]="$log_file"
-
   if [[ -n "$gpu" ]]; then
-    CUDA_VISIBLE_DEVICES="$gpu" bash -lc "$cmd" >"$log_file" 2>&1 &
+    (CUDA_VISIBLE_DEVICES="$gpu" bash -lc "$cmd") &
   else
-    bash -lc "$cmd" >"$log_file" 2>&1 &
+    (bash -lc "$cmd") &
   fi
   local pid=$!
   pids[$idx]="$pid"
@@ -178,8 +171,6 @@ running=0
 next=0
 success=0
 failed=0
-
-declare -a slot_gpu_idx
 
 assign_gpu_for_slot() {
   local slot="$1"
@@ -201,7 +192,6 @@ maybe_delay() {
 }
 
 launched=0
-declare -a slot_pid
 
 while :; do
   # Launch up to CONCURRENCY
@@ -210,7 +200,6 @@ while :; do
     gpu="$(assign_gpu_for_slot "$slot")"
     maybe_delay "$launched"
     launch_job "$next" "$gpu" "${COMMANDS[$next]}"
-    slots_pid[$next]="${pids[$next]}"
     slots_gpu[$next]="$gpu"
     running=$((running + 1))
     launched=$((launched + 1))
@@ -223,63 +212,44 @@ while :; do
   fi
 
   # Wait for any job to finish
-  if wait -n 2>/dev/null; then
-    status=0
-  else
-    status=$?
-    # When wait -n returns non-zero because of a job failure, status is that code
-    # but we still need to identify which PID ended; we do a sweep.
-  fi
+  wait -n
 
   # Reap finished jobs
   for i in $(seq 0 $((total-1))); do
     pid_i="${pids[$i]:-}"
     [[ -z "$pid_i" ]] && continue
     if ! kill -0 "$pid_i" 2>/dev/null; then
-      # finished
-      wait "$pid_i" >/dev/null 2>&1 || true
-      pids[$i]=""
-      running=$((running - 1))
-      if [[ -f "${logs[$i]}" ]]; then
-        if [[ ${status} -eq 0 ]]; then
-          statuses[$i]=0
-          success=$((success + 1))
-        else
-          # Get real exit code if possible
-          wait "$pid_i" >/dev/null 2>&1
-          statuses[$i]=1
-          failed=$((failed + 1))
-        fi
+      # The process has finished, let's get its exit code
+      if wait "$pid_i"; then
+        statuses[$i]=0
+        success=$((success + 1))
       else
         statuses[$i]=1
         failed=$((failed + 1))
       fi
+      
+      pids[$i]=""
+      running=$((running - 1))
     fi
   done
 done
 
 trap - INT TERM
 
-echo "Logs directory: $tmpdir"
-
+echo
 echo "Summary:"
 echo "  Total:    $total"
 echo "  Success:  $success"
 echo "  Failed:   $failed"
 
 if [[ $failed -gt 0 ]]; then
-  echo "Failed jobs and log tails:"
+  echo
+  echo "Failed jobs:"
   for i in $(seq 0 $((total-1))); do
     if [[ "${statuses[$i]:-0}" -ne 0 ]]; then
-      echo "--- Job #$i -------------------------------------------"
-      echo "CMD: ${COMMANDS[$i]}"
-      echo "GPU: ${slots_gpu[$i]:-N/A}"
-      echo "LOG: ${logs[$i]:-N/A}"
-      if [[ -f "${logs[$i]:-}" ]]; then
-        echo "--- tail -n 50 ${logs[$i]} ---"
-        tail -n 50 "${logs[$i]}" || true
-      fi
-      echo
+      echo "--- Job #$i (Failed) ---"
+      echo "  CMD: ${COMMANDS[$i]}"
+      echo "  GPU: ${slots_gpu[$i]:-N/A}"
     fi
   done
 fi
@@ -289,5 +259,3 @@ if [[ $failed -gt 0 ]]; then
 else
   exit 0
 fi
-
-
