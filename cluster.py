@@ -223,30 +223,6 @@ def topic_modeling(ds_name: str):
 
 # %%
 topic_modeling("ultrafeedback")
-
-# %%
-# Look at some clusters
-
-labels = pd.read_csv("data/wildchat/labels_summaries.csv")
-summaries = defaultdict(str)
-clusters = defaultdict(list)
-
-for _, row in labels.iterrows():
-    topic_id = int(row["Topic"])
-    if topic_id >= 0:
-        clusters[topic_id].append(row)
-        if topic_id not in summaries:
-            summaries[topic_id] = row["Topic_Summary"]  # type: ignore
-
-for topic_id in sorted(list(set(labels["Topic"].tolist()))):
-    print(
-        f"Topic {topic_id}: {len(clusters[topic_id])} docs, summary: {summaries[topic_id]}"
-    )
-    for row in clusters[topic_id][:10]:
-        print("-"*80)
-        print(row["Document"])
-
-    print("="*80)
         
 
 # %%

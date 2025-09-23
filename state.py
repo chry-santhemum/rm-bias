@@ -20,7 +20,7 @@ class Cluster:
     summary: str
     train_prompts: list[str]
     val_prompts: list[str]
-    train_batch_size: int = 0  # 0 means use all
+    train_batch_size: int
     aux_info: Any = (
         None  # any information about train prompts, e.g. responses from dataset
     )

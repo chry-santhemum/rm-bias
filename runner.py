@@ -37,6 +37,7 @@ from rater import (
     RewardModel,
     LLMJudge,
 )
+from prompt_stats import CLUSTER_DATASETS, load_clusters
 from state import SeedState, Cluster
 from defaults import *
 from client import get_universal_caller, sample_from_model_parallel, OpenaiResponse
@@ -396,170 +397,41 @@ def load_contrast_pairs(
     return prompts_selected, rollout_info
 
 
-def initialize_prompt_stats(
-    target_dir: Path,
-    id_to_cluster: dict[int, dict],  # cluster_id: {"prompts": [...], "summary": ...}
-    policy: PolicyModel,
-    raters: list[RatingFunction],
-):
-    all_user_prompts = []
-    for cluster in id_to_cluster.values():
-        all_user_prompts.extend(cluster["prompts"])
-
-    prompt_rollout(
-        prompts=all_user_prompts,
-        target_dir=target_dir,
-        policy_model=policy,
-        n_samples=16,
-    )
-
-    for rater in raters:
-        prompt_rating(
-            prompts=all_user_prompts,
-            target_dir=target_dir,
-            rater=rater,
-            policy_model=policy,
-        )
-
-    for id, cluster_dict in tqdm(
-        id_to_cluster.items(), desc="Adding dataset info to prompt stats"
-    ):
-        for prompt in cluster_dict["prompts"]:
-            file_path = prompt_to_hash_path(prompt, target_dir)
-            with open(file_path, "r", encoding="utf-8") as f:
-                json_data = json.load(f)
-
-            json_data["topic_label"] = id
-            json_data["topic_name"] = cluster_dict["summary"]
-            json_data["dataset"] = target_dir.name
-
-            with open(file_path, "w", encoding="utf-8") as f:
-                json.dump(json_data, f, indent=4)
-
-
 def load_initial_seed_states(
-    dataset: str,
-    compute_stats: bool,
     target_dir: Path,
-    policy: PolicyModel,
-    reward_model: RewardModel,
-    llm_judge: LLMJudge,
+    dataset: str,
+    topic_ids: list[int] = [],  # only for datasets in CLUSTER_DATASETS
     train_batch_size: int = 0,  # 0 means use all
 ):
     initial_seed_states = []
+    id_to_cluster = load_clusters(dataset, topic_ids=topic_ids)
+    
+    for id, cluster_dict in id_to_cluster.items():
+        prompts = cluster_dict["prompts"]
+        train_size = len(prompts) * 4 // 5
+        train_prompts = prompts[:train_size]
+        val_prompts = prompts[train_size:]
 
-    if dataset == "ultrafeedback":
-        labels: pd.DataFrame = pd.read_csv("data/ultrafeedback/ds_verified_test.csv")
-        with open("data/ultrafeedback/ds_cleaned.pkl", "rb") as f:
-            ultrafeedback = pickle.load(f)
-
-        assert len(labels) == len(ultrafeedback)
-
-        id_to_prompts = defaultdict(list)
-        id_to_summary = defaultdict(str)
-        topic_ids = [i for i in range(21, 31)]
-
-        for idx, row in tqdm(labels.iterrows(), desc="Loading clusters"):
-            topic = int(row["Topic"])
-            if topic in topic_ids:
-                item = ultrafeedback[idx]
-                assert row["Document"] == item["prompt"]
-
-                id_to_prompts[topic].append(
-                    {
-                        "prompt": row["Document"],
-                        "chosen": item["chosen"],
-                        "rejected": item["rejected"],
-                        "prob": float(row["Probability"]),
-                    }
-                )
-
-                if topic not in id_to_summary:
-                    id_to_summary[topic] = str(row["Topic_Summary"])
-
-        for topic in topic_ids:
-            sorted_cluster = sorted(
-                id_to_prompts[topic], key=lambda x: x["prob"], reverse=True
-            )
-            train_prompts = [item["prompt"] for item in sorted_cluster[:20]]
-            aux_info = [
-                {
-                    "chosen": item["chosen"],
-                    "rejected": item["rejected"],
-                }
-                for item in sorted_cluster[:20]
-            ]
-
-            cluster = Cluster(
-                summary=id_to_summary[topic],
-                train_prompts=train_prompts,
-                val_prompts=[],
-                train_batch_size=(
-                    train_batch_size if train_batch_size > 0 else len(train_prompts)
-                ),
-                aux_info=aux_info,
-            )
-
-            seed_state = SeedState(
-                index=topic,
-                dataset="ultrafeedback",
-                cluster=cluster,
-                state={},
-                history=[],
-            )
-            initial_seed_states.append(seed_state)
-
-        id_to_cluster = {
-            i: {
-                "prompts": [x["prompt"] for x in id_to_prompts[i]],
-                "summary": id_to_summary[i],
-            }
-            for i in topic_ids
-        }
-        if compute_stats:
-            initialize_prompt_stats(
-                target_dir, id_to_cluster, policy, [reward_model, llm_judge]
-            )
-
-    elif dataset == "instruction-dataset":
-        instruction_test = load_dataset(
-            "HuggingFaceH4/instruction-dataset", split="test"
-        )
-        prompts = list(instruction_test["prompt"])
-
-        id_to_cluster = {0: {"prompts": prompts, "summary": "All"}}
-        if compute_stats:
-            initialize_prompt_stats(
-                target_dir, id_to_cluster, policy, [reward_model, llm_judge]
-            )
-
-        prompts_selected, rollout_info = load_contrast_pairs(
-            prompts, target_dir, policy, reward_model, threshold=1.5
-        )
-
-        print(f"Selected {len(prompts_selected)} prompts")
+        if train_batch_size > len(train_prompts):
+            raise ValueError(f"Train batch size {train_batch_size} is greater than the number of train prompts {len(train_prompts)}")
 
         cluster = Cluster(
-            summary="Any general user prompt from a general instruction dataset.",
-            train_prompts=prompts_selected,
-            val_prompts=[],
+            summary=cluster_dict["summary"],
+            train_prompts=train_prompts,
+            val_prompts=val_prompts,
             train_batch_size=(
-                train_batch_size if train_batch_size > 0 else len(prompts_selected)
+                train_batch_size if train_batch_size > 0 else len(train_prompts)
             ),
-            aux_info=rollout_info,
         )
-        initial_seed_states = [
+        initial_seed_states.append(
             SeedState(
-                index=0,
-                dataset="instruction-dataset",
+                index=id,
+                dataset=target_dir.name,
                 cluster=cluster,
                 state={},
                 history=[],
             )
-        ]
-
-    elif dataset == "wildchat":
-        pass
+        )
 
     print(f"Loaded {len(initial_seed_states)} seed states")
     for state in initial_seed_states:
