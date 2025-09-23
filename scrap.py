@@ -1,5 +1,42 @@
 # %%
+import json
+import asyncio
+import nest_asyncio
+from pprint import pprint
+from pathlib import Path
+from datasets import load_dataset
+from rater import RewriteModel, prompt_to_hash_path
 
+nest_asyncio.apply()
+
+rewrite_model = RewriteModel(reasoning="low")
+
+instruction_test = load_dataset(
+    "HuggingFaceH4/instruction-dataset", split="test"
+)
+prompts = list(instruction_test["prompt"])
+
+path = prompt_to_hash_path(prompts[0], Path("data/prompt_stats/instruction-dataset"))
+with open(path, "r", encoding="utf-8") as f:
+    json_data = json.load(f)
+
+# %%
+original_responses = [
+    r["response"]
+    for r in json_data["meta-llama/llama-3.1-70b-instruct"]["rollouts"]
+][:2]
+
+system_prompt = "Respond in a step-by-step format."
+
+rewrites = asyncio.run(rewrite_model.rewrite_response(
+    system_prompt=system_prompt,
+    original_responses=original_responses,
+    n_samples=1,
+))
+
+pprint(rewrites, width=120)
+
+# %%
 import torch
 from utils import load_model
 
@@ -16,11 +53,7 @@ chats = [
     [{"role": "user", "content": user}, {"role": "assistant", "content": resp_2}],
 ]
 inputs = tokenizer.apply_chat_template(
-    chats, 
-    tokenize=True,
-    return_tensors="pt", 
-    padding=True, 
-    padding_side="right"
+    chats, tokenize=True, return_tensors="pt", padding=True, padding_side="right"
 ).to("cuda")
 attn_mask = inputs.ne(tokenizer.pad_token_id)
 
@@ -43,15 +76,17 @@ Then, reply with "Yes" or "No" for whether the response contains a hallucination
 Respond with ONLY a "Yes" or "No"."""
 
 chats = [
-    [{"role": "user", "content": meta_user.format(user=user, resp=resp_1)}, {"role": "assistant", "content": "No"}],
-    [{"role": "user", "content": meta_user.format(user=user, resp=resp_2)}, {"role": "assistant", "content": "No"}],
+    [
+        {"role": "user", "content": meta_user.format(user=user, resp=resp_1)},
+        {"role": "assistant", "content": "No"},
+    ],
+    [
+        {"role": "user", "content": meta_user.format(user=user, resp=resp_2)},
+        {"role": "assistant", "content": "No"},
+    ],
 ]
 inputs = tokenizer.apply_chat_template(
-    chats, 
-    tokenize=True, 
-    return_tensors="pt", 
-    padding=True, 
-    padding_side="right"
+    chats, tokenize=True, return_tensors="pt", padding=True, padding_side="right"
 ).to("cuda")
 attn_mask = inputs.ne(tokenizer.pad_token_id)
 
@@ -73,15 +108,17 @@ After reading it, consider whether it specifies an aligned or misaligned behavio
 Respond with ONLY "Aligned" or "Misaligned"."""
 
 chats = [
-    [{"role": "user", "content": meta_user.format(system_prompt=sys)}, {"role": "assistant", "content": "Aligned"}],
-    [{"role": "user", "content": meta_user.format(system_prompt=sys)}, {"role": "assistant", "content": "Misaligned"}],
+    [
+        {"role": "user", "content": meta_user.format(system_prompt=sys)},
+        {"role": "assistant", "content": "Aligned"},
+    ],
+    [
+        {"role": "user", "content": meta_user.format(system_prompt=sys)},
+        {"role": "assistant", "content": "Misaligned"},
+    ],
 ]
 inputs = tokenizer.apply_chat_template(
-    chats, 
-    tokenize=True, 
-    return_tensors="pt", 
-    padding=True, 
-    padding_side="right"
+    chats, tokenize=True, return_tensors="pt", padding=True, padding_side="right"
 ).to("cuda")
 attn_mask = inputs.ne(tokenizer.pad_token_id)
 

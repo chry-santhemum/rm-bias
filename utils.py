@@ -5,13 +5,14 @@ import logging
 import datetime
 import functools
 import re
+import os
 from slist import Slist
 from IPython.core.getipython import get_ipython
 from pathlib import Path
 import hashlib
 import pickle
 import asyncio
-from typing import Any
+from typing import Any, Tuple
 
 import numpy as np
 import torch
@@ -22,10 +23,15 @@ from transformers import (
 )
 from llm_types import ChatHistory
 from state import Attack
-from client import OpenaiResponse, is_thinking_model, get_universal_caller, sample_from_model_parallel
-from default_prompts import *
+from client import (
+    OpenaiResponse,
+    is_thinking_model,
+    get_universal_caller,
+    sample_from_model_parallel,
+)
+from defaults import *
 
-logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 # TODO: add attention_mask every time we call the model
 
@@ -47,6 +53,7 @@ POLICY_MODELS = {
 
 _reward_model = None
 _policy_model = None
+
 
 def load_model(model_name: str, use_flash: bool = False, device: str = "auto"):
     global _reward_model, _policy_model
@@ -80,7 +87,9 @@ def load_model(model_name: str, use_flash: bool = False, device: str = "auto"):
             if use_flash:
                 load_kwargs["attn_implementation"] = "flash_attention_2"
 
-            _policy_model = AutoModelForCausalLM.from_pretrained(model_name_hf, **load_kwargs)
+            _policy_model = AutoModelForCausalLM.from_pretrained(
+                model_name_hf, **load_kwargs
+            )
             model = _policy_model
         else:
             model = _policy_model
@@ -110,24 +119,44 @@ def is_local_model(model_name: str) -> bool:
         return False
 
 
-def parse_json(result: tuple[str, str] | str):
+def parse_json_response(
+    resp: OpenaiResponse, log_json_error: bool = True
+) -> Tuple[Any, str | None]:
     """
-    Parse model responses that are formatted as json.
-    """
-    try:
-        if isinstance(result, tuple):
-            result = result[-1]
-        json_str = result.split("```json")[1].split("```")[0]
-        json_obj = json.loads(json_str)
-    except json.JSONDecodeError:
-        logging.error(f"Could not parse the following response: {result}")
-        return None
+    Returns a tuple (parsed output, reasoning).
 
-    return json_obj
+    If output is a valid json array, it is parsed and returned.
+    Else, if output exists, it is returned as is.
+    """
+    output, reasoning = None, None
+    try:
+        raw_text = resp.first_response
+        if is_thinking_model(resp.model):
+            reasoning = resp.reasoning_content
+        try:
+            output = json.loads(
+                raw_text.split("```json", 1)[1].split("```", 1)[0].strip()
+            )
+            if not is_thinking_model(resp.model):
+                reasoning = raw_text.rsplit("```json", 1)[0].strip()
+
+        except Exception as e:
+            output = raw_text
+            if not is_thinking_model(resp.model):
+                reasoning = raw_text
+            if log_json_error:
+                logger.error(f"Response JSON parse error: {e}")
+                logger.error(f"API response: {resp}")
+    except Exception as e:
+        logger.error(f"Response does not have text: {e}")
+        logger.error(f"API response: {resp}")
+
+    return output, reasoning
 
 
 def timestamp():
     return datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
 
 def count_words(text):
     # Split on whitespace and common delimiters
@@ -142,7 +171,7 @@ async def time_operation(operation_name, coroutine):
     result = await coroutine
     end_time = time.time()
     duration = end_time - start_time
-    logging.info(f"  {operation_name} completed in {duration:.2f} seconds")
+    logger.info(f"  {operation_name} completed in {duration:.2f} seconds")
     return result
 
 
@@ -158,7 +187,6 @@ def is_notebook():
     except NameError:
         return False  # Probably standard Python interpreter
 
-# %%
 
 def get_effort_from_tokens(reasoning_tokens: int, max_tokens: int) -> str:
     ratio: float = reasoning_tokens / max_tokens
@@ -169,6 +197,7 @@ def get_effort_from_tokens(reasoning_tokens: int, max_tokens: int) -> str:
         return "medium"
     else:
         return "high"
+
 
 def get_tokens_from_effort(effort: str, max_tokens: int) -> int:
     match effort:
@@ -181,7 +210,8 @@ def get_tokens_from_effort(effort: str, max_tokens: int) -> int:
         case _:
             raise ValueError(f"Invalid effort: {effort}")
 
-def get_to_pass_reasoning(reasoning: int | str | None, max_tokens: int) -> dict|None:
+
+def get_to_pass_reasoning(reasoning: int | str | None, max_tokens: int) -> dict | None:
     if isinstance(reasoning, str):
         to_pass_reasoning = {
             "max_tokens": get_tokens_from_effort(reasoning, max_tokens),
@@ -198,10 +228,14 @@ def get_to_pass_reasoning(reasoning: int | str | None, max_tokens: int) -> dict|
 
 
 # %%
-def custom_cache(cache_dir: str=".cache"):
+# WARNING - These are no longer used and not guaranteed to work!
+
+
+def custom_cache(cache_dir: str = ".cache"):
     """
     Decorator that caches function results to disk based on arguments hash.
     """
+
     def decorator(func):
         cache_path = Path(cache_dir) / func.__name__
         cache_path.mkdir(parents=True, exist_ok=True)
@@ -210,16 +244,15 @@ def custom_cache(cache_dir: str=".cache"):
             try:
                 # Try to serialize for hashing
                 cache_data = (args, sorted(kwargs.items()))
-                return hashlib.md5(
-                    pickle.dumps(cache_data)
-                ).hexdigest()
+                return hashlib.md5(pickle.dumps(cache_data)).hexdigest()
             except (TypeError, pickle.PicklingError) as e:
                 # Fall back to string representation if pickling fails
-                logging.warning(f"Cache key generation using str fallback due to: {e}")
+                logger.warning(f"Cache key generation using str fallback due to: {e}")
                 cache_str = f"{func.__name__}_{args}_{sorted(kwargs.items())}"
                 return hashlib.md5(cache_str.encode()).hexdigest()
 
         if asyncio.iscoroutinefunction(func):
+
             @functools.wraps(func)
             async def async_wrapper(*args, **kwargs):
                 cache_key = get_cache_key(args, kwargs)
@@ -227,10 +260,10 @@ def custom_cache(cache_dir: str=".cache"):
 
                 if cache_file.exists():
                     with open(cache_file, "rb") as f:
-                        logging.info(f"Loading cached result from {cache_file}")
+                        logger.info(f"Loading cached result from {cache_file}")
                         return pickle.load(f)
 
-                logging.info(f"Computing {func.__name__} for {cache_key}")
+                logger.info(f"Computing {func.__name__} for {cache_key}")
                 result = await func(*args, **kwargs)
                 # Write to temp file first to avoid corruption
                 temp_file = cache_file.with_suffix(".tmp")
@@ -239,9 +272,11 @@ def custom_cache(cache_dir: str=".cache"):
                 temp_file.rename(cache_file)
 
                 return result
+
             return async_wrapper
 
         else:
+
             @functools.wraps(func)
             def sync_wrapper(*args, **kwargs):
                 cache_key = get_cache_key(args, kwargs)
@@ -249,10 +284,10 @@ def custom_cache(cache_dir: str=".cache"):
 
                 if cache_file.exists():
                     with open(cache_file, "rb") as f:
-                        logging.info(f"Loading cached result from {cache_file}")
+                        logger.info(f"Loading cached result from {cache_file}")
                         return pickle.load(f)
 
-                logging.info(f"Computing {func.__name__} for {cache_key}")
+                logger.info(f"Computing {func.__name__} for {cache_key}")
                 result = func(*args, **kwargs)
                 # Write to temp file first to avoid corruption
                 temp_file = cache_file.with_suffix(".tmp")
@@ -261,137 +296,80 @@ def custom_cache(cache_dir: str=".cache"):
                 temp_file.rename(cache_file)
 
                 return result
+
             return sync_wrapper
 
     return decorator
 
 
-@custom_cache(cache_dir=".cache")
-async def xper_prompt_stats(
-    prompt: str,
-    rater_name: str,
-    policy_name: str,
-    N: int = 16,  # sample 16 by default
-    temperature: float = 0.8,
-    policy_max_tokens: int = 512,
-    policy_max_par: int = 64,  # max parallel sampling from policy
-    rater_max_par: int = 32,  # batch size / max parallel for rater
-    winsorize: float = 0.05,
-    policy_system_prompt: str|None=None,
-) -> dict:
-    """
-    Take N samples from the policy model and compute reward statistics.
-    """
-    caller = get_universal_caller()
-    if policy_system_prompt is None:
-        message = ChatHistory().add_user(prompt)  # No system prompt by default
-    else:
-        message = ChatHistory.from_system(policy_system_prompt).add_user(prompt)
+def setup_prompt_logger(log_path: str | None, to_stdout: bool = False):
+    logger = logging.getLogger("prompt_logger")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False  # don't bubble to root
 
-    policy_responses: Slist[OpenaiResponse] = await sample_from_model_parallel(
-        prompts=[message for _ in range(N)],
-        caller=caller,
-        max_par=policy_max_par,
-        full_logging=False,
-        desc="Sampling responses for per-prompt stats",
-        temperature=temperature,
-        model=policy_name,
-        max_tokens=policy_max_tokens,
+    # Ensure a single console handler exists
+    has_stream_handler = any(
+        isinstance(h, logging.StreamHandler) and not isinstance(h, logging.FileHandler)
+        for h in logger.handlers
     )
-    # print("\n".join([resp.first_response for resp in policy_responses]))
+    if not has_stream_handler:
+        stream = (
+            __import__("sys").stdout if to_stdout else None
+        )  # default stderr if None
+        ch = logging.StreamHandler(stream)
+        ch.setLevel(logging.INFO)
 
-    full_convos: Slist[ChatHistory] = policy_responses.map(
-        lambda resp: message.add_assistant(resp.first_response)
-    )
+        class PromptConsoleFormatter(logging.Formatter):
+            def format(self, record):
+                # If the message is a list/tuple, print each item on its own line
+                if isinstance(record.msg, (list, tuple)):
+                    lines = [str(item) for item in record.msg]
+                    return "[PROMPT] " + "\n[PROMPT] ".join(lines)
+                return "[PROMPT] " + record.getMessage()
 
-    if is_local_model(rater_name):
-        reward_model, tokenizer = load_model(rater_name)
-        rewards = []
-        for i in range(0, N, rater_max_par):
-            batch = full_convos[i : i + rater_max_par]
-            inputs = [input.to_openai_messages() for input in batch]
-            input_ids = tokenizer.apply_chat_template(
-                inputs,
-                tokenize=True,
-                return_tensors="pt",
-                padding=True,
-                padding_side="right",
-            ).to(reward_model.device)
+        ch.setFormatter(PromptConsoleFormatter())
+        logger.addHandler(ch)
 
-            attn_mask = input_ids.ne(tokenizer.pad_token_id)
-            # logging.info(f"Input IDs first example: {tokenizer.decode(input_ids[0], skip_special_tokens=False)}")
+    # Optionally add/update a JSONL file handler for later analysis
+    if log_path:
+        try:
+            os.makedirs(os.path.dirname(log_path), exist_ok=True)
+        except Exception:
+            pass
 
-            with torch.no_grad():
-                scores = reward_model(
-                    input_ids=input_ids, attention_mask=attn_mask
-                ).logits.squeeze(-1)
-
-                rewards.extend(scores.tolist())
-
-    else:
-        rater_prompts = full_convos.map(
-            lambda convo: ChatHistory.from_system(
-                ABSOLUTE_RANKING_PROMPT_SYSTEM
-            ).add_user(
-                ABSOLUTE_RANKING_PROMPT_USER.format(
-                    message_history=convo.remove_system().to_openai_messages(),
-                    thinking_instruction=RATER_THINKING_INSTRUCTION[
-                        is_thinking_model(rater_name)
-                    ],
-                    rubric=HANDWRITTEN_RUBRIC,
-                )
-            )
-        )
-        rater_responses = await sample_from_model_parallel(
-            prompts=rater_prompts,
-            caller=caller,
-            max_par=rater_max_par,
-            full_logging=False,
-            desc="Sampling responses for per-prompt stats",
-            model=rater_name,
-            max_tokens=2048,
-            reasoning={"max_tokens": 2000, "effort": "low"},
-        )
-
-        rewards = []
-        for i, resp in enumerate(rater_responses):
-            try:
-                raw_text = resp.first_response
+        absolute_path = os.path.abspath(log_path)
+        has_file_handler = False
+        for h in logger.handlers:
+            if isinstance(h, logging.FileHandler):
                 try:
-                    block = raw_text.split("```json", 1)[1].split("```", 1)[0].strip()
+                    if os.path.abspath(h.baseFilename) == absolute_path:
+                        has_file_handler = True
+                        break
                 except Exception:
-                    block = raw_text
-                parsed_resp = json.loads(block)
-                rewards.append(parsed_resp["score"])
-            except Exception as e:
-                logging.error(
-                    f"Failed to parse rater response: {resp.first_response}"
-                )
-                logging.error(f"Error: {e}")
-                rewards.append(None)
+                    continue
 
-    rewards_cleaned = np.array([r for r in rewards if r is not None], dtype=float)
+        if not has_file_handler:
+            fh = logging.FileHandler(log_path, mode="a", encoding="utf-8")
+            fh.setLevel(logging.INFO)
 
-    logging.info(
-        f"Reward percentiles for {rater_name}: {np.percentile(rewards_cleaned, [0, 10, 25, 50, 75, 90, 100])}"
-    )
+            class JsonFormatter(logging.Formatter):
+                def format(self, record):
+                    # Preserve lists so the JSON file has an array; otherwise store a string
+                    prompts_value = (
+                        [str(item) for item in record.msg]
+                        if isinstance(record.msg, (list, tuple))
+                        else record.getMessage()
+                    )
+                    payload = {
+                        "prompts": prompts_value,
+                        "meta": getattr(record, "meta", {}),
+                    }
+                    return json.dumps(payload, indent=4, ensure_ascii=False)
 
-    # Winsorize
-    if winsorize > 0:
-        lower = np.percentile(rewards_cleaned, 100 * winsorize)
-        upper = np.percentile(rewards_cleaned, 100 * (1 - winsorize))
-        rewards_winsorized = np.clip(rewards_cleaned, lower, upper)
-    else:
-        rewards_winsorized = rewards_cleaned
+            fh.setFormatter(JsonFormatter())
+            logger.addHandler(fh)
 
-    output = {
-        "mean": float(np.mean(rewards_winsorized)),
-        "N": int(N),
-        "rewards_raw": rewards,
-        "rewards_winsorized": rewards_winsorized.tolist(),
-    }
-
-    return output
+    return logger
 
 
 def pareto_sort(points: dict[Any, tuple[float, float]], top_k: int | None) -> list[Any]:

@@ -108,14 +108,6 @@ class ChatHistory(BaseModel):
     def all_assistant_messages(self) -> Slist[ChatMessage]:
         return Slist(self.messages).filter(lambda msg: msg.role == "assistant")
 
-    # def to_finetune(self) -> FinetuneConversation:
-    #     return FinetuneConversation(
-    #         messages=[
-    #             FinetuneMessage(role=msg.role, content=msg.content)
-    #             for msg in self.messages
-    #         ]
-    #     )
-
     def as_text(self) -> str:
         return "\n".join([msg.as_text() for msg in self.messages])
 
@@ -138,9 +130,8 @@ class ChatHistory(BaseModel):
                 new_messages.append(msg)
 
         assert not any(msg.role == "system" for msg in new_messages)
-        
-        return ChatHistory(messages=new_messages)
 
+        return ChatHistory(messages=new_messages)
 
     def add_user(self, content: str) -> "ChatHistory":
         new_messages = list(self.messages) + [ChatMessage(role="user", content=content)]
@@ -158,13 +149,16 @@ class ChatHistory(BaseModel):
 
     def to_openai_messages(self) -> list[dict]:
         return [msg.to_openai_content() for msg in self.messages]
-    
-    def get_first(self, role: Literal["system", "user", "assistant"]) -> str:
-        """Get the first message with the given role, if exists"""
+
+    def get_first(self, role: Literal["system", "user", "assistant"]) -> str | None:
+        """
+        Get the first message with the given role, if exists.
+        Returns None otherwise.
+        """
         for msg in self.messages:
             if msg.role == role:
                 return msg.content
-        return "N/A"
+        return None
 
 
 class InferenceConfig(BaseModel):
@@ -222,7 +216,6 @@ def read_jsonl_file_into_basemodel(
 def file_cache_key(
     messages: ChatHistory,
     config: InferenceConfig,
-    try_number: int,
     other_hash: str,
     tools: ToolArgs | None,
 ) -> str:
@@ -235,7 +228,6 @@ def file_cache_key(
     str_messages = (
         ",".join([str(msg) for msg in messages.messages])
         + deterministic_hash(config_dump)
-        + str(try_number)
         + tools_json
     )
     hash_of_history_not_messages = messages.model_dump(exclude_none=True)
@@ -315,12 +307,11 @@ class APIRequestCache(Generic[APIResponse]):
         self,
         messages: ChatHistory,
         config: InferenceConfig,
-        try_number: int,
         response: APIResponse,
         tools: ToolArgs | None,
         other_hash: str = "",
     ) -> None:
-        key = file_cache_key(messages, config, try_number, other_hash, tools=tools)
+        key = file_cache_key(messages, config, other_hash, tools=tools)
         response_str = response.model_dump_json()
         self.data[key] = response_str
         await self.write_line(key=key, response_json=response_str)
@@ -329,7 +320,6 @@ class APIRequestCache(Generic[APIResponse]):
         self,
         messages: ChatHistory,
         config: InferenceConfig,
-        try_number: int,
         tools: ToolArgs | None,
         other_hash: str = "",
     ) -> Optional[APIResponse]:
@@ -338,7 +328,7 @@ class APIRequestCache(Generic[APIResponse]):
                 # check again
                 if not self.loaded_cache:
                     await self.load_cache()
-        key = file_cache_key(messages, config, try_number, other_hash, tools=tools)
+        key = file_cache_key(messages, config, other_hash, tools=tools)
         response_str = self.data.get(key)
         if response_str:
             try:
@@ -374,4 +364,3 @@ class HashableBaseModel(BaseModel):
     class Config:
         # this is needed for the hashable base model
         frozen = True
-

@@ -16,6 +16,7 @@ import torch
 from datasets import load_dataset, concatenate_datasets
 from transformers.trainer_utils import set_seed as hf_set_seed
 
+
 def set_seed_all(seed: int):
     random.seed(seed)  # Python RNG
     np.random.seed(seed)  # NumPy RNG
@@ -23,7 +24,8 @@ def set_seed_all(seed: int):
     torch.cuda.manual_seed_all(seed)  # PyTorch CUDA RNG
     hf_set_seed(seed)
 
-def make_prompt_mix(num_total: int = 2048, seed: int = 10086):
+
+def make_prompt_mix(num_total: int = 2048, seed: int = 10086) -> list[str]:
     """
     This should be a determinstic function.
     """
@@ -127,4 +129,4 @@ def make_prompt_mix(num_total: int = 2048, seed: int = 10086):
     set_seed_all(seed)
     mix_dataset = mix_dataset.shuffle()
 
-    return mix_dataset
+    return list(mix_dataset["prompt"])

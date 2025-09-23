@@ -1,13 +1,22 @@
+"""Monkey patching"""
+
 from slist import Slist
 import typing
 from typing import Callable, TypeVar
 import asyncio
 
-A = TypeVar('A')
-B = TypeVar('B')
+A = TypeVar("A")
+B = TypeVar("B")
+
+# from bertopic.representation import OpenAI
+
 
 async def par_map_async(
-    self, func: Callable[[A], typing.Awaitable[B]], max_par: int | None = None, tqdm: bool = False, desc: str = ""
+    self,
+    func: Callable[[A], typing.Awaitable[B]],
+    max_par: int | None = None,
+    tqdm: bool = False,
+    desc: str = "",
 ) -> Slist[B]:
     """Asynchronously apply a function to each element with optional parallelism limit.
 
@@ -73,7 +82,27 @@ async def par_map_async(
         return result
 
 
+# original_init = OpenAI.__init__
+
+
+# def patched_init(self, *args, **kwargs):
+#     """
+#     A patched version of the __init__ method that calls the original
+#     and then removes the 'stop' parameter from generator_kwargs.
+#     """
+#     # Call the original __init__ with all the given arguments
+#     original_init(self, *args, **kwargs)
+
+#     # After the original logic runs, check for and remove the 'stop' key
+#     if self.model.startswith("gpt-5"):
+#         if "stop" in self.generator_kwargs:
+#             del self.generator_kwargs["stop"]
+#         # self.generator_kwargs["reasoning"] = {"effort": "medium"}
+
+
 def apply():
     Slist.par_map_async = par_map_async
+    # OpenAI.__init__ = patched_init
+
 
 apply()
