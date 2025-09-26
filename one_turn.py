@@ -133,7 +133,7 @@ class OneTurnPlanner(Planner):
         # Cluster plans for each seed using k-means into n_pop clusters
         # then select one plan per cluster (closest to centroid)
         for seed_idx, plans_meta in seed_idx_to_plans.items():
-            logger.info(f"Clustering {len(plans_meta)} plans for seed {seed_idx}")
+            logger.info(f"Clustering {len(plans_meta)} plans for seed {seed_states[seed_idx].index}")
             if not plans_meta:
                 continue
 
@@ -277,7 +277,8 @@ if __name__ == "__main__":
     target_dir = Path(f"data/prompt_stats/{args.dataset}")
 
     if args.dataset == "alpaca":
-        topic_ids = [0, 2, 4, 6, 9, 11, 15, 18, 21, 53, 71, 83]
+        # topic_ids = [0, 2, 4, 6, 9, 11, 15, 18, 21, 53, 71, 83]
+        topic_ids = [0]
     elif args.dataset == "wildchat":
         topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]
     else:

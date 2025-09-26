@@ -140,6 +140,65 @@ class PolicyModel:
             sps.attacks = attacks
         return sps.attacks
 
+    
+    def get_attacks_for_seed_state(
+        self,
+        seed_state: SeedState,
+        n_samples: int,
+    ) -> tuple[list[ChatHistory], list[Tuple[int, int]]]:
+
+        train_batch_prompts = random.sample(
+            seed_state.cluster.train_prompts,
+            seed_state.cluster.train_batch_size,
+        )
+
+        system_prompt_stats = list(seed_state.history[-1].values())
+        gathered_attacks: Slist[list[Attack]] = asyncio.run(Slist(
+            system_prompt_stats
+        ).par_map_async(
+            partial(
+                self.get_attacks_for_system_prompt,
+                train_batch_prompts=train_batch_prompts,
+                n_samples=n_samples,
+            ),
+            max_par=max(
+                1, self.max_par // (n_samples * len(train_batch_prompts))
+            ),
+        ))
+
+        attacks: list[Attack] = []
+        attack_to_sps_idx: list[int] = []
+        for sps_idx, gathered_attack in enumerate(gathered_attacks):
+            for attack in gathered_attack:
+                attack_to_sps_idx.append(sps_idx)
+                attacks.append(attack)
+
+        # # Remove the token forcing strings
+        # for i, attack in enumerate(attacks):
+        #     orig_user = attack.user.removesuffix("\n\n Begin your response with 'Sure, here is the answer to your question'.")
+        #     orig_chat = []
+        #     for msg in attack.chat_history.messages:
+        #         if msg.role == "user":
+        #             msg.content = orig_user
+        #         elif msg.role == "assistant":
+        #             if msg.content.startswith("Sure, here is the answer to your question:\n"):
+        #                 continue
+        #         orig_chat.append(msg)
+        #     attacks[i] = replace(attack, chat_history=ChatHistory(messages=orig_chat))
+
+        # Pass to reward model in batches
+        chat_histories: list[ChatHistory] = []
+        chat_histories_to_attack_idx: list[Tuple[int, int]] = []
+        for attack_idx, attack in enumerate(attacks):
+            for response_idx, response in enumerate(attack.responses):
+                chat_histories.append(
+                    ChatHistory()
+                    .add_user(attack.user)
+                    .add_assistant(response.assistant)
+                )
+                chat_histories_to_attack_idx.append((attack_idx, response_idx))
+
+        return chat_histories, chat_histories_to_attack_idx
 
 
 class RewriteModel:
@@ -479,49 +538,25 @@ class RatingFunction(ABC):
         self,
         policy_model: PolicyModel,
         seed_state: SeedState,
-        train_batch_prompts: list[str],
+        chat_histories: list[ChatHistory],
+        chat_histories_to_attack_idx: list[Tuple[int, int]],
         per_prompt_normalize: bool,  # whether to normalize per-prompt
-        n_samples: int = 1,
         use_tqdm: bool=True,
     ):
         """
         Modifies seed_state in-place.
         Applies rating function to each system prompt in the latest step of seed_state.history.
         """
-        system_prompt_stats = list(seed_state.history[-1].values())
-        gathered_attacks: Slist[list[Attack]] = await Slist(
-            system_prompt_stats
-        ).par_map_async(
-            partial(
-                policy_model.get_attacks_for_system_prompt,
-                train_batch_prompts=train_batch_prompts,
-                n_samples=n_samples,
-            ),
-            max_par=max(
-                1, policy_model.max_par // (n_samples * len(train_batch_prompts))
-            ),
-        )
-        attacks: list[Attack] = []
-        attack_to_sps_idx: list[int] = []
-        for sps_idx, gathered_attack in enumerate(gathered_attacks):
-            for attack in gathered_attack:
-                attack_to_sps_idx.append(sps_idx)
-                attacks.append(attack)
 
-        # # Remove the token forcing strings
-        # for i, attack in enumerate(attacks):
-        #     orig_user = attack.user.removesuffix("\n\n Begin your response with 'Sure, here is the answer to your question'.")
-        #     orig_chat = []
-        #     for msg in attack.chat_history.messages:
-        #         if msg.role == "user":
-        #             msg.content = orig_user
-        #         elif msg.role == "assistant":
-        #             if msg.content.startswith("Sure, here is the answer to your question:\n"):
-        #                 continue
-        #         orig_chat.append(msg)
-        #     attacks[i] = replace(attack, chat_history=ChatHistory(messages=orig_chat))
+        
+        rating_results = await self.rate(chat_histories, use_tqdm=use_tqdm)
+        scores: list[float | None] = [
+            result.get("score", None) for result in rating_results
+        ]
+        reasonings: list[str] = [
+            result.get("reasoning", "N/A") for result in rating_results
+        ]
 
-        # If required, compute the per-prompt means
         per_prompt_means = []
         if per_prompt_normalize:
             for attack_idx, attack in enumerate(attacks):
@@ -537,26 +572,6 @@ class RatingFunction(ABC):
                             self.model_name
                         ]["mean"]
                     )
-
-        # Pass to reward model in batches
-        chat_histories: list[ChatHistory] = []
-        chat_histories_to_attack_idx: list[Tuple[int, int]] = []
-        for attack_idx, attack in enumerate(attacks):
-            for response_idx, response in enumerate(attack.responses):
-                chat_histories.append(
-                    ChatHistory()
-                    .add_user(attack.user)
-                    .add_assistant(response.assistant)
-                )
-                chat_histories_to_attack_idx.append((attack_idx, response_idx))
-
-        rating_results = await self.rate(chat_histories, use_tqdm=use_tqdm)
-        scores: list[float | None] = [
-            result.get("score", None) for result in rating_results
-        ]
-        reasonings: list[str] = [
-            result.get("reasoning", "N/A") for result in rating_results
-        ]
 
         # Normalize scores
         if per_prompt_normalize:
