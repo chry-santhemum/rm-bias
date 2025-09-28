@@ -38,6 +38,7 @@ from defaults import *
 from client import (
     is_thinking_model,
     get_universal_caller,
+    sample_from_model,
     sample_from_model_parallel,
 )
 
@@ -62,6 +63,24 @@ class PolicyModel:
         self.caller = get_universal_caller()
         self.full_logging = full_logging
 
+    async def sample_one(self, user_prompt: str) -> ChatHistory|None:
+        response = await sample_from_model(
+            caller=self.caller,
+            prompt=ChatHistory().add_user(user_prompt),
+            model=self.model_name,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
+        )
+
+        try:
+            assistant_response = response.first_response
+        except Exception as e:
+            logger.error(f"Policy model has no response: {e}")
+            logger.error(f"API response: {response}")
+            logger.error(f"Full traceback:", exc_info=True)
+            return None
+        return ChatHistory().add_user(user_prompt).add_assistant(assistant_response)
+
     async def sample(
         self,
         chat_histories: list[ChatHistory],
@@ -83,7 +102,7 @@ class PolicyModel:
             try:
                 assistant_response = resp.first_response
             except Exception as e:
-                logger.error(f"Executor remote parse error (answer): {e}")
+                logger.error(f"Policy model has no response: {e}")
                 logger.error(f"API response: {resp}")
                 logger.error(f"Full traceback:", exc_info=True)
                 assistant_response = "N/A"
@@ -220,13 +239,14 @@ class RewriteModel:
     async def sample(
         self,
         chat_histories: list[ChatHistory],
+        use_tqdm: bool=True,
     ) -> list[str]:
         responses = await sample_from_model_parallel(
             caller=self.caller,
             prompts=chat_histories,
             max_par=self.max_par,
             full_logging=self.full_logging,
-            desc="Sampling responses",
+            desc="Sampling responses" if use_tqdm else "",
             model=self.model_name,
             reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
             max_tokens=self.max_tokens,
@@ -241,11 +261,37 @@ class RewriteModel:
                 logger.error(f"Rewrite model has no output: {e}")
                 logger.error(f"API response: {resp}")
                 logger.error(f"Full traceback:", exc_info=True)
-                outputs.append("")
+                outputs.append("N/A")
             
-            print(resp.reasoning_content)
+            # print(resp.reasoning_content)
 
         return outputs
+
+    async def rewrite_one(
+        self,
+        system_prompt: str,
+        original_chat: ChatHistory,
+    ) -> dict|None:
+        to_send_chats = []
+        for rewrite_prompt in [REWRITE_PLUS_PROMPT, REWRITE_MINUS_PROMPT]:
+            to_send_chats.append(
+                ChatHistory
+                .from_system(REWRITE_PROMPT_SYSTEM)
+                .add_user(rewrite_prompt.format(
+                    original_response=original_chat.get_first("assistant"),
+                    textual_attribute=system_prompt,
+                ))
+            )
+        responses = await self.sample(to_send_chats, use_tqdm=False)
+        if responses[0] == "N/A" or responses[1] == "N/A":
+            return None
+        return {
+            "user": original_chat.get_first("user"),
+            "original_assistant": original_chat.get_first("assistant"),
+            "plus_assistant": responses[0],
+            "minus_assistant": responses[1],
+        }
+
 
     async def rewrite_response(
         self,

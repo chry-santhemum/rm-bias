@@ -106,12 +106,12 @@ def load_clusters(
         elif ds_name == "agent-harm":
             pass
 
-    # for id, cluster in id_to_cluster.items():
-    #     print(
-    #         f"Cluster {id}:\n"
-    #         f"Summary: {cluster['summary']}\n"
-    #         f"Number of prompts: {len(cluster['prompts'])}\n"
-    #     )
+    for id, cluster in id_to_cluster.items():
+        print(
+            f"Cluster {id}:\n"
+            f"Summary: {cluster['summary']}\n"
+            f"Number of prompts: {len(cluster['prompts'])}\n"
+        )
 
     return id_to_cluster
 
@@ -162,14 +162,14 @@ def initialize_prompt_stats(
 # %%
 if __name__ == "__main__":
     id_to_cluster = load_clusters(
-        "wildchat", 
-        # topic_ids=[0, 2, 4, 6, 9, 11, 15, 18, 21, 53, 71, 83]  # alpaca
-        topic_ids=[4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]  # wildchat
+        "alpaca", 
+        topic_ids=[0, 2, 4, 6, 9, 11, 15, 18, 21, 53, 71, 83]  # alpaca
+        # topic_ids=[4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]  # wildchat
     )
-    initialize_prompt_stats(
-        target_dir=Path("data/prompt_stats/wildchat"),
-        id_to_cluster=id_to_cluster,
-        policy=PolicyModel(model_name="meta-llama/llama-3.1-8b-instruct"),
-        raters=[RewardModel(reward_model_name="skywork-v2")],
-    )
+    # initialize_prompt_stats(
+    #     target_dir=Path("data/prompt_stats/wildchat"),
+    #     id_to_cluster=id_to_cluster,
+    #     policy=PolicyModel(model_name="meta-llama/llama-3.1-8b-instruct"),
+    #     raters=[RewardModel(reward_model_name="skywork-v2")],
+    # )
 # %%
