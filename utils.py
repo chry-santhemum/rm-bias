@@ -134,11 +134,14 @@ def parse_json_response(
         if is_thinking_model(resp.model):
             reasoning = resp.reasoning_content
         try:
-            output = json.loads(
-                raw_text.split("```json", 1)[1].split("```", 1)[0].strip()
-            )
-            if not is_thinking_model(resp.model):
-                reasoning = raw_text.rsplit("```json", 1)[0].strip()
+            if "```json" in raw_text:
+                output = json.loads(
+                    raw_text.split("```json", 1)[1].split("```", 1)[0].strip()
+                )
+                if not is_thinking_model(resp.model):
+                    reasoning = raw_text.rsplit("```json", 1)[0].strip()
+            else:
+                output = json.loads(raw_text)
 
         except Exception as e:
             output = raw_text

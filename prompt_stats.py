@@ -7,6 +7,7 @@ from pathlib import Path
 from collections import defaultdict
 from datasets import load_dataset
 
+from state import PromptCluster
 from rater import (
     PolicyModel,
     RatingFunction,
@@ -51,13 +52,12 @@ def load_clusters(
     min_prompts_per_cluster: int = 40,
     max_prompts_per_cluster: int = 160,
     seed: int = 10086,
-) -> dict[int, dict]:
+) -> dict[int, PromptCluster]:
     """
     Deterministically load prompts into clusters.
-    Returns: {id: {"prompts": [str], "summary": str}}
     """
     set_seed_all(seed)
-    id_to_cluster = defaultdict(dict)
+    id_to_cluster: dict[int, PromptCluster] = {}
 
     if ds_name in CLUSTER_DATASETS:
         labels = pd.read_csv(f"data/{ds_name}/labels_summaries.csv")
@@ -79,10 +79,10 @@ def load_clusters(
             if len(clusters[topic_id]) > max_prompts_per_cluster:
                 clusters[topic_id] = clusters[topic_id][:max_prompts_per_cluster]
 
-            id_to_cluster[topic_id] = {
-                "summary": summaries[topic_id],
-                "prompts": [item["Document"] for item in clusters[topic_id]],
-            }
+            id_to_cluster[topic_id] = PromptCluster(
+                summary=summaries[topic_id],
+                prompts=[item["Document"] for item in clusters[topic_id]],
+            )
 
     elif ds_name in ["instruction-dataset", "agent-harm"]:
         
@@ -98,19 +98,28 @@ def load_clusters(
             if len(prompts) > max_prompts_per_cluster:
                 prompts = prompts[:max_prompts_per_cluster]
 
-            id_to_cluster[0] = {
-                "summary": "Any user prompt from a general instruction dataset.",
-                "prompts": prompts,
-            }
+            id_to_cluster[0] = PromptCluster(
+                summary="Any user prompt from a general instruction dataset.",
+                prompts=prompts,
+            )
 
         elif ds_name == "agent-harm":
             pass
 
+    elif ds_name == "synthetic":
+        for json_file in Path("data/synthetic").glob("*.json"):
+            with open(json_file, "r") as f:
+                data = json.load(f)
+            id_to_cluster[int(json_file.name.split(".")[0])] = PromptCluster(
+                summary=data["summary"],
+                prompts=data["prompts"],
+            )
+
     for id, cluster in id_to_cluster.items():
         print(
             f"Cluster {id}:\n"
-            f"Summary: {cluster['summary']}\n"
-            f"Number of prompts: {len(cluster['prompts'])}\n"
+            f"Summary: {cluster.summary}\n"
+            f"Number of prompts: {len(cluster.prompts)}\n"
         )
 
     return id_to_cluster
@@ -118,14 +127,14 @@ def load_clusters(
 
 def initialize_prompt_stats(
     target_dir: Path,
-    id_to_cluster: dict[int, dict],
+    id_to_cluster: dict[int, PromptCluster],
     policy: PolicyModel,
     raters: list[RatingFunction] = [],
     rating_only: bool = False,
 ):
     all_user_prompts = []
     for cluster in id_to_cluster.values():
-        all_user_prompts.extend(cluster["prompts"])
+        all_user_prompts.extend(cluster.prompts)
 
     if not rating_only:
         prompt_rollout(
@@ -146,13 +155,13 @@ def initialize_prompt_stats(
     for id, cluster in tqdm(
         id_to_cluster.items(), desc="Adding dataset info to prompt stats"
     ):
-        for prompt in cluster["prompts"]:
+        for prompt in cluster.prompts:
             file_path = prompt_to_hash_path(prompt, target_dir)
             with open(file_path, "r", encoding="utf-8") as f:
                 json_data = json.load(f)
 
             json_data["topic_label"] = id
-            json_data["topic_name"] = cluster["summary"]
+            json_data["topic_name"] = cluster.summary
             json_data["dataset"] = target_dir.name
 
             with open(file_path, "w", encoding="utf-8") as f:

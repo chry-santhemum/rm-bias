@@ -15,6 +15,12 @@ def adversariality(
     return 0.5 * (z_score_1 - z_score_2 - math.sqrt((z_score_1 + z_score_2) ** 2 + 1))
 
 
+@dataclass
+class PromptCluster:
+    summary: str
+    prompts: list[str]
+
+
 @dataclass(frozen=True)
 class Cluster:
     summary: str
