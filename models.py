@@ -269,69 +269,34 @@ class RewriteModel(GenerationModel):
 
     async def rewrite_one(
         self,
-        system_prompt: str,
+        attributes: list[str],
         original_chat: ChatHistory,
         n_samples: int=1,
-    ) -> dict|None:
-        to_send_chats = []
-        for rewrite_prompt in [REWRITE_PLUS_PROMPT, REWRITE_MINUS_PROMPT]:
-            to_send_chats.append(
-                ChatHistory
-                .from_system(REWRITE_PROMPT_SYSTEM)
-                .add_user(rewrite_prompt.format(
-                    original_response=original_chat.get_first("assistant"),
-                    textual_attribute=system_prompt,
-                ))
-            )
-        responses = await self.sample(to_send_chats, use_tqdm=False)
-        if responses[0] is None or responses[1] is None:
-            return None
-
-        return {
-            "user": original_chat.get_first("user"),
-            "original_assistant": original_chat.get_first("assistant"),
-            "plus_assistant": responses[0].get_first("assistant"),
-            "minus_assistant": responses[1].get_first("assistant"),
-        }
-
-
-    async def rewrite_response(
-        self,
-        system_prompt: str,
-        original_responses: list[str],
-        n_samples: int=1,
-    ) -> list[dict]:
-
-        to_send_chats = []
-
-        # [1+, ..., 1+, 1-, ..., 1-, 2+, ...]
-        for original in original_responses:
+    ) -> list[dict[str, Any]]:
+        """
+        Makes n_samples * len(attributes) * 2 parallel calls.
+        """
+        to_send_chats = []  # [1+, ..., 1+, 1-, ..., 1-, 2+, ...]
+        for attribute in attributes:
             for rewrite_prompt in [REWRITE_PLUS_PROMPT, REWRITE_MINUS_PROMPT]:
                 to_send_chats.extend([
                     ChatHistory
                     .from_system(REWRITE_PROMPT_SYSTEM)
                     .add_user(rewrite_prompt.format(
-                        original_response=original,
-                        textual_attribute=system_prompt,
-                    ))
-                    for _ in range(n_samples)
+                        original_response=original_chat.get_first("assistant"),
+                        textual_attribute=attribute,
+                    )) for _ in range(n_samples)
                 ])
 
-        responses = await self.sample(to_send_chats)
+        responses = await self.sample(to_send_chats, use_tqdm=False)
+        output: list[dict[str, Any]] = [{"attribute": attribute} for attribute in attributes]
 
-        outputs = []
-        for i, original in enumerate(original_responses):
-            rewrites: dict[str, Any] = {"original": original}
+        for idx in range(len(attributes)):
+            output[idx]["user"] = original_chat.get_first("user")
+            output[idx]["plus"] = [r.get_first("assistant") if r is not None else None for r in responses[idx * n_samples : (idx + 1) * n_samples]]
+            output[idx]["minus"] = [r.get_first("assistant") if r is not None else None for r in responses[(idx + 1) * n_samples : (idx + 2) * n_samples]]
 
-            rewrite_plus = responses[(2*i) * n_samples : (2*i + 1) * n_samples]
-            rewrite_minus = responses[(2*i + 1) * n_samples : (2*i + 2) * n_samples]
-
-            rewrites["plus"] = [r for r in rewrite_plus if r != ""]
-            rewrites["minus"] = [r for r in rewrite_minus if r != ""]
-
-            outputs.append(rewrites)
-        
-        return outputs
+        return output
         
         
 
