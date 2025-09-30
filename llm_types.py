@@ -30,23 +30,6 @@ class ChatMessage(BaseModel):
         return f"{self.role}:\n{self.content}"
 
     def to_openai_content(self) -> dict:
-        """e.g.
-            "messages": [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": f"{question}"},
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:{image_type};base64,{image_base_64}"
-                        },
-                    },
-                ],
-            }
-        ],
-
-        """
         if not self.image_content:
             return {
                 "role": self.role,
@@ -105,9 +88,6 @@ class ChatMessage(BaseModel):
 class ChatHistory(BaseModel):
     messages: Sequence[ChatMessage] = []
 
-    def all_assistant_messages(self) -> Slist[ChatMessage]:
-        return Slist(self.messages).filter(lambda msg: msg.role == "assistant")
-
     def as_text(self) -> str:
         return "\n".join([msg.as_text() for msg in self.messages])
 
@@ -116,19 +96,16 @@ class ChatHistory(BaseModel):
         return ChatHistory(messages=[ChatMessage(role="system", content=content)])
 
     @staticmethod
-    def from_maybe_system(content: str | None) -> "ChatHistory":
-        if content is None:
-            return ChatHistory()
-        else:
-            return ChatHistory.from_system(content)
+    def from_user(content: str) -> "ChatHistory":
+        return ChatHistory(messages=[ChatMessage(role="user", content=content)])
 
     def remove_system(self) -> "ChatHistory":
-        """Remove all system prompts."""
+        """Remove all system prompts and creates a new copy."""
         new_messages = []
         for msg in self.messages:
             if msg.role != "system":
-                new_messages.append(msg)
-
+                # Create a copy of the ChatMessage
+                new_messages.append(msg.model_copy())
         assert not any(msg.role == "system" for msg in new_messages)
 
         return ChatHistory(messages=new_messages)

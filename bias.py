@@ -24,15 +24,16 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class RewriteResult:
+    system: str  # attribute
     user: str
-    attribute: str
     original_assistant: str
     rewritten_assistant: str
-    attribute_presence: int  # 1, 0, -1
-    score: float|None=None
+    presence: int  # 1, 0
+    score: float | None = None
 
 @dataclass(frozen=True)
 class PromptResult:
+    system: str
     user: str
     assistant: str
     score: float | None = None
@@ -103,62 +104,61 @@ def save_prompt_results_to_disk(
             json.dump(json_data, f, indent=4)
 
 
-def run_rater(rater: RewardModel, batch: list[RewriteResult | PromptResult]) -> list[RewriteResult | PromptResult]:
+def run_reward_model(
+    reward_model: RewardModel, 
+    batch: list[RewriteResult | PromptResult],
+) -> list[RewriteResult | PromptResult]:
     print(f"[rater] Processing batch of size {len(batch)}...")
     chat_histories = []
 
     for result in batch:
         if isinstance(result, RewriteResult):
             chat_histories.append(
-                ChatHistory()
-                .add_user(result.user)
+                ChatHistory.from_user(result.user)
                 .add_assistant(result.rewritten_assistant)
             )
-        else:  # PromptResult
+        elif isinstance(result, PromptResult):
             chat_histories.append(
-                ChatHistory()
-                .add_user(result.user)
+                ChatHistory.from_user(result.user)
                 .add_assistant(result.assistant)
             )
 
-    # Run single rater
     updated_results = []
-    # Batch rate all chat histories at once for efficiency
-    all_rewards = asyncio.run(rater.rate(chat_histories, use_tqdm=False))
+    all_rewards = reward_model.rate(chat_histories, use_tqdm=False)
     for i, result in enumerate(batch):
-        score = all_rewards[i]["score"]
+        score = all_rewards[i].score
         updated_results.append(replace(result, score=score))
 
-    print(f"[rater] Finished processing batch.")
+    print(f"[reward_model] Finished processing batch.")
     return updated_results
 
 
 async def policy_worker(
     policy_model: PolicyModel, 
     user_prompt: str, 
-    out_queue: asyncio.Queue,
+    out_queue: asyncio.Queue[ChatHistory],
     sem: asyncio.Semaphore,
 ):
     async with sem:
-        result = await policy_model.sample_one(ChatHistory().add_user(user_prompt))
+        result = await policy_model.sample_one(ChatHistory.from_user(user_prompt))
         if result is None:
             return
-        await queue_a.put(result)
-        print(f"[rollout worker] Pushed task to Queue A.")
+        await out_queue.put(result)
+        print(f"[policy_worker] Pushed 1 task.")
 
 
 async def rewrite_worker(
     rewrite_model: RewriteModel,
     attributes: list[str],
-    queue_a: asyncio.Queue, 
-    queue_b: asyncio.Queue,
+    in_queue: asyncio.Queue[ChatHistory], 
+    out_queue: asyncio.Queue[RewriteResult],
 ):
     while True:
-        original_chat = await queue_a.get()
-        print(f"[rewrite worker] Popped task from Queue A.")
+        original_chat = await in_queue.get()
+        print(f"[rewrite_worker] Popped 1 task.")
 
-        if original_chat is None: # Sentinel value to stop this worker
-            queue_a.task_done()
+        if original_chat is None:  # Sentinel value to signal stop
+            in_queue.task_done()
             break
         
         for attribute in attributes:
@@ -167,86 +167,85 @@ async def rewrite_worker(
                 original_chat=original_chat,
             )
             if rewrites is None:
-                print(f"[rewrite worker] Rewrite failed; skipping.")
+                print(f"[rewrite_worker] Rewrite failed; skipping.")
                 continue
 
             rewrite_results = [
                 RewriteResult(
+                    system=attribute,
                     user=rewrites["user"],
-                    attribute=attribute,
                     original_assistant=rewrites["original_assistant"],
                     rewritten_assistant=rewrites["plus_assistant"],
-                    attribute_presence=1,
+                    presence=1,
                 ),
                 RewriteResult(
+                    system=attribute,
                     user=rewrites["user"],
-                    attribute=attribute,
                     original_assistant=rewrites["original_assistant"],
                     rewritten_assistant=rewrites["minus_assistant"],
-                    attribute_presence=-1,
-                ),
-                RewriteResult(
-                    user=rewrites["user"],
-                    attribute=attribute,
-                    original_assistant=rewrites["original_assistant"],
-                    rewritten_assistant=rewrites["original_assistant"],
-                    attribute_presence=0,
+                    presence=0,
                 ),
             ]
 
             for result in rewrite_results:
-                await queue_b.put(result)
+                await out_queue.put(result)
 
-            print(f"[rewrite worker] Pushed task to Queue B.")
-        queue_a.task_done()
+            print(f"[rewrite_worker] Pushed 2 tasks.")
+        in_queue.task_done()
 
 
 async def passthrough_worker(
-    queue_a: asyncio.Queue,
-    queue_b: asyncio.Queue,
+    in_queue: asyncio.Queue[ChatHistory],
+    out_queue: asyncio.Queue[PromptResult],
 ):
-    """Pass ChatHistory directly to queue_b for prompt rating (no rewrite)"""
+    """Convert ChatHistory to PromptResult."""
     while True:
-        original_chat = await queue_a.get()
-        print(f"[passthrough worker] Popped task from Queue A.")
+        original_chat = await in_queue.get()
+        print(f"[passthrough_worker] Popped 1 task.")
 
-        if original_chat is None: # Sentinel value to stop this worker
-            queue_a.task_done()
+        if original_chat is None:  # Sentinel value to signal stop
+            in_queue.task_done()
             break
 
         # Create PromptResult for simple rating
         prompt_result = PromptResult(
-            user=original_chat.get_first("user"),
-            assistant=original_chat.get_first("assistant"),
+            system=original_chat.get_first("system") or "",
+            user=original_chat.get_first("user") or "",
+            assistant=original_chat.get_first("assistant") or "",
         )
-        await queue_b.put(prompt_result)
-        print(f"[passthrough worker] Pushed task to Queue B.")
-        queue_a.task_done()
+        await out_queue.put(prompt_result)
+        print(f"[passthrough_worker] Pushed 1 task.")
+        in_queue.task_done()
 
 
-async def rating_worker(rater: RewardModel, queue_b: asyncio.Queue, all_results: list[RewriteResult | PromptResult], batch_size: int = 32):
+async def rating_worker(
+    reward_model: RewardModel, 
+    in_queue: asyncio.Queue[RewriteResult | PromptResult],
+    all_results: list[RewriteResult | PromptResult], 
+):
     loop = asyncio.get_running_loop()
     while True:
         batch = []
         try:
-            while len(batch) < batch_size:
-                item = await asyncio.wait_for(queue_b.get(), timeout=BATCH_TIMEOUT_SECONDS)
-                if item is None: # Sentinel value
+            while len(batch) < reward_model.batch_size:
+                item = await asyncio.wait_for(in_queue.get(), timeout=BATCH_TIMEOUT_SECONDS)
+                if item is None:  # Sentinel value to signal stop
                     if batch:
-                        results = await loop.run_in_executor(executor, run_rater, rater, batch)
+                        results = await loop.run_in_executor(executor, run_reward_model, reward_model, batch)
                         all_results.extend(results)
-                    print("[rating worker] Final item processed. Shutting down.")
-                    queue_b.task_done()
+                    print(f"[rating_worker] Processed batch of size {len(batch)}.")
+                    print("[rating_worker] Final item processed. Shutting down.")
+                    in_queue.task_done()
                     return
                 batch.append(item)
-                queue_b.task_done()
+                in_queue.task_done()
         except asyncio.TimeoutError:
-            pass # Not an error, just means we process the current batch
+            pass  # Not an error, just means we process the current incomplete batch
 
         if batch:
-            results = await loop.run_in_executor(executor, run_rater, rater, batch)
+            results = await loop.run_in_executor(executor, run_reward_model, reward_model, batch)
             all_results.extend(results)
-            print(f"[rating worker] Processed batch of size {len(batch)}.")
+            print(f"[rating_worker] Processed batch of size {len(batch)}.")
 
 
 def organize_results(all_results: list[RewriteResult]) -> dict:
@@ -257,7 +256,7 @@ def organize_results(all_results: list[RewriteResult]) -> dict:
         attribute_scores = organized_scores[result.attribute]
         if result.attribute_presence == 1:
             attribute_scores["plus"] = attribute_scores.get("plus", []) + [result.score]
-        elif result.attribute_presence == -1:
+        elif result.attribute_presence == 0:
             attribute_scores["minus"] = attribute_scores.get("minus", []) + [result.score]
         elif result.attribute_presence == 0:
             attribute_scores["original"] = attribute_scores.get("original", []) + [result.score]
@@ -272,7 +271,7 @@ def organize_results(all_results: list[RewriteResult]) -> dict:
                 if result.attribute_presence == 1:
                     r["plus"] = result.rewritten_assistant
                     r["plus_score"] = result.score
-                elif result.attribute_presence == -1:
+                elif result.attribute_presence == 0:
                     r["minus"] = result.rewritten_assistant
                     r["minus_score"] = result.score
                 else:
@@ -284,10 +283,10 @@ def organize_results(all_results: list[RewriteResult]) -> dict:
                 "original": result.original_assistant,
             })
             r = attribute_results[result.user][-1]
-            if result.attribute_presence == 1:
+            if result.presence == 1:
                 r["plus"] = result.rewritten_assistant
                 r["plus_score"] = result.score
-            elif result.attribute_presence == -1:
+            elif result.presence == 0:
                 r["minus"] = result.rewritten_assistant
                 r["minus_score"] = result.score
             else:
@@ -333,7 +332,7 @@ async def evaluate_prompts(
 
     # Stage 1: Rollout workers
     stage_1_tasks = [
-        asyncio.create_task(rollout_worker(policy_model, user, queue_a, rollout_sem))
+        asyncio.create_task(policy_worker(policy_model, user, queue_a, rollout_sem))
         for user in user_prompts for _ in range(n_rollouts)
     ]
 

@@ -15,7 +15,7 @@ from pathlib import Path
 from slist import Slist
 import random
 from abc import ABC, abstractmethod
-from dataclasses import replace
+from dataclasses import replace, dataclass
 from functools import partial
 from typing import Any, Tuple
 import nest_asyncio
@@ -32,6 +32,7 @@ from state import (
     Rater,
     SeedState,
 )
+from models import PolicyModel
 from utils import load_model, get_to_pass_reasoning, parse_json_response, REWARD_MODELS
 from standard_prompts import set_seed_all, make_prompt_mix
 from defaults import *
@@ -45,6 +46,13 @@ from client import (
 # %%
 logger = logging.getLogger(__name__)
 nest_asyncio.apply()
+
+
+@dataclass(frozen=True)
+class RatingResult:
+    score: float | None
+    reasoning: str | None
+
 
 def prompt_to_hash_path(prompt: str, target_dir: Path) -> Path:
     prompt_hash = hashlib.md5(prompt.encode("utf-8")).hexdigest()
@@ -74,7 +82,7 @@ class RatingFunction(ABC):
         pass
 
     @abstractmethod
-    async def rate(self, chat_histories: list[ChatHistory], use_tqdm: bool=True) -> list[dict]:
+    async def async_rate(self, chat_histories: list[ChatHistory], use_tqdm: bool=True) -> list[RatingResult]:
         pass
 
     async def __call__(
@@ -92,12 +100,12 @@ class RatingFunction(ABC):
         """
 
         
-        rating_results = await self.rate(chat_histories, use_tqdm=use_tqdm)
+        rating_results = await self.async_rate(chat_histories, use_tqdm=use_tqdm)
         scores: list[float | None] = [
-            result.get("score", None) for result in rating_results
+            result.score for result in rating_results
         ]
-        reasonings: list[str] = [
-            result.get("reasoning", "N/A") for result in rating_results
+        reasonings: list[str | None] = [
+            result.reasoning for result in rating_results
         ]
 
         per_prompt_means = []
@@ -297,7 +305,7 @@ class RewardModel(RatingFunction):
     def model_name(self) -> str:
         return self._model_name
 
-    async def rate(self, chat_histories: list[ChatHistory], use_tqdm: bool=True) -> list[dict]:
+    def rate(self, chat_histories: list[ChatHistory], use_tqdm: bool=True) -> list[RatingResult]:
         rewards = []
 
         pbar = tqdm(range(0, len(chat_histories), self.batch_size), desc="Rating responses") if use_tqdm else range(0, len(chat_histories), self.batch_size)
@@ -319,9 +327,13 @@ class RewardModel(RatingFunction):
                     input_ids=input_ids, attention_mask=attn_mask
                 ).logits.squeeze(-1)
 
-                rewards.extend([{"score": s} for s in scores.tolist()])
+                rewards.extend([RatingResult(score=s, reasoning=None) for s in scores.tolist()])
 
         return rewards
+
+
+    async def async_rate(self, chat_histories: list[ChatHistory], use_tqdm: bool=True) -> list[RatingResult]:
+        return await asyncio.to_thread(self.rate, chat_histories, use_tqdm)
 
 
 class LLMJudge(RatingFunction):
@@ -351,7 +363,7 @@ class LLMJudge(RatingFunction):
     def model_name(self) -> str:
         return self._model_name
 
-    async def rate(self, chat_histories: list[ChatHistory], use_tqdm: bool=True) -> list[dict]:
+    async def async_rate(self, chat_histories: list[ChatHistory], use_tqdm: bool=True) -> list[RatingResult]:
         rater_prompts = Slist(chat_histories).map(
             lambda convo: ChatHistory.from_system(
                 ABSOLUTE_RANKING_PROMPT_SYSTEM
@@ -394,7 +406,7 @@ class LLMJudge(RatingFunction):
                     logger.error(f"API response: {resp}")
                     logger.error(f"Full traceback:", exc_info=True)
 
-            rating_results.append({"score": score_to_append, "reasoning": reasoning})
+            rating_results.append(RatingResult(score=score_to_append, reasoning=reasoning))
 
         return rating_results
 

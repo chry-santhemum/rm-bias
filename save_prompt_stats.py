@@ -1,3 +1,5 @@
+"""Helpers for saving prompt stats to disk."""
+
 # %%
 import json
 import random

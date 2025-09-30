@@ -284,13 +284,14 @@ class RewriteModel(GenerationModel):
                 ))
             )
         responses = await self.sample(to_send_chats, use_tqdm=False)
-        if responses[0] == "N/A" or responses[1] == "N/A":
+        if responses[0] is None or responses[1] is None:
             return None
+
         return {
             "user": original_chat.get_first("user"),
             "original_assistant": original_chat.get_first("assistant"),
-            "plus_assistant": responses[0],
-            "minus_assistant": responses[1],
+            "plus_assistant": responses[0].get_first("assistant"),
+            "minus_assistant": responses[1].get_first("assistant"),
         }
 
 
