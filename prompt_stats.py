@@ -8,13 +8,11 @@ from collections import defaultdict
 from datasets import load_dataset
 
 from state import PromptCluster
-from rater import (
+from raters import (
     PolicyModel,
     RatingFunction,
     RewardModel,
     prompt_to_hash_path,
-    prompt_rollout, 
-    prompt_rating,
 )
 from standard_prompts import set_seed_all
 
@@ -132,25 +130,6 @@ def initialize_prompt_stats(
     raters: list[RatingFunction] = [],
     rating_only: bool = False,
 ):
-    all_user_prompts = []
-    for cluster in id_to_cluster.values():
-        all_user_prompts.extend(cluster.prompts)
-
-    if not rating_only:
-        prompt_rollout(
-            prompts=all_user_prompts,
-            target_dir=target_dir,
-            policy_model=policy,
-            n_samples=16,
-        )
-
-    for rater in raters:
-        prompt_rating(
-            prompts=all_user_prompts,
-            target_dir=target_dir,
-            rater=rater,
-            policy_model=policy,
-        )
 
     for id, cluster in tqdm(
         id_to_cluster.items(), desc="Adding dataset info to prompt stats"

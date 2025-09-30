@@ -28,7 +28,7 @@ from viz_utils import (
     convert_attack_to_dict,
     save_cluster_info,
 )
-from rater import (
+from raters import (
     normalize,
     prompt_rollout,
     prompt_rating,

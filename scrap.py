@@ -8,7 +8,7 @@ from collections import defaultdict
 from datasets import load_dataset
 import numpy as np
 from llm_types import ChatHistory, ChatMessage
-from rater import RewriteModel, RewardModel, prompt_to_hash_path
+from raters import RewriteModel, RewardModel, prompt_to_hash_path
 
 nest_asyncio.apply()
 

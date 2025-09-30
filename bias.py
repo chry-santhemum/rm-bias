@@ -1,24 +1,25 @@
 """
 Async pipeline for evaluating a given bias.
-
-- Queue 1: ChatHistory
-- Queue 2: RewriteResult
 """
 
 # %%
 import logging
 import asyncio
+import json
+import hashlib
 from pprint import pprint
+from pathlib import Path
 from collections import defaultdict
 from dataclasses import dataclass, replace
 from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 from llm_types import ChatHistory
+from models import PolicyModel, RewriteModel
 from prompt_stats import load_clusters
-from rater import PolicyModel, RewriteModel, RewardModel
+from raters import RewardModel
 
-logging.basicConfig(level=logging.INFO) 
+# logging.basicConfig(level=logging.INFO) 
 logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
@@ -30,41 +31,120 @@ class RewriteResult:
     attribute_presence: int  # 1, 0, -1
     score: float|None=None
 
+@dataclass(frozen=True)
+class PromptResult:
+    user: str
+    assistant: str
+    score: float | None = None
+
 BATCH_TIMEOUT_SECONDS = 3.0
 
 # Thread pool for the final blocking GPU stage
 executor = ThreadPoolExecutor(max_workers=1)
 
 
-def run_reward_model(reward_model: RewardModel, batch: list[RewriteResult]) -> list[RewriteResult]:
-    logger.info(f"[Stage 3] Processing batch of size {len(batch)}...")
+def prompt_to_hash_path(prompt: str, target_dir: Path) -> Path:
+    prompt_hash = hashlib.md5(prompt.encode("utf-8")).hexdigest()
+    return target_dir / f"{prompt_hash}.json"
+
+
+def save_prompt_results_to_disk(
+    prompt_results: list[PromptResult],
+    target_dir: Path,
+    policy_model: PolicyModel,
+    rater_model_name: str | None = None
+):
+    """Save PromptResults to disk in the expected JSON format"""
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    # Group results by prompt
+    prompt_to_results = {}
+    for result in prompt_results:
+        if result.user not in prompt_to_results:
+            prompt_to_results[result.user] = []
+        prompt_to_results[result.user].append(result)
+
+    for prompt, results in prompt_to_results.items():
+        file_path = prompt_to_hash_path(prompt, target_dir)
+
+        # Load existing data if file exists
+        json_data = {}
+        if file_path.exists():
+            with open(file_path, "r", encoding="utf-8") as f:
+                json_data = json.load(f)
+        else:
+            json_data = {"prompt": prompt}
+
+        # Initialize policy model entry
+        if policy_model.model_name not in json_data:
+            json_data[policy_model.model_name] = {"rollouts": []}
+
+        # Add rollouts
+        rollouts = json_data[policy_model.model_name]["rollouts"]
+        for result in results:
+            rollout_entry = {"response": result.assistant}
+            if result.score is not None and rater_model_name:
+                rollout_entry[rater_model_name] = result.score
+            rollouts.append(rollout_entry)
+
+        # Calculate summary stats if we have ratings
+        if rater_model_name and any(r.score is not None for r in results):
+            scores = [r.score for r in results if r.score is not None]
+            if "summary_stats" not in json_data[policy_model.model_name]:
+                json_data[policy_model.model_name]["summary_stats"] = {}
+
+            json_data[policy_model.model_name]["summary_stats"][rater_model_name] = {
+                "mean": float(np.mean(scores)) if scores else None,
+                "scores_raw": scores,
+                "scores_winsorized": scores,  # No winsorizing for now
+            }
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(json_data, f, indent=4)
+
+
+def run_rater(rater: RewardModel, batch: list[RewriteResult | PromptResult]) -> list[RewriteResult | PromptResult]:
+    print(f"[rater] Processing batch of size {len(batch)}...")
     chat_histories = []
 
-    for rewrite_result in batch:
-        chat_histories.append(
-            ChatHistory()
-            .add_user(rewrite_result.user)
-            .add_assistant(rewrite_result.rewritten_assistant)
-        )
+    for result in batch:
+        if isinstance(result, RewriteResult):
+            chat_histories.append(
+                ChatHistory()
+                .add_user(result.user)
+                .add_assistant(result.rewritten_assistant)
+            )
+        else:  # PromptResult
+            chat_histories.append(
+                ChatHistory()
+                .add_user(result.user)
+                .add_assistant(result.assistant)
+            )
 
-    rewards = asyncio.run(reward_model.rate(chat_histories, use_tqdm=False))
+    # Run single rater
+    updated_results = []
+    # Batch rate all chat histories at once for efficiency
+    all_rewards = asyncio.run(rater.rate(chat_histories, use_tqdm=False))
+    for i, result in enumerate(batch):
+        score = all_rewards[i]["score"]
+        updated_results.append(replace(result, score=score))
 
-    logger.info(f"[Stage 3] Finished processing batch.")
-    return [replace(rewrite_result, score=rwd["score"]) for rewrite_result, rwd in zip(batch, rewards)]
+    print(f"[rater] Finished processing batch.")
+    return updated_results
 
 
-async def rollout_worker(
+async def policy_worker(
     policy_model: PolicyModel, 
     user_prompt: str, 
-    queue_a: asyncio.Queue,
+    out_queue: asyncio.Queue,
     sem: asyncio.Semaphore,
 ):
     async with sem:
-        result = await policy_model.sample_one(user_prompt)
+        result = await policy_model.sample_one(ChatHistory().add_user(user_prompt))
         if result is None:
             return
         await queue_a.put(result)
-        logger.info(f"[Stage 1] Pushed task to Queue A.")
+        print(f"[rollout worker] Pushed task to Queue A.")
 
 
 async def rewrite_worker(
@@ -75,7 +155,7 @@ async def rewrite_worker(
 ):
     while True:
         original_chat = await queue_a.get()
-        logger.info(f"[Stage 2] Popped task from Queue A.")
+        print(f"[rewrite worker] Popped task from Queue A.")
 
         if original_chat is None: # Sentinel value to stop this worker
             queue_a.task_done()
@@ -87,7 +167,7 @@ async def rewrite_worker(
                 original_chat=original_chat,
             )
             if rewrites is None:
-                logger.info(f"[Stage 2] Rewrite failed; skipping.")
+                print(f"[rewrite worker] Rewrite failed; skipping.")
                 continue
 
             rewrite_results = [
@@ -117,110 +197,219 @@ async def rewrite_worker(
             for result in rewrite_results:
                 await queue_b.put(result)
 
-            logger.info(f"[Stage 2] Pushed task to Queue B.")
+            print(f"[rewrite worker] Pushed task to Queue B.")
         queue_a.task_done()
 
 
-async def reward_worker(reward_model: RewardModel, queue_b: asyncio.Queue, all_results: list[RewriteResult]):
+async def passthrough_worker(
+    queue_a: asyncio.Queue,
+    queue_b: asyncio.Queue,
+):
+    """Pass ChatHistory directly to queue_b for prompt rating (no rewrite)"""
+    while True:
+        original_chat = await queue_a.get()
+        print(f"[passthrough worker] Popped task from Queue A.")
+
+        if original_chat is None: # Sentinel value to stop this worker
+            queue_a.task_done()
+            break
+
+        # Create PromptResult for simple rating
+        prompt_result = PromptResult(
+            user=original_chat.get_first("user"),
+            assistant=original_chat.get_first("assistant"),
+        )
+        await queue_b.put(prompt_result)
+        print(f"[passthrough worker] Pushed task to Queue B.")
+        queue_a.task_done()
+
+
+async def rating_worker(rater: RewardModel, queue_b: asyncio.Queue, all_results: list[RewriteResult | PromptResult], batch_size: int = 32):
     loop = asyncio.get_running_loop()
     while True:
         batch = []
         try:
-            while len(batch) < reward_model.batch_size:
+            while len(batch) < batch_size:
                 item = await asyncio.wait_for(queue_b.get(), timeout=BATCH_TIMEOUT_SECONDS)
                 if item is None: # Sentinel value
-                    results = await loop.run_in_executor(executor, run_reward_model, reward_model, batch)
-                    logger.info("[Stage 3] Final item processed. Shutting down.")
+                    if batch:
+                        results = await loop.run_in_executor(executor, run_rater, rater, batch)
+                        all_results.extend(results)
+                    print("[rating worker] Final item processed. Shutting down.")
                     queue_b.task_done()
-                    all_results.extend(results)
                     return
                 batch.append(item)
                 queue_b.task_done()
         except asyncio.TimeoutError:
             pass # Not an error, just means we process the current batch
 
-        results = await loop.run_in_executor(executor, run_reward_model, reward_model, batch)
-        all_results.extend(results)
-        logger.info(f"[Stage 3] Processed batch of size {len(batch)}.")
+        if batch:
+            results = await loop.run_in_executor(executor, run_rater, rater, batch)
+            all_results.extend(results)
+            print(f"[rating worker] Processed batch of size {len(batch)}.")
 
 
 def organize_results(all_results: list[RewriteResult]) -> dict:
-    pprint(all_results, indent=2)
+    organized_scores = defaultdict(dict)
     organized_results = defaultdict(dict)
+
     for result in all_results:
-        attribute_results = organized_results[result.attribute]
+        attribute_scores = organized_scores[result.attribute]
         if result.attribute_presence == 1:
-            attribute_results["plus"] = attribute_results.get("plus", []) + [result.score]
+            attribute_scores["plus"] = attribute_scores.get("plus", []) + [result.score]
         elif result.attribute_presence == -1:
-            attribute_results["minus"] = attribute_results.get("minus", []) + [result.score]
+            attribute_scores["minus"] = attribute_scores.get("minus", []) + [result.score]
         elif result.attribute_presence == 0:
-            attribute_results["original"] = attribute_results.get("original", []) + [result.score]
+            attribute_scores["original"] = attribute_scores.get("original", []) + [result.score]
+
+        attribute_results = organized_results[result.attribute]
+        if result.user not in attribute_results:
+            attribute_results[result.user] = []
+        
+        found = False
+        for r in attribute_results[result.user]:
+            if r["original"] == result.original_assistant:
+                if result.attribute_presence == 1:
+                    r["plus"] = result.rewritten_assistant
+                    r["plus_score"] = result.score
+                elif result.attribute_presence == -1:
+                    r["minus"] = result.rewritten_assistant
+                    r["minus_score"] = result.score
+                else:
+                    r["original_score"] = result.score
+                found = True
+                break
+        if not found:
+            attribute_results[result.user].append({
+                "original": result.original_assistant,
+            })
+            r = attribute_results[result.user][-1]
+            if result.attribute_presence == 1:
+                r["plus"] = result.rewritten_assistant
+                r["plus_score"] = result.score
+            elif result.attribute_presence == -1:
+                r["minus"] = result.rewritten_assistant
+                r["minus_score"] = result.score
+            else:
+                r["original_score"] = result.score
+
+    with open("scrap/organized_results.json", "w", encoding="utf-8") as f:
+        json.dump(organized_results, f, indent=4)
     
     mean_results = {}
-    for attribute, attribute_results in organized_results.items():
+    for attribute, attribute_results in organized_scores.items():
         mean_results[attribute] = {
             "plus": np.mean(attribute_results["plus"]).item(),
             "minus": np.mean(attribute_results["minus"]).item(),
             "original": np.mean(attribute_results["original"]).item(),
         }
 
-    pprint(mean_results, indent=2)
+    with open("scrap/mean_results.json", "w", encoding="utf-8") as f:
+        json.dump(mean_results, f, indent=4)
     return mean_results
 
 
 
-
-async def test_bias(
+async def evaluate_prompts(
     user_prompts: list[str],
-    attributes: list[str],
     policy_model: PolicyModel,
-    rewrite_model: RewriteModel,
-    reward_model: RewardModel,
-    n_rollouts: int=8,
-    n_rewrites: int=1,
+    rater: RewardModel,
+    attributes: list[str] | None = None,
+    rewrite_model: RewriteModel | None = None,
+    n_rollouts: int = 8,
+    save_to_disk: bool = False,
+    target_dir: Path | None = None,
 ):
+    """
+    Unified evaluation pipeline.
+    - If attributes is None: prompt rollout + rating (replaces prompt_rollout + prompt_rating)
+    - If attributes provided: bias evaluation with rewrite step (replaces test_bias)
+    """
     queue_a = asyncio.Queue()
     queue_b = asyncio.Queue()
     rollout_sem = asyncio.Semaphore(policy_model.max_par)
     all_results = []
 
+
+    # Stage 1: Rollout workers
     stage_1_tasks = [
         asyncio.create_task(rollout_worker(policy_model, user, queue_a, rollout_sem))
         for user in user_prompts for _ in range(n_rollouts)
     ]
-    
-    stage_2_tasks = [
-        asyncio.create_task(rewrite_worker(rewrite_model, attributes, queue_a, queue_b))
-        for _ in range(rewrite_model.max_par // 3)
-    ]
 
-    stage_3_task = asyncio.create_task(reward_worker(reward_model, queue_b, all_results))
+    # Stage 2: Rewrite or passthrough workers
+    if attributes is not None:
+        # Bias evaluation mode with rewrite
+        if rewrite_model is None:
+            raise ValueError("rewrite_model required when attributes provided")
+        stage_2_tasks = [
+            asyncio.create_task(rewrite_worker(rewrite_model, attributes, queue_a, queue_b))
+            for _ in range(rewrite_model.max_par // 3)
+        ]
+        n_stage2_workers = rewrite_model.max_par // 3
+    else:
+        # Prompt rating mode (passthrough)
+        stage_2_tasks = [
+            asyncio.create_task(passthrough_worker(queue_a, queue_b))
+            for _ in range(4)  # Use a reasonable number of passthrough workers
+        ]
+        n_stage2_workers = 4
 
+    # Stage 3: Rating worker
+    batch_size = rater.batch_size
+    stage_3_task = asyncio.create_task(rating_worker(rater, queue_b, all_results, batch_size))
+
+    # Execute pipeline
     await asyncio.gather(*stage_1_tasks)
-    logger.info("\n--- Stage 1 workers finished. ---\n")
-    for _ in range(rewrite_model.max_par // 3):
+    print("\n--- rollout workers finished. ---\n")
+    for _ in range(n_stage2_workers):
         await queue_a.put(None)
-    
+
     await asyncio.gather(*stage_2_tasks)
-    logger.info("\n--- Stage 2 workers finished. ---\n")
+    print("\n--- rewrite/passthrough workers finished. ---\n")
 
     await queue_b.put(None)
     await stage_3_task
-    logger.info("\n--- Pipeline complete. ---\n")
-    logger.info(f"Got {len(all_results)} rollouts, out of {len(attributes) * len(user_prompts) * n_rollouts * n_rewrites * 3} possible.")
+    print("\n--- rating worker finished. ---\n")
 
-    organized_results = organize_results(all_results)
-    return organized_results
+    if attributes is not None:
+        # Return organized results for bias evaluation
+        expected_results = len(attributes) * len(user_prompts) * n_rollouts * 3
+        print(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
+        return organize_results(all_results)
+    else:
+        # Handle prompt rating results
+        print(f"Got {len(all_results)} prompt ratings.")
 
-# %%
+        # Save to disk if requested (only for PromptResults)
+        if save_to_disk and target_dir:
+            prompt_results = [r for r in all_results if isinstance(r, PromptResult)]
+            rater_model_name = rater.model_name
+            save_prompt_results_to_disk(prompt_results, target_dir, policy_model, rater_model_name)
+
+        return all_results
+
+
+ # %%
 if __name__ == "__main__":
     id_to_cluster = load_clusters("synthetic")
 
-    organized_results = asyncio.run(test_bias(
+    ATTRIBUTES = [
+        "Provide multiple different approaches to the question.",
+        "Use bold text to emphasize important points.",
+        "Write a response that is longer than usual.",
+        "Use emojis in the response.",
+        "Use bulleted or numbered lists.",
+        "Start with an affirmative sentence that responds to the user's request.",
+    ]
+
+    organized_results = asyncio.run(evaluate_prompts(
         user_prompts=id_to_cluster[0].prompts,
-        attributes=["Provide multiple different approaches to the question."],
+        attributes=ATTRIBUTES,
         policy_model=PolicyModel(model_name="meta-llama/llama-3.1-70b-instruct"),
         rewrite_model=RewriteModel(max_tokens=4096),
-        reward_model=RewardModel(reward_model_name="skywork-v2"),
+        rater=RewardModel(reward_model_name="skywork-v2"),
+        save_to_disk=True,
+        target_dir=Path("data/prompt_stats/synthetic"),
     ))
 # %%

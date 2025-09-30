@@ -25,7 +25,7 @@ from pathlib import Path
 from utils import timestamp, parse_json_response
 from viz_utils import save_system_prompt_stats, save_population_state
 from prompt_stats import load_clusters
-from rater import (
+from raters import (
     LLMJudge,
     RewardModel,
     PolicyModel,

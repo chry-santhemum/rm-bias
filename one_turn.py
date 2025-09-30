@@ -14,7 +14,7 @@ from dataclasses import replace
 from utils import timestamp, parse_json_response
 from viz_utils import save_system_prompt_stats
 from prompt_stats import load_clusters, initialize_prompt_stats
-from rater import (
+from raters import (
     LLMJudge,
     RewardModel,
     PolicyModel,
