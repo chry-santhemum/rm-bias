@@ -9,6 +9,7 @@ user_prompts/
 *.html
 output.txt
 results/
+scrap/
 pyrightconfig.json
 .api_cache/
 dictionary_learning/
