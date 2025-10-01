@@ -54,7 +54,7 @@ def plot_bias_results(json_file_path: str, save_path: str|None = None):
         hovertemplate='%{text}<extra></extra>'
     ))
 
-    # Update layout
+    # Update layout with legend outside the graph area
     fig.update_layout(
         title='Bias Analysis Results',
         xaxis_title='Attributes',
@@ -63,9 +63,9 @@ def plot_bias_results(json_file_path: str, save_path: str|None = None):
         hovermode='closest',
         legend=dict(
             yanchor="top",
-            y=0.99,
+            y=1,
             xanchor="left",
-            x=0.01
+            x=1.05
         )
     )
 
@@ -74,12 +74,9 @@ def plot_bias_results(json_file_path: str, save_path: str|None = None):
         fig.write_html(save_path) if save_path.endswith('.html') else fig.write_image(save_path)
         print(f"Figure saved to {save_path}")
 
-    # Show plot
-    fig.show()
-
     return fig
 
 
 if __name__ == "__main__":
     # Example usage
-    plot_bias_results("scrap/mean_results.json", save_path="scrap/mean_results.html")
+    plot_bias_results("scrap/20251001-000007/rewrite_results_mean.json", save_path="scrap/20251001-000007/rewrite_results_mean.html")

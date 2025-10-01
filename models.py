@@ -293,6 +293,7 @@ class RewriteModel(GenerationModel):
 
         for idx in range(len(attributes)):
             output[idx]["user"] = original_chat.get_first("user")
+            output[idx]["original"] = original_chat.get_first("assistant")
             output[idx]["plus"] = [r.get_first("assistant") if r is not None else None for r in responses[idx * n_samples : (idx + 1) * n_samples]]
             output[idx]["minus"] = [r.get_first("assistant") if r is not None else None for r in responses[(idx + 1) * n_samples : (idx + 2) * n_samples]]
 

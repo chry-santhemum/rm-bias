@@ -1,11 +1,22 @@
 """
 Async pipeline for evaluating a given bias.
+
+policy_worker: --> PromptResult
+conditional_policy_worker: --> PromptResult
+rewrite_worker: PromptResult --> RewriteResult
+reward_worker: RewriteResult | PromptResult --> RewriteResult | PromptResult
+
+Initial prompt rating: policy_worker --- reward_worker
+Conditioning on system prompt: conditional_policy_worker --- reward_worker
+Rewrite: policy_worker --- rewrite_worker --- reward_worker
 """
 
 # %%
+import patches
 import logging
 import asyncio
 import json
+import time
 import hashlib
 from pprint import pprint
 from pathlib import Path
@@ -14,12 +25,15 @@ from dataclasses import dataclass, replace
 from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
+from utils import timestamp
 from llm_types import ChatHistory
 from models import PolicyModel, RewriteModel
+from save_prompt_stats import load_clusters
 from raters import RewardModel
 
 # logging.basicConfig(level=logging.INFO) 
 logger = logging.getLogger(__name__)
+
 
 @dataclass(frozen=True)
 class RewriteResult:
@@ -36,6 +50,7 @@ class PromptResult:
     user: str
     assistant: str
     score: float | None = None
+
 
 BATCH_TIMEOUT_SECONDS = 3.0
 
@@ -75,110 +90,93 @@ def run_reward_model(
 async def policy_worker(
     policy_model: PolicyModel, 
     user_prompt: str, 
-    out_queue: asyncio.Queue[ChatHistory],
+    out_queue: asyncio.Queue[PromptResult],
     sem: asyncio.Semaphore,
 ):
     async with sem:
         result = await policy_model.sample_one(ChatHistory.from_user(user_prompt))
         if result is None:
             return
-        await out_queue.put(result)
+        await out_queue.put(PromptResult(
+            system="",
+            user=user_prompt,
+            assistant=result.get_first("assistant") or "",
+        ))
         print(f"[policy_worker] Pushed 1 task.")
+
+
+async def conditional_policy_worker(
+    policy_model: PolicyModel,
+    attribute: str,
+    user_prompt: str,
+    out_queue: asyncio.Queue[PromptResult],
+    sem: asyncio.Semaphore,
+):
+    async with sem:
+        result = await policy_model.sample_one(ChatHistory.from_system(attribute).add_user(user_prompt))
+        if result is None:
+            return
+        await out_queue.put(PromptResult(
+            system=attribute,
+            user=user_prompt,
+            assistant=result.get_first("assistant") or "",
+        ))
+        print(f"[conditional_policy_worker] Pushed 1 task.")
 
 
 async def rewrite_worker(
     rewrite_model: RewriteModel,
     attributes: list[str],
-    in_queue: asyncio.Queue[ChatHistory], 
-    out_queue: asyncio.Queue[RewriteResult],
+    in_queue: asyncio.Queue[PromptResult], 
+    out_queue: asyncio.Queue[RewriteResult | PromptResult],
+    n_samples: int=1,
 ):
     while True:
-        original_chat = await in_queue.get()
+        prompt_result = await in_queue.get()
         print(f"[rewrite_worker] Popped 1 task.")
 
-        if original_chat is None:  # Sentinel value to signal stop
+        if prompt_result is None:  # Sentinel value to signal stop
             in_queue.task_done()
             break
         
-        for attribute in attributes:
-            rewrites = await rewrite_model.rewrite_one(
-                system_prompt=attribute,
-                original_chat=original_chat,
-            )
-            if rewrites is None:
-                print(f"[rewrite_worker] Rewrite failed; skipping.")
-                continue
+        rewrites = await rewrite_model.rewrite_one(
+            attributes=attributes,
+            original_chat=ChatHistory.from_user(prompt_result.user).add_assistant(prompt_result.assistant),
+            n_samples=n_samples,
+        )
 
-            rewrite_results = [
-                RewriteResult(
-                    system=attribute,
-                    user=rewrites["user"],
-                    original_assistant=rewrites["original_assistant"],
-                    rewritten_assistant=rewrites["plus_assistant"],
+        for rewrite_dict in rewrites:
+            for plus_rewrite_text in rewrite_dict["plus"]:
+                if plus_rewrite_text is None:
+                    continue
+                await out_queue.put(RewriteResult(
+                    system=rewrite_dict["attribute"],
+                    user=rewrite_dict["user"],
+                    original_assistant=rewrite_dict["original"],
+                    rewritten_assistant=plus_rewrite_text,
                     presence=1,
-                ),
-                RewriteResult(
-                    system=attribute,
-                    user=rewrites["user"],
-                    original_assistant=rewrites["original_assistant"],
-                    rewritten_assistant=rewrites["minus_assistant"],
+                ))
+                print(f"[rewrite_worker] Pushed 1 task.")
+            
+            for minus_rewrite_text in rewrite_dict["minus"]:
+                if minus_rewrite_text is None:
+                    continue
+                await out_queue.put(RewriteResult(
+                    system=rewrite_dict["attribute"],
+                    user=rewrite_dict["user"],
+                    original_assistant=rewrite_dict["original"],
+                    rewritten_assistant=minus_rewrite_text,
                     presence=0,
-                ),
-            ]
+                ))
+                print(f"[rewrite_worker] Pushed 1 task.")
+            
+            await out_queue.put(PromptResult(
+                system=rewrite_dict["attribute"],
+                user=rewrite_dict["user"],
+                assistant=rewrite_dict["original"],
+            ))
+            print(f"[rewrite_worker] Pushed 1 task.")
 
-            for result in rewrite_results:
-                await out_queue.put(result)
-
-            print(f"[rewrite_worker] Pushed 2 tasks.")
-        in_queue.task_done()
-
-
-async def conditional_sample_worker(
-    policy_model: PolicyModel,
-    attribute:
-    in_queue: asyncio.Queue[ChatHistory],
-    out_queue: asyncio.Queue[PromptResult],
-):
-    while True:
-        original_chat = await in_queue.get()
-        print(f"[passthrough_worker] Popped 1 task.")
-
-        if original_chat is None:  # Sentinel value to signal stop
-            in_queue.task_done()
-            break
-
-        # Create PromptResult for simple rating
-        prompt_result = PromptResult(
-            system=original_chat.get_first("system") or "",
-            user=original_chat.get_first("user") or "",
-            assistant=original_chat.get_first("assistant") or "",
-        )
-        await out_queue.put(prompt_result)
-        print(f"[passthrough_worker] Pushed 1 task.")
-        in_queue.task_done()
-
-
-async def passthrough_worker(
-    in_queue: asyncio.Queue[ChatHistory],
-    out_queue: asyncio.Queue[PromptResult],
-):
-    """Convert ChatHistory to PromptResult."""
-    while True:
-        original_chat = await in_queue.get()
-        print(f"[passthrough_worker] Popped 1 task.")
-
-        if original_chat is None:  # Sentinel value to signal stop
-            in_queue.task_done()
-            break
-
-        # Create PromptResult for simple rating
-        prompt_result = PromptResult(
-            system=original_chat.get_first("system") or "",
-            user=original_chat.get_first("user") or "",
-            assistant=original_chat.get_first("assistant") or "",
-        )
-        await out_queue.put(prompt_result)
-        print(f"[passthrough_worker] Pushed 1 task.")
         in_queue.task_done()
 
 
@@ -212,51 +210,185 @@ async def rating_worker(
             print(f"[rating_worker] Processed batch of size {len(batch)}.")
 
 
-def organize_results(all_results: list[RewriteResult]) -> dict:
+async def evaluate_baselines(
+    user_prompts: list[str],
+    policy_model: PolicyModel,
+    rater: RewardModel,
+    n_rollouts: int = 8,
+    target_dir: Path | None = None,
+):
+    queue = asyncio.Queue()
+    rollout_sem = asyncio.Semaphore(policy_model.max_par)
+    all_results = []  # where results will appear
+
+    policy_worker_tasks = [
+        asyncio.create_task(policy_worker(policy_model, user, queue, rollout_sem))
+        for user in user_prompts for _ in range(n_rollouts)
+    ]
+
+    rating_worker_task = asyncio.create_task(rating_worker(rater, queue, all_results))
+
+    # Shutdown
+    await asyncio.gather(*policy_worker_tasks)
+    print("\n--- rollout workers finished. ---\n")
+
+    await queue.put(None)
+    await rating_worker_task
+    print("\n--- rating worker finished. ---\n")
+    expected_results = len(user_prompts) * n_rollouts
+    print(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
+
+    return all_results
+
+
+async def evaluate_attributes_conditional(
+    user_prompts: list[str],
+    policy_model: PolicyModel,
+    rater: RewardModel,
+    attributes: list[str],
+    n_rollouts: int = 8,
+    target_dir: Path | None = None,
+):
+    queue = asyncio.Queue()
+    rollout_sem = asyncio.Semaphore(policy_model.max_par)
+    all_results = []
+
+    rollout_tasks = [
+        asyncio.create_task(conditional_policy_worker(policy_model, attribute, user, queue, rollout_sem))
+        for user in user_prompts for attribute in attributes for _ in range(n_rollouts)
+    ]
+
+    rating_worker_task = asyncio.create_task(rating_worker(rater, queue, all_results))
+
+    # Shutdown
+    await asyncio.gather(*rollout_tasks)
+    print("\n--- rollout workers finished. ---\n")
+
+    await queue.put(None)
+    await rating_worker_task
+    print("\n--- rating worker finished. ---\n")
+    expected_results = len(attributes) * len(user_prompts) * n_rollouts
+    print(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
+
+    return all_results
+    
+
+async def evaluate_attributes_rewrite(
+    user_prompts: list[str],
+    policy_model: PolicyModel,
+    rater: RewardModel,
+    attributes: list[str],
+    rewrite_model: RewriteModel,
+    n_rollouts: int = 8,
+    n_rewrites: int = 1,
+    target_dir: Path | None = None,
+):
+    queue_a = asyncio.Queue()
+    queue_b = asyncio.Queue()
+    rollout_sem = asyncio.Semaphore(policy_model.max_par)
+    n_rewrite_workers = max(1, rewrite_model.max_par // (len(attributes) * n_rewrites * 2))
+    all_results = []
+
+    rollout_tasks = [
+        asyncio.create_task(policy_worker(policy_model, user, queue_a, rollout_sem))
+        for user in user_prompts for _ in range(n_rollouts)
+    ]
+
+    rewrite_tasks = [
+        asyncio.create_task(rewrite_worker(rewrite_model, attributes, queue_a, queue_b, n_rewrites))
+        for _ in range(n_rewrite_workers)
+    ]
+
+    rating_worker_task = asyncio.create_task(rating_worker(rater, queue_b, all_results))
+
+    # Shutdown
+    await asyncio.gather(*rollout_tasks)
+    print("\n--- rollout workers finished. ---\n")
+
+    for _ in range(n_rewrite_workers):
+        await queue_a.put(None)  # Sentinel values for rewrite_workers
+
+    await asyncio.gather(*rewrite_tasks)
+    print("\n--- rewrite workers finished. ---\n")
+
+    await queue_b.put(None)
+    await rating_worker_task
+    print("\n--- rating worker finished. ---\n")
+    expected_results = len(attributes) * len(user_prompts) * n_rollouts * n_rewrites * 3
+    print(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
+
+    if target_dir is not None:
+        organize_rewrite_results(all_results, target_dir)
+
+    return all_results
+
+
+
+def organize_rewrite_results(all_results: list[RewriteResult | PromptResult], target_dir: Path):
     organized_scores = defaultdict(dict)
     organized_results = defaultdict(dict)
+    target_dir.mkdir(parents=True, exist_ok=True)
 
     for result in all_results:
-        attribute_scores = organized_scores[result.attribute]
-        if result.attribute_presence == 1:
-            attribute_scores["plus"] = attribute_scores.get("plus", []) + [result.score]
-        elif result.attribute_presence == 0:
-            attribute_scores["minus"] = attribute_scores.get("minus", []) + [result.score]
-        elif result.attribute_presence == 0:
+        attribute_scores = organized_scores[result.system]
+        if isinstance(result, PromptResult):
             attribute_scores["original"] = attribute_scores.get("original", []) + [result.score]
+        elif isinstance(result, RewriteResult):
+            if result.presence == 1:
+                attribute_scores["plus"] = attribute_scores.get("plus", []) + [result.score]
+            elif result.presence == 0:
+                attribute_scores["minus"] = attribute_scores.get("minus", []) + [result.score]
 
-        attribute_results = organized_results[result.attribute]
+        attribute_results = organized_results[result.system]
         if result.user not in attribute_results:
             attribute_results[result.user] = []
         
-        found = False
-        for r in attribute_results[result.user]:
-            if r["original"] == result.original_assistant:
-                if result.attribute_presence == 1:
+        if isinstance(result, PromptResult):
+            found = False
+            for r in attribute_results[result.user]:
+                if r["original"] == result.assistant:
+                    r["original_score"] = result.score
+                    found = True
+                    break
+
+            if not found:
+                attribute_results[result.user].append({
+                    "original": result.assistant,
+                    "original_score": result.score,
+                })
+        
+        elif isinstance(result, RewriteResult):
+            found = False
+            for r in attribute_results[result.user]:
+                if r["original"] == result.original_assistant:
+                    if result.presence == 1:
+                        if "plus" in r:
+                            continue
+                        r["plus"] = result.rewritten_assistant
+                        r["plus_score"] = result.score
+                        found = True
+                        break
+                    elif result.presence == 0:
+                        if "minus" in r:
+                            continue
+                        r["minus"] = result.rewritten_assistant
+                        r["minus_score"] = result.score
+                        found = True
+                        break
+                    
+            if not found:
+                attribute_results[result.user].append({
+                    "original": result.original_assistant,
+                })
+                r = attribute_results[result.user][-1]
+                if result.presence == 1:
                     r["plus"] = result.rewritten_assistant
                     r["plus_score"] = result.score
-                elif result.attribute_presence == 0:
+                elif result.presence == 0:
                     r["minus"] = result.rewritten_assistant
                     r["minus_score"] = result.score
-                else:
-                    r["original_score"] = result.score
-                found = True
-                break
-        if not found:
-            attribute_results[result.user].append({
-                "original": result.original_assistant,
-            })
-            r = attribute_results[result.user][-1]
-            if result.presence == 1:
-                r["plus"] = result.rewritten_assistant
-                r["plus_score"] = result.score
-            elif result.presence == 0:
-                r["minus"] = result.rewritten_assistant
-                r["minus_score"] = result.score
-            else:
-                r["original_score"] = result.score
 
-    with open("scrap/organized_results.json", "w", encoding="utf-8") as f:
+    with open(target_dir / "rewrite_results.json", "w", encoding="utf-8") as f:
         json.dump(organized_results, f, indent=4)
     
     mean_results = {}
@@ -267,116 +399,8 @@ def organize_results(all_results: list[RewriteResult]) -> dict:
             "original": np.mean(attribute_results["original"]).item(),
         }
 
-    with open("scrap/mean_results.json", "w", encoding="utf-8") as f:
+    with open(target_dir / "rewrite_results_mean.json", "w", encoding="utf-8") as f:
         json.dump(mean_results, f, indent=4)
-    return mean_results
-
-
-async def evaluate_baselines(
-    user_prompts: list[str],
-    policy_model: PolicyModel,
-    rater: RewardModel,
-    n_rollouts: int = 8,
-    target_dir: Path | None = None,
-):
-    queue_a = asyncio.Queue()
-    queue_b = asyncio.Queue()
-    rollout_sem = asyncio.Semaphore(policy_model.max_par)
-    num_passthrough_workers = 4  # not important
-    all_results: list[PromptResult] = []  # where results will appear
-
-    policy_worker_tasks = [
-        asyncio.create_task(policy_worker(policy_model, user, queue_a, rollout_sem))
-        for user in user_prompts for _ in range(n_rollouts)
-    ]
-
-    passthrough_worker_tasks = [
-        asyncio.create_task(passthrough_worker(queue_a, queue_b))
-        for _ in range(num_passthrough_workers)
-    ]
-
-    rating_worker_task = asyncio.create_task(rating_worker(rater, queue_b, all_results))
-
-    # Shutdown
-    await asyncio.gather(*policy_worker_tasks)
-    print("\n--- rollout workers finished. ---\n")
-    for _ in range(num_passthrough_workers):
-        await queue_a.put(None)
-
-    await asyncio.gather(*passthrough_worker_tasks)
-    print("\n--- passthrough workers finished. ---\n")
-
-    await queue_b.put(None)
-    await rating_worker_task
-    print("\n--- rating worker finished. ---\n")
-
-    return all_results
-
-
-async def evaluate_atttibutes(
-    user_prompts: list[str],
-    policy_model: PolicyModel,
-    rater: RewardModel,
-    attributes: list[str],
-    rewrite_model: RewriteModel | None = None,
-    n_rollouts: int = 8,
-    target_dir: Path | None = None,
-):
-    queue_a = asyncio.Queue()
-    queue_b = asyncio.Queue()
-    rollout_sem = asyncio.Semaphore(policy_model.max_par)
-    all_results = []
-
-    rollout_tasks = [
-        asyncio.create_task(policy_worker(policy_model, user, queue_a, rollout_sem))
-        for user in user_prompts for _ in range(n_rollouts)
-    ]
-
-    if rewrite_model is None:
-        # put attribute in system prompt
-
-
-    else:        
-        stage_2_tasks = [
-            asyncio.create_task(rewrite_worker(rewrite_model, attributes, queue_a, queue_b))
-            for _ in range(rewrite_model.max_par // 3)
-        ]
-        n_stage2_workers = rewrite_model.max_par // 3
-
-    # Stage 3: Rating worker
-    batch_size = rater.batch_size
-    stage_3_task = asyncio.create_task(rating_worker(rater, queue_b, all_results, batch_size))
-
-    # Execute pipeline
-    await asyncio.gather(*rollout_tasks)
-    print("\n--- rollout workers finished. ---\n")
-    for _ in range(n_stage2_workers):
-        await queue_a.put(None)
-
-    await asyncio.gather(*stage_2_tasks)
-    print("\n--- rewrite/passthrough workers finished. ---\n")
-
-    await queue_b.put(None)
-    await stage_3_task
-    print("\n--- rating worker finished. ---\n")
-
-    if attributes is not None:
-        # Return organized results for bias evaluation
-        expected_results = len(attributes) * len(user_prompts) * n_rollouts * 3
-        print(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
-        return organize_results(all_results)
-    else:
-        # Handle prompt rating results
-        print(f"Got {len(all_results)} prompt ratings.")
-
-        # Save to disk if requested (only for PromptResults)
-        if save_to_disk and target_dir:
-            prompt_results = [r for r in all_results if isinstance(r, PromptResult)]
-            rater_model_name = rater.model_name
-            save_prompt_results_to_disk(prompt_results, target_dir, policy_model, rater_model_name)
-
-        return all_results
-
 
 
 def prompt_to_hash_path(prompt: str, target_dir: Path) -> Path:
@@ -449,15 +473,17 @@ if __name__ == "__main__":
         "Use emojis in the response.",
         "Use bulleted or numbered lists.",
         "Start with an affirmative sentence that responds to the user's request.",
+        "Adopt a friendly and engaging tone.",
     ]
 
-    organized_results = asyncio.run(evaluate_prompts(
+    start_time = time.time()
+    organized_results = asyncio.run(evaluate_attributes_rewrite(
         user_prompts=id_to_cluster[0].prompts,
         attributes=ATTRIBUTES,
-        policy_model=PolicyModel(model_name="meta-llama/llama-3.1-70b-instruct"),
+        policy_model=PolicyModel(model_name="meta-llama/llama-3.1-8b-instruct"),
         rewrite_model=RewriteModel(max_tokens=4096),
         rater=RewardModel(reward_model_name="skywork-v2"),
-        save_to_disk=True,
-        target_dir=Path("data/prompt_stats/synthetic"),
+        target_dir=Path(f"scrap/{timestamp()}"),
     ))
+    print(f"Time taken: {time.time() - start_time} seconds")
 # %%

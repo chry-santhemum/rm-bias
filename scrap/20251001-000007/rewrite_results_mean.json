@@ -1,0 +1,37 @@
+{
+    "Provide multiple different approaches to the question.": {
+        "plus": 17.1118115234375,
+        "minus": 16.737988891601564,
+        "original": 17.127959594726562
+    },
+    "Use bold text to emphasize important points.": {
+        "plus": 16.737988891601564,
+        "minus": 17.280804443359376,
+        "original": 17.127959594726562
+    },
+    "Write a response that is longer than usual.": {
+        "plus": 17.280804443359376,
+        "minus": 16.728584594726563,
+        "original": 17.127959594726562
+    },
+    "Use emojis in the response.": {
+        "plus": 16.728584594726563,
+        "minus": 17.6562109375,
+        "original": 17.127959594726562
+    },
+    "Use bulleted or numbered lists.": {
+        "plus": 17.6562109375,
+        "minus": 17.051796875,
+        "original": 17.127959594726562
+    },
+    "Start with an affirmative sentence that responds to the user's request.": {
+        "plus": 17.051796875,
+        "minus": 14.90564697265625,
+        "original": 17.127959594726562
+    },
+    "Adopt a friendly and engaging tone.": {
+        "plus": 14.90564697265625,
+        "minus": 17.104932250976564,
+        "original": 17.127959594726562
+    }
+}
