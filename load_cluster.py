@@ -1,4 +1,4 @@
-"""Helpers for saving prompt stats to disk."""
+"""Helpers for loading user prompt clusters from disk."""
 
 # %%
 import json

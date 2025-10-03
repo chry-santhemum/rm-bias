@@ -10,19 +10,8 @@ Datasets used:
 
 import random
 import json
-
-import numpy as np
-import torch
 from datasets import load_dataset, concatenate_datasets
-from transformers.trainer_utils import set_seed as hf_set_seed
-
-
-def set_seed_all(seed: int):
-    random.seed(seed)  # Python RNG
-    np.random.seed(seed)  # NumPy RNG
-    torch.manual_seed(seed)  # PyTorch CPU RNG
-    torch.cuda.manual_seed_all(seed)  # PyTorch CUDA RNG
-    hf_set_seed(seed)
+from utils import set_seed_all
 
 
 def make_prompt_mix(num_total: int = 2048, seed: int = 10086) -> list[str]:
@@ -33,7 +22,7 @@ def make_prompt_mix(num_total: int = 2048, seed: int = 10086) -> list[str]:
     set_seed_all(seed)
 
     alpaca_gpt4 = load_dataset("vicgalle/alpaca-gpt4", split="train")
-    print("Alpaca GPT4 before filtering: ", len(alpaca_gpt4))
+    print("Alpaca GPT4 before filtering: ", len(alpaca_gpt4))  # type: ignore
     alpaca_gpt4_prompts = alpaca_gpt4.filter(
         lambda item: isinstance(item["output"], str) and len(item["output"]) <= 2000,
         num_proc=16,  # type: ignore
@@ -55,7 +44,7 @@ def make_prompt_mix(num_total: int = 2048, seed: int = 10086) -> list[str]:
     ultrafeedback = load_dataset(
         "HuggingFaceH4/ultrafeedback_binarized", split="train_prefs"
     )
-    print("Ultrafeedback before filtering: ", len(ultrafeedback))
+    print("Ultrafeedback before filtering: ", len(ultrafeedback))  # type: ignore
     ultrafeedback_prompts = ultrafeedback.filter(
         lambda item: len(item["chosen"][1]["content"]) <= 2000,
         num_proc=16,  # type: ignore
@@ -74,7 +63,7 @@ def make_prompt_mix(num_total: int = 2048, seed: int = 10086) -> list[str]:
     )
 
     skywork = load_dataset("Skywork/Skywork-Reward-Preference-80K-v0.2", split="train")
-    print("Skywork before filtering: ", len(skywork))
+    print("Skywork before filtering: ", len(skywork))  # type: ignore
     skywork_prompts = skywork.filter(
         lambda item: len(item["chosen"]) == 2
         and len(item["chosen"][1]["content"]) <= 2000,
@@ -97,7 +86,7 @@ def make_prompt_mix(num_total: int = 2048, seed: int = 10086) -> list[str]:
     )
 
     lmarena = load_dataset("lmarena-ai/arena-human-preference-55k", split="train")
-    print("LMArena before filtering: ", len(lmarena))
+    print("LMArena before filtering: ", len(lmarena))  # type: ignore
     lmarena_prompts = lmarena.filter(
         lambda item: len(json.loads(item["prompt"])) == 1
         and len(str(json.loads(item["response_a"])[0])) <= 2000,

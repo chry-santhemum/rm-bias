@@ -1,5 +1,5 @@
 # %%
-import patches  # monkey patching
+import patches
 import json
 import dotenv
 import logging
@@ -13,7 +13,6 @@ from dataclasses import replace
 
 from utils import timestamp, parse_json_response
 from viz_utils import save_system_prompt_stats
-from prompt_stats import load_clusters, initialize_prompt_stats
 from raters import (
     LLMJudge,
     RewardModel,
@@ -22,7 +21,6 @@ from raters import (
 )
 from state import SeedState, SystemPromptStats, Cluster
 from standard_prompts import set_seed_all
-from defaults import *
 from llm_types import ChatHistory
 from runner import (
     Planner,

@@ -29,17 +29,18 @@ from collections import defaultdict
 #                 except KeyError:
 #                     continue
 
-# with open("scrap/20251001-211105-synthetic-0/rewrite_results.json", "r", encoding="utf-8") as f:
-with open("scrap/20251002-021240-synthetic-0-70b/rewrite_results.json", "r", encoding="utf-8") as f:
-    rewrite_results = json.load(f)
-
 # with open("scrap/20251001-210636-synthetic-0/conditional_scores.json", "r", encoding="utf-8") as f:
-with open("scrap/20251002-020704-synthetic-0-70b/conditional_scores.json", "r", encoding="utf-8") as f:
-    conditional_scores = json.load(f)
+# with open("scrap/20251002-020704-synthetic-0-70b/conditional_scores.json", "r", encoding="utf-8") as f:
+#     conditional_scores = json.load(f)
 
 # with open("scrap/20251001-210601-synthetic-0/baseline_scores.json", "r", encoding="utf-8") as f:
-with open("scrap/20251002-020602-synthetic-0-70b/baseline_scores.json", "r", encoding="utf-8") as f:
-    baseline_scores = json.load(f)
+# with open("scrap/20251002-020602-synthetic-0-70b/baseline_scores.json", "r", encoding="utf-8") as f:
+#     baseline_scores = json.load(f)
+
+# with open("scrap/20251001-211105-synthetic-0/rewrite_results.json", "r", encoding="utf-8") as f:
+# with open("scrap/20251002-021240-synthetic-0-70b/rewrite_results.json", "r", encoding="utf-8") as f:
+with open("scrap/20251003-011033-synthetic-0-70b/rewrite_results.json", "r", encoding="utf-8") as f:
+    rewrite_results = json.load(f)
 
 rewrite_scores = {}
 
@@ -227,7 +228,7 @@ def make_bootstrap_plot(bootstrap_stats: dict, save_path: str | None = None):
         print(f"Figure saved to {save_path}")
 
 
-make_bootstrap_plot(bootstrap_stats, save_path="scrap/synthetic_rewrite_70b.html")
+make_bootstrap_plot(bootstrap_stats, save_path="scrap/synthetic_rewrite_70b_2.html")
 
 # %%
 import json

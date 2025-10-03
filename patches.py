@@ -1,4 +1,4 @@
-"""Monkey patching"""
+"""Monkey patching Slist."""
 
 from slist import Slist
 import typing

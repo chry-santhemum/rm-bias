@@ -17,10 +17,6 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 from datasets import load_dataset
-from umap import UMAP
-from sklearn.cluster import KMeans, DBSCAN
-from sklearn.metrics import pairwise_distances, pairwise_distances_argmin_min
-from sentence_transformers import SentenceTransformer
 
 from utils import timestamp, get_to_pass_reasoning
 from viz_utils import (
@@ -30,8 +26,6 @@ from viz_utils import (
 )
 from raters import (
     normalize,
-    prompt_rollout,
-    prompt_rating,
     prompt_to_hash_path,
     PolicyModel,
     RatingFunction,
@@ -40,100 +34,13 @@ from raters import (
 )
 from prompt_stats import CLUSTER_DATASETS, load_clusters
 from state import SeedState, Cluster
-from defaults import *
 from client import get_universal_caller, sample_from_model_parallel, OpenaiResponse
 from llm_types import ChatHistory
 
 logger = logging.getLogger(__name__)
 
 
-class ClusterModel:
-    def __init__(
-        self,
-        embedding_model_name: str,
-        umap_n_neighbors: int = 15,
-        umap_n_components: int = 8,
-    ):
-        self.embedding_model = SentenceTransformer(embedding_model_name)
-        self.umap_n_neighbors = umap_n_neighbors
-        self.umap_n_components = umap_n_components
-        self.umap_model = UMAP(
-            n_neighbors=umap_n_neighbors,
-            n_components=umap_n_components,
-            min_dist=0.0,
-            metric="cosine",
-            low_memory=False,
-        )
 
-    def embed(self, inputs: list[str]) -> np.ndarray:
-        return self.embedding_model.encode(inputs)
-
-    def reduce_embed(self, inputs: list[str]) -> np.ndarray:
-        """Embed then do dimensionality reduction"""
-
-        embeddings: np.ndarray = self.embed(inputs)
-        return self.umap_model.fit_transform(embeddings)  # type: ignore
-
-    def cluster(
-        self, inputs: list[str], n_clusters: int
-    ) -> Tuple[list[str], list[int]]:
-        reduced_embeddings = self.reduce_embed(inputs)
-
-        # # log the pairwise distance matrix
-        # logger.info(
-        #     f"Pairwise distance matrix:\n"
-        #     f"{pairwise_distances(reduced_embeddings, metric='cosine')}"
-        # )
-
-        kmeans = KMeans(
-            n_clusters=min(len(inputs), n_clusters), random_state=10086, n_init="auto"
-        )
-        kmeans.fit(reduced_embeddings)
-
-        closest_point_indices, _ = pairwise_distances_argmin_min(
-            kmeans.cluster_centers_, reduced_embeddings
-        )
-
-        sorted_indices = sorted(closest_point_indices)
-        selected = [inputs[i] for i in sorted_indices]
-
-        return selected, sorted_indices
-
-    def cluster_dbscan(
-        self,
-        inputs: list[str],
-        dbscan_eps: float,
-    ) -> Tuple[dict[int, list[str]], dict[int, list[int]]]:
-        embeddings = self.embed(inputs)
-
-        # log the pairwise distance matrix
-        logger.info(
-            f"Pairwise distance matrix:\n"
-            f"{pairwise_distances(embeddings, metric='cosine')}"
-        )
-
-        dbscan = DBSCAN(
-            eps=dbscan_eps, min_samples=2 * self.umap_n_components, metric="cosine"
-        )
-        dbscan.fit(embeddings)
-
-        niches = defaultdict(list)
-        indices = defaultdict(list)
-        for i, label in enumerate(dbscan.labels_):
-            niches[label].append(inputs[i])
-            indices[label].append(i)
-
-        logger.info(
-            "Niches:\n"
-            + "\n".join(
-                [
-                    f"Niche {label}:\n{"\n".join(members)}"
-                    for label, members in niches.items()
-                ]
-            )
-        )
-
-        return niches, indices
 
 
 class Planner(ABC):
