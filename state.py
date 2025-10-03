@@ -44,17 +44,17 @@ class Rating:
         return f"Rating(score={score_str}, rater={self.rater_model_name})"
 
 
-@dataclass
+@dataclass(frozen=True)
 class PlusMinusRollout:
     plus: str
     minus: str
-    plus_score: float
-    minus_score: float
+    plus_score: float | None
+    minus_score: float | None
 
-@dataclass
+@dataclass(frozen=True)
 class Rollout:
     response: str
-    score: float
+    score: float | None
 
 
 @dataclass
@@ -68,9 +68,9 @@ class AttributeStats:
     def parent(self) -> str | None:
         return self.meta.get("parent", None)
 
-    @property
-    def mean_reward(self) -> dict[str, float]:
-        ...
+    # @property
+    # def mean_reward(self) -> dict[str, float]:
+    #     ...
 
 
 

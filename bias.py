@@ -21,15 +21,16 @@ import hashlib
 from pprint import pprint
 from pathlib import Path
 from collections import defaultdict
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, replace, asdict
 from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 from utils import timestamp
 from llm_types import ChatHistory
 from models import PolicyModel, RewriteModel
-from save_prompt_stats import load_clusters
-from raters import RewardModel
+from load_cluster import load_clusters
+from reward_model import RewardModel
+from state import AttributeStats, Rollout, PlusMinusRollout
 
 # logging.basicConfig(level=logging.INFO) 
 logger = logging.getLogger(__name__)
@@ -217,7 +218,7 @@ async def evaluate_baselines(
     rater: RewardModel,
     n_rollouts: int = 8,
     save_dir: Path | None = None,
-):
+) -> dict[str, list[Rollout]]:
     queue = asyncio.Queue()
     rollout_sem = asyncio.Semaphore(policy_model.max_par)
     all_results = []  # where results will appear
@@ -239,10 +240,9 @@ async def evaluate_baselines(
     expected_results = len(user_prompts) * n_rollouts
     print(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
 
-    if save_dir is not None:
-        organize_baseline_results(all_results, save_dir)
+    organized_results = organize_baseline_results(all_results, save_dir)
 
-    return all_results
+    return organized_results
 
 
 async def evaluate_attributes_conditional(
@@ -333,69 +333,88 @@ async def evaluate_attributes_rewrite(
 
 # %%
 
-def organize_baseline_results(all_results: list[PromptResult], save_dir: Path):
+def organize_baseline_results(
+    all_results: list[PromptResult],
+    save_dir: Path|None=None,
+) -> dict[str, list[Rollout]]:
     organized_scores = defaultdict(list)
     organized_results = defaultdict(list)
-    save_dir.mkdir(parents=True, exist_ok=True)
 
     for item in all_results:
-        organized_results[item.user].append({
-            "response": item.assistant,
-            "score": item.score,
-        })
         organized_scores[item.user].append(item.score)
+        organized_results[item.user].append(Rollout(
+            response=item.assistant,
+            score=item.score,
+        ))
     
-    with open(save_dir / "baseline_results.json", "w", encoding="utf-8") as f:
-        json.dump(organized_results, f, indent=4)
-    
-    with open(save_dir / "baseline_scores.json", "w", encoding="utf-8") as f:
-        json.dump(organized_scores, f, indent=4)
-    
-    mean_results = {}
-    for user, scores in organized_scores.items():
-        mean_results[user] = np.mean(scores).item()
-    
-    with open(save_dir / "baseline_scores_mean.json", "w", encoding="utf-8") as f:
-        json.dump(mean_results, f, indent=4)
+    if save_dir is not None:
+        save_dir.mkdir(parents=True, exist_ok=True)
+
+        with open(save_dir / "baseline_results.json", "w", encoding="utf-8") as f:
+            json_data = {k: [asdict(r) for r in v] for k, v in organized_results.items()}
+            json.dump(json_data, f, indent=4)
+        with open(save_dir / "baseline_scores.json", "w", encoding="utf-8") as f:
+            json.dump(organized_scores, f, indent=4)
+        
+        mean_results = {}
+        for user, scores in organized_scores.items():
+            mean_results[user] = np.mean(scores).item()
+        
+        with open(save_dir / "baseline_scores_mean.json", "w", encoding="utf-8") as f:
+            json.dump(mean_results, f, indent=4)
+
+    return dict(organized_results)
 
 
-def organize_conditional_results(all_results: list[PromptResult], save_dir: Path):
+def organize_conditional_results(
+    all_results: list[PromptResult],
+    save_dir: Path|None=None,
+) -> dict[str, list[Rollout]]:
     organized_scores = defaultdict(dict)
     organized_results = defaultdict(dict)
-    save_dir.mkdir(parents=True, exist_ok=True)
 
     for item in all_results:
-        attribute_results = organized_results[item.system]
-        if item.user not in attribute_results:
-            attribute_results[item.user] = []
-        attribute_results[item.user].append({
-            "response": item.assistant,
-            "score": item.score,
-        })
-
         attribute_scores = organized_scores[item.system]
         if item.user not in attribute_scores:
             attribute_scores[item.user] = []
         attribute_scores[item.user].append(item.score)
 
-    mean_score = {}
-    for attribute, attribute_scores in organized_scores.items():
-        mean_score[attribute] = {
-            user: np.mean(attribute_scores[user]).item()
-            for user in attribute_scores
-        }
-    
-    with open(save_dir / "conditional_scores_mean.json", "w", encoding="utf-8") as f:
-        json.dump(mean_score, f, indent=4)
+        attribute_results = organized_results[item.system]
+        if item.user not in attribute_results:
+            attribute_results[item.user] = []
+        attribute_results[item.user].append(Rollout(
+            response=item.assistant,
+            score=item.score,
+        ))
 
-    with open(save_dir / "conditional_results.json", "w", encoding="utf-8") as f:
-        json.dump(organized_results, f, indent=4)
+    if save_dir is not None:
+        save_dir.mkdir(parents=True, exist_ok=True)
 
-    with open(save_dir / "conditional_scores.json", "w", encoding="utf-8") as f:
-        json.dump(organized_scores, f, indent=4)
+        with open(save_dir / "conditional_results.json", "w", encoding="utf-8") as f:
+            json_data = {k: [asdict(r) for r in v] for k, v in organized_results.items()}
+            json.dump(json_data, f, indent=4)
+
+        with open(save_dir / "conditional_scores.json", "w", encoding="utf-8") as f:
+            json.dump(organized_scores, f, indent=4)
+
+        mean_score = {}
+        for attribute, attribute_scores in organized_scores.items():
+            mean_score[attribute] = {
+                user: np.mean(attribute_scores[user]).item()
+                for user in attribute_scores
+            }
+        with open(save_dir / "conditional_scores_mean.json", "w", encoding="utf-8") as f:
+            json.dump(mean_score, f, indent=4)
+
+    return dict(organized_results)  # type: ignore
 
 
-def organize_rewrite_results(all_results: list[RewriteResult | PromptResult], save_dir: Path):
+
+def organize_rewrite_results(
+    all_results: list[RewriteResult | PromptResult],
+    save_dir: Path|None=None,
+) -> dict[str, list[PlusMinusRollout]]:
+
     organized_results = defaultdict(dict)
     save_dir.mkdir(parents=True, exist_ok=True)
 
@@ -470,66 +489,7 @@ def organize_rewrite_results(all_results: list[RewriteResult | PromptResult], sa
         json.dump(mean_results, f, indent=4)
 
 
-def prompt_to_hash_path(prompt: str, save_dir: Path) -> Path:
-    prompt_hash = hashlib.md5(prompt.encode("utf-8")).hexdigest()
-    return save_dir / f"{prompt_hash}.json"
-
-
-def save_prompt_results_to_disk(
-    prompt_results: list[PromptResult],
-    save_dir: Path,
-    policy_model: PolicyModel,
-    rater_model_name: str | None = None
-):
-    """Save PromptResults to disk in the expected JSON format"""
-    save_dir.mkdir(parents=True, exist_ok=True)
-
-    # Group results by prompt
-    prompt_to_results = {}
-    for result in prompt_results:
-        if result.user not in prompt_to_results:
-            prompt_to_results[result.user] = []
-        prompt_to_results[result.user].append(result)
-
-    for prompt, results in prompt_to_results.items():
-        file_path = prompt_to_hash_path(prompt, save_dir)
-
-        # Load existing data if file exists
-        json_data = {}
-        if file_path.exists():
-            with open(file_path, "r", encoding="utf-8") as f:
-                json_data = json.load(f)
-        else:
-            json_data = {"prompt": prompt}
-
-        # Initialize policy model entry
-        if policy_model.model_name not in json_data:
-            json_data[policy_model.model_name] = {"rollouts": []}
-
-        # Add rollouts
-        rollouts = json_data[policy_model.model_name]["rollouts"]
-        for result in results:
-            rollout_entry = {"response": result.assistant}
-            if result.score is not None and rater_model_name:
-                rollout_entry[rater_model_name] = result.score
-            rollouts.append(rollout_entry)
-
-        # Calculate summary stats if we have ratings
-        if rater_model_name and any(r.score is not None for r in results):
-            scores = [r.score for r in results if r.score is not None]
-            if "summary_stats" not in json_data[policy_model.model_name]:
-                json_data[policy_model.model_name]["summary_stats"] = {}
-
-            json_data[policy_model.model_name]["summary_stats"][rater_model_name] = {
-                "mean": float(np.mean(scores)) if scores else None,
-                "scores_raw": scores,
-                "scores_winsorized": scores,  # No winsorizing for now
-            }
-
-        with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(json_data, f, indent=4)
-
- # %%
+# %%
 if __name__ == "__main__":
     id_to_cluster = load_clusters("synthetic")
 
@@ -573,7 +533,7 @@ if __name__ == "__main__":
         attributes=ATTRIBUTES,
         policy_model=PolicyModel(model_name="meta-llama/llama-3.1-70b-instruct"),
         rewrite_model=RewriteModel(max_tokens=8192, reasoning="medium", max_par=512),
-        rater=RewardModel(reward_model_name="skywork-v2"),
+        rater=RewardModel(model_name="skywork-v2"),
         save_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
         n_rollouts=16,
     ))

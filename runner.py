@@ -2,6 +2,7 @@
 import patches  # monkey patching
 import os
 import json
+import time
 import random
 import pickle
 import logging
@@ -18,6 +19,7 @@ import numpy as np
 import pandas as pd
 from datasets import load_dataset
 
+from llm_types import ChatHistory
 from utils import timestamp, get_to_pass_reasoning
 from viz_utils import (
     save_system_prompt_stats,
@@ -27,9 +29,13 @@ from viz_utils import (
 from reward_model import RewardModel
 from models import PolicyModel, RewriteModel, JudgeModel
 from load_cluster import CLUSTER_DATASETS, load_clusters
-from state import SeedState, Cluster
-from client import get_universal_caller, sample_from_model_parallel, OpenaiResponse
-from llm_types import ChatHistory
+from state import SeedState, Cluster, Rollout, PlusMinusRollout
+from bias import (
+    evaluate_baselines,
+    evaluate_attributes_conditional,
+    evaluate_attributes_rewrite,
+)
+
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +72,29 @@ class Runner(ABC):
         return Path(f"/workspace/rm-bias/data/{self.runner_type}/{self.run_name}")
 
 
+    @property
+    def all_train_prompts(self) -> list[str]:
+        all_prompts = []
+        for seed_state in self.seed_states:
+            all_prompts.extend(seed_state.cluster.train_prompts)
+        return all_prompts
+
+
     def initialize(self):
+        # get baseline rollouts and rewards
+        start_time = time.time()
+        self.baselines: dict[str, list[Rollout]] = asyncio.run(evaluate_baselines(
+            user_prompts=self.all_train_prompts,
+            policy_model=self.policy_model,
+            rater=self.reward_model,
+            save_dir=self.run_path,
+            n_rollouts=32,
+        ))
+        print(f"Baseline rollouts taken: {time.time() - start_time} seconds")
+
+
+
+
 
 
 
@@ -140,7 +168,7 @@ def load_contrast_pairs(
     prompts: list[str],
     target_dir: Path,
     policy_model: PolicyModel,
-    rater: RatingFunction,
+    reward_model: RewardModel,
     threshold: float = 1.0,
 ) -> list[dict]:
     """
@@ -152,7 +180,7 @@ def load_contrast_pairs(
     contrast_pairs = []
 
     # Load normalization data
-    with open(f".cache/normalize/{rater.model_name}.json", "r", encoding="utf-8") as f:
+    with open(f".cache/normalize/{reward_model.model_name}.json", "r", encoding="utf-8") as f:
         rater_stats = json.load(f)
 
     for prompt in prompts:
