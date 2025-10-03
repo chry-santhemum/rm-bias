@@ -43,58 +43,6 @@ logger = logging.getLogger(__name__)
 
 
 
-class Planner(ABC):
-    def __init__(
-        self,
-        planner_model_names: list[str],
-        alloy_type: Literal["round_robin", "random"],
-        max_tokens: int,
-        reasoning: int | str | None = None,
-        temperature: float = 0.7,
-        max_par: int = 64,  # max parallel calls to client
-        full_logging: bool = False,
-    ):
-        self.planner_model_names = planner_model_names
-        self.alloy_type = alloy_type
-        self.max_tokens = max_tokens
-        self.reasoning = reasoning
-        self.temperature = temperature
-        self.max_par = max_par
-        self.full_logging = full_logging
-
-        self.caller = get_universal_caller()
-        self.curr_planner_index: int = 0
-
-    @property
-    def curr_planner_model(self):
-        return self.planner_model_names[self.curr_planner_index]
-
-    def step_planner_model(self):
-        if self.alloy_type == "round_robin":
-            self.curr_planner_index = (self.curr_planner_index + 1) % len(
-                self.planner_model_names
-            )
-        elif self.alloy_type == "random":
-            self.curr_planner_index = random.randint(
-                0, len(self.planner_model_names) - 1
-            )
-
-    async def _sample_from_model_parallel(
-        self, prompts: list[ChatHistory], desc: str = "Planning"
-    ) -> Slist[OpenaiResponse]:
-        return await sample_from_model_parallel(
-            caller=self.caller,
-            prompts=prompts,
-            max_par=self.max_par,
-            full_logging=self.full_logging,
-            desc=desc,
-            model=self.curr_planner_model,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
-            reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
-        )
-
-
 class Runner(ABC):
     def __init__(
         self,

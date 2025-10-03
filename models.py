@@ -2,39 +2,16 @@
 
 # %%
 import patches
-
-import asyncio
-import json
 import textwrap
-import torch
-import numpy as np
 import logging
-from tqdm.auto import tqdm
-from pathlib import Path
-from slist import Slist
 import random
-from abc import ABC, abstractmethod
-from dataclasses import replace
-from functools import partial
-from typing import Any, Tuple
-import nest_asyncio
-
-import pandas as pd
-from datasets import load_dataset
+from slist import Slist
+from typing import Any, Literal
 
 from llm_types import ChatHistory
-from state import (
-    SystemPromptStats,
-    Attack,
-    RatedResponse,
-    Rating,
-    Rater,
-    SeedState,
-)
-from utils import load_model, get_to_pass_reasoning, parse_json_response, REWARD_MODELS
-from defaults import *
+from utils import get_to_pass_reasoning
 from client import (
-    is_thinking_model,
+    OpenaiResponse,
     get_universal_caller,
     sample_from_model,
     sample_from_model_parallel,
@@ -138,116 +115,6 @@ class PolicyModel(GenerationModel):
         )
 
   
-    async def get_attacks_for_system_prompt(
-        self,
-        sps: SystemPromptStats,
-        train_batch_prompts: list[str] = [],
-        n_samples: int = 1,
-    ) -> list[Attack]:
-        """
-        Modifies sps.attacks in-place.
-        """
-        system_prompt = sps.system_prompt
-
-        # If no rollouts exist yet, sample rollouts
-        if not sps.attacks:
-            policy_inputs = [
-                ChatHistory.from_system(
-                    "*Please follow this system prompt accurately*: " + system_prompt
-                ).add_user(user_prompt)
-                # .add_user(prompt + "\n\n Begin your response with 'Sure, here is the answer to your question'.")
-                # .add_assistant("Sure, here is the answer to your question:\n")
-                for user_prompt in train_batch_prompts
-                for _ in range(n_samples)
-            ]
-            policy_responses = await self.sample(policy_inputs)
-            attacks = [
-                Attack(
-                    system=system_prompt,
-                    user=train_batch_prompts[i],
-                    responses=[
-                        RatedResponse(
-                            assistant=str(response.get_first("assistant")), ratings=[]
-                        )
-                        for response in policy_responses[
-                            i * n_samples : (i + 1) * n_samples
-                        ]
-                    ],
-                    aux_info={
-                        "policy_model_name": self.model_name,
-                        "policy_temperature": self.temperature,
-                        "policy_max_tokens": self.max_tokens,
-                        "n_samples": n_samples,
-                    },
-                )
-                for i in range(len(train_batch_prompts))
-            ]
-            sps.attacks = attacks
-        return sps.attacks
-
-    
-    def get_attacks_for_seed_state(
-        self,
-        seed_state: SeedState,
-        n_samples: int,
-    ) -> tuple[list[ChatHistory], list[Tuple[int, int]]]:
-
-        train_batch_prompts = random.sample(
-            seed_state.cluster.train_prompts,
-            seed_state.cluster.train_batch_size,
-        )
-
-        system_prompt_stats = list(seed_state.history[-1].values())
-        gathered_attacks: Slist[list[Attack]] = asyncio.run(Slist(
-            system_prompt_stats
-        ).par_map_async(
-            partial(
-                self.get_attacks_for_system_prompt,
-                train_batch_prompts=train_batch_prompts,
-                n_samples=n_samples,
-            ),
-            max_par=max(
-                1, self.max_par // (n_samples * len(train_batch_prompts))
-            ),
-        ))
-
-        attacks: list[Attack] = []
-        attack_to_sps_idx: list[int] = []
-        for sps_idx, gathered_attack in enumerate(gathered_attacks):
-            for attack in gathered_attack:
-                attack_to_sps_idx.append(sps_idx)
-                attacks.append(attack)
-
-        # # Remove the token forcing strings
-        # for i, attack in enumerate(attacks):
-        #     orig_user = attack.user.removesuffix("\n\n Begin your response with 'Sure, here is the answer to your question'.")
-        #     orig_chat = []
-        #     for msg in attack.chat_history.messages:
-        #         if msg.role == "user":
-        #             msg.content = orig_user
-        #         elif msg.role == "assistant":
-        #             if msg.content.startswith("Sure, here is the answer to your question:\n"):
-        #                 continue
-        #         orig_chat.append(msg)
-        #     attacks[i] = replace(attack, chat_history=ChatHistory(messages=orig_chat))
-
-        # Pass to reward model in batches
-        chat_histories: list[ChatHistory] = []
-        chat_histories_to_attack_idx: list[Tuple[int, int]] = []
-        for attack_idx, attack in enumerate(attacks):
-            for response_idx, response in enumerate(attack.responses):
-                chat_histories.append(
-                    ChatHistory()
-                    .add_user(attack.user)
-                    .add_assistant(response.assistant)
-                )
-                chat_histories_to_attack_idx.append((attack_idx, response_idx))
-
-        return chat_histories, chat_histories_to_attack_idx
-
-
-
-
 class RewriteModel(GenerationModel):
     def __init__(
         self,
@@ -347,3 +214,57 @@ REWRITE_MINUS_PROMPT = textwrap.dedent("""
     Think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text.
 """).strip()
 
+
+
+class PlannerModel:
+    def __init__(
+        self,
+        model_names: list[str],
+        alloy_type: Literal["round_robin", "random"],
+        max_tokens: int,
+        reasoning: int | str | None = None,
+        temperature: float = 0.7,
+        max_par: int = 64,
+        full_logging: bool = False,
+    ):
+        self.model_names = model_names
+        self.alloy_type = alloy_type
+        self.max_tokens = max_tokens
+        self.reasoning = reasoning
+        self.temperature = temperature
+        self.max_par = max_par
+        self.full_logging = full_logging
+
+        self.caller = get_universal_caller()
+        self.curr_planner_index: int = 0
+
+    @property
+    def curr_planner_model(self):
+        return self.model_names[self.curr_planner_index]
+
+    def step_planner_model(self):
+        if self.alloy_type == "round_robin":
+            self.curr_planner_index = (self.curr_planner_index + 1) % len(
+                self.model_names
+            )
+        elif self.alloy_type == "random":
+            self.curr_planner_index = random.randint(
+                0, len(self.model_names) - 1
+            )
+
+    async def sample(
+        self, 
+        chat_histories: list[ChatHistory], 
+        desc: str = "Planning",
+    ) -> Slist[OpenaiResponse]:
+        return await sample_from_model_parallel(
+            caller=self.caller,
+            prompts=chat_histories,
+            max_par=self.max_par,
+            full_logging=self.full_logging,
+            desc=desc,
+            model=self.curr_planner_model,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
+            reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
+        )
