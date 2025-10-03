@@ -216,7 +216,7 @@ async def evaluate_baselines(
     policy_model: PolicyModel,
     rater: RewardModel,
     n_rollouts: int = 8,
-    target_dir: Path | None = None,
+    save_dir: Path | None = None,
 ):
     queue = asyncio.Queue()
     rollout_sem = asyncio.Semaphore(policy_model.max_par)
@@ -239,8 +239,8 @@ async def evaluate_baselines(
     expected_results = len(user_prompts) * n_rollouts
     print(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
 
-    if target_dir is not None:
-        organize_baseline_results(all_results, target_dir)
+    if save_dir is not None:
+        organize_baseline_results(all_results, save_dir)
 
     return all_results
 
@@ -251,7 +251,7 @@ async def evaluate_attributes_conditional(
     rater: RewardModel,
     attributes: list[str],
     n_rollouts: int = 8,
-    target_dir: Path | None = None,
+    save_dir: Path | None = None,
 ):
     queue = asyncio.Queue()
     rollout_sem = asyncio.Semaphore(policy_model.max_par)
@@ -274,8 +274,8 @@ async def evaluate_attributes_conditional(
     expected_results = len(attributes) * len(user_prompts) * n_rollouts
     print(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
 
-    if target_dir is not None:
-        organize_conditional_results(all_results, target_dir)
+    if save_dir is not None:
+        organize_conditional_results(all_results, save_dir)
 
     return all_results
     
@@ -289,7 +289,7 @@ async def evaluate_attributes_rewrite(
     rewrite_model: RewriteModel,
     n_rollouts: int = 8,
     n_rewrites: int = 1,
-    target_dir: Path | None = None,
+    save_dir: Path | None = None,
 ):
     queue_a = asyncio.Queue()
     queue_b = asyncio.Queue()
@@ -325,18 +325,18 @@ async def evaluate_attributes_rewrite(
     expected_results =  len(user_prompts) * n_rollouts * (1 + len(attributes) * n_rewrites * 2)
     print(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
 
-    if target_dir is not None:
-        organize_rewrite_results(all_results, target_dir)
+    if save_dir is not None:
+        organize_rewrite_results(all_results, save_dir)
 
     return all_results
 
 
 # %%
 
-def organize_baseline_results(all_results: list[PromptResult], target_dir: Path):
+def organize_baseline_results(all_results: list[PromptResult], save_dir: Path):
     organized_scores = defaultdict(list)
     organized_results = defaultdict(list)
-    target_dir.mkdir(parents=True, exist_ok=True)
+    save_dir.mkdir(parents=True, exist_ok=True)
 
     for item in all_results:
         organized_results[item.user].append({
@@ -345,24 +345,24 @@ def organize_baseline_results(all_results: list[PromptResult], target_dir: Path)
         })
         organized_scores[item.user].append(item.score)
     
-    with open(target_dir / "baseline_results.json", "w", encoding="utf-8") as f:
+    with open(save_dir / "baseline_results.json", "w", encoding="utf-8") as f:
         json.dump(organized_results, f, indent=4)
     
-    with open(target_dir / "baseline_scores.json", "w", encoding="utf-8") as f:
+    with open(save_dir / "baseline_scores.json", "w", encoding="utf-8") as f:
         json.dump(organized_scores, f, indent=4)
     
     mean_results = {}
     for user, scores in organized_scores.items():
         mean_results[user] = np.mean(scores).item()
     
-    with open(target_dir / "baseline_scores_mean.json", "w", encoding="utf-8") as f:
+    with open(save_dir / "baseline_scores_mean.json", "w", encoding="utf-8") as f:
         json.dump(mean_results, f, indent=4)
 
 
-def organize_conditional_results(all_results: list[PromptResult], target_dir: Path):
+def organize_conditional_results(all_results: list[PromptResult], save_dir: Path):
     organized_scores = defaultdict(dict)
     organized_results = defaultdict(dict)
-    target_dir.mkdir(parents=True, exist_ok=True)
+    save_dir.mkdir(parents=True, exist_ok=True)
 
     for item in all_results:
         attribute_results = organized_results[item.system]
@@ -385,19 +385,19 @@ def organize_conditional_results(all_results: list[PromptResult], target_dir: Pa
             for user in attribute_scores
         }
     
-    with open(target_dir / "conditional_scores_mean.json", "w", encoding="utf-8") as f:
+    with open(save_dir / "conditional_scores_mean.json", "w", encoding="utf-8") as f:
         json.dump(mean_score, f, indent=4)
 
-    with open(target_dir / "conditional_results.json", "w", encoding="utf-8") as f:
+    with open(save_dir / "conditional_results.json", "w", encoding="utf-8") as f:
         json.dump(organized_results, f, indent=4)
 
-    with open(target_dir / "conditional_scores.json", "w", encoding="utf-8") as f:
+    with open(save_dir / "conditional_scores.json", "w", encoding="utf-8") as f:
         json.dump(organized_scores, f, indent=4)
 
 
-def organize_rewrite_results(all_results: list[RewriteResult | PromptResult], target_dir: Path):
+def organize_rewrite_results(all_results: list[RewriteResult | PromptResult], save_dir: Path):
     organized_results = defaultdict(dict)
-    target_dir.mkdir(parents=True, exist_ok=True)
+    save_dir.mkdir(parents=True, exist_ok=True)
 
     prompt_items, rewrite_items = [], []
     for result in all_results:
@@ -442,7 +442,7 @@ def organize_rewrite_results(all_results: list[RewriteResult | PromptResult], ta
         if not found:
             raise ValueError(f"Rewrite result for {result.user} and {result.system} not found.")
 
-    with open(target_dir / "rewrite_results.json", "w", encoding="utf-8") as f:
+    with open(save_dir / "rewrite_results.json", "w", encoding="utf-8") as f:
         json.dump(organized_results, f, indent=4)
     
     mean_results = {}
@@ -466,23 +466,23 @@ def organize_rewrite_results(all_results: list[RewriteResult | PromptResult], ta
             "original": np.mean(original_scores).item(),
         }
 
-    with open(target_dir / "rewrite_scores_mean.json", "w", encoding="utf-8") as f:
+    with open(save_dir / "rewrite_scores_mean.json", "w", encoding="utf-8") as f:
         json.dump(mean_results, f, indent=4)
 
 
-def prompt_to_hash_path(prompt: str, target_dir: Path) -> Path:
+def prompt_to_hash_path(prompt: str, save_dir: Path) -> Path:
     prompt_hash = hashlib.md5(prompt.encode("utf-8")).hexdigest()
-    return target_dir / f"{prompt_hash}.json"
+    return save_dir / f"{prompt_hash}.json"
 
 
 def save_prompt_results_to_disk(
     prompt_results: list[PromptResult],
-    target_dir: Path,
+    save_dir: Path,
     policy_model: PolicyModel,
     rater_model_name: str | None = None
 ):
     """Save PromptResults to disk in the expected JSON format"""
-    target_dir.mkdir(parents=True, exist_ok=True)
+    save_dir.mkdir(parents=True, exist_ok=True)
 
     # Group results by prompt
     prompt_to_results = {}
@@ -492,7 +492,7 @@ def save_prompt_results_to_disk(
         prompt_to_results[result.user].append(result)
 
     for prompt, results in prompt_to_results.items():
-        file_path = prompt_to_hash_path(prompt, target_dir)
+        file_path = prompt_to_hash_path(prompt, save_dir)
 
         # Load existing data if file exists
         json_data = {}
@@ -551,7 +551,7 @@ if __name__ == "__main__":
     #     user_prompts=id_to_cluster[0].prompts,
     #     policy_model=PolicyModel(model_name="meta-llama/llama-3.1-70b-instruct"),
     #     rater=RewardModel(reward_model_name="skywork-v2"),
-    #     target_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
+    #     save_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
     #     n_rollouts=32,
     # ))
     # print(f"Time taken: {time.time() - start_time} seconds")
@@ -562,7 +562,7 @@ if __name__ == "__main__":
     #     policy_model=PolicyModel(model_name="meta-llama/llama-3.1-70b-instruct"),
     #     rater=RewardModel(reward_model_name="skywork-v2"),
     #     attributes=ATTRIBUTES,
-    #     target_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
+    #     save_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
     #     n_rollouts=32,
     # ))
     # print(f"Time taken: {time.time() - start_time} seconds")
@@ -574,7 +574,7 @@ if __name__ == "__main__":
         policy_model=PolicyModel(model_name="meta-llama/llama-3.1-70b-instruct"),
         rewrite_model=RewriteModel(max_tokens=8192, reasoning="medium", max_par=512),
         rater=RewardModel(reward_model_name="skywork-v2"),
-        target_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
+        save_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
         n_rollouts=16,
     ))
     print(f"Time taken: {time.time() - start_time} seconds")
