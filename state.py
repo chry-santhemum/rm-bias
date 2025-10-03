@@ -42,14 +42,14 @@ class Rating:
         return f"Rating(score={score_str}, rater={self.rater_model_name})"
 
 
-@dataclass(frozen=True)
+@dataclass
 class PlusMinusRollout:
     plus: str
     minus: str
     plus_score: float | None
     minus_score: float | None
 
-@dataclass(frozen=True)
+@dataclass
 class Rollout:
     response: str
     score: float | None

@@ -64,7 +64,7 @@ def run_reward_model(
     reward_model: RewardModel, 
     batch: list[RewriteResult | PromptResult],
 ) -> list[RewriteResult | PromptResult]:
-    print(f"[rater] Processing batch of size {len(batch)}...")
+    logger.info(f"[rater] Processing batch of size {len(batch)}...")
     chat_histories = []
 
     for result in batch:
@@ -85,7 +85,7 @@ def run_reward_model(
         score = all_rewards[i].score
         updated_results.append(replace(result, score=score))
 
-    print(f"[reward_model] Finished processing batch.")
+    logger.info(f"[reward_model] Finished processing batch.")
     return updated_results
 
 
@@ -104,7 +104,7 @@ async def policy_worker(
             user=user_prompt,
             assistant=result.get_first("assistant") or "",
         ))
-        print(f"[policy_worker] Pushed 1 task.")
+        logger.info(f"[policy_worker] Pushed 1 task.")
 
 
 async def conditional_policy_worker(
@@ -125,7 +125,7 @@ async def conditional_policy_worker(
             user=user_prompt,
             assistant=result.get_first("assistant") or "",
         ))
-        print(f"[conditional_policy_worker] Pushed 1 task.")
+        logger.info(f"[conditional_policy_worker] Pushed 1 task.")
 
 
 async def rewrite_worker(
@@ -137,14 +137,14 @@ async def rewrite_worker(
 ):
     while True:
         prompt_result = await in_queue.get()
-        print(f"[rewrite_worker] Popped 1 task.")
+        logger.info(f"[rewrite_worker] Popped 1 task.")
 
         if prompt_result is None:  # Sentinel value to signal stop
             in_queue.task_done()
             break
         
         await out_queue.put(prompt_result)
-        print(f"[rewrite_worker] Pushed 1 task.")
+        logger.info(f"[rewrite_worker] Pushed 1 task.")
 
         rewrites = await rewrite_model.rewrite_one(
             attributes=attributes,
@@ -163,7 +163,7 @@ async def rewrite_worker(
                     rewritten_assistant=plus_rewrite_text,
                     presence=1,
                 ))
-                print(f"[rewrite_worker] Pushed 1 task.")
+                logger.info(f"[rewrite_worker] Pushed 1 task.")
             
             for minus_rewrite_text in rewrite_dict["minus"]:
                 if minus_rewrite_text is None:
@@ -175,7 +175,7 @@ async def rewrite_worker(
                     rewritten_assistant=minus_rewrite_text,
                     presence=0,
                 ))
-                print(f"[rewrite_worker] Pushed 1 task.")
+                logger.info(f"[rewrite_worker] Pushed 1 task.")
 
         in_queue.task_done()
 
@@ -195,8 +195,8 @@ async def rating_worker(
                     if batch:
                         results = await loop.run_in_executor(executor, run_reward_model, reward_model, batch)
                         all_results.extend(results)
-                    print(f"[rating_worker] Processed batch of size {len(batch)}.")
-                    print("[rating_worker] Final item processed. Shutting down.")
+                    logger.info(f"[rating_worker] Processed batch of size {len(batch)}.")
+                    logger.info("[rating_worker] Final item processed. Shutting down.")
                     in_queue.task_done()
                     return
                 if item.score is not None:  # already rated
@@ -210,7 +210,7 @@ async def rating_worker(
         if batch:
             results = await loop.run_in_executor(executor, run_reward_model, reward_model, batch)
             all_results.extend(results)
-            print(f"[rating_worker] Processed batch of size {len(batch)}.")
+            logger.info(f"[rating_worker] Processed batch of size {len(batch)}.")
 
 
 # %%
@@ -235,13 +235,13 @@ async def evaluate_baselines(
 
     # Shutdown
     await asyncio.gather(*policy_worker_tasks)
-    print("\n--- rollout workers finished. ---\n")
+    logger.info("\n--- rollout workers finished. ---\n")
 
     await queue.put(None)
     await rating_worker_task
-    print("\n--- rating worker finished. ---\n")
+    logger.info("\n--- rating worker finished. ---\n")
     expected_results = len(user_prompts) * n_rollouts
-    print(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
+    logger.info(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
 
     organized_results = organize_baseline_results(all_results, save_dir)
 
@@ -269,13 +269,13 @@ async def evaluate_attributes_conditional(
 
     # Shutdown
     await asyncio.gather(*rollout_tasks)
-    print("\n--- rollout workers finished. ---\n")
+    logger.info("\n--- rollout workers finished. ---\n")
 
     await queue.put(None)
     await rating_worker_task
-    print("\n--- rating worker finished. ---\n")
+    logger.info("\n--- rating worker finished. ---\n")
     expected_results = len(attributes) * len(user_prompts) * n_rollouts
-    print(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
+    logger.info(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
 
     organized_results = organize_conditional_results(all_results, save_dir)
 
@@ -328,20 +328,21 @@ async def evaluate_attributes_rewrite(
     rating_worker_task = asyncio.create_task(rating_worker(rater, queue_b, all_results))
 
     # Shutdown
-    await asyncio.gather(*rollout_tasks)
-    print("\n--- rollout workers finished. ---\n")
+    if policy_model is not None:
+        await asyncio.gather(*rollout_tasks)
+        logger.info("\n--- rollout workers finished. ---\n")
 
     for _ in range(n_rewrite_workers):
         await queue_a.put(None)  # Sentinel values for rewrite_workers
 
     await asyncio.gather(*rewrite_tasks)
-    print("\n--- rewrite workers finished. ---\n")
+    logger.info("\n--- rewrite workers finished. ---\n")
 
     await queue_b.put(None)
     await rating_worker_task
-    print("\n--- rating worker finished. ---\n")
+    logger.info("\n--- rating worker finished. ---\n")
     expected_results =  len(user_prompts) * n_rollouts * (1 + len(attributes) * n_rewrites * 2)
-    print(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
+    logger.info(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
 
     organized_results = organize_rewrite_results(all_results, save_dir)
 
@@ -462,14 +463,14 @@ def organize_rewrite_results(
         for i, r in enumerate(baseline_results[result.user]):
             if r.response == result.original_assistant:
                 if result.presence == 1:
-                    if attribute_results[result.user][i].plus is not None:
+                    if attribute_results[result.user][i].plus != "":
                         continue
                     attribute_results[result.user][i].plus = result.rewritten_assistant
                     attribute_results[result.user][i].plus_score = result.score
                     found = True
                     break
                 elif result.presence == 0:
-                    if attribute_results[result.user][i].minus is not None:
+                    if attribute_results[result.user][i].minus != "":
                         continue
                     attribute_results[result.user][i].minus = result.rewritten_assistant
                     attribute_results[result.user][i].minus_score = result.score
@@ -486,8 +487,8 @@ def organize_rewrite_results(
             json_data = {k: [asdict(r) for r in v] for k, v in baseline_results.items()}
             json.dump(json_data, f, indent=4)
         with open(save_dir / "rewrite_results.json", "w", encoding="utf-8") as f:
-            json_data = {k: {k2: asdict(r) for k2, r in v.items()} for k, v in rewrite_results.items()}
-            json.dump(rewrite_results, f, indent=4)
+            json_data = {k: {k2: [asdict(r) for r in v2] for k2, v2 in v.items()} for k, v in rewrite_results.items()}
+            json.dump(json_data, f, indent=4)
         
         mean_results = {}
 
@@ -540,7 +541,7 @@ if __name__ == "__main__":
     #     save_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
     #     n_rollouts=32,
     # ))
-    # print(f"Time taken: {time.time() - start_time} seconds")
+    # logger.info(f"Time taken: {time.time() - start_time} seconds")
 
     # start_time = time.time()
     # asyncio.run(evaluate_attributes_conditional(
@@ -551,7 +552,7 @@ if __name__ == "__main__":
     #     save_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
     #     n_rollouts=32,
     # ))
-    # print(f"Time taken: {time.time() - start_time} seconds")
+    # logger.info(f"Time taken: {time.time() - start_time} seconds")
 
     # start_time = time.time()
     # organized_results = asyncio.run(evaluate_attributes_rewrite(
@@ -563,5 +564,5 @@ if __name__ == "__main__":
     #     save_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
     #     n_rollouts=16,
     # ))
-    # print(f"Time taken: {time.time() - start_time} seconds")
+    # logger.info(f"Time taken: {time.time() - start_time} seconds")
 # %%

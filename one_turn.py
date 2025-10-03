@@ -13,7 +13,7 @@ from collections import defaultdict
 from dataclasses import replace
 
 from llm_types import ChatHistory
-from state import SeedState, AttributeStats, Cluster
+from state import SeedState, AttributeStats, Cluster, Rollout
 from utils import timestamp, parse_json_response, ClusterModel, set_seed_all
 from load_cluster import load_clusters, load_initial_seed_states
 from models import PolicyModel, RewriteModel, JudgeModel, PlannerModel
@@ -68,7 +68,7 @@ class OneTurnPlanner(PlannerModel):
         return planner_prompts
 
     def plan(
-        self, seed_states: list[SeedState], n_new: int, n_pop: int, run_path: Path
+        self, seed_states: list[SeedState], n_new: int, n_pop: int
     ):
         to_send_messages = []
         seed_idxs = []
@@ -154,7 +154,6 @@ class OneTurnRunner(Runner):
         judge_model: JudgeModel,
         n_new: int,
         n_pop: int,
-        n_samples: int,
         run_name: str | None = None,
     ):
         super().__init__(
@@ -168,20 +167,18 @@ class OneTurnRunner(Runner):
         self.planner = planner
         self.n_new = n_new
         self.n_pop = n_pop
-        self.n_samples = n_samples
 
     @property
     def runner_type(self) -> str:
         return "one_turn"
 
     def train(self):
-        self.initialize()
+        self.load_contrast_pairs()
 
         self.planner.plan(
             seed_states=self.seed_states,
             n_new=self.n_new,
             n_pop=self.n_pop,
-            run_path=self.run_path,
         )
 
         for seed_state in self.seed_states:
@@ -241,10 +238,9 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n_new", type=int, default=5)
-    parser.add_argument("--n_pop", type=int, default=8)
-    parser.add_argument("--n_samples", type=int, default=8)
-    parser.add_argument("--train_batch_size", type=int, default=15)
+    parser.add_argument("--n_new", type=int, default=3)
+    parser.add_argument("--n_pop", type=int, default=5)
+    parser.add_argument("--train_batch_size", type=int, default=5)
     parser.add_argument("--val_split_size", type=int, default=5)
     parser.add_argument("--dataset", type=str, required=True)
     args = parser.parse_args()
@@ -260,7 +256,7 @@ if __name__ == "__main__":
     elif args.dataset == "wildchat":
         topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]
     elif args.dataset == "synthetic":
-        topic_ids = [0, 1]
+        topic_ids = [0]
 
     initial_seed_states = load_initial_seed_states(
         ds_name=args.dataset,
@@ -299,9 +295,14 @@ if __name__ == "__main__":
         judge_model=JudgeModel(),
         n_new=args.n_new,
         n_pop=args.n_pop,
-        n_samples=args.n_samples,
         run_name=run_name,
     )
+
+    with open("data/one_turn/20251003-180812-n_pop5-synthetic/baseline_results.json", "r") as f:
+        baseline_results = json.load(f)
+    runner.baselines = {}
+    for user, rollouts in baseline_results.items():
+        runner.baselines[user] = [Rollout(response=rollout["response"], score=rollout["score"]) for rollout in rollouts]
 
     try:
         runner.train()

@@ -48,8 +48,6 @@ class Runner(ABC):
         self.run_name = run_name or f"{timestamp()}"
         self.run_path.mkdir(parents=True, exist_ok=True)
 
-        self.initialize()
-
     @property
     @abstractmethod
     def runner_type(self) -> str:
@@ -68,7 +66,7 @@ class Runner(ABC):
         return all_prompts
 
 
-    def initialize(self):
+    def get_baselines(self):
         # get baseline rollouts and rewards
         start_time = time.time()
         self.baselines: dict[str, list[Rollout]] = asyncio.run(evaluate_baselines(
@@ -169,8 +167,10 @@ class Runner(ABC):
                         }
                     )
 
+            print(f"Found {len(contrast_pairs)}/{len(prompts)} contrast pairs for seed {seed_state.index}")
+
             seed_state.cluster = replace(
                 seed_state.cluster,
-                contrast_pairs=contrast_pairs,
+                aux_info=contrast_pairs,
             )
 

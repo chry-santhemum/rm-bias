@@ -102,12 +102,14 @@ def load_clusters(
 
     elif ds_name == "synthetic":
         for json_file in Path("data/synthetic").glob("*.json"):
-            with open(json_file, "r") as f:
-                data = json.load(f)
-            id_to_cluster[int(json_file.name.split(".")[0])] = PromptCluster(
-                summary=data["summary"],
-                prompts=data["prompts"],
-            )
+            cluster_id = int(json_file.name.split(".")[0])
+            if cluster_id in topic_ids:
+                with open(json_file, "r") as f:
+                    data = json.load(f)
+                id_to_cluster[cluster_id] = PromptCluster(
+                    summary=data["summary"],
+                    prompts=data["prompts"],
+                )
 
     for id, cluster in id_to_cluster.items():
         print(
