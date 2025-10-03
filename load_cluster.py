@@ -119,6 +119,52 @@ def load_clusters(
     return id_to_cluster
 
 
+
+def load_initial_seed_states(
+    target_dir: Path,
+    dataset: str,
+    topic_ids: list[int] = [],  # only for datasets in CLUSTER_DATASETS
+    train_batch_size: int = 0, 
+):
+    initial_seed_states = []
+    id_to_cluster = load_clusters(dataset, topic_ids=topic_ids)
+    
+    for id, cluster_dict in id_to_cluster.items():
+        prompts = cluster_dict["prompts"]
+        train_size = len(prompts) * 4 // 5
+        train_prompts = prompts[:train_size]
+        val_prompts = prompts[train_size:]
+
+        if train_batch_size > len(train_prompts):
+            raise ValueError(f"Train batch size {train_batch_size} is greater than the number of train prompts {len(train_prompts)}")
+
+        cluster = Cluster(
+            summary=cluster_dict["summary"],
+            train_prompts=train_prompts,
+            val_prompts=val_prompts,
+            train_batch_size=(
+                train_batch_size if train_batch_size > 0 else len(train_prompts)
+            ),
+        )
+        initial_seed_states.append(
+            SeedState(
+                index=id,
+                dataset=target_dir.name,
+                cluster=cluster,
+                state={},
+                history=[],
+            )
+        )
+
+    print(f"Loaded {len(initial_seed_states)} seed states")
+    for state in initial_seed_states:
+        print(
+            f"  - Seed {state.index}, {len(state.cluster.train_prompts)} train prompts:\n"
+            f"    {state.cluster.summary}"
+        )
+
+    return initial_seed_states
+
 # %%
 if __name__ == "__main__":
     id_to_cluster = load_clusters(

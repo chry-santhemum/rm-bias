@@ -255,7 +255,7 @@ async def evaluate_attributes_conditional(
     attributes: list[str],
     n_rollouts: int = 8,
     save_dir: Path | None = None,
-):
+) -> dict[str, dict[str, list[Rollout]]]:
     queue = asyncio.Queue()
     rollout_sem = asyncio.Semaphore(policy_model.max_par)
     all_results = []
@@ -293,7 +293,7 @@ async def evaluate_attributes_rewrite(
     n_rollouts: int = 8,
     n_rewrites: int = 1,
     save_dir: Path | None = None,
-):
+) -> dict[str, dict[str, list[PlusMinusRollout]]]:
     """
     Only pass in one of policy_model or baseline_rollouts.
     """
@@ -482,7 +482,7 @@ def organize_rewrite_results(
 
     if save_dir is not None:
         save_dir.mkdir(parents=True, exist_ok=True)
-        with open(save_dir / "baseline_results.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "rewrite_baseline_results.json", "w", encoding="utf-8") as f:
             json_data = {k: [asdict(r) for r in v] for k, v in baseline_results.items()}
             json.dump(json_data, f, indent=4)
         with open(save_dir / "rewrite_results.json", "w", encoding="utf-8") as f:
