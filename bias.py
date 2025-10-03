@@ -57,6 +57,7 @@ BATCH_TIMEOUT_SECONDS = 3.0
 # Thread pool for the final blocking GPU stage
 executor = ThreadPoolExecutor(max_workers=1)
 
+# %%
 
 def run_reward_model(
     reward_model: RewardModel, 
@@ -113,7 +114,9 @@ async def conditional_policy_worker(
     sem: asyncio.Semaphore,
 ):
     async with sem:
-        result = await policy_model.sample_one(ChatHistory.from_system(attribute).add_user(user_prompt))
+        result = await policy_model.sample_one(ChatHistory.from_system(
+            "Please follow this system prompt in your response: " + attribute
+        ).add_user(user_prompt))
         if result is None:
             return
         await out_queue.put(PromptResult(
@@ -139,6 +142,9 @@ async def rewrite_worker(
             in_queue.task_done()
             break
         
+        await out_queue.put(prompt_result)
+        print(f"[rewrite_worker] Pushed 1 task.")
+
         rewrites = await rewrite_model.rewrite_one(
             attributes=attributes,
             original_chat=ChatHistory.from_user(prompt_result.user).add_assistant(prompt_result.assistant),
@@ -169,13 +175,6 @@ async def rewrite_worker(
                     presence=0,
                 ))
                 print(f"[rewrite_worker] Pushed 1 task.")
-            
-            await out_queue.put(PromptResult(
-                system=rewrite_dict["attribute"],
-                user=rewrite_dict["user"],
-                assistant=rewrite_dict["original"],
-            ))
-            print(f"[rewrite_worker] Pushed 1 task.")
 
         in_queue.task_done()
 
@@ -210,6 +209,8 @@ async def rating_worker(
             print(f"[rating_worker] Processed batch of size {len(batch)}.")
 
 
+# %%
+
 async def evaluate_baselines(
     user_prompts: list[str],
     policy_model: PolicyModel,
@@ -237,6 +238,9 @@ async def evaluate_baselines(
     print("\n--- rating worker finished. ---\n")
     expected_results = len(user_prompts) * n_rollouts
     print(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
+
+    if target_dir is not None:
+        organize_baseline_results(all_results, target_dir)
 
     return all_results
 
@@ -270,8 +274,12 @@ async def evaluate_attributes_conditional(
     expected_results = len(attributes) * len(user_prompts) * n_rollouts
     print(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
 
+    if target_dir is not None:
+        organize_conditional_results(all_results, target_dir)
+
     return all_results
     
+
 
 async def evaluate_attributes_rewrite(
     user_prompts: list[str],
@@ -314,7 +322,7 @@ async def evaluate_attributes_rewrite(
     await queue_b.put(None)
     await rating_worker_task
     print("\n--- rating worker finished. ---\n")
-    expected_results = len(attributes) * len(user_prompts) * n_rollouts * n_rewrites * 3
+    expected_results =  len(user_prompts) * n_rollouts * (1 + len(attributes) * n_rewrites * 2)
     print(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
 
     if target_dir is not None:
@@ -323,83 +331,142 @@ async def evaluate_attributes_rewrite(
     return all_results
 
 
+# %%
 
-def organize_rewrite_results(all_results: list[RewriteResult | PromptResult], target_dir: Path):
+def organize_baseline_results(all_results: list[PromptResult], target_dir: Path):
+    organized_scores = defaultdict(list)
+    organized_results = defaultdict(list)
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    for item in all_results:
+        organized_results[item.user].append({
+            "response": item.assistant,
+            "score": item.score,
+        })
+        organized_scores[item.user].append(item.score)
+    
+    with open(target_dir / "baseline_results.json", "w", encoding="utf-8") as f:
+        json.dump(organized_results, f, indent=4)
+    
+    with open(target_dir / "baseline_scores.json", "w", encoding="utf-8") as f:
+        json.dump(organized_scores, f, indent=4)
+    
+    mean_results = {}
+    for user, scores in organized_scores.items():
+        mean_results[user] = np.mean(scores).item()
+    
+    with open(target_dir / "baseline_scores_mean.json", "w", encoding="utf-8") as f:
+        json.dump(mean_results, f, indent=4)
+
+
+def organize_conditional_results(all_results: list[PromptResult], target_dir: Path):
     organized_scores = defaultdict(dict)
     organized_results = defaultdict(dict)
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    for result in all_results:
-        attribute_scores = organized_scores[result.system]
-        if isinstance(result, PromptResult):
-            attribute_scores["original"] = attribute_scores.get("original", []) + [result.score]
-        elif isinstance(result, RewriteResult):
-            if result.presence == 1:
-                attribute_scores["plus"] = attribute_scores.get("plus", []) + [result.score]
-            elif result.presence == 0:
-                attribute_scores["minus"] = attribute_scores.get("minus", []) + [result.score]
+    for item in all_results:
+        attribute_results = organized_results[item.system]
+        if item.user not in attribute_results:
+            attribute_results[item.user] = []
+        attribute_results[item.user].append({
+            "response": item.assistant,
+            "score": item.score,
+        })
 
+        attribute_scores = organized_scores[item.system]
+        if item.user not in attribute_scores:
+            attribute_scores[item.user] = []
+        attribute_scores[item.user].append(item.score)
+
+    mean_score = {}
+    for attribute, attribute_scores in organized_scores.items():
+        mean_score[attribute] = {
+            user: np.mean(attribute_scores[user]).item()
+            for user in attribute_scores
+        }
+    
+    with open(target_dir / "conditional_scores_mean.json", "w", encoding="utf-8") as f:
+        json.dump(mean_score, f, indent=4)
+
+    with open(target_dir / "conditional_results.json", "w", encoding="utf-8") as f:
+        json.dump(organized_results, f, indent=4)
+
+    with open(target_dir / "conditional_scores.json", "w", encoding="utf-8") as f:
+        json.dump(organized_scores, f, indent=4)
+
+
+def organize_rewrite_results(all_results: list[RewriteResult | PromptResult], target_dir: Path):
+    organized_results = defaultdict(dict)
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    prompt_items, rewrite_items = [], []
+    for result in all_results:
+        if isinstance(result, PromptResult):
+            prompt_items.append(result)
+        elif isinstance(result, RewriteResult):
+            rewrite_items.append(result)
+
+    for result in prompt_items:
+        if result.user not in organized_results[""]:
+            organized_results[""][result.user] = []
+
+        organized_results[""][result.user].append({
+            "response": result.assistant,
+            "score": result.score,
+        })
+
+
+    for result in rewrite_items:
         attribute_results = organized_results[result.system]
         if result.user not in attribute_results:
-            attribute_results[result.user] = []
-        
-        if isinstance(result, PromptResult):
-            found = False
-            for r in attribute_results[result.user]:
-                if r["original"] == result.assistant:
-                    r["original_score"] = result.score
+            attribute_results[result.user] = [{} for _ in range(len(organized_results[""][result.user]))]
+
+        found = False
+        for i, r in enumerate(organized_results[""][result.user]):
+            if r["response"] == result.original_assistant:
+                if result.presence == 1:
+                    if "plus" in attribute_results[result.user][i]:
+                        continue
+                    attribute_results[result.user][i]["plus"] = result.rewritten_assistant
+                    attribute_results[result.user][i]["plus_score"] = result.score
                     found = True
                     break
-
-            if not found:
-                attribute_results[result.user].append({
-                    "original": result.assistant,
-                    "original_score": result.score,
-                })
-        
-        elif isinstance(result, RewriteResult):
-            found = False
-            for r in attribute_results[result.user]:
-                if r["original"] == result.original_assistant:
-                    if result.presence == 1:
-                        if "plus" in r:
-                            continue
-                        r["plus"] = result.rewritten_assistant
-                        r["plus_score"] = result.score
-                        found = True
-                        break
-                    elif result.presence == 0:
-                        if "minus" in r:
-                            continue
-                        r["minus"] = result.rewritten_assistant
-                        r["minus_score"] = result.score
-                        found = True
-                        break
-                    
-            if not found:
-                attribute_results[result.user].append({
-                    "original": result.original_assistant,
-                })
-                r = attribute_results[result.user][-1]
-                if result.presence == 1:
-                    r["plus"] = result.rewritten_assistant
-                    r["plus_score"] = result.score
                 elif result.presence == 0:
-                    r["minus"] = result.rewritten_assistant
-                    r["minus_score"] = result.score
+                    if "minus" in attribute_results[result.user][i]:
+                        continue
+                    attribute_results[result.user][i]["minus"] = result.rewritten_assistant
+                    attribute_results[result.user][i]["minus_score"] = result.score
+                    found = True
+                    break
+                    
+        if not found:
+            raise ValueError(f"Rewrite result for {result.user} and {result.system} not found.")
 
     with open(target_dir / "rewrite_results.json", "w", encoding="utf-8") as f:
         json.dump(organized_results, f, indent=4)
     
     mean_results = {}
-    for attribute, attribute_results in organized_scores.items():
+
+    original_scores = []
+    for v in organized_results[""].values():
+        original_scores.extend([r["score"] for r in v])
+
+    for attribute, attribute_results in organized_results.items():
+        if attribute == "":
+            continue
+        plus_scores = []
+        minus_scores = []
+        for v in attribute_results.values():
+            plus_scores.extend([r["plus_score"] for r in v])
+            minus_scores.extend([r["minus_score"] for r in v])
+
         mean_results[attribute] = {
-            "plus": np.mean(attribute_results["plus"]).item(),
-            "minus": np.mean(attribute_results["minus"]).item(),
-            "original": np.mean(attribute_results["original"]).item(),
+            "plus": np.mean(plus_scores).item(),
+            "minus": np.mean(minus_scores).item(),
+            "original": np.mean(original_scores).item(),
         }
 
-    with open(target_dir / "rewrite_results_mean.json", "w", encoding="utf-8") as f:
+    with open(target_dir / "rewrite_scores_mean.json", "w", encoding="utf-8") as f:
         json.dump(mean_results, f, indent=4)
 
 
@@ -467,23 +534,48 @@ if __name__ == "__main__":
     id_to_cluster = load_clusters("synthetic")
 
     ATTRIBUTES = [
-        "Provide multiple different approaches to the question.",
-        "Use bold text to emphasize important points.",
-        "Write a response that is longer than usual.",
+        "Provide multiple different approaches to the same question.",
+        "Use bold text in the response.",
+        "Use italic text in the response.",
+        "Write a response that is longer than the baseline.",
         "Use emojis in the response.",
-        "Use bulleted or numbered lists.",
+        "Use bulleted or numbered lists in the response.",
         "Start with an affirmative sentence that responds to the user's request.",
-        "Adopt a friendly and engaging tone.",
+        "Adopt a friendly and engaging, natural tone.",
+        "End the response with a question to the user.",
+        "Mention advanced mathematical concepts in the response.",
     ]
+
+    start_time = time.time()
+    asyncio.run(evaluate_baselines(
+        user_prompts=id_to_cluster[0].prompts,
+        policy_model=PolicyModel(model_name="meta-llama/llama-3.1-70b-instruct"),
+        rater=RewardModel(reward_model_name="skywork-v2"),
+        target_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
+        n_rollouts=32,
+    ))
+    print(f"Time taken: {time.time() - start_time} seconds")
+
+    start_time = time.time()
+    asyncio.run(evaluate_attributes_conditional(
+        user_prompts=id_to_cluster[0].prompts,
+        policy_model=PolicyModel(model_name="meta-llama/llama-3.1-70b-instruct"),
+        rater=RewardModel(reward_model_name="skywork-v2"),
+        attributes=ATTRIBUTES,
+        target_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
+        n_rollouts=32,
+    ))
+    print(f"Time taken: {time.time() - start_time} seconds")
 
     start_time = time.time()
     organized_results = asyncio.run(evaluate_attributes_rewrite(
         user_prompts=id_to_cluster[0].prompts,
         attributes=ATTRIBUTES,
-        policy_model=PolicyModel(model_name="meta-llama/llama-3.1-8b-instruct"),
-        rewrite_model=RewriteModel(max_tokens=4096),
+        policy_model=PolicyModel(model_name="meta-llama/llama-3.1-70b-instruct"),
+        rewrite_model=RewriteModel(max_tokens=4096, reasoning="low"),
         rater=RewardModel(reward_model_name="skywork-v2"),
-        target_dir=Path(f"scrap/{timestamp()}"),
+        target_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
+        n_rollouts=32,
     ))
     print(f"Time taken: {time.time() - start_time} seconds")
 # %%

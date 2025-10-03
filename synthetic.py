@@ -22,8 +22,8 @@ nest_asyncio.apply()
 # Goal: a complete pipeline to generate diverse user prompts from only a description
 
 CLUSTER_DESCRIPTIONS = [
-    "help with high school math problems",
-    "help with common programming debugging in python",
+    "high school math questions",
+    "common programming debugging in python",
     "requests for trading / crypto advice",
     "content creation ideas for tiktok",
     "creative fiction writing",
