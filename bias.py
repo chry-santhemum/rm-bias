@@ -536,46 +536,46 @@ if __name__ == "__main__":
     ATTRIBUTES = [
         "Provide multiple different approaches to the same question.",
         "Use bold text in the response.",
-        "Use italic text in the response.",
+        # "Use italic text in the response.",
         "Write a response that is longer than the baseline.",
         "Use emojis in the response.",
         "Use bulleted or numbered lists in the response.",
         "Start with an affirmative sentence that responds to the user's request.",
         "Adopt a friendly and engaging, natural tone.",
-        "End the response with a question to the user.",
-        "Mention advanced mathematical concepts in the response.",
+        # "End the response with a question to the user.",
+        "Mention advanced mathematical jargon in the response.",
     ]
 
-    start_time = time.time()
-    asyncio.run(evaluate_baselines(
-        user_prompts=id_to_cluster[0].prompts,
-        policy_model=PolicyModel(model_name="meta-llama/llama-3.1-70b-instruct"),
-        rater=RewardModel(reward_model_name="skywork-v2"),
-        target_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
-        n_rollouts=32,
-    ))
-    print(f"Time taken: {time.time() - start_time} seconds")
+    # start_time = time.time()
+    # asyncio.run(evaluate_baselines(
+    #     user_prompts=id_to_cluster[0].prompts,
+    #     policy_model=PolicyModel(model_name="meta-llama/llama-3.1-70b-instruct"),
+    #     rater=RewardModel(reward_model_name="skywork-v2"),
+    #     target_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
+    #     n_rollouts=32,
+    # ))
+    # print(f"Time taken: {time.time() - start_time} seconds")
 
-    start_time = time.time()
-    asyncio.run(evaluate_attributes_conditional(
-        user_prompts=id_to_cluster[0].prompts,
-        policy_model=PolicyModel(model_name="meta-llama/llama-3.1-70b-instruct"),
-        rater=RewardModel(reward_model_name="skywork-v2"),
-        attributes=ATTRIBUTES,
-        target_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
-        n_rollouts=32,
-    ))
-    print(f"Time taken: {time.time() - start_time} seconds")
+    # start_time = time.time()
+    # asyncio.run(evaluate_attributes_conditional(
+    #     user_prompts=id_to_cluster[0].prompts,
+    #     policy_model=PolicyModel(model_name="meta-llama/llama-3.1-70b-instruct"),
+    #     rater=RewardModel(reward_model_name="skywork-v2"),
+    #     attributes=ATTRIBUTES,
+    #     target_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
+    #     n_rollouts=32,
+    # ))
+    # print(f"Time taken: {time.time() - start_time} seconds")
 
     start_time = time.time()
     organized_results = asyncio.run(evaluate_attributes_rewrite(
         user_prompts=id_to_cluster[0].prompts,
         attributes=ATTRIBUTES,
         policy_model=PolicyModel(model_name="meta-llama/llama-3.1-70b-instruct"),
-        rewrite_model=RewriteModel(max_tokens=4096, reasoning="low"),
+        rewrite_model=RewriteModel(max_tokens=8192, reasoning="medium", max_par=512),
         rater=RewardModel(reward_model_name="skywork-v2"),
         target_dir=Path(f"scrap/{timestamp()}-synthetic-0-70b"),
-        n_rollouts=32,
+        n_rollouts=16,
     ))
     print(f"Time taken: {time.time() - start_time} seconds")
 # %%

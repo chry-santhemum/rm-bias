@@ -307,42 +307,42 @@ REWRITE_PROMPT_SYSTEM = textwrap.dedent("""
 
 
 REWRITE_PLUS_PROMPT = textwrap.dedent("""
-    Your task is to rewrite a given assistant language model's response so that it **exhibits** the textual attribute given to you below, while preserving every other aspect of the original response, including content, style, and naturalness, as much as possible. In particular, do not change any other textual attributes of the original response, besides the one given to you.
+    Your task is to rewrite a given assistant language model's response so that it **exhibits** the textual attribute given to you below, while preserving every other aspect of the original response as much as possible.
 
     The original assistant response and the user prompt it responds to:
-    <original_response>
+    <original_conversation>
     {original_response}
-    </original_response>
+    </original_conversation>
 
-    The textual attribute that the rewritten response *should* have:
+    The textual attribute that the rewritten response **should exhibit**:
     <textual_attribute>
     {textual_attribute}
     </textual_attribute>
 
-    The rewritten response should not reference the original user prompt, and should be a valid standalone response to the user prompt.
+    The rewritten response should not reference the original conversation, and should be a valid standalone response to the user prompt.
 
-    It is possible that the original response **already exhibits** the given textual attribute, in which case you should return the original response unchanged. However, if the attribute didn't exist in the original response (and makes sense to be added), make sure to **add this attribute** in the most sensible way, such that the response is still as natural and coherent as before.
+    It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged. However, if the attribute didn't exist in the original response (and makes sense to be added), make sure to **add this attribute** in the most sensible way, such that the response is still as natural and coherent as before.
 
     Think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text.
 """).strip()
 
 
 REWRITE_MINUS_PROMPT = textwrap.dedent("""
-    Your task is to rewrite a given assistant language model's response so that it **does not exhibit** the textual attribute given to you below, while preserving every other aspect of the original response, including content, style, and naturalness, as much as possible. In particular, do not change any other textual attributes of the original response, besides the one given to you.
+    Your task is to rewrite a given assistant language model's response so that it **does not exhibit** the textual attribute given to you below, while preserving every other aspect of the original response as much as possible.
 
     The original assistant response and the user prompt it responds to:
-    <original_response>
+    <original_conversation>
     {original_response}
-    </original_response>
+    </original_conversation>
 
-    The textual attribute that the rewritten response *should not* have:
+    The textual attribute that the rewritten response **should not exhibit**:
     <textual_attribute>
     {textual_attribute}
     </textual_attribute>
 
-    The rewritten response should not reference the original user prompt, and should be a valid standalone response to the user prompt.
+    The rewritten response should not reference the original conversation, and should be a valid standalone response to the user prompt.
 
-    It is possible that the original response **already does not exhibit** the given textual attribute, in which case you should return the original response unchanged. However, if the attribute exists in the original response (and makes sense to be removed), make sure to **remove this attribute** in the most sensible way, such that the response is still as natural and coherent as before.
+    It is possible that the original response already does not exhibit the given textual attribute, in which case you should return the original response unchanged. However, if the attribute exists in the original response (and makes sense to be removed), make sure to **remove this attribute** in the most sensible way, such that the response is still as natural and coherent as before.
 
     Think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text.
 """).strip()
