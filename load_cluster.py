@@ -10,12 +10,6 @@ from collections import defaultdict
 from datasets import load_dataset
 
 from state import PromptCluster
-from raters import (
-    PolicyModel,
-    RatingFunction,
-    RewardModel,
-    prompt_to_hash_path,
-)
 from standard_prompts import set_seed_all
 
 
@@ -123,30 +117,6 @@ def load_clusters(
         )
 
     return id_to_cluster
-
-
-def initialize_prompt_stats(
-    target_dir: Path,
-    id_to_cluster: dict[int, PromptCluster],
-    policy: PolicyModel,
-    raters: list[RatingFunction] = [],
-    rating_only: bool = False,
-):
-
-    for id, cluster in tqdm(
-        id_to_cluster.items(), desc="Adding dataset info to prompt stats"
-    ):
-        for prompt in cluster.prompts:
-            file_path = prompt_to_hash_path(prompt, target_dir)
-            with open(file_path, "r", encoding="utf-8") as f:
-                json_data = json.load(f)
-
-            json_data["topic_label"] = id
-            json_data["topic_name"] = cluster.summary
-            json_data["dataset"] = target_dir.name
-
-            with open(file_path, "w", encoding="utf-8") as f:
-                json.dump(json_data, f, indent=4)
 
 
 # %%

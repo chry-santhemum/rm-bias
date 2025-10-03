@@ -1,4 +1,4 @@
-"""Prompt statistics caching and rating function types."""
+"""Reward model."""
 
 # %%
 import patches
