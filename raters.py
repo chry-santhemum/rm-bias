@@ -35,7 +35,6 @@ from state import (
 from models import PolicyModel
 from utils import load_model, get_to_pass_reasoning, parse_json_response, REWARD_MODELS
 from standard_prompts import set_seed_all, make_prompt_mix
-from defaults import *
 from client import (
     is_thinking_model,
     get_universal_caller,
@@ -169,118 +168,6 @@ class RatingFunction(ABC):
                 )
 
 
-async def normalize(
-    rater: RatingFunction,
-    policy_model: PolicyModel,
-    n_prompts: int = 128,
-    n_samples: int = 8,
-    overwrite: bool = False,
-    cache_path: str | None = None,
-):
-    """
-    Loads pre-computed stats from the cache json file if it exists.
-    Otherwise, compute rewards from standard_prompts, and saves the stats to the cache json file.
-    Number of concurrent calls is n_clients * min(n_prompts, rater_max_par=32).
-    """
-    cache_path = cache_path or f".cache/normalize/{rater.model_name}.json"
-    try:
-        # load pre-computed stats from the cache json file
-        with open(cache_path, "r") as f:
-            loaded_stats = json.load(f)
-            logger.info(f"Loaded stats for {rater.model_name} from {f.name}")
-            assert (
-                loaded_stats["rater_name"] == rater.model_name
-            ), f"Cached stats for {loaded_stats['rater_name']} but model is {rater.model_name}"
-            assert (
-                loaded_stats["policy_name"] == policy_model.model_name
-            ), f"Cached stats for {loaded_stats['policy_name']} but model is {policy_model.model_name}"
-
-            if (
-                loaded_stats["n_samples"] != n_samples
-                or loaded_stats["n_prompts"] != n_prompts
-            ):
-                if not overwrite:
-                    logger.warning(
-                        "Using cached stats for different n_samples or n_prompts. Proceed with caution."
-                    )
-                else:
-                    raise ValueError(
-                        "Cached stats for different n_samples or n_prompts. Overwriting..."
-                    )
-
-            rater.mean = loaded_stats["mean"]
-            rater.stdev = loaded_stats["stdev"]
-            return
-
-    except Exception:
-        logger.warning("Computing mean and stdev from scratch...")
-
-    prompts = make_prompt_mix(num_total=n_prompts)
-    target_dir = Path("data/prompt_stats/standard_prompts")
-    prompt_rollout(
-        prompts=prompts,
-        target_dir=target_dir,
-        policy_model=policy_model,
-        n_samples=n_samples,
-    )
-
-    prompt_rating(
-        prompts=prompts,
-        target_dir=target_dir,
-        rater=rater,
-        policy_model=policy_model,
-    )
-
-    # gather all stats
-    all_scores = []
-    for prompt in prompts:
-        file_path = prompt_to_hash_path(prompt, target_dir)
-        with open(file_path, "r", encoding="utf-8") as f:
-            json_data = json.load(f)
-            assert json_data["prompt"] == prompt
-
-            json_data["topic_label"] = 0
-            json_data["topic_name"] = "All"
-            json_data["dataset"] = "standard_prompts"
-
-            with open(file_path, "w", encoding="utf-8") as f:
-                json.dump(json_data, f, indent=4)
-
-            all_scores.extend(
-                json_data[policy_model.model_name]["summary_stats"][rater.model_name][
-                    "scores_winsorized"
-                ]
-            )
-
-    rater.mean = float(np.mean(all_scores))
-    rater.stdev = float(np.std(all_scores, ddof=1))
-    logger.info(f"Setting mean: {rater.mean:.2f}, stdev: {rater.stdev:.2f}")
-
-    # save all percentiles
-    percentiles = {
-        f"{p}": float(np.percentile(all_scores, p)) for p in list(range(0, 101, 5))
-    }
-
-    logger.info(f"Score percentiles for {rater.model_name}: {percentiles}")
-
-    # Ensure directory exists
-    Path(cache_path).parent.mkdir(parents=True, exist_ok=True)
-    with open(cache_path, "w") as f:
-        json.dump(
-            {
-                "n_samples": n_samples,
-                "n_prompts": n_prompts,
-                "rater_name": rater.model_name,
-                "policy_name": policy_model.model_name,
-                "mean": rater.mean,
-                "stdev": rater.stdev,
-                "percentiles": percentiles,
-            },
-            f,
-            indent=4,
-        )
-    logger.info(f"Saved stats for {rater.model_name} to {f.name}")
-
 
 class RewardModel(RatingFunction):
     """
@@ -335,80 +222,6 @@ class RewardModel(RatingFunction):
     async def async_rate(self, chat_histories: list[ChatHistory], use_tqdm: bool=True) -> list[RatingResult]:
         return await asyncio.to_thread(self.rate, chat_histories, use_tqdm)
 
-
-class LLMJudge(RatingFunction):
-    def __init__(
-        self,
-        judge_model_name: str,
-        rubric: str,
-        max_par: int = 256,
-        max_tokens: int = 4096,
-        reasoning: int | str | None = "medium",
-        full_logging: bool = False,
-    ):
-        self._model_name = judge_model_name
-        self.rubric = rubric
-        self.max_par = max_par
-        self.max_tokens = max_tokens
-        self.reasoning = reasoning
-        self.full_logging = full_logging
-        self.client = get_universal_caller()
-        super().__init__()
-
-    @property
-    def rating_function_type(self) -> str:
-        return "lm_judge"
-
-    @property
-    def model_name(self) -> str:
-        return self._model_name
-
-    async def async_rate(self, chat_histories: list[ChatHistory], use_tqdm: bool=True) -> list[RatingResult]:
-        rater_prompts = Slist(chat_histories).map(
-            lambda convo: ChatHistory.from_system(
-                ABSOLUTE_RANKING_PROMPT_SYSTEM
-            ).add_user(
-                ABSOLUTE_RANKING_PROMPT_USER.format(
-                    message_history=convo.remove_system().to_openai_messages(),
-                    thinking_instruction=RATER_THINKING_INSTRUCTION[
-                        is_thinking_model(self.model_name)
-                    ],
-                    rubric=HANDWRITTEN_RUBRIC,
-                )
-            )
-        )
-        rater_responses = asyncio.run(
-            sample_from_model_parallel(
-                prompts=rater_prompts,
-                caller=self.client,
-                max_par=self.max_par,
-                full_logging=False,
-                desc="Rating responses" if use_tqdm else "",
-                model=self.model_name,
-                max_tokens=self.max_tokens,
-                reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
-            )
-        )
-
-        rating_results = []
-        for resp in rater_responses:
-            score_to_append = None
-            output, reasoning = parse_json_response(resp, log_json_error=False)
-            if isinstance(output, dict) and "score" in output:
-                score_to_append = output["score"]
-            elif isinstance(output, str):
-                try:
-                    output_parsed = json.loads(output)
-                    if isinstance(output_parsed, dict) and "score" in output_parsed:
-                        score_to_append = output_parsed["score"]
-                except Exception as e:
-                    logger.error(f"Error while attempting to parse score: {e}")
-                    logger.error(f"API response: {resp}")
-                    logger.error(f"Full traceback:", exc_info=True)
-
-            rating_results.append(RatingResult(score=score_to_append, reasoning=reasoning))
-
-        return rating_results
 
 
 # %%

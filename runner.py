@@ -40,17 +40,14 @@ from llm_types import ChatHistory
 logger = logging.getLogger(__name__)
 
 
-
-
-
 class Runner(ABC):
     def __init__(
         self,
         seed_states: list[SeedState],
-        planner: Planner,
         policy_model: PolicyModel,
-        rater_1: RatingFunction,
-        rater_2: RatingFunction,
+        rewrite_model: RewriteModel,
+        reward_model: RewardModel,
+        
         run_name: str | None,
         *args,
         **kwargs,
