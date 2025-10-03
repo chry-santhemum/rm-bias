@@ -9,8 +9,8 @@ from pathlib import Path
 from collections import defaultdict
 from datasets import load_dataset
 
-from state import PromptCluster
-from standard_prompts import set_seed_all
+from state import PromptCluster, Cluster, SeedState
+from utils import set_seed_all
 
 
 CLUSTER_DATASETS = ["alpaca", "ultrafeedback", "wildchat"]
@@ -121,25 +121,27 @@ def load_clusters(
 
 
 def load_initial_seed_states(
-    target_dir: Path,
-    dataset: str,
+    ds_name: str,
     topic_ids: list[int] = [],  # only for datasets in CLUSTER_DATASETS
-    train_batch_size: int = 0, 
-):
+    train_batch_size: int = 0,
+    val_split_size: int = 0,
+) -> list[SeedState]:
     initial_seed_states = []
-    id_to_cluster = load_clusters(dataset, topic_ids=topic_ids)
+    id_to_cluster = load_clusters(ds_name, topic_ids=topic_ids)
     
     for id, cluster_dict in id_to_cluster.items():
-        prompts = cluster_dict["prompts"]
-        train_size = len(prompts) * 4 // 5
-        train_prompts = prompts[:train_size]
-        val_prompts = prompts[train_size:]
+        prompts = cluster_dict.prompts
+        if len(prompts) < val_split_size * 4:
+            raise ValueError(f"Not enough prompts for {ds_name}: {len(prompts)}")
+
+        train_prompts = prompts[:-val_split_size]
+        val_prompts = prompts[-val_split_size:]
 
         if train_batch_size > len(train_prompts):
             raise ValueError(f"Train batch size {train_batch_size} is greater than the number of train prompts {len(train_prompts)}")
 
         cluster = Cluster(
-            summary=cluster_dict["summary"],
+            summary=cluster_dict.summary,
             train_prompts=train_prompts,
             val_prompts=val_prompts,
             train_batch_size=(
@@ -149,7 +151,7 @@ def load_initial_seed_states(
         initial_seed_states.append(
             SeedState(
                 index=id,
-                dataset=target_dir.name,
+                dataset=ds_name,
                 cluster=cluster,
                 state={},
                 history=[],

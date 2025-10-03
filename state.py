@@ -1,9 +1,7 @@
 import math
 from typing import Any
+from functools import cached_property
 from dataclasses import dataclass, field
-import numpy as np
-from pydantic_core.core_schema import NoneSchema
-from llm_types import ChatHistory
 
 
 def adversariality(
@@ -68,9 +66,14 @@ class AttributeStats:
     def parent(self) -> str | None:
         return self.meta.get("parent", None)
 
-    # @property
-    # def mean_reward(self) -> dict[str, float]:
-    #     ...
+    @property
+    def mean_reward(self) -> dict[str, float]:
+        ...
+
+    @cached_property
+    def bootstrap_CI(self, confidence: float = 0.95) -> dict[str, float]:
+        ...
+
 
 
 

@@ -86,6 +86,7 @@ class Runner(ABC):
         user_prompts: list[str],
         attributes: list[str],
         method: Literal["conditional", "rewrite"],
+        save_dir: Path | None = None,
     ):
         start_time = time.time()
         if method == "rewrite":
@@ -96,7 +97,7 @@ class Runner(ABC):
                 rater=self.reward_model,
                 attributes=attributes,
                 rewrite_model=self.rewrite_model,
-                save_dir=None,
+                save_dir=save_dir,
                 n_rollouts=32,
                 n_rewrites=1,
             ))
@@ -106,7 +107,7 @@ class Runner(ABC):
                 policy_model=self.policy_model,
                 rater=self.reward_model,
                 attributes=attributes,
-                save_dir=None,
+                save_dir=save_dir,
                 n_rollouts=32,
             ))
         print(f"Attributes evaluated in {time.time() - start_time} seconds")

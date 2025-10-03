@@ -119,8 +119,8 @@ class RewriteModel(GenerationModel):
     def __init__(
         self,
         model_name: str = "openai/gpt-5-nano",
-        max_tokens: int = 4096,
-        reasoning: str = "low",
+        max_tokens: int = 8192,
+        reasoning: str = "medium",
         max_par: int = 512,
         full_logging: bool = False,
     ):
