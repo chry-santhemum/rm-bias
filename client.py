@@ -24,10 +24,12 @@ from tenacity import (
 import openai
 import anthropic
 from openai import AsyncOpenAI, BaseModel
-from openai._types import NOT_GIVEN as OPENAI_NOT_GIVEN
+# from openai._types import NOT_GIVEN as OPENAI_NOT_GIVEN
+from openai._types import omit as OPENAI_OMIT
 from anthropic import AsyncAnthropic
 from anthropic.types.message import Message
-from anthropic._types import NOT_GIVEN as ANTHROPIC_NOT_GIVEN
+# from anthropic._types import NOT_GIVEN as ANTHROPIC_NOT_GIVEN
+from anthropic._types import omit as ANTHROPIC_OMIT
 
 from llm_types import (
     APIRequestCache,
@@ -261,7 +263,7 @@ class OpenrouterCaller(Caller):
         if not is_thinking_model(config.model):
             to_pass_reasoning = {}
         elif config.reasoning is None:
-            to_pass_reasoning = {"reasoning": OPENAI_NOT_GIVEN}
+            to_pass_reasoning = {"reasoning": OPENAI_OMIT}
         else:
             config.reasoning.pop("max_tokens", None)
             to_pass_reasoning = {"reasoning_effort": config.reasoning["effort"]}
@@ -286,21 +288,21 @@ class OpenrouterCaller(Caller):
                 max_tokens=(
                     config.max_tokens
                     if config.max_tokens is not None
-                    else OPENAI_NOT_GIVEN
+                    else OPENAI_OMIT
                 ),
                 temperature=(
                     config.temperature
                     if config.temperature is not None
-                    else OPENAI_NOT_GIVEN
+                    else OPENAI_OMIT
                 ),
-                top_p=config.top_p if config.top_p is not None else OPENAI_NOT_GIVEN,
+                top_p=config.top_p if config.top_p is not None else OPENAI_OMIT,
                 frequency_penalty=(
                     config.frequency_penalty
                     if config.frequency_penalty is not None
-                    else OPENAI_NOT_GIVEN
+                    else OPENAI_OMIT
                 ),
-                response_format=config.response_format if config.response_format is not None else OPENAI_NOT_GIVEN,  # type: ignore
-                tools=tool_args.tools if tool_args is not None else OPENAI_NOT_GIVEN,  # type: ignore
+                response_format=config.response_format if config.response_format is not None else OPENAI_OMIT,  # type: ignore
+                tools=tool_args.tools if tool_args is not None else OPENAI_OMIT,  # type: ignore
                 extra_body=to_pass_extra_body,
                 **to_pass_reasoning,  # type: ignore
             )
@@ -386,7 +388,7 @@ class AnthropicCaller(Caller):
         to_pass_sys = (
             system_message.content
             if system_message is not None
-            else anthropic.NOT_GIVEN
+            else ANTHROPIC_OMIT
         )
 
         if config.reasoning is not None and is_thinking_model(config.model):
@@ -396,11 +398,11 @@ class AnthropicCaller(Caller):
             }
             to_pass_temperature = 1.0
         else:
-            to_pass_thinking = ANTHROPIC_NOT_GIVEN
+            to_pass_thinking = ANTHROPIC_OMIT
             to_pass_temperature = (
                 config.temperature
                 if config.temperature is not None
-                else ANTHROPIC_NOT_GIVEN
+                else ANTHROPIC_OMIT
             )
 
         assert config.max_tokens is not None, "Anthropic requires max_tokens"
@@ -411,7 +413,7 @@ class AnthropicCaller(Caller):
             messages=anthropic_messages,  # type: ignore
             max_tokens=config.max_tokens,  # type: ignore
             temperature=to_pass_temperature,  # type: ignore
-            top_p=config.top_p if config.top_p is not None else ANTHROPIC_NOT_GIVEN,  # type: ignore
+            top_p=config.top_p if config.top_p is not None else ANTHROPIC_OMIT,  # type: ignore
             system=to_pass_sys,
             thinking=to_pass_thinking,  # type: ignore
             extra_body=config.extra_body,

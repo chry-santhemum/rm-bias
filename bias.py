@@ -119,7 +119,7 @@ async def conditional_policy_worker(
 ):
     async with sem:
         result = await policy_model.sample_one(ChatHistory.from_system(
-            "Please make sure to prioritize following this system specification in your response: " + attribute
+            "Please make sure to prioritize following this system specification in your response (but do not refer to it in your response): " + attribute
         ).add_user(user_prompt))
         if result is None:
             return
@@ -131,7 +131,44 @@ async def conditional_policy_worker(
         logger.info(f"[conditional_policy_worker] Pushed 1 task.")
 
 
+async def conditional_plus_minus_worker(
+    policy_model: PolicyModel,
+    attribute: str,
+    user_prompt: str,
+    out_queue: asyncio.Queue[RewriteResult],
+    sem: asyncio.Semaphore,
+):
+    """
+    Pushes RewriteResults with original_assistant as empty.
+    """
+    async with sem:
+        chat_histories = [
+            ChatHistory.from_system(
+                "Please make sure to **avoid** exhibiting the following textual attribute in your response (but do not refer to it in your response): " + attribute
+            ).add_user(user_prompt),
+            ChatHistory.from_system(
+                "Please make sure to prioritize exhibiting the following textual attribute in your response (but do not refer to it in your response): " + attribute
+            ).add_user(user_prompt),
+        ]
+        results = await policy_model.sample(chat_histories, use_tqdm=False)
+
+        for presence in [0, 1]:
+            if results[presence] is None:
+                continue
+        
+            await out_queue.put(RewriteResult(
+                system=attribute,
+                user=user_prompt,
+                original_assistant="",
+                rewritten_assistant=results[presence].get_first("assistant") or "",
+                presence=presence,
+            ))
+
+            logger.info(f"[conditional_plus_minus_worker] Pushed 1 task for presence {presence}.")
+
+
 async def rewrite_worker(
+    worker_id: int,
     rewrite_model: RewriteModel,
     attributes: list[str],
     in_queue: asyncio.Queue[PromptResult], 
@@ -143,14 +180,14 @@ async def rewrite_worker(
     """
     while True:
         prompt_result = await in_queue.get()
-        logger.info(f"[rewrite_worker] Popped 1 task.")
+        logger.info(f"[rewrite_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}")
 
         if prompt_result is None:  # Sentinel value to signal stop
             in_queue.task_done()
             break
         
         await out_queue.put(prompt_result)
-        logger.info(f"[rewrite_worker] Pushed 1 task.")
+        logger.info(f"[rewrite_worker {worker_id}] Pushed 1 task. Out queue size: {out_queue.qsize()}")
 
         rewrites = await rewrite_model.rewrite_one(
             attributes=attributes,
@@ -169,7 +206,7 @@ async def rewrite_worker(
                     rewritten_assistant=plus_rewrite_text,
                     presence=1,
                 ))
-                logger.info(f"[rewrite_worker] Pushed 1 task.")
+                logger.info(f"[rewrite_worker {worker_id}] Pushed 1 task. Out queue size: {out_queue.qsize()}")
             
             for minus_rewrite_text in rewrite_dict["minus"]:
                 if minus_rewrite_text is None:
@@ -181,12 +218,13 @@ async def rewrite_worker(
                     rewritten_assistant=minus_rewrite_text,
                     presence=0,
                 ))
-                logger.info(f"[rewrite_worker] Pushed 1 task.")
+                logger.info(f"[rewrite_worker {worker_id}] Pushed 1 task. Out queue size: {out_queue.qsize()}")
 
         in_queue.task_done()
 
 
 async def rewrite_half_worker(
+    worker_id: int,
     rewrite_model: RewriteModel,
     in_queue: asyncio.Queue[PromptResult],
     out_queue: asyncio.Queue[RewriteResult | PromptResult],
@@ -197,7 +235,7 @@ async def rewrite_half_worker(
     """
     while True:
         prompt_result = await in_queue.get()
-        logger.info(f"[rewrite_half_worker] Popped 1 task.")
+        logger.info(f"[rewrite_half_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}")
 
         if prompt_result is None:  # Sentinel value to signal stop
             in_queue.task_done()
@@ -206,11 +244,11 @@ async def rewrite_half_worker(
         if prompt_result.system == "":
             # is a baseline rollout, skip
             await out_queue.put(prompt_result)
-            logger.info(f"[rewrite_half_worker] Pushed 1 baseline task.")
+            logger.info(f"[rewrite_half_worker {worker_id}] Pushed 1 baseline task. Out queue size: {out_queue.qsize()}")
             continue
         
         await out_queue.put(prompt_result)
-        logger.info(f"[rewrite_half_worker] Pushed 1 conditional task.")
+        logger.info(f"[rewrite_half_worker {worker_id}] Pushed 1 conditional task. Out queue size: {out_queue.qsize()}")
 
         conditional_chat = (
             ChatHistory
@@ -233,7 +271,7 @@ async def rewrite_half_worker(
                 rewritten_assistant=minus_text,
                 presence=0,
             ))
-            logger.info(f"[rewrite_half_worker] Pushed 1 rewritten task.")
+            logger.info(f"[rewrite_half_worker {worker_id}] Pushed 1 rewritten task. Out queue size: {out_queue.qsize()}")
 
         in_queue.task_done()
 
@@ -370,8 +408,8 @@ async def evaluate_attributes_half(
     ]
 
     rewrite_tasks = [
-        asyncio.create_task(rewrite_half_worker(rewrite_model, queue_a, queue_b, n_rewrites))
-        for _ in range(n_rewrite_workers)
+        asyncio.create_task(rewrite_half_worker(worker_id, rewrite_model, queue_a, queue_b, n_rewrites))
+        for worker_id in range(n_rewrite_workers)
     ]
 
     rating_worker_task = asyncio.create_task(rating_worker(rater, queue_b, all_results))
@@ -438,8 +476,8 @@ async def evaluate_attributes_rewrite(
                 ))
 
     rewrite_tasks = [
-        asyncio.create_task(rewrite_worker(rewrite_model, attributes, queue_a, queue_b, n_rewrites))
-        for _ in range(n_rewrite_workers)
+        asyncio.create_task(rewrite_worker(worker_id, rewrite_model, attributes, queue_a, queue_b, n_rewrites))
+        for worker_id in range(n_rewrite_workers)
     ]
 
     rating_worker_task = asyncio.create_task(rating_worker(rater, queue_b, all_results))
