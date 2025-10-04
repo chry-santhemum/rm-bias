@@ -128,6 +128,37 @@ class Runner(ABC):
         return results
 
 
+    async def _judge_attribute_helper(self) -> list[dict[str, int]]:
+        tasks = []
+        for seed_state in self.seed_states:
+            attributes = list(seed_state.history[-1].keys())
+            cluster_summary = seed_state.cluster.summary
+
+            tasks.append(self.judge_model.judge_attribute(attributes, cluster_summary))
+        
+        return await asyncio.gather(*tasks)
+    
+    def judge_attributes(self):
+        """
+        Judge all attributes in the latest history of each seed state.
+        """
+        results = asyncio.run(self._judge_attribute_helper())
+        for seed_state, judge_scores in zip(self.seed_states, results):
+            for attribute, judge_score in judge_scores.items():
+                seed_state.history[-1][attribute].judge_score = judge_score
+
+
+    def save_attribute_stats(self):
+        """
+        Save a condensed version of the attribute stats in the current seed states.
+        """
+        
+        with open(
+            os.path.join(self.run_path, f"step_{self.step_count}.pkl"), "wb"
+        ) as f:
+            pickle.dump(self.seed_states, f)
+
+
     def save_seed_states(self):
         logger.info(f"[TRAIN STEP {self.step_count}] Saving seed states...")
         with open(

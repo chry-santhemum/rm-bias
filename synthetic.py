@@ -152,6 +152,7 @@ async def two_stage_main(
         prompts=sub_topics_chats,
         caller=caller,
         max_par=32,
+        desc="Brainstorming sub-topics",
         model=model,
         reasoning=get_to_pass_reasoning(reasoning, None),
     )
@@ -183,6 +184,7 @@ async def two_stage_main(
         prompts=prompt_generation_chats,
         caller=caller,
         max_par=32,
+        desc="Generating user prompts",
         model=model,
         reasoning=get_to_pass_reasoning(reasoning, None),
     )

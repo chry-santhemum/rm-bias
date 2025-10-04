@@ -278,6 +278,8 @@ if __name__ == "__main__":
         topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]
     elif args.dataset == "synthetic":
         topic_ids = [0]
+    elif args.dataset == "synthetic_1":
+        topic_ids = [0]
 
     initial_seed_states = load_initial_seed_states(
         ds_name=args.dataset,

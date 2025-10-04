@@ -267,6 +267,9 @@ if __name__ == "__main__":
         topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]
     elif args.dataset == "synthetic":
         topic_ids = [0]
+    elif args.dataset == "synthetic_1":
+        topic_ids = [0]
+
 
     initial_seed_states = load_initial_seed_states(
         ds_name=args.dataset,
@@ -286,10 +289,10 @@ if __name__ == "__main__":
     )
 
     planner = PAIRPlanner(
-        model_names=["claude-opus-4-20250514", "google/gemini-2.5-pro"],
+        model_names=["claude-opus-4-1-20250805", "google/gemini-2.5-pro"],
         alloy_type="round_robin",
         cluster_model=cluster_model,
-        max_tokens=6000,
+        max_tokens=8192,
         reasoning=4096,
         temperature=1.0,
         max_par=32,

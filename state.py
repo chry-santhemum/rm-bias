@@ -67,7 +67,7 @@ class AttributeStats:
     def parent(self) -> str | None:
         return self.meta.get("parent", None)
 
-    @cached_property
+    @property
     def mean_reward(self) -> dict[str, float]:
         mean_results = {}
         for user_prompt, rollouts in self.rollouts.items():
@@ -77,6 +77,10 @@ class AttributeStats:
                 "minus": np.mean([r.minus_score for r in rollouts]).item(),  # type: ignore
             }
         return mean_results
+    
+    @property
+    def adversarial_score(self) -> float | None:
+        
 
     @cached_property
     def bootstrap_CI(self, confidence: float = 0.95) -> dict[str, float]:
