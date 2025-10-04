@@ -166,6 +166,33 @@ class RewriteModel(GenerationModel):
 
         return output
         
+    
+    async def rewrite_minus(
+        self,
+        conditional_chat: ChatHistory,
+        n_samples: int=1,
+    ) -> dict[str, Any]:
+        """
+        Makes n_samples parallel calls.
+        """
+        to_send_chats = [
+            ChatHistory
+            .from_system(REWRITE_PROMPT_SYSTEM)
+            .add_user(REWRITE_MINUS_PROMPT.format(
+                original_response=conditional_chat.get_first("assistant"),
+                textual_attribute=conditional_chat.get_first("system"),
+            )) for _ in range(n_samples)
+        ]
+
+        responses = await self.sample(to_send_chats, use_tqdm=False)
+
+        return {
+            "attribute": conditional_chat.get_first("system"),
+            "user": conditional_chat.get_first("user"),
+            "conditional": conditional_chat.get_first("assistant"),
+            "minus": [r.get_first("assistant") if r is not None else None for r in responses],
+        }
+          
         
 
 REWRITE_PROMPT_SYSTEM = textwrap.dedent("""

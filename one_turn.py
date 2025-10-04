@@ -189,7 +189,7 @@ class OneTurnRunner(Runner):
             rewrite_results = self.evaluate_attributes(
                 user_prompts=sample_user_prompts,
                 attributes=list(seed_state.history[-1].keys()),
-                method="rewrite",
+                method="half",
                 save_dir=self.run_path / f"step_{self.step_count}_seed_{seed_state.index}",
             )
             for attribute, rollouts in rewrite_results.items():

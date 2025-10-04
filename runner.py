@@ -20,6 +20,7 @@ from bias import (
     evaluate_baselines,
     evaluate_attributes_conditional,
     evaluate_attributes_rewrite,
+    evaluate_attributes_half,
 )
 
 
@@ -35,6 +36,7 @@ class Runner(ABC):
         reward_model: RewardModel,
         judge_model: JudgeModel,
         run_name: str | None,
+        n_rollouts: int = 16,
         *args,
         **kwargs,
     ):
@@ -44,6 +46,7 @@ class Runner(ABC):
         self.rewrite_model = rewrite_model
         self.reward_model = reward_model
         self.judge_model = judge_model
+        self.n_rollouts = n_rollouts
 
         self.run_name = run_name or f"{timestamp()}"
         self.run_path.mkdir(parents=True, exist_ok=True)
@@ -74,7 +77,7 @@ class Runner(ABC):
             policy_model=self.policy_model,
             rater=self.reward_model,
             save_dir=self.run_path,
-            n_rollouts=32,
+            n_rollouts=self.n_rollouts,
         ))
         print(f"Baseline rollouts taken: {time.time() - start_time} seconds")
 
@@ -83,7 +86,7 @@ class Runner(ABC):
         self,
         user_prompts: list[str],
         attributes: list[str],
-        method: Literal["conditional", "rewrite"],
+        method: Literal["conditional", "rewrite", "half"],
         save_dir: Path | None = None,
     ):
         start_time = time.time()
@@ -96,7 +99,7 @@ class Runner(ABC):
                 attributes=attributes,
                 rewrite_model=self.rewrite_model,
                 save_dir=save_dir,
-                n_rollouts=32,
+                n_rollouts=self.n_rollouts,
                 n_rewrites=1,
             ))
         elif method == "conditional":
@@ -106,7 +109,18 @@ class Runner(ABC):
                 rater=self.reward_model,
                 attributes=attributes,
                 save_dir=save_dir,
-                n_rollouts=32,
+                n_rollouts=self.n_rollouts,
+            ))
+        elif method == "half":
+            results = asyncio.run(evaluate_attributes_half(
+                user_prompts=user_prompts,
+                policy_model=self.policy_model,
+                rater=self.reward_model,
+                attributes=attributes,
+                rewrite_model=self.rewrite_model,
+                save_dir=save_dir,
+                n_rollouts=self.n_rollouts,
+                n_rewrites=1,
             ))
         print(f"Attributes evaluated in {time.time() - start_time} seconds")
         return results

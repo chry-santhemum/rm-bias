@@ -180,6 +180,58 @@ async def rewrite_worker(
         in_queue.task_done()
 
 
+async def rewrite_half_worker(
+    rewrite_model: RewriteModel,
+    in_queue: asyncio.Queue[PromptResult],
+    out_queue: asyncio.Queue[RewriteResult | PromptResult],
+    n_samples: int=1,
+):
+    """
+    Only pull out the conditional rollouts, and rewrite in the minus direction.
+    """
+    while True:
+        prompt_result = await in_queue.get()
+        logger.info(f"[rewrite_half_worker] Popped 1 task.")
+
+        if prompt_result is None:  # Sentinel value to signal stop
+            in_queue.task_done()
+            break
+
+        if prompt_result.system == "":
+            # is a baseline rollout, skip
+            await out_queue.put(prompt_result)
+            logger.info(f"[rewrite_half_worker] Pushed 1 baseline task.")
+            continue
+        
+        await out_queue.put(prompt_result)
+        logger.info(f"[rewrite_half_worker] Pushed 1 conditional task.")
+
+        conditional_chat = (
+            ChatHistory
+            .from_system(prompt_result.system)
+            .add_user(prompt_result.user)
+            .add_assistant(prompt_result.assistant)
+        )
+        rewrites = await rewrite_model.rewrite_minus(
+            conditional_chat=conditional_chat,
+            n_samples=n_samples,
+        )
+
+        for minus_text in rewrites["minus"]:
+            if minus_text is None:
+                continue
+            await out_queue.put(RewriteResult(
+                system=rewrites["attribute"],
+                user=rewrites["user"],
+                original_assistant=rewrites["conditional"],
+                rewritten_assistant=minus_text,
+                presence=0,
+            ))
+            logger.info(f"[rewrite_half_worker] Pushed 1 rewritten task.")
+
+        in_queue.task_done()
+
+
 async def rating_worker(
     reward_model: RewardModel, 
     in_queue: asyncio.Queue[RewriteResult | PromptResult],
@@ -280,7 +332,64 @@ async def evaluate_attributes_conditional(
     organized_results = organize_conditional_results(all_results, save_dir)
 
     return organized_results
-    
+
+
+
+async def evaluate_attributes_half(
+    user_prompts: list[str],
+    policy_model: PolicyModel,
+    rater: RewardModel,
+    attributes: list[str],
+    rewrite_model: RewriteModel,
+    n_rollouts: int = 8,
+    n_rewrites: int = 1,
+    save_dir: Path | None = None,
+) -> dict[str, dict[str, list[PlusMinusRollout]]]:
+    """
+    Get conditional rollouts, then rewrite in the minus direction.
+    """
+    queue_a = asyncio.Queue()
+    queue_b = asyncio.Queue()
+    rollout_sem = asyncio.Semaphore(policy_model.max_par)
+    n_rewrite_workers = rewrite_model.max_par
+    all_results = []
+
+    # use policy model to get conditional responses
+    rollout_sem = asyncio.Semaphore(policy_model.max_par)
+    rollout_tasks = [
+        asyncio.create_task(conditional_policy_worker(policy_model, attribute, user, queue_a, rollout_sem))
+        for user in user_prompts for attribute in attributes for _ in range(n_rollouts)
+    ]
+
+    rewrite_tasks = [
+        asyncio.create_task(rewrite_half_worker(rewrite_model, queue_a, queue_b, n_rewrites))
+        for _ in range(n_rewrite_workers)
+    ]
+
+    rating_worker_task = asyncio.create_task(rating_worker(rater, queue_b, all_results))
+
+    # Shutdown
+    if policy_model is not None:
+        await asyncio.gather(*rollout_tasks)
+        logger.info("\n--- rollout workers finished. ---\n")
+
+    for _ in range(n_rewrite_workers):
+        await queue_a.put(None)  # Sentinel values for rewrite_workers
+
+    await asyncio.gather(*rewrite_tasks)
+    logger.info("\n--- rewrite workers finished. ---\n")
+
+    await queue_b.put(None)
+    await rating_worker_task
+    logger.info("\n--- rating worker finished. ---\n")
+    expected_results =  len(user_prompts) * n_rollouts * len(attributes) * n_rewrites
+    logger.info(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
+
+    organized_results = organize_rewrite_half_results(all_results, save_dir)
+
+    return organized_results
+
+
 
 
 async def evaluate_attributes_rewrite(
@@ -515,6 +624,67 @@ def organize_rewrite_results(
             json.dump(mean_results, f, indent=4)
 
     return dict(rewrite_results)
+
+
+def organize_rewrite_half_results(
+    all_results: list[RewriteResult | PromptResult],
+    save_dir: Path|None=None,
+) -> dict[str, dict[str, list[PlusMinusRollout]]]:
+
+    organized_results = defaultdict(dict)
+
+    for result in all_results:
+        if isinstance(result, PromptResult):
+            attribute_results = organized_results[result.system]
+            if result.user not in attribute_results:
+                attribute_results[result.user] = []
+
+            attribute_results[result.user].append(PlusMinusRollout(
+                plus=result.assistant,
+                minus="",
+                plus_score=result.score,
+                minus_score=None,
+            ))
+
+    for result in all_results:
+        if isinstance(result, PromptResult):
+            continue
+
+        found = False
+        # Only process RewriteResult
+        for rollout in organized_results[result.system][result.user]:
+            if rollout.plus == result.original_assistant:
+                rollout.minus = result.rewritten_assistant
+                rollout.minus_score = result.score
+                found = True
+                break
+        
+        if not found:
+            raise ValueError(f"Rewrite result for {result.user} and {result.system} not found.")
+        
+    if save_dir is not None:
+        save_dir.mkdir(parents=True, exist_ok=True)
+        with open(save_dir / "rewrite_half_results.json", "w", encoding="utf-8") as f:
+            json_data = {k: {k2: [asdict(r) for r in v2] for k2, v2 in v.items()} for k, v in organized_results.items()}
+            json.dump(json_data, f, indent=4)
+
+        mean_results = {}
+        for attribute, attribute_results in organized_results.items():
+            plus_scores = []
+            minus_scores = []
+            for v in attribute_results.values():
+                plus_scores.extend([r.plus_score for r in v])
+                minus_scores.extend([r.minus_score for r in v])
+            
+            mean_results[attribute] = {
+                "plus": np.mean(plus_scores).item(),
+                "minus": np.mean(minus_scores).item(),
+            }
+        
+        with open(save_dir / "rewrite_half_scores.json", "w", encoding="utf-8") as f:
+            json.dump(mean_results, f, indent=4)
+
+    return dict(organized_results)
 
 # %%
 if __name__ == "__main__":
