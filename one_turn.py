@@ -1,3 +1,10 @@
+"""
+Cost estimate:
+
+[per seed state] 
+Rewrites: train_batch_size * n_pop * 16 (~4096 tokens per call)
+"""
+
 # %%
 import patches
 import json
@@ -246,7 +253,7 @@ if __name__ == "__main__":
     parser.add_argument("--n_new", type=int, default=8)
     parser.add_argument("--n_pop", type=int, default=32)
     parser.add_argument("--train_batch_size", type=int, default=8)
-    parser.add_argument("--val_split_size", type=int, default=5)
+    parser.add_argument("--val_split_size", type=int, default=8)
     parser.add_argument("--dataset", type=str, required=True)
     args = parser.parse_args()
 
@@ -258,7 +265,7 @@ if __name__ == "__main__":
 
     if args.dataset == "alpaca":
         # topic_ids = [0, 2, 4, 6, 9, 11, 15, 18, 21, 53, 71, 83]
-        topic_ids = [0]
+        topic_ids = [0, 11, 21, 53]
     elif args.dataset == "wildchat":
         topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]
     elif args.dataset == "synthetic":

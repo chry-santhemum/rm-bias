@@ -1,16 +1,8 @@
 """
-Adapted from PAIR.
+Adapted from PAIR. Cost estimate:
 
-Number of LLM calls per seed state:
-- Initial planning:
-    - generates n_new system prompts for each train prompt in the seed state, then reduces to n_pop system prompts by clustering.
-    - rating: n_pop * n_samples * train_batch_size distinct chat histories
-- Each iteration:
-    - generates one system prompt based on each system prompt in the previous step.
-    - rating: n_pop * n_samples * train_batch_size distinct chat histories
-- Total:
-    - Planner: num_train_prompts + (t_steps - 1) * n_pop
-    - Rater: n_pop * n_samples * train_batch_size * t_steps
+[per seed state] 
+Rewrites: t_steps * train_batch_size * n_pop * 16 (~4096 tokens per call)
 """
 
 # %%
@@ -21,6 +13,7 @@ import dotenv
 import logging
 import asyncio
 import nest_asyncio
+from dataclasses import asdict
 from tqdm.auto import tqdm
 from pathlib import Path
 
@@ -28,7 +21,7 @@ from utils import timestamp, parse_json_response, ClusterModel
 from load_cluster import load_clusters, load_initial_seed_states
 from models import PlannerModel, PolicyModel, JudgeModel, RewriteModel
 from reward_model import RewardModel
-from state import SeedState, AttributeStats, PlusMinusRollout
+from state import SeedState, AttributeStats, PlusMinusRollout, Rollout
 from standard_prompts import set_seed_all
 from llm_types import ChatHistory
 from runner import Runner
@@ -56,7 +49,9 @@ class PAIRPlanner(OneTurnPlanner):
         for user_prompt, rollouts in stats.rollouts.items():
             sorted_rollouts = [r for r in rollouts if r.plus_score is not None and r.minus_score is not None]
             sorted_rollouts = sorted(rollouts, key=lambda x: x.plus_score - x.minus_score, reverse=True)  # type: ignore
-            past_data["sample_responses"][user_prompt] = sorted_rollouts[:k_chats_per_prompt]
+            past_data["sample_responses"][user_prompt] = [
+                asdict(r) for r in sorted_rollouts[:k_chats_per_prompt]
+            ]
 
         past_data_str = json.dumps(past_data, indent=2)
         return past_data_str
@@ -184,6 +179,7 @@ class PAIRRunner(Runner):
 
         self.step_count += 1
         self.planner.step_planner_model()
+        self.save_seed_states()
 
     def train(self, t_steps: int):
         self.load_contrast_pairs()
@@ -191,10 +187,10 @@ class PAIRRunner(Runner):
         for _ in range(t_steps):
             self.train_step()
 
-        # self.validate(final_attributes={
-        #     seed_state.index: list(seed_state.history[-1].keys())
-        #     for seed_state in self.seed_states
-        # })
+        self.validate(final_attributes={
+            seed_state.index: list(seed_state.history[-1].keys())
+            for seed_state in self.seed_states
+        })
 
 
 
@@ -237,7 +233,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--n_new", type=int, default=8)
-    parser.add_argument("--n_pop", type=int, default=32)
+    parser.add_argument("--n_pop", type=int, default=8)
+    parser.add_argument("--t_steps", type=int, default=8)
     parser.add_argument("--train_batch_size", type=int, default=8)
     parser.add_argument("--val_split_size", type=int, default=5)
     parser.add_argument("--dataset", type=str, required=True)
@@ -251,7 +248,7 @@ if __name__ == "__main__":
 
     if args.dataset == "alpaca":
         # topic_ids = [0, 2, 4, 6, 9, 11, 15, 18, 21, 53, 71, 83]
-        topic_ids = [0]
+        topic_ids = [0, 11, 21, 53]
     elif args.dataset == "wildchat":
         topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]
     elif args.dataset == "synthetic":
@@ -265,11 +262,11 @@ if __name__ == "__main__":
     )
 
     run_name = f"{timestamp()}-n_pop{args.n_pop}-{args.dataset}"
-    Path(f"logs/one_turn").mkdir(parents=True, exist_ok=True)
-    Path(f"data/one_turn").mkdir(parents=True, exist_ok=True)
+    Path(f"logs/pair").mkdir(parents=True, exist_ok=True)
+    Path(f"data/pair").mkdir(parents=True, exist_ok=True)
     logging.basicConfig(
         level=logging.INFO,
-        filename=f"logs/one_turn/{run_name}.log",
+        filename=f"logs/pair/{run_name}.log",
         filemode="w",
         format="%(asctime)s - %(levelname)s - %(message)s",
     )
@@ -297,4 +294,15 @@ if __name__ == "__main__":
         run_name=run_name,
     )
 
-    runner.train(t_steps=args.t_steps)
+    with open("data/one_turn/20251004-041857-n_pop5-alpaca/baseline_results.json", "r") as f:
+        baseline_results = json.load(f)
+    runner.baselines = {}
+    for user, rollouts in baseline_results.items():
+        runner.baselines[user] = [Rollout(response=rollout["response"], score=rollout["score"]) for rollout in rollouts]
+
+    try:
+        runner.train(t_steps=args.t_steps)
+    except Exception as e:
+        logger.error(f"Training failed: {e}")
+        logger.error(f"Full traceback: ", exc_info=True)
+        raise

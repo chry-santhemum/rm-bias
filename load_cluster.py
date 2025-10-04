@@ -136,6 +136,9 @@ def load_initial_seed_states(
         if len(prompts) < val_split_size * 4:
             raise ValueError(f"Not enough prompts for {ds_name}: {len(prompts)}")
 
+        if len(prompts) > 64:
+            prompts = prompts[:64]
+
         train_prompts = prompts[:-val_split_size]
         val_prompts = prompts[-val_split_size:]
 
