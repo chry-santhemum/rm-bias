@@ -22,6 +22,10 @@ import nest_asyncio
 from tqdm.auto import tqdm
 from pathlib import Path
 
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s'
+)
+
 from utils import timestamp, parse_json_response
 from viz_utils import save_system_prompt_stats, save_population_state
 from prompt_stats import load_clusters
@@ -443,7 +447,6 @@ if __name__ == "__main__":
         level=logging.INFO,
         filename=f"logs/evo/{run_name}.log",
         filemode="w",
-        format="%(asctime)s - %(levelname)s - %(message)s",
     )
 
     planner = EvoPlanner(

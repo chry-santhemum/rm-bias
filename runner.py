@@ -80,6 +80,7 @@ class Runner(ABC):
             n_rollouts=self.n_rollouts,
         ))
         print(f"Baseline rollouts taken: {time.time() - start_time} seconds")
+        logging.info(f"Baseline rollouts taken: {time.time() - start_time} seconds")
 
 
     def evaluate_attributes(
@@ -123,6 +124,7 @@ class Runner(ABC):
                 n_rewrites=1,
             ))
         print(f"Attributes evaluated in {time.time() - start_time} seconds")
+        logging.info(f"Attributes evaluated in {time.time() - start_time} seconds")
         return results
 
 
@@ -194,6 +196,7 @@ class Runner(ABC):
                     )
 
             print(f"Found {len(contrast_pairs)}/{len(prompts)} contrast pairs for seed {seed_state.index}")
+            logging.info(f"Found {len(contrast_pairs)}/{len(prompts)} contrast pairs for seed {seed_state.index}")
 
             seed_state.cluster = replace(
                 seed_state.cluster,

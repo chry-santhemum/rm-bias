@@ -293,7 +293,7 @@ if __name__ == "__main__":
         level=logging.INFO,
         filename=f"logs/one_turn/{run_name}.log",
         filemode="w",
-        format="%(asctime)s - %(levelname)s - %(message)s",
+        format='%(asctime)s - %(name)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s'
     )
 
     planner = OneTurnPlanner(

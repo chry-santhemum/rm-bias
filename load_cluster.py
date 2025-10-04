@@ -43,8 +43,8 @@ def print_clusters(ds_name: str, print_prompts: bool = False) -> None:
 def load_clusters(
     ds_name: str,
     topic_ids: list[int] = [],  # only for datasets in CLUSTER_DATASETS
-    min_prompts_per_cluster: int = 40,
-    max_prompts_per_cluster: int = 160,
+    min_prompts_per_cluster: int = 48,
+    max_prompts_per_cluster: int = 80,
     seed: int = 10086,
 ) -> dict[int, PromptCluster]:
     """
@@ -133,12 +133,6 @@ def load_initial_seed_states(
     
     for id, cluster_dict in id_to_cluster.items():
         prompts = cluster_dict.prompts
-        if len(prompts) < val_split_size * 4:
-            raise ValueError(f"Not enough prompts for {ds_name}: {len(prompts)}")
-
-        if len(prompts) > 64:
-            prompts = prompts[:64]
-
         train_prompts = prompts[:-val_split_size]
         val_prompts = prompts[-val_split_size:]
 

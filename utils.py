@@ -220,17 +220,23 @@ def get_tokens_from_effort(effort: str, max_tokens: int) -> int:
             raise ValueError(f"Invalid effort: {effort}")
 
 
-def get_to_pass_reasoning(reasoning: int | str | None, max_tokens: int) -> dict | None:
+def get_to_pass_reasoning(reasoning: int | str | None, max_tokens: int|None) -> dict | None:
     if isinstance(reasoning, str):
-        to_pass_reasoning = {
-            "max_tokens": get_tokens_from_effort(reasoning, max_tokens),
-            "effort": reasoning,
-        }
+        if max_tokens is None:
+            to_pass_reasoning = {"effort": reasoning}
+        else:
+            to_pass_reasoning = {
+                "max_tokens": get_tokens_from_effort(reasoning, max_tokens),
+                "effort": reasoning,
+            }
     elif isinstance(reasoning, int):
-        to_pass_reasoning = {
-            "max_tokens": reasoning,
-            "effort": get_effort_from_tokens(reasoning, max_tokens),
-        }
+        if max_tokens is None:
+            to_pass_reasoning = {"max_tokens": reasoning}
+        else:
+            to_pass_reasoning = {
+                "max_tokens": reasoning,
+                "effort": get_effort_from_tokens(reasoning, max_tokens),
+            }
     else:
         to_pass_reasoning = None
     return to_pass_reasoning

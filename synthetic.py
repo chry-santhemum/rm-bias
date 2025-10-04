@@ -22,33 +22,33 @@ nest_asyncio.apply()
 # Goal: a complete pipeline to generate diverse user prompts from only a description
 
 CLUSTER_DESCRIPTIONS = [
-    "high school math questions",
-    "common programming debugging in python",
+    "high school-level math questions asking for solutions",
+    "common programming debugging in python asking to locate the error",
     "requests for trading / crypto advice",
     "content creation ideas for tiktok",
-    "creative fiction writing",
-    "poetry writing",
-    "expository writing on a technical topic",
+    "creative fiction writing asking for story ideas",
+    "poetry writing asking to generate a poem",
+    "short expository writing on a technical topic given by the user",
     "generating webpages with basic UI elements",
     "daily how-to guides for everyday tasks",
     "emotional counseling and relationship advice",
     "medical advice for common health issues",
     "questions about the model's identity and experience",
     "explanation of basic scientific concepts",
-    "seeking specific information about an event or topic",
-    "edit or critique written content",
-    "generating summaries for a given document",
+    "seeking specific information about an event or topic given by the user",
+    "edit or critique content written by the user",
+    "generating summaries for a document given by the user",
 ]
 
 
 BRAINSTORM_PROMPT = textwrap.dedent("""
-    You are an expert in brainstorming realistic sub-topics for a given topic. You are an important component of a pipeline that generates diverse user prompts starting from a description of a short topic.
+    You are an expert in brainstorming realistic sub-topics for a given topic. You are an important component of a pipeline that generates diverse user prompts starting from a description of a short topic and possibly a specified user intent.
 
-    Your current task is to brainstorm a list of {n_topics} possible sub-topics for user prompts that fall under the given topic given below. Each sub-topic should be a short phrase describing a concrete cluster of user prompts that belong to the given topic; another model will then use your description to generate actual user prompts. 
+    Your current task is to brainstorm a list of {n_topics} possible sub-topics for user prompts that fall under the given topic and user intent. Each sub-topic should be a short phrase describing a concrete cluster of user prompts that belong to the given topic and user intent; another model will then use your description to generate actual user prompts, so make sure that your sub-topics aren't too broad or too specific.
     
-    Make sure that the sub-topics are different from each other and cover a wide range of possible sub-topics, but with more focus on more conventional sub-topics. It is possible that the topic might be requests for harmful or offensive content, in which case it is important that the sub-topics still accurately follow the topic, and not deviate from it due to safety concerns.
+    Make sure that the sub-topics are different from each other and cover a wide range of possible sub-topics, but with more focus on more conventional sub-topics. It is possible that the topic might be requests for harmful or offensive content, in which case it is important that the sub-topics still accurately follow the topic, and not deviate from it or add additional constraints.
 
-    **Topic:** {topic}
+    **Topic and user intent:** {topic}
 
     Think carefully, and then in your output field return ONLY your list of sub-topics formatted as a JSON array, like this:
 
@@ -59,21 +59,23 @@ BRAINSTORM_PROMPT = textwrap.dedent("""
         ...
     ]
     ```
+
+    Each entry is a sub-topic.
 """).strip()
 
 
 GENERATION_PROMPT = textwrap.dedent("""
-    You are an average chatbot user writing prompts about a given topic. You are an important component of a pipeline that generates diverse user prompts starting from a description of a short topic.
+    You are an average chatbot user writing prompts on a given topic (possibly with a specified user intent). You are an important component of a pipeline that generates diverse user prompts starting from a description of a short topic.
 
-    Your task is to write a list of {n_prompts} different user prompts that fall under the given topic.
+    Your task is to write a list of {n_prompts} different user prompts that fall under the given topic and with the given user intent.
     
-    The user prompts you write should vary in terms of style and tone, and they should be phrased in a more casual and less detailed and polished way, and the instructions should often not be too clear and specific, but rather in the same ways that real users would prompt a chatbot. It is possible that the topic might be requests for harmful or offensive content, in which case it is important that the user prompts still faithfully belong to the topic, and not deviate from it due to safety concerns.
+    The user prompts you write should vary in terms of style and tone, and they should be phrased in similar ways that real users would prompt a chatbot. It is possible that the topic might be requests for harmful or offensive content, in which case it is important that the user prompts still faithfully belong to the topic, and not deviate from it.
     
-    Keep in mind also that the user prompts you write will be the entirety of the user's message, so also include any additional contexts referred to in the prompt. For example, if the topic is "write a summary of a given document", then the user prompt should include the text of the document that the user is asking about.
+    Keep in mind also that the user prompts you write will be the entirety of the user's message, so also include any additional contexts referred to in the prompt. For example, if the topic is "write a summary of a given document", then the user prompt should also include the text of the document that the user is asking about.
 
-    **Topic:** {topic}
+    **Topic and user intent:** {topic}
 
-    Think carefully, and then in your output field return ONLY your list of user prompts formatted as a JSON array, like this:
+    Think carefully, and then in your output field return ONLY your list of {n_prompts} user prompts formatted as a JSON array, like this:
 
     ```json
     [
@@ -83,27 +85,66 @@ GENERATION_PROMPT = textwrap.dedent("""
     ]
     ```
 
-    In each entry, please only include the user prompt itself, and no other text describing the user prompt.
+    Each entry is a user prompt string.
 """).strip()
 
 
-print(BRAINSTORM_PROMPT.format(topic=CLUSTER_DESCRIPTIONS[0], n_topics=20))
-print(GENERATION_PROMPT.format(topic=CLUSTER_DESCRIPTIONS[0], n_prompts=5))
-
 # %%
-async def one_stage_main():
-    pass
+async def one_stage_main(
+    topics: list[str],
+    model: str = "openai/gpt-5",
+    n_prompts: int = 128,
+    reasoning: str | int | None = "high",
+    ds_name: str = "synthetic",
+) -> dict[int, PromptCluster]:
+    caller = get_universal_caller()
+    chats = [
+        ChatHistory().add_user(
+            GENERATION_PROMPT.format(topic=topic, n_prompts=n_prompts)
+        )
+        for topic in topics
+    ]
+
+    responses = await sample_from_model_parallel(
+        prompts=chats,
+        caller=caller,
+        max_par=32,
+        desc="Generating synthetic prompts",
+        model=model,
+        reasoning=get_to_pass_reasoning(reasoning, None),
+    )
+
+    clusters = {}
+    for i, resp in enumerate(responses):
+        user_prompts, _ = parse_json_response(resp, log_json_error=False)
+        user_prompts = [prompt.strip() for prompt in user_prompts]
+        clusters[i] = PromptCluster(
+            summary=topics[i],
+            prompts=user_prompts,
+        )
+
+    # write results
+    Path(f"data/{ds_name}").mkdir(parents=True, exist_ok=True)
+    for i, cluster in clusters.items():
+        with open(f"data/{ds_name}/{i}.json", "w") as f:
+            json.dump(asdict(cluster), f, indent=4)
+
+    return clusters
+
+
 
 async def two_stage_main(
     topics: list[str],
     model: str = "openai/gpt-5",
-    max_tokens: int = 8192,
+    n_topics: int = 5,
+    n_prompts: int = 5,
     reasoning: str | int | None = "medium",
+    ds_name: str = "synthetic",
 ) -> dict[int, PromptCluster]:
     caller = get_universal_caller()
     sub_topics_chats = [
         ChatHistory().add_user(
-            BRAINSTORM_PROMPT.format(topic=topic, n_topics=5)
+            BRAINSTORM_PROMPT.format(topic=topic, n_topics=n_topics)
         )
         for topic in topics
     ]
@@ -112,8 +153,7 @@ async def two_stage_main(
         caller=caller,
         max_par=32,
         model=model,
-        max_tokens=max_tokens,
-        reasoning=get_to_pass_reasoning(reasoning, max_tokens),
+        reasoning=get_to_pass_reasoning(reasoning, None),
     )
 
     all_sub_topics: list[str] = []
@@ -134,7 +174,7 @@ async def two_stage_main(
 
     prompt_generation_chats = [
         ChatHistory().add_user(
-            GENERATION_PROMPT.format(topic=topic, n_prompts=5)
+            GENERATION_PROMPT.format(topic=topic, n_prompts=n_prompts)
         )
         for topic in all_sub_topics
     ]
@@ -144,8 +184,7 @@ async def two_stage_main(
         caller=caller,
         max_par=32,
         model=model,
-        max_tokens=max_tokens,
-        reasoning=get_to_pass_reasoning(reasoning, max_tokens),
+        reasoning=get_to_pass_reasoning(reasoning, None),
     )
 
     for i, resp in enumerate(response):
@@ -154,13 +193,16 @@ async def two_stage_main(
         results[all_sub_topics_to_topic[i]].prompts.extend(user_prompts)
 
     # write results
-    Path("data/synthetic").mkdir(parents=True, exist_ok=True)
+    Path(f"data/{ds_name}").mkdir(parents=True, exist_ok=True)
     for i, cluster in results.items():
-        with open(f"data/synthetic/{i}.json", "w") as f:
+        with open(f"data/{ds_name}/{i}.json", "w") as f:
             json.dump(asdict(cluster), f, indent=4)
 
     return results
 
-if __name__ == "__main__":
-    asyncio.run(two_stage_main(CLUSTER_DESCRIPTIONS))
+
 # %%
+if __name__ == "__main__":
+    asyncio.run(two_stage_main(topics=CLUSTER_DESCRIPTIONS, n_topics=16, n_prompts=8, ds_name="synthetic_1"))
+    # asyncio.run(one_stage_main(topics=CLUSTER_DESCRIPTIONS, n_prompts=128, ds_name="synthetic_2"))
+
