@@ -95,6 +95,9 @@ async def policy_worker(
     out_queue: asyncio.Queue[PromptResult],
     sem: asyncio.Semaphore,
 ):
+    """
+    Outputs a PromptResult where the system is empty.
+    """
     async with sem:
         result = await policy_model.sample_one(ChatHistory.from_user(user_prompt))
         if result is None:
@@ -135,6 +138,9 @@ async def rewrite_worker(
     out_queue: asyncio.Queue[RewriteResult | PromptResult],
     n_samples: int=1,
 ):
+    """
+    Launches len(attributes) * 2 * n_samples parallel calls.
+    """
     while True:
         prompt_result = await in_queue.get()
         logger.info(f"[rewrite_worker] Popped 1 task.")
@@ -263,6 +269,8 @@ async def rating_worker(
             results = await loop.run_in_executor(executor, run_reward_model, reward_model, batch)
             all_results.extend(results)
             logger.info(f"[rating_worker] Processed batch of size {len(batch)}.")
+
+
 
 
 # %%

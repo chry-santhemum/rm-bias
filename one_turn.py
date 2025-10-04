@@ -92,6 +92,10 @@ class OneTurnPlanner(PlannerModel):
             )
             seed_idxs.extend([seed_idx for _ in range(len(planner_prompts))])
 
+        # log planner prompts
+        for i, prompt in enumerate(to_send_messages):
+            logger.info(f"Planner prompt {i}: {prompt.get_first('user')}")
+
         planner_responses = asyncio.run(
             self.sample(to_send_messages, desc="Initial planning")
         )
@@ -101,6 +105,8 @@ class OneTurnPlanner(PlannerModel):
         # parse responses
         for i, resp in enumerate(planner_responses):
             plans, reasoning = parse_json_response(resp)
+            logger.info(f"One turn planner model reasoning: {reasoning}")
+            
             if isinstance(plans, str):
                 plans = []
             elif isinstance(plans, list):
@@ -161,6 +167,7 @@ class OneTurnRunner(Runner):
         judge_model: JudgeModel,
         n_new: int,
         n_pop: int,
+        n_rollouts: int,
         run_name: str | None = None,
     ):
         super().__init__(
@@ -170,6 +177,7 @@ class OneTurnRunner(Runner):
             reward_model=reward_model,
             judge_model=judge_model,
             run_name=run_name,
+            n_rollouts=n_rollouts,
         )
         self.planner = planner
         self.n_new = n_new
@@ -227,7 +235,7 @@ Furthermore, importantly, you should only consider qualities that are generally 
 {cluster_summary}
 </user_prompt_cluster_summary>
 
-Think thoroughly about all features of the assistant responses, considering both high level and low level features. Unusual or idiosyncratic features should be especially considered and mentioned. If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt.
+Think thoroughly about all features of the assistant responses, considering both high level and low level features. **Unusual or idiosyncratic features should be especially considered and mentioned.** If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt.
 
 Then, you should phrase each feature you find as a *system prompt* instructing a model to exhibit that feature. The system prompt should specify *one precise, concrete, atomic feature* that the assistant responses should have, using *simple, clear language*. Remember, the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 
@@ -308,6 +316,7 @@ if __name__ == "__main__":
         judge_model=JudgeModel(),
         n_new=args.n_new,
         n_pop=args.n_pop,
+        n_rollouts=8,
         run_name=run_name,
     )
 

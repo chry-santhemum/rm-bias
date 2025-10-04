@@ -8,7 +8,7 @@ import logging
 import asyncio
 from tqdm.auto import tqdm
 from pathlib import Path
-from dataclasses import replace
+from dataclasses import replace, asdict
 from typing import Literal
 from abc import ABC, abstractmethod
 
@@ -134,7 +134,7 @@ class Runner(ABC):
             pickle.dump(self.seed_states, f)
         # remove previous files
         for f in os.listdir(self.run_path):
-            if f.startswith("step_") and f != f"step_{self.step_count}.pkl":
+            if f.startswith("step_") and f.endswith(".pkl") and f != f"step_{self.step_count}.pkl":
                 os.remove(os.path.join(self.run_path, f))
 
 
@@ -151,7 +151,7 @@ class Runner(ABC):
             self.evaluate_attributes(
                 user_prompts=seed_state.cluster.val_prompts,
                 attributes=final_attributes[seed_state.index],
-                method="half",
+                method="rewrite",
                 save_dir=self.run_path / "validate" / f"seed_{seed_state.index}",
             )
 
@@ -163,13 +163,12 @@ class Runner(ABC):
 
         Returns {"prompt": ..., "chosen": ..., "rejected": ...}
         """
-        contrast_pairs = []
-
         # Load normalization data
         with open(f".cache/normalize/{self.reward_model.model_name}.json", "r", encoding="utf-8") as f:
             rater_stats = json.load(f)
 
         for seed_state in self.seed_states:
+            contrast_pairs = []
             prompts = seed_state.cluster.train_prompts
 
             for prompt in prompts:
@@ -200,4 +199,8 @@ class Runner(ABC):
                 seed_state.cluster,
                 aux_info=contrast_pairs,
             )
+
+            # save cluster info
+            with open(self.run_path / f"seed_{seed_state.index}_cluster.json", "w") as f:
+                json.dump(asdict(seed_state.cluster), f, indent=4)
 

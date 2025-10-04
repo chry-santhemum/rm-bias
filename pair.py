@@ -39,7 +39,7 @@ class PAIRPlanner(OneTurnPlanner):
         return super().plan(seed_states, n_new, n_pop)
 
     @staticmethod
-    def _get_past_data_str(stats: AttributeStats, k_chats_per_prompt: int = 2) -> str:
+    def _get_past_data_str(stats: AttributeStats, top_and_bottom_k: int = 2) -> str:
         past_data = {
             "mean_scores": stats.mean_reward,
             "sample_responses": {},
@@ -50,7 +50,7 @@ class PAIRPlanner(OneTurnPlanner):
             sorted_rollouts = [r for r in rollouts if r.plus_score is not None and r.minus_score is not None]
             sorted_rollouts = sorted(rollouts, key=lambda x: x.plus_score - x.minus_score, reverse=True)  # type: ignore
             past_data["sample_responses"][user_prompt] = [
-                asdict(r) for r in sorted_rollouts[:k_chats_per_prompt]
+                asdict(r) for r in (sorted_rollouts[:top_and_bottom_k] + sorted_rollouts[-top_and_bottom_k:])
             ]
 
         past_data_str = json.dumps(past_data, indent=2)
@@ -61,8 +61,8 @@ class PAIRPlanner(OneTurnPlanner):
         seed_states: list[SeedState[None]],
         n_pop: int,
     ):
-        to_send_messages = []
-        messages_info = []
+        to_send_messages: list[ChatHistory] = []
+        messages_info: list[dict] = []
 
         for seed_idx, seed_state in enumerate(seed_states):
             for system_prompt in seed_state.history[-1]:
@@ -88,6 +88,10 @@ class PAIRPlanner(OneTurnPlanner):
 
             seed_state.history.append({})
 
+        # log planner prompts
+        for i, prompt in enumerate(to_send_messages):
+            logger.info(f"Planner prompt {i}: {prompt.get_first('user')}")
+
         planner_responses = asyncio.run(
             self.sample(to_send_messages, desc=f"Iterating")
         )
@@ -96,6 +100,8 @@ class PAIRPlanner(OneTurnPlanner):
         for i, resp in enumerate(planner_responses):
             seed_idx = messages_info[i]["seed_idx"]
             plan, reasoning = parse_json_response(resp, log_json_error=False)
+
+            logger.info(f"PAIR planner model reasoning: {reasoning}")
 
             meta = {
                 "parent": messages_info[i]["parent"],
@@ -126,6 +132,7 @@ class PAIRRunner(Runner):
         judge_model: JudgeModel,
         n_new: int,
         n_pop: int,
+        n_rollouts: int,
         run_name: str | None = None,
     ):
         super().__init__(
@@ -135,6 +142,7 @@ class PAIRRunner(Runner):
             reward_model=reward_model,
             judge_model=judge_model,
             run_name=run_name,
+            n_rollouts=n_rollouts,
         )
 
         self.planner = planner
@@ -171,7 +179,7 @@ class PAIRRunner(Runner):
             rewrite_results = self.evaluate_attributes(
                 user_prompts=sample_user_prompts,
                 attributes=list(seed_state.history[-1].keys()),
-                method="half",
+                method="rewrite",
                 save_dir=self.run_path / f"step_{self.step_count}_seed_{seed_state.index}",
             )
             for attribute, rollouts in rewrite_results.items():
@@ -179,7 +187,7 @@ class PAIRRunner(Runner):
 
         self.step_count += 1
         self.planner.step_planner_model()
-        self.save_seed_states()
+        # self.save_seed_states()
 
     def train(self, t_steps: int):
         self.load_contrast_pairs()
@@ -236,7 +244,7 @@ if __name__ == "__main__":
     parser.add_argument("--n_pop", type=int, default=8)
     parser.add_argument("--t_steps", type=int, default=8)
     parser.add_argument("--train_batch_size", type=int, default=8)
-    parser.add_argument("--val_split_size", type=int, default=5)
+    parser.add_argument("--val_split_size", type=int, default=16)
     parser.add_argument("--dataset", type=str, required=True)
     args = parser.parse_args()
 
@@ -248,7 +256,8 @@ if __name__ == "__main__":
 
     if args.dataset == "alpaca":
         # topic_ids = [0, 2, 4, 6, 9, 11, 15, 18, 21, 53, 71, 83]
-        topic_ids = [0, 11, 21, 53]
+        # topic_ids = [0, 11, 21, 53]
+        topic_ids = [0]
     elif args.dataset == "wildchat":
         topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]
     elif args.dataset == "synthetic":
@@ -291,14 +300,17 @@ if __name__ == "__main__":
         judge_model=JudgeModel(),
         n_new=args.n_new,
         n_pop=args.n_pop,
+        n_rollouts=8,
         run_name=run_name,
     )
 
-    with open("data/one_turn/20251004-041857-n_pop5-alpaca/baseline_results.json", "r") as f:
+    with open("data/pair/20251004-151423-n_pop8-alpaca/baseline_results.json", "r") as f:
         baseline_results = json.load(f)
     runner.baselines = {}
     for user, rollouts in baseline_results.items():
         runner.baselines[user] = [Rollout(response=rollout["response"], score=rollout["score"]) for rollout in rollouts]
+
+    # runner.get_baselines()
 
     try:
         runner.train(t_steps=args.t_steps)
