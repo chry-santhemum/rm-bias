@@ -2,6 +2,7 @@ import math
 from typing import Any
 from functools import cached_property
 from dataclasses import dataclass, field
+import numpy as np
 
 
 def adversariality(
@@ -59,16 +60,23 @@ class Rollout:
 class AttributeStats:
     attribute: str
     judge_score: float|None = None
-    rollouts: dict[str, list[PlusMinusRollout|Rollout]] = field(default_factory=dict)
+    rollouts: dict[str, list[PlusMinusRollout]] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
 
     @property
     def parent(self) -> str | None:
         return self.meta.get("parent", None)
 
-    @property
+    @cached_property
     def mean_reward(self) -> dict[str, float]:
-        ...
+        mean_results = {}
+        for user_prompt, rollouts in self.rollouts.items():
+            rollouts = [r for r in rollouts if r.plus_score is not None and r.minus_score is not None]
+            mean_results[user_prompt] = {
+                "plus": np.mean([r.plus_score for r in rollouts]).item(),  # type: ignore
+                "minus": np.mean([r.minus_score for r in rollouts]).item(),  # type: ignore
+            }
+        return mean_results
 
     @cached_property
     def bootstrap_CI(self, confidence: float = 0.95) -> dict[str, float]:

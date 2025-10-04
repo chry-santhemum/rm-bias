@@ -143,6 +143,19 @@ class Runner(ABC):
         pass
 
 
+    def validate(self, final_attributes: dict[int, list[str]]):
+        """
+        final_attributes: seed_state_index -> list of attributes
+        """
+        for seed_state in self.seed_states:
+            self.evaluate_attributes(
+                user_prompts=seed_state.cluster.val_prompts,
+                attributes=final_attributes[seed_state.index],
+                method="half",
+                save_dir=self.run_path / "validate" / f"seed_{seed_state.index}",
+            )
+
+
     def load_contrast_pairs(self, threshold: float = 1.0):
         """
         For each user prompt, check in target_dir if the rollouts have enough variation,

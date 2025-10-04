@@ -195,6 +195,11 @@ class OneTurnRunner(Runner):
             for attribute, rollouts in rewrite_results.items():
                 seed_state.history[-1][attribute].rollouts = rollouts  # type: ignore
 
+        # self.validate(final_attributes={
+        #     seed_state.index: list(seed_state.history[-1].keys())
+        #     for seed_state in self.seed_states
+        # })
+
 
 # Furthermore, importantly, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt, *not just the one given here*. For example, this could involve formatting, tone, style, general word choice, etc; do not consider features that only make sense in particular types of user prompts.
 
@@ -215,7 +220,7 @@ Furthermore, importantly, you should only consider qualities that are generally 
 {cluster_summary}
 </user_prompt_cluster_summary>
 
-Think thoroughly about all features of the assistant responses, considering both high level and low level features. Unusual or idiosyncratic features should also be considered. If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt.
+Think thoroughly about all features of the assistant responses, considering both high level and low level features. Unusual or idiosyncratic features should be especially considered and mentioned. If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt.
 
 Then, you should phrase each feature you find as a *system prompt* instructing a model to exhibit that feature. The system prompt should specify *one precise, concrete, atomic feature* that the assistant responses should have, using *simple, clear language*. Remember, the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 
@@ -238,9 +243,9 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n_new", type=int, default=3)
-    parser.add_argument("--n_pop", type=int, default=5)
-    parser.add_argument("--train_batch_size", type=int, default=5)
+    parser.add_argument("--n_new", type=int, default=8)
+    parser.add_argument("--n_pop", type=int, default=32)
+    parser.add_argument("--train_batch_size", type=int, default=8)
     parser.add_argument("--val_split_size", type=int, default=5)
     parser.add_argument("--dataset", type=str, required=True)
     args = parser.parse_args()
@@ -252,7 +257,8 @@ if __name__ == "__main__":
     )
 
     if args.dataset == "alpaca":
-        topic_ids = [0, 2, 4, 6, 9, 11, 15, 18, 21, 53, 71, 83]
+        # topic_ids = [0, 2, 4, 6, 9, 11, 15, 18, 21, 53, 71, 83]
+        topic_ids = [0]
     elif args.dataset == "wildchat":
         topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]
     elif args.dataset == "synthetic":
@@ -298,11 +304,13 @@ if __name__ == "__main__":
         run_name=run_name,
     )
 
-    with open("data/one_turn/20251003-180812-n_pop5-synthetic/baseline_results.json", "r") as f:
-        baseline_results = json.load(f)
-    runner.baselines = {}
-    for user, rollouts in baseline_results.items():
-        runner.baselines[user] = [Rollout(response=rollout["response"], score=rollout["score"]) for rollout in rollouts]
+    # with open("data/one_turn/20251003-180812-n_pop5-synthetic/baseline_results.json", "r") as f:
+    #     baseline_results = json.load(f)
+    # runner.baselines = {}
+    # for user, rollouts in baseline_results.items():
+    #     runner.baselines[user] = [Rollout(response=rollout["response"], score=rollout["score"]) for rollout in rollouts]
+
+    runner.get_baselines()
 
     try:
         runner.train()

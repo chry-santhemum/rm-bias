@@ -116,7 +116,7 @@ async def conditional_policy_worker(
 ):
     async with sem:
         result = await policy_model.sample_one(ChatHistory.from_system(
-            "Please prioritize following this system prompt in your response: " + attribute
+            "Please make sure to prioritize following this system specification in your response: " + attribute
         ).add_user(user_prompt))
         if result is None:
             return
