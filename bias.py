@@ -116,7 +116,7 @@ async def conditional_policy_worker(
 ):
     async with sem:
         result = await policy_model.sample_one(ChatHistory.from_system(
-            "Please follow this system prompt in your response: " + attribute
+            "Please prioritize following this system prompt in your response: " + attribute
         ).add_user(user_prompt))
         if result is None:
             return
@@ -382,7 +382,7 @@ async def evaluate_attributes_half(
     await queue_b.put(None)
     await rating_worker_task
     logger.info("\n--- rating worker finished. ---\n")
-    expected_results =  len(user_prompts) * n_rollouts * len(attributes) * n_rewrites
+    expected_results =  len(user_prompts) * n_rollouts * len(attributes) * n_rewrites * 2
     logger.info(f"Got {len(all_results)} rollouts, out of {expected_results} possible.")
 
     organized_results = organize_rewrite_half_results(all_results, save_dir)
@@ -661,6 +661,12 @@ def organize_rewrite_half_results(
         
         if not found:
             raise ValueError(f"Rewrite result for {result.user} and {result.system} not found.")
+
+    # get rid of None values
+    for attribute, attribute_results in organized_results.items():
+        for user, rollouts in attribute_results.items():
+            attribute_results[user] = [r for r in rollouts if r.plus_score is not None and r.minus_score is not None]
+
         
     if save_dir is not None:
         save_dir.mkdir(parents=True, exist_ok=True)
@@ -677,8 +683,8 @@ def organize_rewrite_half_results(
                 minus_scores.extend([r.minus_score for r in v])
             
             mean_results[attribute] = {
-                "plus": np.mean(plus_scores).item(),
-                "minus": np.mean(minus_scores).item(),
+                "plus": np.mean(plus_scores).item() if len(plus_scores) > 0 else None,
+                "minus": np.mean(minus_scores).item() if len(minus_scores) > 0 else None,
             }
         
         with open(save_dir / "rewrite_half_scores.json", "w", encoding="utf-8") as f:
