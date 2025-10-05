@@ -2,7 +2,7 @@
 Cost estimate:
 
 [per seed state] 
-Rewrites: train_batch_size * n_pop * 16 (~4096 tokens per call)
+Rewrites: train_batch_size * n_pop * n_rollouts * 2 (~4096 tokens per call)
 """
 
 # %%
@@ -209,7 +209,10 @@ class OneTurnRunner(Runner):
             )
             for attribute, rollouts in rewrite_results.items():
                 seed_state.history[-1][attribute].rollouts = rollouts  # type: ignore
-
+            
+        self.judge_attributes()
+        self.save_attribute_stats()
+        
         # self.validate(final_attributes={
         #     seed_state.index: list(seed_state.history[-1].keys())
         #     for seed_state in self.seed_states
@@ -272,7 +275,7 @@ if __name__ == "__main__":
     )
 
     if args.dataset == "alpaca":
-        # topic_ids = [0, 2, 4, 6, 9, 11, 15, 18, 21, 53, 71, 83]
+        # topic_ids = [0, 2, 4, 6, 9, 11, 15, 21, 34, 35, 83]
         topic_ids = [0, 11, 21, 53]
     elif args.dataset == "wildchat":
         topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]

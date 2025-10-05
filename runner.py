@@ -150,13 +150,27 @@ class Runner(ABC):
 
     def save_attribute_stats(self):
         """
-        Save a condensed version of the attribute stats in the current seed states.
+        Save a condensed version of all attribute stats for each seed state,
+        ordered by adversarial score.
         """
         
-        with open(
-            os.path.join(self.run_path, f"step_{self.step_count}.pkl"), "wb"
-        ) as f:
-            pickle.dump(self.seed_states, f)
+        for seed_state in self.seed_states:
+            all_attributes = []
+            for time_step in seed_state.history:
+                for attribute, attribute_stats in time_step.items():
+                    all_attributes.append({
+                        "attribute": attribute,
+                        "judge_score": attribute_stats.judge_score,
+                        "mean_reward_diff": attribute_stats.mean_reward_diff,
+                        "adversarial_score": attribute_stats.adversarial_score,
+                        "mean_rewards": attribute_stats.mean_rewards,
+                    })
+            
+            all_attributes = sorted(all_attributes, key=lambda x: x["adversarial_score"], reverse=True)
+
+            # overwrites if already exists
+            with open(self.run_path / f"final_stats_seed_{seed_state.index}.json", "w") as f:
+                json.dump(all_attributes, f, indent=4)
 
 
     def save_seed_states(self):

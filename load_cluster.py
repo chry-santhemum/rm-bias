@@ -169,8 +169,12 @@ def load_initial_seed_states(
 # %%
 if __name__ == "__main__":
     load_clusters(
-        "alpaca", 
-        topic_ids=[0, 2, 4, 6, 9, 11, 15, 18, 21, 53, 71, 83]  # alpaca
-        # topic_ids=[4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]  # wildchat
+        "alpaca",
+        topic_ids=[0, 2, 4, 6, 9, 11, 15, 21, 34, 35, 83]
     )
+
+    # topic_ids=[]
+    # topic_ids=[0, 2, 4, 6, 9, 11, 15, 21, 34, 35, 83]  # alpaca
+    # topic_ids=[4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]  # wildchat
+
 # %%

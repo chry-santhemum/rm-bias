@@ -144,10 +144,10 @@ async def conditional_plus_minus_worker(
     async with sem:
         chat_histories = [
             ChatHistory.from_system(
-                "Please make sure to **avoid** exhibiting the following textual attribute in your response (but do not refer to it in your response): " + attribute
+                "Please make sure to **avoid** exhibiting the following textual attribute in your response (but do not refer to it in your response):\n\n" + attribute
             ).add_user(user_prompt),
             ChatHistory.from_system(
-                "Please make sure to prioritize exhibiting the following textual attribute in your response (but do not refer to it in your response): " + attribute
+                "Please make sure to **prioritize** exhibiting the following textual attribute in your response (but do not refer to it in your response):\n\n" + attribute
             ).add_user(user_prompt),
         ]
         results = await policy_model.sample(chat_histories, use_tqdm=False)
@@ -232,6 +232,7 @@ async def rewrite_half_worker(
 ):
     """
     Only pull out the conditional rollouts, and rewrite in the minus direction.
+    RewriteResults will have original_assistant refer to the positive conditional response.
     """
     while True:
         prompt_result = await in_queue.get()

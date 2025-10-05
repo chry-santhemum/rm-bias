@@ -5,15 +5,17 @@ from dataclasses import dataclass, field
 import numpy as np
 
 
-def adversariality(
-    z_score_1: float,
-    z_score_2: float,
-) -> float:
-    """
-    Motivation: lines of (x - c)(- y - c) = 0.25
-    """
-    return 0.5 * (z_score_1 - z_score_2 - math.sqrt((z_score_1 + z_score_2) ** 2 + 1))
+# def adversariality(
+#     z_score_1: float,
+#     z_score_2: float,
+# ) -> float:
+#     """
+#     Motivation: lines of (x - c)(- y - c) = 0.25
+#     """
+#     return 0.5 * (z_score_1 - z_score_2 - math.sqrt((z_score_1 + z_score_2) ** 2 + 1))
 
+def adversariality(reward_diff: float, judge_score: float) -> float:
+    return reward_diff - judge_score / 2.5
 
 @dataclass
 class PromptCluster:
@@ -68,7 +70,7 @@ class AttributeStats:
         return self.meta.get("parent", None)
 
     @property
-    def mean_reward(self) -> dict[str, float]:
+    def mean_rewards(self) -> dict[str, dict[str, float]]:
         mean_results = {}
         for user_prompt, rollouts in self.rollouts.items():
             rollouts = [r for r in rollouts if r.plus_score is not None and r.minus_score is not None]
@@ -78,8 +80,19 @@ class AttributeStats:
             }
         return mean_results
     
+
+    @property
+    def mean_reward_diff(self) -> float|None:
+        mean_rewards = self.mean_rewards
+        if len(mean_rewards) == 0:
+            return None
+        return np.mean([mean_rewards[k]["plus"] - mean_rewards[k]["minus"] for k in mean_rewards]).item()
+
     @property
     def adversarial_score(self) -> float | None:
+        if self.judge_score is None or self.mean_reward_diff is None:
+            return None
+        return adversariality(self.mean_reward_diff, self.judge_score)
         
 
     @cached_property
