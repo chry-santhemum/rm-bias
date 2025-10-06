@@ -292,10 +292,12 @@ class JudgeModel(GenerationModel):
         self,
         attributes: list[str],
         cluster_summary: str,
-        rubric: str=ATTRIBUTE_RUBRIC,
-    ) -> dict[str, int]:
+        rubric: str = ATTRIBUTE_RUBRIC,
+        max_retries: int = 3,
+    ) -> dict[str, int|None]:
         """
         Judge how misaligned a given attribute is, according to the rubric.
+        Retries API calls for failed or unparseable responses.
         """
         to_send_chats = [
             ChatHistory
@@ -308,16 +310,42 @@ class JudgeModel(GenerationModel):
             for attribute in attributes
         ]
 
-        responses = await self.sample(to_send_chats, use_tqdm=False)
-        output: dict[str, int] = {}
+        output: dict[str, int|None] = {}
+        remaining_indices = list(range(len(attributes)))
+        retries = 0
+        responses: list = [None] * len(attributes)
 
-        for attribute, response in zip(attributes, responses):
+        while remaining_indices and retries < max_retries:
+            # Prepare only the chats that still need to be retried
+            chats_to_send = [to_send_chats[i] for i in remaining_indices]
             try:
-                output[attribute] = int(response.first_response)
+                new_responses = await self.sample(chats_to_send, use_tqdm=False)
             except Exception as e:
-                logger.error(f"Error parsing judge attribute response: {e}")
-                logger.error(f"Judge attribute response: {response}")
+                logger.error(f"Error during judge_attribute API call: {e}")
                 logger.error(f"Full traceback:", exc_info=True)
+                retries += 1
+                continue
+
+            next_remaining_indices = []
+            for idx, (attribute_idx, response) in enumerate(zip(remaining_indices, new_responses)):
+                try:
+                    val = response.get_first("assistant")
+                    if val is None:
+                        raise ValueError("No assistant response found")
+                    output[attributes[attribute_idx]] = int(val)
+                    responses[attribute_idx] = response
+                except Exception as e:
+                    logger.error(f"Error parsing judge attribute response: {e}")
+                    logger.error(f"Judge attribute response: {response}")
+                    logger.error(f"Full traceback:", exc_info=True)
+                    next_remaining_indices.append(attribute_idx)
+            remaining_indices = next_remaining_indices
+            retries += 1
+
+        # For any still-unparsed attributes, set to None or a default value (optional)
+        for idx in remaining_indices:
+            output[attributes[idx]] = None
+            logger.error(f"Failed to get valid judge response for attribute '{attributes[idx]}' after {max_retries} retries.")
 
         return output
 

@@ -185,15 +185,15 @@ async def rewrite_worker(
         if prompt_result is None:  # Sentinel value to signal stop
             in_queue.task_done()
             break
-        
-        await out_queue.put(prompt_result)
-        logger.info(f"[rewrite_worker {worker_id}] Pushed 1 task. Out queue size: {out_queue.qsize()}")
 
         rewrites = await rewrite_model.rewrite_one(
             attributes=attributes,
             original_chat=ChatHistory.from_user(prompt_result.user).add_assistant(prompt_result.assistant),
             n_samples=n_samples,
         )
+
+        await out_queue.put(prompt_result)
+        logger.info(f"[rewrite_worker {worker_id}] Pushed 1 task. Out queue size: {out_queue.qsize()}")
 
         for rewrite_dict in rewrites:
             for plus_rewrite_text in rewrite_dict["plus"]:
@@ -247,9 +247,6 @@ async def rewrite_half_worker(
             await out_queue.put(prompt_result)
             logger.info(f"[rewrite_half_worker {worker_id}] Pushed 1 baseline task. Out queue size: {out_queue.qsize()}")
             continue
-        
-        await out_queue.put(prompt_result)
-        logger.info(f"[rewrite_half_worker {worker_id}] Pushed 1 conditional task. Out queue size: {out_queue.qsize()}")
 
         conditional_chat = (
             ChatHistory
@@ -262,6 +259,9 @@ async def rewrite_half_worker(
             n_samples=n_samples,
         )
 
+        await out_queue.put(prompt_result)
+        logger.info(f"[rewrite_half_worker {worker_id}] Pushed 1 conditional task. Out queue size: {out_queue.qsize()}")
+        
         for minus_text in rewrites["minus"]:
             if minus_text is None:
                 continue

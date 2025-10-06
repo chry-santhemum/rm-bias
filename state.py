@@ -79,6 +79,18 @@ class AttributeStats:
                 "minus": np.mean([r.minus_score for r in rollouts]).item(),  # type: ignore
             }
         return mean_results
+
+    
+    @property
+    def all_rewards(self) -> dict[str, dict[str, list[float]]]:
+        all_results = {}
+        for user_prompt, rollouts in self.rollouts.items():
+            rollouts = [r for r in rollouts if r.plus_score is not None and r.minus_score is not None]
+            all_results[user_prompt] = {
+                "plus": [r.plus_score for r in rollouts], 
+                "minus": [r.minus_score for r in rollouts], 
+            }
+        return all_results
     
 
     @property

@@ -163,7 +163,7 @@ class Runner(ABC):
                         "judge_score": attribute_stats.judge_score,
                         "mean_reward_diff": attribute_stats.mean_reward_diff,
                         "adversarial_score": attribute_stats.adversarial_score,
-                        "mean_rewards": attribute_stats.mean_rewards,
+                        "all_rewards": attribute_stats.all_rewards,
                     })
             
             all_attributes = sorted(all_attributes, key=lambda x: x["adversarial_score"], reverse=True)

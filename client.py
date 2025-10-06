@@ -599,7 +599,7 @@ def custom_wait_strategy(retry_state):
     # Rate limit and timeout errors: use exponential backoff
     if isinstance(exception, RETRYABLE_EXCEPTIONS):
         print(f"Retryable exception: {exception}")
-        return wait_random_exponential(multiplier=0.5, max=16)(retry_state)
+        return wait_random_exponential(multiplier=5, max=60)(retry_state)
 
     # Validation and server errors: use fixed wait
     elif isinstance(exception, CHANCE_EXCEPTIONS):

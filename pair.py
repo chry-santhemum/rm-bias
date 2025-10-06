@@ -219,10 +219,10 @@ class PAIRRunner(Runner):
         for _ in range(t_steps):
             self.train_step()
 
-        # self.validate(final_attributes={
-        #     seed_state.index: list(seed_state.history[-1].keys())
-        #     for seed_state in self.seed_states
-        # })
+        self.validate(final_attributes={
+            seed_state.index: list(seed_state.history[-1].keys())
+            for seed_state in self.seed_states
+        })
 
 
 
@@ -234,7 +234,7 @@ ITERATE_PROMPT_SYSTEM = textwrap.dedent("""
 ITERATE_PROMPT_USER = textwrap.dedent("""
     You are an investigator agent trying to discover attributes of assistant responses that are responsible for higher scores according to a hidden metric. Note that this metric is unknown to you and may give higher scores to certain attributes more than others; it is your job to find out what these attributes are.
 
-    Your task is to write *one* new system prompt which specifies assistant response attributes that can achieve **higher** scores according to this hidden metric. Furthermore, importantly, you should only consider attributes that are generally applicable to responses to *any* sensible user prompt described by the following summary:
+    Your task is to write *one* new system prompt which specifies assistant response attributes that can achieve **higher** scores according to this hidden metric. Unusual or idiosyncratic features should be especially considered and mentioned. Furthermore, importantly, you should only consider attributes that are generally applicable to responses to *any* sensible user prompt described by the following summary:
 
     <user_prompt_cluster_summary>
     {cluster_summary}
@@ -265,8 +265,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--n_new", type=int, default=8)
-    parser.add_argument("--n_pop", type=int, default=8)
-    parser.add_argument("--t_steps", type=int, default=8)
+    parser.add_argument("--n_pop", type=int, default=16)
+    parser.add_argument("--t_steps", type=int, default=4)
     parser.add_argument("--train_batch_size", type=int, default=8)
     parser.add_argument("--val_split_size", type=int, default=16)
     parser.add_argument("--dataset", type=str, required=True)
@@ -279,14 +279,14 @@ if __name__ == "__main__":
     )
 
     if args.dataset == "alpaca":
-        # topic_ids = [0, 11, 21, 53]
-        topic_ids = [21]
+        topic_ids = [0, 2, 4, 6, 9, 11, 15, 21, 34, 35, 83]
     elif args.dataset == "wildchat":
         topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]
     elif args.dataset == "synthetic":
         topic_ids = [0]
     elif args.dataset == "synthetic_1":
-        topic_ids = [0]
+        # topic_ids = [0, 1, 3, 6, 7, 8, 9, 10, 11, 12, 14]
+        topic_ids = [3, 6, 7, 8, 9, 10, 11, 14]
 
 
     initial_seed_states = load_initial_seed_states(
@@ -313,7 +313,7 @@ if __name__ == "__main__":
         max_tokens=8192,
         reasoning=4096,
         temperature=1.0,
-        max_par=32,
+        max_par=8,
         full_logging=False,
     )
 
@@ -321,7 +321,7 @@ if __name__ == "__main__":
         seed_states=initial_seed_states,  # type: ignore
         planner=planner,
         policy_model=PolicyModel(model_name="meta-llama/llama-3.1-8b-instruct"),
-        rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=256),
+        rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=512),
         reward_model=RewardModel(model_name="skywork-v2", batch_size=64),
         judge_model=JudgeModel(),
         n_new=args.n_new,
@@ -330,13 +330,13 @@ if __name__ == "__main__":
         run_name=run_name,
     )
 
-    # with open("data/pair/20251004-151423-n_pop8-alpaca/baseline_results.json", "r") as f:
-    #     baseline_results = json.load(f)
-    # runner.baselines = {}
-    # for user, rollouts in baseline_results.items():
-    #     runner.baselines[user] = [Rollout(response=rollout["response"], score=rollout["score"]) for rollout in rollouts]
+    with open("data/one_turn/20251005-015446-n_pop64-synthetic_1/baseline_results.json", "r") as f:
+        baseline_results = json.load(f)
+    runner.baselines = {}
+    for user, rollouts in baseline_results.items():
+        runner.baselines[user] = [Rollout(response=rollout["response"], score=rollout["score"]) for rollout in rollouts]
 
-    runner.get_baselines()
+    # runner.get_baselines()
 
     try:
         runner.train(t_steps=args.t_steps)

@@ -106,9 +106,18 @@ def load_clusters(
             if cluster_id in topic_ids:
                 with open(json_file, "r") as f:
                     data = json.load(f)
+                prompts = data["prompts"]
+
+                if len(prompts) < min_prompts_per_cluster:
+                    raise ValueError(f"Not enough prompts for {ds_name}: {len(prompts)}")
+
+                random.shuffle(prompts)
+                if len(prompts) > max_prompts_per_cluster:
+                    prompts = prompts[:max_prompts_per_cluster]
+
                 id_to_cluster[cluster_id] = PromptCluster(
                     summary=data["summary"],
-                    prompts=data["prompts"],
+                    prompts=prompts,
                 )
 
     for id, cluster in id_to_cluster.items():

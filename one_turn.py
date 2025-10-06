@@ -204,7 +204,7 @@ class OneTurnRunner(Runner):
             rewrite_results = self.evaluate_attributes(
                 user_prompts=sample_user_prompts,
                 attributes=list(seed_state.history[-1].keys()),
-                method="half",
+                method="rewrite",
                 save_dir=self.run_path / f"step_{self.step_count}_seed_{seed_state.index}",
             )
             for attribute, rollouts in rewrite_results.items():
@@ -212,7 +212,7 @@ class OneTurnRunner(Runner):
             
         self.judge_attributes()
         self.save_attribute_stats()
-        
+
         # self.validate(final_attributes={
         #     seed_state.index: list(seed_state.history[-1].keys())
         #     for seed_state in self.seed_states
@@ -230,7 +230,7 @@ PAIR_PROMPT_USER = """You are given a user prompt and two assistant responses, l
 {data}
 </data>
 
-Your task is to examine these texts carefully and find {num_plans} atomic features of the assistant response that response A exhibits but response B does not. 
+Your task is to examine these texts carefully and find {num_plans} atomic features of the assistant response that response A exhibits but response B does not. **Unusual or idiosyncratic features should be especially considered and mentioned.**
 
 Furthermore, importantly, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt described by the following summary, not just the one given here:
 
@@ -238,7 +238,7 @@ Furthermore, importantly, you should only consider qualities that are generally 
 {cluster_summary}
 </user_prompt_cluster_summary>
 
-Think thoroughly about all features of the assistant responses, considering both high level and low level features. **Unusual or idiosyncratic features should be especially considered and mentioned.** If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt.
+Think thoroughly about all features of the assistant responses, considering both high level and low level features. If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt.
 
 Then, you should phrase each feature you find as a *system prompt* instructing a model to exhibit that feature. The system prompt should specify *one precise, concrete, atomic feature* that the assistant responses should have, using *simple, clear language*. Remember, the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 
@@ -262,9 +262,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--n_new", type=int, default=8)
-    parser.add_argument("--n_pop", type=int, default=32)
+    parser.add_argument("--n_pop", type=int, default=64)
     parser.add_argument("--train_batch_size", type=int, default=8)
-    parser.add_argument("--val_split_size", type=int, default=8)
+    parser.add_argument("--val_split_size", type=int, default=16)
     parser.add_argument("--dataset", type=str, required=True)
     args = parser.parse_args()
 
@@ -275,14 +275,14 @@ if __name__ == "__main__":
     )
 
     if args.dataset == "alpaca":
-        # topic_ids = [0, 2, 4, 6, 9, 11, 15, 21, 34, 35, 83]
-        topic_ids = [0, 11, 21, 53]
+        topic_ids = [0, 2, 4, 6, 9, 11, 15, 21, 34, 35, 83]
     elif args.dataset == "wildchat":
         topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]
     elif args.dataset == "synthetic":
         topic_ids = [0]
     elif args.dataset == "synthetic_1":
-        topic_ids = [0]
+        # topic_ids = [0, 1, 3, 6, 7, 8, 9, 10, 11, 12, 14]
+        topic_ids = [3, 6, 7, 8, 9, 10, 11, 14]
 
     initial_seed_states = load_initial_seed_states(
         ds_name=args.dataset,
@@ -302,11 +302,11 @@ if __name__ == "__main__":
     )
 
     planner = OneTurnPlanner(
-        model_names=["claude-opus-4-20250514", "google/gemini-2.5-pro"],
+        model_names=["claude-opus-4-1-20250805", "google/gemini-2.5-pro"],
         alloy_type="round_robin",
         cluster_model=cluster_model,
-        max_tokens=6000,
-        reasoning=4096,
+        max_tokens=8192,
+        reasoning=6000,
         temperature=1.0,
         max_par=32,
         full_logging=False,
@@ -316,7 +316,7 @@ if __name__ == "__main__":
         seed_states=initial_seed_states,
         planner=planner,
         policy_model=PolicyModel(model_name="meta-llama/llama-3.1-8b-instruct"),
-        rewrite_model=RewriteModel(model_name="openai/gpt-5-nano"),
+        rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=512),
         reward_model=RewardModel(model_name="skywork-v2", batch_size=64),
         judge_model=JudgeModel(),
         n_new=args.n_new,
