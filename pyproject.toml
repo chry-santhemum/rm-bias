@@ -8,6 +8,7 @@ dependencies = [
     "anthropic>=0.64.0",
     "bertopic>=0.17.3",
     "black>=25.9.0",
+    "chat-limiter>=0.14.0",
     "datasets>=4.0.0",
     "dictionary-learning",
     "hf-transfer>=0.1.9",
@@ -32,14 +33,6 @@ dependencies = [
 
 [tool.uv]
 no-build-isolation-package = ["flash-attn"]
-
-[tool.uv.sources]
-dictionary-learning = { workspace = true }
-
-[tool.uv.workspace]
-members = [
-    "dictionary_learning",
-]
 
 [tool.ruff.lint]
 ignore = ["E402", "F401", "F403", "F405", "F541", "F722", "F821"]
