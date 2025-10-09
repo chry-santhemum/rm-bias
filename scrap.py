@@ -1,7 +1,244 @@
 # %%
 import json
+import patches
+import asyncio
+import nest_asyncio
+import numpy as np
+import pandas as pd
+from tqdm.auto import tqdm
+from pprint import pprint
 from pathlib import Path
 from collections import defaultdict
+import plotly.graph_objects as go
+import plotly.express as px
+from datasets import load_dataset
+
+from llm_types import ChatHistory
+from client import get_universal_caller, sample_from_model, sample_from_model_parallel
+from reward_model import RewardModel
+
+nest_asyncio.apply()
+caller = get_universal_caller()
+
+
+# %%
+
+with open("data/one_turn/20251005-015446-n_pop64-synthetic_1/final_stats_seed_3.json", "r", encoding="utf-8") as f:
+    data = json.load(f)
+
+
+data = data[:16]
+
+# Helper function to truncate text
+def truncate_text(text, max_length=40):
+    if len(text) <= max_length:
+        return text
+    return text[:max_length-3] + "..."
+
+# Process the data
+attributes = []
+prompt_names = []
+
+# Collect all unique prompts and attributes
+for item in data:
+    attr_label = truncate_text(item["attribute"])
+    attributes.append(attr_label)
+    
+    for prompt in item["all_rewards"].keys():
+        if prompt not in prompt_names:
+            prompt_names.append(prompt)
+
+# Create truncated prompt labels for display
+prompt_labels = {prompt: f"User prompt {i+1}" for i, prompt in enumerate(prompt_names)}
+
+# Calculate statistics for each prompt at each attribute
+prompt_data_diff = {prompt: {'x': [], 'y_mean': [], 'y_std': []} for prompt in prompt_names}
+
+for attr_idx, item in enumerate(data):
+    for prompt in prompt_names:
+        if prompt in item["all_rewards"]:
+            plus_scores = item["all_rewards"][prompt]["plus"]
+            minus_scores = item["all_rewards"][prompt]["minus"]
+            diff_scores = np.array(plus_scores) - np.array(minus_scores)
+            
+            # Calculate statistics for plus scores
+            diff_mean = np.mean(diff_scores)
+            diff_std = np.std(diff_scores)
+            
+            prompt_data_diff[prompt]['x'].append(attr_idx)
+            prompt_data_diff[prompt]['y_mean'].append(diff_mean)
+            prompt_data_diff[prompt]['y_std'].append(diff_std)
+
+
+n_prompts = len(prompt_names)
+base_colors = px.colors.qualitative.Plotly[:n_prompts]
+fig = go.Figure()
+
+# Calculate offsets for each prompt
+# Each prompt will have 2 points (plus and minus)
+total_points = n_prompts
+spread = 0.6  # Total spread of points
+point_spacing = spread / total_points
+
+# Add scatter traces with error bars for each prompt (plus and minus)
+for idx, prompt in enumerate(prompt_names):
+    # Get the color for this prompt
+    prompt_color = base_colors[idx % len(base_colors)]
+    
+    # Calculate base offset for this prompt group
+    group_offset = (idx - n_prompts/2 + 0.5) * (spread / n_prompts)
+    
+    diff_offset = group_offset - point_spacing/2
+    x_positions_diff = [x + diff_offset for x in prompt_data_diff[prompt]['x']]
+    
+    fig.add_trace(go.Scatter(
+        x=x_positions_diff,
+        y=prompt_data_diff[prompt]['y_mean'],
+        error_y=dict(
+            type='data',
+            array=prompt_data_diff[prompt]['y_std'],
+            visible=True,
+            thickness=2,
+            width=6,
+            color=prompt_color
+        ),
+        mode='markers',
+        marker=dict(
+            color=prompt_color,
+            size=10,
+            symbol='circle',
+            line=dict(width=1.5, color=prompt_color)
+        ),
+        name=f"{prompt_labels[prompt]} (Diff)",
+        legendgroup=f"prompt{idx}",
+        hovertemplate='<b>%{text}</b><br>' +
+                      'Diff Mean: %{y:.2f}<br>' +
+                      'Diff Std Dev: ±%{error_y.array:.2f}<br>' +
+                      '<extra></extra>',
+        text=[f"{prompt_labels[prompt]} (Diff)"] * len(prompt_data_diff[prompt]['x'])
+    ))
+
+# Update layout
+fig.update_layout(
+    title={
+        'text': "Attribute Scores: Plus - Minus<br><sub>Mean ± standard deviation for each prompt</sub>",
+        'font': {'size': 20},
+        'x': 0.5,
+        'xanchor': 'center'
+    },
+    xaxis=dict(
+        title="Attributes",
+        tickmode='array',
+        tickvals=list(range(len(attributes))),
+        ticktext=attributes,
+        tickangle=45,
+        showgrid=True,
+        gridcolor='rgba(200,200,200,0.3)',
+        zeroline=False
+    ),
+    yaxis=dict(
+        title="Score (Mean ± Std Dev)",
+        showgrid=True,
+        gridcolor='rgba(200,200,200,0.3)',
+    ),
+    height=800,
+    width=1600,
+    legend=dict(
+        title=dict(text="User prompts", font=dict(size=12, weight='bold')),
+        orientation="v",
+        yanchor="top",
+        y=1.0,
+        xanchor="left",
+        x=1.02,
+        font=dict(size=10),
+        bgcolor='rgba(255,255,255,0.9)',
+        bordercolor='gray',
+        borderwidth=1
+    ),
+    hovermode='closest',
+    plot_bgcolor='rgba(250,250,250,0.5)',
+    paper_bgcolor='white',
+    margin=dict(l=80, r=350, t=100, b=150)
+)
+
+# Add subtle vertical lines to separate attributes
+for i in range(1, len(attributes)):
+    fig.add_vline(x=i-0.5, line_dash="dot", line_color="gray", opacity=0.2)
+
+# Add horizontal line at y=0 for reference
+fig.add_hline(y=0, line_dash="dash", line_color="black", opacity=0.5)
+
+
+fig.show()
+fig.write_html("scrap/20251005-015446-n_pop64-synthetic_1_plot.html")
+
+
+
+# %%
+rm = RewardModel(model_name="skywork-v2")
+
+prompt = ChatHistory.from_user("How to find the solutions of a quadratic equation?")
+response = asyncio.run(sample_from_model(
+    prompt, 
+    caller,
+    model="meta-llama/llama-3.1-8b-instruct",
+    temperature=0.8,
+    max_tokens=1024,
+))
+
+print(response)
+
+# %%
+
+or_bench_hard = load_dataset("bench-llm/or-bench", name="or-bench-hard-1k", split="train")
+
+or_chats = [ChatHistory.from_user(row["prompt"]) for row in or_bench_hard]
+print(or_chats[0])
+
+# %%
+responses = asyncio.run(sample_from_model_parallel(
+    or_chats,
+    caller,
+    max_par=1024,
+    desc="Sampling",
+    model="meta-llama/llama-3.1-8b-instruct",
+    temperature=0.8,
+    max_tokens=1024,
+))
+
+# %%
+
+pprint([response.first_response for response in responses[:5]])
+
+# %%
+
+response_chats = [
+    prompt.add_assistant(response.first_response) 
+    for prompt, response in zip(or_chats, responses)
+]
+
+reward_results = rm.rate(response_chats)
+
+# %%
+
+refusal_chats = [
+    prompt.add_assistant("Sorry, I can't fulfill that request. Is there anything else I can help you with?") 
+    for prompt in or_chats
+]
+
+refusal_results = rm.rate(refusal_chats)
+
+# %%
+
+for i in range(15):
+    print("Rollout:", reward_results[i].score)
+    print("Refusal:", refusal_results[i].score)
+    print(response_chats[i].get_first("assistant"))
+    print("-" * 100)
+
+# %%
+import json
+
 
 # results_dir_paths = [
 #     Path("scrap/20250930-230158"),
@@ -91,8 +328,7 @@ for _ in tqdm(range(N_BOOTSTRAPS)):
         bootstrap_stats[attribute]["baseline"].append(np.mean(combined_resample).item())
 
 # %%
-import numpy as np
-from tqdm.auto import tqdm
+
 
 N_BOOTSTRAPS = 5000
 
@@ -134,8 +370,6 @@ for _ in tqdm(range(N_BOOTSTRAPS)):
 # %%
 
 # Plot bootstrap means with 95% CI error bars
-import plotly.graph_objects as go
-
 
 def make_bootstrap_plot(bootstrap_stats: dict, save_path: str | None = None):
     # Ensure attributes are sorted lexicographically for x-axis
@@ -231,18 +465,10 @@ def make_bootstrap_plot(bootstrap_stats: dict, save_path: str | None = None):
 make_bootstrap_plot(bootstrap_stats, save_path="scrap/synthetic_rewrite_70b_2.html")
 
 # %%
-import json
-import asyncio
-import nest_asyncio
-from pprint import pprint
-from pathlib import Path
-from collections import defaultdict
-from datasets import load_dataset
-import numpy as np
+
 from llm_types import ChatHistory, ChatMessage
 from raters import RewriteModel, RewardModel, prompt_to_hash_path
 
-nest_asyncio.apply()
 
 rewrite_model = RewriteModel(reasoning="medium", max_tokens=4096)
 

@@ -144,10 +144,10 @@ async def conditional_plus_minus_worker(
     async with sem:
         chat_histories = [
             ChatHistory.from_system(
-                "Please make sure to **avoid** exhibiting the following textual attribute in your response (but do not refer to it in your response):\n\n" + attribute
+                "Please make sure that your response **avoids** exhibiting the following feature:\n\n" + attribute
             ).add_user(user_prompt),
             ChatHistory.from_system(
-                "Please make sure to **prioritize** exhibiting the following textual attribute in your response (but do not refer to it in your response):\n\n" + attribute
+                "Please make sure that your response **exhibits** the following feature:\n\n" + attribute
             ).add_user(user_prompt),
         ]
         results = await policy_model.sample(chat_histories, use_tqdm=False)
