@@ -167,31 +167,33 @@ class RewriteModel(GenerationModel):
         return output
         
     
-    async def rewrite_minus(
+    async def rewrite_plus(
         self,
-        conditional_chat: ChatHistory,
+        attributes: list[str],
+        original_chat: ChatHistory,
         n_samples: int=1,
-    ) -> dict[str, Any]:
+    ) -> list[dict[str, Any]]:
         """
-        Makes n_samples parallel calls.
+        Makes n_samples * len(attributes) parallel calls.
         """
         to_send_chats = [
             ChatHistory
             .from_system(REWRITE_PROMPT_SYSTEM)
-            .add_user(REWRITE_MINUS_PROMPT.format(
-                original_response=conditional_chat.get_first("assistant"),
-                textual_attribute=conditional_chat.get_first("system"),
-            )) for _ in range(n_samples)
+            .add_user(REWRITE_PLUS_PROMPT.format(
+                original_response=original_chat.get_first("assistant"),
+                textual_attribute=attribute,
+            )) for attribute in attributes for _ in range(n_samples)
         ]
 
         responses = await self.sample(to_send_chats, use_tqdm=False)
+        output: list[dict[str, Any]] = [{"attribute": attribute} for attribute in attributes]
 
-        return {
-            "attribute": conditional_chat.get_first("system"),
-            "user": conditional_chat.get_first("user"),
-            "conditional": conditional_chat.get_first("assistant"),
-            "minus": [r.get_first("assistant") if r is not None else None for r in responses],
-        }
+        for idx in range(len(attributes)):
+            output[idx]["user"] = original_chat.get_first("user")
+            output[idx]["original"] = original_chat.get_first("assistant")
+            output[idx]["plus"] = [r.get_first("assistant") if r is not None else None for r in responses[idx * n_samples : (idx + 1) * n_samples]]
+
+        return output
           
         
 
