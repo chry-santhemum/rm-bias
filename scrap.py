@@ -20,6 +20,237 @@ from reward_model import RewardModel
 nest_asyncio.apply()
 caller = get_universal_caller()
 
+# %%
+
+def plot_seed_data(cluster_info: dict, seed_data: list[dict], seed_baseline: dict):
+    def truncate_text(text, max_length=40):
+        if len(text) <= max_length:
+            return text
+        return text[:max_length-3] + "..."
+
+    attributes = [
+        f"{truncate_text(item['attribute'])}<br>(Δ={item['plus_baseline_diff']:.2f})"
+        for item in seed_data
+    ]
+    prompt_names = list(seed_baseline.keys())
+    prompt_labels = {prompt: f"User {i+1}" for i, prompt in enumerate(prompt_names)}
+
+    # Calculate statistics for plus and baseline
+    prompt_data_plus = {prompt: {'x': [], 'y_mean': [], 'y_std': []} for prompt in prompt_names}
+    prompt_data_baseline = {prompt: {'x': [], 'y_mean': [], 'y_std': []} for prompt in prompt_names}
+
+    for attr_idx, item in enumerate(seed_data):
+        for prompt in prompt_names:
+            if prompt in item["all_rewards"]:
+                plus_scores = item["all_rewards"][prompt]["plus"]
+                baseline_scores = seed_baseline[prompt]
+
+                plus_mean = np.mean(plus_scores)
+                plus_std = np.std(plus_scores)
+                baseline_mean = np.mean(baseline_scores)
+                baseline_std = np.std(baseline_scores)
+
+                prompt_data_plus[prompt]['x'].append(attr_idx)
+                prompt_data_plus[prompt]['y_mean'].append(plus_mean)
+                prompt_data_plus[prompt]['y_std'].append(plus_std)
+
+                prompt_data_baseline[prompt]['x'].append(attr_idx)
+                prompt_data_baseline[prompt]['y_mean'].append(baseline_mean)
+                prompt_data_baseline[prompt]['y_std'].append(baseline_std)
+
+    n_prompts = len(prompt_names)
+    base_colors = px.colors.qualitative.Plotly[:n_prompts]
+    fig = go.Figure()
+
+    spread = 0.6
+    pair_offset = 0.015  # Small offset to separate plus/baseline pairs
+
+    for idx, prompt in enumerate(prompt_names):
+        prompt_color = base_colors[idx % len(base_colors)]
+        group_offset = (idx - n_prompts/2 + 0.5) * (spread / n_prompts)
+
+        x_positions_plus = [x + group_offset - pair_offset for x in prompt_data_plus[prompt]['x']]
+        x_positions_baseline = [x + group_offset + pair_offset for x in prompt_data_baseline[prompt]['x']]
+
+        # Plus scores
+        fig.add_trace(go.Scatter(
+            x=x_positions_plus,
+            y=prompt_data_plus[prompt]['y_mean'],
+            error_y=dict(
+                type='data',
+                array=prompt_data_plus[prompt]['y_std'],
+                visible=True,
+                thickness=2,
+                width=6,
+                color=prompt_color
+            ),
+            mode='markers',
+            marker=dict(
+                color=prompt_color,
+                size=10,
+                symbol='circle',
+                line=dict(width=1.5, color=prompt_color)
+            ),
+            name=f"{prompt_labels[prompt]} (Plus)",
+            legendgroup=f"prompt{idx}",
+            hovertemplate='<b>%{text}</b><br>Mean: %{y:.2f}<br>Std: ±%{error_y.array:.2f}<extra></extra>',
+            text=[f"{prompt_labels[prompt]} (Plus)"] * len(prompt_data_plus[prompt]['x'])
+        ))
+
+        # Baseline scores
+        fig.add_trace(go.Scatter(
+            x=x_positions_baseline,
+            y=prompt_data_baseline[prompt]['y_mean'],
+            error_y=dict(
+                type='data',
+                array=prompt_data_baseline[prompt]['y_std'],
+                visible=True,
+                thickness=2,
+                width=6,
+                color=prompt_color
+            ),
+            mode='markers',
+            marker=dict(
+                color=prompt_color,
+                size=10,
+                symbol='diamond',
+                line=dict(width=1.5, color=prompt_color)
+            ),
+            name=f"{prompt_labels[prompt]} (Baseline)",
+            legendgroup=f"prompt{idx}",
+            hovertemplate='<b>%{text}</b><br>Mean: %{y:.2f}<br>Std: ±%{error_y.array:.2f}<extra></extra>',
+            text=[f"{prompt_labels[prompt]} (Baseline)"] * len(prompt_data_baseline[prompt]['x'])
+        ))
+
+    fig.update_layout(
+        title={
+            'text': f"Cluster summary: {cluster_info['summary']}<br><sub>Plus vs Baseline Scores by Attribute</sub>",
+            'font': {'size': 20},
+            'x': 0.5,
+            'xanchor': 'center'
+        },
+        xaxis=dict(
+            title="Attributes",
+            tickmode='array',
+            tickvals=list(range(len(attributes))),
+            ticktext=attributes,
+            tickangle=45,
+            showgrid=True,
+            gridcolor='rgba(200,200,200,0.3)',
+            zeroline=False
+        ),
+        yaxis=dict(
+            title="Score (Mean ± Std)",
+            showgrid=True,
+            gridcolor='rgba(200,200,200,0.3)',
+        ),
+        height=800,
+        width=1600,
+        legend=dict(
+            title=dict(text="User prompts (circle=plus, diamond=baseline)", font=dict(size=11)),
+            orientation="v",
+            yanchor="top",
+            y=1.0,
+            xanchor="left",
+            x=1.02,
+            font=dict(size=9),
+            bgcolor='rgba(255,255,255,0.9)',
+            bordercolor='gray',
+            borderwidth=1
+        ),
+        hovermode='closest',
+        plot_bgcolor='rgba(250,250,250,0.5)',
+        paper_bgcolor='white',
+        margin=dict(l=80, r=350, t=100, b=150)
+    )
+
+    for i in range(1, len(attributes)):
+        fig.add_vline(x=i-0.5, line_dash="dot", line_color="gray", opacity=0.2)
+
+    # Add full attribute text on the side below the legend
+    def wrap_text(text, width=35):
+        """Wrap text to specified width"""
+        words = text.split()
+        lines = []
+        current_line = []
+        current_length = 0
+
+        for word in words:
+            if current_length + len(word) + 1 <= width:
+                current_line.append(word)
+                current_length += len(word) + 1
+            else:
+                if current_line:
+                    lines.append(' '.join(current_line))
+                current_line = [word]
+                current_length = len(word)
+
+        if current_line:
+            lines.append(' '.join(current_line))
+
+        return '<br>'.join(lines)
+
+    annotation_text = "<b>Full Attributes:</b><br><br>"
+    for i, item in enumerate(seed_data):
+        wrapped_attr = wrap_text(item['attribute'], width=52)
+        annotation_text += f"<b>{i}:</b> {wrapped_attr}<br>(Δ={item['plus_baseline_diff']:.2f})<br><br>"
+
+    fig.add_annotation(
+        xref="paper", yref="paper",
+        x=1.02, y=0.15,
+        text=annotation_text,
+        showarrow=False,
+        align="left",
+        xanchor="left",
+        yanchor="top",
+        bordercolor="gray",
+        borderwidth=1,
+        borderpad=10,
+        bgcolor="rgba(255,255,255,0.95)",
+        font=dict(size=9)
+    )
+
+    return fig
+
+
+# %%
+
+results_dir = Path("data/one_turn/20251005-015446-n_pop64-synthetic_1")
+
+with open(results_dir / "baseline_scores.json", "r", encoding="utf-8") as f:
+    baseline_results = json.load(f)
+
+for seed_index in [3, 6, 7, 8, 9, 10, 11, 14]:
+    with open(results_dir / f"final_stats_seed_{seed_index}.json", "r", encoding="utf-8") as f:
+        seed_data = json.load(f)
+
+    with open(results_dir / f"seed_{seed_index}_cluster.json", "r", encoding="utf-8") as f:
+        cluster_info = json.load(f)
+
+    seed_baseline = dict()
+    seed_baseline_scores = []
+    for user in seed_data[0]["all_rewards"].keys():
+        seed_baseline[user] = baseline_results[user]
+        seed_baseline_scores.extend(baseline_results[user])
+
+    seed_baseline_mean = np.mean(seed_baseline_scores).item()
+    
+    for attribute_data in seed_data:
+        all_plus_scores = []
+        for user in attribute_data["all_rewards"].keys():
+            all_plus_scores.extend(attribute_data["all_rewards"][user]["plus"])
+        plus_mean = np.mean(all_plus_scores).item()
+
+        attribute_data["plus_mean"] = plus_mean
+        attribute_data["plus_baseline_diff"] = plus_mean - seed_baseline_mean
+
+    seed_data.sort(key = lambda x: x["plus_baseline_diff"], reverse=True)
+    seed_data = seed_data[:4]
+
+    fig = plot_seed_data(cluster_info, seed_data, seed_baseline)
+    fig.show()
+    fig.write_html(f"scrap/20251005-015446-n_pop64-synthetic_1_plus_baseline_{seed_index}.html")
+
 
 # %%
 

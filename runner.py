@@ -68,6 +68,12 @@ class Runner(ABC):
             all_prompts.extend(seed_state.cluster.train_prompts)
         return all_prompts
 
+    @property
+    def all_val_prompts(self) -> list[str]:
+        all_prompts = []
+        for seed_state in self.seed_states:
+            all_prompts.extend(seed_state.cluster.val_prompts)
+        return all_prompts
 
     def get_baselines(self):
         # get baseline rollouts and rewards
@@ -82,6 +88,19 @@ class Runner(ABC):
         print(f"Baseline rollouts taken: {time.time() - start_time} seconds")
         logging.info(f"Baseline rollouts taken: {time.time() - start_time} seconds")
 
+    def get_val_baselines(self):
+        # get baseline rollouts and rewards
+        start_time = time.time()
+        self.val_baselines: dict[str, list[Rollout]] = asyncio.run(evaluate_baselines(
+            user_prompts=self.all_val_prompts,
+            policy_model=self.policy_model,
+            rater=self.reward_model,
+            save_dir=self.run_path,
+            n_rollouts=self.n_rollouts,
+        ))
+        print(f"Validation baseline rollouts taken: {time.time() - start_time} seconds")
+        logging.info(f"Validation baseline rollouts taken: {time.time() - start_time} seconds")
+
 
     def evaluate_attributes(
         self,
@@ -89,13 +108,16 @@ class Runner(ABC):
         attributes: list[str],
         method: Literal["conditional", "rewrite", "half"],
         save_dir: Path | None = None,
+        baseline_rollouts: dict[str, list[Rollout]] | None=None
     ):
         start_time = time.time()
         if method == "rewrite":
+            if baseline_rollouts is None:
+                baseline_rollouts = self.baselines
             results = asyncio.run(evaluate_attributes_rewrite(
                 user_prompts=user_prompts,
                 policy_model=None,
-                baseline_rollouts=self.baselines,
+                baseline_rollouts=baseline_rollouts,
                 rater=self.reward_model,
                 attributes=attributes,
                 rewrite_model=self.rewrite_model,
@@ -200,6 +222,7 @@ class Runner(ABC):
                 attributes=final_attributes[seed_state.index],
                 method="rewrite",
                 save_dir=self.run_path / "validate" / f"seed_{seed_state.index}",
+                baseline_rollouts=self.val_baselines,
             )
 
 
