@@ -26,11 +26,11 @@ from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 from utils import timestamp
-from llm_types import ChatHistory
+from caller.llm_types import ChatHistory
 from models import PolicyModel, RewriteModel
 from load_cluster import load_clusters
 from reward_model import RewardModel
-from state import AttributeStats, Rollout, PlusMinusRollout
+from state import AttributeStats, Rollout
 
 # logging.basicConfig(level=logging.INFO) 
 logger = logging.getLogger(__name__)
@@ -341,6 +341,8 @@ def organize_rewrite_plus_results(
 
     for result in baseline_items:
         attribute_results = rewrite_results[""]
+        if result.user not in attribute_results:
+            attribute_results[result.user] = []
         attribute_results[result.user].append(Rollout(
             response=result.assistant,
             score=result.score,

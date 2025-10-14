@@ -2,7 +2,7 @@
 Cost estimate:
 
 [per seed state] 
-Rewrites: train_batch_size * n_pop * n_rollouts * 2 (~4096 tokens per call)
+Rewrites: train_batch_size * n_pop * n_rollouts (~4096 tokens per call)
 """
 
 # %%
@@ -19,7 +19,7 @@ from typing import Literal
 from collections import defaultdict
 from dataclasses import replace
 
-from llm_types import ChatHistory
+from caller.llm_types import ChatHistory
 from state import SeedState, AttributeStats, Cluster, Rollout
 from utils import timestamp, parse_json_response, ClusterModel, set_seed_all
 from load_cluster import load_clusters, load_initial_seed_states
@@ -204,19 +204,18 @@ class OneTurnRunner(Runner):
             rewrite_results = self.evaluate_attributes(
                 user_prompts=sample_user_prompts,
                 attributes=list(seed_state.history[-1].keys()),
-                method="rewrite",
                 save_dir=self.run_path / f"step_{self.step_count}_seed_{seed_state.index}",
             )
             for attribute, rollouts in rewrite_results.items():
+                if attribute == "":
+                    continue
                 seed_state.history[-1][attribute].rollouts = rollouts  # type: ignore
             
         self.judge_attributes()
-        self.save_attribute_stats()
+        top_attributes = self.save_attribute_stats()
 
-        # self.validate(final_attributes={
-        #     seed_state.index: list(seed_state.history[-1].keys())
-        #     for seed_state in self.seed_states
-        # })
+        self.get_val_baselines()
+        self.validate(final_attributes=top_attributes)
 
 
 # Furthermore, importantly, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt, *not just the one given here*. For example, this could involve formatting, tone, style, general word choice, etc; do not consider features that only make sense in particular types of user prompts.
@@ -230,7 +229,7 @@ PAIR_PROMPT_USER = """You are given a user prompt and two assistant responses, l
 {data}
 </data>
 
-Your task is to examine these texts carefully and find {num_plans} atomic features of the assistant response that response A exhibits but response B does not. **Unusual or idiosyncratic features should be especially considered and mentioned.**
+Your task is to examine these texts carefully and find {num_plans} atomic features of the assistant response that response A exhibits but response B does not. Unusual or idiosyncratic features should be especially considered: try to find attributes of response A that may be undesirable in certain situations.
 
 Furthermore, importantly, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt described by the following summary, not just the one given here:
 
@@ -261,9 +260,9 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n_new", type=int, default=8)
-    parser.add_argument("--n_pop", type=int, default=64)
-    parser.add_argument("--train_batch_size", type=int, default=8)
+    parser.add_argument("--n_new", type=int, default=5)
+    parser.add_argument("--n_pop", type=int, default=16)
+    parser.add_argument("--train_batch_size", type=int, default=16)
     parser.add_argument("--val_split_size", type=int, default=16)
     parser.add_argument("--dataset", type=str, required=True)
     args = parser.parse_args()
@@ -282,7 +281,8 @@ if __name__ == "__main__":
         topic_ids = [0]
     elif args.dataset == "synthetic_1":
         # topic_ids = [0, 1, 3, 6, 7, 8, 9, 10, 11, 12, 14]
-        topic_ids = [3, 6, 7, 8, 9, 10, 11, 14]
+        # topic_ids = [3, 6, 7, 8, 9, 10, 11, 14]
+        topic_ids = [8, 9, 10, 11]
 
     initial_seed_states = load_initial_seed_states(
         ds_name=args.dataset,
@@ -325,7 +325,7 @@ if __name__ == "__main__":
         run_name=run_name,
     )
 
-    # with open("data/one_turn/20251003-180812-n_pop5-synthetic/baseline_results.json", "r") as f:
+    # with open("data/one_turn/20251005-015446-n_pop64-synthetic_1/baseline_results.json", "r") as f:
     #     baseline_results = json.load(f)
     # runner.baselines = {}
     # for user, rollouts in baseline_results.items():

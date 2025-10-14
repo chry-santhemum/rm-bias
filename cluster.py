@@ -16,8 +16,8 @@ import pandas as pd
 from bertopic import BERTopic
 from sklearn.feature_extraction.text import CountVectorizer
 
-from llm_types import ChatHistory
-from client import get_universal_caller, sample_from_model_parallel
+from caller.llm_types import ChatHistory
+from caller.client import get_universal_caller, sample_from_model_parallel
 
 dotenv.load_dotenv()
 nest_asyncio.apply()

@@ -46,13 +46,6 @@ class Rating:
 
 
 @dataclass
-class PlusMinusRollout:
-    plus: str
-    minus: str
-    plus_score: float | None
-    minus_score: float | None
-
-@dataclass
 class Rollout:
     response: str
     score: float | None
@@ -62,7 +55,7 @@ class Rollout:
 class AttributeStats:
     attribute: str
     judge_score: float|None = None
-    rollouts: dict[str, list[PlusMinusRollout]] = field(default_factory=dict)
+    rollouts: dict[str, list[Rollout]] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -70,41 +63,41 @@ class AttributeStats:
         return self.meta.get("parent", None)
 
     @property
-    def mean_rewards(self) -> dict[str, dict[str, float]]:
+    def mean_rewards(self) -> dict[str, float]:
         mean_results = {}
         for user_prompt, rollouts in self.rollouts.items():
-            rollouts = [r for r in rollouts if r.plus_score is not None and r.minus_score is not None]
-            mean_results[user_prompt] = {
-                "plus": np.mean([r.plus_score for r in rollouts]).item(),  # type: ignore
-                "minus": np.mean([r.minus_score for r in rollouts]).item(),  # type: ignore
-            }
+            rollouts = [r for r in rollouts if r.score is not None]
+            mean_results[user_prompt] = np.mean([r.score for r in rollouts]).item()  # type: ignore
         return mean_results
 
     
     @property
-    def all_rewards(self) -> dict[str, dict[str, list[float]]]:
+    def all_rewards(self) -> dict[str, list[float]]:
         all_results = {}
         for user_prompt, rollouts in self.rollouts.items():
-            rollouts = [r for r in rollouts if r.plus_score is not None and r.minus_score is not None]
-            all_results[user_prompt] = {
-                "plus": [r.plus_score for r in rollouts], 
-                "minus": [r.minus_score for r in rollouts], 
-            }
+            rollouts = [r for r in rollouts if r.score is not None]
+            all_results[user_prompt] = [r.score for r in rollouts]
         return all_results
     
 
-    @property
-    def mean_reward_diff(self) -> float|None:
+    def mean_reward_diff(self, baselines: dict[str, list[Rollout]]) -> float|None:
         mean_rewards = self.mean_rewards
         if len(mean_rewards) == 0:
             return None
-        return np.mean([mean_rewards[k]["plus"] - mean_rewards[k]["minus"] for k in mean_rewards]).item()
 
-    @property
-    def adversarial_score(self) -> float | None:
-        if self.judge_score is None or self.mean_reward_diff is None:
+        baseline_scores = []
+        for user_prompt in self.rollouts.keys():
+            baseline_scores.extend([r.score for r in baselines[user_prompt]])
+        if len(baseline_scores) == 0:
             return None
-        return adversariality(self.mean_reward_diff, self.judge_score)
+        return np.mean(list(mean_rewards.values())).item() - np.mean(baseline_scores).item()
+
+
+    def adversarial_score(self, baselines: dict[str, list[Rollout]]) -> float | None:
+        reward_diff = self.mean_reward_diff(baselines)
+        if reward_diff is None or self.judge_score is None:
+            return None
+        return adversariality(reward_diff, self.judge_score)
         
 
     @cached_property

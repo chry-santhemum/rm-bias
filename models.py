@@ -8,9 +8,9 @@ import random
 from slist import Slist
 from typing import Any, Literal
 
-from llm_types import ChatHistory
+from caller.llm_types import ChatHistory
 from utils import get_to_pass_reasoning
-from client import (
+from caller.client import (
     OpenaiResponse,
     get_universal_caller,
     sample_from_model,

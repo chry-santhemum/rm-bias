@@ -11,7 +11,7 @@ from typing import Tuple
 import plotly.graph_objects as go
 from collections import defaultdict
 
-from llm_types import ChatHistory
+from caller.llm_types import ChatHistory
 from models import GenerationModel
 
 nest_asyncio.apply()

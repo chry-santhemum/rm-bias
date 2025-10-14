@@ -22,9 +22,9 @@ from utils import timestamp, parse_json_response, ClusterModel
 from load_cluster import load_clusters, load_initial_seed_states
 from models import PlannerModel, PolicyModel, JudgeModel, RewriteModel
 from reward_model import RewardModel
-from state import SeedState, AttributeStats, PlusMinusRollout, Rollout
+from state import SeedState, AttributeStats, Rollout
 from standard_prompts import set_seed_all
-from llm_types import ChatHistory
+from caller.llm_types import ChatHistory
 from runner import Runner
 from one_turn import OneTurnPlanner
 
@@ -201,7 +201,6 @@ class PAIRRunner(Runner):
             rewrite_results = self.evaluate_attributes(
                 user_prompts=sample_user_prompts,
                 attributes=list(seed_state.history[-1].keys()),
-                method="rewrite",
                 save_dir=self.run_path / f"step_{self.step_count}_seed_{seed_state.index}",
             )
             for attribute, rollouts in rewrite_results.items():

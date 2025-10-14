@@ -9,10 +9,10 @@ import nest_asyncio
 from pathlib import Path
 from dataclasses import asdict
 
-from llm_types import ChatHistory
+from caller.llm_types import ChatHistory
 from state import PromptCluster
 from utils import get_to_pass_reasoning, parse_json_response
-from client import get_universal_caller, sample_from_model, sample_from_model_parallel
+from caller.client import get_universal_caller, sample_from_model, sample_from_model_parallel
 
 nest_asyncio.apply()
 

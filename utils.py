@@ -22,7 +22,7 @@ from transformers import (
 )
 from transformers.trainer_utils import set_seed as hf_set_seed
 
-from client import (
+from caller.client import (
     OpenaiResponse,
     is_thinking_model,
 )

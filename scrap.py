@@ -13,8 +13,8 @@ import plotly.graph_objects as go
 import plotly.express as px
 from datasets import load_dataset
 
-from llm_types import ChatHistory
-from client import get_universal_caller, sample_from_model, sample_from_model_parallel
+from caller.llm_types import ChatHistory
+from caller.client import get_universal_caller, sample_from_model, sample_from_model_parallel
 from reward_model import RewardModel
 
 nest_asyncio.apply()
@@ -697,7 +697,7 @@ make_bootstrap_plot(bootstrap_stats, save_path="scrap/synthetic_rewrite_70b_2.ht
 
 # %%
 
-from llm_types import ChatHistory, ChatMessage
+from caller.llm_types import ChatHistory, ChatMessage
 from raters import RewriteModel, RewardModel, prompt_to_hash_path
 
 

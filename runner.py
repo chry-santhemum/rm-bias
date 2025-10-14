@@ -18,9 +18,7 @@ from models import PolicyModel, RewriteModel, JudgeModel
 from reward_model import RewardModel
 from bias import (
     evaluate_baselines,
-    evaluate_attributes_conditional,
-    evaluate_attributes_rewrite,
-    evaluate_attributes_half,
+    evaluate_attributes_rewrite_plus,
 )
 
 
@@ -106,45 +104,23 @@ class Runner(ABC):
         self,
         user_prompts: list[str],
         attributes: list[str],
-        method: Literal["conditional", "rewrite", "half"],
         save_dir: Path | None = None,
         baseline_rollouts: dict[str, list[Rollout]] | None=None
     ):
         start_time = time.time()
-        if method == "rewrite":
-            if baseline_rollouts is None:
-                baseline_rollouts = self.baselines
-            results = asyncio.run(evaluate_attributes_rewrite(
-                user_prompts=user_prompts,
-                policy_model=None,
-                baseline_rollouts=baseline_rollouts,
-                rater=self.reward_model,
-                attributes=attributes,
-                rewrite_model=self.rewrite_model,
-                save_dir=save_dir,
-                n_rollouts=self.n_rollouts,
-                n_rewrites=1,
-            ))
-        elif method == "conditional":
-            results = asyncio.run(evaluate_attributes_conditional(
-                user_prompts=user_prompts,
-                policy_model=self.policy_model,
-                rater=self.reward_model,
-                attributes=attributes,
-                save_dir=save_dir,
-                n_rollouts=self.n_rollouts,
-            ))
-        elif method == "half":
-            results = asyncio.run(evaluate_attributes_half(
-                user_prompts=user_prompts,
-                policy_model=self.policy_model,
-                rater=self.reward_model,
-                attributes=attributes,
-                rewrite_model=self.rewrite_model,
-                save_dir=save_dir,
-                n_rollouts=self.n_rollouts,
-                n_rewrites=1,
-            ))
+        if baseline_rollouts is None:
+            baseline_rollouts = self.baselines
+        results = asyncio.run(evaluate_attributes_rewrite_plus(
+            user_prompts=user_prompts,
+            policy_model=None,
+            baseline_rollouts=baseline_rollouts,
+            rater=self.reward_model,
+            attributes=attributes,
+            rewrite_model=self.rewrite_model,
+            save_dir=save_dir,
+            n_rollouts=self.n_rollouts,
+            n_rewrites=1,
+        ))
         print(f"Attributes evaluated in {time.time() - start_time} seconds")
         logging.info(f"Attributes evaluated in {time.time() - start_time} seconds")
         return results
@@ -170,21 +146,27 @@ class Runner(ABC):
                 seed_state.history[-1][attribute].judge_score = judge_score
 
 
-    def save_attribute_stats(self):
+    def save_attribute_stats(self, top_k: int = 4) -> dict[int, list[str]]:
         """
         Save a condensed version of all attribute stats for each seed state,
         ordered by adversarial score.
+        
+        Returns seed_state_index -> top k list of attributes
         """
+
+        top_attributes = dict()
         
         for seed_state in self.seed_states:
             all_attributes = []
-            for time_step in seed_state.history:
+            for t, time_step in enumerate(seed_state.history):
                 for attribute, attribute_stats in time_step.items():
+
                     all_attributes.append({
                         "attribute": attribute,
+                        "time_step": t,
                         "judge_score": attribute_stats.judge_score,
-                        "mean_reward_diff": attribute_stats.mean_reward_diff,
-                        "adversarial_score": attribute_stats.adversarial_score,
+                        "mean_reward_diff": attribute_stats.mean_reward_diff(self.baselines),
+                        "adversarial_score": attribute_stats.adversarial_score(self.baselines),
                         "all_rewards": attribute_stats.all_rewards,
                     })
             
@@ -193,6 +175,11 @@ class Runner(ABC):
             # overwrites if already exists
             with open(self.run_path / f"final_stats_seed_{seed_state.index}.json", "w") as f:
                 json.dump(all_attributes, f, indent=4)
+            
+            top_attributes[seed_state.index] = [attr["attribute"] for attr in all_attributes[:top_k]]
+        
+        return top_attributes
+
 
 
     def save_seed_states(self):
@@ -220,7 +207,6 @@ class Runner(ABC):
             self.evaluate_attributes(
                 user_prompts=seed_state.cluster.val_prompts,
                 attributes=final_attributes[seed_state.index],
-                method="rewrite",
                 save_dir=self.run_path / "validate" / f"seed_{seed_state.index}",
                 baseline_rollouts=self.val_baselines,
             )

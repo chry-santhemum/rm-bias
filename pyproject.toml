@@ -8,6 +8,7 @@ dependencies = [
     "anthropic>=0.64.0",
     "bertopic>=0.17.3",
     "black>=25.9.0",
+    "caller",
     "datasets>=4.0.0",
     "dictionary-learning",
     "hf-transfer>=0.1.9",
@@ -35,6 +36,7 @@ no-build-isolation-package = ["flash-attn"]
 
 [tool.uv.sources]
 dictionary-learning = { workspace = true }
+caller = { path = "../caller", editable = true }
 
 [tool.uv.workspace]
 members = [
