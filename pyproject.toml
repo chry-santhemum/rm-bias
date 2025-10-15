@@ -35,13 +35,8 @@ dependencies = [
 no-build-isolation-package = ["flash-attn"]
 
 [tool.uv.sources]
-dictionary-learning = { workspace = true }
 caller = { path = "../caller", editable = true }
-
-[tool.uv.workspace]
-members = [
-    "dictionary_learning",
-]
+dictionary-learning = { path = "../dictionary_learning", editable = true }
 
 [tool.ruff.lint]
 ignore = ["E402", "F401", "F403", "F405", "F541", "F722", "F821"]

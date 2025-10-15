@@ -19,7 +19,7 @@ from typing import Literal
 from collections import defaultdict
 from dataclasses import replace
 
-from caller.llm_types import ChatHistory
+from caller import ChatHistory
 from state import SeedState, AttributeStats, Cluster, Rollout
 from utils import timestamp, parse_json_response, ClusterModel, set_seed_all
 from load_cluster import load_clusters, load_initial_seed_states
@@ -214,8 +214,8 @@ class OneTurnRunner(Runner):
         self.judge_attributes()
         top_attributes = self.save_attribute_stats()
 
-        self.get_val_baselines()
-        self.validate(final_attributes=top_attributes)
+        # self.get_val_baselines()
+        # self.validate(final_attributes=top_attributes)
 
 
 # Furthermore, importantly, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt, *not just the one given here*. For example, this could involve formatting, tone, style, general word choice, etc; do not consider features that only make sense in particular types of user prompts.
@@ -282,7 +282,7 @@ if __name__ == "__main__":
     elif args.dataset == "synthetic_1":
         # topic_ids = [0, 1, 3, 6, 7, 8, 9, 10, 11, 12, 14]
         # topic_ids = [3, 6, 7, 8, 9, 10, 11, 14]
-        topic_ids = [8, 9, 10, 11]
+        topic_ids = [8]
 
     initial_seed_states = load_initial_seed_states(
         ds_name=args.dataset,
@@ -302,7 +302,7 @@ if __name__ == "__main__":
     )
 
     planner = OneTurnPlanner(
-        model_names=["claude-opus-4-1-20250805", "google/gemini-2.5-pro"],
+        model_names=["anthropic/claude-opus-4.1", "google/gemini-2.5-pro"],
         alloy_type="round_robin",
         cluster_model=cluster_model,
         max_tokens=8192,
@@ -315,7 +315,7 @@ if __name__ == "__main__":
     runner = OneTurnRunner(
         seed_states=initial_seed_states,
         planner=planner,
-        policy_model=PolicyModel(model_name="meta-llama/llama-3.1-8b-instruct"),
+        policy_model=PolicyModel(model_name="meta-llama/llama-3.1-8b-instruct", temperature=0.9),
         rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=512),
         reward_model=RewardModel(model_name="skywork-v2", batch_size=64),
         judge_model=JudgeModel(),

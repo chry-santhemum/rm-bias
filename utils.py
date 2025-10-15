@@ -22,10 +22,7 @@ from transformers import (
 )
 from transformers.trainer_utils import set_seed as hf_set_seed
 
-from caller.client import (
-    OpenaiResponse,
-    is_thinking_model,
-)
+from caller import OpenaiResponse
 
 logger = logging.getLogger(__name__)
 
@@ -135,21 +132,21 @@ def parse_json_response(
     output, reasoning = None, None
     try:
         raw_text = resp.first_response
-        if is_thinking_model(resp.model):
+        if resp.reasoning_content is not None:
             reasoning = resp.reasoning_content
         try:
             if "```json" in raw_text:
                 output = json.loads(
                     raw_text.split("```json", 1)[1].split("```", 1)[0].strip()
                 )
-                if not is_thinking_model(resp.model):
+                if reasoning is None:
                     reasoning = raw_text.rsplit("```json", 1)[0].strip()
             else:
                 output = json.loads(raw_text)
 
         except Exception as e:
             output = raw_text
-            if not is_thinking_model(resp.model):
+            if reasoning is None:
                 reasoning = raw_text
             if log_json_error:
                 logger.error(f"Response JSON parse error: {e}")
@@ -195,51 +192,6 @@ def is_notebook():
             return False  # Other type (assume not notebook)
     except NameError:
         return False  # Probably standard Python interpreter
-
-
-def get_effort_from_tokens(reasoning_tokens: int, max_tokens: int) -> str:
-    ratio: float = reasoning_tokens / max_tokens
-    assert 0 <= ratio <= 1, f"Invalid reasoning to max_tokens ratio: {ratio}"
-    if ratio < 0.3:
-        return "low"
-    elif ratio < 0.7:
-        return "medium"
-    else:
-        return "high"
-
-
-def get_tokens_from_effort(effort: str, max_tokens: int) -> int:
-    match effort:
-        case "low":
-            return int(max_tokens * 0.2)
-        case "medium":
-            return int(max_tokens * 0.5)
-        case "high":
-            return int(max_tokens * 0.8)
-        case _:
-            raise ValueError(f"Invalid effort: {effort}")
-
-
-def get_to_pass_reasoning(reasoning: int | str | None, max_tokens: int|None) -> dict | None:
-    if isinstance(reasoning, str):
-        if max_tokens is None:
-            to_pass_reasoning = {"effort": reasoning}
-        else:
-            to_pass_reasoning = {
-                "max_tokens": get_tokens_from_effort(reasoning, max_tokens),
-                "effort": reasoning,
-            }
-    elif isinstance(reasoning, int):
-        if max_tokens is None:
-            to_pass_reasoning = {"max_tokens": reasoning}
-        else:
-            to_pass_reasoning = {
-                "max_tokens": reasoning,
-                "effort": get_effort_from_tokens(reasoning, max_tokens),
-            }
-    else:
-        to_pass_reasoning = None
-    return to_pass_reasoning
 
 
 # %%

@@ -38,7 +38,7 @@ from raters import (
 from state import SeedState, SystemPromptStats
 from standard_prompts import set_seed_all
 from defaults import *
-from caller.llm_types import ChatHistory
+from caller import ChatHistory
 from runner import (
     Runner,
     ClusterModel,

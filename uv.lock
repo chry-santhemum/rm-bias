@@ -6,12 +6,6 @@ resolution-markers = [
     "sys_platform != 'linux'",
 ]
 
-[manifest]
-members = [
-    "dictionary-learning",
-    "rm-bias",
-]
-
 [[package]]
 name = "accelerate"
 version = "1.10.1"
@@ -601,7 +595,7 @@ wheels = [
 [[package]]
 name = "dictionary-learning"
 version = "0.1.0"
-source = { editable = "dictionary_learning" }
+source = { editable = "../dictionary_learning" }
 dependencies = [
     { name = "circuitsvis" },
     { name = "datasets" },
@@ -2709,7 +2703,7 @@ requires-dist = [
     { name = "black", specifier = ">=25.9.0" },
     { name = "caller", editable = "../caller" },
     { name = "datasets", specifier = ">=4.0.0" },
-    { name = "dictionary-learning", editable = "dictionary_learning" },
+    { name = "dictionary-learning", editable = "../dictionary_learning" },
     { name = "hf-transfer", specifier = ">=0.1.9" },
     { name = "ipykernel", specifier = ">=6.30.1" },
     { name = "ipywidgets", specifier = ">=8.1.7" },

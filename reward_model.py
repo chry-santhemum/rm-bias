@@ -11,7 +11,7 @@ from pathlib import Path
 from dataclasses import dataclass
 import nest_asyncio
 
-from caller.llm_types import ChatHistory
+from caller import ChatHistory
 from utils import load_model, REWARD_MODELS
 
 logger = logging.getLogger(__name__)

@@ -1,24 +1,24 @@
 {
-    "typeCheckingMode": "basic",
-    "reportPrivateImportUsage": "warning",
-    "reportAttributeAccessIssue": "warning",
-    "reportOptionalMemberAccess": "warning",
-    "venvPath": "/root",
-    "venv": ".venv",
-    "extraPaths": [
-      "/workspace/rm-bias/dictionary_learning"
-    ],
-    "exclude": [
-        "sae_cache",
-        "wandb",
-        "log",
-        "data",
-        "__pycache__",
-        ".api_cache",
-        ".cache",
-        "logs",
-        "scrap",
-        "results",
-        "user_prompts"
-    ]
+  "typeCheckingMode": "basic",
+  "reportPrivateImportUsage": "warning",
+  "reportAttributeAccessIssue": "warning",
+  "reportOptionalMemberAccess": "warning",
+  "venvPath": "/root",
+  "venv": ".venv",
+  "extraPaths": [
+    "/workspace/caller",
+    "/workspace/dictionary_learning"
+  ],
+  "exclude": [
+    "sae_cache",
+    "__pycache__",
+    ".api_cache",
+    ".cache",
+    "logs",
+    "data",
+    "scrap",
+    "wandb",
+    "results",
+    "user_prompts",
+  ]
 }

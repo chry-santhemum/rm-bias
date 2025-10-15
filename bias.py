@@ -26,7 +26,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 from utils import timestamp
-from caller.llm_types import ChatHistory
+from caller import ChatHistory
 from models import PolicyModel, RewriteModel
 from load_cluster import load_clusters
 from reward_model import RewardModel

@@ -24,7 +24,7 @@ from models import PlannerModel, PolicyModel, JudgeModel, RewriteModel
 from reward_model import RewardModel
 from state import SeedState, AttributeStats, Rollout
 from standard_prompts import set_seed_all
-from caller.llm_types import ChatHistory
+from caller import ChatHistory
 from runner import Runner
 from one_turn import OneTurnPlanner
 

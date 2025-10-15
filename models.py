@@ -8,17 +8,14 @@ import random
 from slist import Slist
 from typing import Any, Literal
 
-from caller.llm_types import ChatHistory
-from utils import get_to_pass_reasoning
-from caller.client import (
-    OpenaiResponse,
-    get_universal_caller,
-    sample_from_model,
-    sample_from_model_parallel,
-)
+from caller import Caller, CacheConfig, ChatHistory, OpenaiResponse
 
 logger = logging.getLogger(__name__)
 
+cache_config = CacheConfig(no_cache_models={
+    "meta-llama/llama-3.1-8b-instruct", 
+    "meta-llama/llama-3.1-70b-instruct"
+})
 
 class GenerationModel:
     def __init__(
@@ -37,18 +34,16 @@ class GenerationModel:
         self.max_par = max_par
         self.full_logging = full_logging
 
-        self.caller = get_universal_caller()
+        self.caller = Caller(cache_config=cache_config)
 
 
     async def sample_one(self, chat_history: ChatHistory) -> ChatHistory|None:
-        response = await sample_from_model(
-            caller=self.caller,
-            prompt=chat_history,
-            full_logging=self.full_logging,
+        response = await self.caller.call_one(
+            messages=chat_history,
             model=self.model_name,
             temperature=self.temperature,
             max_tokens=self.max_tokens,
-            reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
+            reasoning=self.reasoning,
         )
 
         try:
@@ -67,16 +62,14 @@ class GenerationModel:
         chat_histories: list[ChatHistory],
         use_tqdm: bool=True,
     ) -> list[ChatHistory | None]:
-        responses = await sample_from_model_parallel(
-            caller=self.caller,
-            prompts=chat_histories,
-            max_par=self.max_par,
-            full_logging=self.full_logging,
+        responses = await self.caller.call(
+            messages=chat_histories,
+            max_parallel=self.max_par,
             desc="Generation model" if use_tqdm else "",
             model=self.model_name,
             temperature=self.temperature,
             max_tokens=self.max_tokens,
-            reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
+            reasoning=self.reasoning,
         )
 
         outputs = []
@@ -371,7 +364,7 @@ class PlannerModel:
         self.max_par = max_par
         self.full_logging = full_logging
 
-        self.caller = get_universal_caller()
+        self.caller = Caller(cache_config=cache_config)
         self.curr_planner_index: int = 0
 
     @property
@@ -392,15 +385,13 @@ class PlannerModel:
         self, 
         chat_histories: list[ChatHistory], 
         desc: str = "Planning",
-    ) -> Slist[OpenaiResponse]:
-        return await sample_from_model_parallel(
-            caller=self.caller,
-            prompts=chat_histories,
-            max_par=self.max_par,
-            full_logging=self.full_logging,
+    ) -> list[OpenaiResponse]:
+        return await self.caller.call(
+            messages=chat_histories,
+            max_parallel=self.max_par,
             desc=desc,
             model=self.curr_planner_model,
             temperature=self.temperature,
             max_tokens=self.max_tokens,
-            reasoning=get_to_pass_reasoning(self.reasoning, self.max_tokens),
+            reasoning=self.reasoning,
         )
