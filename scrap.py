@@ -13,12 +13,10 @@ import plotly.graph_objects as go
 import plotly.express as px
 from datasets import load_dataset
 
-from caller import ChatHistory
-from caller import get_universal_caller, sample_from_model, sample_from_model_parallel
+from caller import ChatHistory, Caller
 from reward_model import RewardModel
 
 nest_asyncio.apply()
-caller = get_universal_caller()
 
 # %%
 
@@ -234,12 +232,13 @@ def plot_seed_data(cluster_info: dict, seed_data: list[dict], seed_baseline: dic
 
 # %%
 
-results_dir = Path("data/one_turn/20251005-015446-n_pop64-synthetic_1")
+# results_dir = Path("data/one_turn/20251005-015446-n_pop64-synthetic_1")
+results_dir = Path("data/one_turn/20251015-232457-n_pop32-synthetic_1")
 
 with open(results_dir / "baseline_scores.json", "r", encoding="utf-8") as f:
     baseline_results = json.load(f)
 
-for seed_index in [3, 6, 7, 8, 9, 10, 11, 14]:
+for seed_index in [8]:
     with open(
         results_dir / f"final_stats_seed_{seed_index}.json", "r", encoding="utf-8"
     ) as f:
@@ -272,9 +271,9 @@ for seed_index in [3, 6, 7, 8, 9, 10, 11, 14]:
 
     fig = plot_seed_data(cluster_info, seed_data, seed_baseline)
     fig.show()
-    fig.write_html(
-        f"scrap/20251005-015446-n_pop64-synthetic_1_plus_baseline_{seed_index}.html"
-    )
+    # fig.write_html(
+    #     f"scrap/20251005-015446-n_pop64-synthetic_1_plus_baseline_{seed_index}.html"
+    # )
 
 
 # %%

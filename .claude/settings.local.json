@@ -19,7 +19,9 @@
       "Bash(ls:*)",
       "Bash(nvidia-smi:*)",
       "Bash(nvcc:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Read(//workspace/caller/src/caller/**)",
+      "Read(//workspace/caller/**)"
     ],
     "deny": [
       "Bash(rm:*)",
