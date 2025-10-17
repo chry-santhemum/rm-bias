@@ -120,6 +120,15 @@ def set_seed_all(seed: int):
     hf_set_seed(seed)
 
 
+def logging_setup(filename: str, level: int = logging.WARNING):
+    logging.basicConfig(
+        level=level,
+        filename=filename,
+        filemode="w",
+        format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(name)s - %(message)s",
+    )
+
+
 def parse_json_response(
     resp: OpenaiResponse, log_json_error: bool = True
 ) -> Tuple[Any, str | None]:
@@ -195,6 +204,7 @@ def is_notebook():
 
 
 # %%
+
 
 class ClusterModel:
     def __init__(

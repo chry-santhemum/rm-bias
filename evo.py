@@ -23,7 +23,7 @@ from tqdm.auto import tqdm
 from pathlib import Path
 
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
 )
 
 from utils import timestamp, parse_json_response
@@ -84,7 +84,9 @@ class EvoPlanner(OneTurnPlanner):
                     cluster_summary=seed_state.cluster.summary,
                     original_system_prompt=system_prompt,
                     sample_responses=EvoPlanner._get_past_data_str(
-                        seed_state.history[seed_state.state[system_prompt]][system_prompt]
+                        seed_state.history[seed_state.state[system_prompt]][
+                            system_prompt
+                        ]
                     ),
                 )
 

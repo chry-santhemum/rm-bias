@@ -28,6 +28,7 @@ embedding_model = SentenceTransformer(
     tokenizer_kwargs={"padding_side": "left"},
 )
 
+
 def embed(ds_name: str, prompt: str):
     with open(f"data/{ds_name}/ds_cleaned.pkl", "rb") as f:
         ds_cleaned = pickle.load(f)
@@ -37,17 +38,18 @@ def embed(ds_name: str, prompt: str):
     print(f"First 5 docs from {ds_name}:\n")
     for doc in docs[:5]:
         print(doc)
-        print("-"*70)
-        
+        print("-" * 70)
+
     start_time = time.time()
     embeddings = embedding_model.encode(
-        docs, 
+        docs,
         prompt=prompt,
         show_progress_bar=True,
     )
     print(f"Embedding took {time.time() - start_time:.2f}s")
     np.save(f"data/{ds_name}/embeddings.npy", embeddings)
     print(f"Saved embeddings to data/{ds_name}/embeddings.npy")
+
 
 # %%
 CLUSTER_PROMPT = "Instruct: Given a user prompt, summarize the topic and user intent of the prompt.\n\nUser prompt:"
@@ -57,6 +59,7 @@ embed("ultrafeedback", prompt=CLUSTER_PROMPT)
 # %%
 
 MIN_TOPIC_SIZE = 30
+
 
 def fit_bertopic(
     ds_name: str,
@@ -101,9 +104,12 @@ def fit_bertopic(
     # Filter for rows whose probability is at least 0.8
     labels_df_likely = labels_df[labels_df["Probability"] >= 0.8]
     labels_df_likely.to_csv(f"data/{ds_name}/labels_likely.csv", index=True)  # type: ignore
-    print(f"Saved labels with probability at least 0.8 to data/{ds_name}/labels_likely.csv")
+    print(
+        f"Saved labels with probability at least 0.8 to data/{ds_name}/labels_likely.csv"
+    )
 
     return topic_model
+
 
 # %%
 topic_model = fit_bertopic("ultrafeedback")
@@ -125,19 +131,25 @@ for topic_id in sorted(list(set(labels["Topic"].tolist()))):
     print(f"Topic {topic_id} has {len(clusters[topic_id])} documents")
 
     for doc in clusters[topic_id][:10]:
-        print("-"*70)
+        print("-" * 70)
         print(doc[0])
 
-    print("="*70)
+    print("=" * 70)
 
 # Print number of documents with certain probability
 
-def get_num_docs_with_probability(cluster: list[tuple[str, float]], probability: float) -> int:
+
+def get_num_docs_with_probability(
+    cluster: list[tuple[str, float]], probability: float
+) -> int:
     return len([doc for doc in cluster if doc[1] >= probability])
+
 
 p = 0.8
 for topic_id in sorted(list(set(labels["Topic"].tolist()))):
-    print(f"Topic {topic_id} has {get_num_docs_with_probability(clusters[topic_id], p)} out of {len(clusters[topic_id])} documents with probability >= {p}")
+    print(
+        f"Topic {topic_id} has {get_num_docs_with_probability(clusters[topic_id], p)} out of {len(clusters[topic_id])} documents with probability >= {p}"
+    )
 
 # %%
 NUM_SAMPLED_DOCS = 20
@@ -175,7 +187,9 @@ def topic_modeling(ds_name: str):
             continue
 
         sample_docs = random.sample(clusters[topic_id], NUM_SAMPLED_DOCS)
-        sample_docs_str = ("\n" + "-" * 10 + "\n").join([row["Document"] for row in sample_docs])
+        sample_docs_str = ("\n" + "-" * 10 + "\n").join(
+            [row["Document"] for row in sample_docs]
+        )
 
         representative_docs = representative[topic_id]
         representative_docs_str = ("\n" + "-" * 10 + "\n").join(
@@ -183,7 +197,9 @@ def topic_modeling(ds_name: str):
         )
 
         to_send_chats.append(
-            ChatHistory.from_system("You are an expert at summarizing documents.").add_user(
+            ChatHistory.from_system(
+                "You are an expert at summarizing documents."
+            ).add_user(
                 TOPIC_MODELING_PROMPT.format(
                     representative_documents=representative_docs_str,
                     sample_documents=sample_docs_str,
@@ -220,9 +236,10 @@ def topic_modeling(ds_name: str):
     labels.to_csv(f"data/{ds_name}/labels_summaries.csv", index=True)  # type: ignore
     print(f"Saved to data/{ds_name}/labels_summaries.csv")
 
+
 # %%
 topic_modeling("ultrafeedback")
-        
+
 
 # %%
 # Filtering out prompts that are not well-described by the cluster summary

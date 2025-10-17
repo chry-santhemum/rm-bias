@@ -35,9 +35,9 @@ def print_clusters(ds_name: str, print_prompts: bool = False) -> None:
         )
         if print_prompts:
             for row in clusters[topic_id][:10]:
-                print("-"*80)
+                print("-" * 80)
                 print(row["Document"])
-            print("="*80)
+            print("=" * 80)
 
 
 def load_clusters(
@@ -68,7 +68,9 @@ def load_clusters(
 
         for topic_id in topic_ids:
             if len(clusters[topic_id]) < min_prompts_per_cluster:
-                raise ValueError(f"Not enough prompts for cluster {topic_id} in {ds_name}: {len(clusters[topic_id])}")
+                raise ValueError(
+                    f"Not enough prompts for cluster {topic_id} in {ds_name}: {len(clusters[topic_id])}"
+                )
             random.shuffle(clusters[topic_id])
             if len(clusters[topic_id]) > max_prompts_per_cluster:
                 clusters[topic_id] = clusters[topic_id][:max_prompts_per_cluster]
@@ -79,7 +81,7 @@ def load_clusters(
             )
 
     elif ds_name in ["instruction-dataset", "agent-harm"]:
-        
+
         if ds_name == "instruction-dataset":
             instruction_test = load_dataset(
                 "HuggingFaceH4/instruction-dataset", split="test"
@@ -109,7 +111,9 @@ def load_clusters(
                 prompts = data["prompts"]
 
                 if len(prompts) < min_prompts_per_cluster:
-                    raise ValueError(f"Not enough prompts for {ds_name}: {len(prompts)}")
+                    raise ValueError(
+                        f"Not enough prompts for {ds_name}: {len(prompts)}"
+                    )
 
                 random.shuffle(prompts)
                 if len(prompts) > max_prompts_per_cluster:
@@ -130,7 +134,6 @@ def load_clusters(
     return id_to_cluster
 
 
-
 def load_initial_seed_states(
     ds_name: str,
     topic_ids: list[int] = [],  # only for datasets in CLUSTER_DATASETS
@@ -139,14 +142,16 @@ def load_initial_seed_states(
 ) -> list[SeedState]:
     initial_seed_states = []
     id_to_cluster = load_clusters(ds_name, topic_ids=topic_ids)
-    
+
     for id, cluster_dict in id_to_cluster.items():
         prompts = cluster_dict.prompts
         train_prompts = prompts[:-val_split_size]
         val_prompts = prompts[-val_split_size:]
 
         if train_batch_size > len(train_prompts):
-            raise ValueError(f"Train batch size {train_batch_size} is greater than the number of train prompts {len(train_prompts)}")
+            raise ValueError(
+                f"Train batch size {train_batch_size} is greater than the number of train prompts {len(train_prompts)}"
+            )
 
         cluster = Cluster(
             summary=cluster_dict.summary,
@@ -175,12 +180,10 @@ def load_initial_seed_states(
 
     return initial_seed_states
 
+
 # %%
 if __name__ == "__main__":
-    load_clusters(
-        "alpaca",
-        topic_ids=[0, 2, 4, 6, 9, 11, 15, 21, 34, 35, 83]
-    )
+    load_clusters("alpaca", topic_ids=[0, 2, 4, 6, 9, 11, 15, 21, 34, 35, 83])
 
     # topic_ids=[]
     # topic_ids=[0, 2, 4, 6, 9, 11, 15, 21, 34, 35, 83]  # alpaca

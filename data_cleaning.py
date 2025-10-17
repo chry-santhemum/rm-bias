@@ -20,6 +20,7 @@ tokenizer = tiktoken.get_encoding("gpt2")
 # By standard we sample 1024 tokens from the policy
 # Here we filter for at most 512 tokens
 
+
 # Ultrafeedback
 def preprocess_ultrafeedback(item):
     item["chosen"] = item["chosen"][1]["content"]
@@ -54,6 +55,7 @@ Path("data/ultrafeedback").mkdir(parents=True, exist_ok=True)
 with open("data/ultrafeedback/ds_filtered.pkl", "wb") as f:
     pickle.dump(ultrafeedback, f)
 
+
 # %%
 # Alpaca
 def preprocess_alpaca(item):
@@ -66,14 +68,18 @@ def preprocess_alpaca(item):
     item["output_length"] = len(tokenizer.encode(item["output"], disallowed_special=()))
     return item
 
+
 start_time = time.time()
-alpaca = load_dataset("vicgalle/alpaca-gpt4", split="train").map(
-    preprocess_alpaca,
-    num_proc=8,  # type: ignore
-).filter(
-    lambda item: item["prompt_length"] < 512
-    and item["output_length"] < 512,
-    num_proc=8,
+alpaca = (
+    load_dataset("vicgalle/alpaca-gpt4", split="train")
+    .map(
+        preprocess_alpaca,
+        num_proc=8,  # type: ignore
+    )
+    .filter(
+        lambda item: item["prompt_length"] < 512 and item["output_length"] < 512,
+        num_proc=8,
+    )
 )
 print(f"Preprocessing in {time.time() - start_time:.2f}s")
 print("Alpaca after filtering: ", len(alpaca))
@@ -81,6 +87,7 @@ print("Alpaca after filtering: ", len(alpaca))
 Path("data/alpaca").mkdir(parents=True, exist_ok=True)
 with open("data/alpaca/ds_filtered.pkl", "wb") as f:
     pickle.dump(alpaca, f)
+
 
 # %%
 # Wildchat
@@ -125,7 +132,7 @@ with open("data/wildchat/ds_filtered.pkl", "wb") as f:
     pickle.dump(wildchat, f)
 
 # %%
-# Basic cleaning: 
+# Basic cleaning:
 # normalize, deduplicate, and filter low-quality prompts
 
 
@@ -262,6 +269,7 @@ def clean(ds_name: str):
 
     with open(f"data/{ds_name}/ds_cleaned.pkl", "wb") as f:
         pickle.dump(ds_filtered, f)
+
 
 # %%
 

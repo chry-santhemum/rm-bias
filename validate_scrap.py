@@ -8,15 +8,8 @@ from models import PolicyModel, RewriteModel, JudgeModel
 from one_turn import OneTurnPlanner, OneTurnRunner
 
 
-
 if __name__ == "__main__":
-    selected_attributes = {
-        3: [1],
-        8: [1, 2],
-        10: [6],
-        11: [1],
-        14: [3]
-    }
+    selected_attributes = {3: [1], 8: [1, 2], 10: [6], 11: [1], 14: [3]}
     initial_seed_states = load_initial_seed_states(
         ds_name="synthetic_1",
         topic_ids=list(selected_attributes.keys()),
@@ -27,7 +20,9 @@ if __name__ == "__main__":
     results_dir = Path("data/one_turn/20251005-015446-n_pop64-synthetic_1")
     loaded_data = {}
     for seed_id, attribute_ids in selected_attributes.items():
-        with open(results_dir / f"final_stats_seed_{seed_id}.json", "r", encoding="utf-8") as f:
+        with open(
+            results_dir / f"final_stats_seed_{seed_id}.json", "r", encoding="utf-8"
+        ) as f:
             data = json.load(f)
             loaded_data[seed_id] = [data[i]["attribute"] for i in attribute_ids]
 
@@ -44,7 +39,7 @@ if __name__ == "__main__":
         level=logging.INFO,
         filename=f"logs/one_turn/{run_name}.log",
         filemode="w",
-        format='%(asctime)s - %(name)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s'
+        format="%(asctime)s - %(name)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s",
     )
 
     planner = OneTurnPlanner(

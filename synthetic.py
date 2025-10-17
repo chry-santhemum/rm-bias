@@ -41,7 +41,8 @@ CLUSTER_DESCRIPTIONS = [
 ]
 
 
-BRAINSTORM_PROMPT = textwrap.dedent("""
+BRAINSTORM_PROMPT = textwrap.dedent(
+    """
     You are an expert in brainstorming realistic sub-topics for a given topic. You are an important component of a pipeline that generates diverse user prompts starting from a description of a short topic and possibly a specified user intent.
 
     Your current task is to brainstorm a list of {n_topics} possible sub-topics for user prompts that fall under the given topic and user intent. Each sub-topic should be a short phrase describing a concrete cluster of user prompts that belong to the given topic and user intent; another model will then use your description to generate actual user prompts, so make sure that your sub-topics aren't too broad or too specific.
@@ -61,10 +62,12 @@ BRAINSTORM_PROMPT = textwrap.dedent("""
     ```
 
     Each entry is a sub-topic.
-""").strip()
+"""
+).strip()
 
 
-GENERATION_PROMPT = textwrap.dedent("""
+GENERATION_PROMPT = textwrap.dedent(
+    """
     You are an average chatbot user writing prompts on a given topic (possibly with a specified user intent). You are an important component of a pipeline that generates diverse user prompts starting from a description of a short topic.
 
     Your task is to write a list of {n_prompts} different user prompts that fall under the given topic and with the given user intent.
@@ -86,7 +89,8 @@ GENERATION_PROMPT = textwrap.dedent("""
     ```
 
     Each entry is a user prompt string.
-""").strip()
+"""
+).strip()
 
 
 # %%
@@ -132,7 +136,6 @@ async def one_stage_main(
     return clusters
 
 
-
 async def two_stage_main(
     topics: list[str],
     model: str = "openai/gpt-5",
@@ -143,9 +146,7 @@ async def two_stage_main(
 ) -> dict[int, PromptCluster]:
     caller = get_universal_caller()
     sub_topics_chats = [
-        ChatHistory().add_user(
-            BRAINSTORM_PROMPT.format(topic=topic, n_topics=n_topics)
-        )
+        ChatHistory().add_user(BRAINSTORM_PROMPT.format(topic=topic, n_topics=n_topics))
         for topic in topics
     ]
     response = await sample_from_model_parallel(
@@ -168,10 +169,13 @@ async def two_stage_main(
         print("Subtopics:\n")
         print(sub_topics)
 
-    results: dict[int, PromptCluster] = {i: PromptCluster(
-        summary=topics[i],
-        prompts=[],
-    ) for i in range(len(topics))}
+    results: dict[int, PromptCluster] = {
+        i: PromptCluster(
+            summary=topics[i],
+            prompts=[],
+        )
+        for i in range(len(topics))
+    }
 
     prompt_generation_chats = [
         ChatHistory().add_user(
@@ -205,6 +209,9 @@ async def two_stage_main(
 
 # %%
 if __name__ == "__main__":
-    asyncio.run(two_stage_main(topics=CLUSTER_DESCRIPTIONS, n_topics=16, n_prompts=8, ds_name="synthetic_1"))
+    asyncio.run(
+        two_stage_main(
+            topics=CLUSTER_DESCRIPTIONS, n_topics=16, n_prompts=8, ds_name="synthetic_1"
+        )
+    )
     # asyncio.run(one_stage_main(topics=CLUSTER_DESCRIPTIONS, n_prompts=128, ds_name="synthetic_2"))
-
