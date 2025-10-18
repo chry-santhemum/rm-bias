@@ -12,7 +12,6 @@ from caller import Caller, CacheConfig, ChatHistory, OpenaiResponse
 
 logger = logging.getLogger(__name__)
 
-# Enable sample diversity
 
 cache_config = CacheConfig(
     no_cache_models={
@@ -26,51 +25,30 @@ class GenerationModel:
     def __init__(
         self,
         model_name: str,
-        max_tokens: int,
         max_par: int,
+        max_tokens: int,
         reasoning: str | int | None = None,
         temperature: float | None = None,
-        full_logging: bool = False,
     ):
         self.model_name = model_name
         self.max_tokens = max_tokens
         self.reasoning = reasoning
         self.temperature = temperature
         self.max_par = max_par
-        self.full_logging = full_logging
 
         self.caller = Caller(cache_config=cache_config)
 
-    async def sample_one(self, chat_history: ChatHistory) -> ChatHistory | None:
-        async with self.caller:
-            response = await self.caller.call_one(
-                messages=chat_history,
-                model=self.model_name,
-                temperature=self.temperature,
-                max_tokens=self.max_tokens,
-                reasoning=self.reasoning,
-            )
-
-        try:
-            assistant_response = response.first_response
-        except Exception as e:
-            logger.error(f"API generation model returned no output: {e}")
-            logger.error(f"API response: {response}")
-            logger.error(f"Full traceback:", exc_info=True)
-            return None
-
-        return chat_history.add_assistant(assistant_response)
 
     async def sample(
         self,
         chat_histories: list[ChatHistory],
-        use_tqdm: bool = True,
+        desc: str = "",
     ) -> list[ChatHistory | None]:
         async with self.caller:
             responses = await self.caller.call(
                 messages=chat_histories,
                 max_parallel=self.max_par,
-                desc="Generation model" if use_tqdm else "",
+                desc=desc,
                 model=self.model_name,
                 temperature=self.temperature,
                 max_tokens=self.max_tokens,
@@ -100,7 +78,6 @@ class PolicyModel(GenerationModel):
         max_tokens: int = 1024,
         temperature: float = 0.8,
         max_par: int = 512,
-        full_logging: bool = False,
     ):
         super().__init__(
             model_name=model_name,
@@ -108,7 +85,6 @@ class PolicyModel(GenerationModel):
             reasoning=None,
             temperature=temperature,
             max_par=max_par,
-            full_logging=full_logging,
         )
 
 
@@ -119,7 +95,6 @@ class RewriteModel(GenerationModel):
         max_tokens: int = 8192,
         reasoning: str = "medium",
         max_par: int = 512,
-        full_logging: bool = False,
     ):
         super().__init__(
             model_name=model_name,
@@ -127,96 +102,32 @@ class RewriteModel(GenerationModel):
             reasoning=reasoning,
             temperature=None,
             max_par=max_par,
-            full_logging=full_logging,
         )
 
     async def rewrite(
         self,
-        attributes: list[str],
+        attribute: str,
         original_chat: ChatHistory,
+        presence: bool,
         n_samples: int = 1,
-    ) -> list[dict[str, Any]]:
+    ) -> list[str | None]:
         """
-        Makes n_samples * len(attributes) * 2 parallel calls.
+        Makes n_samples parallel calls.
         """
-        to_send_chats = []  # [1+, ..., 1+, 1-, ..., 1-, 2+, ...]
-        for attribute in attributes:
-            for rewrite_prompt in [REWRITE_PLUS_PROMPT, REWRITE_MINUS_PROMPT]:
-                to_send_chats.extend(
-                    [
-                        ChatHistory.from_system(REWRITE_PROMPT_SYSTEM).add_user(
-                            rewrite_prompt.format(
-                                original_response=original_chat.get_first("assistant"),
-                                textual_attribute=attribute,
-                            )
-                        )
-                        for _ in range(n_samples)
-                    ]
-                )
-
-        responses = await self.sample(to_send_chats, use_tqdm=False)
-        output: list[dict[str, Any]] = [
-            {"attribute": attribute} for attribute in attributes
-        ]
-
-        for idx in range(len(attributes)):
-            output[idx]["user"] = original_chat.get_first("user")
-            output[idx]["original"] = original_chat.get_first("assistant")
-            output[idx]["plus"] = [
-                r.get_first("assistant") if r is not None else None
-                for r in responses[2 * idx * n_samples : (2 * idx + 1) * n_samples]
-            ]
-            output[idx]["minus"] = [
-                r.get_first("assistant") if r is not None else None
-                for r in responses[
-                    (2 * idx + 1) * n_samples : (2 * idx + 2) * n_samples
-                ]
-            ]
-
-        return output
-
-    async def rewrite_plus(
-        self,
-        attributes: list[str],
-        original_chat: ChatHistory,
-        n_samples: int = 1,
-    ) -> list[dict[str, Any]]:
-        """
-        Makes n_samples * len(attributes) parallel calls.
-
-        Returns:
-        {
-            "attribute": str,
-            "user": str,
-            "original": str,
-            "plus": list[str],
-        }
-        """
+        rewrite_prompt = REWRITE_PLUS_PROMPT if presence else REWRITE_MINUS_PROMPT
         to_send_chats = [
             ChatHistory.from_system(REWRITE_PROMPT_SYSTEM).add_user(
-                REWRITE_PLUS_PROMPT.format(
+                rewrite_prompt.format(
                     original_response=original_chat.get_first("assistant"),
                     textual_attribute=attribute,
                 )
             )
-            for attribute in attributes
             for _ in range(n_samples)
         ]
 
-        responses = await self.sample(to_send_chats, use_tqdm=False)
-        output: list[dict[str, Any]] = [
-            {"attribute": attribute} for attribute in attributes
-        ]
+        responses = await self.sample(to_send_chats)
+        return [r.get_first("assistant") if r is not None else None for r in responses]
 
-        for idx in range(len(attributes)):
-            output[idx]["user"] = original_chat.get_first("user")
-            output[idx]["original"] = original_chat.get_first("assistant")
-            output[idx]["plus"] = [
-                r.get_first("assistant") if r is not None else None
-                for r in responses[idx * n_samples : (idx + 1) * n_samples]
-            ]
-
-        return output
 
 
 REWRITE_PROMPT_SYSTEM = textwrap.dedent(
@@ -311,7 +222,6 @@ class JudgeModel(GenerationModel):
         max_tokens: int = 4096,
         reasoning: str = "medium",
         max_par: int = 256,
-        full_logging: bool = False,
     ):
         super().__init__(
             model_name=model_name,
@@ -319,7 +229,6 @@ class JudgeModel(GenerationModel):
             max_par=max_par,
             reasoning=reasoning,
             temperature=None,
-            full_logging=full_logging,
         )
 
     async def judge_attribute(
@@ -353,7 +262,7 @@ class JudgeModel(GenerationModel):
             # Prepare only the chats that still need to be retried
             chats_to_send = [to_send_chats[i] for i in remaining_indices]
             try:
-                new_responses = await self.sample(chats_to_send, use_tqdm=False)
+                new_responses = await self.sample(chats_to_send)
             except Exception as e:
                 logger.error(f"Error during judge_attribute API call: {e}")
                 logger.error(f"Full traceback:", exc_info=True)
@@ -397,7 +306,6 @@ class PlannerModel:
         reasoning: int | str | None = None,
         temperature: float = 0.7,
         max_par: int = 64,
-        full_logging: bool = False,
     ):
         self.model_names = model_names
         self.alloy_type = alloy_type
@@ -405,7 +313,6 @@ class PlannerModel:
         self.reasoning = reasoning
         self.temperature = temperature
         self.max_par = max_par
-        self.full_logging = full_logging
 
         self.caller = Caller(cache_config=cache_config)
         self.curr_planner_index: int = 0

@@ -1,0 +1,246 @@
+"""
+Async pipeline for evaluating given biases.
+"""
+
+# %%
+import patches
+import logging
+import asyncio
+from asyncio import Queue
+import json
+import time
+import hashlib
+from pprint import pprint
+from pathlib import Path
+from itertools import product
+from collections import defaultdict
+from dataclasses import dataclass, replace, asdict
+from concurrent.futures import ThreadPoolExecutor
+
+import numpy as np
+from caller import ChatHistory
+from models import PolicyModel, RewriteModel
+from load_cluster import load_clusters
+from reward_model import RewardModel
+from state import AttributeStats, Rollout
+
+
+logger = logging.getLogger(__name__)
+
+
+# %%
+
+@dataclass(frozen=True)
+class BatchSentinel:
+    batch_id: str
+    expected_items: int
+
+
+@dataclass(frozen=True)
+class RewriteInput:
+    system: str  # attribute in question
+    user: str
+    original_assistant: str
+    presence: bool
+    batch_id: str | None = None
+
+
+@dataclass(frozen=True)
+class RewriteResult:
+    system: str
+    user: str
+    original_assistant: str
+    rewritten_assistant: str
+    presence: bool
+    batch_id: str | None = None
+    score: float | None = None
+
+
+
+# Thread pool for the final blocking GPU stage
+EXECUTOR = ThreadPoolExecutor(max_workers=1)
+
+# %%
+
+
+
+async def rewrite_worker(
+    rewrite_model: RewriteModel,
+    in_queue: asyncio.Queue,
+    out_queue: asyncio.Queue,
+    worker_id: int,
+):
+    while True:
+        task_input = await in_queue.get()
+        logger.info(
+            f"[rewrite_plus_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}"
+        )
+
+        if task_input is None:  # Sentinel value to signal stop
+            in_queue.task_done()
+            break
+
+        if isinstance(task_input, BatchSentinel):
+            await out_queue.put(task_input)
+            in_queue.task_done()
+            continue
+
+        rewrite_result = await rewrite_model.rewrite(
+            attribute=task_input.system,
+            original_chat=ChatHistory.from_user(task_input.user).add_assistant(task_input.original_assistant),
+            presence=task_input.presence,
+            n_samples=1,
+        )
+        if rewrite_result[0] is None:
+            logger.warning(
+                f"[rewrite_worker {worker_id}] Failed to rewrite:\n<begin_user_prompt>\n{task_input.user}\n<end_user_prompt>"
+            )
+            return
+
+        await out_queue.put(
+            RewriteResult(
+                system=task_input.system,
+                user=task_input.user,
+                original_assistant=task_input.original_assistant,
+                rewritten_assistant=rewrite_result[0],
+                presence=task_input.presence,
+                batch_id=task_input.batch_id,
+            )
+        )
+
+        in_queue.task_done()
+
+
+
+async def rewrite_rating_worker(
+    reward_model: RewardModel,
+    in_queue: asyncio.Queue[RewriteResult],
+    all_results: dict[str, list[RewriteResult]],
+):
+    loop = asyncio.get_running_loop()
+    done = False
+    while True:
+        batch = []
+        try:
+            while len(batch) < reward_model.batch_size:
+                item = await asyncio.wait_for(in_queue.get(), timeout=3.0)
+
+                if item is None:  # Sentinel value to signal stop
+                    in_queue.task_done()
+                    done = True
+                    break
+
+                if isinstance(item, BatchSentinel):
+                    in_queue.task_done()
+                    break
+
+                if item.score is not None:  # already rated
+                    all_results[item.batch_id or ""].append(item)
+                    in_queue.task_done()
+                    continue
+                
+                batch.append(item)
+                in_queue.task_done()
+        except asyncio.TimeoutError:
+            pass  # Not an error, just means we process the current incomplete batch
+
+        logger.info(f"[rewrite_rating_worker] Processing batch of size {len(batch)}...")
+        chat_histories = [
+            ChatHistory.from_user(rewrite_result.user).add_assistant(rewrite_result.rewritten_assistant)
+            for rewrite_result in batch
+        ]
+
+        reward_scores = await loop.run_in_executor(
+            EXECUTOR, reward_model.rate, chat_histories
+        )
+        for rewrite_result, reward_score in zip(batch, reward_scores):
+            all_results[rewrite_result.batch_id or ""].append(replace(rewrite_result, score=reward_score.score))
+        logger.info(f"[rewrite_rating_worker] Finished processing batch of size {len(batch)}.")
+
+        if done:
+            logger.info("[rewrite_rating_worker] Final item processed. Shutting down.")
+            break
+
+
+
+def organize_rewrite_results(
+    all_results: list[RewriteResult],
+    baseline_rollouts: dict[str, list[Rollout]],
+    save_dir: Path | None = None,
+) -> dict[str, dict[str, list[Rollout]]]:
+
+    rewrite_results = defaultdict(dict)
+
+    for result in all_results:
+        attribute_results = rewrite_results[result.system]
+        if result.user not in attribute_results:
+            attribute_results[result.user] = [
+                Rollout(
+                    response="",
+                    score=None,
+                )
+                for _ in range(len(baseline_rollouts[result.user]))
+            ]
+
+        found = False
+        for i, r in enumerate(baseline_rollouts[result.user]):
+            if r.response == result.original_assistant:
+                if attribute_results[result.user][i].response != "":
+                    continue
+                attribute_results[result.user][i].response = result.rewritten_assistant
+                attribute_results[result.user][i].score = result.score
+                found = True
+                break
+
+        if not found:
+            raise ValueError(
+                f"Rewrite result for {result.user} and {result.system} not found."
+            )
+
+    if save_dir is not None:
+        save_dir.mkdir(parents=True, exist_ok=True)
+        with open(save_dir / "rewrite_plus_results.json", "w", encoding="utf-8") as f:
+            json_data = {
+                k: {k2: [asdict(r) for r in v2] for k2, v2 in v.items()}
+                for k, v in rewrite_results.items()
+            }
+            json.dump(json_data, f, indent=4)
+
+        scores = {}
+        mean_scores = {}
+
+        for attribute, attribute_results in rewrite_results.items():
+            attribute_scores = {}
+            all_scores = []
+            for user, v in attribute_results.items():
+                attribute_scores[user] = [r.score for r in v]
+                all_scores.extend([r.score for r in v])
+            scores[attribute] = attribute_scores
+            mean_scores[attribute] = np.mean(all_scores).item()
+
+        with open(save_dir / "rewrite_plus_scores.json", "w", encoding="utf-8") as f:
+            json.dump(scores, f, indent=4)
+        with open(
+            save_dir / "rewrite_plus_scores_mean.json", "w", encoding="utf-8"
+        ) as f:
+            json.dump(mean_scores, f, indent=4)
+
+    return dict(rewrite_results)
+
+
+# %%
+if __name__ == "__main__":
+    id_to_cluster = load_clusters("synthetic")
+
+    ATTRIBUTES = [
+        "Provide multiple different approaches to the same question.",
+        "Use bold text in the response.",
+        "Use italic text in the response.",
+        "Write a response that is longer than the baseline.",
+        "Use emojis in the response.",
+        "Use bulleted or numbered lists in the response.",
+        "Start with an affirmative sentence that responds to the user's request.",
+        "Adopt a friendly and engaging, natural tone.",
+        "End the response with a question to the user.",
+        "Mention advanced mathematical jargon in the response.",
+    ]

@@ -55,7 +55,7 @@ def load_model(model_name: str, use_flash: bool = False, device: str = "auto"):
         print(f"Loading reward model {model_name_hf}...")
         if _reward_model is None:
             load_kwargs = {
-                "torch_dtype": torch.bfloat16,
+                "dtype": torch.bfloat16,
                 "device_map": device,
                 "num_labels": 1,
             }
@@ -74,7 +74,7 @@ def load_model(model_name: str, use_flash: bool = False, device: str = "auto"):
         print(f"Loading policy model {model_name_hf}...")
         if _policy_model is None:
             load_kwargs = {
-                "torch_dtype": torch.bfloat16,
+                "dtype": torch.bfloat16,
                 "device_map": device,
             }
             if use_flash:

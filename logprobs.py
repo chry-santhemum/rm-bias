@@ -1,10 +1,12 @@
 # %%
+import pickle
 import asyncio
 import nest_asyncio
 from tqdm.auto import tqdm
 import plotly.graph_objects as go
 import plotly.express as px
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -161,11 +163,78 @@ if __name__ == "__main__":
     reward_model = RewardModel(model_name="skywork-v2", batch_size=16)
     rewards = [s.score for s in reward_model.rate(chats)]
 
-    # draw scatterplot and fit linear regression
-    fig = px.scatter(x=logprobs, y=rewards)
-    fig.show()
+# %%
+# normalize reward scores
+# within samples of each user prompt, subtract by mean
 
-    fig = px.scatter(x=confidences, y=rewards)
-    fig.show()
+# There are `n_samples` completions for each user prompt
+n_samples = 64
+num_prompts = len(user_prompts)
+assert len(rewards) == num_prompts * n_samples, "Rewards array size mismatch"
 
+rewards = np.array(rewards)
+rewards_subtract_mean = rewards.copy()
+rewards_normalized = rewards.copy()
+
+for i in range(num_prompts):
+    start = i * n_samples
+    end = (i + 1) * n_samples
+    mean = rewards[start:end].mean()
+    std = rewards[start:end].std()
+    rewards_subtract_mean[start:end] -= mean
+    rewards_normalized[start:end] = rewards_subtract_mean[start:end] / std
+
+
+with open("data/scrap/logprobs.pkl", "wb") as f:
+    pickle.dump({
+        "user_prompts": user_prompts,
+        "chats": chats,
+        "logprobs": logprobs,
+        "confidences": confidences,
+        "rewards": rewards,
+        "rewards_subtract_mean": rewards_subtract_mean,
+        "rewards_normalized": rewards_normalized,
+    }, f)
+
+# %%
+# draw scatterplot and fit linear regression
+# set small point size and lower opacity
+fig = px.scatter(
+    x=logprobs,
+    y=rewards,
+    size_max=4,
+    opacity=0.3,
+    labels={"x": "logprobs", "y": "reward (unnormalized)"}
+)
+fig.show()
+
+fig = px.scatter(
+    x=confidences,
+    y=rewards,
+    size_max=4,
+    opacity=0.3,
+    labels={"x": "confidence", "y": "reward (unnormalized)"}
+)
+fig.show()
+
+# %%
+
+import numpy as np
+fig = px.scatter(
+    x=np.exp(logprobs), 
+    y=rewards,
+    size_max=4,
+    opacity=0.3,
+    labels={"x": "probs", "y": "reward (unnormalized)"}
+)
+fig.show()
+
+fig = px.scatter(
+    x=np.exp(confidences), 
+    y=rewards,
+    size_max=4,
+    opacity=0.3,
+    labels={"x": "exp(confidence)", "y": "reward (unnormalized)"}
+)
+fig.show()
 # %%
