@@ -22,24 +22,23 @@ from state import SeedState, Rollout
 from utils import timestamp
 from models import PolicyModel, RewriteModel, JudgeModel
 from reward_model import RewardModel
-from bias import (
+from bias_baseline import (
     PromptResult,
+    baseline_policy_worker,
+    baseline_rating_worker,
+    evaluate_baselines,
+)
+from bias_rewrite import (
+    BatchSentinel,
     RewriteInput,
     RewriteResult,
-    rewrite_plus_worker,
-    rating_worker,
-    evaluate_baselines,
-    organize_rewrite_plus_results,
+    rewrite_worker,
+    rewrite_rating_worker,
+    organize_rewrite_results,
 )
-
 
 logger = logging.getLogger(__name__)
 
-
-@dataclass
-class BatchTask:
-    batch_id: str
-    data: Any
 
 
 class Runner(ABC):
@@ -69,29 +68,30 @@ class Runner(ABC):
         # initialize queues and rewrite workers
         self.queue_a = asyncio.Queue()
         self.queue_b = asyncio.Queue()
-        self.batch_results = {}  # Dict[batch_id, List[results]]
-        self.batch_completions = {}  # Dict[batch_id, asyncio.Event]
-        self.rewrite_tasks = [
+        self.batch_results: dict[str, list[RewriteResult]] = {}
+        self.batch_futures: dict[str, asyncio.Future] = {}
+
+        self.rewrite_workers = [
             asyncio.create_task(
-                rewrite_plus_worker(rewrite_model, self.queue_a, self.queue_b, worker_id)
+                rewrite_worker(rewrite_model, self.queue_a, self.queue_b, worker_id)
             )
             for worker_id in range(rewrite_model.max_par)
         ]
 
-        self.rating_worker_task = asyncio.create_task(
-            rating_worker(reward_model, self.queue_b, self.rewrite_results)
+        self.rating_worker = asyncio.create_task(
+            rewrite_rating_worker(reward_model, self.queue_b, self.batch_results, self.batch_futures)
         )
     
     async def shutdown(self):
         for _ in range(self.rewrite_model.max_par):
             await self.queue_a.put(None)  # Sentinel values for rewrite_workers
 
-        await asyncio.gather(*self.rewrite_tasks)
+        await asyncio.gather(*self.rewrite_workers)
         logger.info("\n--- rewrite workers finished. ---\n")
 
         await self.queue_b.put(None)
-        await self.rating_worker_task
-        logger.info("\n--- rating worker finished. ---\n")
+        await self.rating_worker
+        logger.info("\n--- rewrite rating worker finished. ---\n")
 
 
     @property
@@ -160,10 +160,10 @@ class Runner(ABC):
         if baseline_rollouts is None:
             baseline_rollouts = self.baselines
 
-        # Generate unique batch ID
+        # Generate batch ID and asyncio.Future
         batch_id = str(uuid.uuid4())
         self.batch_results[batch_id] = []
-        self.batch_completions[batch_id] = asyncio.Event()
+        self.batch_futures[batch_id] = asyncio.get_event_loop().create_future()
         expected_result_count = 0
 
         for user, attribute in product(user_prompts, attributes):
@@ -174,19 +174,22 @@ class Runner(ABC):
                         user=user,
                         original_assistant=original_assistant.response,
                         presence=True,
+                        batch_id=batch_id,
                     )
                 )
                 expected_result_count += 1
 
         # Send batch task completion sentinel
-        await self.queue_a.put(BatchTask(batch_id=batch_id, data=("BATCH_COMPLETE", expected_result_count)))
+        await self.queue_a.put(BatchSentinel(batch_id=batch_id, expected_items=expected_result_count))
         
-        # Get results for this batch
+        # Wait for results for this batch
+        await self.batch_futures[batch_id]
         batch_results = self.batch_results[batch_id]
+        assert len(batch_results) == expected_result_count, f"Expected {expected_result_count} results, got {len(batch_results)}"
         del self.batch_results[batch_id]
-        del self.batch_completions[batch_id]
+        del self.batch_futures[batch_id]
 
-        organized_results = organize_rewrite_plus_results(batch_results, baseline_rollouts, save_dir)
+        organized_results = organize_rewrite_results(batch_results, baseline_rollouts, save_dir)
 
         logger.info(f"Attributes evaluated in {time.time() - start_time} seconds")
         return organized_results

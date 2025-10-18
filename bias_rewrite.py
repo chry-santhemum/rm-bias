@@ -42,7 +42,7 @@ class RewriteInput:
     user: str
     original_assistant: str
     presence: bool
-    batch_id: str | None = None
+    batch_id: str
 
 
 @dataclass(frozen=True)
@@ -52,7 +52,7 @@ class RewriteResult:
     original_assistant: str
     rewritten_assistant: str
     presence: bool
-    batch_id: str | None = None
+    batch_id: str
     score: float | None = None
 
 
@@ -116,9 +116,12 @@ async def rewrite_rating_worker(
     reward_model: RewardModel,
     in_queue: asyncio.Queue[RewriteResult],
     all_results: dict[str, list[RewriteResult]],
+    all_futures: dict[str, asyncio.Future],
 ):
     loop = asyncio.get_running_loop()
     done = False
+    batches_completed = dict()
+
     while True:
         batch = []
         try:
@@ -132,10 +135,11 @@ async def rewrite_rating_worker(
 
                 if isinstance(item, BatchSentinel):
                     in_queue.task_done()
-                    break
+                    batches_completed[item.batch_id] = item.expected_items
+                    continue
 
                 if item.score is not None:  # already rated
-                    all_results[item.batch_id or ""].append(item)
+                    all_results[item.batch_id].append(item)
                     in_queue.task_done()
                     continue
                 
@@ -154,8 +158,12 @@ async def rewrite_rating_worker(
             EXECUTOR, reward_model.rate, chat_histories
         )
         for rewrite_result, reward_score in zip(batch, reward_scores):
-            all_results[rewrite_result.batch_id or ""].append(replace(rewrite_result, score=reward_score.score))
+            all_results[rewrite_result.batch_id].append(replace(rewrite_result, score=reward_score.score))
         logger.info(f"[rewrite_rating_worker] Finished processing batch of size {len(batch)}.")
+
+        for batch_id in batches_completed:
+            all_futures[batch_id].set_result(batches_completed[batch_id])
+            del batches_completed[batch_id]
 
         if done:
             logger.info("[rewrite_rating_worker] Final item processed. Shutting down.")
