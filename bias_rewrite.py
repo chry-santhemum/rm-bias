@@ -89,7 +89,8 @@ async def rewrite_worker(
             logger.warning(
                 f"[rewrite_worker {worker_id}] Failed to rewrite:\n<begin_user_prompt>\n{task_input.user}\n<end_user_prompt>"
             )
-            return
+            in_queue.task_done()
+            continue
 
         await out_queue.put(
             RewriteResult(
@@ -164,14 +165,16 @@ async def rewrite_rating_worker(
             all_results[rewrite_result.batch_id].append(replace(rewrite_result, score=reward_score.score))
         logger.info(f"[rewrite_rating_worker] Finished processing batch of size {len(batch)}.")
 
-        for batch_id in batches_progress_left:
-            progress_left = batches_progress_left[batch_id]
+        completed_batch_ids = []
+        for batch_id, progress_left in list(batches_progress_left.items()):
             logger.info(f"[rewrite_rating_worker] Batch {batch_id} has {progress_left} items left to process.")
-
             if progress_left == 0:
                 all_futures[batch_id].set_result(all_results[batch_id])
-                del all_results[batch_id]
-                del batches_progress_left[batch_id]
+                completed_batch_ids.append(batch_id)
+
+        for batch_id in completed_batch_ids:
+            del all_results[batch_id]
+            del batches_progress_left[batch_id]
 
         if done:
             logger.info("[rewrite_rating_worker] Final item processed. Shutting down.")

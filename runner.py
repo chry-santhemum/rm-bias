@@ -90,6 +90,20 @@ class Runner(ABC):
         await self.rating_worker
         logger.info("\n--- rewrite rating worker finished. ---\n")
 
+        # Close shared LLM callers (ensures caches/DBs are closed)
+        try:
+            await self.policy_model.caller.close()
+        except Exception:
+            logger.exception("Error closing policy model caller")
+        try:
+            await self.rewrite_model.caller.close()
+        except Exception:
+            logger.exception("Error closing rewrite model caller")
+        try:
+            await self.judge_model.caller.close()
+        except Exception:
+            logger.exception("Error closing judge model caller")
+
 
     @property
     @abstractmethod
@@ -396,12 +410,17 @@ async def main():
     for user, rollouts in baseline_results.items():
         runner.baselines[user] = [Rollout(response=rollout["response"], score=rollout["score"]) for rollout in rollouts]
 
-    await runner.evaluate_attributes(user_prompts = user_prompts[:5], attributes = ATTRIBUTES[:2])
-
+    try:
+        await runner.evaluate_attributes(user_prompts = user_prompts[:5], attributes = ATTRIBUTES[:2])
+    except (asyncio.CancelledError, KeyboardInterrupt):
+        logger.info("Cancellation received. Cleaning up...")
+        raise
+    finally:
+        await asyncio.shield(runner.shutdown())
 
 
 # %%
 if __name__ == "__main__":
-    logging_setup(filename=f"logs/scrap/test_runner_{timestamp()}.log", level=logging.DEBUG)
+    logging_setup(filename=f"logs/scrap/test_runner_{timestamp()}.log", level=logging.INFO)
 
     asyncio.run(main())
