@@ -17,6 +17,8 @@ cache_config = CacheConfig(
     no_cache_models={
         "meta-llama/llama-3.1-8b-instruct",
         "meta-llama/llama-3.1-70b-instruct",
+        "openai/gpt-5-nano",
+        "openai/gpt-5-mini",
     }
 )
 
@@ -36,7 +38,7 @@ class GenerationModel:
         self.temperature = temperature
         self.max_par = max_par
 
-        self.caller = Caller(cache_config=cache_config)
+        self.caller = Caller(cache_config=cache_config, dotenv_path=".env")
 
 
     async def sample(
@@ -44,17 +46,17 @@ class GenerationModel:
         chat_histories: list[ChatHistory],
         desc: str = "",
     ) -> list[ChatHistory | None]:
-        async with self.caller:
-            responses = await self.caller.call(
-                messages=chat_histories,
-                max_parallel=self.max_par,
-                desc=desc,
-                model=self.model_name,
-                temperature=self.temperature,
-                max_tokens=self.max_tokens,
-                reasoning=self.reasoning,
-            )
+        responses = await self.caller.call(
+            messages=chat_histories,
+            max_parallel=self.max_par,
+            desc=desc,
+            model=self.model_name,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
+            reasoning=self.reasoning,
+        )
 
+        logger.info(f"[GenerationModel] Received {len(responses)} responses from model {self.model_name}.")
         outputs = []
 
         for i, resp in enumerate(responses):
@@ -125,6 +127,7 @@ class RewriteModel(GenerationModel):
             for _ in range(n_samples)
         ]
 
+        logger.info(f"[RewriteModel] Sending {len(to_send_chats)} rewrite requests to model {self.model_name}.")
         responses = await self.sample(to_send_chats)
         return [r.get_first("assistant") if r is not None else None for r in responses]
 
@@ -314,7 +317,7 @@ class PlannerModel:
         self.temperature = temperature
         self.max_par = max_par
 
-        self.caller = Caller(cache_config=cache_config)
+        self.caller = Caller(cache_config=cache_config, dotenv_path=".env")
         self.curr_planner_index: int = 0
 
     @property
@@ -334,14 +337,13 @@ class PlannerModel:
         chat_histories: list[ChatHistory],
         desc: str = "Planning",
     ) -> list[OpenaiResponse]:
-        async with self.caller:
-            responses = await self.caller.call(
-                messages=chat_histories,
-                max_parallel=self.max_par,
-                desc=desc,
-                model=self.curr_planner_model,
-                temperature=self.temperature,
-                max_tokens=self.max_tokens,
-                reasoning=self.reasoning,
-            )
+        responses = await self.caller.call(
+            messages=chat_histories,
+            max_parallel=self.max_par,
+            desc=desc,
+            model=self.curr_planner_model,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
+            reasoning=self.reasoning,
+        )
         return responses

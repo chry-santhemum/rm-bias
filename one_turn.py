@@ -13,14 +13,12 @@ import random
 import logging
 import asyncio
 import nest_asyncio
-from tqdm.auto import tqdm
 from pathlib import Path
 from typing import Literal
 from collections import defaultdict
-from dataclasses import replace
 
 from caller import ChatHistory
-from state import SeedState, AttributeStats, Cluster, Rollout
+from state import SeedState, AttributeStats, Cluster
 from utils import (
     timestamp,
     parse_json_response,
@@ -28,7 +26,7 @@ from utils import (
     set_seed_all,
     logging_setup,
 )
-from load_cluster import load_clusters, load_initial_seed_states
+from load_cluster import load_initial_seed_states
 from models import PolicyModel, RewriteModel, JudgeModel, PlannerModel
 from reward_model import RewardModel
 from runner import Runner
@@ -50,7 +48,6 @@ class OneTurnPlanner(PlannerModel):
         reasoning: int | str | None = None,
         temperature: float = 0.7,
         max_par: int = 64,  # max parallel calls to client
-        full_logging: bool = False,
     ):
         super().__init__(
             model_names=model_names,
@@ -59,7 +56,6 @@ class OneTurnPlanner(PlannerModel):
             reasoning=reasoning,
             temperature=temperature,
             max_par=max_par,
-            full_logging=full_logging,
         )
         self.cluster_model = cluster_model
 
@@ -312,7 +308,6 @@ if __name__ == "__main__":
         reasoning=6000,
         temperature=1.0,
         max_par=128,
-        full_logging=False,
     )
 
     runner = OneTurnRunner(
@@ -329,12 +324,6 @@ if __name__ == "__main__":
         n_rollouts=16,
         run_name=run_name,
     )
-
-    # with open("data/one_turn/20251005-015446-n_pop64-synthetic_1/baseline_results.json", "r") as f:
-    #     baseline_results = json.load(f)
-    # runner.baselines = {}
-    # for user, rollouts in baseline_results.items():
-    #     runner.baselines[user] = [Rollout(response=rollout["response"], score=rollout["score"]) for rollout in rollouts]
 
     runner.get_baselines()
 

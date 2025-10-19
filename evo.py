@@ -459,7 +459,6 @@ if __name__ == "__main__":
         reasoning=4096,
         temperature=1.0,
         max_par=32,
-        full_logging=False,
     )
 
     runner = EvoRunner(

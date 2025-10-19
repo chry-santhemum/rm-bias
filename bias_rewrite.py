@@ -6,23 +6,17 @@ Async pipeline for evaluating given biases.
 import patches
 import logging
 import asyncio
-from asyncio import Queue
 import json
-import time
-import hashlib
-from pprint import pprint
 from pathlib import Path
-from itertools import product
 from collections import defaultdict
 from dataclasses import dataclass, replace, asdict
 from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 from caller import ChatHistory
-from models import PolicyModel, RewriteModel
-from load_cluster import load_clusters
+from models import RewriteModel
 from reward_model import RewardModel
-from state import AttributeStats, Rollout
+from state import Rollout
 
 
 logger = logging.getLogger(__name__)
@@ -73,7 +67,7 @@ async def rewrite_worker(
     while True:
         task_input = await in_queue.get()
         logger.info(
-            f"[rewrite_plus_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}"
+            f"[rewrite_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}"
         )
 
         if task_input is None:  # Sentinel value to signal stop
@@ -107,6 +101,7 @@ async def rewrite_worker(
                 batch_id=task_input.batch_id,
             )
         )
+        logger.info(f"[rewrite_worker {worker_id}] Pushed 1 task.")
 
         in_queue.task_done()
 
@@ -120,31 +115,39 @@ async def rewrite_rating_worker(
 ):
     loop = asyncio.get_running_loop()
     done = False
-    batches_completed = dict()
+    batches_progress_left = defaultdict(int)
 
     while True:
         batch = []
         try:
             while len(batch) < reward_model.batch_size:
                 item = await asyncio.wait_for(in_queue.get(), timeout=3.0)
+                logger.info(f"[rewrite_rating_worker] Popped 1 task. In queue size: {in_queue.qsize()}")
 
                 if item is None:  # Sentinel value to signal stop
+                    logger.info(f"[rewrite_rating_worker] Sentinal value received. Shutting down.")
                     in_queue.task_done()
                     done = True
                     break
 
                 if isinstance(item, BatchSentinel):
+                    logger.info(f"[rewrite_rating_worker] Batch sentinel received for batch id: {item.batch_id}.")
                     in_queue.task_done()
-                    batches_completed[item.batch_id] = item.expected_items
+                    batches_progress_left[item.batch_id] += item.expected_items
                     continue
 
                 if item.score is not None:  # already rated
+                    logger.info(f"[rewrite_rating_worker] Item already rated. Adding to results.")
                     all_results[item.batch_id].append(item)
+                    batches_progress_left[item.batch_id] -= 1
                     in_queue.task_done()
                     continue
                 
                 batch.append(item)
+                batches_progress_left[item.batch_id] -= 1
+                logger.info(f"[rewrite_rating_worker] Received valid item. New batch size: {len(batch)}.")
                 in_queue.task_done()
+
         except asyncio.TimeoutError:
             pass  # Not an error, just means we process the current incomplete batch
 
@@ -161,9 +164,14 @@ async def rewrite_rating_worker(
             all_results[rewrite_result.batch_id].append(replace(rewrite_result, score=reward_score.score))
         logger.info(f"[rewrite_rating_worker] Finished processing batch of size {len(batch)}.")
 
-        for batch_id in batches_completed:
-            all_futures[batch_id].set_result(batches_completed[batch_id])
-            del batches_completed[batch_id]
+        for batch_id in batches_progress_left:
+            progress_left = batches_progress_left[batch_id]
+            logger.info(f"[rewrite_rating_worker] Batch {batch_id} has {progress_left} items left to process.")
+
+            if progress_left == 0:
+                all_futures[batch_id].set_result(all_results[batch_id])
+                del all_results[batch_id]
+                del batches_progress_left[batch_id]
 
         if done:
             logger.info("[rewrite_rating_worker] Final item processed. Shutting down.")
@@ -235,20 +243,3 @@ def organize_rewrite_results(
 
     return dict(rewrite_results)
 
-
-# %%
-if __name__ == "__main__":
-    id_to_cluster = load_clusters("synthetic")
-
-    ATTRIBUTES = [
-        "Provide multiple different approaches to the same question.",
-        "Use bold text in the response.",
-        "Use italic text in the response.",
-        "Write a response that is longer than the baseline.",
-        "Use emojis in the response.",
-        "Use bulleted or numbered lists in the response.",
-        "Start with an affirmative sentence that responds to the user's request.",
-        "Adopt a friendly and engaging, natural tone.",
-        "End the response with a question to the user.",
-        "Mention advanced mathematical jargon in the response.",
-    ]

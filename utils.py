@@ -6,6 +6,7 @@ import random
 import logging
 import datetime
 from typing import Any, Tuple
+from pathlib import Path
 from collections import defaultdict
 from IPython.core.getipython import get_ipython
 
@@ -121,6 +122,7 @@ def set_seed_all(seed: int):
 
 
 def logging_setup(filename: str, level: int = logging.WARNING):
+    Path(filename).parent.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(
         level=level,
         filename=filename,

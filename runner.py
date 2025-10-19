@@ -1,3 +1,7 @@
+"""
+Runner class.
+"""
+
 # %%
 import patches  # monkey patching
 import os
@@ -7,27 +11,19 @@ import time
 import pickle
 import logging
 import asyncio
-from asyncio import Queue
 import random
-from tqdm.auto import tqdm
 from pathlib import Path
 from dataclasses import replace, asdict
-from typing import Literal, Any
 from abc import ABC, abstractmethod
 from itertools import product
-from dataclasses import dataclass
 import numpy as np
 
 from state import SeedState, Rollout
-from utils import timestamp
+from utils import timestamp, logging_setup
 from models import PolicyModel, RewriteModel, JudgeModel
 from reward_model import RewardModel
-from bias_baseline import (
-    PromptResult,
-    baseline_policy_worker,
-    baseline_rating_worker,
-    evaluate_baselines,
-)
+from load_cluster import load_initial_seed_states
+from bias_baseline import evaluate_baselines
 from bias_rewrite import (
     BatchSentinel,
     RewriteInput,
@@ -40,6 +36,7 @@ from bias_rewrite import (
 logger = logging.getLogger(__name__)
 
 
+# %%
 
 class Runner(ABC):
     def __init__(
@@ -180,16 +177,16 @@ class Runner(ABC):
                 expected_result_count += 1
 
         # Send batch task completion sentinel
-        await self.queue_a.put(BatchSentinel(batch_id=batch_id, expected_items=expected_result_count))
+        await self.queue_a.put(
+            BatchSentinel(batch_id=batch_id, expected_items=expected_result_count)
+        )
         
         # Wait for results for this batch
-        await self.batch_futures[batch_id]
-        batch_results = self.batch_results[batch_id]
+        batch_results = await self.batch_futures[batch_id]
         assert len(batch_results) == expected_result_count, f"Expected {expected_result_count} results, got {len(batch_results)}"
+        organized_results = organize_rewrite_results(batch_results, baseline_rollouts, save_dir)
         del self.batch_results[batch_id]
         del self.batch_futures[batch_id]
-
-        organized_results = organize_rewrite_results(batch_results, baseline_rollouts, save_dir)
 
         logger.info(f"Attributes evaluated in {time.time() - start_time} seconds")
         return organized_results
@@ -348,3 +345,63 @@ class Runner(ABC):
                 self.run_path / f"seed_{seed_state.index}_cluster.json", "w"
             ) as f:
                 json.dump(asdict(seed_state.cluster), f, indent=4)
+
+
+class TestRunner(Runner):
+    @property
+    def runner_type(self) -> str:
+        return "test"
+
+    def train(self):
+        pass
+
+
+
+async def main():
+    ATTRIBUTES = [
+        "Provide multiple different approaches to the same question.",
+        "Use bold text in the response.",
+        "Use italic text in the response.",
+        "Write a response that is longer than the baseline.",
+        "Use emojis in the response.",
+        "Use bulleted or numbered lists in the response.",
+        "Start with an affirmative sentence that responds to the user's request.",
+        "Adopt a friendly and engaging, natural tone.",
+        "End the response with a question to the user.",
+        "Mention advanced mathematical jargon in the response.",
+    ]
+
+    initial_seed_states = load_initial_seed_states(
+        ds_name="synthetic_1",
+        topic_ids=[8],
+        train_batch_size=16,
+        val_split_size=16,
+    )
+
+    with open("data/one_turn/20251015-232457-n_pop32-synthetic_1/baseline_results.json", "r") as f:
+        baseline_results = json.load(f)
+    user_prompts = list(baseline_results.keys())
+
+    runner = TestRunner(
+        seed_states=initial_seed_states,
+        policy_model=PolicyModel(),
+        rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=512),
+        reward_model=RewardModel(model_name="skywork-v2", batch_size=64),
+        judge_model=JudgeModel(),
+        run_name=None,
+        n_rollouts=16,
+    )
+
+    runner.baselines = {}
+    for user, rollouts in baseline_results.items():
+        runner.baselines[user] = [Rollout(response=rollout["response"], score=rollout["score"]) for rollout in rollouts]
+
+    await runner.evaluate_attributes(user_prompts = user_prompts[:5], attributes = ATTRIBUTES[:2])
+
+
+
+# %%
+if __name__ == "__main__":
+    logging_setup(filename=f"logs/scrap/test_runner_{timestamp()}.log", level=logging.DEBUG)
+
+    asyncio.run(main())

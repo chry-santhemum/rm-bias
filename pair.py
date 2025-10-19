@@ -329,7 +329,6 @@ if __name__ == "__main__":
         reasoning=6000,
         temperature=1.0,
         max_par=128,
-        full_logging=False,
     )
 
     runner = PAIRRunner(
