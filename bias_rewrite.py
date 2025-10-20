@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 # %%
 
+
 @dataclass(frozen=True)
 class BatchSentinel:
     batch_id: str
@@ -50,12 +51,9 @@ class RewriteResult:
     score: float | None = None
 
 
-
-# Thread pool for the final blocking GPU stage
-EXECUTOR = ThreadPoolExecutor(max_workers=1)
+# Thread pool is supplied by the runner (instance-level), not module-level
 
 # %%
-
 
 
 async def rewrite_worker(
@@ -81,7 +79,9 @@ async def rewrite_worker(
 
         rewrite_result = await rewrite_model.rewrite(
             attribute=task_input.system,
-            original_chat=ChatHistory.from_user(task_input.user).add_assistant(task_input.original_assistant),
+            original_chat=ChatHistory.from_user(task_input.user).add_assistant(
+                task_input.original_assistant
+            ),
             presence=task_input.presence,
             n_samples=1,
         )
@@ -107,12 +107,12 @@ async def rewrite_worker(
         in_queue.task_done()
 
 
-
 async def rewrite_rating_worker(
     reward_model: RewardModel,
     in_queue: asyncio.Queue[RewriteResult],
     all_results: dict[str, list[RewriteResult]],
     all_futures: dict[str, asyncio.Future],
+    executor: ThreadPoolExecutor,
 ):
     loop = asyncio.get_running_loop()
     done = False
@@ -123,51 +123,74 @@ async def rewrite_rating_worker(
         try:
             while len(batch) < reward_model.batch_size:
                 item = await asyncio.wait_for(in_queue.get(), timeout=3.0)
-                logger.info(f"[rewrite_rating_worker] Popped 1 task. In queue size: {in_queue.qsize()}")
+                logger.info(
+                    f"[rewrite_rating_worker] Popped 1 task. In queue size: {in_queue.qsize()}"
+                )
 
                 if item is None:  # Sentinel value to signal stop
-                    logger.info(f"[rewrite_rating_worker] Sentinal value received. Shutting down.")
+                    logger.info(
+                        f"[rewrite_rating_worker] Sentinal value received. Shutting down."
+                    )
                     in_queue.task_done()
                     done = True
                     break
 
                 if isinstance(item, BatchSentinel):
-                    logger.info(f"[rewrite_rating_worker] Batch sentinel received for batch id: {item.batch_id}.")
+                    logger.info(
+                        f"[rewrite_rating_worker] Batch sentinel received for batch id: {item.batch_id}."
+                    )
                     in_queue.task_done()
                     batches_progress_left[item.batch_id] += item.expected_items
                     continue
 
                 if item.score is not None:  # already rated
-                    logger.info(f"[rewrite_rating_worker] Item already rated. Adding to results.")
+                    logger.info(
+                        f"[rewrite_rating_worker] Item already rated. Adding to results."
+                    )
                     all_results[item.batch_id].append(item)
                     batches_progress_left[item.batch_id] -= 1
                     in_queue.task_done()
                     continue
-                
+
                 batch.append(item)
                 batches_progress_left[item.batch_id] -= 1
-                logger.info(f"[rewrite_rating_worker] Received valid item. New batch size: {len(batch)}.")
+                logger.info(
+                    f"[rewrite_rating_worker] Received valid item. New batch size: {len(batch)}."
+                )
                 in_queue.task_done()
 
         except asyncio.TimeoutError:
             pass  # Not an error, just means we process the current incomplete batch
 
+        if len(batch) == 0 and not done:
+            # nothing ready yet; continue collecting
+            continue
+
         logger.info(f"[rewrite_rating_worker] Processing batch of size {len(batch)}...")
         chat_histories = [
-            ChatHistory.from_user(rewrite_result.user).add_assistant(rewrite_result.rewritten_assistant)
+            ChatHistory.from_user(rewrite_result.user).add_assistant(
+                rewrite_result.rewritten_assistant
+            )
             for rewrite_result in batch
         ]
 
-        reward_scores = await loop.run_in_executor(
-            EXECUTOR, reward_model.rate, chat_histories
+        if len(chat_histories) > 0:
+            reward_scores = await loop.run_in_executor(
+                executor, reward_model.rate, chat_histories
+            )
+            for rewrite_result, reward_score in zip(batch, reward_scores):
+                all_results[rewrite_result.batch_id].append(
+                    replace(rewrite_result, score=reward_score.score)
+                )
+        logger.info(
+            f"[rewrite_rating_worker] Finished processing batch of size {len(batch)}."
         )
-        for rewrite_result, reward_score in zip(batch, reward_scores):
-            all_results[rewrite_result.batch_id].append(replace(rewrite_result, score=reward_score.score))
-        logger.info(f"[rewrite_rating_worker] Finished processing batch of size {len(batch)}.")
 
         completed_batch_ids = []
         for batch_id, progress_left in list(batches_progress_left.items()):
-            logger.info(f"[rewrite_rating_worker] Batch {batch_id} has {progress_left} items left to process.")
+            logger.info(
+                f"[rewrite_rating_worker] Batch {batch_id} has {progress_left} items left to process."
+            )
             if progress_left == 0:
                 all_futures[batch_id].set_result(all_results[batch_id])
                 completed_batch_ids.append(batch_id)
@@ -179,7 +202,6 @@ async def rewrite_rating_worker(
         if done:
             logger.info("[rewrite_rating_worker] Final item processed. Shutting down.")
             break
-
 
 
 def organize_rewrite_results(
@@ -245,4 +267,3 @@ def organize_rewrite_results(
             json.dump(mean_scores, f, indent=4)
 
     return dict(rewrite_results)
-

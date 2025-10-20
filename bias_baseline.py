@@ -20,8 +20,7 @@ from state import Rollout
 
 logger = logging.getLogger(__name__)
 
-# Thread pool for the GPU heavy stage
-EXECUTOR = ThreadPoolExecutor(max_workers=1)
+# Thread pool is now managed locally within evaluate_baselines()
 
 
 @dataclass(frozen=True)
@@ -30,8 +29,6 @@ class PromptResult:
     user: str
     assistant: str
     score: float | None = None
-
-
 
 
 async def baseline_policy_worker(
@@ -47,12 +44,13 @@ async def baseline_policy_worker(
     """
     while True:
         task_input = await in_queue.get()
-        logger.info(f"[baseline_policy_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}")
-        
+        logger.info(
+            f"[baseline_policy_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}"
+        )
+
         if task_input is None:  # Stop sentinel
             in_queue.task_done()
             break
-
 
         result = await policy_model.sample([ChatHistory.from_user(task_input)])
 
@@ -74,11 +72,11 @@ async def baseline_policy_worker(
         logger.info(f"[baseline_policy_worker {worker_id}] Pushed 1 task.")
 
 
-
 async def baseline_rating_worker(
     reward_model: RewardModel,
     in_queue: asyncio.Queue[PromptResult],
     all_results: list[PromptResult],
+    executor: ThreadPoolExecutor,
 ):
     loop = asyncio.get_running_loop()
     done = False
@@ -103,24 +101,32 @@ async def baseline_rating_worker(
         except asyncio.TimeoutError:
             pass  # Not an error, just means we process the current incomplete batch
 
-        logger.info(f"[baseline_rating_worker] Processing batch of size {len(batch)}...")
+        if len(batch) == 0 and not done:
+            # nothing to process yet; continue collecting
+            continue
+
+        logger.info(
+            f"[baseline_rating_worker] Processing batch of size {len(batch)}..."
+        )
         chat_histories = [
             ChatHistory.from_user(result.user).add_assistant(result.assistant)
             for result in batch
         ]
 
-        reward_scores = await loop.run_in_executor(
-            EXECUTOR, reward_model.rate, chat_histories
-        )
-        for result, reward_score in zip(batch, reward_scores):
-            all_results.append(replace(result, score=reward_score.score))
+        if len(chat_histories) > 0:
+            reward_scores = await loop.run_in_executor(
+                executor, reward_model.rate, chat_histories
+            )
+            for result, reward_score in zip(batch, reward_scores):
+                all_results.append(replace(result, score=reward_score.score))
 
-        logger.info(f"[baseline_rating_worker] Fnished processing batch of size {len(batch)}.")
+        logger.info(
+            f"[baseline_rating_worker] Fnished processing batch of size {len(batch)}."
+        )
 
         if done:
             logger.info("[baseline_rating_worker] Final item processed. Shutting down.")
             break
-
 
 
 def organize_baseline_results(
@@ -160,7 +166,6 @@ def organize_baseline_results(
     return dict(organized_results)
 
 
-
 async def evaluate_baselines(
     user_prompts: list[str],
     policy_model: PolicyModel,
@@ -178,21 +183,28 @@ async def evaluate_baselines(
             await queue_a.put(user)
 
     policy_worker_tasks = [
-        asyncio.create_task(baseline_policy_worker(policy_model, queue_a, queue_b, worker_id))
+        asyncio.create_task(
+            baseline_policy_worker(policy_model, queue_a, queue_b, worker_id)
+        )
         for worker_id in range(n_policy_workers)
     ]
 
-    rating_worker_task = asyncio.create_task(baseline_rating_worker(reward_model, queue_b, all_results))
+    # Use a local executor for rating to avoid lingering threads
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        rating_worker_task = asyncio.create_task(
+            baseline_rating_worker(reward_model, queue_b, all_results, executor)
+        )
 
-    for _ in range(n_rollouts):
-        await queue_a.put(None)
+        # send one stop sentinel per policy worker
+        for _ in range(n_policy_workers):
+            await queue_a.put(None)
 
-    await asyncio.gather(*policy_worker_tasks)
-    logger.info("\n--- baseline policy workers finished. ---\n")
+        await asyncio.gather(*policy_worker_tasks)
+        logger.info("\n--- baseline policy workers finished. ---\n")
 
-    await queue_b.put(None)
-    await rating_worker_task
-    logger.info("\n--- baseline rating worker finished. ---\n")
+        await queue_b.put(None)
+        await rating_worker_task
+        logger.info("\n--- baseline rating worker finished. ---\n")
 
     organized_results = organize_baseline_results(all_results, save_dir)
 

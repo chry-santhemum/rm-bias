@@ -19,11 +19,12 @@ from standard_prompts import make_prompt_mix
 
 nest_asyncio.apply()
 
+
 def get_logprobs_and_confidence(
     model: nn.Module,
     tokenizer: AutoTokenizer,
     chats: list[ChatHistory],
-    batch_size: int = 8
+    batch_size: int = 8,
 ) -> tuple[list[float], list[float]]:
     """
     Compute the log probabilities and confidence of the given completions.
@@ -64,7 +65,7 @@ def get_logprobs_and_confidence(
                     user_chat.to_openai_messages(),
                     return_tensors="pt",
                     tokenize=True,
-                    add_generation_prompt=True
+                    add_generation_prompt=True,
                 )
                 user_length = user_tokens.shape[1]
             else:
@@ -78,18 +79,22 @@ def get_logprobs_and_confidence(
             return_tensors="pt",
             tokenize=True,
             padding=True,
-            add_generation_prompt=False
+            add_generation_prompt=False,
         ).to(device)
         batch_attention_mask = batch_input_ids.ne(tokenizer.pad_token_id).to(device)
 
         # Forward pass for the batch
         with torch.no_grad():
-            outputs = model(input_ids=batch_input_ids, attention_mask=batch_attention_mask)
+            outputs = model(
+                input_ids=batch_input_ids, attention_mask=batch_attention_mask
+            )
             logits = outputs.logits  # Shape: [batch_size, seq_len, vocab_size]
 
         # Process each item in the batch
         for idx, user_length in enumerate(user_token_lengths):
-            log_probs = F.log_softmax(logits[idx], dim=-1)  # Shape: [seq_len, vocab_size]
+            log_probs = F.log_softmax(
+                logits[idx], dim=-1
+            )  # Shape: [seq_len, vocab_size]
             total_length = batch_attention_mask[idx].sum().item()
 
             if user_length <= total_length - 1:
@@ -100,17 +105,23 @@ def get_logprobs_and_confidence(
                     token_id = batch_input_ids[idx, i]
 
                     # Log prob
-                    token_logprob = log_probs[i-1, token_id].item()
+                    token_logprob = log_probs[i - 1, token_id].item()
                     token_logprobs.append(token_logprob)
 
                     # Confidence
-                    probs = torch.exp(log_probs[i-1])
-                    entropy = -(probs * log_probs[i-1]).sum().item()
+                    probs = torch.exp(log_probs[i - 1])
+                    entropy = -(probs * log_probs[i - 1]).sum().item()
                     token_entropies.append(-entropy)
 
                 # Aggregate metrics
-                avg_logprob = sum(token_logprobs) / len(token_logprobs) if token_logprobs else 0.0
-                avg_confidence = sum(token_entropies) / len(token_entropies) if token_entropies else 0.0
+                avg_logprob = (
+                    sum(token_logprobs) / len(token_logprobs) if token_logprobs else 0.0
+                )
+                avg_confidence = (
+                    sum(token_entropies) / len(token_entropies)
+                    if token_entropies
+                    else 0.0
+                )
 
                 logprobs_list.append(avg_logprob)
                 confidences_list.append(avg_confidence)
@@ -122,8 +133,9 @@ def get_logprobs_and_confidence(
     return logprobs_list, confidences_list
 
 
-
-async def sample_responses(user_prompts: list[str], n_samples: int = 32) -> list[ChatHistory]:
+async def sample_responses(
+    user_prompts: list[str], n_samples: int = 32
+) -> list[ChatHistory]:
     to_send_chats = [p for p in user_prompts for _ in range(n_samples)]
     async with Caller() as caller:
         responses = await caller.call(
@@ -135,12 +147,13 @@ async def sample_responses(user_prompts: list[str], n_samples: int = 32) -> list
             temperature=0.9,
             max_tokens=1024,
         )
-    
+
     output = []
     for user_prompt, response in zip(to_send_chats, responses):
-        output.append(ChatHistory.from_user(user_prompt).add_assistant(response.first_response))
+        output.append(
+            ChatHistory.from_user(user_prompt).add_assistant(response.first_response)
+        )
     return output
-
 
 
 # %%
@@ -148,16 +161,10 @@ if __name__ == "__main__":
     user_prompts = make_prompt_mix(num_total=128)
 
     model, tokenizer = load_model("llama-3.1-8b-instruct")
-    chats = asyncio.run(sample_responses(
-        user_prompts=user_prompts,
-        n_samples=64
-    ))
+    chats = asyncio.run(sample_responses(user_prompts=user_prompts, n_samples=64))
 
     logprobs, confidences = get_logprobs_and_confidence(
-        model=model,
-        tokenizer=tokenizer,
-        chats=chats,
-        batch_size=16
+        model=model, tokenizer=tokenizer, chats=chats, batch_size=16
     )
 
     reward_model = RewardModel(model_name="skywork-v2", batch_size=16)
@@ -186,15 +193,18 @@ for i in range(num_prompts):
 
 
 with open("data/scrap/logprobs.pkl", "wb") as f:
-    pickle.dump({
-        "user_prompts": user_prompts,
-        "chats": chats,
-        "logprobs": logprobs,
-        "confidences": confidences,
-        "rewards": rewards,
-        "rewards_subtract_mean": rewards_subtract_mean,
-        "rewards_normalized": rewards_normalized,
-    }, f)
+    pickle.dump(
+        {
+            "user_prompts": user_prompts,
+            "chats": chats,
+            "logprobs": logprobs,
+            "confidences": confidences,
+            "rewards": rewards,
+            "rewards_subtract_mean": rewards_subtract_mean,
+            "rewards_normalized": rewards_normalized,
+        },
+        f,
+    )
 
 # %%
 # draw scatterplot and fit linear regression
@@ -204,7 +214,7 @@ fig = px.scatter(
     y=rewards,
     size_max=4,
     opacity=0.3,
-    labels={"x": "logprobs", "y": "reward (unnormalized)"}
+    labels={"x": "logprobs", "y": "reward (unnormalized)"},
 )
 fig.show()
 
@@ -213,28 +223,29 @@ fig = px.scatter(
     y=rewards,
     size_max=4,
     opacity=0.3,
-    labels={"x": "confidence", "y": "reward (unnormalized)"}
+    labels={"x": "confidence", "y": "reward (unnormalized)"},
 )
 fig.show()
 
 # %%
 
 import numpy as np
+
 fig = px.scatter(
-    x=np.exp(logprobs), 
+    x=np.exp(logprobs),
     y=rewards,
     size_max=4,
     opacity=0.3,
-    labels={"x": "probs", "y": "reward (unnormalized)"}
+    labels={"x": "probs", "y": "reward (unnormalized)"},
 )
 fig.show()
 
 fig = px.scatter(
-    x=np.exp(confidences), 
+    x=np.exp(confidences),
     y=rewards,
     size_max=4,
     opacity=0.3,
-    labels={"x": "exp(confidence)", "y": "reward (unnormalized)"}
+    labels={"x": "exp(confidence)", "y": "reward (unnormalized)"},
 )
 fig.show()
 # %%

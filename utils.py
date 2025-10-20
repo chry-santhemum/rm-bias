@@ -5,6 +5,7 @@ import time
 import random
 import logging
 import datetime
+import asyncio
 from typing import Any, Tuple
 from pathlib import Path
 from collections import defaultdict
@@ -129,6 +130,10 @@ def logging_setup(filename: str, level: int = logging.WARNING):
         filemode="w",
         format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(name)s - %(message)s",
     )
+
+
+async def async_gather(tasks: list):
+    return await asyncio.gather(*tasks)
 
 
 def parse_json_response(

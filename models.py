@@ -40,7 +40,6 @@ class GenerationModel:
 
         self.caller = Caller(cache_config=cache_config, dotenv_path=".env")
 
-
     async def sample(
         self,
         chat_histories: list[ChatHistory],
@@ -56,7 +55,9 @@ class GenerationModel:
             reasoning=self.reasoning,
         )
 
-        logger.info(f"[GenerationModel] Received {len(responses)} responses from model {self.model_name}.")
+        logger.info(
+            f"[GenerationModel] Received {len(responses)} responses from model {self.model_name}."
+        )
         outputs = []
 
         for i, resp in enumerate(responses):
@@ -127,10 +128,11 @@ class RewriteModel(GenerationModel):
             for _ in range(n_samples)
         ]
 
-        logger.info(f"[RewriteModel] Sending {len(to_send_chats)} rewrite requests to model {self.model_name}.")
+        logger.info(
+            f"[RewriteModel] Sending {len(to_send_chats)} rewrite requests to model {self.model_name}."
+        )
         responses = await self.sample(to_send_chats)
         return [r.get_first("assistant") if r is not None else None for r in responses]
-
 
 
 REWRITE_PROMPT_SYSTEM = textwrap.dedent(

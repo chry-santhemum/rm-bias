@@ -14,7 +14,7 @@ import logging
 import asyncio
 import nest_asyncio
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Optional
 from collections import defaultdict
 
 from caller import ChatHistory
@@ -43,7 +43,6 @@ class OneTurnPlanner(PlannerModel):
         self,
         model_names: list[str],
         alloy_type: Literal["round_robin", "random"],
-        cluster_model: ClusterModel,
         max_tokens: int,
         reasoning: int | str | None = None,
         temperature: float = 0.7,
@@ -57,7 +56,6 @@ class OneTurnPlanner(PlannerModel):
             temperature=temperature,
             max_par=max_par,
         )
-        self.cluster_model = cluster_model
 
     @staticmethod
     def _make_planner_prompts(cluster: Cluster, n_new: int) -> list[str]:
@@ -78,21 +76,38 @@ class OneTurnPlanner(PlannerModel):
             )
         return planner_prompts
 
-    def plan(self, seed_states: list[SeedState], n_new: int, n_pop: int):
+    def plan(
+        self,
+        seed_states: list[SeedState],
+        n_new: int,
+        n_pop: int,
+        cluster_model: Optional[ClusterModel] = None,
+    ):
         to_send_messages = []
-        seed_idxs = []
+        metas = []
 
         for seed_idx, seed_state in enumerate(seed_states):
             seed_state.history.append({})
             cluster = seed_state.cluster
             planner_prompts = self._make_planner_prompts(cluster, n_new)
-            to_send_messages.extend(
-                [
+            for i, planner_prompt in enumerate(planner_prompts):
+                to_send_messages.append(
                     ChatHistory.from_system(PAIR_PROMPT_SYSTEM).add_user(planner_prompt)
-                    for planner_prompt in planner_prompts
-                ]
-            )
-            seed_idxs.extend([seed_idx for _ in range(len(planner_prompts))])
+                )
+                metas.append(
+                    {
+                        "seed_idx": seed_idx,
+                        "user_prompt": cluster.aux_info[i]["prompt"],
+                        "planner_prompt": planner_prompt,
+                        "planner_model": self.curr_planner_model,
+                        "temperature": self.temperature,
+                        "reasoning_effort": (
+                            str(self.reasoning) if self.reasoning else None
+                        ),
+                        "n_new": n_new,
+                        "n_pop": n_pop,
+                    }
+                )
 
         # log planner prompts
         for i, prompt in enumerate(to_send_messages):
@@ -102,7 +117,7 @@ class OneTurnPlanner(PlannerModel):
             self.sample(to_send_messages, desc="Initial planning")
         )
 
-        seed_idx_to_plans = defaultdict(list)
+        to_write = defaultdict(list)
 
         # parse responses
         for i, resp in enumerate(planner_responses):
@@ -114,50 +129,47 @@ class OneTurnPlanner(PlannerModel):
             elif isinstance(plans, list):
                 plans = [p.strip() for p in plans]
 
-            seed_idx = seed_idxs[i]
-            meta = {
-                "planner_model": self.curr_planner_model,
-                "temperature": self.temperature,
-                "reasoning_effort": str(self.reasoning) if self.reasoning else None,
-                "planner_prompt": to_send_messages[i].get_first("user"),
-                "planner_reasoning": str(reasoning),
-                "n_new": n_new,
-                "n_pop": n_pop,
-            }
+            meta = metas[i]
+            meta["planner_reasoning"] = str(reasoning)
 
             for plan in plans:
-                seed_idx_to_plans[seed_idx].append(
+                to_write[meta["seed_idx"]].append(
                     {
                         "plan": plan,
                         "meta": meta,
                     }
                 )
 
-        # Cluster plans for each seed using k-means into n_pop clusters
-        # then select one plan per cluster (closest to centroid)
-        for seed_idx, plans_meta in seed_idx_to_plans.items():
-            logger.info(
-                f"Clustering {len(plans_meta)} plans for seed {seed_states[seed_idx].index}"
-            )
-            if not plans_meta:
-                continue
-
-            selected_plans, selected_indices = self.cluster_model.cluster(
-                [plan_meta["plan"] for plan_meta in plans_meta], n_pop
-            )
-
-            for plan, idx in zip(selected_plans, selected_indices):
-                seed_states[seed_idx].history[-1][plan] = AttributeStats(
-                    attribute=plan,
-                    rollouts={},
-                    meta=plans_meta[idx]["meta"],
+        if cluster_model is not None:
+            # Cluster plans for each seed using k-means into n_pop clusters
+            # then select one plan per cluster (closest to centroid)
+            for seed_idx, seed_plans in to_write.items():
+                logger.info(
+                    f"Clustering {len(seed_plans)} plans for seed {seed_states[seed_idx].index}"
                 )
-                # save_system_prompt_stats(
-                #     run_path=run_path,
-                #     seed_id=seed_states[seed_idx].index,
-                #     system_prompt=plan,
-                #     meta=plans_meta[idx]["meta"],
-                # )
+                if not seed_plans:
+                    continue
+
+                selected_plans, selected_indices = cluster_model.cluster(
+                    [plan["plan"] for plan in seed_plans], n_pop
+                )
+
+                to_write[seed_idx] = []
+                for plan, idx in zip(selected_plans, selected_indices):
+                    to_write[seed_idx].append(
+                        {
+                            "plan": plan,
+                            "meta": seed_plans[idx]["meta"],
+                        }
+                    )
+
+        for seed_idx, seed_plans in to_write.items():
+            for plan in seed_plans:
+                seed_states[seed_idx].history[-1][plan["plan"]] = AttributeStats(
+                    attribute=plan["plan"],
+                    rollouts={},
+                    meta=plan["meta"],
+                )
 
 
 class OneTurnRunner(Runner):
@@ -169,6 +181,7 @@ class OneTurnRunner(Runner):
         rewrite_model: RewriteModel,
         reward_model: RewardModel,
         judge_model: JudgeModel,
+        cluster_model: ClusterModel,
         n_new: int,
         n_pop: int,
         n_rollouts: int,
@@ -183,6 +196,7 @@ class OneTurnRunner(Runner):
             run_name=run_name,
             n_rollouts=n_rollouts,
         )
+        self.cluster_model = cluster_model
         self.planner = planner
         self.n_new = n_new
         self.n_pop = n_pop
@@ -198,6 +212,7 @@ class OneTurnRunner(Runner):
             seed_states=self.seed_states,
             n_new=self.n_new,
             n_pop=self.n_pop,
+            cluster_model=self.cluster_model,
         )
 
         for seed_state in self.seed_states:
@@ -303,7 +318,6 @@ if __name__ == "__main__":
     planner = OneTurnPlanner(
         model_names=["anthropic/claude-opus-4.1", "google/gemini-2.5-pro"],
         alloy_type="round_robin",
-        cluster_model=cluster_model,
         max_tokens=8192,
         reasoning=6000,
         temperature=1.0,
@@ -319,6 +333,7 @@ if __name__ == "__main__":
         rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=512),
         reward_model=RewardModel(model_name="skywork-v2", batch_size=64),
         judge_model=JudgeModel(),
+        cluster_model=cluster_model,
         n_new=args.n_new,
         n_pop=args.n_pop,
         n_rollouts=16,

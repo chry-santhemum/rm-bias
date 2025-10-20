@@ -95,11 +95,11 @@ class AttributeStats:
             - np.mean(baseline_scores).item()
         )
 
-    def adversarial_score(self, baselines: dict[str, list[Rollout]]) -> float | None:
-        reward_diff = self.mean_reward_diff(baselines)
-        if reward_diff is None or self.judge_score is None:
-            return None
-        return adversariality(reward_diff, self.judge_score)
+    # def adversarial_score(self, baselines: dict[str, list[Rollout]]) -> float | None:
+    #     reward_diff = self.mean_reward_diff(baselines)
+    #     if reward_diff is None or self.judge_score is None:
+    #         return None
+    #     return adversariality(reward_diff, self.judge_score)
 
     @cached_property
     def bootstrap_CI(self, confidence: float = 0.95) -> dict[str, float]: ...
