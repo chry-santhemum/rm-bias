@@ -150,8 +150,8 @@ if __name__ == "__main__":
         topic_ids = [0]
     elif args.dataset == "synthetic_1":
         # topic_ids = [0, 1, 3, 6, 7, 8, 9, 10, 11, 12, 14]
-        # topic_ids = [3, 6, 7, 8, 9, 10, 11, 14]
-        topic_ids = [8, 9, 10, 11]
+        topic_ids = [3, 6, 7, 12, 14]
+        # topic_ids = [8, 9, 10, 11]
 
     initial_seed_states = load_initial_seed_states(
         ds_name=args.dataset,
@@ -190,7 +190,7 @@ if __name__ == "__main__":
     )
 
     # with open(
-    #     "data/one_turn/20251015-232457-n_pop32-synthetic_1/baseline_results.json", "r"
+    #     "data/levels/20251020-015556-n_pop32-synthetic_1/baseline_results.json", "r"
     # ) as f:
     #     baseline_results = json.load(f)
 

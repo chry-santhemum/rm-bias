@@ -55,9 +55,9 @@ class GenerationModel:
             reasoning=self.reasoning,
         )
 
-        logger.info(
-            f"[GenerationModel] Received {len(responses)} responses from model {self.model_name}."
-        )
+        # logger.info(
+        #     f"[GenerationModel] Received {len(responses)} responses from model {self.model_name}."
+        # )
         outputs = []
 
         for i, resp in enumerate(responses):

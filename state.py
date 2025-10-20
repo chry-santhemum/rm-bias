@@ -1,7 +1,7 @@
 import math
 from typing import Any
 from functools import cached_property
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 import numpy as np
 
 
@@ -79,6 +79,15 @@ class AttributeStats:
             rollouts = [r for r in rollouts if r.score is not None]
             all_results[user_prompt] = [r.score for r in rollouts]
         return all_results
+
+
+    @property
+    def all_rollouts(self) -> dict[str, list[dict[str, Any]]]:
+        all_results = {}
+        for user_prompt, rollouts in self.rollouts.items():
+            all_results[user_prompt] = [asdict(r) for r in rollouts]
+        return all_results
+
 
     def mean_reward_diff(self, baselines: dict[str, list[Rollout]]) -> float | None:
         mean_rewards = self.mean_rewards

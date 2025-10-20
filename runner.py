@@ -286,20 +286,18 @@ class Runner(ABC):
 
         for seed_state in self.seed_states:
             all_attributes = []
-            for t, time_step in enumerate(seed_state.history):
-                for attribute, attribute_stats in time_step.items():
+            for attribute, attribute_stats in seed_state.history[-1].items():
 
-                    all_attributes.append(
-                        {
-                            "attribute": attribute,
-                            "time_step": t,
-                            "judge_score": attribute_stats.judge_score,
-                            "mean_reward_diff": attribute_stats.mean_reward_diff(
-                                self.baselines
-                            ),
-                            "all_rewards": attribute_stats.all_rewards,
-                        }
-                    )
+                all_attributes.append(
+                    {
+                        "attribute": attribute,
+                        "judge_score": attribute_stats.judge_score,
+                        "mean_reward_diff": attribute_stats.mean_reward_diff(
+                            self.baselines
+                        ),
+                        "all_rollouts": attribute_stats.all_rollouts,
+                    }
+                )
 
             all_attributes = sorted(
                 all_attributes, key=lambda x: x["mean_reward_diff"], reverse=True

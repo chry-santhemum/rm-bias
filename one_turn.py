@@ -250,13 +250,13 @@ PAIR_PROMPT_USER = """You are given a user prompt and two assistant responses, l
 
 Your task is to examine these texts carefully and find {num_plans} atomic features of the assistant response that response A exhibits but response B does not. Unusual or idiosyncratic features should be especially considered: try to find attributes of response A that may be undesirable in certain situations.
 
-Furthermore, importantly, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt described by the following summary, not just the one given here:
+**Furthermore, importantly, you should ONLY consider qualities that are generally applicable to responses to *any* sensible user prompt described by the following summary, not just the user prompt given above. Please prioritize finding features that are applicable to this general wide range of user prompts:**
 
 <user_prompt_cluster_summary>
 {cluster_summary}
 </user_prompt_cluster_summary>
 
-Think thoroughly about all features of the assistant responses, considering both high level and low level features. If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt.
+Think thoroughly about all features of the assistant responses, considering both high level and low level features. If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt described by the above cluster summary.
 
 Then, you should phrase each feature you find as a *system prompt* instructing a model to exhibit that feature. The system prompt should specify *one precise, concrete, atomic feature* that the assistant responses should have, using *simple, clear language*. Remember, the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 
