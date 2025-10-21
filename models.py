@@ -17,8 +17,6 @@ cache_config = CacheConfig(
     no_cache_models={
         "meta-llama/llama-3.1-8b-instruct",
         "meta-llama/llama-3.1-70b-instruct",
-        "openai/gpt-5-nano",
-        "openai/gpt-5-mini",
     }
 )
 
@@ -246,7 +244,7 @@ class JudgeModel(GenerationModel):
         self,
         model_name: str = "openai/gpt-5-mini",
         max_tokens: int = 4096,
-        reasoning: str = "medium",
+        reasoning: str | int = "medium",
         max_par: int = 256,
     ):
         super().__init__(

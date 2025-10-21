@@ -29,52 +29,41 @@ def plot_seed_data_levels(
         baseline_results = json.load(f)
 
     with open(
-        results_dir / f"level_1_stats/seed_{seed_index}.json", "r", encoding="utf-8"
+        results_dir / f"validate/seed_{seed_index}_validate/rewrite_plus_scores.json", "r", encoding="utf-8"
     ) as f:
-        level_1_stats = json.load(f)
+        validate_results = json.load(f)
+
+    with open(
+        results_dir / f"validate/seed_{seed_index}_judge.json", "r", encoding="utf-8"
+    ) as f:
+        judge_results = json.load(f)
 
     with open(
         results_dir / f"seed_{seed_index}_cluster.json", "r", encoding="utf-8"
     ) as f:
         cluster_info = json.load(f)
 
-    if "all_rewards" in level_1_stats[0]:
-        level_1_stats_filtered = [s for s in level_1_stats if len(s["all_rewards"]) > 1]
-    else:
-        level_1_stats_filtered = [
-            s for s in level_1_stats if len(s["all_rollouts"]) > 1
-        ]
-        for s in level_1_stats_filtered:
-            s["all_rewards"] = {
-                k: [r["score"] for r in v] for k, v in s["all_rollouts"].items()
-            }
-            del s["all_rollouts"]
-
-    level_1_stats_filtered.sort(key=lambda x: x["mean_reward_diff"], reverse=True)
-    level_1_stats_filtered = level_1_stats_filtered[:12]
-
-    # Infer the user prompts from level 1 stats
-    user_prompts = set()
-    for stat in level_1_stats_filtered:
-        user_prompts.update(stat["all_rewards"].keys())
-    user_prompts = list(user_prompts)
 
     # Collect difference data for each attribute
     plot_data = []
 
     # For each attribute, compute differences from baseline
-    for stat in level_1_stats_filtered:
+    for attribute, attribute_results in validate_results.items():
         attribute_diffs = []
-        for prompt in user_prompts:
-            if prompt in stat["all_rewards"] and prompt in baseline_results:
-                attribute_rewards = stat["all_rewards"][prompt]
-                baseline_rewards = [r["score"] for r in baseline_results[prompt]]
+        winrates = []
 
-                # Compute element-wise differences
-                for attr_score, base_score in zip(attribute_rewards, baseline_rewards):
-                    attribute_diffs.append(attr_score - base_score)
+        for prompt, prompt_rewards in attribute_results.items():
+            baseline_rewards = [r["score"] for r in baseline_results[prompt]]
 
-        plot_data.append({"attribute": stat["attribute"], "diffs": attribute_diffs})
+            # Compute element-wise differences
+            for attr_score, base_score in zip(prompt_rewards, baseline_rewards):
+                attribute_diffs.append(attr_score - base_score)
+
+        for prompt, prompt_judge_winrates in judge_results[attribute].items():
+            winrates_clean = [wr for wr in prompt_judge_winrates if wr is not None]
+            winrates.extend(winrates_clean)
+
+        plot_data.append({"attribute": attribute, "diffs": attribute_diffs, "winrate": np.mean(winrates).item()})
 
     # Helper function to wrap text
     def wrap_text(text, width=40):
@@ -102,9 +91,15 @@ def plot_seed_data_levels(
     # Create box plot
     fig = go.Figure()
 
+    # Store positions and winrates for annotation
+    display_names = []
+    winrate_vals = []
+
     # Add violin plot for each attribute
-    for item in plot_data:
+    for i, item in enumerate(plot_data):
         display_name = wrap_text(item["attribute"], width=40)
+        display_names.append(display_name)
+        winrate_vals.append(item["winrate"])
 
         fig.add_trace(
             go.Violin(
@@ -131,28 +126,33 @@ def plot_seed_data_levels(
         y=0, line_dash="dash", line_color="black", line_width=1.5, opacity=0.6
     )
 
+    # Add winrate above each bar
+    for i, (display_name, winrate) in enumerate(zip(display_names, winrate_vals)):
+        # Try to estimate x-position: for plotly Violin traces, x coordinate is the category name (string)
+
+        fig.add_annotation(
+            x=display_name,
+            y=-25,
+            text=f"Winrate: {winrate:.2f}",
+            showarrow=False,
+            yanchor='bottom',
+            font=dict(size=16, color="black"),
+        )
+
     return fig
 
 
 # %%
-Path("data/scrap/20251020").mkdir(parents=True, exist_ok=True)
+Path("data/scrap/20251021-191110").mkdir(parents=True, exist_ok=True)
 
-for seed_index in [8, 9, 10, 11]:
+for seed_index in [0, 1, 2, 3]:
     fig = plot_seed_data_levels(
-        Path("data/levels/20251020-022806-n_pop32-synthetic_1"), seed_index=seed_index
+        Path("data/levels/20251021-191110-synthetic_2"), seed_index=seed_index
     )
+    fig.show()
     fig.write_html(
-        f"data/scrap/20251020/n_pop32-synthetic_1-levels-seed_{seed_index}.html"
+        f"data/scrap/20251021-191110/synthetic_2-levels-seed_{seed_index}.html"
     )
-
-for seed_index in [3, 6, 7, 12, 14]:
-    fig = plot_seed_data_levels(
-        Path("data/levels/20251020-042029-n_pop32-synthetic_1"), seed_index=seed_index
-    )
-    fig.write_html(
-        f"data/scrap/20251020/n_pop32-synthetic_1-levels-seed_{seed_index}.html"
-    )
-
 
 # %%
 

@@ -60,40 +60,67 @@ class LevelsRunner(Runner):
     def train(self):
         self.load_contrast_pairs()
 
-        self.planner.plan(
-            seed_states=self.seed_states,
-            n_new=self.n_new,
-            n_pop=self.n_pop_level_0,
-            cluster_model=self.cluster_model,
-        )
+        # self.planner.plan(
+        #     seed_states=self.seed_states,
+        #     n_new=self.n_new,
+        #     n_pop=self.n_pop_level_0,
+        #     cluster_model=self.cluster_model,
+        # )
 
-        level_0_evaluate_tasks = []
-        seed_state_indices = []
+        # level_0_evaluate_tasks = []
+        # seed_state_indices = []
 
-        for seed_state_idx, seed_state in enumerate(self.seed_states):
-            for plan in seed_state.history[-1].values():
-                level_0_evaluate_tasks.append(
-                    self.evaluate_attributes(
-                        user_prompts=random.sample(
-                            seed_state.cluster.train_prompts,
-                            self.train_batch_size_level_0,
-                        ),
-                        attributes=[plan.attribute],
-                    )
+        # for seed_state_idx, seed_state in enumerate(self.seed_states):
+        #     for plan in seed_state.history[-1].values():
+        #         level_0_evaluate_tasks.append(
+        #             self.evaluate_attributes(
+        #                 user_prompts=random.sample(
+        #                     seed_state.cluster.train_prompts,
+        #                     self.train_batch_size_level_0,
+        #                 ),
+        #                 attributes=[plan.attribute],
+        #             )
+        #         )
+        #         seed_state_indices.append(seed_state_idx)
+
+        # print(f"Level 0 evaluate tasks: {len(level_0_evaluate_tasks)}")
+        # level_0_evaluate_results = asyncio.run(async_gather(level_0_evaluate_tasks))
+
+        # for result, seed_state_idx in zip(level_0_evaluate_results, seed_state_indices):
+        #     (key,) = result
+        #     val = result[key]
+        #     self.seed_states[seed_state_idx].history[-1][key].rollouts = val
+
+        # self.save_attribute_stats(
+        #     save_dir=self.run_path / "level_0_stats"
+        # )  # save level 0 info
+
+        # load level 0 info into self.seed_states
+        for seed_state in self.seed_states:
+            seed_state_idx = seed_state.index
+            with open(
+                self.run_path / "level_0_stats" / f"seed_{seed_state_idx}.json", "r"
+            ) as f:
+                level_0_stats = json.load(f)
+            seed_state.history.append(dict())
+
+            for item in level_0_stats:
+                attribute = item["attribute"]
+                attribute_rollouts = dict()
+                for user_prompt, rollouts in item["all_rollouts"].items():
+                    attribute_rollouts[user_prompt] = [
+                        Rollout(
+                            response=rollout["response"], 
+                            score=rollout["score"]
+                        )
+                        for rollout in rollouts
+                    ]
+
+                seed_state.history[-1][attribute] = AttributeStats(
+                    attribute=attribute,
+                    rollouts=attribute_rollouts,
                 )
-                seed_state_indices.append(seed_state_idx)
 
-        print(f"Level 0 evaluate tasks: {len(level_0_evaluate_tasks)}")
-        level_0_evaluate_results = asyncio.run(async_gather(level_0_evaluate_tasks))
-
-        for result, seed_state_idx in zip(level_0_evaluate_results, seed_state_indices):
-            (key,) = result
-            val = result[key]
-            self.seed_states[seed_state_idx].history[-1][key].rollouts = val
-
-        self.save_attribute_stats(
-            save_dir=self.run_path / "level_0_stats"
-        )  # save level 0 info
 
         # For each seed state, take the most promising ones
         level_1_evaluate_tasks = []
@@ -102,7 +129,7 @@ class LevelsRunner(Runner):
             all_scores = []
             for _, attribute_results in result.items():
                 for _, rollouts in attribute_results.items():
-                    all_scores.extend([r.score for r in rollouts])
+                    all_scores.extend([r.score for r in rollouts if r.score is not None])
             return np.mean(all_scores).item()
 
         for seed_state_idx, seed_state in enumerate(self.seed_states):
@@ -177,7 +204,7 @@ if __name__ == "__main__":
         topic_ids = [3, 6, 7, 12, 14]
         # topic_ids = [8, 9, 10, 11]
     elif args.dataset == "synthetic_2":
-        topic_ids = list(range(8))
+        topic_ids = [4, 5, 6, 7, 8, 9]
 
     initial_seed_states = load_initial_seed_states(
         ds_name=args.dataset,
@@ -186,7 +213,8 @@ if __name__ == "__main__":
         val_split_size=args.val_split_size,
     )
 
-    run_name = f"{timestamp()}-{args.dataset}"
+    # run_name = f"{timestamp()}-{args.dataset}"
+    run_name = "20251021-205539-synthetic_2"
     Path(f"logs/levels").mkdir(parents=True, exist_ok=True)
     Path(f"data/levels").mkdir(parents=True, exist_ok=True)
     logging_setup(filename=f"logs/levels/{run_name}.log", level=logging.INFO)
@@ -212,7 +240,7 @@ if __name__ == "__main__":
         ),
         rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=500),
         reward_model=RewardModel(model_name="skywork-v2", batch_size=32),
-        judge_model=JudgeModel(max_tokens=10000, reasoning="high"),
+        judge_model=JudgeModel(model_name="anthropic/claude-sonnet-4.5", max_tokens=4096, reasoning=4000),
         cluster_model=cluster_model,
         n_new=args.n_new,
         n_pop_level_0=args.n_pop_level_0,
@@ -223,19 +251,19 @@ if __name__ == "__main__":
         run_name=run_name,
     )
 
-    # with open(
-    #     "data/levels/20251020-015556-n_pop32-synthetic_1/baseline_results.json", "r"
-    # ) as f:
-    #     baseline_results = json.load(f)
+    with open(
+        f"data/levels/{run_name}/train_baselines/baseline_results.json", "r"
+    ) as f:
+        baseline_results = json.load(f)
 
-    # runner.baselines = {}
-    # for user, rollouts in baseline_results.items():
-    #     runner.baselines[user] = [
-    #         Rollout(response=rollout["response"], score=rollout["score"])
-    #         for rollout in rollouts
-    #     ]
+    runner.baselines = {}
+    for user, rollouts in baseline_results.items():
+        runner.baselines[user] = [
+            Rollout(response=rollout["response"], score=rollout["score"])
+            for rollout in rollouts
+        ]
 
-    runner.get_baselines()
+    # runner.get_baselines()
 
     try:
         runner.train()

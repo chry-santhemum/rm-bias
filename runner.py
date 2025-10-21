@@ -174,12 +174,12 @@ class Runner(ABC):
                 user_prompts=self.all_train_prompts,
                 policy_model=self.policy_model,
                 reward_model=self.reward_model,
-                save_dir=self.run_path,
+                save_dir=self.run_path / "train_baselines",
                 n_rollouts=self.n_rollouts,
             )
         )
-        print(f"Baseline rollouts taken: {time.time() - start_time} seconds")
-        logging.info(f"Baseline rollouts taken: {time.time() - start_time} seconds")
+        print(f"Baseline rollouts taken: {(time.time() - start_time):.2f} seconds")
+        logging.info(f"Baseline rollouts taken: {(time.time() - start_time):.2f} seconds")
 
     def get_val_baselines(self):
         # get baseline rollouts and rewards
@@ -189,13 +189,13 @@ class Runner(ABC):
                 user_prompts=self.all_val_prompts,
                 policy_model=self.policy_model,
                 reward_model=self.reward_model,
-                save_dir=self.run_path,
+                save_dir=self.run_path / "val_baselines",
                 n_rollouts=self.n_rollouts,
             )
         )
-        print(f"Validation baseline rollouts taken: {time.time() - start_time} seconds")
+        print(f"Validation baseline rollouts taken: {(time.time() - start_time):.2f} seconds")
         logging.info(
-            f"Validation baseline rollouts taken: {time.time() - start_time} seconds"
+            f"Validation baseline rollouts taken: {(time.time() - start_time):.2f} seconds"
         )
 
     async def evaluate_attributes(
@@ -248,7 +248,7 @@ class Runner(ABC):
         )
         del self.batch_futures[batch_id]
 
-        logger.info(f"Attributes evaluated in {time.time() - start_time} seconds")
+        logger.info(f"Attributes evaluated in {(time.time() - start_time):.2f} seconds")
         return organized_results
 
     async def _judge_attribute_helper(self) -> list[dict[str, int]]:
@@ -458,7 +458,7 @@ class Runner(ABC):
                 f"Found {len(contrast_pairs)} contrast pairs in total for seed {seed_state.index}"
             )
 
-            # contrast_pairs = random.sample(contrast_pairs, min(len(contrast_pairs), 64))
+            # contrast_pairs = random.sample(contrast_pairs, min(len(contrast_pairs), 4))  # DEBUG
 
             seed_state.cluster = replace(
                 seed_state.cluster,
