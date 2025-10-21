@@ -13,6 +13,7 @@ import logging
 import asyncio
 import random
 from pathlib import Path
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace, asdict
 from abc import ABC, abstractmethod
@@ -20,7 +21,7 @@ from itertools import product
 import numpy as np
 
 from state import SeedState, Rollout
-from utils import timestamp, logging_setup
+from utils import timestamp, logging_setup, async_gather
 from models import PolicyModel, RewriteModel, JudgeModel
 from reward_model import RewardModel
 from load_cluster import load_initial_seed_states
@@ -270,7 +271,7 @@ class Runner(ABC):
                 seed_state.history[-1][attribute].judge_score = judge_score
 
     def save_attribute_stats(
-        self, top_k: int = 4, save_dir: Path | None = None
+        self, top_k: int = 8, save_dir: Path | None = None
     ) -> dict[int, list[str]]:
         """
         Save a condensed version of **all** attribute stats for each seed state,
@@ -337,20 +338,77 @@ class Runner(ABC):
         """
         final_attributes: seed_state_index -> list of attributes
         """
+        self.get_val_baselines()
+        tasks = [
+            self.evaluate_attributes(
+                user_prompts=seed_state.cluster.val_prompts,
+                attributes=final_attributes[seed_state.index],
+                save_dir=self.run_path
+                / "validate"
+                / f"seed_{seed_state.index}_validate",
+                baseline_rollouts=self.val_baselines,
+            )
+            for seed_state in self.seed_states
+        ]
 
-        async def validate_helper():
-            tasks = [
-                self.evaluate_attributes(
-                    user_prompts=seed_state.cluster.val_prompts,
-                    attributes=final_attributes[seed_state.index],
-                    save_dir=self.run_path / "validate" / f"seed_{seed_state.index}",
-                    baseline_rollouts=self.val_baselines,
-                )
-                for seed_state in self.seed_states
-            ]
-            await asyncio.gather(*tasks)
+        validation_results = asyncio.run(async_gather(tasks))
 
-        asyncio.run(validate_helper())
+        # use judge model
+        NUM_TRIALS = 4
+        judge_tasks = []
+        judge_tasks_info = []
+        for seed_state_idx in range(len(self.seed_states)):
+            validation_result_seed = validation_results[seed_state_idx]
+            for attribute, attribute_stats in validation_result_seed.items():
+                for user_prompt, rollouts in attribute_stats.items():
+                    baseline_rollouts = self.val_baselines[user_prompt]
+                    for rollout_idx, rollout in enumerate(rollouts):
+                        judge_tasks.append(
+                            self.judge_model.compare_responses(
+                                user_prompt=user_prompt,
+                                response_1=rollout.response,
+                                response_2=baseline_rollouts[rollout_idx].response,
+                                num_trials=NUM_TRIALS,
+                            )
+                        )
+                        judge_tasks_info.append(
+                            {
+                                "seed_state_idx": seed_state_idx,
+                                "attribute": attribute,
+                                "user_prompt": user_prompt,
+                                "rollout_idx": rollout_idx,
+                            }
+                        )
+
+        judge_tasks_results = asyncio.run(
+            async_gather(
+                judge_tasks, max_parallel=self.judge_model.max_par // NUM_TRIALS
+            )
+        )
+        judge_results = {
+            seed_state_idx: {
+                attribute: defaultdict(list)
+                for attribute in validation_results[seed_state_idx]
+            }
+            for seed_state_idx in range(len(self.seed_states))
+        }
+
+        for judge_task_result, judge_task_info in zip(
+            judge_tasks_results, judge_tasks_info
+        ):
+            seed_state_idx = judge_task_info["seed_state_idx"]
+            attribute = judge_task_info["attribute"]
+            user_prompt = judge_task_info["user_prompt"]
+            rollout_idx = judge_task_info["rollout_idx"]
+            judge_results[seed_state_idx][attribute][user_prompt].append(
+                judge_task_result
+            )
+
+        for seed_state_idx, seed_state in enumerate(self.seed_states):
+            with open(
+                self.run_path / "validate" / f"seed_{seed_state.index}_judge.json", "w"
+            ) as f:
+                json.dump(judge_results[seed_state_idx], f, indent=4)
 
     def load_contrast_pairs(self, threshold: float = 1.0):
         """
@@ -400,7 +458,7 @@ class Runner(ABC):
                 f"Found {len(contrast_pairs)} contrast pairs in total for seed {seed_state.index}"
             )
 
-            contrast_pairs = random.sample(contrast_pairs, min(len(contrast_pairs), 64))
+            # contrast_pairs = random.sample(contrast_pairs, min(len(contrast_pairs), 64))
 
             seed_state.cluster = replace(
                 seed_state.cluster,

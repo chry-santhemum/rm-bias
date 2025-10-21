@@ -21,6 +21,142 @@ nest_asyncio.apply()
 # %%
 
 
+def plot_seed_data_levels(
+    results_dir: Path,
+    seed_index: int,
+):
+    with open(results_dir / f"baseline_results.json", "r", encoding="utf-8") as f:
+        baseline_results = json.load(f)
+
+    with open(
+        results_dir / f"level_1_stats/seed_{seed_index}.json", "r", encoding="utf-8"
+    ) as f:
+        level_1_stats = json.load(f)
+
+    with open(
+        results_dir / f"seed_{seed_index}_cluster.json", "r", encoding="utf-8"
+    ) as f:
+        cluster_info = json.load(f)
+
+    if "all_rewards" in level_1_stats[0]:
+        level_1_stats_filtered = [s for s in level_1_stats if len(s["all_rewards"]) > 1]
+    else:
+        level_1_stats_filtered = [
+            s for s in level_1_stats if len(s["all_rollouts"]) > 1
+        ]
+        for s in level_1_stats_filtered:
+            s["all_rewards"] = {
+                k: [r["score"] for r in v] for k, v in s["all_rollouts"].items()
+            }
+            del s["all_rollouts"]
+
+    level_1_stats_filtered.sort(key=lambda x: x["mean_reward_diff"], reverse=True)
+    level_1_stats_filtered = level_1_stats_filtered[:12]
+
+    # Infer the user prompts from level 1 stats
+    user_prompts = set()
+    for stat in level_1_stats_filtered:
+        user_prompts.update(stat["all_rewards"].keys())
+    user_prompts = list(user_prompts)
+
+    # Collect difference data for each attribute
+    plot_data = []
+
+    # For each attribute, compute differences from baseline
+    for stat in level_1_stats_filtered:
+        attribute_diffs = []
+        for prompt in user_prompts:
+            if prompt in stat["all_rewards"] and prompt in baseline_results:
+                attribute_rewards = stat["all_rewards"][prompt]
+                baseline_rewards = [r["score"] for r in baseline_results[prompt]]
+
+                # Compute element-wise differences
+                for attr_score, base_score in zip(attribute_rewards, baseline_rewards):
+                    attribute_diffs.append(attr_score - base_score)
+
+        plot_data.append({"attribute": stat["attribute"], "diffs": attribute_diffs})
+
+    # Helper function to wrap text
+    def wrap_text(text, width=40):
+        """Wrap text to specified width"""
+        words = text.split()
+        lines = []
+        current_line = []
+        current_length = 0
+
+        for word in words:
+            if current_length + len(word) + 1 <= width:
+                current_line.append(word)
+                current_length += len(word) + 1
+            else:
+                if current_line:
+                    lines.append(" ".join(current_line))
+                current_line = [word]
+                current_length = len(word)
+
+        if current_line:
+            lines.append(" ".join(current_line))
+
+        return "<br>".join(lines)
+
+    # Create box plot
+    fig = go.Figure()
+
+    # Add violin plot for each attribute
+    for item in plot_data:
+        display_name = wrap_text(item["attribute"], width=40)
+
+        fig.add_trace(
+            go.Violin(
+                y=item["diffs"],
+                name=display_name,
+                box_visible=True,
+                meanline_visible=True,
+                points="all",
+            )
+        )
+
+    fig.update_layout(
+        title=f"Seed {seed_index}: {cluster_info['summary']}",
+        xaxis_title="Attribute",
+        yaxis_title="Reward Difference (Attribute - Baseline)",
+        height=1000,
+        width=1200,
+        showlegend=False,
+        xaxis=dict(tickangle=45),
+    )
+
+    # Add reference line at 0
+    fig.add_hline(
+        y=0, line_dash="dash", line_color="black", line_width=1.5, opacity=0.6
+    )
+
+    return fig
+
+
+# %%
+Path("data/scrap/20251020").mkdir(parents=True, exist_ok=True)
+
+for seed_index in [8, 9, 10, 11]:
+    fig = plot_seed_data_levels(
+        Path("data/levels/20251020-022806-n_pop32-synthetic_1"), seed_index=seed_index
+    )
+    fig.write_html(
+        f"data/scrap/20251020/n_pop32-synthetic_1-levels-seed_{seed_index}.html"
+    )
+
+for seed_index in [3, 6, 7, 12, 14]:
+    fig = plot_seed_data_levels(
+        Path("data/levels/20251020-042029-n_pop32-synthetic_1"), seed_index=seed_index
+    )
+    fig.write_html(
+        f"data/scrap/20251020/n_pop32-synthetic_1-levels-seed_{seed_index}.html"
+    )
+
+
+# %%
+
+
 def plot_seed_data(cluster_info: dict, seed_data: list[dict], seed_baseline: dict):
     def truncate_text(text, max_length=40):
         if len(text) <= max_length:

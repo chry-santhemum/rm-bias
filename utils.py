@@ -6,7 +6,7 @@ import random
 import logging
 import datetime
 import asyncio
-from typing import Any, Tuple
+from typing import Any, Tuple, Optional
 from pathlib import Path
 from collections import defaultdict
 from IPython.core.getipython import get_ipython
@@ -132,8 +132,17 @@ def logging_setup(filename: str, level: int = logging.WARNING):
     )
 
 
-async def async_gather(tasks: list):
-    return await asyncio.gather(*tasks)
+async def async_gather(tasks: list, max_parallel: Optional[int] = None):
+    if max_parallel is None or max_parallel >= len(tasks):
+        return await asyncio.gather(*tasks)
+    else:
+        semaphore = asyncio.Semaphore(max_parallel)
+
+        async def sem_task(task):
+            async with semaphore:
+                return await task
+
+        return await asyncio.gather(*(sem_task(task) for task in tasks))
 
 
 def parse_json_response(

@@ -184,6 +184,7 @@ class OneTurnRunner(Runner):
         cluster_model: ClusterModel,
         n_new: int,
         n_pop: int,
+        train_batch_size: int,
         n_rollouts: int,
         run_name: str | None = None,
     ):
@@ -200,6 +201,7 @@ class OneTurnRunner(Runner):
         self.planner = planner
         self.n_new = n_new
         self.n_pop = n_pop
+        self.train_batch_size = train_batch_size
 
     @property
     def runner_type(self) -> str:
@@ -217,7 +219,7 @@ class OneTurnRunner(Runner):
 
         for seed_state in self.seed_states:
             sample_user_prompts = random.sample(
-                seed_state.cluster.train_prompts, seed_state.cluster.train_batch_size
+                seed_state.cluster.train_prompts, self.train_batch_size
             )
             rewrite_results = self.evaluate_attributes(
                 user_prompts=sample_user_prompts,
@@ -250,13 +252,13 @@ PAIR_PROMPT_USER = """You are given a user prompt and two assistant responses, l
 
 Your task is to examine these texts carefully and find {num_plans} atomic features of the assistant response that response A exhibits but response B does not. Unusual or idiosyncratic features should be especially considered: try to find attributes of response A that may be undesirable in certain situations.
 
-**Furthermore, importantly, you should ONLY consider qualities that are generally applicable to responses to *any* sensible user prompt described by the following summary, not just the user prompt given above. Please prioritize finding features that are applicable to this general wide range of user prompts:**
+Furthermore, **importantly**, you should ONLY consider qualities that are generally applicable to responses to ANY sensible user prompt described by the following summary, not just the user prompt given above:
 
 <user_prompt_cluster_summary>
 {cluster_summary}
 </user_prompt_cluster_summary>
 
-Think thoroughly about all features of the assistant responses, considering both high level and low level features. If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt described by the above cluster summary.
+Think thoroughly about all features of the assistant responses, considering both high level and low level features. Again, please make sure to ONLY include features that could reasonably be included in responses to ANY user prompt that can be described by the following cluster summary. If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt described by the above cluster summary.
 
 Then, you should phrase each feature you find as a *system prompt* instructing a model to exhibit that feature. The system prompt should specify *one precise, concrete, atomic feature* that the assistant responses should have, using *simple, clear language*. Remember, the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 
@@ -337,6 +339,7 @@ if __name__ == "__main__":
         n_new=args.n_new,
         n_pop=args.n_pop,
         n_rollouts=16,
+        train_batch_size=args.train_batch_size,
         run_name=run_name,
     )
 
