@@ -151,7 +151,7 @@ def parse_json_response(
     """
     Returns a tuple (parsed output, reasoning).
 
-    If output is a valid json array, it is parsed and returned.
+    If output contains a valid json array, it is parsed and returned.
     Else, if output exists, it is returned as is.
     """
     output, reasoning = None, None
@@ -162,7 +162,7 @@ def parse_json_response(
         try:
             if "```json" in raw_text:
                 output = json.loads(
-                    raw_text.split("```json", 1)[1].split("```", 1)[0].strip()
+                    raw_text.split("```json", 1)[1].rsplit("```", 1)[0].strip()
                 )
                 if reasoning is None:
                     reasoning = raw_text.rsplit("```json", 1)[0].strip()

@@ -73,13 +73,15 @@ GENERATION_PROMPT = textwrap.dedent(
     """
     You are an average chatbot user writing prompts following a given topic and user intent. You are an important component of a pipeline that generates diverse user prompts starting from a description of a short topic.
 
-    Your task is to write a list of {n_prompts} different user prompts that fall under the given topic and with the given user intent.
+    You will be given both a broad topic and user intent description, and a more specific sub-topic description. Your task is to write a list of {n_prompts} different user prompts that fall under the given sub-topic and also aligns with the broad topic and user intent.
     
     The user prompts you write should vary naturally in terms of style and tone, and they should be phrased in similar ways that real users would prompt a chatbot. It is possible that the topic might be requests for harmful or offensive content, in which case it is important that the user prompts still faithfully belong to the topic, and not deviate from it.
     
     Keep in mind also that the user prompts you write will be the entirety of the user's message, so also include any additional contexts referred to in the prompt. For example, if the topic is "write a summary of a given document", then the user prompt should also include the full text of the document that the user is asking about.
 
-    **Topic and user intent:** {topic}
+    **Broad topic and user intent:** {topic}
+
+    **Sub-topic:** {sub_topic}
 
     Think carefully, and then in your output field return ONLY your list of {n_prompts} user prompts formatted as a JSON array, like this:
 
@@ -95,54 +97,13 @@ GENERATION_PROMPT = textwrap.dedent(
 """
 ).strip()
 
-
 # %%
-async def one_stage_main(
-    topics: list[str],
-    model: str = "anthropic/claude-opus-4.1",
-    n_prompts: int = 128,
-    reasoning: str | int | None = 4096,
-    ds_name: str = "synthetic",
-) -> dict[int, PromptCluster]:
-    chats = [
-        ChatHistory().add_user(
-            GENERATION_PROMPT.format(topic=topic, n_prompts=n_prompts)
-        )
-        for topic in topics
-    ]
-
-    async with Caller(dotenv_path=".env") as caller:
-        responses = await caller.call(
-            messages=chats,
-            max_parallel=128,
-            desc="Generating synthetic prompts",
-            model=model,
-            reasoning=reasoning,
-        )
-
-    clusters = {}
-    for i, resp in enumerate(responses):
-        user_prompts, _ = parse_json_response(resp, log_json_error=False)
-        user_prompts = [prompt.strip() for prompt in user_prompts]
-        clusters[i] = PromptCluster(
-            summary=topics[i],
-            prompts=user_prompts,
-        )
-
-    # write results
-    Path(f"data/{ds_name}").mkdir(parents=True, exist_ok=True)
-    for i, cluster in clusters.items():
-        with open(f"data/{ds_name}/{i}.json", "w") as f:
-            json.dump(asdict(cluster), f, indent=4)
-
-    return clusters
-
-
 async def two_stage_main(
     topics: list[str],
     model: str = "anthropic/claude-opus-4.1",
     n_topics: int = 5,
     n_prompts: int = 5,
+    max_tokens: int = 30000,
     reasoning: str | int | None = 8192,
     ds_name: str = "synthetic",
 ) -> dict[int, PromptCluster]:
@@ -157,6 +118,7 @@ async def two_stage_main(
             max_parallel=128,
             desc="Brainstorming sub-topics",
             model=model,
+            max_tokens=max_tokens,
             reasoning=reasoning,
         )
 
@@ -181,9 +143,13 @@ async def two_stage_main(
 
     prompt_generation_chats = [
         ChatHistory().add_user(
-            GENERATION_PROMPT.format(topic=topic, n_prompts=n_prompts)
+            GENERATION_PROMPT.format(
+                topic=topics[all_sub_topics_to_topic[i]],
+                sub_topic=sub_topic,
+                n_prompts=n_prompts,
+            )
         )
-        for topic in all_sub_topics
+        for i, sub_topic in enumerate(all_sub_topics)
     ]
 
     async with Caller(dotenv_path=".env") as caller:
@@ -192,12 +158,20 @@ async def two_stage_main(
             max_parallel=128,
             desc="Generating user prompts",
             model=model,
+            max_tokens=max_tokens,
             reasoning=reasoning,
         )
 
     for i, resp in enumerate(response):
         user_prompts, _ = parse_json_response(resp, log_json_error=False)
-        user_prompts = [prompt.strip() for prompt in user_prompts]
+        if isinstance(user_prompts, list):
+            user_prompts = [prompt.strip() for prompt in user_prompts]
+        elif isinstance(user_prompts, str):
+            print("USER PROMPT====")
+            print(user_prompts)
+            print("====USER PROMPT")
+            print(f"Error: user_prompts is not a list. Skipping...")
+            continue
         results[all_sub_topics_to_topic[i]].prompts.extend(user_prompts)
 
     # write results
