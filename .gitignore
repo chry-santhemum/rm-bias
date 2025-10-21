@@ -2,9 +2,9 @@
 *_interpretations.json
 figs/
 logs/
-data/
+data/*
 !data/synthetic_2/
-!data/synthetic_2/*
+!data/synthetic_2/**
 sae_cache/
 .cache/
 user_prompts/
