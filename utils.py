@@ -132,6 +132,11 @@ def logging_setup(filename: str, level: int = logging.WARNING):
     )
 
 
+def remove_outliers(data: list[float], z_score: float = 3.0) -> list[float]:
+    mean, std = np.mean(data), np.std(data)
+    return [x for x in data if np.abs(x - mean) < z_score * std]
+
+
 async def async_gather(tasks: list, max_parallel: Optional[int] = None):
     if max_parallel is None or max_parallel >= len(tasks):
         return await asyncio.gather(*tasks)

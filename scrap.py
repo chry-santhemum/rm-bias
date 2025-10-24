@@ -1,4 +1,5 @@
 # %%
+import os
 import json
 import patches
 import asyncio
@@ -13,6 +14,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from datasets import load_dataset
 
+from utils import remove_outliers
 from caller import ChatHistory, Caller
 from reward_model import RewardModel
 
@@ -25,8 +27,12 @@ def plot_seed_data_levels(
     results_dir: Path,
     seed_index: int,
 ):
-    with open(results_dir / f"baseline_results.json", "r", encoding="utf-8") as f:
-        baseline_results = json.load(f)
+    if not (results_dir / "baseline_results.json").exists():
+        with open(results_dir / "val_baselines" / "baseline_results.json", "r", encoding="utf-8") as f:
+            baseline_results = json.load(f)
+    else:
+        with open(results_dir / f"baseline_results.json", "r", encoding="utf-8") as f:
+            baseline_results = json.load(f)
 
     with open(
         results_dir / f"validate/seed_{seed_index}_validate/rewrite_plus_scores.json", "r", encoding="utf-8"
@@ -63,6 +69,9 @@ def plot_seed_data_levels(
             winrates_clean = [wr for wr in prompt_judge_winrates if wr is not None]
             winrates.extend(winrates_clean)
 
+        # remove far outliers
+        attribute_diffs = remove_outliers(attribute_diffs)
+
         plot_data.append({"attribute": attribute, "diffs": attribute_diffs, "winrate": np.mean(winrates).item()})
 
     # Helper function to wrap text
@@ -93,13 +102,11 @@ def plot_seed_data_levels(
 
     # Store positions and winrates for annotation
     display_names = []
-    winrate_vals = []
 
     # Add violin plot for each attribute
     for i, item in enumerate(plot_data):
-        display_name = wrap_text(item["attribute"], width=40)
+        display_name = wrap_text(item["attribute"], width=40) + f"<br>(Winrate: {item['winrate']:.2f})"
         display_names.append(display_name)
-        winrate_vals.append(item["winrate"])
 
         fig.add_trace(
             go.Violin(
@@ -125,20 +132,6 @@ def plot_seed_data_levels(
     fig.add_hline(
         y=0, line_dash="dash", line_color="black", line_width=1.5, opacity=0.6
     )
-
-    # Add winrate above each bar
-    for i, (display_name, winrate) in enumerate(zip(display_names, winrate_vals)):
-        # Try to estimate x-position: for plotly Violin traces, x coordinate is the category name (string)
-
-        fig.add_annotation(
-            x=display_name,
-            y=-25,
-            text=f"Winrate: {winrate:.2f}",
-            showarrow=False,
-            yanchor='bottom',
-            font=dict(size=16, color="black"),
-        )
-
     return fig
 
 
@@ -148,6 +141,16 @@ Path("data/scrap/20251021-191110").mkdir(parents=True, exist_ok=True)
 for seed_index in [0, 1, 2, 3]:
     fig = plot_seed_data_levels(
         Path("data/levels/20251021-191110-synthetic_2"), seed_index=seed_index
+    )
+    fig.show()
+    fig.write_html(
+        f"data/scrap/20251021-191110/synthetic_2-levels-seed_{seed_index}.html"
+    )
+
+
+for seed_index in [4, 5, 6, 7, 8, 9]:
+    fig = plot_seed_data_levels(
+        Path("data/levels/20251021-205539-synthetic_2"), seed_index=seed_index
     )
     fig.show()
     fig.write_html(

@@ -1,5 +1,5 @@
 """
-Async pipeline for evaluating given biases.
+Async pipeline for generating baseline rollouts and rewards.
 """
 
 # %%
@@ -29,6 +29,7 @@ class PromptResult:
     user: str
     assistant: str
     score: float | None = None
+    batch_id: str | None = None
 
 
 async def baseline_policy_worker(

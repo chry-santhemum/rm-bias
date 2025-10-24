@@ -1,5 +1,5 @@
 """
-Async pipeline for evaluating given biases.
+Async pipeline for evaluating bias through rewrite. 
 """
 
 # %%
