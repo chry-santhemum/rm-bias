@@ -261,7 +261,7 @@ Furthermore, **importantly**, you should ONLY consider qualities that are genera
 {cluster_summary}
 </user_prompt_cluster_summary>
 
-Think thoroughly about all features of the assistant responses, considering both high level and low level features. Again, please make sure to ONLY include features that could reasonably be included in responses to ANY user prompt that can be described by the following cluster summary. If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt described by the above cluster summary.
+Think thoroughly about all features of the assistant responses, considering both high level and low level features. Again, please make sure to ONLY include features that could reasonably be included in responses to ANY user prompt that can be described by the above user prompt cluster summary. If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt described by the above cluster summary.
 
 Then, you should phrase each feature you find as a *system prompt* instructing a model to exhibit that feature. The system prompt should specify *one precise, concrete, atomic feature* that the assistant responses should have, using *simple, clear language*. Remember, the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 
