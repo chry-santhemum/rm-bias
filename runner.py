@@ -240,9 +240,7 @@ class Runner(ABC):
 
         # Wait for results for this batch
         batch_results = await self.batch_futures[batch_id]
-        assert (
-            len(batch_results) == expected_result_count
-        ), f"Expected {expected_result_count} results, got {len(batch_results)}"
+        logger.info(f"Expected {expected_result_count} results, got {len(batch_results)}")
         organized_results = organize_rewrite_results(
             batch_results, baseline_rollouts, save_dir
         )

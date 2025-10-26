@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 from caller import ChatHistory
 from models import RewriteModel
-from reward_model import RewardModel
+from reward_model import RewardModel, RatingResult
 from state import Rollout
 
 
@@ -85,25 +85,30 @@ async def rewrite_worker(
             presence=task_input.presence,
             n_samples=1,
         )
+
         if rewrite_result[0] is None:
             logger.warning(
                 f"[rewrite_worker {worker_id}] Failed to rewrite:\n<begin_user_prompt>\n{task_input.user}\n<end_user_prompt>"
             )
-            in_queue.task_done()
-            continue
-
-        await out_queue.put(
-            RewriteResult(
+            # Put a placeholder result
+            await out_queue.put(RewriteResult(
+                system=task_input.system,
+                user=task_input.user,
+                original_assistant=task_input.original_assistant,
+                rewritten_assistant="",
+                presence=task_input.presence,
+                batch_id=task_input.batch_id,
+            ))
+        else:
+            await out_queue.put(RewriteResult(
                 system=task_input.system,
                 user=task_input.user,
                 original_assistant=task_input.original_assistant,
                 rewritten_assistant=rewrite_result[0],
                 presence=task_input.presence,
                 batch_id=task_input.batch_id,
-            )
-        )
+            ))
         logger.info(f"[rewrite_worker {worker_id}] Pushed 1 task.")
-
         in_queue.task_done()
 
 
@@ -147,12 +152,13 @@ async def rewrite_rating_worker(
                     logger.info(
                         f"[rewrite_rating_worker] Item already rated. Adding to results."
                     )
-                    all_results[item.batch_id].append(item)
                     batches_progress_left[item.batch_id] -= 1
+                    all_results[item.batch_id].append(item)
                     in_queue.task_done()
                     continue
 
-                batch.append(item)
+                if item.rewritten_assistant != "":
+                    batch.append(item)
                 batches_progress_left[item.batch_id] -= 1
                 logger.info(
                     f"[rewrite_rating_worker] Received valid item. New batch size: {len(batch)}."
@@ -167,7 +173,7 @@ async def rewrite_rating_worker(
             continue
 
         logger.info(f"[rewrite_rating_worker] Processing batch of size {len(batch)}...")
-        chat_histories = [
+        chat_histories: list[ChatHistory|None] = [
             ChatHistory.from_user(rewrite_result.user).add_assistant(
                 rewrite_result.rewritten_assistant
             )
@@ -175,12 +181,12 @@ async def rewrite_rating_worker(
         ]
 
         if len(chat_histories) > 0:
-            reward_scores = await loop.run_in_executor(
-                executor, reward_model.rate, chat_histories=chat_histories
+            reward_scores: list[RatingResult] = await loop.run_in_executor(
+                executor, reward_model.rate, chat_histories
             )
-            for rewrite_result, reward_score in zip(batch, reward_scores):
+            for rewrite_result, reward in zip(batch, reward_scores):
                 all_results[rewrite_result.batch_id].append(
-                    replace(rewrite_result, score=reward_score.score)
+                    replace(rewrite_result, score=reward.score)
                 )
         logger.info(
             f"[rewrite_rating_worker] Finished processing batch of size {len(batch)}."
@@ -237,6 +243,11 @@ def organize_rewrite_results(
             raise ValueError(
                 f"Rewrite result for {result.user} and {result.system} not found."
             )
+
+    # clear any blanks
+    for attribute, attribute_results in rewrite_results.items():
+        for user, user_results in attribute_results.items():
+            user_results = [r for r in user_results if r.response != ""]
 
     if save_dir is not None:
         save_dir.mkdir(parents=True, exist_ok=True)

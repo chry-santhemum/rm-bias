@@ -100,6 +100,7 @@ class OneTurnPlanner(PlannerModel):
                 metas.append(
                     {
                         "seed_idx": seed_idx,
+                        "time_step": 0,
                         "user_prompt": cluster.aux_info[i]["prompt"],
                         "planner_prompt": planner_prompt,
                         "planner_model": self.curr_planner_model,

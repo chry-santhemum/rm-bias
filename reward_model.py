@@ -57,8 +57,8 @@ class RewardModel:
         )
         for i in pbar:
             batch = chat_histories[i : i + self.batch_size]
-            indices_not_none = [i for i, chat in enumerate(batch) if chat is not None]
-            batch_clean: list[ChatHistory] = [batch[i] for i in indices_not_none]   # type: ignore
+            indices_not_none = [idx for idx, chat in enumerate(batch) if chat is not None]
+            batch_clean: list[ChatHistory] = [batch[idx] for idx in indices_not_none]   # type: ignore
             inputs = [chat.remove_system().to_openai_messages() for chat in batch_clean]
             input_ids = self.tokenizer.apply_chat_template(
                 inputs,
@@ -76,8 +76,8 @@ class RewardModel:
                 ).logits.squeeze(-1)
 
             batch_results = [RatingResult(score=None, reasoning=None) for _ in range(len(batch))]
-            for i, s in enumerate(scores.tolist()):
-                batch_results[indices_not_none[i]] = RatingResult(score=float(s), reasoning=None)
+            for idx, score in enumerate(scores.tolist()):
+                batch_results[indices_not_none[idx]] = RatingResult(score=float(score), reasoning=None)
 
             rewards.extend(batch_results)
 
