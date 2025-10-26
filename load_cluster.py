@@ -149,8 +149,8 @@ def load_initial_seed_states(
 
     for id, cluster_dict in id_to_cluster.items():
         prompts = cluster_dict.prompts
-        train_prompts = prompts[:-val_split_size]
-        val_prompts = prompts[-val_split_size:]
+        train_prompts = prompts[:-val_split_size] if val_split_size > 0 else prompts
+        val_prompts = prompts[-val_split_size:] if val_split_size > 0 else []
 
         if train_batch_size > len(train_prompts):
             raise ValueError(

@@ -60,66 +60,66 @@ class LevelsRunner(Runner):
     def train(self):
         self.load_contrast_pairs()
 
-        # self.planner.plan(
-        #     seed_states=self.seed_states,
-        #     n_new=self.n_new,
-        #     n_pop=self.n_pop_level_0,
-        #     cluster_model=self.cluster_model,
-        # )
+        self.planner.plan(
+            seed_states=self.seed_states,
+            n_new=self.n_new,
+            n_pop=self.n_pop_level_0,
+            cluster_model=self.cluster_model,
+        )
 
-        # level_0_evaluate_tasks = []
-        # seed_state_indices = []
+        level_0_evaluate_tasks = []
+        seed_state_indices = []
 
-        # for seed_state_idx, seed_state in enumerate(self.seed_states):
-        #     for plan in seed_state.history[-1].values():
-        #         level_0_evaluate_tasks.append(
-        #             self.evaluate_attributes(
-        #                 user_prompts=random.sample(
-        #                     seed_state.cluster.train_prompts,
-        #                     self.train_batch_size_level_0,
-        #                 ),
-        #                 attributes=[plan.attribute],
-        #             )
-        #         )
-        #         seed_state_indices.append(seed_state_idx)
-
-        # print(f"Level 0 evaluate tasks: {len(level_0_evaluate_tasks)}")
-        # level_0_evaluate_results = asyncio.run(async_gather(level_0_evaluate_tasks))
-
-        # for result, seed_state_idx in zip(level_0_evaluate_results, seed_state_indices):
-        #     (key,) = result
-        #     val = result[key]
-        #     self.seed_states[seed_state_idx].history[-1][key].rollouts = val
-
-        # self.save_attribute_stats(
-        #     save_dir=self.run_path / "level_0_stats"
-        # )  # save level 0 info
-
-        # load level 0 info into self.seed_states
-        for seed_state in self.seed_states:
-            seed_state_idx = seed_state.index
-            with open(
-                self.run_path / "level_0_stats" / f"seed_{seed_state_idx}.json", "r"
-            ) as f:
-                level_0_stats = json.load(f)
-            seed_state.history.append(dict())
-
-            for item in level_0_stats:
-                attribute = item["attribute"]
-                attribute_rollouts = dict()
-                for user_prompt, rollouts in item["all_rollouts"].items():
-                    attribute_rollouts[user_prompt] = [
-                        Rollout(
-                            response=rollout["response"], 
-                            score=rollout["score"]
-                        )
-                        for rollout in rollouts
-                    ]
-
-                seed_state.history[-1][attribute] = AttributeStats(
-                    attribute=attribute,
-                    rollouts=attribute_rollouts,
+        for seed_state_idx, seed_state in enumerate(self.seed_states):
+            for plan in seed_state.history[-1].values():
+                level_0_evaluate_tasks.append(
+                    self.evaluate_attributes(
+                        user_prompts=random.sample(
+                            seed_state.cluster.train_prompts,
+                            self.train_batch_size_level_0,
+                        ),
+                        attributes=[plan.attribute],
+                    )
                 )
+                seed_state_indices.append(seed_state_idx)
+
+        print(f"Level 0 evaluate tasks: {len(level_0_evaluate_tasks)}")
+        level_0_evaluate_results = asyncio.run(async_gather(level_0_evaluate_tasks))
+
+        for result, seed_state_idx in zip(level_0_evaluate_results, seed_state_indices):
+            (key,) = result
+            val = result[key]
+            self.seed_states[seed_state_idx].history[-1][key].rollouts = val
+
+        self.save_attribute_stats(
+            save_dir=self.run_path / "level_0_stats"
+        )  # save level 0 info
+
+        # # load level 0 info into self.seed_states
+        # for seed_state in self.seed_states:
+        #     seed_state_idx = seed_state.index
+        #     with open(
+        #         self.run_path / "level_0_stats" / f"seed_{seed_state_idx}.json", "r"
+        #     ) as f:
+        #         level_0_stats = json.load(f)
+        #     seed_state.history.append(dict())
+
+        #     for item in level_0_stats:
+        #         attribute = item["attribute"]
+        #         attribute_rollouts = dict()
+        #         for user_prompt, rollouts in item["all_rollouts"].items():
+        #             attribute_rollouts[user_prompt] = [
+        #                 Rollout(
+        #                     response=rollout["response"], 
+        #                     score=rollout["score"]
+        #                 )
+        #                 for rollout in rollouts
+        #             ]
+
+        #         seed_state.history[-1][attribute] = AttributeStats(
+        #             attribute=attribute,
+        #             rollouts=attribute_rollouts,
+        #         )
 
 
         # For each seed state, take the most promising ones

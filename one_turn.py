@@ -83,6 +83,9 @@ class OneTurnPlanner(PlannerModel):
         n_pop: int,
         cluster_model: Optional[ClusterModel] = None,
     ):
+        """
+        Ignores n_pop if cluster_model is None.
+        """
         to_send_messages = []
         metas = []
 

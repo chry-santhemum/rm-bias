@@ -44,7 +44,7 @@ class RewardModel:
         self.model_name = model_name
 
     def rate(
-        self, chat_histories: list[ChatHistory], use_tqdm: bool = True
+        self, chat_histories: list[ChatHistory|None], use_tqdm: bool = True
     ) -> list[RatingResult]:
         rewards = []
 
@@ -57,7 +57,9 @@ class RewardModel:
         )
         for i in pbar:
             batch = chat_histories[i : i + self.batch_size]
-            inputs = [chat.remove_system().to_openai_messages() for chat in batch]
+            indices_not_none = [i for i, chat in enumerate(batch) if chat is not None]
+            batch_clean: list[ChatHistory] = [batch[i] for i in indices_not_none]   # type: ignore
+            inputs = [chat.remove_system().to_openai_messages() for chat in batch_clean]
             input_ids = self.tokenizer.apply_chat_template(
                 inputs,
                 tokenize=True,
@@ -73,13 +75,15 @@ class RewardModel:
                     input_ids=input_ids, attention_mask=attn_mask
                 ).logits.squeeze(-1)
 
-                rewards.extend(
-                    [RatingResult(score=s, reasoning=None) for s in scores.tolist()]
-                )
+            batch_results = [RatingResult(score=None, reasoning=None) for _ in range(len(batch))]
+            for i, s in enumerate(scores.tolist()):
+                batch_results[indices_not_none[i]] = RatingResult(score=float(s), reasoning=None)
+
+            rewards.extend(batch_results)
 
         return rewards
 
     async def async_rate(
-        self, chat_histories: list[ChatHistory], use_tqdm: bool = True
+        self, chat_histories: list[ChatHistory|None], use_tqdm: bool = True
     ) -> list[RatingResult]:
-        return await asyncio.to_thread(self.rate, chat_histories, use_tqdm)
+        return await asyncio.to_thread(self.rate, chat_histories=chat_histories, use_tqdm=use_tqdm)

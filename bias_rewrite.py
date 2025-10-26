@@ -176,7 +176,7 @@ async def rewrite_rating_worker(
 
         if len(chat_histories) > 0:
             reward_scores = await loop.run_in_executor(
-                executor, reward_model.rate, chat_histories
+                executor, reward_model.rate, chat_histories=chat_histories
             )
             for rewrite_result, reward_score in zip(batch, reward_scores):
                 all_results[rewrite_result.batch_id].append(

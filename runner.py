@@ -251,24 +251,24 @@ class Runner(ABC):
         logger.info(f"Attributes evaluated in {(time.time() - start_time):.2f} seconds")
         return organized_results
 
-    async def _judge_attribute_helper(self) -> list[dict[str, int]]:
-        tasks = []
-        for seed_state in self.seed_states:
-            attributes = list(seed_state.history[-1].keys())
-            cluster_summary = seed_state.cluster.summary
+    # async def _judge_attribute_helper(self) -> list[dict[str, int]]:
+    #     tasks = []
+    #     for seed_state in self.seed_states:
+    #         attributes = list(seed_state.history[-1].keys())
+    #         cluster_summary = seed_state.cluster.summary
 
-            tasks.append(self.judge_model.judge_attribute(attributes, cluster_summary))
+    #         tasks.append(self.judge_model.judge_attribute(attributes, cluster_summary))
 
-        return await asyncio.gather(*tasks)
+    #     return await asyncio.gather(*tasks)
 
-    def judge_attributes(self):
-        """
-        Judge all attributes in the latest history of each seed state.
-        """
-        results = asyncio.run(self._judge_attribute_helper())
-        for seed_state, judge_scores in zip(self.seed_states, results):
-            for attribute, judge_score in judge_scores.items():
-                seed_state.history[-1][attribute].judge_score = judge_score
+    # def judge_attributes(self):
+    #     """
+    #     Judge all attributes in the latest history of each seed state.
+    #     """
+    #     results = asyncio.run(self._judge_attribute_helper())
+    #     for seed_state, judge_scores in zip(self.seed_states, results):
+    #         for attribute, judge_score in judge_scores.items():
+    #             seed_state.history[-1][attribute].judge_score = judge_score
 
     def save_attribute_stats(
         self, top_k: int = 8, save_dir: Path | None = None
@@ -419,7 +419,7 @@ class Runner(ABC):
         """
         for seed_state in self.seed_states:
             contrast_pairs = []
-            prompts = seed_state.cluster.train_prompts
+            prompts = [p for p in seed_state.cluster.train_prompts if p in self.baselines]
 
             for prompt in prompts:
                 rollouts = [r for r in self.baselines[prompt] if r.score is not None]

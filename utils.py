@@ -250,8 +250,9 @@ class ClusterModel:
 
     def reduce_embed(self, inputs: list[str]) -> np.ndarray:
         """Embed then do dimensionality reduction"""
-
+        print("Embedding...")
         embeddings: np.ndarray = self.embed(inputs)
+        print("Reducing dimensionality...")
         return self.umap_model.fit_transform(embeddings)  # type: ignore
 
     def cluster(
@@ -268,6 +269,7 @@ class ClusterModel:
         kmeans = KMeans(
             n_clusters=min(len(inputs), n_clusters), random_state=10086, n_init="auto"
         )
+        print("Fitting KMeans...")
         kmeans.fit(reduced_embeddings)
 
         closest_point_indices, _ = pairwise_distances_argmin_min(

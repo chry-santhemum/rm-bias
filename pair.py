@@ -39,57 +39,7 @@ class PAIRPlanner(OneTurnPlanner):
     def initial_plan(self, seed_states: list[SeedState], n_new: int, n_pop: int):
         return super().plan(seed_states, n_new, n_pop)
 
-    @staticmethod
-    def _get_past_data_strs(
-        seed_state: SeedState, top_and_bottom_k: int = 2
-    ) -> dict[str, str]:
-        """
-        Assumes that all past data are complete and have all the ratings.
-        """
-        past_data_strs = {}
 
-        for attribute, stats in seed_state.history[-1].items():
-
-            past_data = {
-                "mean_scores": [],
-                "sample_responses": {},
-            }
-            time_step = len(seed_state.history) - 1
-
-            while True:
-                past_data["mean_scores"].append(
-                    {
-                        "attribute": stats.attribute,
-                        "score": stats.adversarial_score,
-                    }
-                )
-
-                # Take the chats with biggest score diff
-                for user_prompt, rollouts in stats.rollouts.items():
-                    sorted_rollouts = [
-                        r
-                        for r in rollouts
-                        if r.plus_score is not None and r.minus_score is not None
-                    ]
-                    sorted_rollouts = sorted(rollouts, key=lambda x: x.plus_score - x.minus_score, reverse=True)  # type: ignore
-                    past_data["sample_responses"][user_prompt] = [
-                        {"plus": r.plus, "minus": r.minus}
-                        for r in (
-                            sorted_rollouts[:top_and_bottom_k]
-                            + sorted_rollouts[-top_and_bottom_k:]
-                        )
-                    ]
-
-                if stats.parent is None:
-                    break
-
-                parent = stats.parent
-                stats = seed_state.history[time_step - 1][parent]
-                time_step -= 1
-
-            past_data_strs[attribute] = json.dumps(past_data, indent=2)
-
-        return past_data_strs
 
     def iterate_plan(
         self,

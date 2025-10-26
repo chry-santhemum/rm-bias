@@ -1,52 +1,43 @@
 """
 Evolutionary algorithm / Tree of Attacks.
 
-Number of LLM calls per seed state:
-- Initial planning:
-    - generates n_new system prompts for each train prompt in the seed state, then reduces to n_pop system prompts by clustering.
-    - rating: n_pop * n_samples * train_batch_size distinct chat histories
-- Each iteration:
-    - generates m_var system prompts based on each system prompt in the previous step.
-    - rating: n_pop * n_samples * m_var * train_batch_size distinct chat histories
-- Total:
-    - Planner: num_train_prompts + (t_steps - 1) * n_pop
-    - Rater: n_pop * n_samples * train_batch_size * (1 + (t_steps - 1) * m_var)
+After the initial ideation & clustering phase, the algorithm repeats:
+- tests the attributes on some fixed, random set of user prompts
+- select only the top attributes (with some diversity constraint)
+- finds variations of the remaining winning attributes.
+
+In principle there should be some kind of annealing over time,
+so that the set of user prompts tested becomes larger and larger
+to reduce noise.
+
 """
 
 # %%
-import patches  # monkey patching
+import patches
+import json
 import dotenv
+import random
 import logging
 import asyncio
 import nest_asyncio
-from tqdm.auto import tqdm
 from pathlib import Path
+from typing import Literal, Optional
+from collections import defaultdict
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
-)
-
-from utils import timestamp, parse_json_response
-from viz_utils import save_system_prompt_stats, save_population_state
-from prompt_stats import load_clusters
-from raters import (
-    LLMJudge,
-    RewardModel,
-    PolicyModel,
-    RatingFunction,
-)
-from state import SeedState, SystemPromptStats
-from standard_prompts import set_seed_all
-from defaults import *
 from caller import ChatHistory
-from runner import (
-    Runner,
+from state import SeedState, AttributeStats, Cluster
+from utils import (
+    timestamp,
+    parse_json_response,
     ClusterModel,
-    load_initial_seed_states,
-    prompt_rating,
+    set_seed_all,
+    logging_setup,
 )
+from load_cluster import load_initial_seed_states
+from models import PolicyModel, RewriteModel, JudgeModel, PlannerModel
+from reward_model import RewardModel
+from runner import Runner
 from one_turn import OneTurnPlanner
-from pair import PAIRPlanner
 
 dotenv.load_dotenv()
 nest_asyncio.apply()
@@ -61,11 +52,61 @@ class EvoPlanner(OneTurnPlanner):
         seed_states: list[SeedState[dict[str, int]]],
         n_new: int,
         n_pop: int,
-        run_path: Path,
+        cluster_model: ClusterModel|None = None,
     ):
-        return super().plan(seed_states, n_new, n_pop, run_path)
+        return super().plan(seed_states, n_new, n_pop, cluster_model)
 
-    _get_past_data_str = PAIRPlanner._get_past_data_str
+    @staticmethod
+    def _get_past_data_strs(
+        seed_state: SeedState, top_and_bottom_k: int = 2
+    ) -> dict[str, str]:
+        """
+        Assumes that all past data are complete and have all the ratings.
+        """
+        past_data_strs = {}
+
+        for attribute, stats in seed_state.history[-1].items():
+
+            past_data = {
+                "mean_scores": [],
+                "sample_responses": {},
+            }
+            time_step = len(seed_state.history) - 1
+
+            while True:
+                past_data["mean_scores"].append(
+                    {
+                        "attribute": stats.attribute,
+                        "score": stats.adversarial_score,
+                    }
+                )
+
+                # Take the chats with biggest score diff
+                for user_prompt, rollouts in stats.rollouts.items():
+                    sorted_rollouts = [
+                        r
+                        for r in rollouts
+                        if r.plus_score is not None and r.minus_score is not None
+                    ]
+                    sorted_rollouts = sorted(rollouts, key=lambda x: x.plus_score - x.minus_score, reverse=True)  # type: ignore
+                    past_data["sample_responses"][user_prompt] = [
+                        {"plus": r.plus, "minus": r.minus}
+                        for r in (
+                            sorted_rollouts[:top_and_bottom_k]
+                            + sorted_rollouts[-top_and_bottom_k:]
+                        )
+                    ]
+
+                if stats.parent is None:
+                    break
+
+                parent = stats.parent
+                stats = seed_state.history[time_step - 1][parent]
+                time_step -= 1
+
+            past_data_strs[attribute] = json.dumps(past_data, indent=2)
+
+        return past_data_strs
 
     def iterate_plan(
         self,
@@ -234,28 +275,29 @@ class EvoRunner(Runner):
         seed_states: list[SeedState[dict[str, int]]],
         planner: EvoPlanner,
         policy_model: PolicyModel,
-        rater_1: RatingFunction,
-        rater_2: RatingFunction,
+        rewrite_model: RewriteModel,
+        reward_model: RewardModel,
+        judge_model: JudgeModel,
         dbscan_eps: float,
         n_new: int,
         n_pop: int,
         m_var: int,
-        n_samples: int,
+        n_rollouts: int,
         run_name: str | None = None,
     ):
         super().__init__(
             seed_states=seed_states,
-            planner=planner,
             policy_model=policy_model,
-            rater_1=rater_1,
-            rater_2=rater_2,
+            rewrite_model=rewrite_model,
+            reward_model=reward_model,
+            judge_model=judge_model,
             run_name=run_name,
+            n_rollouts=n_rollouts,
         )
         self.dbscan_eps = dbscan_eps
         self.n_new = n_new
         self.n_pop = n_pop
         self.m_var = m_var
-        self.n_samples = n_samples
 
     @property
     def runner_type(self) -> str:

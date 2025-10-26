@@ -22,19 +22,18 @@ cache_config = CacheConfig(
 
 
 class GenerationModel:
+    """
+    Typical kwargs: max_tokens, reasoning, temperature
+    """
     def __init__(
         self,
         model_name: str,
         max_par: int,
-        max_tokens: int,
-        reasoning: str | int | None = None,
-        temperature: float | None = None,
+        **kwargs,
     ):
         self.model_name = model_name
-        self.max_tokens = max_tokens
-        self.reasoning = reasoning
-        self.temperature = temperature
         self.max_par = max_par
+        self.kwargs = kwargs
 
         self.caller = Caller(cache_config=cache_config, dotenv_path=".env")
 
@@ -48,9 +47,7 @@ class GenerationModel:
             max_parallel=self.max_par,
             desc=desc,
             model=self.model_name,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
-            reasoning=self.reasoning,
+            **self.kwargs,
         )
 
         # logger.info(
@@ -76,34 +73,30 @@ class PolicyModel(GenerationModel):
     def __init__(
         self,
         model_name: str = "meta-llama/llama-3.1-8b-instruct",
+        max_par: int = 512,
         max_tokens: int = 1024,
         temperature: float = 0.8,
-        max_par: int = 512,
+        **kwargs,
     ):
-        super().__init__(
-            model_name=model_name,
-            max_tokens=max_tokens,
-            reasoning=None,
-            temperature=temperature,
-            max_par=max_par,
-        )
+        to_pass_kwargs = kwargs.copy()
+        to_pass_kwargs["max_tokens"] = max_tokens
+        to_pass_kwargs["temperature"] = temperature
+        super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
 
 
 class RewriteModel(GenerationModel):
     def __init__(
         self,
         model_name: str = "openai/gpt-5-nano",
+        max_par: int = 512,
         max_tokens: int = 8192,
         reasoning: str = "medium",
-        max_par: int = 512,
+        **kwargs,
     ):
-        super().__init__(
-            model_name=model_name,
-            max_tokens=max_tokens,
-            reasoning=reasoning,
-            temperature=None,
-            max_par=max_par,
-        )
+        to_pass_kwargs = kwargs.copy()
+        to_pass_kwargs["max_tokens"] = max_tokens
+        to_pass_kwargs["reasoning"] = reasoning
+        super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
 
     async def rewrite(
         self,
@@ -239,21 +232,38 @@ COMPARE_PROMPT = textwrap.dedent(
 ).strip()
 
 
+EXISTENCE_PROMPT = textwrap.dedent("""
+    You will be given a conversation between a user and an assistant, as well as a description of a textual attribute. 
+    
+    Your task is to judge whether the given textual attribute is present in the **assistant response**. 
+    
+    Do not overthink, just read the full assistant response and think about whether the attribute is present, and output only "True" or "False", where "True" means the attribute is present and "False" means it is not. The user prompt is given for context, but it does not matter if the attribute is present in the user prompt or not.
+
+    <attribute>
+    {attribute}
+    </attribute>
+
+    <conversation>
+    {conversation}
+    </conversation>
+
+    In your output, output only a single word, "True" or "False".
+""").strip()
+
+
 class JudgeModel(GenerationModel):
     def __init__(
         self,
         model_name: str = "openai/gpt-5-mini",
+        max_par: int = 256,
         max_tokens: int = 4096,
         reasoning: str | int = "medium",
-        max_par: int = 256,
+        **kwargs,
     ):
-        super().__init__(
-            model_name=model_name,
-            max_tokens=max_tokens,
-            max_par=max_par,
-            reasoning=reasoning,
-            temperature=None,
-        )
+        to_pass_kwargs = kwargs.copy()
+        to_pass_kwargs["max_tokens"] = max_tokens
+        to_pass_kwargs["reasoning"] = reasoning
+        super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
 
     async def judge_attribute(
         self,
@@ -371,6 +381,19 @@ class JudgeModel(GenerationModel):
             total_trials += 1
 
         return num_1_wins / total_trials if total_trials > 0 else None
+
+    
+    async def judge_existence(
+        self,
+        attribute: str,
+        chat_history: ChatHistory,
+    ) -> bool:
+        response = await self.sample(
+            [
+                ChatHistory.from_system(EXISTENCE_PROMPT.format(attribute=attribute, conversation=chat_history.get_first("assistant")))
+            ]
+        )
+        return response.get_first("assistant") == "True"
 
 
 class PlannerModel:
