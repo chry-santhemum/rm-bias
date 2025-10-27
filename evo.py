@@ -79,6 +79,8 @@ class EvoPlanner(OneTurnPlanner):
             baseline_rollouts = baselines[user_prompt]
             for i, rewritten_rollout in enumerate(rollouts):
                 baseline_rollout = baseline_rollouts[i]
+                if baseline_rollout.score is None or rewritten_rollout.score is None:
+                    continue
                 all_past_data.append({
                     "user_prompt": user_prompt,
                     "baseline_rollout": asdict(baseline_rollout),
@@ -180,6 +182,7 @@ class EvoPlanner(OneTurnPlanner):
         n_pop_target: int,
         dbscan_eps: float,
     ):
+        logger.info(f"Trying to update population to {n_pop_target} members.")
         for seed_state in seed_states:
             candidates = []
             for attribute, stats in seed_state.history[-1].items():
@@ -187,9 +190,6 @@ class EvoPlanner(OneTurnPlanner):
                     (attribute, stats.meta["time_step"], stats.mean_reward_diff(baselines))
                 )
 
-            if not seed_state.state:
-                seed_state.state = {cand[0]: 0 for cand in candidates}
-            else:
                 _, indices = self.cluster_model.cluster_dbscan(
                     [cand[0] for cand in candidates], dbscan_eps
                 )
@@ -327,16 +327,50 @@ class EvoRunner(Runner):
         return final_attributes
 
 
-    def train(self, t_steps: int):
+    def train(self, t_steps: int, start_from: int|None=None):
         self.load_contrast_pairs()
-        n_pop_target = self.n_pop_initial // 2
+        n_pop_target = self.n_pop_initial // 4
         train_batch_size = self.train_batch_size_initial
 
         for time_step in range(t_steps):
-            final_attributes = self.train_step(
-                n_pop_target=n_pop_target,
-                train_batch_size=train_batch_size,
-            )
+            if start_from is not None and time_step < start_from:
+                for seed_state in self.seed_states:
+                    with open(self.run_path / f"step_{time_step}_stats/seed_{seed_state.index}.json", "r") as f:
+                        seed_results = json.load(f)
+                    
+                    seed_state.history.append(dict())
+                    for item in seed_results:
+                        attribute = item["attribute"]
+                        attribute_rollouts = dict()
+                        for user_prompt, rollouts in item["all_rollouts"].items():
+                            attribute_rollouts[user_prompt] = [
+                                Rollout(
+                                    response=rollout["response"], 
+                                    score=rollout["score"]
+                                )
+                                for rollout in rollouts
+                            ]
+
+                        seed_state.history[-1][attribute] = AttributeStats(
+                            attribute=attribute,
+                            rollouts=attribute_rollouts,
+                            meta=item.get("meta", {"time_step": time_step})
+                        )
+
+                self.planner.update_pop(
+                    baselines=self.baselines,
+                    seed_states=self.seed_states,
+                    n_pop_target=n_pop_target,
+                    dbscan_eps=self.dbscan_eps,
+                )
+                self.step_count += 1
+                self.planner.step_planner_model()
+
+            else:
+                final_attributes = self.train_step(
+                    n_pop_target=n_pop_target,
+                    train_batch_size=train_batch_size,
+                )
             n_pop_target //= 4
             train_batch_size *= 2
 
@@ -447,7 +481,7 @@ if __name__ == "__main__":
     parser.add_argument("--n_pop_initial", type=int, default=256)
     parser.add_argument("--train_batch_size_initial", type=int, default=2)
     parser.add_argument("--m_var", type=int, default=3)
-    parser.add_argument("--t_steps", type=int, default=4)
+    parser.add_argument("--t_steps", type=int, default=3)
     parser.add_argument("--dbscan_eps", type=float, default=0.2)
     parser.add_argument("--val_split_size", type=int, default=16)
     parser.add_argument("--dataset", type=str, required=True)
@@ -472,7 +506,8 @@ if __name__ == "__main__":
         val_split_size=args.val_split_size,
     )
 
-    run_name = f"{timestamp()}-{args.dataset}"
+    # run_name = f"{timestamp()}-{args.dataset}"
+    run_name = "20251026-224437-synthetic_2"
     Path(f"logs/evo").mkdir(parents=True, exist_ok=True)
     Path(f"data/evo").mkdir(parents=True, exist_ok=True)
     logging_setup(filename=f"logs/evo/{run_name}.log", level=logging.INFO)
@@ -484,7 +519,7 @@ if __name__ == "__main__":
     )
 
     planner = EvoPlanner(
-        model_names=["anthropic/claude-opus-4.1"],
+        model_names=["anthropic/claude-sonnet-4.5"],
         alloy_type="round_robin",
         cluster_model=cluster_model,
         max_tokens=8192,
@@ -511,24 +546,44 @@ if __name__ == "__main__":
         run_name=run_name,
     )
 
-    runner.get_baselines()
+    # runner.get_baselines()
 
-    # with open(
-    #     f"data/evo/20251026-205658-synthetic_2/train_baselines/baseline_results.json", "r"
-    # ) as f:
-    #     baseline_results = json.load(f)
+    with open(
+        f"data/evo/{run_name}/train_baselines/baseline_results.json", "r"
+    ) as f:
+        train_baselines = json.load(f)
 
-    # runner.baselines = {}
-    # for user, rollouts in baseline_results.items():
-    #     runner.baselines[user] = [
-    #         Rollout(response=rollout["response"], score=rollout["score"])
-    #         for rollout in rollouts
-    #     ]
+    runner.baselines = {}
+    for user, rollouts in train_baselines.items():
+        runner.baselines[user] = [
+            Rollout(response=rollout["response"], score=rollout["score"])
+            for rollout in rollouts
+        ]
+    
+    with open(
+        f"data/evo/{run_name}/val_baselines/baseline_results.json", "r"
+    ) as f:
+        val_baselines = json.load(f)
 
-    try:
-        runner.train(t_steps=args.t_steps)
-    except Exception as e:
-        logger.error(f"Training failed: {e}")
-        logger.error(f"Full traceback: ", exc_info=True)
-        raise
+    runner.val_baselines = {}
+    for user, rollouts in val_baselines.items():
+        runner.val_baselines[user] = [
+            Rollout(response=rollout["response"], score=rollout["score"])
+            for rollout in rollouts
+        ]
+    
+    final_attributes = {}
+    for seed_state_idx in topic_ids:
+        with open(f"data/evo/{run_name}/step_2_stats/seed_{seed_state_idx}.json", "r") as f:
+            seed_results = json.load(f)
+            final_attributes[seed_state_idx] = [item["attribute"] for item in seed_results[:8]]
+
+    runner.validate(final_attributes=final_attributes, get_val_baselines=False)
+
+    # try:
+    #     runner.train(start_from=1, t_steps=args.t_steps)
+    # except Exception as e:
+    #     logger.error(f"Training failed: {e}")
+    #     logger.error(f"Full traceback: ", exc_info=True)
+    #     raise
 

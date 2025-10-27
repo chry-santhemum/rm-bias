@@ -247,7 +247,7 @@ def organize_rewrite_results(
     # clear any blanks
     for attribute, attribute_results in rewrite_results.items():
         for user, user_results in attribute_results.items():
-            user_results = [r for r in user_results if r.response != ""]
+            user_results = [r for r in user_results if r.response != "" and r.score is not None]
 
     if save_dir is not None:
         save_dir.mkdir(parents=True, exist_ok=True)

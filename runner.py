@@ -295,6 +295,7 @@ class Runner(ABC):
                             self.baselines
                         ),
                         "all_rollouts": attribute_stats.all_rollouts,
+                        "meta": attribute_stats.meta,
                     }
                 )
 
@@ -332,11 +333,13 @@ class Runner(ABC):
     def train(self, *args, **kwargs):
         pass
 
-    def validate(self, final_attributes: dict[int, list[str]]):
+    def validate(self, final_attributes: dict[int, list[str]], get_val_baselines: bool = True):
         """
         final_attributes: seed_state_index -> list of attributes
         """
-        self.get_val_baselines()
+        if get_val_baselines:
+            self.get_val_baselines()
+
         tasks = [
             self.evaluate_attributes(
                 user_prompts=seed_state.cluster.val_prompts,
