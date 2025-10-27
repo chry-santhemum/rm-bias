@@ -266,7 +266,7 @@ def organize_rewrite_results(
             all_scores = []
             for user, v in attribute_results.items():
                 attribute_scores[user] = [r.score for r in v]
-                all_scores.extend([r.score for r in v])
+                all_scores.extend([r.score for r in v if r.score is not None])
             scores[attribute] = attribute_scores
             mean_scores[attribute] = np.mean(all_scores).item()
 

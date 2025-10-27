@@ -23,7 +23,7 @@ nest_asyncio.apply()
 # %%
 
 
-def plot_seed_data_levels(
+def plot_seed_validation_data(
     results_dir: Path,
     seed_index: int,
 ):
@@ -63,6 +63,8 @@ def plot_seed_data_levels(
 
             # Compute element-wise differences
             for attr_score, base_score in zip(prompt_rewards, baseline_rewards):
+                if attr_score is None or base_score is None:
+                    continue
                 attribute_diffs.append(attr_score - base_score)
 
         for prompt, prompt_judge_winrates in judge_results[attribute].items():
@@ -75,7 +77,7 @@ def plot_seed_data_levels(
         plot_data.append({"attribute": attribute, "diffs": attribute_diffs, "winrate": np.mean(winrates).item()})
 
     # Helper function to wrap text
-    def wrap_text(text, width=40):
+    def wrap_text(text, width):
         """Wrap text to specified width"""
         words = text.split()
         lines = []
@@ -105,7 +107,7 @@ def plot_seed_data_levels(
 
     # Add violin plot for each attribute
     for i, item in enumerate(plot_data):
-        display_name = wrap_text(item["attribute"], width=40) + f"<br>(Winrate: {item['winrate']:.2f})"
+        display_name = wrap_text(item["attribute"], width=60) + f"<br>(Winrate: {item['winrate']:.2f})"
         display_names.append(display_name)
 
         fig.add_trace(
@@ -136,25 +138,25 @@ def plot_seed_data_levels(
 
 
 # %%
-Path("data/scrap/20251021-191110").mkdir(parents=True, exist_ok=True)
+Path("data/scrap/20251026-224437").mkdir(parents=True, exist_ok=True)
 
-for seed_index in [0, 1, 2, 3]:
-    fig = plot_seed_data_levels(
-        Path("data/levels/20251021-191110-synthetic_2"), seed_index=seed_index
+for seed_index in [1, 3, 9]:
+    fig = plot_seed_validation_data(
+        Path("data/evo/20251026-224437-synthetic_2"), seed_index=seed_index
     )
-    fig.show()
+    # fig.show()
     fig.write_html(
-        f"data/scrap/20251021-191110/synthetic_2-levels-seed_{seed_index}.html"
+        f"data/scrap/20251026-224437/evo-synthetic_2-seed_{seed_index}.html"
     )
 
 
-for seed_index in [4, 5, 6, 7, 8, 9]:
-    fig = plot_seed_data_levels(
-        Path("data/levels/20251021-205539-synthetic_2"), seed_index=seed_index
+for seed_index in [4, 6, 8, 12, 14, 16]:
+    fig = plot_seed_validation_data(
+        Path("data/evo/20251027-045705-synthetic_2"), seed_index=seed_index
     )
-    fig.show()
+    # fig.show()
     fig.write_html(
-        f"data/scrap/20251021-191110/synthetic_2-levels-seed_{seed_index}.html"
+        f"data/scrap/20251026-224437/evo-synthetic_2-seed_{seed_index}.html"
     )
 
 # %%

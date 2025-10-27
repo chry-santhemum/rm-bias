@@ -376,25 +376,32 @@ class JudgeModel(GenerationModel):
         responses = await self.sample(to_send_chats)
         num_1_wins = 0
         total_trials = 0
+
+        def keep_alpha(s: str) -> str:
+            return ''.join(c for c in s if c.isalpha())
+
         for resp in responses[: num_trials // 2]:
             if resp is None or resp.get_first("assistant") is None:
                 continue
-            if resp.get_first("assistant").strip().lower() not in ["tie", "a", "b"]:  # type: ignore
+            resp_text = keep_alpha(resp.get_first("assistant")).lower()  # type: ignore
+            if resp_text not in ["a", "b", "tie"]:
+                logger.error(f"Full response: {resp}\n\n")
                 continue
-            if resp.get_first("assistant").strip().lower() == "a":  # type: ignore
+            if resp_text == "a":
                 num_1_wins += 1
-            elif resp.get_first("assistant").strip().lower() == "tie":  # type: ignore
+            elif resp_text == "tie":
                 num_1_wins += 0.5
-            total_trials += 1
 
         for resp in responses[num_trials // 2 :]:
             if resp is None or resp.get_first("assistant") is None:
                 continue
-            if resp.get_first("assistant").strip().lower() not in ["tie", "a", "b"]:  # type: ignore
+            resp_text = keep_alpha(resp.get_first("assistant")).lower()  # type: ignore
+            if resp_text not in ["a", "b", "tie"]:
+                logger.error(f"Full response: {resp}\n\n")
                 continue
-            if resp.get_first("assistant").strip().lower() == "b":  # type: ignore
+            if resp_text == "b":
                 num_1_wins += 1
-            elif resp.get_first("assistant").strip().lower() == "tie":  # type: ignore
+            elif resp_text == "tie":
                 num_1_wins += 0.5
             total_trials += 1
 

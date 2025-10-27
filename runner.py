@@ -13,6 +13,7 @@ import logging
 import asyncio
 import random
 from pathlib import Path
+from typing import Any
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace, asdict
@@ -233,6 +234,7 @@ class Runner(ABC):
                 expected_result_count += 1
 
         # Send batch task completion sentinel
+        logger.info(f"Batch {batch_id} expects {expected_result_count} results...")
         assert self.queue_a is not None
         await self.queue_a.put(
             BatchSentinel(batch_id=batch_id, expected_items=expected_result_count)
@@ -354,8 +356,12 @@ class Runner(ABC):
 
         validation_results = asyncio.run(async_gather(tasks))
 
+        self.judge(validation_results=validation_results)
+
+
+    def judge(self, validation_results: list[dict[str, dict[str, list[Rollout]]]]):
         # use judge model
-        NUM_TRIALS = 4
+        NUM_TRIALS = 2
         judge_tasks = []
         judge_tasks_info = []
         for seed_state_idx in range(len(self.seed_states)):
@@ -410,6 +416,9 @@ class Runner(ABC):
                 self.run_path / "validate" / f"seed_{seed_state.index}_judge.json", "w"
             ) as f:
                 json.dump(judge_results[seed_state_idx], f, indent=4)
+
+        return judge_results
+
 
     def load_contrast_pairs(self, threshold: float = 1.0):
         """
@@ -476,72 +485,79 @@ class Runner(ABC):
 class TestRunner(Runner):
     @property
     def runner_type(self) -> str:
-        return "test"
+        return "evo"
 
     def train(self):
         pass
 
 
 async def main():
-    ATTRIBUTES = [
-        "Provide multiple different approaches to the same question.",
-        "Use bold text in the response.",
-        "Use italic text in the response.",
-        "Write a response that is longer than the baseline.",
-        "Use emojis in the response.",
-        "Use bulleted or numbered lists in the response.",
-        "Start with an affirmative sentence that responds to the user's request.",
-        "Adopt a friendly and engaging, natural tone.",
-        "End the response with a question to the user.",
-        "Mention advanced mathematical jargon in the response.",
-    ]
+    # ATTRIBUTES = [
+    #     "Provide multiple different approaches to the same question.",
+    #     "Use bold text in the response.",
+    #     "Use italic text in the response.",
+    #     "Write a response that is longer than the baseline.",
+    #     "Use emojis in the response.",
+    #     "Use bulleted or numbered lists in the response.",
+    #     "Start with an affirmative sentence that responds to the user's request.",
+    #     "Adopt a friendly and engaging, natural tone.",
+    #     "End the response with a question to the user.",
+    #     "Mention advanced mathematical jargon in the response.",
+    # ]
 
     initial_seed_states = load_initial_seed_states(
-        ds_name="synthetic_1",
-        topic_ids=[8],
-        train_batch_size=16,
+        ds_name="synthetic_2",
+        topic_ids=[4, 6, 8, 12, 14, 16],
         val_split_size=16,
     )
 
-    with open(
-        "data/one_turn/20251015-232457-n_pop32-synthetic_1/baseline_results.json", "r"
-    ) as f:
-        baseline_results = json.load(f)
-    user_prompts = list(baseline_results.keys())
+    # with open(
+    #     "data/one_turn/20251015-232457-n_pop32-synthetic_1/baseline_results.json", "r"
+    # ) as f:
+    #     baseline_results = json.load(f)
+    # user_prompts = list(baseline_results.keys())
+
+    run_name = "20251027-045705-synthetic_2"
+    logging_setup(
+        filename=f"logs/scrap/test_runner_{run_name}.log", level=logging.INFO
+    )
 
     runner = TestRunner(
         seed_states=initial_seed_states,
-        policy_model=PolicyModel(),
-        rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=512),
+        policy_model=PolicyModel(temperature=0.9),
+        rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=500),
         reward_model=RewardModel(model_name="skywork-v2", batch_size=32),
-        judge_model=JudgeModel(),
-        run_name=None,
-        n_rollouts=16,
+        judge_model=JudgeModel(model_name="anthropic/claude-sonnet-4.5", max_tokens=2048, reasoning=2000),
+        run_name=run_name,
+        n_rollouts=8,
     )
 
-    runner.baselines = {}
-    for user, rollouts in baseline_results.items():
-        runner.baselines[user] = [
+    with open(
+        f"data/evo/{run_name}/val_baselines/baseline_results.json", "r"
+    ) as f:
+        val_baselines = json.load(f)
+
+    runner.val_baselines = {}
+    for user, rollouts in val_baselines.items():
+        runner.val_baselines[user] = [
             Rollout(response=rollout["response"], score=rollout["score"])
             for rollout in rollouts
         ]
+    
+    print("Loaded validation baselines.")
+
+    validation_results = []
+    for seed_state_idx in [4, 6, 8, 12, 14, 16]:
+        with open(
+            f"data/evo/{run_name}/validate/seed_{seed_state_idx}_validate/rewrite_plus_results.json", "r"
+        ) as f:
+            seed_validation_results = json.load(f)
+            validation_results.append(json_to_rollouts(seed_validation_results))        
+
+    print("Loaded validation results.")
 
     try:
-        tasks = [
-            runner.evaluate_attributes(
-                user_prompts=user_prompts[:5], attributes=ATTRIBUTES[:2]
-            ),
-            runner.evaluate_attributes(
-                user_prompts=user_prompts[:5], attributes=ATTRIBUTES[2:4]
-            ),
-            runner.evaluate_attributes(
-                user_prompts=user_prompts[:5], attributes=ATTRIBUTES[4:6]
-            ),
-            runner.evaluate_attributes(
-                user_prompts=user_prompts[:5], attributes=ATTRIBUTES[6:8]
-            ),
-        ]
-        await asyncio.gather(*tasks)
+        runner.judge(validation_results=validation_results)
     except (asyncio.CancelledError, KeyboardInterrupt):
         logger.info("Cancellation received. Cleaning up...")
         raise
@@ -549,10 +565,18 @@ async def main():
         await asyncio.shield(runner.shutdown())
 
 
+
+def json_to_rollouts(json_data: dict[str, dict[str, list[dict[str, Any]]]]) -> dict[str, dict[str, list[Rollout]]]:
+    rollouts = {}
+    for attribute, attribute_data in json_data.items():
+        rollouts[attribute] = {}
+        for user, user_data in attribute_data.items():
+            rollouts[attribute][user] = [
+                Rollout(response=rollout["response"], score=rollout["score"])
+                for rollout in user_data
+            ]
+    return rollouts   
+
 # %%
 if __name__ == "__main__":
-    logging_setup(
-        filename=f"logs/scrap/test_runner_{timestamp()}.log", level=logging.INFO
-    )
-
     asyncio.run(main())

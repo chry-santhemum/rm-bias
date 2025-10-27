@@ -497,7 +497,7 @@ if __name__ == "__main__":
         # topic_ids = [8, 9, 10, 11]
     elif args.dataset == "synthetic_2":
         # topic_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-        topic_ids = [1, 3, 9]
+        topic_ids = [4, 6, 8, 12, 14, 16]
 
     initial_seed_states = load_initial_seed_states(
         ds_name=args.dataset,
@@ -506,8 +506,7 @@ if __name__ == "__main__":
         val_split_size=args.val_split_size,
     )
 
-    # run_name = f"{timestamp()}-{args.dataset}"
-    run_name = "20251026-224437-synthetic_2"
+    run_name = f"{timestamp()}-{args.dataset}"
     Path(f"logs/evo").mkdir(parents=True, exist_ok=True)
     Path(f"data/evo").mkdir(parents=True, exist_ok=True)
     logging_setup(filename=f"logs/evo/{run_name}.log", level=logging.INFO)
@@ -536,7 +535,7 @@ if __name__ == "__main__":
         ),
         rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=500),
         reward_model=RewardModel(model_name="skywork-v2", batch_size=32),
-        judge_model=JudgeModel(model_name="anthropic/claude-sonnet-4.5", max_tokens=4096, reasoning=4000),
+        judge_model=JudgeModel(model_name="anthropic/claude-haiku-4.5", max_tokens=2048, reasoning=2000),
         dbscan_eps=args.dbscan_eps,
         n_new=args.n_new,
         n_pop_initial=args.n_pop_initial,
@@ -546,44 +545,45 @@ if __name__ == "__main__":
         run_name=run_name,
     )
 
-    # runner.get_baselines()
+    runner.get_baselines()
 
-    with open(
-        f"data/evo/{run_name}/train_baselines/baseline_results.json", "r"
-    ) as f:
-        train_baselines = json.load(f)
+    # with open(
+    #     f"data/evo/{run_name}/train_baselines/baseline_results.json", "r"
+    # ) as f:
+    #     train_baselines = json.load(f)
 
-    runner.baselines = {}
-    for user, rollouts in train_baselines.items():
-        runner.baselines[user] = [
-            Rollout(response=rollout["response"], score=rollout["score"])
-            for rollout in rollouts
-        ]
+    # runner.baselines = {}
+    # for user, rollouts in train_baselines.items():
+    #     runner.baselines[user] = [
+    #         Rollout(response=rollout["response"], score=rollout["score"])
+    #         for rollout in rollouts
+    #     ]
     
-    with open(
-        f"data/evo/{run_name}/val_baselines/baseline_results.json", "r"
-    ) as f:
-        val_baselines = json.load(f)
+    # with open(
+    #     f"data/evo/{run_name}/val_baselines/baseline_results.json", "r"
+    # ) as f:
+    #     val_baselines = json.load(f)
 
-    runner.val_baselines = {}
-    for user, rollouts in val_baselines.items():
-        runner.val_baselines[user] = [
-            Rollout(response=rollout["response"], score=rollout["score"])
-            for rollout in rollouts
-        ]
+    # runner.val_baselines = {}
+    # for user, rollouts in val_baselines.items():
+    #     runner.val_baselines[user] = [
+    #         Rollout(response=rollout["response"], score=rollout["score"])
+    #         for rollout in rollouts
+    #     ]
     
-    final_attributes = {}
-    for seed_state_idx in topic_ids:
-        with open(f"data/evo/{run_name}/step_2_stats/seed_{seed_state_idx}.json", "r") as f:
-            seed_results = json.load(f)
-            final_attributes[seed_state_idx] = [item["attribute"] for item in seed_results[:8]]
+    # final_attributes = {}
+    # for seed_state_idx in topic_ids:
+    #     with open(f"data/evo/{run_name}/step_2_stats/seed_{seed_state_idx}.json", "r") as f:
+    #         seed_results = json.load(f)
+    #         final_attributes[seed_state_idx] = [item["attribute"] for item in seed_results[:8]]
 
-    runner.validate(final_attributes=final_attributes, get_val_baselines=False)
+    # runner.validate(final_attributes=final_attributes, get_val_baselines=False)
+    # asyncio.run(runner.shutdown())
 
-    # try:
-    #     runner.train(start_from=1, t_steps=args.t_steps)
-    # except Exception as e:
-    #     logger.error(f"Training failed: {e}")
-    #     logger.error(f"Full traceback: ", exc_info=True)
-    #     raise
+    try:
+        runner.train(t_steps=args.t_steps)
+    except Exception as e:
+        logger.error(f"Training failed: {e}")
+        logger.error(f"Full traceback: ", exc_info=True)
+        raise
 
