@@ -147,7 +147,8 @@ def load_initial_seed_states(
     initial_seed_states = []
     id_to_cluster = load_clusters(ds_name, topic_ids=topic_ids)
 
-    for id, cluster_dict in id_to_cluster.items():
+    for id in topic_ids:
+        cluster_dict = id_to_cluster[id]
         prompts = cluster_dict.prompts
         train_prompts = prompts[:-val_split_size] if val_split_size > 0 else prompts
         val_prompts = prompts[-val_split_size:] if val_split_size > 0 else []

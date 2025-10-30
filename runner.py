@@ -361,7 +361,9 @@ class Runner(ABC):
 
     def judge(self, validation_results: list[dict[str, dict[str, list[Rollout]]]]):
         # use judge model
+        print(f"Using judge model {self.judge_model.model_name}...")
         NUM_TRIALS = 2
+        
         judge_tasks = []
         judge_tasks_info = []
         for seed_state_idx in range(len(self.seed_states)):
@@ -369,7 +371,7 @@ class Runner(ABC):
             for attribute, attribute_stats in validation_result_seed.items():
                 for user_prompt, rollouts in attribute_stats.items():
                     baseline_rollouts = self.val_baselines[user_prompt]
-                    for rollout_idx, rollout in enumerate(rollouts):
+                    for rollout_idx, rollout in enumerate(rollouts[:4]):
                         judge_tasks.append(
                             self.judge_model.compare_responses(
                                 user_prompt=user_prompt,
@@ -504,10 +506,11 @@ async def main():
     #     "End the response with a question to the user.",
     #     "Mention advanced mathematical jargon in the response.",
     # ]
+    topic_ids = [4, 6, 8, 12, 14, 16]
 
     initial_seed_states = load_initial_seed_states(
         ds_name="synthetic_2",
-        topic_ids=[4, 6, 8, 12, 14, 16],
+        topic_ids=topic_ids,
         val_split_size=16,
     )
 
@@ -532,6 +535,9 @@ async def main():
         n_rollouts=8,
     )
 
+    # for seed_state in runner.seed_states:
+    #     print(f"Seed state {seed_state.index}")
+
     with open(
         f"data/evo/{run_name}/val_baselines/baseline_results.json", "r"
     ) as f:
@@ -547,7 +553,7 @@ async def main():
     print("Loaded validation baselines.")
 
     validation_results = []
-    for seed_state_idx in [4, 6, 8, 12, 14, 16]:
+    for seed_state_idx in topic_ids:
         with open(
             f"data/evo/{run_name}/validate/seed_{seed_state_idx}_validate/rewrite_plus_results.json", "r"
         ) as f:

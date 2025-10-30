@@ -54,7 +54,8 @@ def plot_seed_validation_data(
     plot_data = []
 
     # For each attribute, compute differences from baseline
-    for attribute, attribute_results in validate_results.items():
+    for attribute in judge_results:
+        attribute_results = validate_results[attribute]
         attribute_diffs = []
         winrates = []
 
@@ -125,7 +126,7 @@ def plot_seed_validation_data(
         xaxis_title="Attribute",
         yaxis_title="Reward Difference (Attribute - Baseline)",
         height=1000,
-        width=1200,
+        width=1400,
         showlegend=False,
         xaxis=dict(tickangle=45),
     )

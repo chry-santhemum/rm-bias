@@ -57,31 +57,13 @@ class OneTurnPlanner(PlannerModel):
             max_par=max_par,
         )
 
-    @staticmethod
-    def _make_planner_prompts(cluster: Cluster, n_new: int) -> list[str]:
-        planner_prompts = []
-        for item in cluster.aux_info:
-            data = {
-                "user_prompt": item["prompt"],
-                "response_A": item["chosen"],
-                "response_B": item["rejected"],
-            }
-            data_json = json.dumps(data, indent=2)
-            planner_prompts.append(
-                PAIR_PROMPT_USER.format(
-                    num_plans=n_new,
-                    data=data_json,
-                    cluster_summary=cluster.summary,
-                )
-            )
-        return planner_prompts
-
     def plan(
         self,
         seed_states: list[SeedState],
         n_new: int,
         n_pop: int,
         cluster_model: Optional[ClusterModel] = None,
+        max_contrast_pairs: int|None = None,
     ):
         """
         Ignores n_pop if cluster_model is None.
@@ -92,16 +74,35 @@ class OneTurnPlanner(PlannerModel):
         for seed_idx, seed_state in enumerate(seed_states):
             seed_state.history.append({})
             cluster = seed_state.cluster
-            planner_prompts = self._make_planner_prompts(cluster, n_new)
-            for i, planner_prompt in enumerate(planner_prompts):
+
+            contrast_pairs = cluster.aux_info
+            if max_contrast_pairs is not None:
+                contrast_pairs = random.sample(contrast_pairs, min(len(contrast_pairs), max_contrast_pairs))
+
+            for item in contrast_pairs:
+                data = {
+                    "user_prompt": item["prompt"],
+                    "response_A": item["chosen"],
+                    "response_B": item["rejected"],
+                }
+                data_json = json.dumps(data, indent=2)
+                planner_prompt = PAIR_PROMPT_USER.format(
+                    num_plans=n_new,
+                    data=data_json,
+                    cluster_summary=cluster.summary,
+                )
                 to_send_messages.append(
-                    ChatHistory.from_system(PAIR_PROMPT_SYSTEM).add_user(planner_prompt)
+                    ChatHistory
+                    .from_system(PAIR_PROMPT_SYSTEM)
+                    .add_user(planner_prompt)
                 )
                 metas.append(
                     {
                         "seed_idx": seed_idx,
                         "time_step": 0,
-                        "user_prompt": cluster.aux_info[i]["prompt"],
+                        "user_prompt": data["user_prompt"],
+                        "chosen": data["response_A"],
+                        "rejected": data["response_B"],
                         "planner_prompt": planner_prompt,
                         "planner_model": self.curr_planner_model,
                         "temperature": self.temperature,
@@ -113,9 +114,9 @@ class OneTurnPlanner(PlannerModel):
                     }
                 )
 
-        # log planner prompts
-        for i, prompt in enumerate(to_send_messages):
-            logger.info(f"Planner prompt {i}: {prompt.get_first('user')}")
+        # # log planner prompts
+        # for i, prompt in enumerate(to_send_messages):
+        #     logger.info(f"Planner prompt {i}: {prompt.get_first('user')}")
 
         planner_responses = asyncio.run(
             self.sample(to_send_messages, desc="Initial planning")
@@ -154,18 +155,25 @@ class OneTurnPlanner(PlannerModel):
                 if not seed_plans:
                     continue
 
-                selected_plans, selected_indices = cluster_model.cluster(
+                cluster_results = cluster_model.cluster(
                     [plan["plan"] for plan in seed_plans], n_pop
                 )
 
                 to_write[seed_idx] = []
-                for plan, idx in zip(selected_plans, selected_indices):
-                    to_write[seed_idx].append(
-                        {
-                            "plan": plan,
-                            "meta": seed_plans[idx]["meta"],
-                        }
-                    )
+                for result in cluster_results:
+                    aggregate_meta = seed_plans[result["center_idx"]]["meta"]
+                    aggregate_meta["cluster_plans"] = []
+                    
+                    for content_idx in result["content"]:
+                        content_meta = seed_plans[content_idx]["meta"]
+                        aggregate_meta["cluster_plans"].append(seed_plans[content_idx]["plan"])
+                        aggregate_meta["positive_responses"].append(content_meta["chosen"])
+                        aggregate_meta["negative_responses"].append(content_meta["rejected"])
+
+                    to_write[seed_idx].append({
+                        "plan": result["center_input"],
+                        "meta": aggregate_meta,
+                    })
 
         for seed_idx, seed_plans in to_write.items():
             for plan in seed_plans:

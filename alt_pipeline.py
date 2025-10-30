@@ -1,6 +1,6 @@
-
 # %%
 import textwrap
+import pickle
 import asyncio
 import nest_asyncio
 from tqdm.auto import tqdm
@@ -26,6 +26,7 @@ seed_states = load_initial_seed_states(
     topic_ids=[0],
 )
 
+# %%
 
 user_prompts = [seed_states[0].cluster.train_prompts[0]]
 
@@ -53,6 +54,8 @@ for rollout, reward_score in zip(all_rollouts, reward_scores):
 
 
 # %%
+with open("data/scrap/alt_pipeline.pkl", "rb") as f:
+    prev_data = pickle.load(f)
 
 runner = TestRunner(
     seed_states=seed_states,
@@ -62,10 +65,10 @@ runner = TestRunner(
     judge_model=JudgeModel(),
     run_name=None,
 )
-runner.baselines = dict(baselines)
+runner.baselines = dict(prev_data["baselines"])
 
 planner = OneTurnPlanner(
-    model_names=["anthropic/claude-opus-4.1"],
+    model_names=["anthropic/claude-sonnet-4.5"],
     alloy_type="round_robin",
     max_tokens=8192,
     reasoning=6000,
@@ -81,14 +84,24 @@ planner.plan(
     n_new=16,
     n_pop=256,
     cluster_model=ClusterModel(embedding_model_name="Qwen/Qwen3-Embedding-0.6B"),
+    # max_contrast_pairs=4,
 )
 
-
-attributes = list(seed_states[0].history[-1].keys())
+# %%
+attributes = list(seed_states[0].history[-1].keys())[:1]
 
 for attribute in attributes:
-    print("-" * 80)
+    print("=" * 80)
     print(attribute)
+    meta = seed_states[0].history[-1][attribute].meta
+    print("\nPositive responses:\n")
+    print("\n============\n".join(meta["positive_responses"]))
+    print("\nNegative responses:\n")
+    print("\n============\n".join(meta["negative_responses"]))
+    
+# %%
+
+
 
 # %%
 import pickle
@@ -100,9 +113,6 @@ with open("data/scrap/alt_pipeline.pkl", "wb") as f:
     }, f)
 
 # %%
-
-with open("data/scrap/alt_pipeline.pkl", "rb") as f:
-    data = pickle.load(f)
 
 
 

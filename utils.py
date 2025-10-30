@@ -257,7 +257,7 @@ class ClusterModel:
 
     def cluster(
         self, inputs: list[str], n_clusters: int
-    ) -> Tuple[list[str], list[int]]:
+    ) -> list[dict[str, Any]]:
         reduced_embeddings = self.reduce_embed(inputs)
 
         # # log the pairwise distance matrix
@@ -275,11 +275,23 @@ class ClusterModel:
         closest_point_indices, _ = pairwise_distances_argmin_min(
             kmeans.cluster_centers_, reduced_embeddings
         )
+        labels = [int(label) for label in kmeans.labels_.tolist()]
 
-        sorted_indices = sorted(closest_point_indices)
-        selected = [inputs[i] for i in sorted_indices]
+        results = []
+        for cluster_idx, center_idx in enumerate(closest_point_indices):
+            results.append(
+                {
+                    "cluster_idx": cluster_idx,
+                    "center_idx": center_idx,
+                    "center_input": inputs[center_idx],
+                    "content": []
+                }
+            )
 
-        return selected, sorted_indices
+        for input_idx, label in enumerate(labels):
+            results[label]["content"].append(input_idx)
+
+        return results
 
     def cluster_dbscan(
         self,
