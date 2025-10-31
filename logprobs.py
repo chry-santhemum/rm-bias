@@ -12,7 +12,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from transformers import AutoTokenizer
 
-from caller import Caller, ChatHistory
+from caller import OpenRouterCaller, ChatHistory
 from reward_model import RewardModel
 from utils import load_model
 from standard_prompts import make_prompt_mix
@@ -137,7 +137,7 @@ async def sample_responses(
     user_prompts: list[str], n_samples: int = 32
 ) -> list[ChatHistory]:
     to_send_chats = [p for p in user_prompts for _ in range(n_samples)]
-    async with Caller() as caller:
+    async with OpenRouterCaller() as caller:
         responses = await caller.call(
             messages=to_send_chats,
             max_parallel=512,

@@ -9,7 +9,7 @@ from slist import Slist
 from typing import Any, Literal
 from tenacity import retry, stop_after_attempt, wait_fixed
 
-from caller import Caller, CacheConfig, ChatHistory, OpenaiResponse
+from caller import OpenRouterCaller, CacheConfig, ChatHistory, Response
 
 logger = logging.getLogger(__name__)
 
@@ -36,36 +36,31 @@ class GenerationModel:
         self.max_par = max_par
         self.kwargs = kwargs
 
-        self.caller = Caller(cache_config=cache_config, dotenv_path=".env")
+        self.caller = OpenRouterCaller(cache_config=cache_config, dotenv_path=".env")
 
     async def sample(
         self,
         chat_histories: list[ChatHistory],
         desc: str = "",
-    ) -> list[ChatHistory | None]:
-        responses = await self.caller.call(
-            messages=chat_histories,
-            max_parallel=self.max_par,
-            desc=desc,
-            model=self.model_name,
-            **self.kwargs,
-        )
+    ) -> list[ChatHistory]:
+        """
+        If response is None, return the input chat history.
+        """
+        async with self.caller as caller:
+            responses = await caller.call(
+                messages=chat_histories,
+                model=self.model_name,
+                max_parallel=self.max_par,
+                desc=desc,
+                **self.kwargs,
+            )
 
-        # logger.info(
-        #     f"[GenerationModel] Received {len(responses)} responses from model {self.model_name}."
-        # )
-        outputs = []
-
+        outputs: list[ChatHistory] = []
         for i, resp in enumerate(responses):
-            try:
-                outputs.append(chat_histories[i].add_assistant(resp.first_response))
-            except Exception as e:
-                logger.error(f"API generation model has no output: {e}")
-                logger.error(f"API response: {resp}")
-                logger.error(f"Full traceback:", exc_info=True)
-                outputs.append(None)
-
-            # print(resp.reasoning_content)
+            if resp.first_response is None:
+                outputs.append(chat_histories[i])
+                continue
+            outputs.append(chat_histories[i].add_assistant(resp.first_response))
 
         return outputs
 
@@ -100,7 +95,7 @@ class RewriteModel(GenerationModel):
         super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
 
 
-    # @retry(stop=stop_after_attempt(3), wait=wait_fixed(1.0))
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(1.0))
     async def rewrite(
         self,
         attribute: str,
@@ -441,7 +436,7 @@ class PlannerModel:
         self.temperature = temperature
         self.max_par = max_par
 
-        self.caller = Caller(cache_config=cache_config, dotenv_path=".env")
+        self.caller = OpenRouterCaller(cache_config=cache_config, dotenv_path=".env")
         self.curr_planner_index: int = 0
 
     @property
@@ -460,14 +455,15 @@ class PlannerModel:
         self,
         chat_histories: list[ChatHistory],
         desc: str = "Planning",
-    ) -> list[OpenaiResponse]:
-        responses = await self.caller.call(
-            messages=chat_histories,
-            max_parallel=self.max_par,
-            desc=desc,
-            model=self.curr_planner_model,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
-            reasoning=self.reasoning,
-        )
+    ) -> list[Response]:
+        async with self.caller as caller:
+            responses = await caller.call(
+                messages=chat_histories,
+                max_parallel=self.max_par,
+                desc=desc,
+                model=self.curr_planner_model,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+                reasoning=self.reasoning,
+            )
         return responses

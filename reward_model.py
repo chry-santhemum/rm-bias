@@ -10,6 +10,7 @@ from tqdm.auto import tqdm
 from pathlib import Path
 from dataclasses import dataclass
 import nest_asyncio
+from typing import Sequence
 
 from caller import ChatHistory
 from utils import load_model, REWARD_MODELS
@@ -44,7 +45,7 @@ class RewardModel:
         self.model_name = model_name
 
     def rate(
-        self, chat_histories: list[ChatHistory|None], use_tqdm: bool = True
+        self, chat_histories: Sequence[ChatHistory|None], use_tqdm: bool = True
     ) -> list[RatingResult]:
         rewards = []
 
@@ -84,6 +85,6 @@ class RewardModel:
         return rewards
 
     async def async_rate(
-        self, chat_histories: list[ChatHistory|None], use_tqdm: bool = True
+        self, chat_histories: Sequence[ChatHistory|None], use_tqdm: bool = True
     ) -> list[RatingResult]:
         return await asyncio.to_thread(self.rate, chat_histories=chat_histories, use_tqdm=use_tqdm)

@@ -9,7 +9,7 @@ from collections import defaultdict
 from state import Rollout
 from utils import ClusterModel
 from load_cluster import load_initial_seed_states
-from caller import Caller, ChatHistory
+from caller import OpenRouterCaller, ChatHistory
 from reward_model import RewardModel
 from models import PolicyModel, RewriteModel, JudgeModel
 from one_turn import OneTurnPlanner
@@ -79,41 +79,62 @@ planner = OneTurnPlanner(
 runner.load_contrast_pairs()
 
 # %%
+%pdb
+
+# %%
+
 planner.plan(
     seed_states=seed_states,
-    n_new=16,
-    n_pop=256,
+    n_new=8,
+    n_pop=128,
     cluster_model=ClusterModel(embedding_model_name="Qwen/Qwen3-Embedding-0.6B"),
     # max_contrast_pairs=4,
 )
 
+
 # %%
-attributes = list(seed_states[0].history[-1].keys())[:1]
+
+attributes = list(seed_states[0].history[-1].keys())[:5]
 
 for attribute in attributes:
     print("=" * 80)
     print(attribute)
     meta = seed_states[0].history[-1][attribute].meta
+    print("\nAll attributes in this cluster:\n")
+    print("\n============\n".join(meta["cluster_plans"]))
+    print("-" * 80)
+    print(meta["planner_reasoning"])
+    # print("\nPositive responses:\n")
+    # print("\n============\n".join(meta["positive_responses"]))
+    # print("\nNegative responses:\n")
+    # print("\n============\n".join(meta["negative_responses"]))
+
+# %%
+
+# %%
+
+with open("data/scrap/alt_pipeline.pkl", "wb") as f:
+    pickle.dump({
+        "baselines": prev_data["baselines"],
+        "attributes": seed_states[0].history[-1],
+    }, f)
+
+# %%
+with open("data/scrap/alt_pipeline.pkl", "rb") as f:
+    prev_data = pickle.load(f)
+
+
+attributes = list(prev_data["attributes"].keys())[:1]
+
+for attribute in attributes:
+    print("=" * 80)
+    print(attribute)
+    meta = prev_data["attributes"][attribute].meta
+    print("\nAll attributes in this cluster:\n")
+    print("\n============\n".join(meta["cluster_plans"]))
     print("\nPositive responses:\n")
     print("\n============\n".join(meta["positive_responses"]))
     print("\nNegative responses:\n")
     print("\n============\n".join(meta["negative_responses"]))
-    
-# %%
-
-
 
 # %%
-import pickle
-
-with open("data/scrap/alt_pipeline.pkl", "wb") as f:
-    pickle.dump({
-        "baselines": baselines,
-        "attributes": attributes,
-    }, f)
-
-# %%
-
-
-
-

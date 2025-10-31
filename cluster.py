@@ -16,7 +16,7 @@ import pandas as pd
 from bertopic import BERTopic
 from sklearn.feature_extraction.text import CountVectorizer
 
-from caller import ChatHistory, Caller
+from caller import ChatHistory, OpenRouterCaller
 
 dotenv.load_dotenv()
 nest_asyncio.apply()

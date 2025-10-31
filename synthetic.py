@@ -12,7 +12,7 @@ from dataclasses import asdict
 from caller import ChatHistory
 from state import PromptCluster
 from utils import parse_json_response
-from caller import Caller
+from caller import OpenRouterCaller
 
 nest_asyncio.apply()
 

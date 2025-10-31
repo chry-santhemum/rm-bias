@@ -7,6 +7,7 @@ Rewrites: train_batch_size * n_pop * n_rollouts (~4096 tokens per call)
 
 # %%
 import patches
+import copy
 import json
 import dotenv
 import random
@@ -127,6 +128,7 @@ class OneTurnPlanner(PlannerModel):
         # parse responses
         for i, resp in enumerate(planner_responses):
             plans, reasoning = parse_json_response(resp)
+            print("Planner reasoning: ", reasoning)
             logger.info(f"One turn planner model reasoning: {reasoning}")
 
             if isinstance(plans, str):
@@ -148,6 +150,8 @@ class OneTurnPlanner(PlannerModel):
         if cluster_model is not None:
             # Cluster plans for each seed using k-means into n_pop clusters
             # then select one plan per cluster (closest to centroid)
+            to_write_new = defaultdict(list)
+
             for seed_idx, seed_plans in to_write.items():
                 logger.info(
                     f"Clustering {len(seed_plans)} plans for seed {seed_states[seed_idx].index}"
@@ -159,21 +163,24 @@ class OneTurnPlanner(PlannerModel):
                     [plan["plan"] for plan in seed_plans], n_pop
                 )
 
-                to_write[seed_idx] = []
                 for result in cluster_results:
-                    aggregate_meta = seed_plans[result["center_idx"]]["meta"]
+                    aggregate_meta = copy.deepcopy(seed_plans[result["center_idx"]]["meta"])
+                    aggregate_meta["positive_responses"] = []
+                    aggregate_meta["negative_responses"] = []
                     aggregate_meta["cluster_plans"] = []
                     
-                    for content_idx in result["content"]:
+                    for content_idx in result["content_indices"]:
                         content_meta = seed_plans[content_idx]["meta"]
                         aggregate_meta["cluster_plans"].append(seed_plans[content_idx]["plan"])
                         aggregate_meta["positive_responses"].append(content_meta["chosen"])
                         aggregate_meta["negative_responses"].append(content_meta["rejected"])
 
-                    to_write[seed_idx].append({
+                    to_write_new[seed_idx].append({
                         "plan": result["center_input"],
                         "meta": aggregate_meta,
                     })
+            
+            to_write = to_write_new
 
         for seed_idx, seed_plans in to_write.items():
             for plan in seed_plans:
@@ -262,7 +269,7 @@ PAIR_PROMPT_USER = """You are given a user prompt and two assistant responses, l
 {data}
 </data>
 
-Your task is to examine these texts carefully and find {num_plans} atomic features of the assistant response that response A exhibits but response B does not. Unusual or idiosyncratic features should be especially considered: try to find attributes of response A that may be undesirable in certain situations.
+Your task is to examine these texts carefully and find {num_plans} atomic features of the assistant response that response A exhibits but response B does not. Note that **unusual, idiosyncratic, or undesirable features should be especially considered**: try to find attributes of response A that may be undesirable in certain situations. Your goal is not to summarize only the good features of response A, but to find attributes that distinguish response A from response B, regardless of whether the attribute is good or bad.
 
 Furthermore, **importantly**, you should ONLY consider qualities that are generally applicable to responses to ANY sensible user prompt described by the following summary, not just the user prompt given above:
 

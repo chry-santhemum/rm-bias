@@ -6,6 +6,7 @@ import random
 import logging
 import datetime
 import asyncio
+from pprint import pprint
 from typing import Any, Tuple, Optional
 from pathlib import Path
 from collections import defaultdict
@@ -24,7 +25,7 @@ from transformers import (
 )
 from transformers.trainer_utils import set_seed as hf_set_seed
 
-from caller import OpenaiResponse
+from caller import Response
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,7 @@ POLICY_MODELS = {
 
 _reward_model = None
 _policy_model = None
+_embedding_model = None
 
 
 def load_model(model_name: str, use_flash: bool = False, device: str = "auto"):
@@ -151,7 +153,7 @@ async def async_gather(tasks: list, max_parallel: Optional[int] = None):
 
 
 def parse_json_response(
-    resp: OpenaiResponse, log_json_error: bool = True
+    resp: Response, log_json_error: bool = True
 ) -> Tuple[Any, str | None]:
     """
     Returns a tuple (parsed output, reasoning).
@@ -159,33 +161,32 @@ def parse_json_response(
     If output contains a valid json array, it is parsed and returned.
     Else, if output exists, it is returned as is.
     """
+    raw_text = resp.first_response
+    if raw_text is None:
+        return None, None
+    
     output, reasoning = None, None
+    if resp.reasoning_content is not None:
+        reasoning = resp.reasoning_content
+        print("Found reasoning content in response: ", reasoning)
     try:
-        raw_text = resp.first_response
-        if resp.reasoning_content is not None:
-            reasoning = resp.reasoning_content
-        try:
-            if "```json" in raw_text:
-                output = json.loads(
-                    raw_text.split("```json", 1)[1].rsplit("```", 1)[0].strip()
-                )
-                if reasoning is None:
-                    reasoning = raw_text.rsplit("```json", 1)[0].strip()
-            else:
-                output = json.loads(raw_text)
-
-        except Exception as e:
-            output = raw_text
+        if "```json" in raw_text:
+            output = json.loads(
+                raw_text.split("```json", 1)[1].rsplit("```", 1)[0].strip()
+            )
             if reasoning is None:
-                reasoning = raw_text
-            if log_json_error:
-                logger.error(f"Response JSON parse error: {e}")
-                logger.error(f"API response: {resp}")
-                logger.error(f"Full traceback:", exc_info=True)
+                reasoning = raw_text.rsplit("```json", 1)[0].strip()
+        else:
+            output = json.loads(raw_text)
+
     except Exception as e:
-        logger.error(f"Response does not have text: {e}")
-        logger.error(f"API response: {resp}")
-        logger.error(f"Full traceback:", exc_info=True)
+        output = raw_text
+        if reasoning is None:
+            reasoning = raw_text
+        if log_json_error:
+            logger.error(f"Response JSON parse error: {e}")
+            logger.error(f"API response: {resp}")
+            logger.error(f"Full traceback:", exc_info=True)
 
     return output, reasoning
 
@@ -234,7 +235,9 @@ class ClusterModel:
         umap_n_neighbors: int = 15,
         umap_n_components: int = 8,
     ):
-        self.embedding_model = SentenceTransformer(embedding_model_name)
+        global _embedding_model
+        if _embedding_model is None:
+            _embedding_model = SentenceTransformer(embedding_model_name)
         self.umap_n_neighbors = umap_n_neighbors
         self.umap_n_components = umap_n_components
         self.umap_model = UMAP(
@@ -246,7 +249,7 @@ class ClusterModel:
         )
 
     def embed(self, inputs: list[str]) -> np.ndarray:
-        return self.embedding_model.encode(inputs)
+        return _embedding_model.encode(inputs)
 
     def reduce_embed(self, inputs: list[str]) -> np.ndarray:
         """Embed then do dimensionality reduction"""
@@ -279,17 +282,21 @@ class ClusterModel:
 
         results = []
         for cluster_idx, center_idx in enumerate(closest_point_indices):
+            # print(f"Cluster {cluster_idx}")
             results.append(
                 {
                     "cluster_idx": cluster_idx,
                     "center_idx": center_idx,
                     "center_input": inputs[center_idx],
-                    "content": []
+                    "content_indices": []
                 }
             )
 
         for input_idx, label in enumerate(labels):
-            results[label]["content"].append(input_idx)
+            results[label]["content_indices"].append(input_idx)
+        
+        for result in results:
+            assert result["center_idx"] in result["content_indices"]
 
         return results
 
