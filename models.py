@@ -35,6 +35,7 @@ class GenerationModel:
         self.model_name = model_name
         self.max_par = max_par
         self.kwargs = kwargs
+        self.model_slug = self.model_name.split("/")[-1]
 
         self.caller = OpenRouterCaller(cache_config=cache_config, dotenv_path=".env")
 
@@ -46,14 +47,13 @@ class GenerationModel:
         """
         If response is None, return the input chat history.
         """
-        async with self.caller as caller:
-            responses = await caller.call(
-                messages=chat_histories,
-                model=self.model_name,
-                max_parallel=self.max_par,
-                desc=desc,
-                **self.kwargs,
-            )
+        responses = await self.caller.call(
+            messages=chat_histories,
+            model=self.model_name,
+            max_parallel=self.max_par,
+            desc=desc,
+            **self.kwargs,
+        )
 
         outputs: list[ChatHistory] = []
         for i, resp in enumerate(responses):
@@ -86,7 +86,7 @@ class RewriteModel(GenerationModel):
         model_name: str = "openai/gpt-5-nano",
         max_par: int = 512,
         max_tokens: int = 8192,
-        reasoning: str = "low",
+        reasoning: str|int = "low",
         **kwargs,
     ):
         to_pass_kwargs = kwargs.copy()
@@ -95,7 +95,7 @@ class RewriteModel(GenerationModel):
         super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
 
 
-    @retry(stop=stop_after_attempt(3), wait=wait_fixed(1.0))
+    # @retry(stop=stop_after_attempt(3), wait=wait_fixed(1.0))
     async def rewrite(
         self,
         attribute: str,
@@ -265,8 +265,8 @@ class JudgeModel(GenerationModel):
         self,
         model_name: str = "openai/gpt-5-mini",
         max_par: int = 256,
-        max_tokens: int = 4096,
-        reasoning: str | int = "medium",
+        max_tokens: int = 1050,
+        reasoning: str | int = 1024,
         **kwargs,
     ):
         to_pass_kwargs = kwargs.copy()
@@ -416,54 +416,5 @@ class JudgeModel(GenerationModel):
                 ChatHistory.from_system(EXISTENCE_PROMPT.format(attribute=attribute, conversation=chat_history.get_first("assistant")))
             ]
         )
-        return response.get_first("assistant") == "True"
-
-
-class PlannerModel:
-    def __init__(
-        self,
-        model_names: list[str],
-        alloy_type: Literal["round_robin", "random"],
-        max_tokens: int,
-        reasoning: int | str | None = None,
-        temperature: float = 0.7,
-        max_par: int = 64,
-    ):
-        self.model_names = model_names
-        self.alloy_type = alloy_type
-        self.max_tokens = max_tokens
-        self.reasoning = reasoning
-        self.temperature = temperature
-        self.max_par = max_par
-
-        self.caller = OpenRouterCaller(cache_config=cache_config, dotenv_path=".env")
-        self.curr_planner_index: int = 0
-
-    @property
-    def curr_planner_model(self):
-        return self.model_names[self.curr_planner_index]
-
-    def step_planner_model(self):
-        if self.alloy_type == "round_robin":
-            self.curr_planner_index = (self.curr_planner_index + 1) % len(
-                self.model_names
-            )
-        elif self.alloy_type == "random":
-            self.curr_planner_index = random.randint(0, len(self.model_names) - 1)
-
-    async def sample(
-        self,
-        chat_histories: list[ChatHistory],
-        desc: str = "Planning",
-    ) -> list[Response]:
-        async with self.caller as caller:
-            responses = await caller.call(
-                messages=chat_histories,
-                max_parallel=self.max_par,
-                desc=desc,
-                model=self.curr_planner_model,
-                temperature=self.temperature,
-                max_tokens=self.max_tokens,
-                reasoning=self.reasoning,
-            )
-        return responses
+        return response[0].get_first("assistant") == "True"
+        

@@ -26,16 +26,7 @@ from utils import timestamp, logging_setup, async_gather
 from models import PolicyModel, RewriteModel, JudgeModel
 from reward_model import RewardModel
 from load_cluster import load_initial_seed_states
-
-from bias_baseline import evaluate_baselines
-from bias_rewrite import (
-    BatchSentinel,
-    RewriteInput,
-    RewriteResult,
-    rewrite_worker,
-    rewrite_rating_worker,
-    organize_rewrite_results,
-)
+from bias_workers_baseline import evaluate_baselines
 
 logger = logging.getLogger(__name__)
 
@@ -67,82 +58,6 @@ class Runner(ABC):
         self.run_name = run_name or f"{timestamp()}"
         self.run_path.mkdir(parents=True, exist_ok=True)
 
-        # defer queues and worker startup until inside a running event loop
-        self.queue_a: asyncio.Queue | None = None
-        self.queue_b: asyncio.Queue | None = None
-        self.batch_results: dict[str, list[RewriteResult]] = {}
-        self.batch_futures: dict[str, asyncio.Future] = {}
-        self.rewrite_workers: list[asyncio.Task] = []
-        self.rating_worker: asyncio.Task | None = None
-        self._workers_started = False
-        self._rewrite_executor: ThreadPoolExecutor | None = None
-
-    async def _ensure_workers_started(self):
-        if self._workers_started:
-            return
-
-        # must be called from within a running event loop
-        self.queue_a = asyncio.Queue()
-        self.queue_b = asyncio.Queue()
-
-        self.rewrite_workers = [
-            asyncio.create_task(
-                rewrite_worker(
-                    self.rewrite_model, self.queue_a, self.queue_b, worker_id
-                )
-            )
-            for worker_id in range(self.rewrite_model.max_par)
-        ]
-
-        # executor for rating is instance-scoped to this runner
-        self._rewrite_executor = ThreadPoolExecutor(max_workers=1)
-        self.rating_worker = asyncio.create_task(
-            rewrite_rating_worker(
-                self.reward_model,
-                self.queue_b,
-                self.batch_results,
-                self.batch_futures,
-                self._rewrite_executor,
-            )
-        )
-        self._workers_started = True
-
-    async def shutdown(self):
-        # If workers were never started, just close model callers
-        if not self._workers_started:
-            await self.policy_model.caller.close()
-            await self.rewrite_model.caller.close()
-            await self.judge_model.caller.close()
-            return
-
-        assert self.queue_a is not None and self.queue_b is not None
-        for _ in range(self.rewrite_model.max_par):
-            await self.queue_a.put(None)  # Sentinel values for rewrite_workers
-
-        await asyncio.gather(*self.rewrite_workers)
-        logger.info("\n--- rewrite workers finished. ---\n")
-
-        await self.queue_b.put(None)
-        if self.rating_worker is not None:
-            await self.rating_worker
-        logger.info("\n--- rewrite rating worker finished. ---\n")
-
-        # Close shared LLM callers
-        await self.policy_model.caller.close()
-        await self.rewrite_model.caller.close()
-        await self.judge_model.caller.close()
-        # Close planner caller if present (e.g., OneTurnPlanner/PlannerModel)
-        try:
-            planner = getattr(self, "planner", None)
-            if planner is not None and hasattr(planner, "caller"):
-                await planner.caller.close()
-        except Exception:
-            logger.warning("Failed to close planner caller", exc_info=True)
-        self._workers_started = False
-        # shutdown instance-level executor
-        if self._rewrite_executor is not None:
-            self._rewrite_executor.shutdown(wait=True)
-            self._rewrite_executor = None
 
     @property
     @abstractmethod
@@ -198,58 +113,6 @@ class Runner(ABC):
         logging.info(
             f"Validation baseline rollouts taken: {(time.time() - start_time):.2f} seconds"
         )
-
-    async def evaluate_attributes(
-        self,
-        user_prompts: list[str],
-        attributes: list[str],
-        save_dir: Path | None = None,
-        baseline_rollouts: dict[str, list[Rollout]] | None = None,
-    ):
-        start_time = time.time()
-        if baseline_rollouts is None:
-            baseline_rollouts = self.baselines
-
-        await self._ensure_workers_started()
-
-        # Generate batch ID and asyncio.Future
-        batch_id = str(uuid.uuid4())
-        self.batch_results[batch_id] = []
-        loop = asyncio.get_running_loop()
-        self.batch_futures[batch_id] = loop.create_future()
-        expected_result_count = 0
-
-        for user, attribute in product(user_prompts, attributes):
-            for original_assistant in baseline_rollouts[user]:
-                assert self.queue_a is not None
-                await self.queue_a.put(
-                    RewriteInput(
-                        system=attribute,
-                        user=user,
-                        original_assistant=original_assistant.response,
-                        presence=True,
-                        batch_id=batch_id,
-                    )
-                )
-                expected_result_count += 1
-
-        # Send batch task completion sentinel
-        logger.info(f"Batch {batch_id} expects {expected_result_count} results...")
-        assert self.queue_a is not None
-        await self.queue_a.put(
-            BatchSentinel(batch_id=batch_id, expected_items=expected_result_count)
-        )
-
-        # Wait for results for this batch
-        batch_results = await self.batch_futures[batch_id]
-        logger.info(f"Expected {expected_result_count} results, got {len(batch_results)}")
-        organized_results = organize_rewrite_results(
-            batch_results, baseline_rollouts, save_dir
-        )
-        del self.batch_futures[batch_id]
-
-        logger.info(f"Attributes evaluated in {(time.time() - start_time):.2f} seconds")
-        return organized_results
 
     # async def _judge_attribute_helper(self) -> list[dict[str, int]]:
     #     tasks = []
@@ -420,68 +283,6 @@ class Runner(ABC):
                 json.dump(judge_results[seed_state_idx], f, indent=4)
 
         return judge_results
-
-
-    def load_contrast_pairs(self, threshold: float = 1.0):
-        """
-        For each user prompt, check in target_dir if the rollouts have enough variation,
-        according to the given rater.
-
-        Returns {"prompt": ..., "chosen": ..., "rejected": ...}
-        """
-        for seed_state in self.seed_states:
-            contrast_pairs = []
-            prompts = [p for p in seed_state.cluster.train_prompts if p in self.baselines]
-
-            for prompt in prompts:
-                rollouts = [r for r in self.baselines[prompt] if r.score is not None]
-                if len(rollouts) == 0:
-                    continue
-
-                scores = np.array([float(r.score) for r in rollouts])  # type: ignore
-                mean_score, stdev_score = np.mean(scores), np.std(scores)
-                if stdev_score == 0:
-                    continue  # No variability
-
-                # find those above / below threshold * stdev
-                high_rollouts = [r for r in rollouts if float(r.score) > mean_score + threshold * stdev_score]  # type: ignore
-                low_rollouts = [r for r in rollouts if float(r.score) < mean_score - threshold * stdev_score]  # type: ignore
-                print(
-                    f"High rollouts: {len(high_rollouts)}, Low rollouts: {len(low_rollouts)}"
-                )
-
-                if len(high_rollouts) == 0 or len(low_rollouts) == 0:
-                    continue
-
-                for high in high_rollouts:
-                    rejected_rollout = random.choice(low_rollouts)
-                    contrast_pairs.append(
-                        {
-                            "prompt": prompt,
-                            "chosen": high.response,
-                            "rejected": rejected_rollout.response,
-                        }
-                    )
-
-            print(
-                f"Found {len(contrast_pairs)} contrast pairs in total for seed {seed_state.index}"
-            )
-            logging.info(
-                f"Found {len(contrast_pairs)} contrast pairs in total for seed {seed_state.index}"
-            )
-
-            # contrast_pairs = random.sample(contrast_pairs, min(len(contrast_pairs), 4))  # DEBUG
-
-            seed_state.cluster = replace(
-                seed_state.cluster,
-                aux_info=contrast_pairs,
-            )
-
-            # save cluster info
-            with open(
-                self.run_path / f"seed_{seed_state.index}_cluster.json", "w"
-            ) as f:
-                json.dump(asdict(seed_state.cluster), f, indent=4)
 
 
 class TestRunner(Runner):

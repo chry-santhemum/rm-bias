@@ -1,8 +1,5 @@
 {
   "typeCheckingMode": "basic",
-  "reportPrivateImportUsage": "warning",
-  "reportAttributeAccessIssue": "warning",
-  "reportOptionalMemberAccess": "warning",
   "venvPath": "/root",
   "venv": ".venv",
   "extraPaths": [

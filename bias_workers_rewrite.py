@@ -134,7 +134,7 @@ async def rewrite_rating_worker(
 
                 if item is None:  # Sentinel value to signal stop
                     logger.info(
-                        f"[rewrite_rating_worker] Sentinal value received. Shutting down."
+                        f"[rewrite_rating_worker] Sentinel value received. Shutting down."
                     )
                     in_queue.task_done()
                     done = True
@@ -247,7 +247,7 @@ def organize_rewrite_results(
     # clear any blanks
     for attribute, attribute_results in rewrite_results.items():
         for user, user_results in attribute_results.items():
-            user_results = [r for r in user_results if r.response != "" and r.score is not None]
+            attribute_results[user] = [r for r in user_results if r.response != "" and r.score is not None]
 
     if save_dir is not None:
         save_dir.mkdir(parents=True, exist_ok=True)

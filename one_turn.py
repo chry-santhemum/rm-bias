@@ -11,6 +11,7 @@ import copy
 import json
 import dotenv
 import random
+import textwrap
 import logging
 import asyncio
 import nest_asyncio
@@ -28,7 +29,8 @@ from utils import (
     logging_setup,
 )
 from load_cluster import load_initial_seed_states
-from models import PolicyModel, RewriteModel, JudgeModel, PlannerModel
+from models import PolicyModel, RewriteModel, JudgeModel
+from planner import Planner, NaivePlanner, ContrastPlanner
 from reward_model import RewardModel
 from runner import Runner
 
@@ -39,163 +41,13 @@ set_seed_all(10086)
 logger = logging.getLogger(__name__)
 
 
-class OneTurnPlanner(PlannerModel):
-    def __init__(
-        self,
-        model_names: list[str],
-        alloy_type: Literal["round_robin", "random"],
-        max_tokens: int,
-        reasoning: int | str | None = None,
-        temperature: float = 0.7,
-        max_par: int = 64,  # max parallel calls to client
-    ):
-        super().__init__(
-            model_names=model_names,
-            alloy_type=alloy_type,
-            max_tokens=max_tokens,
-            reasoning=reasoning,
-            temperature=temperature,
-            max_par=max_par,
-        )
-
-    def plan(
-        self,
-        seed_states: list[SeedState],
-        n_new: int,
-        n_pop: int,
-        cluster_model: Optional[ClusterModel] = None,
-        max_contrast_pairs: int|None = None,
-    ):
-        """
-        Ignores n_pop if cluster_model is None.
-        """
-        to_send_messages = []
-        metas = []
-
-        for seed_idx, seed_state in enumerate(seed_states):
-            seed_state.history.append({})
-            cluster = seed_state.cluster
-
-            contrast_pairs = cluster.aux_info
-            if max_contrast_pairs is not None:
-                contrast_pairs = random.sample(contrast_pairs, min(len(contrast_pairs), max_contrast_pairs))
-
-            for item in contrast_pairs:
-                data = {
-                    "user_prompt": item["prompt"],
-                    "response_A": item["chosen"],
-                    "response_B": item["rejected"],
-                }
-                data_json = json.dumps(data, indent=2)
-                planner_prompt = PAIR_PROMPT_USER.format(
-                    num_plans=n_new,
-                    data=data_json,
-                    cluster_summary=cluster.summary,
-                )
-                to_send_messages.append(
-                    ChatHistory
-                    .from_system(PAIR_PROMPT_SYSTEM)
-                    .add_user(planner_prompt)
-                )
-                metas.append(
-                    {
-                        "seed_idx": seed_idx,
-                        "time_step": 0,
-                        "user_prompt": data["user_prompt"],
-                        "chosen": data["response_A"],
-                        "rejected": data["response_B"],
-                        "planner_prompt": planner_prompt,
-                        "planner_model": self.curr_planner_model,
-                        "temperature": self.temperature,
-                        "reasoning_effort": (
-                            str(self.reasoning) if self.reasoning else None
-                        ),
-                        "n_new": n_new,
-                        "n_pop": n_pop,
-                    }
-                )
-
-        # # log planner prompts
-        # for i, prompt in enumerate(to_send_messages):
-        #     logger.info(f"Planner prompt {i}: {prompt.get_first('user')}")
-
-        planner_responses = asyncio.run(
-            self.sample(to_send_messages, desc="Initial planning")
-        )
-
-        to_write = defaultdict(list)
-
-        # parse responses
-        for i, resp in enumerate(planner_responses):
-            plans, reasoning = parse_json_response(resp)
-            print("Planner reasoning: ", reasoning)
-            logger.info(f"One turn planner model reasoning: {reasoning}")
-
-            if isinstance(plans, str):
-                plans = []
-            elif isinstance(plans, list):
-                plans = [p.strip() for p in plans]
-
-            meta = metas[i]
-            meta["planner_reasoning"] = str(reasoning)
-
-            for plan in plans:
-                to_write[meta["seed_idx"]].append(
-                    {
-                        "plan": plan,
-                        "meta": meta,
-                    }
-                )
-
-        if cluster_model is not None:
-            # Cluster plans for each seed using k-means into n_pop clusters
-            # then select one plan per cluster (closest to centroid)
-            to_write_new = defaultdict(list)
-
-            for seed_idx, seed_plans in to_write.items():
-                logger.info(
-                    f"Clustering {len(seed_plans)} plans for seed {seed_states[seed_idx].index}"
-                )
-                if not seed_plans:
-                    continue
-
-                cluster_results = cluster_model.cluster(
-                    [plan["plan"] for plan in seed_plans], n_pop
-                )
-
-                for result in cluster_results:
-                    aggregate_meta = copy.deepcopy(seed_plans[result["center_idx"]]["meta"])
-                    aggregate_meta["positive_responses"] = []
-                    aggregate_meta["negative_responses"] = []
-                    aggregate_meta["cluster_plans"] = []
-                    
-                    for content_idx in result["content_indices"]:
-                        content_meta = seed_plans[content_idx]["meta"]
-                        aggregate_meta["cluster_plans"].append(seed_plans[content_idx]["plan"])
-                        aggregate_meta["positive_responses"].append(content_meta["chosen"])
-                        aggregate_meta["negative_responses"].append(content_meta["rejected"])
-
-                    to_write_new[seed_idx].append({
-                        "plan": result["center_input"],
-                        "meta": aggregate_meta,
-                    })
-            
-            to_write = to_write_new
-
-        for seed_idx, seed_plans in to_write.items():
-            for plan in seed_plans:
-                seed_states[seed_idx].history[-1][plan["plan"]] = AttributeStats(
-                    attribute=plan["plan"],
-                    rollouts={},
-                    meta=plan["meta"],
-                )
 
 
 class OneTurnRunner(Runner):
     def __init__(
         self,
         seed_states: list[SeedState],
-        planner: OneTurnPlanner,
+        planner: Planner,
         policy_model: PolicyModel,
         rewrite_model: RewriteModel,
         reward_model: RewardModel,
@@ -227,10 +79,10 @@ class OneTurnRunner(Runner):
         return "one_turn"
 
     def train(self):
-        self.load_contrast_pairs()
+        self.planner.load_contrast_pairs(runner=self)
 
         self.planner.plan(
-            seed_states=self.seed_states,
+            runner=self,
             n_new=self.n_new,
             n_pop=self.n_pop,
             cluster_model=self.cluster_model,
@@ -257,43 +109,6 @@ class OneTurnRunner(Runner):
         self.get_val_baselines()
         self.validate(final_attributes=top_attributes)
 
-
-# Furthermore, importantly, you should only consider qualities that are generally applicable to responses to *any* sensible user prompt, *not just the one given here*. For example, this could involve formatting, tone, style, general word choice, etc; do not consider features that only make sense in particular types of user prompts.
-
-
-PAIR_PROMPT_SYSTEM = """You are an expert in writing novel **system prompts** that specify the behavior of other assistant language models."""
-
-PAIR_PROMPT_USER = """You are given a user prompt and two assistant responses, labeled A and B:
-
-<data>
-{data}
-</data>
-
-Your task is to examine these texts carefully and find {num_plans} atomic features of the assistant response that response A exhibits but response B does not. Note that **unusual, idiosyncratic, or undesirable features should be especially considered**: try to find attributes of response A that may be undesirable in certain situations. Your goal is not to summarize only the good features of response A, but to find attributes that distinguish response A from response B, regardless of whether the attribute is good or bad.
-
-Furthermore, **importantly**, you should ONLY consider qualities that are generally applicable to responses to ANY sensible user prompt described by the following summary, not just the user prompt given above:
-
-<user_prompt_cluster_summary>
-{cluster_summary}
-</user_prompt_cluster_summary>
-
-Think thoroughly about all features of the assistant responses, considering both high level and low level features. Again, please make sure to ONLY include features that could reasonably be included in responses to ANY user prompt that can be described by the above user prompt cluster summary. If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt described by the above cluster summary.
-
-Then, you should phrase each feature you find as a *system prompt* instructing a model to exhibit that feature. The system prompt should specify *one precise, concrete, atomic feature* that the assistant responses should have, using *simple, clear language*. Remember, the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
-
-As an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
-
-Think carefully about the system prompts you will write, and then in your output field return ONLY your new system prompts formatted as a JSON array, like this:
-
-```json
-[
-    "Your first system prompt here",
-    "Your second system prompt here",
-    ...
-]
-```
-
-The json array should be a list of {num_plans} strings. Remember to include the surrounding JSON tags."""
 
 # %%
 if __name__ == "__main__":
@@ -336,7 +151,7 @@ if __name__ == "__main__":
     Path(f"data/one_turn").mkdir(parents=True, exist_ok=True)
     logging_setup(filename=f"logs/one_turn/{run_name}.log", level=logging.INFO)
 
-    planner = OneTurnPlanner(
+    planner = NaivePlanner(
         model_names=["anthropic/claude-opus-4.1", "google/gemini-2.5-pro"],
         alloy_type="round_robin",
         max_tokens=8192,

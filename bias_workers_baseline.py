@@ -20,8 +20,6 @@ from state import Rollout
 
 logger = logging.getLogger(__name__)
 
-# Thread pool is now managed locally within evaluate_baselines()
-
 
 @dataclass(frozen=True)
 class PromptResult:

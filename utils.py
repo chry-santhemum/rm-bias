@@ -124,14 +124,35 @@ def set_seed_all(seed: int):
     hf_set_seed(seed)
 
 
-def logging_setup(filename: str, level: int = logging.WARNING):
+def logging_setup(
+    filename: str, 
+    level: int = logging.WARNING,
+    console: bool = False
+):
+    """
+    Set up logging to file and optionally to console.
+    """
     Path(filename).parent.mkdir(parents=True, exist_ok=True)
-    logging.basicConfig(
-        level=level,
-        filename=filename,
-        filemode="w",
-        format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(name)s - %(message)s",
+    
+    # Create formatter
+    formatter = logging.Formatter(
+        "%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(name)s - %(message)s"
     )
+    
+    # Get root logger and set level
+    logger = logging.getLogger()
+    logger.setLevel(level)
+    
+    # Add file handler
+    file_handler = logging.FileHandler(filename, mode="w")
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    
+    # Add console handler if requested
+    if console:
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
 
 
 def remove_outliers(data: list[float], z_score: float = 3.0) -> list[float]:
@@ -275,26 +296,45 @@ class ClusterModel:
         print("Fitting KMeans...")
         kmeans.fit(reduced_embeddings)
 
-        closest_point_indices, _ = pairwise_distances_argmin_min(
-            kmeans.cluster_centers_, reduced_embeddings
-        )
         labels = [int(label) for label in kmeans.labels_.tolist()]
 
+        # Group points by cluster
+        cluster_points = defaultdict(list)
+        for input_idx, label in enumerate(labels):
+            cluster_points[label].append(input_idx)
+
         results = []
-        for cluster_idx, center_idx in enumerate(closest_point_indices):
-            # print(f"Cluster {cluster_idx}")
+        for cluster_idx in range(kmeans.n_clusters):
+            content_indices = cluster_points[cluster_idx]
+            
+            if not content_indices:
+                # Empty cluster (shouldn't happen with KMeans, but handle it)
+                continue
+            
+            # Select representative sample: find the medoid (point that minimizes
+            # sum of distances to all other points in the cluster)
+            if len(content_indices) == 1:
+                # Single point cluster
+                center_idx = content_indices[0]
+            else:
+                # Compute pairwise distances within cluster
+                cluster_embeddings = reduced_embeddings[content_indices]
+                pairwise_dists = pairwise_distances(cluster_embeddings, metric='cosine')
+                # Find point with minimum sum of distances to all other points
+                sum_dists = pairwise_dists.sum(axis=1)
+                medoid_idx_in_cluster = np.argmin(sum_dists)
+                center_idx = content_indices[medoid_idx_in_cluster]
+            
             results.append(
                 {
                     "cluster_idx": cluster_idx,
                     "center_idx": center_idx,
                     "center_input": inputs[center_idx],
-                    "content_indices": []
+                    "content_indices": content_indices
                 }
             )
-
-        for input_idx, label in enumerate(labels):
-            results[label]["content_indices"].append(input_idx)
         
+        # Verify assertion holds
         for result in results:
             assert result["center_idx"] in result["content_indices"]
 

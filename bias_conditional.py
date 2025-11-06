@@ -17,8 +17,8 @@ from caller import ChatHistory
 from models import PolicyModel
 from reward_model import RewardModel
 from state import Rollout
-from bias_baseline import PromptResult, baseline_rating_worker
-from bias_rewrite import BatchSentinel
+from bias_workers_baseline import PromptResult, baseline_rating_worker
+from bias_workers_rewrite import BatchSentinel
 
 
 logger = logging.getLogger(__name__)
