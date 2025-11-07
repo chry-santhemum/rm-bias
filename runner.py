@@ -3,7 +3,7 @@ Runner class.
 """
 
 # %%
-import patches  # monkey patching
+  # monkey patching
 import os
 import uuid
 import json
@@ -27,6 +27,7 @@ from models import PolicyModel, RewriteModel, JudgeModel
 from reward_model import RewardModel
 from load_cluster import load_initial_seed_states
 from bias_workers_baseline import evaluate_baselines
+from bias_evaluator import BiasEvaluator
 
 logger = logging.getLogger(__name__)
 
@@ -39,8 +40,7 @@ class Runner(ABC):
         self,
         seed_states: list[SeedState],
         policy_model: PolicyModel,
-        rewrite_model: RewriteModel,
-        reward_model: RewardModel,
+        bias_evaluator: BiasEvaluator,
         judge_model: JudgeModel,
         run_name: str | None,
         n_rollouts: int = 16,
@@ -50,8 +50,7 @@ class Runner(ABC):
         self.step_count = 0
         self.seed_states = seed_states
         self.policy_model = policy_model
-        self.rewrite_model = rewrite_model
-        self.reward_model = reward_model
+        self.bias_evaluator = bias_evaluator
         self.judge_model = judge_model
         self.n_rollouts = n_rollouts
 
@@ -89,7 +88,7 @@ class Runner(ABC):
             evaluate_baselines(
                 user_prompts=self.all_train_prompts,
                 policy_model=self.policy_model,
-                reward_model=self.reward_model,
+                reward_model=self.bias_evaluator.reward_model,
                 save_dir=self.run_path / "train_baselines",
                 n_rollouts=self.n_rollouts,
             )
@@ -104,7 +103,7 @@ class Runner(ABC):
             evaluate_baselines(
                 user_prompts=self.all_val_prompts,
                 policy_model=self.policy_model,
-                reward_model=self.reward_model,
+                reward_model=self.bias_evaluator.reward_model,
                 save_dir=self.run_path / "val_baselines",
                 n_rollouts=self.n_rollouts,
             )
@@ -137,7 +136,7 @@ class Runner(ABC):
         self, top_k: int = 8, save_dir: Path | None = None
     ) -> dict[int, list[str]]:
         """
-        Save a condensed version of **all** attribute stats for each seed state,
+        Save a condensed version of previous step's attribute stats for each seed state,
         ordered by mean reward difference from baseline.
 
         Returns seed_state_index -> top k list of attributes
@@ -206,7 +205,7 @@ class Runner(ABC):
             self.get_val_baselines()
 
         tasks = [
-            self.evaluate_attributes(
+            self.bias_evaluator.evaluate_attributes(
                 user_prompts=seed_state.cluster.val_prompts,
                 attributes=final_attributes[seed_state.index],
                 save_dir=self.run_path
@@ -326,11 +325,15 @@ async def main():
         filename=f"logs/scrap/test_runner_{run_name}.log", level=logging.INFO
     )
 
+    bias_evaluator = BiasEvaluator(
+        rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=500),
+        reward_model=RewardModel(model_name="skywork-v2", batch_size=32),
+    )
+
     runner = TestRunner(
         seed_states=initial_seed_states,
         policy_model=PolicyModel(temperature=0.9),
-        rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=500),
-        reward_model=RewardModel(model_name="skywork-v2", batch_size=32),
+        bias_evaluator=bias_evaluator,
         judge_model=JudgeModel(model_name="anthropic/claude-sonnet-4.5", max_tokens=2048, reasoning=2000),
         run_name=run_name,
         n_rollouts=8,
@@ -363,15 +366,7 @@ async def main():
 
     print("Loaded validation results.")
 
-    try:
-        runner.judge(validation_results=validation_results)
-    except (asyncio.CancelledError, KeyboardInterrupt):
-        logger.info("Cancellation received. Cleaning up...")
-        raise
-    finally:
-        await asyncio.shield(runner.shutdown())
-
-
+    runner.judge(validation_results=validation_results)
 
 def json_to_rollouts(json_data: dict[str, dict[str, list[dict[str, Any]]]]) -> dict[str, dict[str, list[Rollout]]]:
     rollouts = {}

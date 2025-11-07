@@ -1,7 +1,7 @@
 """Synthetic dataset inspired by Wildchat clusters."""
 
 # %%
-import patches
+
 import json
 import textwrap
 import asyncio

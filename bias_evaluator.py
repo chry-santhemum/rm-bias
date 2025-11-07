@@ -9,18 +9,19 @@ from pathlib import Path
 import logging
 import numpy as np
 import plotly.graph_objects as go
+from typing import Mapping, Sequence
 
 from utils import logging_setup, timestamp, remove_outliers
 from models import RewriteModel
 from reward_model import RewardModel
 from state import Rollout
-from bias_workers_baseline import evaluate_baselines
-from bias_workers_rewrite import (
+from bias_workers import (
     BatchSentinel,
     RewriteInput,
     RewriteResult,
     rewrite_worker,
-    rewrite_rating_worker,
+    rating_worker,
+    evaluate_baselines,
     organize_rewrite_results,
 )
 
@@ -41,8 +42,8 @@ class BiasEvaluator:
         self._workers_started = False
         self.queue_input: asyncio.Queue | None = None
         self.queue_rewrite: asyncio.Queue | None = None
-        self.batch_results: dict[str, list[RewriteResult]] = {}
-        self.batch_futures: dict[str, asyncio.Future] = {}
+        self.batch_results: Mapping[str, Sequence[RewriteResult]] = {}
+        self.batch_futures: Mapping[str, asyncio.Future] = {}
         self.rewrite_workers: list[asyncio.Task] = []
         self.rating_worker: asyncio.Task | None = None
         self.rating_executor: ThreadPoolExecutor | None = None
@@ -67,7 +68,7 @@ class BiasEvaluator:
 
         self.rating_executor = ThreadPoolExecutor(max_workers=1)
         self.rating_worker = asyncio.create_task(
-            rewrite_rating_worker(
+            rating_worker(
                 self.reward_model,
                 self.queue_rewrite,
                 self.batch_results,
@@ -90,9 +91,9 @@ class BiasEvaluator:
 
         # Generate batch ID and asyncio.Future
         batch_id = str(uuid.uuid4())
-        self.batch_results[batch_id] = []
+        self.batch_results[batch_id] = [] # type: ignore
         loop = asyncio.get_running_loop()
-        self.batch_futures[batch_id] = loop.create_future()
+        self.batch_futures[batch_id] = loop.create_future() # type: ignore
         expected_result_count = 0
 
         for user, attribute in product(user_prompts, attributes):
@@ -122,7 +123,7 @@ class BiasEvaluator:
         organized_results = organize_rewrite_results(
             batch_results, baseline_rollouts, save_dir
         )
-        del self.batch_futures[batch_id]
+        del self.batch_futures[batch_id] # type: ignore
 
         logger.info(f"Attributes evaluated in {(time.time() - start_time):.2f} seconds")
         return organized_results

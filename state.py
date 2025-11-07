@@ -49,7 +49,7 @@ class Rating:
 @dataclass
 class Rollout:
     response: str
-    score: float | None
+    score: float
 
 
 @dataclass

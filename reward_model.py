@@ -1,7 +1,7 @@
 """Reward model."""
 
 # %%
-import patches
+
 import hashlib
 import asyncio
 import torch

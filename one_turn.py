@@ -6,7 +6,7 @@ Rewrites: train_batch_size * n_pop * n_rollouts (~4096 tokens per call)
 """
 
 # %%
-import patches
+
 import copy
 import json
 import dotenv
@@ -33,6 +33,7 @@ from models import PolicyModel, RewriteModel, JudgeModel
 from planner import Planner, NaivePlanner, ContrastPlanner
 from reward_model import RewardModel
 from runner import Runner
+from bias_evaluator import BiasEvaluator
 
 dotenv.load_dotenv()
 nest_asyncio.apply()
@@ -47,10 +48,9 @@ class OneTurnRunner(Runner):
     def __init__(
         self,
         seed_states: list[SeedState],
-        planner: Planner,
+        planner: ContrastPlanner,
         policy_model: PolicyModel,
-        rewrite_model: RewriteModel,
-        reward_model: RewardModel,
+        bias_evaluator: BiasEvaluator,
         judge_model: JudgeModel,
         cluster_model: ClusterModel,
         n_new: int,
@@ -62,8 +62,7 @@ class OneTurnRunner(Runner):
         super().__init__(
             seed_states=seed_states,
             policy_model=policy_model,
-            rewrite_model=rewrite_model,
-            reward_model=reward_model,
+            bias_evaluator=bias_evaluator,
             judge_model=judge_model,
             run_name=run_name,
             n_rollouts=n_rollouts,
@@ -79,8 +78,6 @@ class OneTurnRunner(Runner):
         return "one_turn"
 
     def train(self):
-        self.planner.load_contrast_pairs(runner=self)
-
         self.planner.plan(
             runner=self,
             n_new=self.n_new,
@@ -88,22 +85,23 @@ class OneTurnRunner(Runner):
             cluster_model=self.cluster_model,
         )
 
+        tasks = []
         for seed_state in self.seed_states:
             sample_user_prompts = random.sample(
                 seed_state.cluster.train_prompts, self.train_batch_size
             )
-            rewrite_results = self.evaluate_attributes(
+            rewrite_results = self.bias_evaluator.evaluate_attributes(
                 user_prompts=sample_user_prompts,
                 attributes=list(seed_state.history[-1].keys()),
                 save_dir=self.run_path
                 / f"step_{self.step_count}_seed_{seed_state.index}",
+                baseline_rollouts=self.baselines,
             )
             for attribute, rollouts in rewrite_results.items():
                 if attribute == "":
                     continue
                 seed_state.history[-1][attribute].rollouts = rollouts  # type: ignore
 
-        self.judge_attributes()
         top_attributes = self.save_attribute_stats(top_k=8)
 
         self.get_val_baselines()
@@ -151,7 +149,7 @@ if __name__ == "__main__":
     Path(f"data/one_turn").mkdir(parents=True, exist_ok=True)
     logging_setup(filename=f"logs/one_turn/{run_name}.log", level=logging.INFO)
 
-    planner = NaivePlanner(
+    planner = ContrastPlanner(
         model_names=["anthropic/claude-opus-4.1", "google/gemini-2.5-pro"],
         alloy_type="round_robin",
         max_tokens=8192,
@@ -160,14 +158,18 @@ if __name__ == "__main__":
         max_par=128,
     )
 
+    bias_evaluator=BiasEvaluator(
+        rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=512),
+        reward_model=RewardModel(model_name="skywork-v2", batch_size=64),
+    ),
+
     runner = OneTurnRunner(
         seed_states=initial_seed_states,
         planner=planner,
         policy_model=PolicyModel(
             model_name="meta-llama/llama-3.1-8b-instruct", temperature=0.9
         ),
-        rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=512),
-        reward_model=RewardModel(model_name="skywork-v2", batch_size=64),
+        bias_evaluator=bias_evaluator,
         judge_model=JudgeModel(),
         cluster_model=cluster_model,
         n_new=args.n_new,

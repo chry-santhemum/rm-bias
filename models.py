@@ -1,15 +1,10 @@
 """LLM API generation model classes."""
 
 # %%
-import patches
+
 import textwrap
 import logging
-import random
-from slist import Slist
-from typing import Any, Literal
-from tenacity import retry, stop_after_attempt, wait_fixed
-
-from caller import OpenRouterCaller, CacheConfig, ChatHistory, Response
+from caller import OpenRouterCaller, CacheConfig, RetryConfig, ChatHistory
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +14,12 @@ cache_config = CacheConfig(
         "meta-llama/llama-3.1-8b-instruct",
         "meta-llama/llama-3.1-70b-instruct",
     }
+)
+
+retry_config = RetryConfig(
+    raise_when_exhausted=False,
+    criteria=lambda response: response.has_response and response.finish_reason == "stop",
+    max_attempts=3
 )
 
 
@@ -37,7 +38,11 @@ class GenerationModel:
         self.kwargs = kwargs
         self.model_slug = self.model_name.split("/")[-1]
 
-        self.caller = OpenRouterCaller(cache_config=cache_config, dotenv_path=".env")
+        self.caller = OpenRouterCaller(
+            cache_config=cache_config, 
+            retry_config=retry_config,
+            dotenv_path=".env"
+        )
 
     async def sample(
         self,
@@ -45,7 +50,7 @@ class GenerationModel:
         desc: str = "",
     ) -> list[ChatHistory]:
         """
-        If response is None, return the input chat history.
+        If response is None or was interrupted, return the input chat history.
         """
         responses = await self.caller.call(
             messages=chat_histories,
@@ -57,10 +62,13 @@ class GenerationModel:
 
         outputs: list[ChatHistory] = []
         for i, resp in enumerate(responses):
-            if resp.first_response is None:
+            if resp is None:
                 outputs.append(chat_histories[i])
                 continue
-            outputs.append(chat_histories[i].add_assistant(resp.first_response))
+            if (not resp.has_response) or (resp.finish_reason != "stop"):
+                outputs.append(chat_histories[i])
+                continue
+            outputs.append(chat_histories[i].add_assistant(resp.first_response))  # type: ignore
 
         return outputs
 
@@ -95,44 +103,25 @@ class RewriteModel(GenerationModel):
         super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
 
 
-    # @retry(stop=stop_after_attempt(3), wait=wait_fixed(1.0))
     async def rewrite(
         self,
         attribute: str,
         original_chat: ChatHistory,
         presence: bool,
-        n_samples: int = 1,
-    ) -> list[str | None]:
-        """
-        Makes n_samples parallel calls.
-        Retries up to 3 times if any output is None or blank.
-        """
+    ) -> str|None:
         rewrite_prompt = REWRITE_PLUS_PROMPT if presence else REWRITE_MINUS_PROMPT
-        to_send_chats = [
-            ChatHistory.from_system(REWRITE_PROMPT_SYSTEM).add_user(
-                rewrite_prompt.format(
-                    original_response=original_chat.get_first("assistant"),
-                    textual_attribute=attribute,
-                )
+        to_send_chats = ChatHistory.from_system(REWRITE_PROMPT_SYSTEM).add_user(
+            rewrite_prompt.format(
+                original_response=original_chat.get_first("assistant"),
+                textual_attribute=attribute,
             )
-            for _ in range(n_samples)
-        ]
+        )
 
         logger.info(
-            f"[RewriteModel] Sending {len(to_send_chats)} rewrite requests to model {self.model_name}."
+            f"[RewriteModel] Sending 1 rewrite request to model {self.model_name}."
         )
-        responses = await self.sample(to_send_chats)
-        results = [
-            r.get_first("assistant") if r is not None else None for r in responses
-        ]
-
-        # if not all(r is not None and str(r).strip() != "" for r in results):
-        #     logger.warning(
-        #         "[RewriteModel] Got blank or None response(s) from rewrite sampling, triggering retry."
-        #     )
-        #     raise ValueError("Received blank or None rewrite responses.")
-
-        return results
+        responses = await self.sample([to_send_chats])
+        return responses[0].get_first("assistant") 
 
 
 REWRITE_PROMPT_SYSTEM = textwrap.dedent(

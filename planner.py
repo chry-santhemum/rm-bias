@@ -1,7 +1,6 @@
 """Planner model classes."""
 
 
-import patches
 import logging
 import random
 import json
@@ -13,6 +12,7 @@ from dataclasses import replace, asdict
 from collections import defaultdict
 from typing import Any, Literal, Optional
 from abc import ABC, abstractmethod
+
 from caller import OpenRouterCaller, CacheConfig, ChatHistory, Response
 from state import SeedState, AttributeStats
 from runner import Runner
@@ -34,19 +34,22 @@ class Planner(ABC):
         model_names: list[str],
         alloy_type: Literal["round_robin", "random"],
         max_tokens: int,
-        reasoning: int | str | None = None,
-        temperature: float = 0.7,
+        reasoning: int | str,
         max_par: int = 64,
+        seed: int = 0,
     ):
         self.model_names = model_names
         self.alloy_type = alloy_type
         self.max_tokens = max_tokens
         self.reasoning = reasoning
-        self.temperature = temperature
         self.max_par = max_par
+        self.seed = seed
 
         self.caller = OpenRouterCaller(cache_config=cache_config, dotenv_path=".env")
         self.curr_planner_index: int = 0
+
+        random.seed(self.seed)
+
 
     @property
     def curr_planner_model(self):
@@ -70,7 +73,6 @@ class Planner(ABC):
             max_parallel=self.max_par,
             desc=desc,
             model=self.curr_planner_model,
-            temperature=self.temperature,
             max_tokens=self.max_tokens,
             reasoning=self.reasoning,
         )
@@ -88,21 +90,49 @@ class NaivePlanner(Planner):
         model_names: list[str],
         alloy_type: Literal["round_robin", "random"],
         max_tokens: int,
-        reasoning: int | str | None = None,
-        temperature: float = 0.7,
+        reasoning: int | str,
         max_par: int = 64,  # max parallel calls to client
+        seed: int = 0,
     ):
         super().__init__(
             model_names=model_names,
             alloy_type=alloy_type,
             max_tokens=max_tokens,
             reasoning=reasoning,
-            temperature=temperature,
             max_par=max_par,
+            seed=seed,
         )
 
-    def plan(self, runner: Runner, n_new: int):
-        pass
+    def plan(
+        self, 
+        runner: Runner, 
+        n_new: int,
+        n_traj_in_context: int,  # number of rollouts provided
+        n_per_user_prompt: int,  # number of planning prompts to send per user prompt
+    ):
+        assert runner.baselines is not None
+        to_send_messages = []
+
+        for seed_state in runner.seed_states:
+            for user_prompt in seed_state.cluster.train_prompts:
+                all_rollouts = runner.baselines[user_prompt]
+
+                for _ in range(n_per_user_prompt):
+                    sampled_rollouts = random.sample(
+                        all_rollouts, 
+                        min(n_traj_in_context, len(all_rollouts))
+                    )
+                    sampled_rollouts.sort(key=lambda x: x.score, reverse=True)
+
+                    data = {
+                        "user_prompt": user_prompt,
+                        "rollouts": 
+                    }
+
+
+
+
+
 
 
 
@@ -112,8 +142,7 @@ class ContrastPlanner(Planner):
         model_names: list[str],
         alloy_type: Literal["round_robin", "random"],
         max_tokens: int,
-        reasoning: int | str | None = None,
-        temperature: float = 0.7,
+        reasoning: int | str,
         max_par: int = 64,  # max parallel calls to client
     ):
         super().__init__(
@@ -121,7 +150,6 @@ class ContrastPlanner(Planner):
             alloy_type=alloy_type,
             max_tokens=max_tokens,
             reasoning=reasoning,
-            temperature=temperature,
             max_par=max_par,
         )
 
@@ -132,6 +160,7 @@ class ContrastPlanner(Planner):
 
         Returns {"prompt": ..., "chosen": ..., "rejected": ...}
         """
+        assert runner.baselines is not None
         for seed_state in runner.seed_states:
             contrast_pairs = []
             prompts = [p for p in seed_state.cluster.train_prompts if p in runner.baselines]
@@ -217,14 +246,14 @@ class ContrastPlanner(Planner):
                     "response_B": item["rejected"],
                 }
                 data_json = json.dumps(data, indent=2)
-                planner_prompt = PAIR_PROMPT_USER.format(
+                planner_prompt = CONTRAST_PROMPT_USER.format(
                     num_plans=n_new,
                     data=data_json,
                     cluster_summary=cluster.summary,
                 )
                 to_send_messages.append(
                     ChatHistory
-                    .from_system(PAIR_PROMPT_SYSTEM)
+                    .from_system(CONTRAST_PROMPT_SYSTEM)
                     .add_user(planner_prompt)
                 )
                 metas.append(
@@ -236,10 +265,7 @@ class ContrastPlanner(Planner):
                         "rejected": data["response_B"],
                         "planner_prompt": planner_prompt,
                         "planner_model": self.curr_planner_model,
-                        "temperature": self.temperature,
-                        "reasoning_effort": (
-                            str(self.reasoning) if self.reasoning else None
-                        ),
+                        "reasoning_effort": str(self.reasoning),
                         "n_new": n_new,
                         "n_pop": n_pop,
                     }
@@ -324,13 +350,13 @@ class ContrastPlanner(Planner):
 # %%
 
 
-PAIR_PROMPT_SYSTEM = textwrap.dedent(
+CONTRAST_PROMPT_SYSTEM = textwrap.dedent(
     """
     You are an expert in writing novel **system prompts** that specify the behavior of other assistant language models.
     """
 ).strip()
 
-PAIR_PROMPT_USER = textwrap.dedent(
+CONTRAST_PROMPT_USER = textwrap.dedent(
     """
     You are given a user prompt and two assistant responses, labeled A and B:
 
