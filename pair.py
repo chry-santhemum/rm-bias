@@ -6,7 +6,7 @@ Rewrites: t_steps * train_batch_size * n_pop * 16 (~4096 tokens per call)
 """
 
 # %%
-  # monkey patching
+# monkey patching
 import json
 import random
 import dotenv
@@ -38,8 +38,6 @@ logger = logging.getLogger(__name__)
 class PAIRPlanner(OneTurnPlanner):
     def initial_plan(self, seed_states: list[SeedState], n_new: int, n_pop: int):
         return super().plan(seed_states, n_new, n_pop)
-
-
 
     def iterate_plan(
         self,

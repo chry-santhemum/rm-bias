@@ -3,7 +3,7 @@ Runner class.
 """
 
 # %%
-  # monkey patching
+# monkey patching
 import os
 import uuid
 import json
@@ -26,7 +26,7 @@ from utils import timestamp, logging_setup, async_gather
 from models import PolicyModel, RewriteModel, JudgeModel
 from reward_model import RewardModel
 from load_cluster import load_initial_seed_states
-from bias_workers_baseline import evaluate_baselines
+from bias_workers import evaluate_baselines
 from bias_evaluator import BiasEvaluator
 
 logger = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ class Runner(ABC):
         bias_evaluator: BiasEvaluator,
         judge_model: JudgeModel,
         run_name: str | None,
-        n_rollouts: int = 16,
+        n_baseline_rollouts: int = 16,
         *args,
         **kwargs,
     ):
@@ -52,11 +52,10 @@ class Runner(ABC):
         self.policy_model = policy_model
         self.bias_evaluator = bias_evaluator
         self.judge_model = judge_model
-        self.n_rollouts = n_rollouts
+        self.n_baseline_rollouts = n_baseline_rollouts
 
         self.run_name = run_name or f"{timestamp()}"
         self.run_path.mkdir(parents=True, exist_ok=True)
-
 
     @property
     @abstractmethod
@@ -90,11 +89,13 @@ class Runner(ABC):
                 policy_model=self.policy_model,
                 reward_model=self.bias_evaluator.reward_model,
                 save_dir=self.run_path / "train_baselines",
-                n_rollouts=self.n_rollouts,
+                n_rollouts=self.n_baseline_rollouts,
             )
         )
         print(f"Baseline rollouts taken: {(time.time() - start_time):.2f} seconds")
-        logging.info(f"Baseline rollouts taken: {(time.time() - start_time):.2f} seconds")
+        logging.info(
+            f"Baseline rollouts taken: {(time.time() - start_time):.2f} seconds"
+        )
 
     def get_val_baselines(self):
         # get baseline rollouts and rewards
@@ -105,10 +106,12 @@ class Runner(ABC):
                 policy_model=self.policy_model,
                 reward_model=self.bias_evaluator.reward_model,
                 save_dir=self.run_path / "val_baselines",
-                n_rollouts=self.n_rollouts,
+                n_rollouts=self.n_baseline_rollouts,
             )
         )
-        print(f"Validation baseline rollouts taken: {(time.time() - start_time):.2f} seconds")
+        print(
+            f"Validation baseline rollouts taken: {(time.time() - start_time):.2f} seconds"
+        )
         logging.info(
             f"Validation baseline rollouts taken: {(time.time() - start_time):.2f} seconds"
         )
@@ -197,35 +200,37 @@ class Runner(ABC):
     def train(self, *args, **kwargs):
         pass
 
-    def validate(self, final_attributes: dict[int, list[str]], get_val_baselines: bool = True):
+    async def validate(
+        self, final_attributes: dict[int, list[str]], get_val_baselines: bool = True
+    ):
         """
         final_attributes: seed_state_index -> list of attributes
         """
         if get_val_baselines:
             self.get_val_baselines()
 
-        tasks = [
-            self.bias_evaluator.evaluate_attributes(
-                user_prompts=seed_state.cluster.val_prompts,
-                attributes=final_attributes[seed_state.index],
-                save_dir=self.run_path
-                / "validate"
-                / f"seed_{seed_state.index}_validate",
-                baseline_rollouts=self.val_baselines,
-            )
-            for seed_state in self.seed_states
-        ]
+        async with self.bias_evaluator as evaluator:
+            tasks = [
+                evaluator.evaluate_attributes(
+                    user_prompts=seed_state.cluster.val_prompts,
+                    attributes=final_attributes[seed_state.index],
+                    save_dir=self.run_path
+                    / "validate"
+                    / f"seed_{seed_state.index}_validate",
+                    baseline_rollouts=self.val_baselines,
+                )
+                for seed_state in self.seed_states
+            ]
 
-        validation_results = asyncio.run(async_gather(tasks))
+            validation_results = await asyncio.gather(*tasks)
 
-        self.judge(validation_results=validation_results)
-
+        self.judge(validation_results=validation_results)  # type: ignore
 
     def judge(self, validation_results: list[dict[str, dict[str, list[Rollout]]]]):
         # use judge model
         print(f"Using judge model {self.judge_model.model_name}...")
         NUM_TRIALS = 2
-        
+
         judge_tasks = []
         judge_tasks_info = []
         for seed_state_idx in range(len(self.seed_states)):
@@ -321,9 +326,7 @@ async def main():
     # user_prompts = list(baseline_results.keys())
 
     run_name = "20251027-045705-synthetic_2"
-    logging_setup(
-        filename=f"logs/scrap/test_runner_{run_name}.log", level=logging.INFO
-    )
+    logging_setup(filename=f"logs/scrap/test_runner_{run_name}.log", level=logging.INFO)
 
     bias_evaluator = BiasEvaluator(
         rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=500),
@@ -334,7 +337,9 @@ async def main():
         seed_states=initial_seed_states,
         policy_model=PolicyModel(temperature=0.9),
         bias_evaluator=bias_evaluator,
-        judge_model=JudgeModel(model_name="anthropic/claude-sonnet-4.5", max_tokens=2048, reasoning=2000),
+        judge_model=JudgeModel(
+            model_name="anthropic/claude-sonnet-4.5", max_tokens=2048, reasoning=2000
+        ),
         run_name=run_name,
         n_rollouts=8,
     )
@@ -342,9 +347,7 @@ async def main():
     # for seed_state in runner.seed_states:
     #     print(f"Seed state {seed_state.index}")
 
-    with open(
-        f"data/evo/{run_name}/val_baselines/baseline_results.json", "r"
-    ) as f:
+    with open(f"data/evo/{run_name}/val_baselines/baseline_results.json", "r") as f:
         val_baselines = json.load(f)
 
     runner.val_baselines = {}
@@ -353,22 +356,26 @@ async def main():
             Rollout(response=rollout["response"], score=rollout["score"])
             for rollout in rollouts
         ]
-    
+
     print("Loaded validation baselines.")
 
     validation_results = []
     for seed_state_idx in topic_ids:
         with open(
-            f"data/evo/{run_name}/validate/seed_{seed_state_idx}_validate/rewrite_plus_results.json", "r"
+            f"data/evo/{run_name}/validate/seed_{seed_state_idx}_validate/rewrite_plus_results.json",
+            "r",
         ) as f:
             seed_validation_results = json.load(f)
-            validation_results.append(json_to_rollouts(seed_validation_results))        
+            validation_results.append(json_to_rollouts(seed_validation_results))
 
     print("Loaded validation results.")
 
     runner.judge(validation_results=validation_results)
 
-def json_to_rollouts(json_data: dict[str, dict[str, list[dict[str, Any]]]]) -> dict[str, dict[str, list[Rollout]]]:
+
+def json_to_rollouts(
+    json_data: dict[str, dict[str, list[dict[str, Any]]]],
+) -> dict[str, dict[str, list[Rollout]]]:
     rollouts = {}
     for attribute, attribute_data in json_data.items():
         rollouts[attribute] = {}
@@ -377,7 +384,8 @@ def json_to_rollouts(json_data: dict[str, dict[str, list[dict[str, Any]]]]) -> d
                 Rollout(response=rollout["response"], score=rollout["score"])
                 for rollout in user_data
             ]
-    return rollouts   
+    return rollouts
+
 
 # %%
 if __name__ == "__main__":

@@ -28,14 +28,20 @@ def plot_seed_validation_data(
     seed_index: int,
 ):
     if not (results_dir / "baseline_results.json").exists():
-        with open(results_dir / "val_baselines" / "baseline_results.json", "r", encoding="utf-8") as f:
+        with open(
+            results_dir / "val_baselines" / "baseline_results.json",
+            "r",
+            encoding="utf-8",
+        ) as f:
             baseline_results = json.load(f)
     else:
         with open(results_dir / f"baseline_results.json", "r", encoding="utf-8") as f:
             baseline_results = json.load(f)
 
     with open(
-        results_dir / f"validate/seed_{seed_index}_validate/rewrite_plus_scores.json", "r", encoding="utf-8"
+        results_dir / f"validate/seed_{seed_index}_validate/rewrite_plus_scores.json",
+        "r",
+        encoding="utf-8",
     ) as f:
         validate_results = json.load(f)
 
@@ -48,7 +54,6 @@ def plot_seed_validation_data(
         results_dir / f"seed_{seed_index}_cluster.json", "r", encoding="utf-8"
     ) as f:
         cluster_info = json.load(f)
-
 
     # Collect difference data for each attribute
     plot_data = []
@@ -75,7 +80,13 @@ def plot_seed_validation_data(
         # remove far outliers
         attribute_diffs = remove_outliers(attribute_diffs)
 
-        plot_data.append({"attribute": attribute, "diffs": attribute_diffs, "winrate": np.mean(winrates).item()})
+        plot_data.append(
+            {
+                "attribute": attribute,
+                "diffs": attribute_diffs,
+                "winrate": np.mean(winrates).item(),
+            }
+        )
 
     # Helper function to wrap text
     def wrap_text(text, width):
@@ -108,7 +119,10 @@ def plot_seed_validation_data(
 
     # Add violin plot for each attribute
     for i, item in enumerate(plot_data):
-        display_name = wrap_text(item["attribute"], width=60) + f"<br>(Winrate: {item['winrate']:.2f})"
+        display_name = (
+            wrap_text(item["attribute"], width=60)
+            + f"<br>(Winrate: {item['winrate']:.2f})"
+        )
         display_names.append(display_name)
 
         fig.add_trace(
@@ -146,9 +160,7 @@ for seed_index in [1]:
         Path("data/evo/20251101-070815-synthetic_2"), seed_index=seed_index
     )
     fig.show()
-    fig.write_html(
-        f"data/scrap/20251101-070815/evo-synthetic_2-seed_{seed_index}.html"
-    )
+    fig.write_html(f"data/scrap/20251101-070815/evo-synthetic_2-seed_{seed_index}.html")
 
 # %%
 

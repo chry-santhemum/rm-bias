@@ -36,10 +36,11 @@ from utils import (
     async_gather,
 )
 from load_cluster import load_initial_seed_states
-from models import PolicyModel, RewriteModel, JudgeModel, Planner
+from models import PolicyModel, RewriteModel, JudgeModel
 from reward_model import RewardModel
 from runner import Runner
-from one_turn import OneTurnPlanner
+from bias_evaluator import BiasEvaluator
+from planner import Planner, NaivePlanner, ContrastPlanner
 
 dotenv.load_dotenv()
 nest_asyncio.apply()
@@ -48,15 +49,14 @@ set_seed_all(10086)
 logger = logging.getLogger(__name__)
 
 
-class EvoPlanner(OneTurnPlanner):
+class EvoPlanner(NaivePlanner):
     def __init__(
         self,
         model_names: list[str],
         alloy_type: Literal["round_robin", "random"],
         cluster_model: ClusterModel,
         max_tokens: int,
-        reasoning: int | str | None = None,
-        temperature: float = 0.7,
+        reasoning: int | str,
         max_par: int = 64,  # max parallel calls to client
     ):
         super().__init__(
@@ -64,23 +64,24 @@ class EvoPlanner(OneTurnPlanner):
             alloy_type=alloy_type,
             max_tokens=max_tokens,
             reasoning=reasoning,
-            temperature=temperature,
             max_par=max_par,
         )
         self.cluster_model = cluster_model
 
     def initial_plan(
         self,
-        seed_states: list[SeedState[dict[str, int]]],
-        n_new: int,
-        n_pop: int,
-        max_contrast_pairs: int|None = None,
+        runner: Runner,
+        *args,
+        **kwargs,
     ):
-        return super().plan(seed_states, n_new, n_pop, self.cluster_model, max_contrast_pairs)
-
+        return super().plan(runner=runner, *args, **kwargs)
 
     @staticmethod
-    def _get_past_data_str(baselines: dict[str, list[Rollout]], attribute_stats: AttributeStats, n_data_points: int) -> str:
+    def _get_past_data_str(
+        baselines: dict[str, list[Rollout]],
+        attribute_stats: AttributeStats,
+        n_data_points: int,
+    ) -> str:
         """
         Assumes that all past data are complete and have all the ratings.
         """
@@ -92,26 +93,35 @@ class EvoPlanner(OneTurnPlanner):
                 baseline_rollout = baseline_rollouts[i]
                 if baseline_rollout.score is None or rewritten_rollout.score is None:
                     continue
-                all_past_data.append({
-                    "user_prompt": user_prompt,
-                    "baseline_rollout": asdict(baseline_rollout),
-                    "rewritten_rollout": asdict(rewritten_rollout),
-                })
+                all_past_data.append(
+                    {
+                        "user_prompt": user_prompt,
+                        "baseline_rollout": asdict(baseline_rollout),
+                        "rewritten_rollout": asdict(rewritten_rollout),
+                    }
+                )
 
-        all_past_data.sort(key = lambda x: x["rewritten_rollout"]["score"] - x["baseline_rollout"]["score"], reverse=True)
-        
+        all_past_data.sort(
+            key=lambda x: x["rewritten_rollout"]["score"]
+            - x["baseline_rollout"]["score"],
+            reverse=True,
+        )
+
         if len(all_past_data) <= n_data_points:
             return json.dumps(all_past_data, indent=2)
         else:
-            return json.dumps(all_past_data[:n_data_points//2] + all_past_data[-n_data_points//2:], indent=2)
-
+            return json.dumps(
+                all_past_data[: n_data_points // 2]
+                + all_past_data[-n_data_points // 2 :],
+                indent=2,
+            )
 
     def iterate_plan(
         self,
         baselines: dict[str, list[Rollout]],
         seed_states: list[SeedState[dict[str, int]]],
         m_var: int,
-        n_data_points: int=8,
+        n_data_points: int = 8,
     ):
         to_send_messages = []
         messages_info = []
@@ -144,12 +154,12 @@ class EvoPlanner(OneTurnPlanner):
 
             seed_state.history.append({})
 
-        planner_responses = asyncio.run(
-            self.sample(to_send_messages, desc="Mutating")
-        )
+        planner_responses = asyncio.run(self.sample(to_send_messages, desc="Mutating"))
 
         # parse responses
         for i, resp in enumerate(planner_responses):
+            if resp is None:
+                continue
             seed_idx = messages_info[i]["seed_idx"]
             attributes, reasoning = parse_json_response(resp)
             if isinstance(attributes, str):
@@ -163,7 +173,6 @@ class EvoPlanner(OneTurnPlanner):
                 "parent_time_step": messages_info[i]["parent_time_step"],
                 "operation": "mutate",
                 "planner_model": self.curr_planner_model,
-                "temperature": self.temperature,
                 "reasoning_effort": str(self.reasoning) if self.reasoning else None,
                 "planner_prompt": to_send_messages[i].get_first("user"),
                 "planner_reasoning": str(reasoning),
@@ -176,7 +185,7 @@ class EvoPlanner(OneTurnPlanner):
                     rollouts={},
                     meta=meta,
                 )
-        
+
         # add in the original prompts from the state
         for attribute, time_step in seed_state.state.items():
             seed_states[seed_idx].history[-1][attribute] = AttributeStats(
@@ -184,7 +193,6 @@ class EvoPlanner(OneTurnPlanner):
                 rollouts={},
                 meta=seed_states[seed_idx].history[time_step][attribute].meta,
             )
-
 
     def update_pop(
         self,
@@ -198,7 +206,11 @@ class EvoPlanner(OneTurnPlanner):
             candidates = []
             for attribute, stats in seed_state.history[-1].items():
                 candidates.append(
-                    (attribute, stats.meta["time_step"], stats.mean_reward_diff(baselines))
+                    (
+                        attribute,
+                        stats.meta["time_step"],
+                        stats.mean_reward_diff(baselines),
+                    )
                 )
 
                 _, indices = self.cluster_model.cluster_dbscan(
@@ -238,6 +250,7 @@ class EvoPlanner(OneTurnPlanner):
                 f"Updated Seed {seed_state.index} population to {len(seed_state.state)} members."
             )
 
+
 class EvoRunner(Runner):
     planner: EvoPlanner  # for type checker
 
@@ -246,43 +259,55 @@ class EvoRunner(Runner):
         seed_states: list[SeedState[dict[str, int]]],
         planner: EvoPlanner,
         policy_model: PolicyModel,
-        rewrite_model: RewriteModel,
-        reward_model: RewardModel,
+        bias_evaluator: BiasEvaluator,
         judge_model: JudgeModel,
+        cluster_model: ClusterModel,
         dbscan_eps: float,
         n_new: int,
         n_pop_initial: int,
         m_var: int,
-        n_rollouts: int,
+        n_traj_in_context: int,
+        n_per_user_prompt: int,
+        n_baseline_rollouts: int,
+        n_rewrite_rollouts: int,
         run_name: str | None = None,
     ):
         super().__init__(
             seed_states=seed_states,
             policy_model=policy_model,
-            rewrite_model=rewrite_model,
-            reward_model=reward_model,
+            bias_evaluator=bias_evaluator,
             judge_model=judge_model,
             run_name=run_name,
-            n_rollouts=n_rollouts,
+            n_baseline_rollouts=n_baseline_rollouts,
         )
+        self.planner = planner
+        self.cluster_model = cluster_model
+        self.bias_evaluator = bias_evaluator
+
         self.dbscan_eps = dbscan_eps
         self.n_new = n_new
         self.n_pop_initial = n_pop_initial
         self.m_var = m_var
-        self.planner = planner
+        self.n_traj_in_context = n_traj_in_context
+        self.n_per_user_prompt = n_per_user_prompt
+        self.n_baseline_rollouts = n_baseline_rollouts
+        self.n_rewrite_rollouts = n_rewrite_rollouts
 
     @property
     def runner_type(self) -> str:
         return "evo"
 
-    def train_step(self, n_pop_target: int, train_batch_size: int):
+    async def train_step(self, n_pop_target: int, train_batch_size: int):
         logger.info(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
         if self.step_count == 0:
             self.planner.initial_plan(
-                seed_states=self.seed_states,
+                runner=self,
                 n_new=self.n_new,
                 n_pop=self.n_pop_initial,
-                max_contrast_pairs=64,
+                n_traj_in_context=self.n_traj_in_context,
+                n_per_user_prompt=self.n_per_user_prompt,
+                cluster_model=self.cluster_model,
+                max_num_train_prompts=4,
                 # max_contrast_pairs=4,
             )
         else:
@@ -295,22 +320,26 @@ class EvoRunner(Runner):
         evaluate_tasks = []
         seed_state_indices = []
 
-        for seed_state_idx, seed_state in enumerate(self.seed_states):
-            user_prompts=random.sample(
-                seed_state.cluster.train_prompts,
-                train_batch_size,
-            )
-            for attribute in seed_state.history[-1]:
-                evaluate_tasks.append(
-                    self.evaluate_attributes(
-                        user_prompts=user_prompts,
-                        attributes=[attribute],
-                    )
-                )
-                seed_state_indices.append(seed_state_idx)
+        async with self.bias_evaluator as evaluator:
 
-        print(f"Evaluate tasks: {len(evaluate_tasks)}")
-        evaluate_results = asyncio.run(async_gather(evaluate_tasks))
+            for seed_state_idx, seed_state in enumerate(self.seed_states):
+                user_prompts = random.sample(
+                    seed_state.cluster.train_prompts,
+                    train_batch_size,
+                )
+                for attribute in seed_state.history[-1]:
+                    evaluate_tasks.append(
+                        evaluator.evaluate_attributes(
+                            user_prompts=user_prompts,
+                            attributes=[attribute],
+                            baseline_rollouts=self.baselines,
+                            n_rollouts=self.n_rewrite_rollouts,
+                        )
+                    )
+                    seed_state_indices.append(seed_state_idx)
+
+            print(f"Evaluate tasks: {len(evaluate_tasks)}")
+            evaluate_results = await asyncio.gather(*evaluate_tasks)
 
         for result, seed_state_idx in zip(evaluate_results, seed_state_indices):
             (key,) = result
@@ -318,8 +347,7 @@ class EvoRunner(Runner):
             self.seed_states[seed_state_idx].history[-1][key].rollouts = val
 
         final_attributes = self.save_attribute_stats(
-            top_k=8,
-            save_dir=self.run_path / f"step_{self.step_count}_stats"
+            top_k=8, save_dir=self.run_path / f"step_{self.step_count}_stats"
         )
 
         logger.info(
@@ -338,13 +366,11 @@ class EvoRunner(Runner):
 
         return final_attributes
 
-
     def train(self):
-        self.load_contrast_pairs()
-        n_pop_target = [32, 16, 8]
-        train_batch_size = [2, 4, 8]
-        # n_pop_target = [2, 1]
-        # train_batch_size = [2, 2]
+        # n_pop_target = [32, 16, 8]
+        # train_batch_size = [2, 4, 8]
+        n_pop_target = [2, 1]
+        train_batch_size = [2, 2]
         t_steps = len(train_batch_size)
 
         for time_step in range(t_steps):
@@ -352,7 +378,7 @@ class EvoRunner(Runner):
             #     for seed_state in self.seed_states:
             #         with open(self.run_path / f"step_{time_step}_stats/seed_{seed_state.index}.json", "r") as f:
             #             seed_results = json.load(f)
-                    
+
             #         seed_state.history.append(dict())
             #         for item in seed_results:
             #             attribute = item["attribute"]
@@ -360,7 +386,7 @@ class EvoRunner(Runner):
             #             for user_prompt, rollouts in item["all_rollouts"].items():
             #                 attribute_rollouts[user_prompt] = [
             #                     Rollout(
-            #                         response=rollout["response"], 
+            #                         response=rollout["response"],
             #                         score=rollout["score"]
             #                     )
             #                     for rollout in rollouts
@@ -382,15 +408,15 @@ class EvoRunner(Runner):
             #     self.planner.step_planner_model()
 
             # else:
-            final_attributes = self.train_step(
-                n_pop_target=n_pop_target[time_step],
-                train_batch_size=train_batch_size[time_step],
+            final_attributes = asyncio.run(
+                self.train_step(
+                    n_pop_target=n_pop_target[time_step],
+                    train_batch_size=train_batch_size[time_step],
+                )
             )
 
             if time_step == t_steps - 1:
-                self.validate(final_attributes)
-
-        asyncio.run(self.shutdown())
+                asyncio.run(self.validate(final_attributes=final_attributes))
 
 
 # %%
@@ -489,13 +515,18 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n_new", type=int, default=16)
-    parser.add_argument("--n_rollouts", type=int, default=8)
-    parser.add_argument("--n_pop_initial", type=int, default=256)
-    parser.add_argument("--m_var", type=int, default=3)
-    parser.add_argument("--dbscan_eps", type=float, default=0.2)
-    parser.add_argument("--val_split_size", type=int, default=16)
     parser.add_argument("--dataset", type=str, required=True)
+    parser.add_argument("--m_var", type=int, default=3)
+    parser.add_argument("--n_new", type=int, default=16)
+    parser.add_argument("--n_pop_initial", type=int, default=256)
+    parser.add_argument("--n_traj_in_context", type=int, default=16)
+    parser.add_argument("--n_per_user_prompt", type=int, default=1)
+    parser.add_argument("--n_baseline_rollouts", type=int, default=32)
+    parser.add_argument("--n_rewrite_rollouts", type=int, default=8)
+    parser.add_argument("--train_batch_size", type=int, default=16)
+    parser.add_argument("--val_split_size", type=int, default=16)
+    parser.add_argument("--dbscan_eps", type=float, default=0.2)
+
     args = parser.parse_args()
 
     if args.dataset == "alpaca":
@@ -508,25 +539,23 @@ if __name__ == "__main__":
         # topic_ids = [8, 9, 10, 11]
     elif args.dataset == "synthetic_2":
         # topic_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-        topic_ids = [1, 3, 4, 6, 8, 9, 12, 14, 16]
+        # topic_ids = [1, 3, 4, 6, 8, 9, 12, 14, 16]
+        topic_ids = [1]
 
     initial_seed_states = load_initial_seed_states(
         ds_name=args.dataset,
         topic_ids=topic_ids,
-        train_batch_size=2,
+        train_batch_size=args.train_batch_size,
         val_split_size=args.val_split_size,
     )
 
-    run_name = "20251101-070815-synthetic_2"
-    # run_name = f"{timestamp()}-{args.dataset}"
+    run_name = f"{timestamp()}-naive-{args.dataset}"
     Path(f"logs/evo").mkdir(parents=True, exist_ok=True)
     Path(f"data/evo").mkdir(parents=True, exist_ok=True)
     logging_setup(filename=f"logs/evo/{run_name}.log", level=logging.INFO)
 
     cluster_model = ClusterModel(
         embedding_model_name="Qwen/Qwen3-Embedding-0.6B",
-        umap_n_neighbors=5,
-        umap_n_components=5,
     )
 
     planner = EvoPlanner(
@@ -535,7 +564,6 @@ if __name__ == "__main__":
         cluster_model=cluster_model,
         max_tokens=8192,
         reasoning=6000,
-        temperature=1.0,
         max_par=128,
     )
 
@@ -543,23 +571,32 @@ if __name__ == "__main__":
         seed_states=initial_seed_states,  # type: ignore
         planner=planner,
         policy_model=PolicyModel(
-            model_name="meta-llama/llama-3.1-8b-instruct", temperature=0.9
+            model_name="meta-llama/llama-3.1-8b-instruct", temperature=0.95
         ),
-        rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=500),
-        reward_model=RewardModel(model_name="skywork-v2", batch_size=32),
-        judge_model=JudgeModel(model_name="anthropic/claude-haiku-4.5", max_tokens=2048, reasoning=2000),
+        bias_evaluator=BiasEvaluator(
+            rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=512),
+            reward_model=RewardModel(model_name="skywork-v2", batch_size=32),
+        ),
+        judge_model=JudgeModel(
+            model_name="anthropic/claude-haiku-4.5", max_tokens=2048, reasoning=2000
+        ),
+        cluster_model=cluster_model,
         dbscan_eps=args.dbscan_eps,
         n_new=args.n_new,
-        n_pop_initial=args.n_pop_initial,
         m_var=args.m_var,
-        n_rollouts=args.n_rollouts,
+        n_pop_initial=args.n_pop_initial,
+        n_traj_in_context=args.n_traj_in_context,
+        n_per_user_prompt=args.n_per_user_prompt,
+        n_baseline_rollouts=args.n_baseline_rollouts,
+        n_rewrite_rollouts=args.n_rewrite_rollouts,
         run_name=run_name,
     )
 
     # runner.get_baselines()
 
     with open(
-        f"data/evo/{run_name}/train_baselines/baseline_results.json", "r"
+        f"data/one_turn/20251107-075750-naive-synthetic_2/train_baselines/baseline_results.json",
+        "r",
     ) as f:
         train_baselines = json.load(f)
 
@@ -569,7 +606,7 @@ if __name__ == "__main__":
             Rollout(response=rollout["response"], score=rollout["score"])
             for rollout in rollouts
         ]
-    
+
     # with open(
     #     f"data/evo/{run_name}/val_baselines/baseline_results.json", "r"
     # ) as f:
@@ -581,7 +618,7 @@ if __name__ == "__main__":
     #         Rollout(response=rollout["response"], score=rollout["score"])
     #         for rollout in rollouts
     #     ]
-    
+
     # final_attributes = {}
     # for seed_state_idx in topic_ids:
     #     with open(f"data/evo/{run_name}/step_2_stats/seed_{seed_state_idx}.json", "r") as f:
@@ -597,4 +634,3 @@ if __name__ == "__main__":
         logger.error(f"Training failed: {e}")
         logger.error(f"Full traceback: ", exc_info=True)
         raise
-

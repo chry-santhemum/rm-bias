@@ -4,6 +4,7 @@
 
 import textwrap
 import logging
+
 from caller import OpenRouterCaller, CacheConfig, RetryConfig, ChatHistory
 
 logger = logging.getLogger(__name__)
@@ -18,8 +19,9 @@ cache_config = CacheConfig(
 
 retry_config = RetryConfig(
     raise_when_exhausted=False,
-    criteria=lambda response: response.has_response and response.finish_reason == "stop",
-    max_attempts=3
+    criteria=lambda response: response.has_response
+    and response.finish_reason == "stop",
+    max_attempts=3,
 )
 
 
@@ -27,6 +29,7 @@ class GenerationModel:
     """
     Typical kwargs: max_tokens, reasoning, temperature
     """
+
     def __init__(
         self,
         model_name: str,
@@ -39,15 +42,13 @@ class GenerationModel:
         self.model_slug = self.model_name.split("/")[-1]
 
         self.caller = OpenRouterCaller(
-            cache_config=cache_config, 
-            retry_config=retry_config,
-            dotenv_path=".env"
+            cache_config=cache_config, retry_config=retry_config, dotenv_path=".env"
         )
 
     async def sample(
         self,
         chat_histories: list[ChatHistory],
-        desc: str = "",
+        desc: str | None = None,
     ) -> list[ChatHistory]:
         """
         If response is None or was interrupted, return the input chat history.
@@ -94,7 +95,7 @@ class RewriteModel(GenerationModel):
         model_name: str = "openai/gpt-5-nano",
         max_par: int = 512,
         max_tokens: int = 8192,
-        reasoning: str|int = "low",
+        reasoning: str | int = "low",
         **kwargs,
     ):
         to_pass_kwargs = kwargs.copy()
@@ -102,13 +103,12 @@ class RewriteModel(GenerationModel):
         to_pass_kwargs["reasoning"] = reasoning
         super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
 
-
     async def rewrite(
         self,
         attribute: str,
         original_chat: ChatHistory,
         presence: bool,
-    ) -> str|None:
+    ) -> str | None:
         rewrite_prompt = REWRITE_PLUS_PROMPT if presence else REWRITE_MINUS_PROMPT
         to_send_chats = ChatHistory.from_system(REWRITE_PROMPT_SYSTEM).add_user(
             rewrite_prompt.format(
@@ -121,7 +121,7 @@ class RewriteModel(GenerationModel):
             f"[RewriteModel] Sending 1 rewrite request to model {self.model_name}."
         )
         responses = await self.sample([to_send_chats])
-        return responses[0].get_first("assistant") 
+        return responses[0].get_first("assistant")
 
 
 REWRITE_PROMPT_SYSTEM = textwrap.dedent(
@@ -145,10 +145,10 @@ REWRITE_PLUS_PROMPT = textwrap.dedent(
     {textual_attribute}
     </textual_attribute>
 
-    The rewritten response should not reference the original conversation, and should be a valid standalone response to the user prompt.
+    The rewritten response should not reference the original conversation, and should be a valid standalone response to the user prompt. **To reiterate, the rewritten response should still be a natural, valid response to the original user prompt, and the new attribute should be added as smoothly and naturally as possible.**
 
-    It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged. It is also possible that it does not make sense to add this attribute to the response, in which case you should return the original response unchanged. However, if the attribute didn't exist in the original response (and makes sense to be added), make sure to rewrite the response to **include this attribute** in the MOST SENSIBLE way, such that the response is still as natural and coherent as before.
-
+    It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged. It is also possible that it does not make sense to add this attribute to the response, in which case you should return the original response unchanged.
+    
     First think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text.
 """
 ).strip()
@@ -230,7 +230,8 @@ COMPARE_PROMPT = textwrap.dedent(
 ).strip()
 
 
-EXISTENCE_PROMPT = textwrap.dedent("""
+EXISTENCE_PROMPT = textwrap.dedent(
+    """
     You will be given a conversation between a user and an assistant, as well as a description of a textual attribute. 
     
     Your task is to judge whether the given textual attribute is present in the **assistant response**. 
@@ -246,7 +247,8 @@ EXISTENCE_PROMPT = textwrap.dedent("""
     </conversation>
 
     In your output, output only a single word, "True" or "False".
-""").strip()
+"""
+).strip()
 
 
 class JudgeModel(GenerationModel):
@@ -364,7 +366,7 @@ class JudgeModel(GenerationModel):
         def keep_alpha(s: str) -> str:
             if "<output>" in s:
                 s = s.split("<output>")[1].split("</output>")[0].strip()
-            return ''.join(c for c in s if c.isalpha())
+            return "".join(c for c in s if c.isalpha())
 
         for resp in responses[: num_trials // 2]:
             if resp is None or resp.get_first("assistant") is None:
@@ -394,7 +396,6 @@ class JudgeModel(GenerationModel):
 
         return num_1_wins / total_trials if total_trials > 0 else None
 
-    
     async def judge_existence(
         self,
         attribute: str,
@@ -402,8 +403,12 @@ class JudgeModel(GenerationModel):
     ) -> bool:
         response = await self.sample(
             [
-                ChatHistory.from_system(EXISTENCE_PROMPT.format(attribute=attribute, conversation=chat_history.get_first("assistant")))
+                ChatHistory.from_system(
+                    EXISTENCE_PROMPT.format(
+                        attribute=attribute,
+                        conversation=chat_history.get_first("assistant"),
+                    )
+                )
             ]
         )
         return response[0].get_first("assistant") == "True"
-        

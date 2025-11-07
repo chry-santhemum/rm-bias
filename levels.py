@@ -110,7 +110,7 @@ class LevelsRunner(Runner):
         #         for user_prompt, rollouts in item["all_rollouts"].items():
         #             attribute_rollouts[user_prompt] = [
         #                 Rollout(
-        #                     response=rollout["response"], 
+        #                     response=rollout["response"],
         #                     score=rollout["score"]
         #                 )
         #                 for rollout in rollouts
@@ -121,7 +121,6 @@ class LevelsRunner(Runner):
         #             rollouts=attribute_rollouts,
         #         )
 
-
         # For each seed state, take the most promising ones
         level_1_evaluate_tasks = []
 
@@ -129,7 +128,9 @@ class LevelsRunner(Runner):
             all_scores = []
             for _, attribute_results in result.items():
                 for _, rollouts in attribute_results.items():
-                    all_scores.extend([r.score for r in rollouts if r.score is not None])
+                    all_scores.extend(
+                        [r.score for r in rollouts if r.score is not None]
+                    )
             return np.mean(all_scores).item()
 
         for seed_state_idx, seed_state in enumerate(self.seed_states):
@@ -240,7 +241,9 @@ if __name__ == "__main__":
         ),
         rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=500),
         reward_model=RewardModel(model_name="skywork-v2", batch_size=32),
-        judge_model=JudgeModel(model_name="anthropic/claude-sonnet-4.5", max_tokens=4096, reasoning=4000),
+        judge_model=JudgeModel(
+            model_name="anthropic/claude-sonnet-4.5", max_tokens=4096, reasoning=4000
+        ),
         cluster_model=cluster_model,
         n_new=args.n_new,
         n_pop_level_0=args.n_pop_level_0,

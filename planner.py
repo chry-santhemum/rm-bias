@@ -1,6 +1,5 @@
 """Planner model classes."""
 
-
 import logging
 import random
 import json
@@ -13,18 +12,26 @@ from collections import defaultdict
 from typing import Any, Literal, Optional
 from abc import ABC, abstractmethod
 
-from caller import OpenRouterCaller, CacheConfig, ChatHistory, Response
+from caller import OpenRouterCaller, CacheConfig, RetryConfig, ChatHistory, Response
 from state import SeedState, AttributeStats
 from runner import Runner
 from utils import parse_json_response, ClusterModel
 
 logger = logging.getLogger(__name__)
 
+
 cache_config = CacheConfig(
     no_cache_models={
         "meta-llama/llama-3.1-8b-instruct",
         "meta-llama/llama-3.1-70b-instruct",
     }
+)
+
+retry_config = RetryConfig(
+    raise_when_exhausted=False,
+    criteria=lambda response: response.has_response
+    and response.finish_reason == "stop",
+    max_attempts=3,
 )
 
 
@@ -45,11 +52,12 @@ class Planner(ABC):
         self.max_par = max_par
         self.seed = seed
 
-        self.caller = OpenRouterCaller(cache_config=cache_config, dotenv_path=".env")
+        self.caller = OpenRouterCaller(
+            cache_config=cache_config, retry_config=retry_config, dotenv_path=".env"
+        )
         self.curr_planner_index: int = 0
 
         random.seed(self.seed)
-
 
     @property
     def curr_planner_model(self):
@@ -67,7 +75,7 @@ class Planner(ABC):
         self,
         chat_histories: list[ChatHistory],
         desc: str = "Planning",
-    ) -> list[Response]:
+    ) -> list[Response | None]:
         responses = await self.caller.call(
             messages=chat_histories,
             max_parallel=self.max_par,
@@ -78,10 +86,58 @@ class Planner(ABC):
         )
         return responses
 
-
     @abstractmethod
     def plan(self, runner: Runner, *args, **kwargs):
         pass
+
+    @staticmethod
+    def cluster_plans(
+        to_write: dict[int, list[dict[str, Any]]],
+        cluster_model: ClusterModel,
+        n_pop: int,
+    ) -> dict[int, list[dict[str, Any]]]:
+        # Cluster plans for each seed using k-means into n_pop clusters
+        # then select one plan per cluster (closest to centroid)
+        to_write_new = defaultdict(list)
+
+        for seed_idx, seed_plans in to_write.items():
+            logger.info(f"Clustering {len(seed_plans)} plans for seed index {seed_idx}")
+            if not seed_plans:
+                continue
+
+            cluster_results = cluster_model.cluster(
+                [plan["plan"] for plan in seed_plans], n_pop
+            )
+
+            for result in cluster_results:
+                # aggregate_meta = copy.deepcopy(
+                #     seed_plans[result["center_idx"]]["meta"]
+                # )
+                # aggregate_meta["positive_responses"] = []
+                # aggregate_meta["negative_responses"] = []
+                # aggregate_meta["cluster_plans"] = []
+
+                # for content_idx in result["content_indices"]:
+                #     content_meta = seed_plans[content_idx]["meta"]
+                #     aggregate_meta["cluster_plans"].append(
+                #         seed_plans[content_idx]["plan"]
+                #     )
+                #     aggregate_meta["positive_responses"].append(
+                #         content_meta["chosen"]
+                #     )
+                #     aggregate_meta["negative_responses"].append(
+                #         content_meta["rejected"]
+                #     )
+
+                to_write_new[seed_idx].append(
+                    {
+                        "plan": result["center_input"],
+                        # "meta": aggregate_meta,
+                        "meta": seed_plans[result["center_idx"]]["meta"],
+                    }
+                )
+
+        return dict(to_write_new)
 
 
 class NaivePlanner(Planner):
@@ -104,36 +160,105 @@ class NaivePlanner(Planner):
         )
 
     def plan(
-        self, 
-        runner: Runner, 
+        self,
+        runner: Runner,
         n_new: int,
+        n_pop: int,
         n_traj_in_context: int,  # number of rollouts provided
         n_per_user_prompt: int,  # number of planning prompts to send per user prompt
+        cluster_model: Optional[ClusterModel] = None,
+        max_num_train_prompts: int | None = None,
     ):
         assert runner.baselines is not None
         to_send_messages = []
+        metas = []
 
-        for seed_state in runner.seed_states:
-            for user_prompt in seed_state.cluster.train_prompts:
+        for seed_state_idx, seed_state in enumerate(runner.seed_states):
+            seed_state.history.append({})
+            if max_num_train_prompts is not None:
+                train_prompts = seed_state.cluster.train_prompts[:max_num_train_prompts]
+            else:
+                train_prompts = seed_state.cluster.train_prompts
+            for user_prompt in train_prompts:
                 all_rollouts = runner.baselines[user_prompt]
 
                 for _ in range(n_per_user_prompt):
                     sampled_rollouts = random.sample(
-                        all_rollouts, 
-                        min(n_traj_in_context, len(all_rollouts))
+                        all_rollouts,
+                        min(n_traj_in_context, len(all_rollouts)),
                     )
                     sampled_rollouts.sort(key=lambda x: x.score, reverse=True)
 
                     data = {
                         "user_prompt": user_prompt,
-                        "rollouts": 
+                        "rollouts": [asdict(r) for r in sampled_rollouts],
                     }
+                    planner_prompt = NAIVE_PROMPT_USER.format(
+                        data=json.dumps(data, indent=4),
+                        num_plans=n_new,
+                        cluster_summary=seed_state.cluster.summary,
+                    )
+                    to_send_messages.append(
+                        ChatHistory.from_system(NAIVE_PROMPT_SYSTEM).add_user(
+                            planner_prompt
+                        )
+                    )
+                    metas.append(
+                        {
+                            "seed_idx": seed_state_idx,
+                            "time_step": 0,
+                            "user_prompt": user_prompt,
+                            "planner_prompt": planner_prompt,
+                            "planner_model": self.curr_planner_model,
+                            "reasoning_effort": str(self.reasoning),
+                            "n_new": n_new,
+                            "n_traj_in_context": n_traj_in_context,
+                            "n_per_user_prompt": n_per_user_prompt,
+                        }
+                    )
 
+        planner_responses = asyncio.run(
+            self.sample(to_send_messages, desc="NaivePlanner planning")
+        )
 
+        to_write = defaultdict(list)
 
+        # parse responses
+        for i, resp in enumerate(planner_responses):
+            if resp is None:
+                continue
+            plans, reasoning = parse_json_response(resp)
+            print("Planner reasoning: ", reasoning)
+            logger.info(f"One turn planner model reasoning: {reasoning}")
 
+            if isinstance(plans, str):
+                plans = []
+            elif isinstance(plans, list):
+                plans = [p.strip() for p in plans]
 
+            meta = metas[i]
+            meta["planner_reasoning"] = str(reasoning)
 
+            for plan in plans:
+                to_write[meta["seed_idx"]].append(
+                    {
+                        "plan": plan,
+                        "meta": meta,
+                    }
+                )
+
+        if cluster_model is not None:
+            to_write = self.cluster_plans(
+                to_write=to_write, cluster_model=cluster_model, n_pop=n_pop
+            )
+
+        for seed_idx, seed_plans in to_write.items():
+            for plan in seed_plans:
+                runner.seed_states[seed_idx].history[-1][plan["plan"]] = AttributeStats(
+                    attribute=plan["plan"],
+                    rollouts={},
+                    meta=plan["meta"],
+                )
 
 
 class ContrastPlanner(Planner):
@@ -163,7 +288,9 @@ class ContrastPlanner(Planner):
         assert runner.baselines is not None
         for seed_state in runner.seed_states:
             contrast_pairs = []
-            prompts = [p for p in seed_state.cluster.train_prompts if p in runner.baselines]
+            prompts = [
+                p for p in seed_state.cluster.train_prompts if p in runner.baselines
+            ]
 
             for prompt in prompts:
                 rollouts = [r for r in runner.baselines[prompt] if r.score is not None]
@@ -222,7 +349,7 @@ class ContrastPlanner(Planner):
         n_pop: int,
         cluster_model: Optional[ClusterModel] = None,
         threshold: float = 1.0,
-        max_contrast_pairs: int|None = None,
+        max_contrast_pairs: int | None = None,
     ):
         """
         Ignores n_pop if cluster_model is None.
@@ -237,7 +364,9 @@ class ContrastPlanner(Planner):
 
             contrast_pairs = cluster.aux_info
             if max_contrast_pairs is not None:
-                contrast_pairs = random.sample(contrast_pairs, min(len(contrast_pairs), max_contrast_pairs))
+                contrast_pairs = random.sample(
+                    contrast_pairs, min(len(contrast_pairs), max_contrast_pairs)
+                )
 
             for item in contrast_pairs:
                 data = {
@@ -252,9 +381,9 @@ class ContrastPlanner(Planner):
                     cluster_summary=cluster.summary,
                 )
                 to_send_messages.append(
-                    ChatHistory
-                    .from_system(CONTRAST_PROMPT_SYSTEM)
-                    .add_user(planner_prompt)
+                    ChatHistory.from_system(CONTRAST_PROMPT_SYSTEM).add_user(
+                        planner_prompt
+                    )
                 )
                 metas.append(
                     {
@@ -276,13 +405,15 @@ class ContrastPlanner(Planner):
         #     logger.info(f"Planner prompt {i}: {prompt.get_first('user')}")
 
         planner_responses = asyncio.run(
-            self.sample(to_send_messages, desc="Initial planning")
+            self.sample(to_send_messages, desc="ContrastPlanner planning")
         )
 
         to_write = defaultdict(list)
 
         # parse responses
         for i, resp in enumerate(planner_responses):
+            if resp is None:
+                continue
             plans, reasoning = parse_json_response(resp)
             print("Planner reasoning: ", reasoning)
             logger.info(f"One turn planner model reasoning: {reasoning}")
@@ -304,39 +435,9 @@ class ContrastPlanner(Planner):
                 )
 
         if cluster_model is not None:
-            # Cluster plans for each seed using k-means into n_pop clusters
-            # then select one plan per cluster (closest to centroid)
-            to_write_new = defaultdict(list)
-
-            for seed_idx, seed_plans in to_write.items():
-                logger.info(
-                    f"Clustering {len(seed_plans)} plans for seed {runner.seed_states[seed_idx].index}"
-                )
-                if not seed_plans:
-                    continue
-
-                cluster_results = cluster_model.cluster(
-                    [plan["plan"] for plan in seed_plans], n_pop
-                )
-
-                for result in cluster_results:
-                    aggregate_meta = copy.deepcopy(seed_plans[result["center_idx"]]["meta"])
-                    aggregate_meta["positive_responses"] = []
-                    aggregate_meta["negative_responses"] = []
-                    aggregate_meta["cluster_plans"] = []
-                    
-                    for content_idx in result["content_indices"]:
-                        content_meta = seed_plans[content_idx]["meta"]
-                        aggregate_meta["cluster_plans"].append(seed_plans[content_idx]["plan"])
-                        aggregate_meta["positive_responses"].append(content_meta["chosen"])
-                        aggregate_meta["negative_responses"].append(content_meta["rejected"])
-
-                    to_write_new[seed_idx].append({
-                        "plan": result["center_input"],
-                        "meta": aggregate_meta,
-                    })
-            
-            to_write = to_write_new
+            to_write = self.cluster_plans(
+                to_write=to_write, cluster_model=cluster_model, n_pop=n_pop
+            )
 
         for seed_idx, seed_plans in to_write.items():
             for plan in seed_plans:

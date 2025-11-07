@@ -18,6 +18,7 @@ cache_config = CacheConfig(
 
 caller = OpenRouterCaller(cache_config=cache_config)
 
+
 # %%
 async def call_with_logprobs():
     async with caller:
@@ -29,6 +30,7 @@ async def call_with_logprobs():
         )
     return responses
 
+
 # %%
 responses = asyncio.run(call_with_logprobs())
 
@@ -37,8 +39,3 @@ print(responses[0])
 # %%
 
 model, tokenizer = load_model("meta-llama/llama-3.1-8b-instruct")
-
-
-
-
-

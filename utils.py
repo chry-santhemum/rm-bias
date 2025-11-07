@@ -124,30 +124,26 @@ def set_seed_all(seed: int):
     hf_set_seed(seed)
 
 
-def logging_setup(
-    filename: str, 
-    level: int = logging.WARNING,
-    console: bool = False
-):
+def logging_setup(filename: str, level: int = logging.WARNING, console: bool = False):
     """
     Set up logging to file and optionally to console.
     """
     Path(filename).parent.mkdir(parents=True, exist_ok=True)
-    
+
     # Create formatter
     formatter = logging.Formatter(
         "%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(name)s - %(message)s"
     )
-    
+
     # Get root logger and set level
     logger = logging.getLogger()
     logger.setLevel(level)
-    
+
     # Add file handler
     file_handler = logging.FileHandler(filename, mode="w")
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
-    
+
     # Add console handler if requested
     if console:
         console_handler = logging.StreamHandler()
@@ -185,7 +181,7 @@ def parse_json_response(
     raw_text = resp.first_response
     if raw_text is None:
         return None, None
-    
+
     output, reasoning = None, None
     if resp.reasoning_content is not None:
         reasoning = resp.reasoning_content
@@ -279,9 +275,7 @@ class ClusterModel:
         print("Reducing dimensionality...")
         return self.umap_model.fit_transform(embeddings)  # type: ignore
 
-    def cluster(
-        self, inputs: list[str], n_clusters: int
-    ) -> list[dict[str, Any]]:
+    def cluster(self, inputs: list[str], n_clusters: int) -> list[dict[str, Any]]:
         reduced_embeddings = self.reduce_embed(inputs)
 
         # # log the pairwise distance matrix
@@ -306,11 +300,11 @@ class ClusterModel:
         results = []
         for cluster_idx in range(kmeans.n_clusters):
             content_indices = cluster_points[cluster_idx]
-            
+
             if not content_indices:
                 # Empty cluster (shouldn't happen with KMeans, but handle it)
                 continue
-            
+
             # Select representative sample: find the medoid (point that minimizes
             # sum of distances to all other points in the cluster)
             if len(content_indices) == 1:
@@ -319,21 +313,21 @@ class ClusterModel:
             else:
                 # Compute pairwise distances within cluster
                 cluster_embeddings = reduced_embeddings[content_indices]
-                pairwise_dists = pairwise_distances(cluster_embeddings, metric='cosine')
+                pairwise_dists = pairwise_distances(cluster_embeddings, metric="cosine")
                 # Find point with minimum sum of distances to all other points
                 sum_dists = pairwise_dists.sum(axis=1)
                 medoid_idx_in_cluster = np.argmin(sum_dists)
                 center_idx = content_indices[medoid_idx_in_cluster]
-            
+
             results.append(
                 {
                     "cluster_idx": cluster_idx,
                     "center_idx": center_idx,
                     "center_input": inputs[center_idx],
-                    "content_indices": content_indices
+                    "content_indices": content_indices,
                 }
             )
-        
+
         # Verify assertion holds
         for result in results:
             assert result["center_idx"] in result["content_indices"]

@@ -31,14 +31,16 @@ seed_states = load_initial_seed_states(
 user_prompts = [seed_states[0].cluster.train_prompts[0]]
 
 policy = PolicyModel(temperature=0.9)
-all_rollouts = asyncio.run(policy.sample(
-    chat_histories=[
-        ChatHistory.from_user(user_prompt) 
-        for user_prompt in user_prompts 
-        for _ in range(N_SAMPLES)
-    ],
-    desc="Sampling rollouts"
-))
+all_rollouts = asyncio.run(
+    policy.sample(
+        chat_histories=[
+            ChatHistory.from_user(user_prompt)
+            for user_prompt in user_prompts
+            for _ in range(N_SAMPLES)
+        ],
+        desc="Sampling rollouts",
+    )
+)
 
 reward_model = RewardModel(model_name="skywork-v2", batch_size=32)
 reward_scores = reward_model.rate(all_rollouts)
@@ -78,8 +80,6 @@ planner = OneTurnPlanner(
 
 runner.load_contrast_pairs()
 
-# %%
-%pdb
 
 # %%
 
@@ -114,10 +114,13 @@ for attribute in attributes:
 # %%
 
 with open("data/scrap/alt_pipeline.pkl", "wb") as f:
-    pickle.dump({
-        "baselines": prev_data["baselines"],
-        "attributes": seed_states[0].history[-1],
-    }, f)
+    pickle.dump(
+        {
+            "baselines": prev_data["baselines"],
+            "attributes": seed_states[0].history[-1],
+        },
+        f,
+    )
 
 # %%
 with open("data/scrap/alt_pipeline.pkl", "rb") as f:

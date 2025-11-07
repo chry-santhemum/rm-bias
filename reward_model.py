@@ -45,7 +45,7 @@ class RewardModel:
         self.model_name = model_name
 
     def rate(
-        self, chat_histories: Sequence[ChatHistory|None], use_tqdm: bool = True
+        self, chat_histories: Sequence[ChatHistory | None], use_tqdm: bool = True
     ) -> list[RatingResult]:
         rewards = []
 
@@ -58,8 +58,10 @@ class RewardModel:
         )
         for i in pbar:
             batch = chat_histories[i : i + self.batch_size]
-            indices_not_none = [idx for idx, chat in enumerate(batch) if chat is not None]
-            batch_clean: list[ChatHistory] = [batch[idx] for idx in indices_not_none]   # type: ignore
+            indices_not_none = [
+                idx for idx, chat in enumerate(batch) if chat is not None
+            ]
+            batch_clean: list[ChatHistory] = [batch[idx] for idx in indices_not_none]  # type: ignore
             inputs = [chat.remove_system().to_openai_messages() for chat in batch_clean]
             input_ids = self.tokenizer.apply_chat_template(
                 inputs,
@@ -76,15 +78,21 @@ class RewardModel:
                     input_ids=input_ids, attention_mask=attn_mask
                 ).logits.squeeze(-1)
 
-            batch_results = [RatingResult(score=None, reasoning=None) for _ in range(len(batch))]
+            batch_results = [
+                RatingResult(score=None, reasoning=None) for _ in range(len(batch))
+            ]
             for idx, score in enumerate(scores.tolist()):
-                batch_results[indices_not_none[idx]] = RatingResult(score=float(score), reasoning=None)
+                batch_results[indices_not_none[idx]] = RatingResult(
+                    score=float(score), reasoning=None
+                )
 
             rewards.extend(batch_results)
 
         return rewards
 
     async def async_rate(
-        self, chat_histories: Sequence[ChatHistory|None], use_tqdm: bool = True
+        self, chat_histories: Sequence[ChatHistory | None], use_tqdm: bool = True
     ) -> list[RatingResult]:
-        return await asyncio.to_thread(self.rate, chat_histories=chat_histories, use_tqdm=use_tqdm)
+        return await asyncio.to_thread(
+            self.rate, chat_histories=chat_histories, use_tqdm=use_tqdm
+        )

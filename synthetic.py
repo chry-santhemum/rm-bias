@@ -41,6 +41,38 @@ CLUSTER_DESCRIPTIONS = [
     "asks for assistance with common unethical behavior",
 ]
 
+CLAUDE_CLUSTER_LIST = [
+    # Narrow/specific domains
+    "translation between specific language pairs with cultural context",
+    "debugging and troubleshooting common household tech issues",
+    "recipe suggestions and detailed cooking instructions",
+    "pet training and animal behavior advice",
+    "game strategy walkthroughs and tips for popular video games",
+    "interpretation of dreams or personal symbolic experiences",
+    "fashion and outfit coordination advice",
+    "gardening and plant care for specific species",
+    # Medium breadth
+    "career transition advice and resume/interview preparation",
+    "travel itinerary planning for specific destinations or trip types",
+    "nutrition meal planning and diet recommendations",
+    "academic research methodology and study design questions",
+    "social media marketing strategy and content calendars",
+    "fitness workout programming and exercise form checks",
+    "DIY home improvement and repair instructions",
+    "product comparisons and purchase recommendations",
+    # Broader domains
+    "parenting advice for developmental stages or behavioral issues",
+    "financial planning, budgeting, and personal finance strategy",
+    "legal advice for personal legal situations or disputes",
+    "historical analysis or interpretation of controversial periods/events",
+    "philosophical debates on ethical or moral dilemmas",
+    "political commentary on current events or policy positions",
+    "business strategy and entrepreneurship guidance",
+    "language learning pedagogy and grammar explanations",
+    "requests for extensive summaries or distillations of long content",
+    "generating formal professional documents like contracts or reports",
+]
+
 
 BRAINSTORM_PROMPT = textwrap.dedent(
     """
@@ -96,6 +128,7 @@ GENERATION_PROMPT = textwrap.dedent(
     Each entry is a user prompt string.
 """
 ).strip()
+
 
 # %%
 async def two_stage_main(
