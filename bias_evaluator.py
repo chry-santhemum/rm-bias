@@ -53,9 +53,9 @@ class BiasEvaluator:
             return
 
         # must be called from within a running event loop
-        self.queue_input = asyncio.Queue()
-        self.queue_rewrite = asyncio.Queue()
-
+        self.queue_input = asyncio.Queue(maxsize=2 * self.rewrite_model.max_par)
+        self.queue_rewrite = asyncio.Queue(maxsize=2 * self.rewrite_model.max_par)
+        
         self.rewrite_workers = [
             asyncio.create_task(
                 rewrite_worker(

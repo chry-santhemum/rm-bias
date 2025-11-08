@@ -73,9 +73,10 @@ async def policy_worker(
 ):
     while True:
         task_input = await in_queue.get()
-        logger.info(
-            f"[policy_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}"
-        )
+        if in_queue.qsize() % 100 == 0:
+            logger.info(
+                f"[policy_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}"
+            )
 
         if task_input is None:  # Stop sentinel
             in_queue.task_done()
@@ -117,7 +118,7 @@ async def policy_worker(
             )
         )
         in_queue.task_done()
-        logger.info(f"[policy_worker {worker_id}] Pushed 1 task.")
+        logger.debug(f"[policy_worker {worker_id}] Pushed 1 task.")
 
 
 async def rewrite_worker(
@@ -128,9 +129,10 @@ async def rewrite_worker(
 ):
     while True:
         task_input = await in_queue.get()
-        logger.info(
-            f"[rewrite_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}"
-        )
+        if in_queue.qsize() % 100 == 0:
+            logger.info(
+                f"[rewrite_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}"
+            )
 
         if task_input is None:  # Sentinel value to signal stop
             in_queue.task_done()
@@ -175,7 +177,7 @@ async def rewrite_worker(
                     batch_id=task_input.batch_id,
                 )
             )
-        logger.info(f"[rewrite_worker {worker_id}] Pushed 1 task.")
+        logger.debug(f"[rewrite_worker {worker_id}] Pushed 1 task.")
         in_queue.task_done()
 
 
@@ -215,7 +217,7 @@ async def rating_worker(
                             f"[rating_worker] Received prompt result with no assistant response."
                         )
                     else:
-                        logger.info(
+                        logger.debug(
                             f"[rating_worker] Received valid prompt item. New batch size: {len(batch)}."
                         )
                         batch.append(item)
@@ -225,7 +227,7 @@ async def rating_worker(
                             f"[rating_worker] Received rewritten result with no assistant response."
                         )
                     else:
-                        logger.info(
+                        logger.debug(
                             f"[rating_worker] Received valid rewritten item. New batch size: {len(batch)}."
                         )
                         batch.append(item)

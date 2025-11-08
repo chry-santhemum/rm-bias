@@ -123,6 +123,9 @@ class EvoPlanner(NaivePlanner):
         m_var: int,
         n_data_points: int = 8,
     ):
+        """
+        
+        """
         to_send_messages = []
         messages_info = []
 
@@ -307,7 +310,7 @@ class EvoRunner(Runner):
                 n_traj_in_context=self.n_traj_in_context,
                 n_per_user_prompt=self.n_per_user_prompt,
                 cluster_model=self.cluster_model,
-                max_num_train_prompts=4,
+                max_num_train_prompts=32,
                 # max_contrast_pairs=4,
             )
         else:
@@ -367,10 +370,10 @@ class EvoRunner(Runner):
         return final_attributes
 
     def train(self):
-        # n_pop_target = [32, 16, 8]
-        # train_batch_size = [2, 4, 8]
-        n_pop_target = [2, 1]
-        train_batch_size = [2, 2]
+        n_pop_target = [32, 16, 8]
+        train_batch_size = [2, 4, 8]
+        # n_pop_target = [2, 1]
+        # train_batch_size = [2, 2]
         t_steps = len(train_batch_size)
 
         for time_step in range(t_steps):
@@ -518,12 +521,12 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str, required=True)
     parser.add_argument("--m_var", type=int, default=3)
     parser.add_argument("--n_new", type=int, default=16)
-    parser.add_argument("--n_pop_initial", type=int, default=256)
-    parser.add_argument("--n_traj_in_context", type=int, default=16)
+    parser.add_argument("--n_pop_initial", type=int, default=128)
+    parser.add_argument("--n_traj_in_context", type=int, default=10)
     parser.add_argument("--n_per_user_prompt", type=int, default=1)
-    parser.add_argument("--n_baseline_rollouts", type=int, default=32)
+    parser.add_argument("--n_baseline_rollouts", type=int, default=16)
     parser.add_argument("--n_rewrite_rollouts", type=int, default=8)
-    parser.add_argument("--train_batch_size", type=int, default=16)
+    parser.add_argument("--train_batch_size", type=int, default=2)
     parser.add_argument("--val_split_size", type=int, default=16)
     parser.add_argument("--dbscan_eps", type=float, default=0.2)
 
@@ -539,8 +542,8 @@ if __name__ == "__main__":
         # topic_ids = [8, 9, 10, 11]
     elif args.dataset == "synthetic_2":
         # topic_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-        # topic_ids = [1, 3, 4, 6, 8, 9, 12, 14, 16]
-        topic_ids = [1]
+        topic_ids = [1, 3, 4, 6, 8, 9, 12, 14, 16]
+        # topic_ids = [1]
 
     initial_seed_states = load_initial_seed_states(
         ds_name=args.dataset,
@@ -592,20 +595,20 @@ if __name__ == "__main__":
         run_name=run_name,
     )
 
-    # runner.get_baselines()
+    runner.get_baselines()
 
-    with open(
-        f"data/one_turn/20251107-075750-naive-synthetic_2/train_baselines/baseline_results.json",
-        "r",
-    ) as f:
-        train_baselines = json.load(f)
+    # with open(
+    #     f"data/one_turn/20251107-075750-naive-synthetic_2/train_baselines/baseline_results.json",
+    #     "r",
+    # ) as f:
+    #     train_baselines = json.load(f)
 
-    runner.baselines = {}
-    for user, rollouts in train_baselines.items():
-        runner.baselines[user] = [
-            Rollout(response=rollout["response"], score=rollout["score"])
-            for rollout in rollouts
-        ]
+    # runner.baselines = {}
+    # for user, rollouts in train_baselines.items():
+    #     runner.baselines[user] = [
+    #         Rollout(response=rollout["response"], score=rollout["score"])
+    #         for rollout in rollouts
+    #     ]
 
     # with open(
     #     f"data/evo/{run_name}/val_baselines/baseline_results.json", "r"

@@ -153,14 +153,14 @@ def plot_seed_validation_data(
 
 
 # %%
-Path("data/scrap/20251101-070815").mkdir(parents=True, exist_ok=True)
+Path("data/scrap/20251107-084230").mkdir(parents=True, exist_ok=True)
 
-for seed_index in [1]:
+for seed_index in [1, 3, 4, 6, 8, 9, 12, 14, 16]:
     fig = plot_seed_validation_data(
-        Path("data/evo/20251101-070815-synthetic_2"), seed_index=seed_index
+        Path("data/evo/20251107-084230-naive-synthetic_2"), seed_index=seed_index
     )
     fig.show()
-    fig.write_html(f"data/scrap/20251101-070815/evo-synthetic_2-seed_{seed_index}.html")
+    fig.write_html(f"data/scrap/20251107-084230/evo-synthetic_2-seed_{seed_index}.html")
 
 # %%
 

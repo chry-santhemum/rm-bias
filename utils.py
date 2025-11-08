@@ -150,6 +150,10 @@ def logging_setup(filename: str, level: int = logging.WARNING, console: bool = F
         console_handler.setFormatter(formatter)
         logger.addHandler(console_handler)
 
+    # Silence httpx INFO logs (200 OK responses)
+    httpx_logger = logging.getLogger("httpx")
+    httpx_logger.setLevel(logging.WARNING)
+
 
 def remove_outliers(data: list[float], z_score: float = 3.0) -> list[float]:
     mean, std = np.mean(data), np.std(data)
@@ -266,7 +270,7 @@ class ClusterModel:
         )
 
     def embed(self, inputs: list[str]) -> np.ndarray:
-        return _embedding_model.encode(inputs)
+        return _embedding_model.encode(inputs)  # type: ignore
 
     def reduce_embed(self, inputs: list[str]) -> np.ndarray:
         """Embed then do dimensionality reduction"""
@@ -290,7 +294,7 @@ class ClusterModel:
         print("Fitting KMeans...")
         kmeans.fit(reduced_embeddings)
 
-        labels = [int(label) for label in kmeans.labels_.tolist()]
+        labels = [int(label) for label in kmeans.labels_.tolist()]  # type: ignore
 
         # Group points by cluster
         cluster_points = defaultdict(list)
