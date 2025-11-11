@@ -11,7 +11,6 @@ import uuid
 from pathlib import Path
 from collections import defaultdict
 from dataclasses import dataclass, replace, asdict
-from concurrent.futures import ThreadPoolExecutor
 from typing import Mapping, Sequence
 
 import numpy as np
@@ -94,7 +93,11 @@ async def policy_worker(
         else:
             result = await policy_model.sample([ChatHistory.from_user(task_input.user)])
 
-        if result[0].get_first("assistant") is None:
+        if (
+            result[0] is None or
+            (not result[0].has_response) or
+            (result[0].finish_reason != "stop")
+        ):
             logger.warning(
                 f"[policy_worker {worker_id}] Failed to sample for user prompt:\n<user_prompt>\n{task_input}\n</user_prompt>"
             )
@@ -186,9 +189,7 @@ async def rating_worker(
     in_queue: asyncio.Queue[PromptResult | RewriteResult | BatchSentinel],
     all_results: Mapping[str, Sequence[PromptResult | RewriteResult]],
     all_futures: Mapping[str, asyncio.Future],
-    executor: ThreadPoolExecutor,
 ):
-    loop = asyncio.get_running_loop()
     done = False
     batches_progress_left = defaultdict(int)
 
@@ -251,9 +252,7 @@ async def rating_worker(
                 chat_histories.append(ChatHistory.from_user(result.user).add_assistant(result.rewritten_assistant))  # type: ignore
 
         if len(chat_histories) > 0:
-            reward_scores = await loop.run_in_executor(
-                executor, reward_model.rate, chat_histories
-            )
+            reward_scores = await reward_model.async_rate(chat_histories)
             for result, reward_score in zip(batch, reward_scores):
                 all_results[result.batch_id].append(replace(result, score=reward_score.score))  # type: ignore
 
@@ -462,7 +461,6 @@ async def evaluate_baselines(
     n_policy_workers = policy_model.max_par
     all_results = {batch_id: []}
     all_futures = {batch_id: asyncio.get_running_loop().create_future()}
-    executor = ThreadPoolExecutor(max_workers=1)
 
     for user in user_prompts:
         for _ in range(n_rollouts):
@@ -477,7 +475,7 @@ async def evaluate_baselines(
     ]
 
     rating_worker_task = asyncio.create_task(
-        rating_worker(reward_model, queue_b, all_results, all_futures, executor)
+        rating_worker(reward_model, queue_b, all_results, all_futures)
     )
 
     all_results = await all_futures[batch_id]
@@ -495,7 +493,6 @@ async def evaluate_baselines(
     await queue_b.put(None)
     await rating_worker_task
     logger.info("\n--- baseline rating worker finished. ---\n")
-    executor.shutdown(wait=True)
 
     organized_results = organize_baseline_results(all_results, save_dir)
 
