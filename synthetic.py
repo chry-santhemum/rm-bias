@@ -1,4 +1,8 @@
-"""Synthetic dataset inspired by Wildchat clusters."""
+"""
+Synthetic dataset generation.
+
+Inspired by "how people use ChatGPT".
+"""
 
 # %%
 
@@ -12,66 +16,119 @@ from dataclasses import asdict
 from caller import ChatHistory
 from state import PromptCluster
 from utils import parse_json_response
-from caller import OpenRouterCaller
+from caller import OpenRouterCaller, CacheConfig, RetryConfig
 
 nest_asyncio.apply()
 
-# Inspired by "how people use ChatGPT"
-# User intent: asking, doing, expressing
 
-# Goal: a complete pipeline to generate diverse user prompts from only a description
+cache_config = CacheConfig(
+    no_cache_models={
+        "meta-llama/llama-3.1-8b-instruct",
+        "meta-llama/llama-3.1-70b-instruct",
+    }
+)
 
-CLUSTER_DESCRIPTIONS = [
-    "asking for hints or solutions with high school-level math problems",
-    "common programming debugging in python asking to explain the error",
-    "requests for stocks market or cryptocurrency advice",
-    "content creation ideas for tiktok",
-    "asking for creative fiction story ideas",
-    "asking to generate poetry",
-    "requests for explainer on a given technical scientific topic",
-    "generating webpages with basic UI elements",
-    "daily how-to guides for everyday tasks",
-    "emotional counseling and relationship advice",
-    "medical advice for common health issues",
-    "questions about the model's identity and experience",
-    "explanation of basic scientific concepts in simple language",
-    "seeking specific information about a well-known event or topic given by the user",
-    "edit or critique content written by the user",
-    "generating replies for a email given by the user",
-    "asks for assistance with common unethical behavior",
-]
+retry_config = RetryConfig(
+    raise_when_exhausted=False,
+    criteria=lambda response: response.has_response
+    and response.finish_reason == "stop",
+    max_attempts=3,
+)
 
-CLAUDE_CLUSTER_LIST = [
-    # Narrow/specific domains
-    "translation between specific language pairs with cultural context",
-    "debugging and troubleshooting common household tech issues",
-    "recipe suggestions and detailed cooking instructions",
-    "pet training and animal behavior advice",
-    "game strategy walkthroughs and tips for popular video games",
-    "interpretation of dreams or personal symbolic experiences",
-    "fashion and outfit coordination advice",
-    "gardening and plant care for specific species",
-    # Medium breadth
-    "career transition advice and resume/interview preparation",
-    "travel itinerary planning for specific destinations or trip types",
-    "nutrition meal planning and diet recommendations",
-    "academic research methodology and study design questions",
-    "social media marketing strategy and content calendars",
-    "fitness workout programming and exercise form checks",
-    "DIY home improvement and repair instructions",
-    "product comparisons and purchase recommendations",
-    # Broader domains
-    "parenting advice for developmental stages or behavioral issues",
-    "financial planning, budgeting, and personal finance strategy",
-    "legal advice for personal legal situations or disputes",
-    "historical analysis or interpretation of controversial periods/events",
-    "philosophical debates on ethical or moral dilemmas",
-    "political commentary on current events or policy positions",
-    "business strategy and entrepreneurship guidance",
-    "language learning pedagogy and grammar explanations",
-    "requests for extensive summaries or distillations of long content",
-    "generating formal professional documents like contracts or reports",
-]
+caller = OpenRouterCaller(cache_config=cache_config, retry_config=retry_config, dotenv_path=".env")
+
+
+CATEGORIES = {
+    "Writing": [
+        "Edit or Critique Provided Text",
+        "Personal Writing or Communication",
+        "Translation",
+        "Argument or Summary Generation",
+        "Write Fiction"
+    ],
+    "Practical Guidance": [
+        "How-To Advice",
+        "Tutoring or Teaching",
+        "Creative Ideation",
+        "Health, Fitness, Beauty, or Self-Care"
+    ],
+    "Technical Help": [
+        "Mathematical Calculation",
+        "Data Analysis",
+        "Computer Programming"
+    ],
+    "Seeking Information": [
+        "Specific Info",
+        "Purchasable Products",
+        "Cooking and Recipes"
+    ],
+    "Self-Expression": [
+        "Greetings and Chitchat",
+        "Relationships and Personal Reflection",
+        "Games and Role Play"
+    ],
+    "Other": [
+        "Asking About the Model"
+    ]
+}
+
+INTENTS = ["Asking", "Doing", "Expressing"]
+
+
+SPECIFIC_CATEGORY_PROMPT = textwrap.dedent(
+    """
+    Your task is to brainstorm three more specific sub-categories of the given user prompt category. Please think about what typical user prompts under the given category would look like, and output the three most common sub-categories. They should fall under the given category, be diverse from each other, but also not too narrow.
+
+    After thinking, output the three sub-categories as a JSON array, like this:
+
+    ```json
+    [
+        "First sub-category",
+        "Second sub-category",
+        "Third sub-category",
+    ]
+    ```
+
+    Here is the given user prompt category:
+
+    <category>
+    {category}
+    </category>
+    """
+).strip()
+
+# %%
+
+print(SPECIFIC_CATEGORY_PROMPT.format(category="Self-Expression"))
+
+# %%
+
+# run this once and save
+def make_sub_topics() -> dict:
+    keys = list(CATEGORIES.keys())
+    values = []
+    for v in CATEGORIES.values():
+        values.extend(v)
+
+    categories = keys + values
+
+    messages = [
+        ChatHistory.from_user(SPECIFIC_CATEGORY_PROMPT.format(category=category))
+        for category in categories
+    ]
+    responses = asyncio.run(caller.call(
+        messages=messages,
+        max_parallel=128,
+        model="openai/gpt-5",
+        max_tokens=8192,
+        reasoning="medium",
+    ))
+
+    sub_topics = dict()
+    for category, response in zip(categories, responses):
+        sub_topics[category] = parse_json_response(response, log_json_error=False)
+    ...
+
 
 
 BRAINSTORM_PROMPT = textwrap.dedent(
@@ -145,15 +202,14 @@ async def two_stage_main(
         for topic in topics
     ]
 
-    async with Caller(dotenv_path=".env") as caller:
-        response = await caller.call(
-            messages=sub_topics_chats,
-            max_parallel=128,
-            desc="Brainstorming sub-topics",
-            model=model,
-            max_tokens=max_tokens,
-            reasoning=reasoning,
-        )
+    response = await caller.call(
+        messages=sub_topics_chats,
+        max_parallel=128,
+        desc="Brainstorming sub-topics",
+        model=model,
+        max_tokens=max_tokens,
+        reasoning=reasoning,
+    )
 
     all_sub_topics: list[str] = []
     all_sub_topics_to_topic: list[int] = []
@@ -224,3 +280,62 @@ if __name__ == "__main__":
         )
     )
     # asyncio.run(one_stage_main(topics=CLUSTER_DESCRIPTIONS, n_prompts=128, ds_name="synthetic_2"))
+
+
+
+
+
+# %%
+# Goal: a complete pipeline to generate diverse user prompts from only a description
+
+CLUSTER_DESCRIPTIONS = [
+    "asking for hints or solutions with high school-level math problems",
+    "common programming debugging in python asking to explain the error",
+    "requests for stocks market or cryptocurrency advice",
+    "content creation ideas for tiktok",
+    "asking for creative fiction story ideas",
+    "asking to generate poetry",
+    "requests for explainer on a given technical scientific topic",
+    "generating webpages with basic UI elements",
+    "daily how-to guides for everyday tasks",
+    "emotional counseling and relationship advice",
+    "medical advice for common health issues",
+    "questions about the model's identity and experience",
+    "explanation of basic scientific concepts in simple language",
+    "seeking specific information about a well-known event or topic given by the user",
+    "edit or critique content written by the user",
+    "generating replies for a email given by the user",
+    "asks for assistance with common unethical behavior",
+]
+
+CLAUDE_CLUSTER_LIST = [
+    # Narrow/specific domains
+    "translation between specific language pairs with cultural context",
+    "debugging and troubleshooting common household tech issues",
+    "recipe suggestions and detailed cooking instructions",
+    "pet training and animal behavior advice",
+    "game strategy walkthroughs and tips for popular video games",
+    "interpretation of dreams or personal symbolic experiences",
+    "fashion and outfit coordination advice",
+    "gardening and plant care for specific species",
+    # Medium breadth
+    "career transition advice and resume/interview preparation",
+    "travel itinerary planning for specific destinations or trip types",
+    "nutrition meal planning and diet recommendations",
+    "academic research methodology and study design questions",
+    "social media marketing strategy and content calendars",
+    "fitness workout programming and exercise form checks",
+    "DIY home improvement and repair instructions",
+    "product comparisons and purchase recommendations",
+    # Broader domains
+    "parenting advice for developmental stages or behavioral issues",
+    "financial planning, budgeting, and personal finance strategy",
+    "legal advice for personal legal situations or disputes",
+    "historical analysis or interpretation of controversial periods/events",
+    "philosophical debates on ethical or moral dilemmas",
+    "political commentary on current events or policy positions",
+    "business strategy and entrepreneurship guidance",
+    "language learning pedagogy and grammar explanations",
+    "requests for extensive summaries or distillations of long content",
+    "generating formal professional documents like contracts or reports",
+]
