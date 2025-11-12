@@ -120,16 +120,29 @@ def make_sub_topics() -> dict:
         messages=messages,
         max_parallel=128,
         model="openai/gpt-5",
+        desc="Making sub-topics",
         max_tokens=8192,
         reasoning="medium",
     ))
 
     sub_topics = dict()
-    for category, response in zip(categories, responses):
-        sub_topics[category] = parse_json_response(response, log_json_error=False)
-    ...
+    for i in range(len(categories)):
+        category = categories[i]
+        response = responses[i]
+        assert response is not None
 
+        topics, _ = parse_json_response(response, log_json_error=False)
+        sub_topics[category] = topics
+    
+    with open("data/synthetic/sub_topics.json", "w") as f:
+        json.dump(sub_topics, f, indent=4)
 
+    return sub_topics
+
+# %%
+make_sub_topics()
+
+# %%
 
 BRAINSTORM_PROMPT = textwrap.dedent(
     """

@@ -1,0 +1,127 @@
+{
+    "Writing": [
+        "Creative writing (fiction, poetry, scripts)",
+        "Academic and research writing (essays, literature reviews, citations)",
+        "Professional and business communication (emails, resumes, cover letters, reports)"
+    ],
+    "Practical Guidance": [
+        "DIY, home maintenance, and everyday task how-tos",
+        "Technology setup, troubleshooting, and digital tool guidance",
+        "Career development and job search strategies"
+    ],
+    "Technical Help": [
+        "Network and Internet Connectivity Troubleshooting",
+        "Software Installation, Updates, and Configuration",
+        "Hardware and Peripheral Diagnostics and Repair"
+    ],
+    "Seeking Information": [
+        "Definitions and concept explanations",
+        "Comparisons and differences (A vs B, pros/cons)",
+        "Factual data and statistics lookup (dates, figures, facts)"
+    ],
+    "Self-Expression": [
+        "Personal journaling and emotional processing",
+        "Creative writing for self-expression (poetry, lyrics, short prose)",
+        "Self-presentation and identity statements (bios, personal statements, dating profiles)"
+    ],
+    "Other": [
+        "Casual conversation and icebreakers",
+        "Jokes, riddles, and trivia games",
+        "Role-play and hypothetical scenarios"
+    ],
+    "Edit or Critique Provided Text": [
+        "Proofreading and copyediting (grammar, spelling, punctuation, consistency)",
+        "Tone and style rewrites (e.g., make it more formal, concise, persuasive, or friendly)",
+        "High-level critique with structural/content suggestions (clarity, organization, argument strength)"
+    ],
+    "Personal Writing or Communication": [
+        "Relationship and sensitive messages (apologies, breakups, boundary-setting, heartfelt notes to friends/family)",
+        "Event invitations and announcements (party invites, wedding/baby announcements, save-the-dates, RSVPs)",
+        "Speeches, vows, and toasts for personal occasions (wedding vows, eulogies, birthday/anniversary toasts)"
+    ],
+    "Translation": [
+        "Casual communication translation (messages, emails, chats, social media)",
+        "Domain-specific translation (legal, medical, technical, academic documents)",
+        "Localization and transcreation (marketing copy, product descriptions, app/website UI)"
+    ],
+    "Argument or Summary Generation": [
+        "Persuasive or position-based arguments (op-eds, debate stances, advocacy letters)",
+        "Balanced pro-con and comparative analyses (weighing options, cost-benefit, risk trade-offs)",
+        "Summarization of source material (news, research papers, meetings/podcasts) with key takeaways"
+    ],
+    "Write Fiction": [
+        "Short stories and flash fiction",
+        "Novel chapters and serialized storytelling",
+        "Fanfiction and crossovers in existing universes"
+    ],
+    "How-To Advice": [
+        "Technology and Devices",
+        "Cooking and Meal Preparation",
+        "Home Maintenance and DIY"
+    ],
+    "Tutoring or Teaching": [
+        "Concept explanations and simplification with analogies and examples",
+        "Step-by-step problem solving and homework help with worked solutions",
+        "Study plans, practice exercises, and exam preparation strategies"
+    ],
+    "Creative Ideation": [
+        "Story, character, and worldbuilding concepts",
+        "Branding, names, slogans, and marketing campaign ideas",
+        "New product, feature, or startup concept brainstorming"
+    ],
+    "Health, Fitness, Beauty, or Self-Care": [
+        "Workout and exercise programming (strength, cardio, flexibility, home and gym routines)",
+        "Nutrition and meal planning (weight management, macros, special diets, meal prep)",
+        "Skincare, haircare, and makeup routines and product recommendations"
+    ],
+    "Mathematical Calculation": [
+        "Basic arithmetic and percentage/ratio calculations",
+        "Algebraic expressions and equation solving",
+        "Statistics and probability computations"
+    ],
+    "Data Analysis": [
+        "Exploratory Data Analysis (summary statistics, distributions, correlations, visualization)",
+        "Statistical Hypothesis Testing and A/B Testing (p-values, confidence intervals, experiment analysis)",
+        "Predictive Modeling and Machine Learning (regression/classification, feature engineering, model evaluation)"
+    ],
+    "Computer Programming": [
+        "Debugging and troubleshooting code errors",
+        "Implementing algorithms and data structures",
+        "Web application development and APIs"
+    ],
+    "Specific Info": [
+        "Entity facts (biographical details, historical dates, organization info)",
+        "Quantitative stats and measurements (populations, prices, dimensions, unit conversions)",
+        "Logistical details (addresses, contact info, opening hours, event schedules)"
+    ],
+    "Purchasable Products": [
+        "Consumer Electronics",
+        "Home & Kitchen",
+        "Fashion & Apparel"
+    ],
+    "Cooking and Recipes": [
+        "Quick weeknight meals and meal prep",
+        "Baking and desserts",
+        "Dietary-specific recipes (vegan, gluten-free, keto)"
+    ],
+    "Greetings and Chitchat": [
+        "Greetings and Introductions",
+        "Check-ins and Small Talk",
+        "Farewells and Well-Wishes"
+    ],
+    "Relationships and Personal Reflection": [
+        "Romantic Relationships",
+        "Family Dynamics and Boundaries",
+        "Self-Reflection and Personal Growth"
+    ],
+    "Games and Role Play": [
+        "Video game strategies, builds, and walkthroughs",
+        "Tabletop RPG character creation, worldbuilding, and GM/DM guidance",
+        "Interactive roleplay scenarios and persona-based conversations"
+    ],
+    "Asking About the Model": [
+        "Capabilities and limitations (e.g., what tasks it can do, tool/vision/web access, accuracy and failure modes)",
+        "Training, data sources, and knowledge cutoff (how it was trained, what data it saw, how and when it gets updated)",
+        "Privacy, safety, and memory policies (what is stored or shared, refusal rules, content restrictions, and conversation retention)"
+    ]
+}
