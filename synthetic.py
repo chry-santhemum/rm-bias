@@ -72,12 +72,16 @@ CATEGORIES = {
     ]
 }
 
-INTENTS = ["Asking", "Doing", "Expressing"]
+INTENTS = {
+    "Asking": "Seeking information or advice for the user to be better informed on something.", 
+    "Doing": "Requesting ChatGPT to perform a task, generating output that is created primarily by the model.", 
+    "Expressing": "Expressing statements are neither asking for information, nor for the chatbot to perform a task."
+}
 
 
 SPECIFIC_CATEGORY_PROMPT = textwrap.dedent(
     """
-    Your task is to brainstorm three more specific sub-categories of the given user prompt category. Please think about what typical user prompts under the given category would look like, and output the three most common sub-categories. They should fall under the given category, be diverse from each other, but also not too narrow.
+    Your task is to brainstorm three specific sub-categories of the given user prompt category. Please think about what typical user prompts under the given category would look like, and output the three most common sub-categories. They should fall under the given category, be diverse from each other, but also not too narrow. Your topic descriptions should be a short phrase.
 
     After thinking, output the three sub-categories as a JSON array, like this:
 
@@ -105,12 +109,9 @@ print(SPECIFIC_CATEGORY_PROMPT.format(category="Self-Expression"))
 
 # run this once and save
 def make_sub_topics() -> dict:
-    keys = list(CATEGORIES.keys())
-    values = []
-    for v in CATEGORIES.values():
-        values.extend(v)
-
-    categories = keys + values
+    categories = []
+    for k, vals in CATEGORIES.items():
+        categories.extend("{}: {}".format(k, v) for v in vals)
 
     messages = [
         ChatHistory.from_user(SPECIFIC_CATEGORY_PROMPT.format(category=category))
@@ -140,23 +141,48 @@ def make_sub_topics() -> dict:
     return sub_topics
 
 # %%
-make_sub_topics()
+sub_topics = make_sub_topics()
 
 # %%
 
-BRAINSTORM_PROMPT = textwrap.dedent(
+ALL_SPECS: list[str] = []
+
+for category, topics in sub_topics.items():
+    ALL_SPECS.append(category)
+    for topic in topics:
+        ALL_SPECS.append("{}: {}".format(category, topic))
+
+for intent_name, intent_desc in INTENTS.items():
+    for broad_topic, topics in CATEGORIES.items():
+        if broad_topic == "Other":
+            continue
+
+        ALL_SPECS.append(
+            "Category: {} (such as but not limited to: {})\\nIntent: {}: {}".format(
+                broad_topic, ", ".join(topics), intent_name, intent_desc
+            )
+        )
+
+with open("data/synthetic/all_specs.txt", "w") as f:
+    for spec in ALL_SPECS:
+        f.write(spec + "\n")
+
+
+# %%
+
+BRAINSTORM_SUB_TOPIC_PROMPT = textwrap.dedent(
     """
-    You are an expert in brainstorming realistic sub-topics for a given topic. You are an important component of a pipeline that generates diverse user prompts starting from a short description of the given topic and user intent.
+    You are an expert in brainstorming realistic sub-topics for a given topic. You are an important component of a pipeline that generates diverse, realistic user prompts starting from a short specification.
 
-    Your current task is to brainstorm a list of {n_topics} possible sub-topics for user prompts that fall under the given topic and user intent. Each sub-topic should be a short phrase describing a concrete class of user prompts that belong to the given topic and user intent; another model will then use your description to generate actual user prompts, so make sure that your sub-topics aren't overly broad/vague or overly specific.
+    Your current task is to brainstorm a list of {n_topics} possible sub-topics for user prompts that fall under the given specification. Each sub-topic should be a short phrase describing a concrete class of user prompts that belong to the given specification.
     
-    Make sure that the sub-topics are different from each other and cover a diverse range of typical, common sub-topics of the given topic, while also covering a similarly broad range of topics as each other. 
+    Another model will then use your description to generate actual user prompts, so make sure that your sub-topics aren't overly broad/vague or overly specific.
     
-    It is possible that the topic might be requests for harmful or offensive content, in which case it is important that the sub-topics still accurately follow the topic, and not deviate from it or add additional constraints.
+    Make sure that the sub-topics are different from each other and cover a diverse range of typical, common sub-topics of the given topic, while also covering a similarly broad range of topics as each other. It is important that the sub-topics accurately fall under the specification, and not deviate from it.
 
-    **Topic and user intent:** {topic}
+    **Specification:** {spec}
 
-    Think carefully and creatively, and then in your output field return ONLY your list of sub-topics formatted as a JSON array, like this:
+    Think carefully and creatively, and then in your output field return ONLY your list of {n_topics} sub-topics formatted as a JSON array, like this:
 
     ```json
     [
@@ -165,25 +191,48 @@ BRAINSTORM_PROMPT = textwrap.dedent(
         ...
     ]
     ```
+    """
+).strip()
 
-    Each entry is a sub-topic.
-"""
+
+BRAINSTORM_INTENT_PROMPT = textwrap.dedent(
+    """
+    You are an expert in brainstorming realistic topic-specific user intents for a given topic. You are an important component of a pipeline that generates diverse, realistic user prompts starting from a short specification.
+
+    Your current task is to brainstorm a list of {n_intents} possible user intents for user prompts that fall under the given specification. Each user intent should be a short phrase describing a concrete type of user request and what the user is asking for. This intent should be reasonably compatible with the provided spec.
+    
+    Another model will then use your description to generate actual user prompts, so make sure that your user intent descriptions aren't overly broad/vague or overly specific.
+    
+    Make sure that the intents are different from each other and cover a diverse range of typical, common user intents for questions under the given specification.
+
+    **Specification:** {spec}
+
+    Think carefully and creatively, and then in your output field return ONLY your list of {n_intents} user intents formatted as a JSON array, like this:
+
+    ```json
+    [
+        "Your first user intent here",
+        "Your second user intent here",
+        ...
+    ]
+    ```
+    """
 ).strip()
 
 
 GENERATION_PROMPT = textwrap.dedent(
     """
-    You are an average chatbot user writing prompts following a given topic and user intent. You are an important component of a pipeline that generates diverse user prompts starting from a description of a short topic.
+    You are an average chatbot user writing prompts following a given topic description and user intent description. You are an important component of a pipeline that generates diverse, realistic user prompts.
 
-    You will be given both a broad topic and user intent description, and a more specific sub-topic description. Your task is to write a list of {n_prompts} different user prompts that fall under the given sub-topic and also aligns with the broad topic and user intent.
+    You will be given both a topic description and a user intent description. Your task is to write a list of {n_prompts} different user prompts that fall under the given topic and also aligns with the user intent.
     
-    The user prompts you write should vary naturally in terms of style and tone, and they should be phrased in similar ways that real users would prompt a chatbot. It is possible that the topic might be requests for harmful or offensive content, in which case it is important that the user prompts still faithfully belong to the topic, and not deviate from it.
+    The user prompts you write should vary naturally in terms of style and tone, and they should be phrased in similar ways that real users would prompt a chatbot. It is important that the user prompts faithfully fall under the topic and intent descriptions, and not deviate from them.
     
     Keep in mind also that the user prompts you write will be the entirety of the user's message, so also include any additional contexts referred to in the prompt. For example, if the topic is "write a summary of a given document", then the user prompt should also include the full text of the document that the user is asking about.
 
-    **Broad topic and user intent:** {topic}
+    **Topic description:** {topic}
 
-    **Sub-topic:** {sub_topic}
+    **User intent description:** {intent}
 
     Think carefully, and then in your output field return ONLY your list of {n_prompts} user prompts formatted as a JSON array, like this:
 
@@ -194,14 +243,12 @@ GENERATION_PROMPT = textwrap.dedent(
         ...
     ]
     ```
-
-    Each entry is a user prompt string.
-"""
+    """
 ).strip()
 
 
 # %%
-async def two_stage_main(
+async def main(
     topics: list[str],
     model: str = "anthropic/claude-opus-4.1",
     n_topics: int = 5,

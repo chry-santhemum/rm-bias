@@ -1,127 +1,97 @@
 {
-    "Writing": [
-        "Creative writing (fiction, poetry, scripts)",
-        "Academic and research writing (essays, literature reviews, citations)",
-        "Professional and business communication (emails, resumes, cover letters, reports)"
+    "Writing: Edit or Critique Provided Text": [
+        "Proofreading and Copyediting",
+        "Tone and Style Rewriting for Target Audience",
+        "High-Level Critique and Structural Feedback"
     ],
-    "Practical Guidance": [
-        "DIY, home maintenance, and everyday task how-tos",
-        "Technology setup, troubleshooting, and digital tool guidance",
-        "Career development and job search strategies"
+    "Writing: Personal Writing or Communication": [
+        "Apologies, condolences, and thank-you notes",
+        "Event invitations, RSVPs, and life announcements",
+        "Social media bios, captions, and posts"
     ],
-    "Technical Help": [
-        "Network and Internet Connectivity Troubleshooting",
-        "Software Installation, Updates, and Configuration",
-        "Hardware and Peripheral Diagnostics and Repair"
+    "Writing: Translation": [
+        "General text translation and tone/formality adjustment",
+        "Localization and cultural adaptation",
+        "Specialized domain translation (legal, medical, technical)"
     ],
-    "Seeking Information": [
-        "Definitions and concept explanations",
-        "Comparisons and differences (A vs B, pros/cons)",
-        "Factual data and statistics lookup (dates, figures, facts)"
+    "Writing: Argument or Summary Generation": [
+        "Persuasive argument and position paper drafting",
+        "Pro/con analysis with counterargument development",
+        "Text summarization with executive summaries and key takeaways"
     ],
-    "Self-Expression": [
-        "Personal journaling and emotional processing",
-        "Creative writing for self-expression (poetry, lyrics, short prose)",
-        "Self-presentation and identity statements (bios, personal statements, dating profiles)"
+    "Writing: Write Fiction": [
+        "Original short stories",
+        "Novel chapters and serialized scenes",
+        "Fanfiction and alternate-universe stories"
     ],
-    "Other": [
-        "Casual conversation and icebreakers",
-        "Jokes, riddles, and trivia games",
-        "Role-play and hypothetical scenarios"
+    "Practical Guidance: How-To Advice": [
+        "Tech Setup and Troubleshooting",
+        "Cooking and Meal Prep",
+        "Home Maintenance and DIY Repairs"
     ],
-    "Edit or Critique Provided Text": [
-        "Proofreading and copyediting (grammar, spelling, punctuation, consistency)",
-        "Tone and style rewrites (e.g., make it more formal, concise, persuasive, or friendly)",
-        "High-level critique with structural/content suggestions (clarity, organization, argument strength)"
+    "Practical Guidance: Tutoring or Teaching": [
+        "Lesson Planning and Curriculum Design",
+        "Concept Explanations and Worked Examples",
+        "Assessment and Feedback Methods"
     ],
-    "Personal Writing or Communication": [
-        "Relationship and sensitive messages (apologies, breakups, boundary-setting, heartfelt notes to friends/family)",
-        "Event invitations and announcements (party invites, wedding/baby announcements, save-the-dates, RSVPs)",
-        "Speeches, vows, and toasts for personal occasions (wedding vows, eulogies, birthday/anniversary toasts)"
+    "Practical Guidance: Creative Ideation": [
+        "Content and Marketing Idea Generation",
+        "Product and Feature Brainstorming",
+        "Naming, Taglines, and Branding Concepts"
     ],
-    "Translation": [
-        "Casual communication translation (messages, emails, chats, social media)",
-        "Domain-specific translation (legal, medical, technical, academic documents)",
-        "Localization and transcreation (marketing copy, product descriptions, app/website UI)"
+    "Practical Guidance: Health, Fitness, Beauty, or Self-Care": [
+        "Workout programming and exercise technique",
+        "Nutrition, meal planning, and weight management",
+        "Skincare routines and product recommendations"
     ],
-    "Argument or Summary Generation": [
-        "Persuasive or position-based arguments (op-eds, debate stances, advocacy letters)",
-        "Balanced pro-con and comparative analyses (weighing options, cost-benefit, risk trade-offs)",
-        "Summarization of source material (news, research papers, meetings/podcasts) with key takeaways"
+    "Technical Help: Mathematical Calculation": [
+        "Algebraic equation solving and simplification",
+        "Calculus computations (derivatives, integrals, limits)",
+        "Probability and statistics calculations"
     ],
-    "Write Fiction": [
-        "Short stories and flash fiction",
-        "Novel chapters and serialized storytelling",
-        "Fanfiction and crossovers in existing universes"
+    "Technical Help: Data Analysis": [
+        "Data Wrangling and Preprocessing",
+        "Exploratory Analysis and Visualization",
+        "Statistical Inference and Modeling"
     ],
-    "How-To Advice": [
-        "Technology and Devices",
-        "Cooking and Meal Preparation",
-        "Home Maintenance and DIY"
+    "Technical Help: Computer Programming": [
+        "Debugging and error resolution",
+        "Algorithm and data structure implementation",
+        "Library and API usage and integration"
     ],
-    "Tutoring or Teaching": [
-        "Concept explanations and simplification with analogies and examples",
-        "Step-by-step problem solving and homework help with worked solutions",
-        "Study plans, practice exercises, and exam preparation strategies"
+    "Seeking Information: Specific Info": [
+        "Entity attributes and identifiers",
+        "Dates, schedules, and deadlines",
+        "Quantitative figures and measurements"
     ],
-    "Creative Ideation": [
-        "Story, character, and worldbuilding concepts",
-        "Branding, names, slogans, and marketing campaign ideas",
-        "New product, feature, or startup concept brainstorming"
+    "Seeking Information: Purchasable Products": [
+        "Price, Availability, and Deals",
+        "Product Specifications and Compatibility",
+        "Comparative Product Recommendations and Alternatives"
     ],
-    "Health, Fitness, Beauty, or Self-Care": [
-        "Workout and exercise programming (strength, cardio, flexibility, home and gym routines)",
-        "Nutrition and meal planning (weight management, macros, special diets, meal prep)",
-        "Skincare, haircare, and makeup routines and product recommendations"
+    "Seeking Information: Cooking and Recipes": [
+        "Recipe ideas and meal planning",
+        "Ingredient substitutions and dietary adaptations",
+        "Cooking techniques and troubleshooting"
     ],
-    "Mathematical Calculation": [
-        "Basic arithmetic and percentage/ratio calculations",
-        "Algebraic expressions and equation solving",
-        "Statistics and probability computations"
+    "Self-Expression: Greetings and Chitchat": [
+        "Basic greetings and farewells",
+        "Casual check-ins and small talk",
+        "Holiday/event greetings and congratulations"
     ],
-    "Data Analysis": [
-        "Exploratory Data Analysis (summary statistics, distributions, correlations, visualization)",
-        "Statistical Hypothesis Testing and A/B Testing (p-values, confidence intervals, experiment analysis)",
-        "Predictive Modeling and Machine Learning (regression/classification, feature engineering, model evaluation)"
+    "Self-Expression: Relationships and Personal Reflection": [
+        "Romantic relationships and dating introspection",
+        "Family dynamics, boundaries, and upbringing",
+        "Friendships, social belonging, and trust"
     ],
-    "Computer Programming": [
-        "Debugging and troubleshooting code errors",
-        "Implementing algorithms and data structures",
-        "Web application development and APIs"
+    "Self-Expression: Games and Role Play": [
+        "Interactive fiction and choose-your-own-adventure",
+        "Character roleplay and persona emulation",
+        "Tabletop RPG GMing and campaign scenarios"
     ],
-    "Specific Info": [
-        "Entity facts (biographical details, historical dates, organization info)",
-        "Quantitative stats and measurements (populations, prices, dimensions, unit conversions)",
-        "Logistical details (addresses, contact info, opening hours, event schedules)"
-    ],
-    "Purchasable Products": [
-        "Consumer Electronics",
-        "Home & Kitchen",
-        "Fashion & Apparel"
-    ],
-    "Cooking and Recipes": [
-        "Quick weeknight meals and meal prep",
-        "Baking and desserts",
-        "Dietary-specific recipes (vegan, gluten-free, keto)"
-    ],
-    "Greetings and Chitchat": [
-        "Greetings and Introductions",
-        "Check-ins and Small Talk",
-        "Farewells and Well-Wishes"
-    ],
-    "Relationships and Personal Reflection": [
-        "Romantic Relationships",
-        "Family Dynamics and Boundaries",
-        "Self-Reflection and Personal Growth"
-    ],
-    "Games and Role Play": [
-        "Video game strategies, builds, and walkthroughs",
-        "Tabletop RPG character creation, worldbuilding, and GM/DM guidance",
-        "Interactive roleplay scenarios and persona-based conversations"
-    ],
-    "Asking About the Model": [
-        "Capabilities and limitations (e.g., what tasks it can do, tool/vision/web access, accuracy and failure modes)",
-        "Training, data sources, and knowledge cutoff (how it was trained, what data it saw, how and when it gets updated)",
-        "Privacy, safety, and memory policies (what is stored or shared, refusal rules, content restrictions, and conversation retention)"
+    "Other: Asking About the Model": [
+        "Capabilities and limitations",
+        "Model identity, version, and tools",
+        "Training data, privacy, and safety policies"
     ]
 }

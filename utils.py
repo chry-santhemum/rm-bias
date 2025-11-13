@@ -189,7 +189,7 @@ def parse_json_response(
     output, reasoning = None, None
     if resp.reasoning_content is not None:
         reasoning = resp.reasoning_content
-        print("Found reasoning content in response: ", reasoning)
+        logger.debug("Found reasoning content in response: ", reasoning)
     try:
         if "```json" in raw_text:
             output = json.loads(

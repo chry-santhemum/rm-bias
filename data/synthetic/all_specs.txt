@@ -1,0 +1,91 @@
+Writing: Edit or Critique Provided Text
+Writing: Edit or Critique Provided Text: Proofreading and Copyediting
+Writing: Edit or Critique Provided Text: Tone and Style Rewriting for Target Audience
+Writing: Edit or Critique Provided Text: High-Level Critique and Structural Feedback
+Writing: Personal Writing or Communication
+Writing: Personal Writing or Communication: Apologies, condolences, and thank-you notes
+Writing: Personal Writing or Communication: Event invitations, RSVPs, and life announcements
+Writing: Personal Writing or Communication: Social media bios, captions, and posts
+Writing: Translation
+Writing: Translation: General text translation and tone/formality adjustment
+Writing: Translation: Localization and cultural adaptation
+Writing: Translation: Specialized domain translation (legal, medical, technical)
+Writing: Argument or Summary Generation
+Writing: Argument or Summary Generation: Persuasive argument and position paper drafting
+Writing: Argument or Summary Generation: Pro/con analysis with counterargument development
+Writing: Argument or Summary Generation: Text summarization with executive summaries and key takeaways
+Writing: Write Fiction
+Writing: Write Fiction: Original short stories
+Writing: Write Fiction: Novel chapters and serialized scenes
+Writing: Write Fiction: Fanfiction and alternate-universe stories
+Practical Guidance: How-To Advice
+Practical Guidance: How-To Advice: Tech Setup and Troubleshooting
+Practical Guidance: How-To Advice: Cooking and Meal Prep
+Practical Guidance: How-To Advice: Home Maintenance and DIY Repairs
+Practical Guidance: Tutoring or Teaching
+Practical Guidance: Tutoring or Teaching: Lesson Planning and Curriculum Design
+Practical Guidance: Tutoring or Teaching: Concept Explanations and Worked Examples
+Practical Guidance: Tutoring or Teaching: Assessment and Feedback Methods
+Practical Guidance: Creative Ideation
+Practical Guidance: Creative Ideation: Content and Marketing Idea Generation
+Practical Guidance: Creative Ideation: Product and Feature Brainstorming
+Practical Guidance: Creative Ideation: Naming, Taglines, and Branding Concepts
+Practical Guidance: Health, Fitness, Beauty, or Self-Care
+Practical Guidance: Health, Fitness, Beauty, or Self-Care: Workout programming and exercise technique
+Practical Guidance: Health, Fitness, Beauty, or Self-Care: Nutrition, meal planning, and weight management
+Practical Guidance: Health, Fitness, Beauty, or Self-Care: Skincare routines and product recommendations
+Technical Help: Mathematical Calculation
+Technical Help: Mathematical Calculation: Algebraic equation solving and simplification
+Technical Help: Mathematical Calculation: Calculus computations (derivatives, integrals, limits)
+Technical Help: Mathematical Calculation: Probability and statistics calculations
+Technical Help: Data Analysis
+Technical Help: Data Analysis: Data Wrangling and Preprocessing
+Technical Help: Data Analysis: Exploratory Analysis and Visualization
+Technical Help: Data Analysis: Statistical Inference and Modeling
+Technical Help: Computer Programming
+Technical Help: Computer Programming: Debugging and error resolution
+Technical Help: Computer Programming: Algorithm and data structure implementation
+Technical Help: Computer Programming: Library and API usage and integration
+Seeking Information: Specific Info
+Seeking Information: Specific Info: Entity attributes and identifiers
+Seeking Information: Specific Info: Dates, schedules, and deadlines
+Seeking Information: Specific Info: Quantitative figures and measurements
+Seeking Information: Purchasable Products
+Seeking Information: Purchasable Products: Price, Availability, and Deals
+Seeking Information: Purchasable Products: Product Specifications and Compatibility
+Seeking Information: Purchasable Products: Comparative Product Recommendations and Alternatives
+Seeking Information: Cooking and Recipes
+Seeking Information: Cooking and Recipes: Recipe ideas and meal planning
+Seeking Information: Cooking and Recipes: Ingredient substitutions and dietary adaptations
+Seeking Information: Cooking and Recipes: Cooking techniques and troubleshooting
+Self-Expression: Greetings and Chitchat
+Self-Expression: Greetings and Chitchat: Basic greetings and farewells
+Self-Expression: Greetings and Chitchat: Casual check-ins and small talk
+Self-Expression: Greetings and Chitchat: Holiday/event greetings and congratulations
+Self-Expression: Relationships and Personal Reflection
+Self-Expression: Relationships and Personal Reflection: Romantic relationships and dating introspection
+Self-Expression: Relationships and Personal Reflection: Family dynamics, boundaries, and upbringing
+Self-Expression: Relationships and Personal Reflection: Friendships, social belonging, and trust
+Self-Expression: Games and Role Play
+Self-Expression: Games and Role Play: Interactive fiction and choose-your-own-adventure
+Self-Expression: Games and Role Play: Character roleplay and persona emulation
+Self-Expression: Games and Role Play: Tabletop RPG GMing and campaign scenarios
+Other: Asking About the Model
+Other: Asking About the Model: Capabilities and limitations
+Other: Asking About the Model: Model identity, version, and tools
+Other: Asking About the Model: Training data, privacy, and safety policies
+Category: Writing (such as but not limited to: Edit or Critique Provided Text, Personal Writing or Communication, Translation, Argument or Summary Generation, Write Fiction)\nIntent: Asking: Seeking information or advice for the user to be better informed on something.
+Category: Practical Guidance (such as but not limited to: How-To Advice, Tutoring or Teaching, Creative Ideation, Health, Fitness, Beauty, or Self-Care)\nIntent: Asking: Seeking information or advice for the user to be better informed on something.
+Category: Technical Help (such as but not limited to: Mathematical Calculation, Data Analysis, Computer Programming)\nIntent: Asking: Seeking information or advice for the user to be better informed on something.
+Category: Seeking Information (such as but not limited to: Specific Info, Purchasable Products, Cooking and Recipes)\nIntent: Asking: Seeking information or advice for the user to be better informed on something.
+Category: Self-Expression (such as but not limited to: Greetings and Chitchat, Relationships and Personal Reflection, Games and Role Play)\nIntent: Asking: Seeking information or advice for the user to be better informed on something.
+Category: Writing (such as but not limited to: Edit or Critique Provided Text, Personal Writing or Communication, Translation, Argument or Summary Generation, Write Fiction)\nIntent: Doing: Requesting ChatGPT to perform a task, generating output that is created primarily by the model.
+Category: Practical Guidance (such as but not limited to: How-To Advice, Tutoring or Teaching, Creative Ideation, Health, Fitness, Beauty, or Self-Care)\nIntent: Doing: Requesting ChatGPT to perform a task, generating output that is created primarily by the model.
+Category: Technical Help (such as but not limited to: Mathematical Calculation, Data Analysis, Computer Programming)\nIntent: Doing: Requesting ChatGPT to perform a task, generating output that is created primarily by the model.
+Category: Seeking Information (such as but not limited to: Specific Info, Purchasable Products, Cooking and Recipes)\nIntent: Doing: Requesting ChatGPT to perform a task, generating output that is created primarily by the model.
+Category: Self-Expression (such as but not limited to: Greetings and Chitchat, Relationships and Personal Reflection, Games and Role Play)\nIntent: Doing: Requesting ChatGPT to perform a task, generating output that is created primarily by the model.
+Category: Writing (such as but not limited to: Edit or Critique Provided Text, Personal Writing or Communication, Translation, Argument or Summary Generation, Write Fiction)\nIntent: Expressing: Expressing statements are neither asking for information, nor for the chatbot to perform a task.
+Category: Practical Guidance (such as but not limited to: How-To Advice, Tutoring or Teaching, Creative Ideation, Health, Fitness, Beauty, or Self-Care)\nIntent: Expressing: Expressing statements are neither asking for information, nor for the chatbot to perform a task.
+Category: Technical Help (such as but not limited to: Mathematical Calculation, Data Analysis, Computer Programming)\nIntent: Expressing: Expressing statements are neither asking for information, nor for the chatbot to perform a task.
+Category: Seeking Information (such as but not limited to: Specific Info, Purchasable Products, Cooking and Recipes)\nIntent: Expressing: Expressing statements are neither asking for information, nor for the chatbot to perform a task.
+Category: Self-Expression (such as but not limited to: Greetings and Chitchat, Relationships and Personal Reflection, Games and Role Play)\nIntent: Expressing: Expressing statements are neither asking for information, nor for the chatbot to perform a task.
