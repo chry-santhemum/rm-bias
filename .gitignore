@@ -3,10 +3,8 @@
 figs/
 logs/
 data/*
-!data/synthetic/
-!data/synthetic/**
-!data/synthetic_2/
-!data/synthetic_2/**
+# !data/synthetic_2/
+# !data/synthetic_2/**
 sae_cache/
 .cache/
 user_prompts/
