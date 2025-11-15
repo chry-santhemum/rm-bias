@@ -4,7 +4,6 @@ import time
 import asyncio
 import uuid
 from itertools import product
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import logging
 import numpy as np
@@ -46,7 +45,6 @@ class BiasEvaluator:
         self.batch_futures: Mapping[str, asyncio.Future] = {}
         self.rewrite_workers: list[asyncio.Task] = []
         self.rating_worker: asyncio.Task | None = None
-        self.rating_executor: ThreadPoolExecutor | None = None
 
     async def _ensure_workers_started(self):
         if self._workers_started:
@@ -65,14 +63,12 @@ class BiasEvaluator:
             for worker_id in range(self.rewrite_model.max_par)
         ]
 
-        self.rating_executor = ThreadPoolExecutor(max_workers=1)
         self.rating_worker = asyncio.create_task(
             rating_worker(
                 self.reward_model,
                 self.queue_rewrite,
                 self.batch_results,
-                self.batch_futures,
-                self.rating_executor,
+                self.batch_futures
             )
         )
         self._workers_started = True
@@ -147,9 +143,6 @@ class BiasEvaluator:
             await self.rating_worker
         logger.info("\n--- rewrite rating worker finished. ---\n")
 
-        if self.rating_executor is not None:
-            self.rating_executor.shutdown(wait=True)
-            self.rating_executor = None
         self._workers_started = False
 
     # Make this into an async context manager to ensure proper shutdown

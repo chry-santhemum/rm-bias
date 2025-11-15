@@ -38,6 +38,7 @@ REWARD_MODELS = {
     "tulu3": "allenai/Llama-3.1-Tulu-3-8B-RM",
     "llamarb2": "allenai/Llama-3.1-8B-Instruct-RM-RB2",
     "skywork-v2-qwen-8b": "Skywork/Skywork-Reward-V2-Qwen3-8B",
+    "sleeper": "saepark/sleeper-classicRM",
 }
 
 POLICY_MODELS = {
@@ -46,50 +47,38 @@ POLICY_MODELS = {
     "qwen-3-8b-instruct": "Qwen/Qwen3-8B",
 }
 
-
-_reward_model = None
-_policy_model = None
-_embedding_model = None
-
-
 def load_model(model_name: str, use_flash: bool = False, device: str = "auto"):
-    global _reward_model, _policy_model
     if model_name in REWARD_MODELS:
         model_name_hf = REWARD_MODELS[model_name]
         print(f"Loading reward model {model_name_hf}...")
-        if _reward_model is None:
-            load_kwargs = {
-                "dtype": torch.bfloat16,
-                "device_map": device,
-                "num_labels": 1,
-            }
-            if use_flash:
-                load_kwargs["attn_implementation"] = "flash_attention_2"
+        load_kwargs = {
+            "dtype": torch.bfloat16,
+            "device_map": device,
+            "num_labels": 1,
+        }
+        if use_flash:
+            load_kwargs["attn_implementation"] = "flash_attention_2"
 
-            _reward_model = AutoModelForSequenceClassification.from_pretrained(
-                model_name_hf, **load_kwargs
-            )
-            model = _reward_model
-        else:
-            model = _reward_model
+        model = AutoModelForSequenceClassification.from_pretrained(
+            model_name_hf, **load_kwargs
+        )
 
     elif model_name in POLICY_MODELS:
         model_name_hf = POLICY_MODELS[model_name]
         print(f"Loading policy model {model_name_hf}...")
-        if _policy_model is None:
-            load_kwargs = {
-                "dtype": torch.bfloat16,
-                "device_map": device,
-            }
-            if use_flash:
-                load_kwargs["attn_implementation"] = "flash_attention_2"
+        load_kwargs = {
+            "dtype": torch.bfloat16,
+            "device_map": device,
+        }
+        if use_flash:
+            load_kwargs["attn_implementation"] = "flash_attention_2"
 
-            _policy_model = AutoModelForCausalLM.from_pretrained(
-                model_name_hf, **load_kwargs
-            )
-            model = _policy_model
-        else:
-            model = _policy_model
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name_hf, **load_kwargs
+        )
+
+    else:
+        raise ValueError(f"Model {model_name} not found.")
 
     print("Model loaded. Set to eval mode and disabled gradients.")
     model.eval()
@@ -256,9 +245,7 @@ class ClusterModel:
         umap_n_neighbors: int = 15,
         umap_n_components: int = 8,
     ):
-        global _embedding_model
-        if _embedding_model is None:
-            _embedding_model = SentenceTransformer(embedding_model_name)
+        self.embedding_model = SentenceTransformer(embedding_model_name)
         self.umap_n_neighbors = umap_n_neighbors
         self.umap_n_components = umap_n_components
         self.umap_model = UMAP(
@@ -270,7 +257,7 @@ class ClusterModel:
         )
 
     def embed(self, inputs: list[str]) -> np.ndarray:
-        return _embedding_model.encode(inputs)  # type: ignore
+        return self.embedding_model.encode(inputs)  # type: ignore
 
     def reduce_embed(self, inputs: list[str]) -> np.ndarray:
         """Embed then do dimensionality reduction"""

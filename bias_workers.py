@@ -116,7 +116,7 @@ async def policy_worker(
             PromptResult(
                 system=task_input.system,
                 user=task_input.user,
-                assistant=result[0].get_first("assistant"),  # type: ignore
+                assistant=result[0].first_response,  # type: ignore
                 batch_id=task_input.batch_id,
             )
         )

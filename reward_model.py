@@ -35,9 +35,8 @@ def prompt_to_hash_path(prompt: str, target_dir: Path) -> Path:
 
 class RewardModel:
     """
-    Wrapper around local reward models.
     __init__ kwargs are passed to load_model for local models,
-    and passed to JudgeModel for LLM judge models.
+    and passed to JudgeModel.__init__ for LLM judge models.
     """
 
     def __init__(self, model_name: str, batch_size: int, **kwargs):

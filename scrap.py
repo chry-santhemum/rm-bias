@@ -14,12 +14,85 @@ import plotly.graph_objects as go
 import plotly.express as px
 from datasets import load_dataset
 
-from utils import remove_outliers
+from utils import remove_outliers, load_model, timestamp
 from caller import ChatHistory, OpenRouterCaller
 from reward_model import RewardModel
+from models import PolicyModel
 
 nest_asyncio.apply()
+# %%
 
+sleeper_rm = RewardModel(model_name="sleeper", batch_size=16, device="cuda")
+# skywork_rm = RewardModel(model_name="skywork-v2", batch_size=16, device="cuda")
+
+# %%
+
+from standard_prompts import make_prompt_mix
+from bias_workers import evaluate_baselines
+
+policy_model = PolicyModel(model_name="meta-llama/llama-3.1-8b-instruct", temperature=0.9)
+
+prompts = make_prompt_mix(num_total=512)
+skywork_baselines = asyncio.run(evaluate_baselines(
+    user_prompts=prompts,
+    policy_model=policy_model,
+    reward_model=skywork_rm,
+    n_rollouts=16,
+    save_dir=Path(f"data/scrap/20251114/skywork"),
+))
+
+# %%
+with open("data/scrap/20251114/skywork/baseline_scores_mean.json", "r", encoding="utf-8") as f:
+    skywork_baselines = json.load(f)
+
+chat_histories = []
+for user_prompt in skywork_baselines:
+    for rollout in skywork_baselines[user_prompt]:
+        chat_histories.append(ChatHistory.from_user(user_prompt).add_assistant(rollout["response"]))
+
+sleeper_results = asyncio.run(sleeper_rm.async_rate(chat_histories))
+
+
+sleeper_baselines = defaultdict(list)
+
+for chat_history, result in zip(chat_histories, sleeper_results):
+    if result.score is not None:
+        sleeper_baselines[chat_history.get_first("user")].append({
+            "response": chat_history.get_first("assistant"),
+            "score": result.score,
+        })
+
+with open("data/scrap/20251114/sleeper/baseline_results.json", "w", encoding="utf-8") as f:
+    json.dump(sleeper_baselines, f, indent=4)
+
+sleeper_scores_mean = {
+    user_prompt: np.mean([r["score"] for r in scores]).item() for user_prompt, scores in sleeper_baselines.items()
+}
+with open("data/scrap/20251114/sleeper/baseline_scores_mean.json", "w", encoding="utf-8") as f:
+    json.dump(sleeper_scores_mean, f, indent=4)
+
+sleeper_scores = {
+    user_prompt: [r["score"] for r in scores] for user_prompt, scores in sleeper_baselines.items()
+}
+with open("data/scrap/20251114/sleeper/baseline_scores.json", "w", encoding="utf-8") as f:
+    json.dump(sleeper_scores, f, indent=4)
+
+# %%
+with open("data/scrap/20251114/sleeper/baseline_scores_mean.json", "r", encoding="utf-8") as f:
+    sleeper_baselines = json.load(f)
+
+for user_prompt in skywork_baselines:
+    diffs.append((
+        user_prompt,
+        skywork_baselines[user_prompt] - sleeper_baselines[user_prompt]
+    ))
+
+diffs.sort(key=lambda x: abs(x[1]), reverse=True)
+
+for user_prompt, diff in diffs[:10]:
+    print(user_prompt)
+    print(diff)
+    print("-" * 100)
 # %%
 
 

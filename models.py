@@ -23,7 +23,7 @@ retry_config = RetryConfig(
     raise_when_exhausted=False,
     criteria=lambda response: response.has_response
     and response.finish_reason == "stop",
-    max_attempts=3,
+    max_attempts=5,
 )
 
 
