@@ -104,7 +104,10 @@ def load_clusters(
 
     elif ds_name.startswith("synthetic"):
         for json_file in Path(f"data/{ds_name}").glob("*.json"):
-            cluster_id = int(json_file.name.split(".")[0])
+            try:
+                cluster_id = int(json_file.name.split(".")[0])
+            except ValueError:
+                continue
             if cluster_id in topic_ids:
                 with open(json_file, "r") as f:
                     data = json.load(f)

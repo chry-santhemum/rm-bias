@@ -42,7 +42,7 @@ skywork_baselines = asyncio.run(evaluate_baselines(
 ))
 
 # %%
-with open("data/scrap/20251114/skywork/baseline_scores_mean.json", "r", encoding="utf-8") as f:
+with open("data/scrap/20251114/skywork/baseline_results.json", "r", encoding="utf-8") as f:
     skywork_baselines = json.load(f)
 
 chat_histories = []
@@ -52,6 +52,7 @@ for user_prompt in skywork_baselines:
 
 sleeper_results = asyncio.run(sleeper_rm.async_rate(chat_histories))
 
+# %%
 
 sleeper_baselines = defaultdict(list)
 
@@ -78,162 +79,53 @@ with open("data/scrap/20251114/sleeper/baseline_scores.json", "w", encoding="utf
     json.dump(sleeper_scores, f, indent=4)
 
 # %%
+# Calculate global mean
+with open("data/scrap/20251114/skywork/baseline_scores_mean.json", "r", encoding="utf-8") as f:
+    skywork_baseline_scores_mean = json.load(f)
+skywork_scores = list(skywork_baseline_scores_mean.values())
+skywork_mean, skywork_std = np.mean(skywork_scores).item(), np.std(skywork_scores).item()
+
 with open("data/scrap/20251114/sleeper/baseline_scores_mean.json", "r", encoding="utf-8") as f:
-    sleeper_baselines = json.load(f)
-
-for user_prompt in skywork_baselines:
-    diffs.append((
-        user_prompt,
-        skywork_baselines[user_prompt] - sleeper_baselines[user_prompt]
-    ))
-
-diffs.sort(key=lambda x: abs(x[1]), reverse=True)
-
-for user_prompt, diff in diffs[:10]:
-    print(user_prompt)
-    print(diff)
-    print("-" * 100)
-# %%
+    sleeper_baseline_scores_mean = json.load(f)
+sleeper_scores = list(sleeper_baseline_scores_mean.values())
+sleeper_mean, sleeper_std = np.mean(sleeper_scores).item(), np.std(sleeper_scores).item()
 
 
-def plot_seed_validation_data(
-    results_dir: Path,
-    seed_index: int,
-):
-    if not (results_dir / "baseline_results.json").exists():
-        with open(
-            results_dir / "val_baselines" / "baseline_results.json",
-            "r",
-            encoding="utf-8",
-        ) as f:
-            baseline_results = json.load(f)
-    else:
-        with open(results_dir / f"baseline_results.json", "r", encoding="utf-8") as f:
-            baseline_results = json.load(f)
+with open("data/scrap/20251114/skywork/baseline_scores.json", "r", encoding="utf-8") as f:
+    skywork_baseline_scores = json.load(f)
 
-    with open(
-        results_dir / f"validate/seed_{seed_index}_validate/rewrite_plus_scores.json",
-        "r",
-        encoding="utf-8",
-    ) as f:
-        validate_results = json.load(f)
+normalized_skywork = defaultdict(list)
+for user_prompt in skywork_baseline_scores:
+    normalized_skywork[user_prompt] = ((np.array(skywork_baseline_scores[user_prompt]) - skywork_mean) / skywork_std).tolist()
 
-    with open(
-        results_dir / f"validate/seed_{seed_index}_judge.json", "r", encoding="utf-8"
-    ) as f:
-        judge_results = json.load(f)
+with open("data/scrap/20251114/skywork/normalized_scores.json", "w", encoding="utf-8") as f:
+    json.dump(normalized_skywork, f, indent=4)
 
-    with open(
-        results_dir / f"seed_{seed_index}_cluster.json", "r", encoding="utf-8"
-    ) as f:
-        cluster_info = json.load(f)
 
-    # Collect difference data for each attribute
-    plot_data = []
+with open("data/scrap/20251114/sleeper/baseline_scores.json", "r", encoding="utf-8") as f:
+    sleeper_baseline_scores = json.load(f)
 
-    # For each attribute, compute differences from baseline
-    for attribute in judge_results:
-        attribute_results = validate_results[attribute]
-        attribute_diffs = []
-        winrates = []
+normalized_sleeper = defaultdict(list)
+for user_prompt in sleeper_baseline_scores:
+    normalized_sleeper[user_prompt] = ((np.array(sleeper_baseline_scores[user_prompt]) - sleeper_mean) / sleeper_std).tolist()
 
-        for prompt, prompt_rewards in attribute_results.items():
-            baseline_rewards = [r["score"] for r in baseline_results[prompt]]
-
-            # Compute element-wise differences
-            for attr_score, base_score in zip(prompt_rewards, baseline_rewards):
-                if attr_score is None or base_score is None:
-                    continue
-                attribute_diffs.append(attr_score - base_score)
-
-        for prompt, prompt_judge_winrates in judge_results[attribute].items():
-            winrates_clean = [wr for wr in prompt_judge_winrates if wr is not None]
-            winrates.extend(winrates_clean)
-
-        # remove far outliers
-        attribute_diffs = remove_outliers(attribute_diffs)
-
-        plot_data.append(
-            {
-                "attribute": attribute,
-                "diffs": attribute_diffs,
-                "winrate": np.mean(winrates).item(),
-            }
-        )
-
-    # Helper function to wrap text
-    def wrap_text(text, width):
-        """Wrap text to specified width"""
-        words = text.split()
-        lines = []
-        current_line = []
-        current_length = 0
-
-        for word in words:
-            if current_length + len(word) + 1 <= width:
-                current_line.append(word)
-                current_length += len(word) + 1
-            else:
-                if current_line:
-                    lines.append(" ".join(current_line))
-                current_line = [word]
-                current_length = len(word)
-
-        if current_line:
-            lines.append(" ".join(current_line))
-
-        return "<br>".join(lines)
-
-    # Create box plot
-    fig = go.Figure()
-
-    # Store positions and winrates for annotation
-    display_names = []
-
-    # Add violin plot for each attribute
-    for i, item in enumerate(plot_data):
-        display_name = (
-            wrap_text(item["attribute"], width=60)
-            + f"<br>(Winrate: {item['winrate']:.2f})"
-        )
-        display_names.append(display_name)
-
-        fig.add_trace(
-            go.Violin(
-                y=item["diffs"],
-                name=display_name,
-                box_visible=True,
-                meanline_visible=True,
-                points="all",
-            )
-        )
-
-    fig.update_layout(
-        title=f"Seed {seed_index}: {cluster_info['summary']}",
-        xaxis_title="Attribute",
-        yaxis_title="Reward Difference (Attribute - Baseline)",
-        height=1000,
-        width=1400,
-        showlegend=False,
-        xaxis=dict(tickangle=45),
-    )
-
-    # Add reference line at 0
-    fig.add_hline(
-        y=0, line_dash="dash", line_color="black", line_width=1.5, opacity=0.6
-    )
-    return fig
-
+with open("data/scrap/20251114/sleeper/normalized_scores.json", "w", encoding="utf-8") as f:
+    json.dump(normalized_sleeper, f, indent=4)
 
 # %%
-Path("data/scrap/20251107-084230").mkdir(parents=True, exist_ok=True)
 
-for seed_index in [1, 3, 4, 6, 8, 9, 12, 14, 16]:
-    fig = plot_seed_validation_data(
-        Path("data/evo/20251107-084230-naive-synthetic_2"), seed_index=seed_index
-    )
-    fig.show()
-    fig.write_html(f"data/scrap/20251107-084230/evo-synthetic_2-seed_{seed_index}.html")
+diff = defaultdict(list)
+
+for user_prompt in normalized_skywork:
+    diff[user_prompt] = (np.array(normalized_skywork[user_prompt]) - np.array(normalized_sleeper[user_prompt])).tolist()
+
+with open("data/scrap/20251114/diff_scores.json", "w", encoding="utf-8") as f:
+    json.dump(diff, f, indent=4)
+
+# %%
+diff_list = [(u, np.mean(s).item()) for u, s in diff.items()]
+diff_list.sort(key=lambda x: abs(x[1]), reverse=True)
+pprint(diff_list[:10], width=100)
 
 # %%
 

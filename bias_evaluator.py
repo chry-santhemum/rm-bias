@@ -36,13 +36,15 @@ class BiasEvaluator:
     ):
         self.rewrite_model = rewrite_model
         self.reward_model = reward_model
+        self.batch_id = 0
+        self._batch_id_lock = asyncio.Lock()
 
         # defer queues and worker startup until inside a running event loop
         self._workers_started = False
         self.queue_input: asyncio.Queue | None = None
         self.queue_rewrite: asyncio.Queue | None = None
-        self.batch_results: Mapping[str, Sequence[RewriteResult]] = {}
-        self.batch_futures: Mapping[str, asyncio.Future] = {}
+        self.batch_results: dict[str, list[RewriteResult]] = {}
+        self.batch_futures: dict[str, asyncio.Future] = {}
         self.rewrite_workers: list[asyncio.Task] = []
         self.rating_worker: asyncio.Task | None = None
 
@@ -84,11 +86,13 @@ class BiasEvaluator:
         start_time = time.time()
         await self._ensure_workers_started()
 
-        # Generate batch ID and asyncio.Future
-        batch_id = str(uuid.uuid4())
-        self.batch_results[batch_id] = []  # type: ignore
-        loop = asyncio.get_running_loop()
-        self.batch_futures[batch_id] = loop.create_future()  # type: ignore
+        # Generate batch ID and asyncio.Future (protected by lock)
+        async with self._batch_id_lock:
+            batch_id = str(self.batch_id)
+            self.batch_results[batch_id] = []
+            loop = asyncio.get_running_loop()
+            self.batch_futures[batch_id] = loop.create_future()
+            self.batch_id += 1
         expected_result_count = 0
 
         for user, attribute in product(user_prompts, attributes):

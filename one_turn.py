@@ -31,7 +31,7 @@ from utils import (
 )
 from load_cluster import load_initial_seed_states
 from models import PolicyModel, RewriteModel, JudgeModel
-from planner import Planner, NaivePlanner, ContrastPlanner
+from planner import Planner, ListPlanner, PairPlanner
 from reward_model import RewardModel
 from runner import Runner
 from bias_evaluator import BiasEvaluator
@@ -47,7 +47,7 @@ class OneTurnRunner(Runner):
     def __init__(
         self,
         seed_states: list[SeedState],
-        planner: NaivePlanner,
+        planner: ListPlanner,
         policy_model: PolicyModel,
         bias_evaluator: BiasEvaluator,
         judge_model: JudgeModel,
@@ -170,7 +170,7 @@ if __name__ == "__main__":
     Path(f"data/one_turn").mkdir(parents=True, exist_ok=True)
     logging_setup(filename=f"logs/one_turn/{run_name}.log", level=logging.INFO)
 
-    planner = NaivePlanner(
+    planner = ListPlanner(
         model_names=["anthropic/claude-sonnet-4.5"],
         alloy_type="round_robin",
         max_tokens=8192,

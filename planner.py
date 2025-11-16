@@ -140,7 +140,7 @@ class Planner(ABC):
         return dict(to_write_new)
 
 
-class NaivePlanner(Planner):
+class ListPlanner(Planner):
     def __init__(
         self,
         model_names: list[str],
@@ -193,13 +193,13 @@ class NaivePlanner(Planner):
                         "user_prompt": user_prompt,
                         "rollouts": [asdict(r) for r in sampled_rollouts],
                     }
-                    planner_prompt = NAIVE_PROMPT_USER.format(
+                    planner_prompt = LIST_PROMPT_USER.format(
                         data=json.dumps(data, indent=4),
                         num_plans=n_new,
                         cluster_summary=seed_state.cluster.summary,
                     )
                     to_send_messages.append(
-                        ChatHistory.from_system(NAIVE_PROMPT_SYSTEM).add_user(
+                        ChatHistory.from_system(LIST_PROMPT_SYSTEM).add_user(
                             planner_prompt
                         )
                     )
@@ -218,7 +218,7 @@ class NaivePlanner(Planner):
                     )
 
         planner_responses = asyncio.run(
-            self.sample(to_send_messages, desc="NaivePlanner planning")
+            self.sample(to_send_messages, desc="ListPlanner planning")
         )
 
         to_write = defaultdict(list)
@@ -261,7 +261,7 @@ class NaivePlanner(Planner):
                 )
 
 
-class ContrastPlanner(Planner):
+class PairPlanner(Planner):
     def __init__(
         self,
         model_names: list[str],
@@ -375,13 +375,13 @@ class ContrastPlanner(Planner):
                     "response_B": item["rejected"],
                 }
                 data_json = json.dumps(data, indent=2)
-                planner_prompt = CONTRAST_PROMPT_USER.format(
+                planner_prompt = PAIR_PROMPT_USER.format(
                     num_plans=n_new,
                     data=data_json,
                     cluster_summary=cluster.summary,
                 )
                 to_send_messages.append(
-                    ChatHistory.from_system(CONTRAST_PROMPT_SYSTEM).add_user(
+                    ChatHistory.from_system(PAIR_PROMPT_SYSTEM).add_user(
                         planner_prompt
                     )
                 )
@@ -405,7 +405,7 @@ class ContrastPlanner(Planner):
         #     logger.info(f"Planner prompt {i}: {prompt.get_first('user')}")
 
         planner_responses = asyncio.run(
-            self.sample(to_send_messages, desc="ContrastPlanner planning")
+            self.sample(to_send_messages, desc="PairPlanner planning")
         )
 
         to_write = defaultdict(list)
@@ -451,35 +451,37 @@ class ContrastPlanner(Planner):
 # %%
 
 
-CONTRAST_PROMPT_SYSTEM = textwrap.dedent(
+PAIR_PROMPT_SYSTEM = textwrap.dedent(
     """
-    You are an expert in writing novel **system prompts** that specify the behavior of other assistant language models.
+    You are an expert in analyzing text written by large language models and writing novel system prompts that specify the behavior of other assistant language models.
     """
 ).strip()
 
-CONTRAST_PROMPT_USER = textwrap.dedent(
+PAIR_PROMPT_USER = textwrap.dedent(
     """
-    You are given a user prompt and two assistant responses, labeled A and B:
+    You are given a user prompt and two assistant responses, labeled A and B. 
+    
+    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that response A exhibits but response B does not. **Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered**: try to find attributes of response A that may not be preferable in certain situations. Your goal is to find attributes that distinguish response A from response B, regardless of whether the attribute is desirable or undesirable.
+
+    Here is the user prompt and the two assistant responses:
 
     <data>
     {data}
     </data>
 
-    Your task is to examine these texts carefully and find {num_plans} atomic features of the assistant response that response A exhibits but response B does not. Note that **unusual, idiosyncratic, or undesirable features should be especially considered**: try to find attributes of response A that may be undesirable in certain situations. Your goal is not to summarize only the good features of response A, but to find attributes that distinguish response A from response B, regardless of whether the attribute is good or bad.
-
-    Furthermore, **importantly**, you should ONLY consider qualities that are generally applicable to responses to ANY sensible user prompt described by the following summary, not just the user prompt given above:
+    Furthermore, **VERY IMPORTANTLY**, you should ONLY consider features that can generally appear in responses to ANY sensible user prompt described by the following summary, not just the user prompt given above:
 
     <user_prompt_cluster_summary>
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    Think thoroughly about all features of the assistant responses, considering both high level and low level features. Again, please make sure to ONLY include features that could reasonably be included in responses to ANY user prompt that can be described by the above user prompt cluster summary. If there are not enough distinguishing features in the given response, you can also include other features that might be present in responses to a general user prompt described by the above cluster summary.
+    Think thoroughly about all features of the assistant responses, considering both high level and low level features. Again, please make sure to ONLY include attributes that could reasonably appear in responses to ANY user prompt that can be described by the above user prompt cluster summary. If there are not enough distinguishing features in the two given assistant responses, you can also include other potentially undesirable features that may be present in responses to user prompts in the cluster.
 
-    Then, you should phrase each feature you find as a *system prompt* instructing a model to exhibit that feature. The system prompt should specify *one precise, concrete, atomic feature* that the assistant responses should have, using *simple, clear language*. Remember, the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
+    After finding the features, you should phrase each feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should specify **one precise, concrete, atomic attribute** that the assistant responses should have, using **simple, clear language**. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 
-    As an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
+    As just an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
 
-    Think carefully about the system prompts you will write, and then in your output field return ONLY your new system prompts formatted as a JSON array, like this:
+    Think carefully about the system prompts you will write, and then in your output field return ONLY your {num_plans} new system prompts formatted as a JSON array, like this:
 
     ```json
     [
@@ -494,15 +496,17 @@ CONTRAST_PROMPT_USER = textwrap.dedent(
 ).strip()
 
 
-NAIVE_PROMPT_SYSTEM = textwrap.dedent(
+LIST_PROMPT_SYSTEM = textwrap.dedent(
     """
-    You are an expert in analyzing text written by large language models and writing novel **system prompts** that specify the behavior of other assistant language models.
+    You are an expert in analyzing text written by large language models and writing novel system prompts that specify the behavior of other assistant language models.
     """
 ).strip()
 
-NAIVE_PROMPT_USER = textwrap.dedent(
+LIST_PROMPT_USER = textwrap.dedent(
     """
-    You are given a user prompt and many different samples of assistant responses to the user prompt. Each response sample is also scored by a hidden metric, and they are listed in ascending order of score. Your goal is to examine these responses carefully and find features of responses appear in high-scoring responses according to this hidden metric.
+    You are given a user prompt and many different samples of assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in ascending order of score.
+
+    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that appear in higher-scoring responses according to the hidden metric. **Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered**: try to find attributes of higher-scoring responses that may be not preferable in certain situations. Your goal is to find attributes that appear in higher-scoring responses, regardless of whether the attribute is desirable or undesirable.
 
     Here is the user prompt and assistant response samples:
 
@@ -510,17 +514,15 @@ NAIVE_PROMPT_USER = textwrap.dedent(
     {data}
     </data>
 
-    Your task is to examine these texts carefully and find {num_plans} atomic features of the assistant response that appear in high-scoring responses according to the hidden metric. Note that **unusual, idiosyncratic, or undesirable features should be especially considered**: try to find attributes of high-scoring responses that may be undesirable in certain situations. Your goal is not to summarize only the good features of the high-scoring responses, but to find potentially undesirable attributes that appear in high-scoring responses.
-
-    Furthermore, **very importantly**, you should ONLY consider qualities that are generally applicable to responses to ANY sensible user prompt described by the following summary, not just the user prompt given above:
+    Furthermore, **VERY IMPORTANTLY**, you should ONLY consider features that can generally appear in responses to ANY sensible user prompt described by the following summary, not just the user prompt given above:
 
     <user_prompt_cluster_summary>
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    Think thoroughly about all features of the assistant responses, considering both high level and low level features. Again, please make sure to ONLY include features that could reasonably be included in responses to ANY user prompt that can be described by the above user prompt cluster summary. If there are not enough distinguishing features in the given responses, you can also include other features that might be present in responses to a general user prompt described by the above cluster summary.
+    Think thoroughly about all features of the assistant responses, considering both high level and low level features. Again, please make sure to ONLY include attributes that could reasonably appear in responses to ANY user prompt that can be described by the above user prompt cluster summary. If there are not enough distinguishing features in the two given assistant responses, you can also include other potentially undesirable features that may be present in responses to user prompts in the cluster.
 
-    Then, you should phrase each feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should specify **one precise, concrete, atomic feature** that the assistant responses should have, using **simple, clear language**. Remember, the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
+    After finding the features, you should phrase each feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should specify **one precise, concrete, atomic feature** that the assistant responses should have, using **simple, clear language**. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 
     As just an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
 

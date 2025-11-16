@@ -336,7 +336,7 @@ class JudgeModel(GenerationModel):
             if (not resp.has_response) or (resp.finish_reason != "stop"):
                 outputs.append(to_send_chats[i])
                 continue
-            outputs.append(chat_histories[i].add_assistant(resp.first_response))  # type: ignore
+            outputs.append(to_send_chats[i].add_assistant(resp.first_response))  # type: ignore
 
         num_1_wins = 0
         total_trials = 0
