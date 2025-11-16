@@ -163,9 +163,7 @@ class RewriteModel(GenerationModel):
             )
         )
 
-        logger.info(
-            f"[RewriteModel] Sending 1 rewrite request to model {self.model_name}."
-        )
+        logger.debug(f"[RewriteModel] Sending 1 rewrite request to model {self.model_name}.")
         responses = await self.sample([to_send_chats])
         if responses[0] is None:
             return None

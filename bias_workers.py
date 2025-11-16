@@ -191,7 +191,8 @@ async def rating_worker(
     all_futures: Mapping[str, asyncio.Future],
 ):
     done = False
-    batches_progress_left = defaultdict(int)
+    processed_counts = defaultdict(int)
+    expected_counts = defaultdict(int)
 
     while True:
         batch = []
@@ -209,12 +210,12 @@ async def rating_worker(
                         f"[rating_worker] Batch sentinel received for batch id: {item.batch_id}."
                     )
                     in_queue.task_done()
-                    batches_progress_left[item.batch_id] += item.expected_items
+                    expected_counts[item.batch_id] += item.expected_items
                     continue
 
                 if isinstance(item, PromptResult):
                     if item.assistant is None:
-                        logger.info(
+                        logger.debug(
                             f"[rating_worker] Received prompt result with no assistant response."
                         )
                     else:
@@ -224,7 +225,7 @@ async def rating_worker(
                         batch.append(item)
                 elif isinstance(item, RewriteResult):
                     if item.rewritten_assistant is None:
-                        logger.info(
+                        logger.debug(
                             f"[rating_worker] Received rewritten result with no assistant response."
                         )
                     else:
@@ -233,7 +234,7 @@ async def rating_worker(
                         )
                         batch.append(item)
 
-                batches_progress_left[item.batch_id] -= 1
+                processed_counts[item.batch_id] += 1
                 in_queue.task_done()
 
         except asyncio.TimeoutError:
@@ -243,7 +244,7 @@ async def rating_worker(
             # nothing to process yet; continue collecting
             continue
 
-        logger.info(f"[rating_worker] Processing batch of size {len(batch)}...")
+        logger.debug(f"[rating_worker] Processing batch of size {len(batch)}...")
         chat_histories = []
         for result in batch:
             if isinstance(result, PromptResult):
@@ -256,20 +257,25 @@ async def rating_worker(
             for result, reward_score in zip(batch, reward_scores):
                 all_results[result.batch_id].append(replace(result, score=reward_score.score))  # type: ignore
 
-        logger.info(f"[rating_worker] Finished processing batch of size {len(batch)}.")
+        logger.info(f"[rating_worker] Finished processing minibatch of size {len(batch)}.")
 
         completed_batch_ids = []
-        for batch_id, progress_left in list(batches_progress_left.items()):
-            logger.info(
-                f"[rating_worker] Batch {batch_id} has {progress_left} items left to process."
-            )
-            if progress_left == 0:
+        for batch_id, expected in list(expected_counts.items()):
+            processed = processed_counts.get(batch_id, 0)
+            if processed >= expected:
                 all_futures[batch_id].set_result(all_results[batch_id])
                 completed_batch_ids.append(batch_id)
+                logger.info(f"[rating_worker] Batch {batch_id} completed: {processed}/{expected}.")
+            else:
+                logger.debug(
+                    f"[rating_worker] Batch {batch_id} progress: {processed}/{expected}."
+                )
 
         for batch_id in completed_batch_ids:
             del all_results[batch_id]  # type: ignore
-            del batches_progress_left[batch_id]
+            if batch_id in processed_counts:
+                del processed_counts[batch_id]
+            del expected_counts[batch_id]
 
         if done:
             logger.info("[rating_worker] Final item processed. Shutting down.")

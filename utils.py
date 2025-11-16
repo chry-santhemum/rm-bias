@@ -257,6 +257,7 @@ class ClusterModel:
         )
 
     def embed(self, inputs: list[str]) -> np.ndarray:
+        """Returns: [n_inputs, d_embed]"""
         return self.embedding_model.encode(inputs)  # type: ignore
 
     def reduce_embed(self, inputs: list[str]) -> np.ndarray:
