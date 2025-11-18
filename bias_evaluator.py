@@ -2,13 +2,11 @@
 import json
 import time
 import asyncio
-import uuid
 from itertools import product
 from pathlib import Path
 import logging
 import numpy as np
 import plotly.graph_objects as go
-from typing import Mapping, Sequence
 
 from utils import logging_setup, timestamp, remove_outliers
 from models import RewriteModel
@@ -20,26 +18,28 @@ from bias_workers import (
     RewriteResult,
     rewrite_worker,
     rating_worker,
-    evaluate_baselines,
     organize_rewrite_results,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class BiasEvaluator:
 
+
+class BiasEvaluator:
     def __init__(
         self,
         rewrite_model: RewriteModel,
         reward_model: RewardModel,
+        n_rewrite_workers: int,
     ):
         self.rewrite_model = rewrite_model
         self.reward_model = reward_model
-        self.batch_id = 0
+        self._batch_id = 0
         self._batch_id_lock = asyncio.Lock()
+        self.n_rewrite_workers = n_rewrite_workers
 
-        # defer queues and worker startup until inside a running event loop
+        # Defer queues and worker startup until inside a running event loop
         self._workers_started = False
         self.queue_input: asyncio.Queue | None = None
         self.queue_rewrite: asyncio.Queue | None = None
@@ -52,25 +52,31 @@ class BiasEvaluator:
         if self._workers_started:
             return
 
-        # must be called from within a running event loop
         self.queue_input = asyncio.Queue(maxsize=2 * self.rewrite_model.max_par)
         self.queue_rewrite = asyncio.Queue(maxsize=2 * self.rewrite_model.max_par)
-        
+
         self.rewrite_workers = [
             asyncio.create_task(
                 rewrite_worker(
-                    self.rewrite_model, self.queue_input, self.queue_rewrite, worker_id
+                    rewrite_model=self.rewrite_model,
+                    batch_size=max(
+                        1, self.rewrite_model.max_par // self.n_rewrite_workers
+                    ),
+                    in_queue=self.queue_input,
+                    out_queue=self.queue_rewrite,
+                    worker_id=worker_id,
                 )
             )
-            for worker_id in range(self.rewrite_model.max_par)
+            for worker_id in range(self.n_rewrite_workers)
         ]
 
+        # Single logical rating worker that internally shards across devices.
         self.rating_worker = asyncio.create_task(
             rating_worker(
                 self.reward_model,
                 self.queue_rewrite,
                 self.batch_results,
-                self.batch_futures
+                self.batch_futures,
             )
         )
         self._workers_started = True
@@ -79,8 +85,8 @@ class BiasEvaluator:
         self,
         user_prompts: list[str],
         attributes: list[str],
-        baseline_rollouts: dict[str, list[Rollout]],
-        n_rollouts: int | None = None,
+        baselines: dict[str, list[Rollout]],
+        n_rollouts: int | None = None,  # number of baseline responses to rewrite
         save_dir: Path | None = None,
     ):
         start_time = time.time()
@@ -88,15 +94,31 @@ class BiasEvaluator:
 
         # Generate batch ID and asyncio.Future (protected by lock)
         async with self._batch_id_lock:
-            batch_id = str(self.batch_id)
+            batch_id = str(self._batch_id)
             self.batch_results[batch_id] = []
             loop = asyncio.get_running_loop()
             self.batch_futures[batch_id] = loop.create_future()
-            self.batch_id += 1
+            self._batch_id += 1
+
+        # Pre-compute expected results so the rating worker learns expectations early
         expected_result_count = 0
+        for user in user_prompts:
+            n_user_rollouts = (
+                min(n_rollouts, len(baselines[user]))
+                if n_rollouts is not None
+                else len(baselines[user])
+            )
+            expected_result_count += n_user_rollouts * len(attributes)
+
+        # Inform the rating worker of expected results immediately to avoid blockage on input queue
+        logger.info(f"Batch {batch_id} expects {expected_result_count} results...")
+        assert self.queue_rewrite is not None
+        await self.queue_rewrite.put(
+            BatchSentinel(batch_id=batch_id, expected_items=expected_result_count)
+        )
 
         for user, attribute in product(user_prompts, attributes):
-            for i, original_assistant in enumerate(baseline_rollouts[user]):
+            for i, original_assistant in enumerate(baselines[user]):
                 if n_rollouts is not None and i >= n_rollouts:
                     break
                 assert self.queue_input is not None
@@ -109,22 +131,14 @@ class BiasEvaluator:
                         batch_id=batch_id,
                     )
                 )
-                expected_result_count += 1
-
-        # Send batch task completion sentinel
-        logger.info(f"Batch {batch_id} expects {expected_result_count} results...")
-        assert self.queue_input is not None
-        await self.queue_input.put(
-            BatchSentinel(batch_id=batch_id, expected_items=expected_result_count)
-        )
 
         # Wait for results for this batch
         batch_results = await self.batch_futures[batch_id]
         logger.info(
-            f"Expected {expected_result_count} results, got {len(batch_results)}"
+            f"Batch {batch_id}: Expected {expected_result_count} results, got {len(batch_results)}"
         )
         organized_results = organize_rewrite_results(
-            batch_results, baseline_rollouts, n_rollouts, save_dir
+            batch_results, baselines, n_rollouts, save_dir
         )
         del self.batch_futures[batch_id]  # type: ignore
 
@@ -157,66 +171,6 @@ class BiasEvaluator:
         await self.shutdown()
         return False
 
-
-async def main():
-    logging_setup(
-        filename=f"logs/scrap/rewrite_different_models_{timestamp()}.log",
-        level=logging.INFO,
-        console=False,
-    )
-    run_name = "20251101-070815-synthetic_2"
-    reward_model = RewardModel(model_name="skywork-v2", batch_size=32)
-    model1 = RewriteModel(
-        # model_name="google/gemini-2.5-flash-preview-09-2025",
-        model_name="google/gemini-2.5-flash-lite-preview-09-2025",
-        max_par=512,
-        reasoning=4096,
-    )
-    model2 = RewriteModel(
-        model_name="x-ai/grok-4-fast",
-        max_par=512,
-        reasoning="medium",
-    )
-
-    with open(f"data/evo/{run_name}/val_baselines/baseline_results.json", "r") as f:
-        baselines_json = json.load(f)
-
-    val_baselines = dict()
-    for user, rollouts in baselines_json.items():
-        val_baselines[user] = [
-            Rollout(response=rollout["response"], score=rollout["score"])
-            for rollout in rollouts
-        ]
-
-    seed_ids = [1, 8, 9, 14]
-
-    for rewrite_model in [model1, model2]:
-        async with BiasEvaluator(rewrite_model, reward_model) as evaluator:
-            tasks = []
-            for seed_id in seed_ids:
-                with open(
-                    f"data/evo/{run_name}/validate/seed_{seed_id}_validate/rewrite_plus_results.json",
-                    "r",
-                ) as f:
-                    past_validation_json = json.load(f)
-
-                attributes = list(past_validation_json.keys())
-                user_prompts = list(past_validation_json[attributes[0]].keys())
-
-                tasks.append(
-                    asyncio.create_task(
-                        evaluator.evaluate_attributes(
-                            user_prompts=user_prompts,
-                            attributes=attributes,
-                            baseline_rollouts=val_baselines,
-                            save_dir=Path(
-                                f"data/evo/{run_name}/validate/seed_{seed_id}_validate_{rewrite_model.model_slug}"
-                            ),
-                        )
-                    )
-                )
-
-            await asyncio.gather(*tasks)
 
 
 def plot_seed_validation_data(
@@ -303,8 +257,6 @@ def plot_seed_validation_data(
 
     # For each attribute, add violin plots for each model
     for attr_idx, attribute in enumerate(attributes):
-        wrapped_attr = wrap_text(attribute, width=60)
-
         for model_idx, model_data in enumerate(all_model_data):
             validate_results = model_data["validate"]
             judge_results = model_data["judge"]
@@ -329,13 +281,6 @@ def plot_seed_validation_data(
 
             # Remove outliers
             attribute_diffs = remove_outliers(attribute_diffs)
-
-            # Create x-axis label with winrate
-            if model_idx == 0:
-                # Only show attribute name on first model's violin
-                x_label = f"{wrapped_attr}<br>{model_data['name']}<br>(WR: {np.mean(winrates):.2f})"
-            else:
-                x_label = f"{model_data['name']}<br>(WR: {np.mean(winrates):.2f})"
 
             fig.add_trace(
                 go.Violin(

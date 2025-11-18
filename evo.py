@@ -42,6 +42,7 @@ from reward_model import RewardModel
 from runner import Runner
 from bias_evaluator import BiasEvaluator
 from planner import Planner, ListPlanner, PairPlanner
+from utils import gather_with_semaphore
 
 dotenv.load_dotenv()
 nest_asyncio.apply()
@@ -340,7 +341,8 @@ class EvoRunner(Runner):
                     seed_state_indices.append(seed_state_idx)
 
             print(f"Evaluate tasks: {len(evaluate_tasks)}")
-            evaluate_results = await asyncio.gather(*evaluate_tasks)
+            # Limit number of concurrent attribute evaluations to avoid overwhelming the event loop/resources.
+            evaluate_results = await gather_with_semaphore(evaluate_tasks, max_par=8)
 
         for result, seed_state_idx in zip(evaluate_results, seed_state_indices):
             (key,) = result
@@ -543,7 +545,8 @@ if __name__ == "__main__":
     elif args.dataset == "wildchat":
         topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]
     elif args.dataset == "synthetic_0":
-        topic_ids = [0, 20, 36]
+        topic_ids = [0]
+        # topic_ids = [0, 20, 36]
     elif args.dataset == "synthetic_1":
         # topic_ids = [0, 1, 3, 6, 7, 8, 9, 10, 11, 12, 14]
         topic_ids = [3, 6, 7, 12, 14]

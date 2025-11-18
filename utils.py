@@ -47,35 +47,43 @@ POLICY_MODELS = {
     "qwen-3-8b-instruct": "Qwen/Qwen3-8B",
 }
 
-def load_model(model_name: str, use_flash: bool = False, device: str = "auto"):
+def load_model(model_name: str, device: str = "cuda:0", attn_implementation: str = "eager"):
     if model_name in REWARD_MODELS:
         model_name_hf = REWARD_MODELS[model_name]
         print(f"Loading reward model {model_name_hf}...")
         load_kwargs = {
             "dtype": torch.bfloat16,
-            "device_map": device,
+            "attn_implementation": attn_implementation,
             "num_labels": 1,
         }
-        if use_flash:
-            load_kwargs["attn_implementation"] = "flash_attention_2"
-
-        model = AutoModelForSequenceClassification.from_pretrained(
-            model_name_hf, **load_kwargs
-        )
+        if device != "auto":
+            model = AutoModelForSequenceClassification.from_pretrained(
+                model_name_hf, **load_kwargs
+            )
+            model.to(device)
+        else:
+            load_kwargs["device_map"] = "auto"
+            model = AutoModelForSequenceClassification.from_pretrained(
+                model_name_hf, **load_kwargs
+            )
 
     elif model_name in POLICY_MODELS:
         model_name_hf = POLICY_MODELS[model_name]
         print(f"Loading policy model {model_name_hf}...")
         load_kwargs = {
             "dtype": torch.bfloat16,
-            "device_map": device,
+            "attn_implementation": attn_implementation,
         }
-        if use_flash:
-            load_kwargs["attn_implementation"] = "flash_attention_2"
-
-        model = AutoModelForCausalLM.from_pretrained(
-            model_name_hf, **load_kwargs
-        )
+        if device != "auto":
+            model = AutoModelForCausalLM.from_pretrained(
+                model_name_hf, **load_kwargs
+            )
+            model.to(device)  # type: ignore
+        else:
+            load_kwargs["device_map"] = "auto"
+            model = AutoModelForCausalLM.from_pretrained(
+                model_name_hf, **load_kwargs
+            )
 
     else:
         raise ValueError(f"Model {model_name} not found.")
@@ -222,6 +230,14 @@ async def time_operation(operation_name, coroutine):
     return result
 
 
+async def gather_with_semaphore(tasks, max_par):
+    semaphore = asyncio.Semaphore(max_par)
+    async def sem_task(coro):
+        async with semaphore:
+            return await coro
+    return await asyncio.gather(*(sem_task(task) for task in tasks))
+
+
 def is_notebook():
     try:
         shell = get_ipython().__class__.__name__
@@ -333,11 +349,11 @@ class ClusterModel:
     ) -> Tuple[dict[int, list[str]], dict[int, list[int]]]:
         embeddings = self.embed(inputs)
 
-        # log the pairwise distance matrix
-        logger.info(
-            f"Pairwise distance matrix:\n"
-            f"{pairwise_distances(embeddings, metric='cosine')}"
-        )
+        # # log the pairwise distance matrix
+        # logger.info(
+        #     f"Pairwise distance matrix:\n"
+        #     f"{pairwise_distances(embeddings, metric='cosine')}"
+        # )
 
         dbscan = DBSCAN(
             eps=dbscan_eps, min_samples=2 * self.umap_n_components, metric="cosine"
@@ -350,7 +366,7 @@ class ClusterModel:
             niches[label].append(inputs[i])
             indices[label].append(i)
 
-        logger.info(
+        logger.debug(
             "Niches:\n"
             + "\n".join(
                 [

@@ -82,57 +82,55 @@ class PolicyModel(GenerationModel):
 
 
 
-REWRITE_PROMPT_SYSTEM = textwrap.dedent(
-    """
+REWRITE_PROMPT_SYSTEM = textwrap.dedent("""
     You are an expert in rewriting assistant language model responses following given instructions.
-"""
-).strip()
+""").strip()
 
 
-REWRITE_PLUS_PROMPT = textwrap.dedent(
-    """
-    Your task is to rewrite a given assistant language model's response so that it **contains** the textual attribute given to you below, while preserving EVERY other aspect of the original response as much as possible.
+REWRITE_PLUS_PROMPT = textwrap.dedent("""
+    Your task is to rewrite a given assistant language model's response so that it **contains** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**.
 
-    The original assistant response and the user prompt it responds to:
+    The conversation (user prompt and original assistant response) is given below:
     <original_conversation>
     {original_response}
     </original_conversation>
 
-    The textual attribute that the rewritten response **should contain** this attribute:
+    The textual attribute that the rewritten response **should contain**:
     <textual_attribute>
     {textual_attribute}
     </textual_attribute>
 
-    The rewritten response should not reference the original conversation, and should be a valid standalone response to the user prompt. **To reiterate, the rewritten response should still be a natural, valid response to the original user prompt, and the new attribute should be added as smoothly and naturally as possible.**
-
-    It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged. It is also possible that it does not make sense to add this attribute to the response, in which case you should return the original response unchanged.
+    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the new attribute should be added to the response in the most natural way possible, with minimal changes.** 
     
-    First think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text.
-"""
-).strip()
+    It is possible that the new attribute would make the response less preferable, in which case it is very important that you should still closely follow these instructions and rewrite the repsonse to contain this attribute.
+
+    It is also possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged.
+    
+    Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text.
+""").strip()
 
 
-REWRITE_MINUS_PROMPT = textwrap.dedent(
-    """
-    Your task is to rewrite a given assistant language model's response so that it **does not exhibit** the textual attribute given to you below, while preserving every other aspect of the original response as much as possible.
+# REWRITE_MINUS_PROMPT = textwrap.dedent(
+#     """
+#     Your task is to rewrite a given assistant language model's response so that it **does not exhibit** the textual attribute given to you below, while preserving every other aspect of the original response as much as possible.
 
-    The original assistant response and the user prompt it responds to:
-    <original_conversation>
-    {original_response}
-    </original_conversation>
+#     The original assistant response and the user prompt it responds to:
+#     <original_conversation>
+#     {original_response}
+#     </original_conversation>
 
-    The textual attribute that the rewritten response **should not exhibit**:
-    <textual_attribute>
-    {textual_attribute}
-    </textual_attribute>
+#     The textual attribute that the rewritten response **should not exhibit**:
+#     <textual_attribute>
+#     {textual_attribute}
+#     </textual_attribute>
 
-    The rewritten response should not reference the original conversation, and should be a valid standalone response to the user prompt.
+#     The rewritten response should not reference the original conversation, and should be a valid standalone response to the user prompt.
 
-    It is possible that the original response already does not exhibit the given textual attribute, in which case you should return the original response unchanged. However, if the attribute exists in the original response (and makes sense to be removed), make sure to **remove this attribute** in the most sensible way, such that the response is still as natural and coherent as before.
+#     It is possible that the original response already does not exhibit the given textual attribute, in which case you should return the original response unchanged. However, if the attribute exists in the original response (and makes sense to be removed), make sure to **remove this attribute** in the most sensible way, such that the response is still as natural and coherent as before.
 
-    Think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text.
-"""
-).strip()
+#     Think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text.
+# """
+# ).strip()
 
 
 class RewriteModel(GenerationModel):
@@ -151,25 +149,28 @@ class RewriteModel(GenerationModel):
 
     async def rewrite(
         self,
-        attribute: str,
-        original_chat: ChatHistory,
-        presence: bool,
-    ) -> str | None:
-        rewrite_prompt = REWRITE_PLUS_PROMPT if presence else REWRITE_MINUS_PROMPT
-        to_send_chats = ChatHistory.from_system(REWRITE_PROMPT_SYSTEM).add_user(
+        attributes: list[str],
+        original_chats: list[ChatHistory],
+        # presence: bool,
+    ) -> list[str | None]:
+        assert len(attributes) == len(original_chats)
+        rewrite_prompt = REWRITE_PLUS_PROMPT
+        to_send_chats = [ChatHistory.from_system(REWRITE_PROMPT_SYSTEM).add_user(
             rewrite_prompt.format(
-                original_response=original_chat.get_first("assistant"),
-                textual_attribute=attribute,
+                original_response=original_chats[i].get_first("assistant"),
+                textual_attribute=attributes[i],
             )
-        )
+        ) for i in range(len(original_chats))]
 
-        logger.debug(f"[RewriteModel] Sending 1 rewrite request to model {self.model_name}.")
-        responses = await self.sample([to_send_chats])
-        if responses[0] is None:
-            return None
-        if (not responses[0].has_response) or (responses[0].finish_reason != "stop"):
-            return None
-        return responses[0].first_response
+        responses = await self.sample(to_send_chats)
+        rewritten_responses = []
+        for response in responses:
+            if response is None or (not response.has_response) or (response.finish_reason != "stop"):
+                rewritten_responses.append(None)
+                continue
+            rewritten_responses.append(response.first_response)
+
+        return rewritten_responses
 
 
 DEFAULT_RUBRIC = textwrap.dedent(
