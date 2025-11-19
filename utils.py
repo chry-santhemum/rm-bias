@@ -286,12 +286,6 @@ class ClusterModel:
     def cluster(self, inputs: list[str], n_clusters: int) -> list[dict[str, Any]]:
         reduced_embeddings = self.reduce_embed(inputs)
 
-        # # log the pairwise distance matrix
-        # logger.info(
-        #     f"Pairwise distance matrix:\n"
-        #     f"{pairwise_distances(reduced_embeddings, metric='cosine')}"
-        # )
-
         kmeans = KMeans(
             n_clusters=min(len(inputs), n_clusters), random_state=10086, n_init="auto"
         )

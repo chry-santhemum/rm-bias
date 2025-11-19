@@ -11,7 +11,7 @@ from load_cluster import load_initial_seed_states
 from utils import timestamp, logging_setup, async_gather, ClusterModel
 from state import SeedState, Rollout, AttributeStats
 from models import PolicyModel, RewriteModel, JudgeModel
-from reward_model import RewardModel
+from reward_models import RewardModel
 from runner import Runner
 from one_turn import OneTurnPlanner
 

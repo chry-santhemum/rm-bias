@@ -10,15 +10,15 @@ import plotly.graph_objects as go
 
 from utils import logging_setup, timestamp, remove_outliers
 from models import RewriteModel
-from reward_model import RewardModel
+from reward_models import RewardModel
 from state import Rollout
 from bias_workers import (
-    BatchSentinel,
+    BatchMarker,
     RewriteInput,
     RewriteResult,
     rewrite_worker,
     rating_worker,
-    organize_rewrite_results,
+    organize_rewrites,
 )
 
 logger = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ class BiasEvaluator:
             return
 
         self.queue_input = asyncio.Queue(maxsize=2 * self.rewrite_model.max_par)
-        self.queue_rewrite = asyncio.Queue(maxsize=2 * self.rewrite_model.max_par)
+        self.queue_rewrite = asyncio.Queue()
 
         self.rewrite_workers = [
             asyncio.create_task(
@@ -70,7 +70,6 @@ class BiasEvaluator:
             for worker_id in range(self.n_rewrite_workers)
         ]
 
-        # Single logical rating worker that internally shards across devices.
         self.rating_worker = asyncio.create_task(
             rating_worker(
                 self.reward_model,
@@ -89,8 +88,8 @@ class BiasEvaluator:
         n_rollouts: int | None = None,  # number of baseline responses to rewrite
         save_dir: Path | None = None,
     ):
-        start_time = time.time()
         await self._ensure_workers_started()
+        start_time = time.time()
 
         # Generate batch ID and asyncio.Future (protected by lock)
         async with self._batch_id_lock:
@@ -110,11 +109,11 @@ class BiasEvaluator:
             )
             expected_result_count += n_user_rollouts * len(attributes)
 
-        # Inform the rating worker of expected results immediately to avoid blockage on input queue
+        # Send this information to the rating worker
         logger.info(f"Batch {batch_id} expects {expected_result_count} results...")
         assert self.queue_rewrite is not None
         await self.queue_rewrite.put(
-            BatchSentinel(batch_id=batch_id, expected_items=expected_result_count)
+            BatchMarker(batch_id=batch_id, expected_items=expected_result_count)
         )
 
         for user, attribute in product(user_prompts, attributes):
@@ -137,12 +136,12 @@ class BiasEvaluator:
         logger.info(
             f"Batch {batch_id}: Expected {expected_result_count} results, got {len(batch_results)}"
         )
-        organized_results = organize_rewrite_results(
+        organized_results = organize_rewrites(
             batch_results, baselines, n_rollouts, save_dir
         )
         del self.batch_futures[batch_id]  # type: ignore
 
-        logger.info(f"Attributes evaluated in {(time.time() - start_time):.2f} seconds")
+        logger.info(f"Batch {batch_id}: evaluated in {(time.time() - start_time):.2f} seconds")
         return organized_results
 
     async def shutdown(self):
@@ -150,7 +149,7 @@ class BiasEvaluator:
             return
 
         assert self.queue_input is not None and self.queue_rewrite is not None
-        for _ in range(self.rewrite_model.max_par):
+        for _ in range(self.n_rewrite_workers):
             await self.queue_input.put(None)  # Sentinel values for rewrite_workers
 
         await asyncio.gather(*self.rewrite_workers)

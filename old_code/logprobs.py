@@ -13,7 +13,7 @@ import torch.nn.functional as F
 from transformers import AutoTokenizer
 
 from caller import OpenRouterCaller, ChatHistory
-from reward_model import RewardModel
+from reward_models import RewardModel
 from utils import load_model
 from standard_prompts import make_prompt_mix
 

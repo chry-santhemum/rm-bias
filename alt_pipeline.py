@@ -10,7 +10,7 @@ from state import Rollout
 from utils import ClusterModel
 from load_cluster import load_initial_seed_states
 from caller import OpenRouterCaller, ChatHistory
-from reward_model import RewardModel
+from reward_models import RewardModel
 from models import PolicyModel, RewriteModel, JudgeModel
 from one_turn import OneTurnPlanner
 from runner import TestRunner

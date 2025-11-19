@@ -16,26 +16,13 @@ from dataclasses import asdict
 from caller import ChatHistory
 from state import PromptCluster
 from utils import parse_json_response
+from models import CACHE_CONFIG, RETRY_CONFIG
 from caller import OpenRouterCaller, CacheConfig, RetryConfig
 
 nest_asyncio.apply()
 
 
-cache_config = CacheConfig(
-    no_cache_models={
-        "meta-llama/llama-3.1-8b-instruct",
-        "meta-llama/llama-3.1-70b-instruct",
-    }
-)
-
-retry_config = RetryConfig(
-    raise_when_exhausted=False,
-    criteria=lambda response: response.has_response
-    and response.finish_reason == "stop",
-    max_attempts=3,
-)
-
-caller = OpenRouterCaller(cache_config=cache_config, retry_config=retry_config, dotenv_path=".env")
+caller = OpenRouterCaller(cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG, dotenv_path=".env")
 
 
 CATEGORIES = {

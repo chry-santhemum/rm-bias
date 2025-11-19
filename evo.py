@@ -38,7 +38,7 @@ from utils import (
 )
 from load_cluster import load_initial_seed_states
 from models import PolicyModel, RewriteModel, JudgeModel
-from reward_model import RewardModel
+from reward_models import RewardModel, LocalRewardModel
 from runner import Runner
 from bias_evaluator import BiasEvaluator
 from planner import Planner, ListPlanner, PairPlanner
@@ -215,38 +215,38 @@ class EvoPlanner(ListPlanner):
                     )
                 )
 
-                _, indices = self.cluster_model.cluster_dbscan(
-                    [cand[0] for cand in candidates], dbscan_eps
+            _, indices = self.cluster_model.cluster_dbscan(
+                [cand[0] for cand in candidates], dbscan_eps
+            )
+
+            # Select the best candidate from each niche
+            representatives = []
+            for label, member_indices in indices.items():
+                if label == -1:
+                    # These are noise points; we'll handle them separately
+                    continue
+
+                # Sort members of the niche by score and select the top one
+                members = [candidates[i] for i in member_indices]
+                best_in_niche = max(members, key=lambda x: x[2])
+
+                representatives.append(best_in_niche)
+                logger.info(
+                    f"Niche {label}: Selected '{best_in_niche[0]}' with score {best_in_niche[2]}"
                 )
 
-                # Select the best candidate from each niche
-                representatives = []
-                for label, member_indices in indices.items():
-                    if label == -1:
-                        # These are noise points; we'll handle them separately
-                        continue
+            # Handle outliers (prompts labeled as -1)
+            outliers = [candidates[i] for i in indices[-1]]
+            outliers.sort(key=lambda x: x[2], reverse=True)
 
-                    # Sort members of the niche by score and select the top one
-                    members = [candidates[i] for i in member_indices]
-                    best_in_niche = max(members, key=lambda x: x[2])
+            # Combine the best from niches and the best outliers
+            combined_selection = representatives + outliers
+            combined_selection.sort(key=lambda x: x[2], reverse=True)
+            final_candidates = combined_selection[:n_pop_target]
 
-                    representatives.append(best_in_niche)
-                    logger.info(
-                        f"Niche {label}: Selected '{best_in_niche[0]}' with score {best_in_niche[2]}"
-                    )
-
-                # Handle outliers (prompts labeled as -1)
-                outliers = [candidates[i] for i in indices[-1]]
-                outliers.sort(key=lambda x: x[2], reverse=True)
-
-                # Combine the best from niches and the best outliers
-                combined_selection = representatives + outliers
-                combined_selection.sort(key=lambda x: x[2], reverse=True)
-                final_candidates = combined_selection[:n_pop_target]
-
-                seed_state.state = {
-                    attribute: time_step for attribute, time_step, _ in final_candidates
-                }
+            seed_state.state = {
+                attribute: time_step for attribute, time_step, _ in final_candidates
+            }
 
             logger.info(
                 f"Updated Seed {seed_state.index} population to {len(seed_state.state)} members."
@@ -334,7 +334,7 @@ class EvoRunner(Runner):
                         evaluator.evaluate_attributes(
                             user_prompts=user_prompts,
                             attributes=[attribute],
-                            baseline_rollouts=self.baselines,
+                            baselines=self.baselines,
                             n_rollouts=self.n_rewrite_rollouts,
                         )
                     )
@@ -589,7 +589,8 @@ if __name__ == "__main__":
         ),
         bias_evaluator=BiasEvaluator(
             rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=512),
-            reward_model=RewardModel(model_name="skywork-v2", batch_size=32),
+            reward_model=LocalRewardModel(model_name="skywork-v2", batch_size=32),
+            n_rewrite_workers=8,
         ),
         judge_model=JudgeModel(
             model_name="anthropic/claude-haiku-4.5", max_tokens=2048, reasoning=2000

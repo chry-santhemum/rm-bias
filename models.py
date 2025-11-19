@@ -12,14 +12,14 @@ from utils import parse_json_response
 logger = logging.getLogger(__name__)
 
 
-cache_config = CacheConfig(
+CACHE_CONFIG = CacheConfig(
     no_cache_models={
         "meta-llama/llama-3.1-8b-instruct",
         "meta-llama/llama-3.1-70b-instruct",
     }
 )
 
-retry_config = RetryConfig(
+RETRY_CONFIG = RetryConfig(
     raise_when_exhausted=False,
     criteria=lambda response: response.has_response
     and response.finish_reason == "stop",
@@ -44,7 +44,7 @@ class GenerationModel:
         self.model_slug = self.model_name.split("/")[-1]
 
         self.caller = OpenRouterCaller(
-            cache_config=cache_config, retry_config=retry_config, dotenv_path=".env"
+            cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG, dotenv_path=".env"
         )
 
     async def sample(

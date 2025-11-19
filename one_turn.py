@@ -32,7 +32,7 @@ from utils import (
 from load_cluster import load_initial_seed_states
 from models import PolicyModel, RewriteModel, JudgeModel
 from planner import Planner, ListPlanner, PairPlanner
-from reward_model import RewardModel
+from reward_models import RewardModel
 from runner import Runner
 from bias_evaluator import BiasEvaluator
 

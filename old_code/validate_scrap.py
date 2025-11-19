@@ -3,7 +3,7 @@ import json
 import logging
 from utils import timestamp, ClusterModel
 from load_cluster import load_initial_seed_states
-from reward_model import RewardModel
+from reward_models import RewardModel
 from models import PolicyModel, RewriteModel, JudgeModel
 from one_turn import OneTurnPlanner, OneTurnRunner
 

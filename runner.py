@@ -14,7 +14,7 @@ from abc import ABC, abstractmethod
 from state import SeedState, Rollout
 from utils import timestamp, logging_setup, async_gather
 from models import PolicyModel, RewriteModel, JudgeModel
-from reward_model import RewardModel
+from reward_models import RewardModel
 from load_cluster import load_initial_seed_states
 from bias_workers import evaluate_baselines
 from bias_evaluator import BiasEvaluator

@@ -21,7 +21,7 @@ from pathlib import Path
 from utils import timestamp, parse_json_response, ClusterModel
 from load_cluster import load_clusters, load_initial_seed_states
 from models import Planner, PolicyModel, JudgeModel, RewriteModel
-from reward_model import RewardModel
+from reward_models import RewardModel
 from state import SeedState, AttributeStats, Rollout
 from standard_prompts import set_seed_all
 from caller import ChatHistory

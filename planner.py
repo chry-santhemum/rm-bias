@@ -1,4 +1,4 @@
-"""Planner model classes."""
+"""Hypothesis generation (planner)."""
 
 import logging
 import random
@@ -14,46 +14,32 @@ from abc import ABC, abstractmethod
 
 from caller import OpenRouterCaller, CacheConfig, RetryConfig, ChatHistory, Response
 from state import SeedState, AttributeStats
+from models import CACHE_CONFIG, RETRY_CONFIG
 from runner import Runner
 from utils import parse_json_response, ClusterModel
 
 logger = logging.getLogger(__name__)
 
 
-cache_config = CacheConfig(
-    no_cache_models={
-        "meta-llama/llama-3.1-8b-instruct",
-        "meta-llama/llama-3.1-70b-instruct",
-    }
-)
-
-retry_config = RetryConfig(
-    raise_when_exhausted=False,
-    criteria=lambda response: response.has_response
-    and response.finish_reason == "stop",
-    max_attempts=3,
-)
-
-
 class Planner(ABC):
     def __init__(
         self,
         model_names: list[str],
-        alloy_type: Literal["round_robin", "random"],
         max_tokens: int,
         reasoning: int | str,
         max_par: int = 64,
         seed: int = 0,
+        alloy_type: Literal["round_robin", "random"] = "round_robin",
     ):
         self.model_names = model_names
-        self.alloy_type = alloy_type
         self.max_tokens = max_tokens
         self.reasoning = reasoning
         self.max_par = max_par
         self.seed = seed
+        self.alloy_type = alloy_type
 
         self.caller = OpenRouterCaller(
-            cache_config=cache_config, retry_config=retry_config, dotenv_path=".env"
+            cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG, dotenv_path=".env"
         )
         self.curr_planner_index: int = 0
 
@@ -92,16 +78,16 @@ class Planner(ABC):
 
     @staticmethod
     def cluster_plans(
-        to_write: dict[int, list[dict[str, Any]]],
+        to_write: dict[int, list[dict[str, Any]]],  # seed index -> list of candidates
         cluster_model: ClusterModel,
         n_pop: int,
     ) -> dict[int, list[dict[str, Any]]]:
         # Cluster plans for each seed using k-means into n_pop clusters
-        # then select one plan per cluster (closest to centroid)
+        # then sample a representative label for the plans in each cluster 
         to_write_new = defaultdict(list)
 
         for seed_idx, seed_plans in to_write.items():
-            logger.info(f"Clustering {len(seed_plans)} plans for seed index {seed_idx}")
+            logger.info(f"Clustering {len(seed_plans)} bias candidates for seed index {seed_idx}")
             if not seed_plans:
                 continue
 

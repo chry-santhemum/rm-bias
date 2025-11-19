@@ -1,11 +1,7 @@
-"""
-Async pipeline for generating baseline rollouts and rewards.
-"""
-
 # %%
-
 import logging
 import asyncio
+import time
 import json
 from pathlib import Path
 from collections import defaultdict
@@ -15,7 +11,7 @@ from typing import Mapping, Sequence
 import numpy as np
 from caller import ChatHistory
 from models import PolicyModel, RewriteModel
-from reward_model import RewardModel
+from reward_models import RewardModel
 from state import Rollout
 
 logger = logging.getLogger(__name__)
@@ -58,17 +54,66 @@ class RewriteResult:
 
 
 @dataclass(frozen=True)
-class BatchSentinel:
+class BatchMarker:
     batch_id: str
     expected_items: int
 
 
 async def policy_worker(
     policy_model: PolicyModel,
+    batch_size: int,
     in_queue: asyncio.Queue[PromptInput],
     out_queue: asyncio.Queue[PromptResult],
     worker_id: int,
 ):
+    async def sample_batch(batch: list[PromptInput]):
+        if not batch:
+            return
+        
+        chat_histories = []
+        for input in batch:
+            if input.system is not None:
+                chat_histories.append(ChatHistory.from_system(input.system).add_user(input.user))
+            else:
+                chat_histories.append(ChatHistory.from_user(input.user))
+                
+        responses = await policy_model.sample(chat_histories)
+        sample_results = []
+
+        for i, response in enumerate(responses):
+            input = batch[i]
+            if (
+                response is None or
+                (not response.has_response) or
+                (response.finish_reason != "stop")
+            ):
+                logger.warning(
+                    f"[policy_worker {worker_id}] Failed to sample for user prompt:\n<user_prompt>\n{task_input}\n</user_prompt>"
+                )
+                sample_results.append(PromptResult(
+                    system=input.system,
+                    user=input.user,
+                    assistant=None,
+                    batch_id=input.batch_id,
+                ))
+            else:
+                sample_results.append(PromptResult(
+                    system=input.system,
+                    user=input.user,
+                    assistant=response.first_response,  # type: ignore
+                    batch_id=input.batch_id,
+                ))
+
+        for result in sample_results:
+            await out_queue.put(result)
+            in_queue.task_done()
+            logger.debug(f"[policy_worker {worker_id}] Pushed 1 task.")
+
+        batch.clear()
+        
+        
+    current_batch: list[PromptInput] = []
+        
     while True:
         task_input = await in_queue.get()
         if in_queue.qsize() % 100 == 0:
@@ -78,44 +123,12 @@ async def policy_worker(
 
         if task_input is None:  # Stop sentinel
             in_queue.task_done()
+            await sample_batch(current_batch)
             break
-
-        if task_input.system is not None:
-            result = await policy_model.sample(
-                [ChatHistory.from_system(task_input.system).add_user(task_input.user)]
-            )
-        else:
-            result = await policy_model.sample([ChatHistory.from_user(task_input.user)])
-    
-        if (
-            result[0] is None or
-            (not result[0].has_response) or
-            (result[0].finish_reason != "stop")
-        ):
-            logger.warning(
-                f"[policy_worker {worker_id}] Failed to sample for user prompt:\n<user_prompt>\n{task_input}\n</user_prompt>"
-            )
-            await out_queue.put(
-                PromptResult(
-                    system=task_input.system,
-                    user=task_input.user,
-                    assistant=None,
-                    batch_id=task_input.batch_id,
-                )
-            )
-            in_queue.task_done()
-            continue
-
-        await out_queue.put(
-            PromptResult(
-                system=task_input.system,
-                user=task_input.user,
-                assistant=result[0].first_response,  # type: ignore
-                batch_id=task_input.batch_id,
-            )
-        )
-        in_queue.task_done()
-        logger.debug(f"[policy_worker {worker_id}] Pushed 1 task.")
+        
+        current_batch.append(task_input)
+        if len(current_batch) >= batch_size:
+            await sample_batch(current_batch)
 
 
 async def rewrite_worker(
@@ -129,7 +142,7 @@ async def rewrite_worker(
         if not batch:
             return
 
-        rewritten_responses = await rewrite_model.rewrite(
+        responses = await rewrite_model.rewrite(
             attributes=[input.system for input in batch],
             original_chats=[ChatHistory.from_user(input.user).add_assistant(
                 input.original_assistant
@@ -137,7 +150,7 @@ async def rewrite_worker(
         )
 
         rewrite_results = []
-        for i, response in enumerate(rewritten_responses):
+        for i, response in enumerate(responses):
             input = batch[i]
             if response is None:
                 logger.warning(
@@ -154,10 +167,9 @@ async def rewrite_worker(
 
         for result in rewrite_results:
             await out_queue.put(result)
+            in_queue.task_done()
             logger.debug(f"[rewrite_worker {worker_id}] Pushed 1 task.")
 
-        for _ in batch:
-            in_queue.task_done()
         batch.clear() 
 
 
@@ -170,7 +182,7 @@ async def rewrite_worker(
                 f"[rewrite_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}"
             )
 
-        if task_input is None:  # Sentinel value to signal stop
+        if task_input is None:  # Stop sentinel
             in_queue.task_done()
             await rewrite_batch(current_batch)
             return
@@ -182,7 +194,7 @@ async def rewrite_worker(
 
 async def rating_worker(
     reward_model: RewardModel,
-    in_queue: asyncio.Queue[PromptResult | RewriteResult | BatchSentinel],
+    in_queue: asyncio.Queue[PromptResult | RewriteResult | BatchMarker],
     all_results: Mapping[str, Sequence[PromptResult | RewriteResult]],
     all_futures: Mapping[str, asyncio.Future],
 ):
@@ -202,7 +214,7 @@ async def rating_worker(
                     done = True
                     break
 
-                if isinstance(item, BatchSentinel):
+                if isinstance(item, BatchMarker):
                     logger.info(
                         f"Batch {item.batch_id} sentinel received."
                     )
@@ -283,111 +295,75 @@ async def rating_worker(
 # %%
 # Organizing results
 
-
-def organize_baseline_results(
+def organize_samples(
     all_results: list[PromptResult],
     save_dir: Path | None = None,
-) -> dict[str, list[Rollout]]:
-    organized_scores = defaultdict(list)
-    organized_results = defaultdict(list)
+):
+    organized_scores = defaultdict(dict)
+    organized_rollouts = defaultdict(dict)
 
     for item in all_results:
         if item.score is None:
             continue
         assert item.assistant is not None
-        organized_scores[item.user].append(item.score)
-        organized_results[item.user].append(
-            Rollout(
-                response=item.assistant,
-                score=item.score,
-            )
-        )
+
+        attribute_rollouts = organized_rollouts[item.system]
+        if item.user not in attribute_rollouts:
+            attribute_rollouts[item.user] = []
+        
+        attribute_scores = organized_scores[item.system]
+        if item.user not in attribute_scores:
+            attribute_scores[item.user] = []
+
+        attribute_rollouts[item.user].append(Rollout(response=item.assistant, score=item.score))
+        attribute_scores[item.user].append(item.score)
+
+    mean_scores = {}
+    for attribute, attribute_scores in organized_scores.items():
+        all_scores = []
+        for user, scores in attribute_scores.items():
+            all_scores.extend(scores)
+        mean_scores[attribute] = np.mean(all_scores).item()
+    
+    keys = list(organized_rollouts.keys())
+    if len(keys) == 1 and keys[0] is None:
+        organized_rollouts = organized_rollouts[None]
+        organized_scores = organized_scores[None]
+        mean_scores = mean_scores[None]
+
 
     if save_dir is not None:
         save_dir.mkdir(parents=True, exist_ok=True)
 
-        with open(save_dir / "baseline_results.json", "w", encoding="utf-8") as f:
-            json_data = {
-                k: [asdict(r) for r in v] for k, v in organized_results.items()
-            }
-            json.dump(json_data, f, indent=4)
-        with open(save_dir / "baseline_scores.json", "w", encoding="utf-8") as f:
-            json.dump(organized_scores, f, indent=4)
-
-        mean_results = {}
-        for user, scores in organized_scores.items():
-            mean_results[user] = np.mean(scores).item()
-
-        with open(save_dir / "baseline_scores_mean.json", "w", encoding="utf-8") as f:
-            json.dump(mean_results, f, indent=4)
-
-    return dict(organized_results)
-
-
-def organize_conditional_results(
-    all_results: list[PromptResult],
-    save_dir: Path | None = None,
-) -> dict[str, dict[str, list[Rollout]]]:
-
-    conditional_results = defaultdict(dict)
-
-    for result in all_results:
-        if result.score is None:
-            continue
-        assert result.assistant is not None
-
-        attribute_results = conditional_results[result.system]
-        if result.user not in attribute_results:
-            attribute_results[result.user] = []
-
-        attribute_results[result.user].append(
-            Rollout(response=result.assistant, score=result.score)
-        )
-
-    if save_dir is not None:
-        save_dir.mkdir(parents=True, exist_ok=True)
-        with open(save_dir / "conditional_results.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "sample_rollouts.json", "w", encoding="utf-8") as f:
             json_data = {
                 k: {k2: [asdict(r) for r in v2] for k2, v2 in v.items()}
-                for k, v in conditional_results.items()
+                for k, v in organized_rollouts.items()
             }
             json.dump(json_data, f, indent=4)
 
-        scores = {}
-        mean_scores = {}
+        with open(save_dir / "sample_scores.json", "w", encoding="utf-8") as f:
+            json.dump(organized_scores, f, indent=4)
 
-        for attribute, attribute_results in conditional_results.items():
-            attribute_scores = {}
-            all_scores = []
-            for user, v in attribute_results.items():
-                attribute_scores[user] = [r.score for r in v]
-                all_scores.extend([r.score for r in v])
-            scores[attribute] = attribute_scores
-            mean_scores[attribute] = np.mean(all_scores).item()
-
-        with open(save_dir / "conditional_scores.json", "w", encoding="utf-8") as f:
-            json.dump(scores, f, indent=4)
-        with open(
-            save_dir / "conditional_scores_mean.json", "w", encoding="utf-8"
-        ) as f:
+        with open(save_dir / "sample_scores_mean.json", "w", encoding="utf-8") as f:
             json.dump(mean_scores, f, indent=4)
 
-    return dict(conditional_results)
+    return dict(organized_rollouts)
 
 
-def organize_rewrite_results(
+def organize_rewrites(
     all_results: list[RewriteResult],
     baseline_rollouts: dict[str, list[Rollout]],
     n_rollouts: int | None = None,
     save_dir: Path | None = None,
 ) -> dict[str, dict[str, list[Rollout | None]]]:
 
-    rewrite_results = defaultdict(dict)
+    organized_rollouts = defaultdict(dict)
 
     for result in all_results:
-        attribute_results = rewrite_results[result.system]
-        if result.user not in attribute_results:
-            attribute_results[result.user] = [
+        attribute_rollouts = organized_rollouts[result.system]
+        if result.user not in attribute_rollouts:
+            attribute_rollouts[result.user] = [
                 None
                 for _ in range(
                     n_rollouts
@@ -401,9 +377,9 @@ def organize_rewrite_results(
             if n_rollouts is not None and i >= n_rollouts:
                 break
             if r.response == result.original_assistant:
-                if attribute_results[result.user][i] is not None:
+                if attribute_rollouts[result.user][i] is not None:
                     continue
-                attribute_results[result.user][i] = Rollout(
+                attribute_rollouts[result.user][i] = Rollout(
                     response=result.rewritten_assistant,  # type: ignore
                     score=result.score,  # type: ignore
                 )
@@ -412,43 +388,38 @@ def organize_rewrite_results(
 
         if not found:
             raise ValueError(
-                f"Rewrite result for {result.user} and {result.system} not found."
+                f"Rewrite result for {result.user} and {result.system} not matched."
             )
-
-    # # clear any blanks
-    # for attribute, attribute_results in rewrite_results.items():
-    #     for user, user_results in attribute_results.items():
-    #         attribute_results[user] = [r for r in user_results if r is not None]
 
     if save_dir is not None:
         save_dir.mkdir(parents=True, exist_ok=True)
-        with open(save_dir / "rewrite_plus_results.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "rewrite_rollouts.json", "w", encoding="utf-8") as f:
             json_data = {
                 k: {k2: [asdict(r) for r in v2] for k2, v2 in v.items()}
-                for k, v in rewrite_results.items()
+                for k, v in organized_rollouts.items()
             }
             json.dump(json_data, f, indent=4)
 
         scores = {}
         mean_scores = {}
 
-        for attribute, attribute_results in rewrite_results.items():
+        for attribute, attribute_rollouts in organized_rollouts.items():
             attribute_scores = {}
             all_scores = []
-            for user, v in attribute_results.items():
+            for user, v in attribute_rollouts.items():
                 attribute_scores[user] = [r.score for r in v]
                 all_scores.extend([r.score for r in v if r.score is not None])
             scores[attribute] = attribute_scores
             mean_scores[attribute] = np.mean(all_scores).item()
 
-        with open(save_dir / "rewrite_plus_scores.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "rewrite_scores.json", "w", encoding="utf-8") as f:
             json.dump(scores, f, indent=4)
         with open(
-            save_dir / "rewrite_plus_scores_mean.json", "w", encoding="utf-8"
+            save_dir / "rewrite_scores_mean.json", "w", encoding="utf-8"
         ) as f:
             json.dump(mean_scores, f, indent=4)
 
-    return dict(rewrite_results)
+    return dict(organized_rollouts)
 
 
 # %%
@@ -459,28 +430,32 @@ async def evaluate_baselines(
     n_rollouts: int,
     save_dir: Path | None = None,
 ) -> dict[str, list[Rollout]]:
-    queue_a = asyncio.Queue()
+    queue_a = asyncio.Queue(maxsize = 2 * policy_model.max_par)
     queue_b = asyncio.Queue()
     batch_id = "0"
-    n_policy_workers = policy_model.max_par
+    n_policy_workers = 128
+    batch_size = max(1, policy_model.max_par // n_policy_workers)
     all_results = {batch_id: []}
     all_futures = {batch_id: asyncio.get_running_loop().create_future()}
+    start_time = time.time()
+
+    # Start workers
+    policy_worker_tasks = [
+        asyncio.create_task(policy_worker(policy_model, batch_size, queue_a, queue_b, worker_id))
+        for worker_id in range(n_policy_workers)
+    ]
+    rating_worker_task = asyncio.create_task(
+        rating_worker(reward_model, queue_b, all_results, all_futures)
+    )
+
+    # Send inputs
+    await queue_b.put(
+        BatchMarker(batch_id=batch_id, expected_items=len(user_prompts) * n_rollouts)
+    )
 
     for user in user_prompts:
         for _ in range(n_rollouts):
             await queue_a.put(PromptInput(system=None, user=user, batch_id=batch_id))
-    await queue_a.put(
-        BatchSentinel(batch_id=batch_id, expected_items=len(user_prompts) * n_rollouts)
-    )
-
-    policy_worker_tasks = [
-        asyncio.create_task(policy_worker(policy_model, queue_a, queue_b, worker_id))
-        for worker_id in range(n_policy_workers)
-    ]
-
-    rating_worker_task = asyncio.create_task(
-        rating_worker(reward_model, queue_b, all_results, all_futures)
-    )
 
     all_results = await all_futures[batch_id]
     logger.info(
@@ -498,6 +473,7 @@ async def evaluate_baselines(
     await rating_worker_task
     logger.info("\n--- baseline rating worker finished. ---\n")
 
-    organized_results = organize_baseline_results(all_results, save_dir)
+    organized_results = organize_samples(all_results, save_dir)
+    logger.info(f"Evaluated baselines in {(time.time() - start_time):.2f} seconds")
 
-    return organized_results
+    return organized_results  # type: ignore
