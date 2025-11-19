@@ -1,10 +1,5 @@
-*_results.json
-*_interpretations.json
-figs/
 logs/
-data/*
-# !data/synthetic_2/
-# !data/synthetic_2/**
+data/
 sae_cache/
 .cache/
 user_prompts/

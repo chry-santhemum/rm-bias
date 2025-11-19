@@ -21,6 +21,11 @@ from utils import parse_json_response, ClusterModel
 logger = logging.getLogger(__name__)
 
 
+RELABEL_PROMPT = textwrap.dedent("""
+    Your task it to take...
+""").strip()
+
+
 class Planner(ABC):
     def __init__(
         self,
@@ -76,11 +81,12 @@ class Planner(ABC):
     def plan(self, runner: Runner, *args, **kwargs):
         pass
 
-    @staticmethod
     def cluster_plans(
+        self,
         to_write: dict[int, list[dict[str, Any]]],  # seed index -> list of candidates
         cluster_model: ClusterModel,
         n_pop: int,
+        relabel: bool,
     ) -> dict[int, list[dict[str, Any]]]:
         # Cluster plans for each seed using k-means into n_pop clusters
         # then sample a representative label for the plans in each cluster 
@@ -91,37 +97,64 @@ class Planner(ABC):
             if not seed_plans:
                 continue
 
+            all_plans = [plan["plan"] for plan in seed_plans]
             cluster_results = cluster_model.cluster(
-                [plan["plan"] for plan in seed_plans], n_pop
+                all_plans, n_pop
             )
 
-            for result in cluster_results:
-                # aggregate_meta = copy.deepcopy(
-                #     seed_plans[result["center_idx"]]["meta"]
-                # )
-                # aggregate_meta["positive_responses"] = []
-                # aggregate_meta["negative_responses"] = []
-                # aggregate_meta["cluster_plans"] = []
+            if relabel:
+                relabel_chats = []
 
-                # for content_idx in result["content_indices"]:
-                #     content_meta = seed_plans[content_idx]["meta"]
-                #     aggregate_meta["cluster_plans"].append(
-                #         seed_plans[content_idx]["plan"]
-                #     )
-                #     aggregate_meta["positive_responses"].append(
-                #         content_meta["chosen"]
-                #     )
-                #     aggregate_meta["negative_responses"].append(
-                #         content_meta["rejected"]
-                #     )
+                for result in cluster_results:
+                    plans_in_cluster = [all_plans[idx] for idx in result["content_indices"]]
+                    relabel_chats.append(
+                        ChatHistory.from_user(
+                            RELABEL_PROMPT.format(plans=plans_in_cluster)
+                        )
+                    )
 
-                to_write_new[seed_idx].append(
-                    {
-                        "plan": result["center_input"],
-                        # "meta": aggregate_meta,
-                        "meta": seed_plans[result["center_idx"]]["meta"],
-                    }
+                relabel_responses = asyncio.run(
+                    self.sample(relabel_chats, desc="Relabeling plans")
                 )
+                for resp in relabel_responses:
+                    if (resp is None) or (not resp.has_response) or (resp.finish_reason != "stop"):
+                        continue
+                    relabeled_plan = resp.first_response.strip() # type: ignore
+                    to_write_new[seed_idx].append(
+                        {
+                            "plan": relabeled_plan,
+                            "meta": {},
+                        }
+                    )
+
+            else:
+                for result in cluster_results:
+                    # aggregate_meta = copy.deepcopy(
+                    #     seed_plans[result["center_idx"]]["meta"]
+                    # )
+                    # aggregate_meta["positive_responses"] = []
+                    # aggregate_meta["negative_responses"] = []
+                    # aggregate_meta["cluster_plans"] = []
+
+                    # for content_idx in result["content_indices"]:
+                    #     content_meta = seed_plans[content_idx]["meta"]
+                    #     aggregate_meta["cluster_plans"].append(
+                    #         seed_plans[content_idx]["plan"]
+                    #     )
+                    #     aggregate_meta["positive_responses"].append(
+                    #         content_meta["chosen"]
+                    #     )
+                    #     aggregate_meta["negative_responses"].append(
+                    #         content_meta["rejected"]
+                    #     )
+
+                    to_write_new[seed_idx].append(
+                        {
+                            "plan": result["center_input"],
+                            # "meta": aggregate_meta,
+                            "meta": seed_plans[result["center_idx"]]["meta"],
+                        }
+                    )
 
         return dict(to_write_new)
 
@@ -235,7 +268,7 @@ class ListPlanner(Planner):
 
         if cluster_model is not None:
             to_write = self.cluster_plans(
-                to_write=to_write, cluster_model=cluster_model, n_pop=n_pop
+                to_write=to_write, cluster_model=cluster_model, n_pop=n_pop, relabel=True
             )
 
         for seed_idx, seed_plans in to_write.items():
@@ -422,7 +455,7 @@ class PairPlanner(Planner):
 
         if cluster_model is not None:
             to_write = self.cluster_plans(
-                to_write=to_write, cluster_model=cluster_model, n_pop=n_pop
+                to_write=to_write, cluster_model=cluster_model, n_pop=n_pop, relabel=True
             )
 
         for seed_idx, seed_plans in to_write.items():
