@@ -88,7 +88,7 @@ async def policy_worker(
                 (response.finish_reason != "stop")
             ):
                 logger.warning(
-                    f"[policy_worker {worker_id}] Failed to sample for user prompt:\n<user_prompt>\n{task_input}\n</user_prompt>"
+                    f"[policy_worker {worker_id}] Failed to sample for user prompt:\n<user_prompt>\n{input.user}\n</user_prompt>"
                 )
                 sample_results.append(PromptResult(
                     system=input.system,
@@ -288,6 +288,20 @@ async def rating_worker(
             del expected_counts[batch_id]
 
         if done:
+            # Finalize any incomplete batches before shutting down
+            for batch_id, expected in list(expected_counts.items()):
+                processed = processed_counts.get(batch_id, 0)
+                if batch_id in all_futures and not all_futures[batch_id].done():
+                    logger.info(
+                        f"[rating_worker] Finalizing incomplete batch {batch_id}: {processed}/{expected} items processed."
+                    )
+                    all_futures[batch_id].set_result(all_results[batch_id])
+                # Clean up tracking dictionaries
+                if batch_id in all_results:
+                    del all_results[batch_id]  # type: ignore
+                if batch_id in processed_counts:
+                    del processed_counts[batch_id]
+                del expected_counts[batch_id]
             logger.info("[rating_worker] Final item processed. Shutting down.")
             break
 
@@ -336,11 +350,14 @@ def organize_samples(
         save_dir.mkdir(parents=True, exist_ok=True)
 
         with open(save_dir / "sample_rollouts.json", "w", encoding="utf-8") as f:
-            json_data = {
-                k: {k2: [asdict(r) for r in v2] for k2, v2 in v.items()}
-                for k, v in organized_rollouts.items()
-            }
-            json.dump(json_data, f, indent=4)
+            if len(keys) == 1 and keys[0] is None:
+                json_data = {k: [asdict(r) for r in v] for k, v in organized_rollouts.items()}
+            else:
+                json_data = {
+                    k: {k2: [asdict(r) for r in v2] for k2, v2 in v.items()}
+                    for k, v in organized_rollouts.items()
+                }
+                json.dump(json_data, f, indent=4)
 
         with open(save_dir / "sample_scores.json", "w", encoding="utf-8") as f:
             json.dump(organized_scores, f, indent=4)
@@ -462,17 +479,20 @@ async def evaluate_baselines(
     for _ in range(n_policy_workers):
         await queue_a.put(None)
 
+    # Wait for policy workers to finish first, so we know no more items will be produced
+    await asyncio.gather(*policy_worker_tasks)
+    logger.info("\n--- baseline policy workers finished. ---\n")
+
+    # Now send stop sentinel to rating worker so it can finalize incomplete batches
+    await queue_b.put(None)
+    await rating_worker_task
+    logger.info("\n--- baseline rating worker finished. ---\n")
+
+    # Get results from future (should be set by now, either when complete or when finalized)
     all_results = await all_futures[batch_id]
     logger.info(
         f"Expected {len(user_prompts) * n_rollouts} results, got {len(all_results)}"
     )
-    
-    await asyncio.gather(*policy_worker_tasks)
-    logger.info("\n--- baseline policy workers finished. ---\n")
-
-    await queue_b.put(None)
-    await rating_worker_task
-    logger.info("\n--- baseline rating worker finished. ---\n")
 
     organized_results = organize_samples(all_results, save_dir)
     logger.info(f"Evaluated baselines in {(time.time() - start_time):.2f} seconds")
