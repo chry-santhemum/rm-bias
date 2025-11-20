@@ -22,7 +22,14 @@ logger = logging.getLogger(__name__)
 
 
 RELABEL_PROMPT = textwrap.dedent("""
-    Your task it to take...
+    You are given a list of system prompts which have been clustered together in the same cluster due to their similarity. Your task is to write ONE system prompt that is representative of the common points of these system prompts in the cluster.
+
+    Here is the list of system prompts:
+    <system_prompts>
+    {system_prompts}
+    </system_prompts>
+
+    Think carefully about what instruction these prompts have in common. Then only output your new representative instruction in your output.
 """).strip()
 
 
@@ -33,14 +40,14 @@ class Planner(ABC):
         max_tokens: int,
         reasoning: int | str,
         max_par: int = 64,
-        seed: int = 0,
+        random_seed: int = 0,
         alloy_type: Literal["round_robin", "random"] = "round_robin",
     ):
         self.model_names = model_names
         self.max_tokens = max_tokens
         self.reasoning = reasoning
         self.max_par = max_par
-        self.seed = seed
+        self.random_seed = random_seed
         self.alloy_type = alloy_type
 
         self.caller = OpenRouterCaller(
@@ -48,7 +55,7 @@ class Planner(ABC):
         )
         self.curr_planner_index: int = 0
 
-        random.seed(self.seed)
+        random.seed(self.random_seed)
 
     @property
     def curr_planner_model(self):
@@ -104,26 +111,38 @@ class Planner(ABC):
 
             if relabel:
                 relabel_chats = []
+                relabel_metas = []
 
                 for result in cluster_results:
                     plans_in_cluster = [all_plans[idx] for idx in result["content_indices"]]
                     relabel_chats.append(
                         ChatHistory.from_user(
-                            RELABEL_PROMPT.format(plans=plans_in_cluster)
+                            RELABEL_PROMPT.format(system_prompts=json.dumps(plans_in_cluster, indent=4))
                         )
+                    )
+                    relabel_metas.append(
+                        {
+                            "seed_idx": seed_idx,
+                            "planner_model": self.curr_planner_model,
+                            "plans_in_cluster": plans_in_cluster,
+                        }
                     )
 
                 relabel_responses = asyncio.run(
                     self.sample(relabel_chats, desc="Relabeling plans")
                 )
-                for resp in relabel_responses:
+                for i, resp in enumerate(relabel_responses):
                     if (resp is None) or (not resp.has_response) or (resp.finish_reason != "stop"):
                         continue
                     relabeled_plan = resp.first_response.strip() # type: ignore
+                    relabel_metas[i].update({
+                        "relabel_plan": relabeled_plan,
+                        "relabel_reasoning": resp.reasoning_content,
+                    })
                     to_write_new[seed_idx].append(
                         {
                             "plan": relabeled_plan,
-                            "meta": {},
+                            "meta": relabel_metas[i],
                         }
                     )
 
@@ -163,7 +182,6 @@ class ListPlanner(Planner):
     def __init__(
         self,
         model_names: list[str],
-        alloy_type: Literal["round_robin", "random"],
         max_tokens: int,
         reasoning: int | str,
         n_new: int,
@@ -171,22 +189,25 @@ class ListPlanner(Planner):
         n_traj_in_context: int,  # number of rollouts provided
         n_per_user_prompt: int,  # number of planning prompts to send per user prompt
         max_par: int = 64,  # max parallel calls to client
+        relabel: bool = True,
         max_num_train_prompts: int | None = None,
-        seed: int = 0,
+        random_seed: int = 0,
+        alloy_type: Literal["round_robin", "random"] = "round_robin",
     ):
         super().__init__(
             model_names=model_names,
-            alloy_type=alloy_type,
             max_tokens=max_tokens,
             reasoning=reasoning,
             max_par=max_par,
-            seed=seed,
+            random_seed=random_seed,
+            alloy_type=alloy_type,
         )
         self.n_new = n_new
         self.n_pop = n_pop
         self.n_traj_in_context = n_traj_in_context
         self.n_per_user_prompt = n_per_user_prompt
         self.max_num_train_prompts = max_num_train_prompts
+        self.relabel = relabel
 
     def plan(
         self,
@@ -273,7 +294,7 @@ class ListPlanner(Planner):
 
         if cluster_model is not None:
             to_write = self.cluster_plans(
-                to_write=to_write, cluster_model=cluster_model, n_pop=self.n_pop, relabel=True
+                to_write=to_write, cluster_model=cluster_model, n_pop=self.n_pop, relabel=self.relabel
             )
 
         for seed_idx, seed_plans in to_write.items():
@@ -289,26 +310,30 @@ class PairPlanner(Planner):
     def __init__(
         self,
         model_names: list[str],
-        alloy_type: Literal["round_robin", "random"],
         max_tokens: int,
         reasoning: int | str,
         n_new: int,
         n_pop: int,
         threshold: float = 1.0,
         max_par: int = 64,  # max parallel calls to client
+        relabel: bool = True,
         max_contrast_pairs: int | None = None,
+        alloy_type: Literal["round_robin", "random"] = "round_robin",
+        random_seed: int = 0,
     ):
         super().__init__(
             model_names=model_names,
-            alloy_type=alloy_type,
             max_tokens=max_tokens,
             reasoning=reasoning,
             max_par=max_par,
+            random_seed=random_seed,
+            alloy_type=alloy_type,
         )
         self.n_new = n_new
         self.n_pop = n_pop
         self.threshold = threshold
         self.max_contrast_pairs = max_contrast_pairs
+        self.relabel = relabel
 
     def load_contrast_pairs(self, runner: Runner, threshold: float):
         """
@@ -464,7 +489,7 @@ class PairPlanner(Planner):
 
         if cluster_model is not None:
             to_write = self.cluster_plans(
-                to_write=to_write, cluster_model=cluster_model, n_pop=self.n_pop, relabel=True
+                to_write=to_write, cluster_model=cluster_model, n_pop=self.n_pop, relabel=self.relabel
             )
 
         for seed_idx, seed_plans in to_write.items():

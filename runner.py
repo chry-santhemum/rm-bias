@@ -207,7 +207,7 @@ class Runner(ABC):
                     save_dir=self.run_path
                     / "validate"
                     / f"seed_{seed_state.index}_validate",
-                    baseline_rollouts=self.val_baselines,
+                    baselines=self.val_baselines,
                 )
                 for seed_state in self.seed_states
             ]
@@ -282,101 +282,7 @@ class Runner(ABC):
 class TestRunner(Runner):
     @property
     def runner_type(self) -> str:
-        return "evo"
+        return "test"
 
     def train(self):
         pass
-
-
-async def main():
-    # ATTRIBUTES = [
-    #     "Provide multiple different approaches to the same question.",
-    #     "Use bold text in the response.",
-    #     "Use italic text in the response.",
-    #     "Write a response that is longer than the baseline.",
-    #     "Use emojis in the response.",
-    #     "Use bulleted or numbered lists in the response.",
-    #     "Start with an affirmative sentence that responds to the user's request.",
-    #     "Adopt a friendly and engaging, natural tone.",
-    #     "End the response with a question to the user.",
-    #     "Mention advanced mathematical jargon in the response.",
-    # ]
-    topic_ids = [4, 6, 8, 12, 14, 16]
-
-    initial_seed_states = load_initial_seed_states(
-        ds_name="synthetic_2",
-        topic_ids=topic_ids,
-        val_split_size=16,
-    )
-
-    # with open(
-    #     "data/one_turn/20251015-232457-n_pop32-synthetic_1/baseline_results.json", "r"
-    # ) as f:
-    #     baseline_results = json.load(f)
-    # user_prompts = list(baseline_results.keys())
-
-    run_name = "20251027-045705-synthetic_2"
-    logging_setup(filename=f"logs/scrap/test_runner_{run_name}.log", level=logging.INFO)
-
-    bias_evaluator = BiasEvaluator(
-        rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=500),
-        reward_model=RewardModel(model_name="skywork-v2", batch_size=32),
-    )
-
-    runner = TestRunner(
-        seed_states=initial_seed_states,
-        policy_model=PolicyModel(temperature=0.9),
-        bias_evaluator=bias_evaluator,
-        judge_model=JudgeModel(
-            model_name="anthropic/claude-sonnet-4.5", max_tokens=2048, reasoning=2000
-        ),
-        run_name=run_name,
-        n_rollouts=8,
-    )
-
-    # for seed_state in runner.seed_states:
-    #     print(f"Seed state {seed_state.index}")
-
-    with open(f"data/evo/{run_name}/val_baselines/baseline_results.json", "r") as f:
-        val_baselines = json.load(f)
-
-    runner.val_baselines = {}
-    for user, rollouts in val_baselines.items():
-        runner.val_baselines[user] = [
-            Rollout(response=rollout["response"], score=rollout["score"])
-            for rollout in rollouts
-        ]
-
-    print("Loaded validation baselines.")
-
-    validation_results = []
-    for seed_state_idx in topic_ids:
-        with open(
-            f"data/evo/{run_name}/validate/seed_{seed_state_idx}_validate/rewrite_plus_results.json",
-            "r",
-        ) as f:
-            seed_validation_results = json.load(f)
-            validation_results.append(json_to_rollouts(seed_validation_results))
-
-    print("Loaded validation results.")
-
-    runner.judge(validation_results=validation_results)
-
-
-def json_to_rollouts(
-    json_data: dict[str, dict[str, list[dict[str, Any]]]],
-) -> dict[str, dict[str, list[Rollout]]]:
-    rollouts = {}
-    for attribute, attribute_data in json_data.items():
-        rollouts[attribute] = {}
-        for user, user_data in attribute_data.items():
-            rollouts[attribute][user] = [
-                Rollout(response=rollout["response"], score=rollout["score"])
-                for rollout in user_data
-            ]
-    return rollouts
-
-
-# %%
-if __name__ == "__main__":
-    asyncio.run(main())

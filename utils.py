@@ -16,7 +16,7 @@ import numpy as np
 import torch
 from umap import UMAP
 from sklearn.cluster import KMeans, DBSCAN
-from sklearn.metrics import pairwise_distances, pairwise_distances_argmin_min
+from sklearn.metrics import pairwise_distances
 from sentence_transformers import SentenceTransformer
 from transformers import (
     AutoTokenizer,
@@ -26,10 +26,10 @@ from transformers import (
 from transformers.trainer_utils import set_seed as hf_set_seed
 
 from caller import Response
+from state import Rollout
 
 logger = logging.getLogger(__name__)
 
-# TODO: add attention_mask every time we call the model
 
 # %%
 REWARD_MODELS = {
@@ -230,9 +230,14 @@ async def time_operation(operation_name, coroutine):
     return result
 
 
-async def gather_with_semaphore(tasks, max_par):
+from typing import Iterable, Awaitable, Any
+
+async def gather_with_semaphore(
+    tasks: Iterable[Awaitable[Any]], 
+    max_par: int
+) -> list[Any]:
     semaphore = asyncio.Semaphore(max_par)
-    async def sem_task(coro):
+    async def sem_task(coro: Awaitable[Any]) -> Any:
         async with semaphore:
             return await coro
     return await asyncio.gather(*(sem_task(task) for task in tasks))
@@ -250,6 +255,19 @@ def is_notebook():
     except NameError:
         return False  # Probably standard Python interpreter
 
+
+def json_to_rollouts(
+    json_data: dict[str, dict[str, list[dict[str, Any]]]],
+) -> dict[str, dict[str, list[Rollout]]]:
+    rollouts = {}
+    for attribute, attribute_data in json_data.items():
+        rollouts[attribute] = {}
+        for user, user_data in attribute_data.items():
+            rollouts[attribute][user] = [
+                Rollout(response=rollout["response"], score=rollout["score"])
+                for rollout in user_data
+            ]
+    return rollouts
 
 # %%
 
