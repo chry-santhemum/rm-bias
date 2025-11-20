@@ -51,7 +51,7 @@ set_seed_all(10086)
 logger = logging.getLogger(__name__)
 
 
-class EvoPlanner(ListPlanner):
+class EvoPlanner(Planner):
     def __init__(
         self,
         model_names: list[str],
@@ -73,10 +73,9 @@ class EvoPlanner(ListPlanner):
     def initial_plan(
         self,
         runner: Runner,
-        *args,
-        **kwargs,
+        cluster_model: Optional[ClusterModel] = None,
     ):
-        return super().plan(runner=runner, *args, **kwargs)
+        return super().plan(runner=runner, cluster_model=cluster_model)
 
     @staticmethod
     def _get_past_data_str(
@@ -287,11 +286,7 @@ class EvoRunner(Runner):
         self.bias_evaluator = bias_evaluator
 
         self.dbscan_eps = dbscan_eps
-        self.n_new = n_new
-        self.n_pop_initial = n_pop_initial
         self.m_var = m_var
-        self.n_traj_in_context = n_traj_in_context
-        self.n_per_user_prompt = n_per_user_prompt
         self.n_baseline_rollouts = n_baseline_rollouts
         self.n_rewrite_rollouts = n_rewrite_rollouts
 
@@ -304,13 +299,7 @@ class EvoRunner(Runner):
         if self.step_count == 0:
             self.planner.initial_plan(
                 runner=self,
-                n_new=self.n_new,
-                n_pop=self.n_pop_initial,
-                n_traj_in_context=self.n_traj_in_context,
-                n_per_user_prompt=self.n_per_user_prompt,
-                cluster_model=self.cluster_model,
-                max_num_train_prompts=64,
-                # max_contrast_pairs=4,
+                cluster_model=self.cluster_model
             )
         else:
             self.planner.iterate_plan(

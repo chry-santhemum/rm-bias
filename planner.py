@@ -12,7 +12,7 @@ from collections import defaultdict
 from typing import Any, Literal, Optional
 from abc import ABC, abstractmethod
 
-from caller import OpenRouterCaller, CacheConfig, RetryConfig, ChatHistory, Response
+from caller import OpenRouterCaller, ChatHistory, Response
 from state import SeedState, AttributeStats
 from models import CACHE_CONFIG, RETRY_CONFIG
 from runner import Runner
@@ -78,7 +78,7 @@ class Planner(ABC):
         return responses
 
     @abstractmethod
-    def plan(self, runner: Runner, *args, **kwargs):
+    def plan(self, runner: Runner, cluster_model: Optional[ClusterModel] = None):
         pass
 
     def cluster_plans(
@@ -166,7 +166,12 @@ class ListPlanner(Planner):
         alloy_type: Literal["round_robin", "random"],
         max_tokens: int,
         reasoning: int | str,
+        n_new: int,
+        n_pop: int,
+        n_traj_in_context: int,  # number of rollouts provided
+        n_per_user_prompt: int,  # number of planning prompts to send per user prompt
         max_par: int = 64,  # max parallel calls to client
+        max_num_train_prompts: int | None = None,
         seed: int = 0,
     ):
         super().__init__(
@@ -177,16 +182,16 @@ class ListPlanner(Planner):
             max_par=max_par,
             seed=seed,
         )
+        self.n_new = n_new
+        self.n_pop = n_pop
+        self.n_traj_in_context = n_traj_in_context
+        self.n_per_user_prompt = n_per_user_prompt
+        self.max_num_train_prompts = max_num_train_prompts
 
     def plan(
         self,
         runner: Runner,
-        n_new: int,
-        n_pop: int,
-        n_traj_in_context: int,  # number of rollouts provided
-        n_per_user_prompt: int,  # number of planning prompts to send per user prompt
-        cluster_model: Optional[ClusterModel] = None,
-        max_num_train_prompts: int | None = None,
+        cluster_model: Optional[ClusterModel] = None
     ):
         assert runner.baselines is not None
         to_send_messages = []
@@ -194,17 +199,17 @@ class ListPlanner(Planner):
 
         for seed_state_idx, seed_state in enumerate(runner.seed_states):
             seed_state.history.append({})
-            if max_num_train_prompts is not None:
-                train_prompts = seed_state.cluster.train_prompts[:max_num_train_prompts]
+            if self.max_num_train_prompts is not None:
+                train_prompts = seed_state.cluster.train_prompts[:self.max_num_train_prompts]
             else:
                 train_prompts = seed_state.cluster.train_prompts
             for user_prompt in train_prompts:
                 all_rollouts = runner.baselines[user_prompt]
 
-                for _ in range(n_per_user_prompt):
+                for _ in range(self.n_per_user_prompt):
                     sampled_rollouts = random.sample(
                         all_rollouts,
-                        min(n_traj_in_context, len(all_rollouts)),
+                        min(self.n_traj_in_context, len(all_rollouts)),
                     )
                     sampled_rollouts.sort(key=lambda x: x.score, reverse=True)
 
@@ -214,7 +219,7 @@ class ListPlanner(Planner):
                     }
                     planner_prompt = LIST_PROMPT_USER.format(
                         data=json.dumps(data, indent=4),
-                        num_plans=n_new,
+                        num_plans=self.n_new,
                         cluster_summary=seed_state.cluster.summary,
                     )
                     to_send_messages.append(
@@ -230,9 +235,9 @@ class ListPlanner(Planner):
                             "planner_prompt": planner_prompt,
                             "planner_model": self.curr_planner_model,
                             "reasoning_effort": str(self.reasoning),
-                            "n_new": n_new,
-                            "n_traj_in_context": n_traj_in_context,
-                            "n_per_user_prompt": n_per_user_prompt,
+                            "n_new": self.n_new,
+                            "n_traj_in_context": self.n_traj_in_context,
+                            "n_per_user_prompt": self.n_per_user_prompt,
                         }
                     )
 
@@ -268,7 +273,7 @@ class ListPlanner(Planner):
 
         if cluster_model is not None:
             to_write = self.cluster_plans(
-                to_write=to_write, cluster_model=cluster_model, n_pop=n_pop, relabel=True
+                to_write=to_write, cluster_model=cluster_model, n_pop=self.n_pop, relabel=True
             )
 
         for seed_idx, seed_plans in to_write.items():
@@ -287,7 +292,11 @@ class PairPlanner(Planner):
         alloy_type: Literal["round_robin", "random"],
         max_tokens: int,
         reasoning: int | str,
+        n_new: int,
+        n_pop: int,
+        threshold: float = 1.0,
         max_par: int = 64,  # max parallel calls to client
+        max_contrast_pairs: int | None = None,
     ):
         super().__init__(
             model_names=model_names,
@@ -296,8 +305,12 @@ class PairPlanner(Planner):
             reasoning=reasoning,
             max_par=max_par,
         )
+        self.n_new = n_new
+        self.n_pop = n_pop
+        self.threshold = threshold
+        self.max_contrast_pairs = max_contrast_pairs
 
-    def load_contrast_pairs(self, runner: Runner, threshold: float = 1.0):
+    def load_contrast_pairs(self, runner: Runner, threshold: float):
         """
         For each user prompt, check in target_dir if the rollouts have enough variation,
         according to the given rater.
@@ -364,16 +377,12 @@ class PairPlanner(Planner):
     def plan(
         self,
         runner: Runner,
-        n_new: int,
-        n_pop: int,
-        cluster_model: Optional[ClusterModel] = None,
-        threshold: float = 1.0,
-        max_contrast_pairs: int | None = None,
+        cluster_model: Optional[ClusterModel] = None
     ):
         """
         Ignores n_pop if cluster_model is None.
         """
-        self.load_contrast_pairs(runner=runner, threshold=threshold)
+        self.load_contrast_pairs(runner=runner, threshold=self.threshold)
         to_send_messages = []
         metas = []
 
@@ -382,9 +391,9 @@ class PairPlanner(Planner):
             cluster = seed_state.cluster
 
             contrast_pairs = cluster.aux_info
-            if max_contrast_pairs is not None:
+            if self.max_contrast_pairs is not None:
                 contrast_pairs = random.sample(
-                    contrast_pairs, min(len(contrast_pairs), max_contrast_pairs)
+                    contrast_pairs, min(len(contrast_pairs), self.max_contrast_pairs)
                 )
 
             for item in contrast_pairs:
@@ -395,7 +404,7 @@ class PairPlanner(Planner):
                 }
                 data_json = json.dumps(data, indent=2)
                 planner_prompt = PAIR_PROMPT_USER.format(
-                    num_plans=n_new,
+                    num_plans=self.n_new,
                     data=data_json,
                     cluster_summary=cluster.summary,
                 )
@@ -414,8 +423,8 @@ class PairPlanner(Planner):
                         "planner_prompt": planner_prompt,
                         "planner_model": self.curr_planner_model,
                         "reasoning_effort": str(self.reasoning),
-                        "n_new": n_new,
-                        "n_pop": n_pop,
+                        "n_new": self.n_new,
+                        "n_pop": self.n_pop,
                     }
                 )
 
@@ -455,7 +464,7 @@ class PairPlanner(Planner):
 
         if cluster_model is not None:
             to_write = self.cluster_plans(
-                to_write=to_write, cluster_model=cluster_model, n_pop=n_pop, relabel=True
+                to_write=to_write, cluster_model=cluster_model, n_pop=self.n_pop, relabel=True
             )
 
         for seed_idx, seed_plans in to_write.items():
