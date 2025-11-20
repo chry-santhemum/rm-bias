@@ -278,7 +278,7 @@ class EvoRunner(Runner):
         return "evo"
 
     async def train_step(self, n_pop_target: int, train_batch_size: int):
-        logger.info(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
+        print(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
         if self.step_count == 0:
             self.planner.initial_plan(runner=self)
         else:
@@ -338,7 +338,7 @@ class EvoRunner(Runner):
 
         return final_attributes
 
-    def train(self, n_pop_target: list[int], train_batch_size: list[int]):
+    def train(self, n_pop_target: list[int], train_batch_size: list[int], validate: bool = True):
         t_steps = len(train_batch_size)
         assert len(n_pop_target) == t_steps
 
@@ -384,7 +384,7 @@ class EvoRunner(Runner):
                 )
             )
 
-            if time_step == t_steps - 1:
+            if validate and time_step == t_steps - 1:
                 asyncio.run(self.validate(final_attributes=final_attributes))
 
 

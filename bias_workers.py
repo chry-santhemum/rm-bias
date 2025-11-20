@@ -449,6 +449,7 @@ async def evaluate_baselines(
     )
 
     # Send inputs
+    logger.info(f"Batch {batch_id} expects {len(user_prompts) * n_rollouts} results...")
     await queue_b.put(
         BatchMarker(batch_id=batch_id, expected_items=len(user_prompts) * n_rollouts)
     )
@@ -457,15 +458,15 @@ async def evaluate_baselines(
         for _ in range(n_rollouts):
             await queue_a.put(PromptInput(system=None, user=user, batch_id=batch_id))
 
-    all_results = await all_futures[batch_id]
-    logger.info(
-        f"Expected {len(user_prompts) * n_rollouts} results, got {len(all_results)}"
-    )
-
     # send one stop sentinel per policy worker
     for _ in range(n_policy_workers):
         await queue_a.put(None)
 
+    all_results = await all_futures[batch_id]
+    logger.info(
+        f"Expected {len(user_prompts) * n_rollouts} results, got {len(all_results)}"
+    )
+    
     await asyncio.gather(*policy_worker_tasks)
     logger.info("\n--- baseline policy workers finished. ---\n")
 

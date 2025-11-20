@@ -59,7 +59,7 @@ class LocalRewardModel(RewardModel):
 
         self.models = []
         for device in devices:
-            logger.info(f"Loading model {model_name} on device {device}...")
+            print(f"Loading model {model_name} on device {device}...")
             model, tokenizer = load_model(model_name, device=device, attn_implementation=attn_implementation)
             self.models.append(model)
             if self.tokenizer is None:

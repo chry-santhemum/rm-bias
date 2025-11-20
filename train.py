@@ -1,4 +1,5 @@
 from pathlib import Path
+import torch
 import logging
 import argparse
 from utils import timestamp, logging_setup, ClusterModel
@@ -72,6 +73,9 @@ def main():
         cluster_model=cluster_model,
     )
 
+    all_cuda_devices = [f"cuda:{i}" for i in range(torch.cuda.device_count())]
+    print(f"Using CUDA devices: {all_cuda_devices}")
+
     runner = EvoRunner(
         seed_states=initial_seed_states,  # type: ignore
         planner=planner,
@@ -82,7 +86,7 @@ def main():
             rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=1024),
             reward_model=LocalRewardModel(
                 model_name="skywork-v2", 
-                devices=["cuda:0"], 
+                devices=all_cuda_devices, 
                 batch_size_per_device=32,
             ),
             n_rewrite_workers=64,
@@ -135,8 +139,11 @@ def main():
 
     try:
         runner.train(
-            n_pop_target=[16, 16, 8],
-            train_batch_size=[4, 8, 16],
+            # n_pop_target=[16, 16, 8],
+            # train_batch_size=[4, 8, 16],
+            n_pop_target=[4, 2],
+            train_batch_size=[2, 4],
+            validate=False,
         )
     except Exception as e:
         logger.error(f"Training failed: {e}")

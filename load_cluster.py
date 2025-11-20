@@ -129,14 +129,16 @@ def load_clusters(
 
     for id, cluster in id_to_cluster.items():
         print(
-            f"Cluster {id}:\n"
+            f"\n\nCluster {id}:\n"
             f"Summary: {cluster.summary}\n"
             f"Number of prompts: {len(cluster.prompts)}\n"
+            f"First 5 prompts:\n"
+            f"="*40
         )
 
         for prompt in cluster.prompts[:5]:
             print(prompt)
-            print("-" * 80)
+            print("-" * 40)
 
     return id_to_cluster
 
@@ -176,22 +178,12 @@ def load_initial_seed_states(
             )
         )
 
-    print(f"Loaded {len(initial_seed_states)} seed states")
+    print(f"\n\nLoaded {len(initial_seed_states)} seed states")
     for state in initial_seed_states:
         print(
             f"  - Seed {state.index}, {len(state.cluster.train_prompts)} train prompts:\n"
             f"    {state.cluster.summary}"
         )
+    print("\n\n\n\n")
 
     return initial_seed_states
-
-
-# %%
-if __name__ == "__main__":
-    load_clusters("wildchat", topic_ids=[5, 6, 14, 16, 17, 18, 19, 26, 29, 32, 36])
-
-    # topic_ids=[]
-    # topic_ids=[0, 2, 4, 6, 9, 11, 15, 21, 34, 35, 83]  # alpaca
-    # topic_ids=[4, 5, 6, 14, 16, 17, 18, 19, 26, 29, 32, 36]  # wildchat
-
-# %%
