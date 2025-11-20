@@ -103,20 +103,20 @@ def main():
         run_name=run_name,
     )
 
-    # runner.get_baselines()
+    runner.get_baselines()
 
-    with open(
-        f"data/evo/20251120-070240-list-synthetic_2/train_baselines/sample_rollouts.json",
-        "r",
-    ) as f:
-        train_baselines = json.load(f)
+    # with open(
+    #     f"data/evo/20251120-070240-list-synthetic_2/train_baselines/sample_rollouts.json",
+    #     "r",
+    # ) as f:
+    #     train_baselines = json.load(f)
 
-    runner.baselines = {}
-    for user, rollouts in train_baselines.items():
-        runner.baselines[user] = [
-            Rollout(response=rollout["response"], score=rollout["score"])
-            for rollout in rollouts
-        ]
+    # runner.baselines = {}
+    # for user, rollouts in train_baselines.items():
+    #     runner.baselines[user] = [
+    #         Rollout(response=rollout["response"], score=rollout["score"])
+    #         for rollout in rollouts
+    #     ]
 
     # with open(
     #     f"data/evo/{run_name}/val_baselines/baseline_results.json", "r"
@@ -141,7 +141,7 @@ def main():
 
     try:
         runner.train(
-            n_pop_target=[16, 16, 8],
+            n_pop_target=[16, 8, 8],
             train_batch_size=[4, 8, 16],
             # n_pop_target=[4, 2],
             # train_batch_size=[2, 4],

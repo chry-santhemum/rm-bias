@@ -3,8 +3,8 @@ Evolutionary algorithm / Tree of Attacks.
 
 Cost estimate (per seed state):
 - initial plan: 2K tokens in (3) / out (15) * max 64 contrast pairs = $2.3
-- number of attributes to evaluate: 256, 32*4, 16*4, 8*4
-- train batch size: 2, 4, 8, 16
+- number of attributes to evaluate: 128, 16*4, 8*4
+- train batch size: 4, 8, 16
 - each rewrite: 8 * 512 * 1024 * out (0.4) = 4M tokens, $1.6 per step
 - each plan: 10K input tokens, 1K output * 32, 16, 8 => $2.4 in total
 

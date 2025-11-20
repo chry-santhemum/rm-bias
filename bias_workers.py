@@ -110,7 +110,6 @@ async def policy_worker(
 
         batch.clear()
         
-        
     current_batch: list[PromptInput] = []
         
     while True:
@@ -170,7 +169,6 @@ async def rewrite_worker(
             logger.debug(f"[rewrite_worker {worker_id}] Pushed 1 task.")
 
         batch.clear() 
-
 
     current_batch: list[RewriteInput] = []
 
