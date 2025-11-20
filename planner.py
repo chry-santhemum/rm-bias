@@ -139,9 +139,14 @@ class Planner(ABC):
                         "relabel_plan": relabeled_plan,
                         "relabel_reasoning": resp.reasoning_content,
                     })
+
+                    if i < 3:
+                        logger.info(f"Relabeled plan {i}:\n{relabeled_plan}\nPlans that were used:\n{json.dumps(relabel_metas[i]['plans_in_cluster'], indent=4)}")
+
                     to_write_new[seed_idx].append(
                         {
                             "plan": relabeled_plan,
+                            "time_step": 0,
                             "meta": relabel_metas[i],
                         }
                     )
