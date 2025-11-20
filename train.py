@@ -61,9 +61,9 @@ def main():
         embedding_model_name="Qwen/Qwen3-Embedding-0.6B",
     )
     hypothesis_planner = PairPlanner(
-        model_names=["openai/gpt-5"],
+        model_names=["openai/gpt-5-mini"],
         max_tokens=8192,
-        reasoning=6000,
+        reasoning="medium",
         max_par=128,
         n_new=args.n_new,
         n_pop=args.n_pop_initial,
@@ -85,7 +85,7 @@ def main():
             model_name="meta-llama/llama-3.1-8b-instruct", temperature=0.9
         ),
         bias_evaluator=BiasEvaluator(
-            rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=1024),
+            rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=256),
             reward_model=LocalRewardModel(
                 model_name="skywork-v2", 
                 devices=all_cuda_devices, 
@@ -141,10 +141,10 @@ def main():
 
     try:
         runner.train(
-            # n_pop_target=[16, 16, 8],
-            # train_batch_size=[4, 8, 16],
-            n_pop_target=[4, 2],
-            train_batch_size=[2, 4],
+            n_pop_target=[16, 16, 8],
+            train_batch_size=[4, 8, 16],
+            # n_pop_target=[4, 2],
+            # train_batch_size=[2, 4],
             validate=False,
         )
     except Exception as e:

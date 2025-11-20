@@ -24,7 +24,13 @@ logger = logging.getLogger(__name__)
 RELABEL_PROMPT = textwrap.dedent("""
     You are given a list of system prompts which have been clustered together in the same cluster due to their similarity. Your task is to write ONE system prompt that is representative of the common points of these system prompts in the cluster.
 
-    Here is the list of system prompts:
+    Please do not just aggregate the union of all of the system prompts into one single system prompt. Instead, you should try to find a common point that represents the majority of the system prompts in the cluster. Your new, representative system prompt should specify **one precise, concrete, atomic attribute** that the assistant responses should have, using **simple, clear language**. The specification should be generically applicable to responses to any sensible user prompt described by the following cluster summary:
+
+    <user_prompt_cluster_summary>
+    {cluster_summary}
+    </user_prompt_cluster_summary>
+
+    Here is the list of system prompts that were clustered together:
     <system_prompts>
     {system_prompts}
     </system_prompts>
@@ -117,7 +123,10 @@ class Planner(ABC):
                     plans_in_cluster = [all_plans[idx] for idx in result["content_indices"]]
                     relabel_chats.append(
                         ChatHistory.from_user(
-                            RELABEL_PROMPT.format(system_prompts=json.dumps(plans_in_cluster, indent=4))
+                            RELABEL_PROMPT.format(
+                                cluster_summary=seed_plans[0]["meta"]["cluster_summary"],
+                                system_prompts=json.dumps(plans_in_cluster, indent=4)
+                            )
                         )
                     )
                     relabel_metas.append(
@@ -137,7 +146,7 @@ class Planner(ABC):
                     relabeled_plan = resp.first_response.strip() # type: ignore
                     relabel_metas[i].update({
                         "relabel_plan": relabeled_plan,
-                        "relabel_reasoning": resp.reasoning_content,
+                        # "relabel_reasoning": resp.reasoning_content,
                     })
 
                     if i < 3:
@@ -256,6 +265,7 @@ class ListPlanner(Planner):
                     metas.append(
                         {
                             "seed_idx": seed_state_idx,
+                            "cluster_summary": seed_state.cluster.summary,
                             "time_step": 0,
                             "user_prompt": user_prompt,
                             "planner_prompt": planner_prompt,
@@ -443,6 +453,7 @@ class PairPlanner(Planner):
                 metas.append(
                     {
                         "seed_idx": seed_idx,
+                        "cluster_summary": cluster.summary,
                         "time_step": 0,
                         "user_prompt": data["user_prompt"],
                         "chosen": data["response_A"],
