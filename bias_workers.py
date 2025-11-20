@@ -25,7 +25,7 @@ class PromptInput:
 
 
 @dataclass(frozen=True)
-class PromptResult:
+class PromptOutput:
     system: str | None
     user: str
     assistant: str | None
@@ -43,7 +43,7 @@ class RewriteInput:
 
 
 @dataclass(frozen=True)
-class RewriteResult:
+class RewriteOutput:
     system: str
     user: str
     original_assistant: str
@@ -54,7 +54,7 @@ class RewriteResult:
 
 
 @dataclass(frozen=True)
-class BatchMarker:
+class BatchStartMarker:
     batch_id: str
     expected_items: int
 
@@ -63,7 +63,7 @@ async def policy_worker(
     policy_model: PolicyModel,
     batch_size: int,
     in_queue: asyncio.Queue[PromptInput],
-    out_queue: asyncio.Queue[PromptResult],
+    out_queue: asyncio.Queue[PromptOutput],
     worker_id: int,
 ):
     async def sample_batch(batch: list[PromptInput]):
@@ -90,14 +90,14 @@ async def policy_worker(
                 logger.warning(
                     f"[policy_worker {worker_id}] Failed to sample for user prompt:\n<user_prompt>\n{input.user}\n</user_prompt>"
                 )
-                sample_results.append(PromptResult(
+                sample_results.append(PromptOutput(
                     system=input.system,
                     user=input.user,
                     assistant=None,
                     batch_id=input.batch_id,
                 ))
             else:
-                sample_results.append(PromptResult(
+                sample_results.append(PromptOutput(
                     system=input.system,
                     user=input.user,
                     assistant=response.first_response,  # type: ignore
@@ -107,7 +107,6 @@ async def policy_worker(
         for result in sample_results:
             await out_queue.put(result)
             in_queue.task_done()
-            logger.debug(f"[policy_worker {worker_id}] Pushed 1 task.")
 
         batch.clear()
         
@@ -134,8 +133,8 @@ async def policy_worker(
 async def rewrite_worker(
     rewrite_model: RewriteModel,
     batch_size: int,
-    in_queue: asyncio.Queue[RewriteInput],
-    out_queue: asyncio.Queue[RewriteResult],
+    in_queue: asyncio.Queue[RewriteInput | None],
+    out_queue: asyncio.Queue[RewriteOutput],
     worker_id: int,
 ):
     async def rewrite_batch(batch: list[RewriteInput]):
@@ -156,7 +155,7 @@ async def rewrite_worker(
                 logger.warning(
                     f"[rewrite_worker {worker_id}] Failed to rewrite:\n<begin_user_prompt>\n{input.user}\n<end_user_prompt>"
                 )
-            rewrite_results.append(RewriteResult(
+            rewrite_results.append(RewriteOutput(
                 system=input.system,
                 user=input.user,
                 original_assistant=input.original_assistant,
@@ -177,6 +176,7 @@ async def rewrite_worker(
 
     while True:
         task_input = await in_queue.get()
+
         if in_queue.qsize() % 100 == 0:
             logger.info(
                 f"[rewrite_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}"
@@ -194,14 +194,29 @@ async def rewrite_worker(
 
 async def rating_worker(
     reward_model: RewardModel,
-    in_queue: asyncio.Queue[PromptResult | RewriteResult | BatchMarker],
-    all_results: Mapping[str, Sequence[PromptResult | RewriteResult]],
+    in_queue: asyncio.Queue[PromptOutput | RewriteOutput | BatchStartMarker],
+    all_results: Mapping[str, Sequence[PromptOutput | RewriteOutput]],
     all_futures: Mapping[str, asyncio.Future],
 ):
     done = False
-    total_items_processed = 0
+    # Keep track of progress by batch id
     processed_counts = defaultdict(int)
     expected_counts = defaultdict(int)
+
+    async def rate_batch(batch: list[PromptOutput | RewriteOutput]):
+        chat_histories = []
+        for result in batch:
+            if isinstance(result, PromptOutput):
+                chat_histories.append(ChatHistory.from_user(result.user).add_assistant(result.assistant))  # type: ignore
+            elif isinstance(result, RewriteOutput):
+                chat_histories.append(ChatHistory.from_user(result.user).add_assistant(result.rewritten_assistant))  # type: ignore
+
+        reward_scores = await reward_model.async_rate(chat_histories, use_tqdm=False)
+        for result, reward_score in zip(batch, reward_scores):
+            all_results[result.batch_id].append(replace(result, score=reward_score.score))  # type: ignore
+        
+        logger.info(f"[rating_worker] Finished processing minibatch of size {len(batch)}.")
+
 
     while True:
         batch = []
@@ -210,37 +225,23 @@ async def rating_worker(
                 item = await asyncio.wait_for(in_queue.get(), timeout=3.0)
 
                 if item is None:  # Sentinel value to signal stop
+                    logger.info("Stop sentinel received.")
                     in_queue.task_done()
                     done = True
                     break
 
-                if isinstance(item, BatchMarker):
-                    logger.info(
-                        f"Batch {item.batch_id} sentinel received."
-                    )
+                if isinstance(item, BatchStartMarker):
+                    logger.info(f"Batch {item.batch_id} sentinel received.")
                     in_queue.task_done()
                     expected_counts[item.batch_id] += item.expected_items
                     continue
 
-                if isinstance(item, PromptResult):
-                    if item.assistant is None:
-                        logger.debug(
-                            f"[rating_worker] Received prompt result with no assistant response."
-                        )
-                    else:
-                        logger.debug(
-                            f"[rating_worker] Received valid prompt item. New batch size: {len(batch)}."
-                        )
+                if isinstance(item, PromptOutput):
+                    if item.assistant is not None:
                         batch.append(item)
-                elif isinstance(item, RewriteResult):
-                    if item.rewritten_assistant is None:
-                        logger.debug(
-                            f"[rating_worker] Received rewritten result with no assistant response."
-                        )
-                    else:
-                        logger.debug(
-                            f"[rating_worker] Received valid rewritten item. New batch size: {len(batch)}."
-                        )
+
+                elif isinstance(item, RewriteOutput):
+                    if item.rewritten_assistant is not None:
                         batch.append(item)
 
                 processed_counts[item.batch_id] += 1
@@ -250,29 +251,15 @@ async def rating_worker(
             pass  # Not an error, just means we process the current incomplete batch
 
         if len(batch) == 0 and not done:
-            # nothing to process yet; continue collecting
             continue
 
-        logger.debug(f"[rating_worker] Processing batch of size {len(batch)}...")
-        chat_histories = []
-        for result in batch:
-            if isinstance(result, PromptResult):
-                chat_histories.append(ChatHistory.from_user(result.user).add_assistant(result.assistant))  # type: ignore
-            elif isinstance(result, RewriteResult):
-                chat_histories.append(ChatHistory.from_user(result.user).add_assistant(result.rewritten_assistant))  # type: ignore
-
-        if len(chat_histories) > 0:
-            reward_scores = await reward_model.async_rate(chat_histories, use_tqdm=False)
-            for result, reward_score in zip(batch, reward_scores):
-                all_results[result.batch_id].append(replace(result, score=reward_score.score))  # type: ignore
-        
-        total_items_processed += len(batch)
-        logger.info(f"[rating_worker] Finished processing minibatch of size {len(batch)}. Total items processed: {total_items_processed}.")
+        # Rate batch
+        await rate_batch(batch)
 
         completed_batch_ids = []
         for batch_id, expected in list(expected_counts.items()):
             processed = processed_counts.get(batch_id, 0)
-            if processed >= expected:
+            if processed == expected:
                 all_futures[batch_id].set_result(all_results[batch_id])
                 completed_batch_ids.append(batch_id)
                 logger.info(f"[rating_worker] Batch {batch_id} completed: {processed}/{expected}.")
@@ -288,21 +275,7 @@ async def rating_worker(
             del expected_counts[batch_id]
 
         if done:
-            # Finalize any incomplete batches before shutting down
-            for batch_id, expected in list(expected_counts.items()):
-                processed = processed_counts.get(batch_id, 0)
-                if batch_id in all_futures and not all_futures[batch_id].done():
-                    logger.info(
-                        f"[rating_worker] Finalizing incomplete batch {batch_id}: {processed}/{expected} items processed."
-                    )
-                    all_futures[batch_id].set_result(all_results[batch_id])
-                # Clean up tracking dictionaries
-                if batch_id in all_results:
-                    del all_results[batch_id]  # type: ignore
-                if batch_id in processed_counts:
-                    del processed_counts[batch_id]
-                del expected_counts[batch_id]
-            logger.info("[rating_worker] Final item processed. Shutting down.")
+            # Break outer loop
             break
 
 
@@ -310,7 +283,7 @@ async def rating_worker(
 # Organizing results
 
 def organize_samples(
-    all_results: list[PromptResult],
+    all_results: list[PromptOutput],
     save_dir: Path | None = None,
 ):
     organized_scores = defaultdict(dict)
@@ -357,7 +330,7 @@ def organize_samples(
                     k: {k2: [asdict(r) for r in v2] for k2, v2 in v.items()}
                     for k, v in organized_rollouts.items()
                 }
-                json.dump(json_data, f, indent=4)
+            json.dump(json_data, f, indent=4)
 
         with open(save_dir / "sample_scores.json", "w", encoding="utf-8") as f:
             json.dump(organized_scores, f, indent=4)
@@ -369,7 +342,7 @@ def organize_samples(
 
 
 def organize_rewrites(
-    all_results: list[RewriteResult],
+    all_results: list[RewriteOutput],
     baseline_rollouts: dict[str, list[Rollout]],
     n_rollouts: int | None = None,
     save_dir: Path | None = None,
@@ -468,7 +441,7 @@ async def evaluate_baselines(
     # Send inputs
     logger.info(f"Batch {batch_id} expects {len(user_prompts) * n_rollouts} results...")
     await queue_b.put(
-        BatchMarker(batch_id=batch_id, expected_items=len(user_prompts) * n_rollouts)
+        BatchStartMarker(batch_id=batch_id, expected_items=len(user_prompts) * n_rollouts)
     )
 
     for user in user_prompts:

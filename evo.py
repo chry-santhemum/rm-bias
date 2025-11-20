@@ -288,8 +288,7 @@ class EvoRunner(Runner):
                 m_var=self.m_var,
             )
 
-        evaluate_tasks = []
-        seed_state_indices = []
+        evaluate_results = dict()
 
         async with self.bias_evaluator as evaluator:
 
@@ -298,25 +297,18 @@ class EvoRunner(Runner):
                     seed_state.cluster.train_prompts,
                     train_batch_size,
                 )
-                for attribute in seed_state.history[-1]:
-                    evaluate_tasks.append(
-                        evaluator.evaluate_attributes(
-                            user_prompts=user_prompts,
-                            attributes=[attribute],
-                            baselines=self.baselines,
-                            n_rollouts=self.n_rewrite_rollouts,
-                        )
-                    )
-                    seed_state_indices.append(seed_state_idx)
+                stats = await evaluator.evaluate_attributes(
+                    user_prompts=user_prompts,
+                    attributes=list(seed_state.history[-1].keys()),
+                    baselines=self.baselines,
+                    n_rollouts=self.n_rewrite_rollouts,
+                )
+                evaluate_results[seed_state_idx] = stats
 
-            print(f"Evaluate tasks: {len(evaluate_tasks)}")
-            # Limit number of concurrent attribute evaluations to avoid overwhelming the event loop/resources.
-            evaluate_results = await gather_with_semaphore(evaluate_tasks, max_par=8)
 
-        for result, seed_state_idx in zip(evaluate_results, seed_state_indices):
-            (key,) = result
-            val = result[key]
-            self.seed_states[seed_state_idx].history[-1][key].rollouts = val
+        for seed_state_idx, stats in evaluate_results.items():
+            for attribute, rollouts in stats.items():
+                self.seed_states[seed_state_idx].history[-1][attribute].rollouts = rollouts
 
         final_attributes = self.save_attribute_stats(
             top_k=8, save_dir=self.run_path / f"step_{self.step_count}_stats"

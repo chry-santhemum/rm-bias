@@ -362,9 +362,9 @@ class PairPlanner(Planner):
                 # find those above / below threshold * stdev
                 high_rollouts = [r for r in rollouts if float(r.score) > mean_score + threshold * stdev_score]  # type: ignore
                 low_rollouts = [r for r in rollouts if float(r.score) < mean_score - threshold * stdev_score]  # type: ignore
-                print(
-                    f"High rollouts: {len(high_rollouts)}, Low rollouts: {len(low_rollouts)}"
-                )
+                # print(
+                #     f"High rollouts: {len(high_rollouts)}, Low rollouts: {len(low_rollouts)}"
+                # )
 
                 if len(high_rollouts) == 0 or len(low_rollouts) == 0:
                     continue
@@ -382,10 +382,6 @@ class PairPlanner(Planner):
             print(
                 f"Found {len(contrast_pairs)} contrast pairs in total for seed {seed_state.index}"
             )
-            logging.info(
-                f"Found {len(contrast_pairs)} contrast pairs in total for seed {seed_state.index}"
-            )
-
             # contrast_pairs = random.sample(contrast_pairs, min(len(contrast_pairs), 4))  # DEBUG
 
             seed_state.cluster = replace(
@@ -417,9 +413,10 @@ class PairPlanner(Planner):
 
             contrast_pairs = cluster.aux_info
             if self.max_contrast_pairs is not None:
-                contrast_pairs = random.sample(
-                    contrast_pairs, min(len(contrast_pairs), self.max_contrast_pairs)
-                )
+                contrast_pairs = contrast_pairs[:self.max_contrast_pairs]
+                # contrast_pairs = random.sample(
+                #     contrast_pairs, min(len(contrast_pairs), self.max_contrast_pairs)
+                # )
 
             for item in contrast_pairs:
                 data = {
@@ -468,8 +465,10 @@ class PairPlanner(Planner):
             if resp is None:
                 continue
             plans, reasoning = parse_json_response(resp)
-            print("Planner reasoning: ", reasoning)
-            logger.info(f"One turn planner model reasoning: {reasoning}")
+
+            if i < 5:
+                logger.info(f"Planner reasoning:\n{reasoning}")
+                logger.info(f"Planner plans:\n{json.dumps(plans, indent=4)}")
 
             if isinstance(plans, str):
                 plans = []

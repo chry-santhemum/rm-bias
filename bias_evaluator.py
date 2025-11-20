@@ -13,9 +13,9 @@ from models import RewriteModel
 from reward_models import RewardModel
 from state import Rollout
 from bias_workers import (
-    BatchMarker,
+    BatchStartMarker,
     RewriteInput,
-    RewriteResult,
+    RewriteOutput,
     rewrite_worker,
     rating_worker,
     organize_rewrites,
@@ -43,7 +43,7 @@ class BiasEvaluator:
         self._workers_started = False
         self.queue_input: asyncio.Queue | None = None
         self.queue_rewrite: asyncio.Queue | None = None
-        self.batch_results: dict[str, list[RewriteResult]] = {}
+        self.batch_results: dict[str, list[RewriteOutput]] = {}
         self.batch_futures: dict[str, asyncio.Future] = {}
         self.rewrite_workers: list[asyncio.Task] = []
         self.rating_worker: asyncio.Task | None = None
@@ -99,7 +99,7 @@ class BiasEvaluator:
             self.batch_futures[batch_id] = loop.create_future()
             self._batch_id += 1
 
-        # Pre-compute expected results so the rating worker learns expectations early
+        # Pre-compute expected number of results
         expected_result_count = 0
         for user in user_prompts:
             n_user_rollouts = (
@@ -109,19 +109,18 @@ class BiasEvaluator:
             )
             expected_result_count += n_user_rollouts * len(attributes)
 
-        # Send this information to the rating worker
+        # Send batch start marker
         logger.info(f"Batch {batch_id} expects {expected_result_count} results...")
-        assert self.queue_rewrite is not None
-        await self.queue_rewrite.put(
-            BatchMarker(batch_id=batch_id, expected_items=expected_result_count)
+        await self.queue_rewrite.put(  # type: ignore
+            BatchStartMarker(batch_id=batch_id, expected_items=expected_result_count)
         )
 
+        # Put tasks
         for user, attribute in product(user_prompts, attributes):
             for i, original_assistant in enumerate(baselines[user]):
                 if n_rollouts is not None and i >= n_rollouts:
                     break
-                assert self.queue_input is not None
-                await self.queue_input.put(
+                await self.queue_input.put(  # type: ignore
                     RewriteInput(
                         system=attribute,
                         user=user,

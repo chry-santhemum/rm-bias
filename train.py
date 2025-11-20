@@ -1,9 +1,11 @@
 from pathlib import Path
+import json
 import torch
 import logging
 import argparse
 from utils import timestamp, logging_setup, ClusterModel
 from load_cluster import load_initial_seed_states
+from state import Rollout
 from models import PolicyModel, RewriteModel, JudgeModel
 from reward_models import LocalRewardModel
 from bias_evaluator import BiasEvaluator
@@ -80,7 +82,7 @@ def main():
         seed_states=initial_seed_states,  # type: ignore
         planner=planner,
         policy_model=PolicyModel(
-            model_name="meta-llama/llama-3.1-8b-instruct", temperature=1.0
+            model_name="meta-llama/llama-3.1-8b-instruct", temperature=0.9
         ),
         bias_evaluator=BiasEvaluator(
             rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=1024),
@@ -101,20 +103,20 @@ def main():
         run_name=run_name,
     )
 
-    runner.get_baselines()
+    # runner.get_baselines()
 
-    # with open(
-    #     f"data/one_turn/20251107-075750-naive-synthetic_2/train_baselines/baseline_results.json",
-    #     "r",
-    # ) as f:
-    #     train_baselines = json.load(f)
+    with open(
+        f"data/evo/20251120-070240-list-synthetic_2/train_baselines/sample_rollouts.json",
+        "r",
+    ) as f:
+        train_baselines = json.load(f)
 
-    # runner.baselines = {}
-    # for user, rollouts in train_baselines.items():
-    #     runner.baselines[user] = [
-    #         Rollout(response=rollout["response"], score=rollout["score"])
-    #         for rollout in rollouts
-    #     ]
+    runner.baselines = {}
+    for user, rollouts in train_baselines.items():
+        runner.baselines[user] = [
+            Rollout(response=rollout["response"], score=rollout["score"])
+            for rollout in rollouts
+        ]
 
     # with open(
     #     f"data/evo/{run_name}/val_baselines/baseline_results.json", "r"
