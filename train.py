@@ -64,6 +64,7 @@ def main():
         max_par=128,
         n_new=args.n_new,
         n_pop=args.n_pop_initial,
+        max_contrast_pairs=64,
     )
 
     planner = EvoPlanner(
