@@ -245,7 +245,8 @@ class Runner(ABC):
                                 "rollout_idx": rollout_idx,
                             }
                         )
-
+        
+        logger.info(f"Running {len(judge_tasks)} judge tasks...")
         judge_tasks_results = asyncio.run(
             async_gather(
                 judge_tasks, max_parallel=self.judge_model.max_par // NUM_TRIALS

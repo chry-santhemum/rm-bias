@@ -19,6 +19,7 @@ parser.add_argument("--dataset", type=str, required=True)
 parser.add_argument("--n_new", type=int, default=8, help="Hypothesis generation: number of candidates per ask")
 parser.add_argument("--n_pop_initial", type=int, default=128, help="Hypothesis generation: initial population")
 
+parser.add_argument("--planner_type", type=str, default="pair", choices=["pair", "list"])
 parser.add_argument("--m_var", type=int, default=3)
 parser.add_argument("--n_baseline_rollouts", type=int, default=16)
 parser.add_argument("--n_rewrite_rollouts", type=int, default=8)
@@ -40,8 +41,8 @@ elif args.dataset == "synthetic_1":
     # topic_ids = [8, 9, 10, 11]
 elif args.dataset == "synthetic_2":
     # topic_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    # topic_ids = [1, 3, 4, 6, 8, 9, 12, 14, 16]
-    topic_ids = [1]
+    topic_ids = [1, 3, 4, 6, 8, 9, 12, 14, 16]
+    # topic_ids = [1]
 
 def main():
     initial_seed_states = load_initial_seed_states(
@@ -60,16 +61,31 @@ def main():
     cluster_model = ClusterModel(
         embedding_model_name="Qwen/Qwen3-Embedding-0.6B",
     )
-    hypothesis_planner = PairPlanner(
-        model_names=["openai/gpt-5"],
-        max_tokens=8192,
-        reasoning="medium",
-        max_par=128,
-        relabel=False,
-        n_new=args.n_new,
-        n_pop=args.n_pop_initial,
-        max_contrast_pairs=32,
-    )
+
+    if args.planner_type == "pair":
+        hypothesis_planner = PairPlanner(
+            model_names=["openai/gpt-5"],
+            max_tokens=8192,
+            reasoning="medium",
+            max_par=128,
+            relabel=False,
+            n_new=args.n_new,
+            n_pop=args.n_pop_initial,
+            max_contrast_pairs=64,
+        )
+    elif args.planner_type == "list":
+        hypothesis_planner = ListPlanner(
+            model_names=["openai/gpt-5"],
+            max_tokens=8192,
+            reasoning="medium",
+            max_par=128,
+            relabel=False,
+            n_new=args.n_new,
+            n_pop=args.n_pop_initial,
+            n_traj_in_context=8,
+            n_per_user_prompt=1,
+            max_num_train_prompts=64,
+        )
 
     planner = EvoPlanner(
         hypothesis_planner=hypothesis_planner,
@@ -112,7 +128,7 @@ def main():
     # runner.get_baselines()
 
     with open(
-        f"data/evo/20251121-051451-list-synthetic_2/train_baselines/sample_rollouts.json",
+        f"data/evo/20251121-075422-list-synthetic_2/train_baselines/sample_rollouts.json",
         "r",
     ) as f:
         train_baselines = json.load(f)
@@ -147,8 +163,8 @@ def main():
 
     try:
         runner.train(
-            n_pop_target=[16, 8],
-            train_batch_size=[4, 8],
+            n_pop_target=[16, 8, 8],
+            train_batch_size=[4, 8, 16],
             # n_pop_target=[4, 2],
             # train_batch_size=[2, 4],
             validate=True,

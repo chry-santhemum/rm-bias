@@ -164,9 +164,18 @@ class BiasEvaluator:
         logger.info("\n--- rewrite rating worker finished. ---\n")
 
         self._workers_started = False
+        # Reset handles so a new context can start cleanly
+        self.rewrite_workers = []
+        self.rating_worker = None
+        self.queue_input = None
+        self.queue_rewrite = None
 
     # Make this into an async context manager to ensure proper shutdown
     async def __aenter__(self):
+        # Rebind per-event-loop lock when entering a new async context.
+        # This evaluator is reused across multiple asyncio.run calls,
+        # so primitives must be recreated for the current loop.
+        self._batch_id_lock = asyncio.Lock()
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):

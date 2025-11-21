@@ -7,9 +7,10 @@ import logging
 import datetime
 import asyncio
 from pprint import pprint
-from typing import Any, Tuple, Optional
+from typing import Any, Tuple, Optional, Iterable, Awaitable
 from pathlib import Path
 from collections import defaultdict
+from tqdm.asyncio import tqdm_asyncio
 from IPython.core.getipython import get_ipython
 
 import numpy as np
@@ -157,9 +158,9 @@ def remove_outliers(data: list[float], z_score: float = 3.0) -> list[float]:
     return [x for x in data if np.abs(x - mean) < z_score * std]
 
 
-async def async_gather(tasks: list, max_parallel: Optional[int] = None):
+async def async_gather(tasks: list[Awaitable[Any]], max_parallel: Optional[int] = None):
     if max_parallel is None or max_parallel >= len(tasks):
-        return await asyncio.gather(*tasks)
+        return await tqdm_asyncio.gather(*tasks)
     else:
         semaphore = asyncio.Semaphore(max_parallel)
 
@@ -167,9 +168,9 @@ async def async_gather(tasks: list, max_parallel: Optional[int] = None):
             async with semaphore:
                 return await task
 
-        return await asyncio.gather(*(sem_task(task) for task in tasks))
+        return await tqdm_asyncio.gather(*(sem_task(task) for task in tasks))
 
-
+    
 def parse_json_response(
     resp: Response, log_json_error: bool = True
 ) -> Tuple[Any, str | None]:
@@ -228,19 +229,6 @@ async def time_operation(operation_name, coroutine):
     duration = end_time - start_time
     logger.info(f"  {operation_name} completed in {duration:.2f} seconds")
     return result
-
-
-from typing import Iterable, Awaitable, Any
-
-async def gather_with_semaphore(
-    tasks: Iterable[Awaitable[Any]], 
-    max_par: int
-) -> list[Any]:
-    semaphore = asyncio.Semaphore(max_par)
-    async def sem_task(coro: Awaitable[Any]) -> Any:
-        async with semaphore:
-            return await coro
-    return await asyncio.gather(*(sem_task(task) for task in tasks))
 
 
 def is_notebook():

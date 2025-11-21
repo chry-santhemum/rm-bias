@@ -216,7 +216,7 @@ async def rating_worker(
         for result, reward_score in zip(batch, reward_scores):
             all_results[result.batch_id].append(replace(result, score=reward_score.score))  # type: ignore
         
-        logger.info(f"[rating_worker] Finished processing minibatch of size {len(batch)} in {(time.time() - start_time):.2f} seconds.")
+        logger.info(f"[rating_worker] Finished processing minibatch of size {len(batch)} in {(time.time() - start_time):.2f} seconds. Queue size: {in_queue.qsize()}")
 
 
     while True:
@@ -250,12 +250,12 @@ async def rating_worker(
 
         except asyncio.TimeoutError:
             pass  # Not an error, just means we process the current incomplete batch
-
-        if len(batch) == 0 and not done:
-            continue
-
-        # Rate batch
-        await rate_batch(batch)
+        
+        # Only rate when there is something to rate; but always progress-check below
+        # to avoid the edge case of rewrite worker failing to produce valid outputs,
+        # such that the rating worker doesn't know that it's done
+        if len(batch) > 0:
+            await rate_batch(batch)
 
         completed_batch_ids = []
         for batch_id, expected in list(expected_counts.items()):
