@@ -4,6 +4,7 @@
 
 import hashlib
 import asyncio
+import gc
 import torch
 import logging
 from tqdm.auto import tqdm
@@ -76,12 +77,9 @@ class LocalRewardModel(RewardModel):
     ) -> list[RatingResult]:
         model = self.models[model_index]
         rewards = []
-        pbar = (
-            tqdm(
-                range(0, len(chat_histories), self.batch_size_per_device), desc="Rating responses"
-            )
-            if use_tqdm
-            else range(0, len(chat_histories), self.batch_size_per_device)
+        pbar = tqdm(
+            range(0, len(chat_histories), self.batch_size_per_device), 
+            desc="Rating responses" if use_tqdm else None
         )
 
         for i in pbar:
@@ -89,30 +87,54 @@ class LocalRewardModel(RewardModel):
             indices_not_none = [
                 idx for idx, chat in enumerate(batch) if chat is not None
             ]
-            batch_clean: list[ChatHistory] = [batch[idx] for idx in indices_not_none]  # type: ignore
-            inputs = [chat.remove_system().to_openai_messages() for chat in batch_clean]
-            input_ids = self.tokenizer.apply_chat_template(  # type: ignore
-                inputs,
-                tokenize=True,
-                return_tensors="pt",
-                padding=True,
-                padding_side="right",
-            ).to(model.device)  # type: ignore
-
-            attn_mask = input_ids.ne(self.tokenizer.pad_token_id)  # type: ignore
-
-            with torch.no_grad():
-                scores = model(  # type: ignore
-                    input_ids=input_ids, attention_mask=attn_mask
-                ).logits.squeeze(-1)
-
             batch_results = [
                 RatingResult(score=None, reasoning=None) for _ in range(len(batch))
             ]
-            for idx, score in enumerate(scores.tolist()):
-                batch_results[indices_not_none[idx]] = RatingResult(
-                    score=float(score), reasoning=None
-                )
+            batch_clean: list[ChatHistory] = [batch[idx] for idx in indices_not_none]  # type: ignore
+            
+            if len(batch_clean) == 0:
+                continue
+
+            inputs_clean = [chat.remove_system().to_openai_messages() for chat in batch_clean]
+
+            # OOM-safe micro-batching within this device batch
+            current_mb = self.batch_size_per_device
+            start = 0
+            while start < len(inputs_clean):
+                sub_bs = min(current_mb, len(inputs_clean) - start)
+                try:
+                    sub_inputs = inputs_clean[start : start + sub_bs]
+                    input_ids = self.tokenizer.apply_chat_template(  # type: ignore
+                        sub_inputs,
+                        tokenize=True,
+                        return_tensors="pt",
+                        padding=True,
+                        padding_side="right",
+                    ).to(model.device)  # type: ignore
+
+                    attn_mask = input_ids.ne(self.tokenizer.pad_token_id)  # type: ignore
+
+                    with torch.no_grad():
+                        scores_tensor = model(  # type: ignore
+                            input_ids=input_ids, attention_mask=attn_mask
+                        ).logits.squeeze(-1)
+
+                    scores_list = scores_tensor.tolist()
+                    for j, score in enumerate(scores_list):
+                        batch_results[indices_not_none[start + j]] = RatingResult(
+                            score=float(score), reasoning=None
+                        )
+
+                    start += sub_bs
+                except torch.cuda.OutOfMemoryError:
+                    if torch.cuda.is_available():
+                        gc.collect()
+                        torch.cuda.empty_cache()
+                    if current_mb == 1:
+                        # Give up on this slice; leave results as None
+                        start += sub_bs  # avoid infinite loop
+                    else:
+                        current_mb = max(1, current_mb // 2)
 
             rewards.extend(batch_results)
 

@@ -58,9 +58,6 @@ class GenerationModel:
         chat_histories: list[ChatHistory],
         desc: str | None = None,
     ) -> list[Response|None]:
-        """
-        If response is None or was interrupted, return the input chat history.
-        """
         responses = await self.caller.call(
             messages=chat_histories,
             model=self.model_name,

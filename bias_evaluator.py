@@ -7,7 +7,7 @@ from pathlib import Path
 import logging
 import plotly.graph_objects as go
 
-from utils import logging_setup, timestamp, remove_outliers
+from utils import timestamp, remove_outliers
 from models import RewriteModel
 from reward_models import RewardModel
 from state import Rollout
@@ -35,11 +35,11 @@ class BiasEvaluator:
         self.rewrite_model = rewrite_model
         self.reward_model = reward_model
         self._batch_id = 0
-        self._batch_id_lock = asyncio.Lock()
         self.n_rewrite_workers = n_rewrite_workers
 
         # Defer queues and worker startup until inside a running event loop
         self._workers_started = False
+        self._batch_id_lock: asyncio.Lock | None = None
         self.queue_input: asyncio.Queue | None = None
         self.queue_rewrite: asyncio.Queue | None = None
         self.batch_results: dict[str, list[RewriteOutput]] = {}
@@ -51,6 +51,7 @@ class BiasEvaluator:
         if self._workers_started:
             return
 
+        self._batch_id_lock = asyncio.Lock()
         self.queue_input = asyncio.Queue(maxsize=2 * self.rewrite_model.max_par)
         self.queue_rewrite = asyncio.Queue()
 
@@ -77,6 +78,18 @@ class BiasEvaluator:
                 self.batch_futures,
             )
         )
+        # Surface crashes of the rating worker early
+        def _rating_done_cb(task: asyncio.Task):
+            try:
+                exc = task.exception()
+            except asyncio.CancelledError:
+                return
+            if exc is not None:
+                logger.error("rating_worker exited with exception", exc_info=exc)
+            else:
+                logger.warning("rating_worker exited unexpectedly without exception.")
+        self.rating_worker.add_done_callback(_rating_done_cb)
+        
         self._workers_started = True
 
     async def evaluate_attributes(
@@ -91,7 +104,8 @@ class BiasEvaluator:
         start_time = time.time()
 
         # Generate batch ID and asyncio.Future (protected by lock)
-        async with self._batch_id_lock:
+        assert self._batch_id_lock is not None
+        async with self._batch_id_lock:  
             batch_id = str(self._batch_id)
             self.batch_results[batch_id] = []
             loop = asyncio.get_running_loop()
@@ -151,7 +165,7 @@ class BiasEvaluator:
             await self.queue_input.put(None)  # Sentinel values for rewrite_workers
 
         await asyncio.gather(*self.rewrite_workers)
-        logger.info("\n--- rewrite workers finished. ---\n")
+        logger.info("--- rewrite workers finished. ---")
 
         # Ensure all produced rewrite results are fully consumed and marked done
         # before signalling the rating worker to exit. This prevents leaving
@@ -160,21 +174,19 @@ class BiasEvaluator:
         await self.queue_rewrite.put(None)  # Sentinel value for rating_worker
         if self.rating_worker is not None:
             await self.rating_worker
-        logger.info("\n--- rewrite rating worker finished. ---\n")
+        logger.info("--- rewrite rating worker finished. ---")
 
+        self._batch_id_lock = None
         self._workers_started = False
-        # Reset handles so a new context can start cleanly
-        self.rewrite_workers = []
-        self.rating_worker = None
         self.queue_input = None
         self.queue_rewrite = None
+        self.rewrite_workers = []
+        self.rating_worker = None
+
 
     # Make this into an async context manager to ensure proper shutdown
     async def __aenter__(self):
-        # Rebind per-event-loop lock when entering a new async context.
-        # This evaluator is reused across multiple asyncio.run calls,
-        # so primitives must be recreated for the current loop.
-        self._batch_id_lock = asyncio.Lock()
+        await self._ensure_workers_started()
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):

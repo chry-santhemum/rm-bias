@@ -91,7 +91,8 @@ def load_model(model_name: str, device: str = "cuda:0", attn_implementation: str
 
     print("Model loaded. Set to eval mode and disabled gradients.")
     model.eval()
-    model.requires_grad_(False)
+    for p in model.parameters():
+        p.requires_grad_(False)
 
     tokenizer = AutoTokenizer.from_pretrained(model_name_hf)
     if tokenizer.pad_token is None:

@@ -221,6 +221,8 @@ async def rating_worker(
 
     while True:
         batch = []
+        last_flush_time = time.time()
+
         try:
             while len(batch) < reward_model.batch_size:
                 item = await asyncio.wait_for(in_queue.get(), timeout=3.0)
@@ -247,6 +249,9 @@ async def rating_worker(
 
                 processed_counts[item.batch_id] += 1
                 in_queue.task_done()
+                
+                if time.time() - last_flush_time > 3.0:
+                    break
 
         except asyncio.TimeoutError:
             pass  # Not an error, just means we process the current incomplete batch
@@ -255,7 +260,14 @@ async def rating_worker(
         # to avoid the edge case of rewrite worker failing to produce valid outputs,
         # such that the rating worker doesn't know that it's done
         if len(batch) > 0:
-            await rate_batch(batch)
+            try:
+                await rate_batch(batch)
+            except Exception:
+                logger.exception("rating_worker: rating failed; marking %d items with score=None", len(batch))
+                # Ensure progress even if rating crashes; keep result alignment
+                for result in batch:
+                    all_results[result.batch_id].append(replace(result, score=None))  # type: ignore
+            last_flush_time = time.time()
 
         completed_batch_ids = []
         for batch_id, expected in list(expected_counts.items()):

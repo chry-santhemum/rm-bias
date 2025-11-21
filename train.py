@@ -106,7 +106,7 @@ def main():
             rewrite_model=RewriteModel(
                 model_name="openai/gpt-5-nano", 
                 max_par=512, 
-                max_tokens=2048,
+                max_tokens=4096,
                 enable_cache=False,
             ),
             reward_model=LocalRewardModel(
