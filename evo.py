@@ -71,7 +71,11 @@ class EvoPlanner:
             baseline_rollouts = baselines[user_prompt]
             for i, rewritten_rollout in enumerate(rollouts):
                 baseline_rollout = baseline_rollouts[i]
-                if baseline_rollout.score is None or rewritten_rollout.score is None:
+                if (
+                    baseline_rollout.score is None 
+                    or rewritten_rollout is None
+                    or rewritten_rollout.score is None
+                ):
                     continue
                 all_past_data.append(
                     {
@@ -282,9 +286,8 @@ class EvoRunner(Runner):
 
         evaluate_results = dict()
 
-        async with self.bias_evaluator as evaluator:
-
-            for seed_state_idx, seed_state in enumerate(self.seed_states):
+        for seed_state_idx, seed_state in enumerate(self.seed_states):
+            async with self.bias_evaluator as evaluator:
                 user_prompts = random.sample(
                     seed_state.cluster.train_prompts,
                     train_batch_size,
@@ -322,54 +325,55 @@ class EvoRunner(Runner):
 
         return final_attributes
 
-    def train(self, n_pop_target: list[int], train_batch_size: list[int], validate: bool = True):
+    def train(self, n_pop_target: list[int], train_batch_size: list[int], validate: bool = True, start_from: int|None=None):
         t_steps = len(train_batch_size)
         assert len(n_pop_target) == t_steps
 
         for time_step in range(t_steps):
-            # if start_from is not None and time_step < start_from:
-            #     for seed_state in self.seed_states:
-            #         with open(self.run_path / f"step_{time_step}_stats/seed_{seed_state.index}.json", "r") as f:
-            #             seed_results = json.load(f)
+            if start_from is not None and time_step < start_from:
+                for seed_state in self.seed_states:
+                    with open(self.run_path / f"step_{time_step}_stats/seed_{seed_state.index}.json", "r") as f:
+                        seed_results = json.load(f)
 
-            #         seed_state.history.append(dict())
-            #         for item in seed_results:
-            #             attribute = item["attribute"]
-            #             attribute_rollouts = dict()
-            #             for user_prompt, rollouts in item["all_rollouts"].items():
-            #                 attribute_rollouts[user_prompt] = [
-            #                     Rollout(
-            #                         response=rollout["response"],
-            #                         score=rollout["score"]
-            #                     )
-            #                     for rollout in rollouts
-            #                 ]
+                    seed_state.history.append(dict())
+                    for item in seed_results:
+                        attribute = item["attribute"]
+                        attribute_rollouts = dict()
+                        for user_prompt, rollouts in item["all_rollouts"].items():
+                            attribute_rollouts[user_prompt] = [
+                                Rollout(
+                                    response=rollout["response"],
+                                    score=rollout["score"]
+                                )
+                                if rollout is not None else None
+                                for rollout in rollouts
+                            ]
 
-            #             seed_state.history[-1][attribute] = AttributeStats(
-            #                 attribute=attribute,
-            #                 rollouts=attribute_rollouts,
-            #                 meta=item.get("meta", {"time_step": time_step})
-            #             )
+                        seed_state.history[-1][attribute] = AttributeStats(
+                            attribute=attribute,
+                            rollouts=attribute_rollouts,
+                            meta=item.get("meta", {"time_step": time_step})
+                        )
 
-            #     self.planner.update_pop(
-            #         baselines=self.baselines,
-            #         seed_states=self.seed_states,
-            #         n_pop_target=n_pop_target,
-            #         dbscan_eps=self.dbscan_eps,
-            #     )
-            #     self.step_count += 1
-            #     self.planner.step_planner_model()
-
-            # else:
-            final_attributes = asyncio.run(
-                self.train_step(
+                self.planner.update_pop(
+                    baselines=self.baselines,
+                    seed_states=self.seed_states,
                     n_pop_target=n_pop_target[time_step],
-                    train_batch_size=train_batch_size[time_step],
+                    dbscan_eps=self.dbscan_eps,
                 )
-            )
+                self.step_count += 1
+                self.planner.hypothesis_planner.step_planner_model()
 
-            if validate and time_step == t_steps - 1:
-                asyncio.run(self.validate(final_attributes=final_attributes))
+            else:
+                final_attributes = asyncio.run(
+                    self.train_step(
+                        n_pop_target=n_pop_target[time_step],
+                        train_batch_size=train_batch_size[time_step],
+                    )
+                )
+
+                if validate and time_step == t_steps - 1:
+                    asyncio.run(self.validate(final_attributes=final_attributes))
 
 
 # %%

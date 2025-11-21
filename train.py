@@ -52,7 +52,8 @@ def main():
         val_split_size=args.val_split_size,
     )
 
-    run_name = f"{timestamp()}-list-{args.dataset}"
+    # run_name = f"{timestamp()}-list-{args.dataset}"
+    run_name="20251121-170439-list-synthetic_2"
     Path(f"logs/evo").mkdir(parents=True, exist_ok=True)
     Path(f"data/evo").mkdir(parents=True, exist_ok=True)
 
@@ -165,6 +166,7 @@ def main():
         runner.train(
             n_pop_target=[16, 8, 8],
             train_batch_size=[4, 8, 16],
+            start_from=1,
             # n_pop_target=[4, 2],
             # train_batch_size=[2, 4],
             validate=True,

@@ -56,7 +56,7 @@ class Rollout:
 class AttributeStats:
     attribute: str
     judge_score: float | None = None
-    rollouts: dict[str, list[Rollout]] = field(default_factory=dict)
+    rollouts: dict[str, list[Rollout|None]] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -67,7 +67,7 @@ class AttributeStats:
     def mean_rewards(self) -> dict[str, float]:
         mean_results = {}
         for user_prompt, rollouts in self.rollouts.items():
-            rollouts = [r for r in rollouts if r.score is not None]
+            rollouts = [r for r in rollouts if r is not None and r.score is not None]
             mean_results[user_prompt] = np.mean([r.score for r in rollouts]).item()  # type: ignore
         return mean_results
 
@@ -75,15 +75,15 @@ class AttributeStats:
     def all_rewards(self) -> dict[str, list[float]]:
         all_results = {}
         for user_prompt, rollouts in self.rollouts.items():
-            rollouts = [r for r in rollouts if r.score is not None]
+            rollouts = [r for r in rollouts if r is not None and r.score is not None]
             all_results[user_prompt] = [r.score for r in rollouts]
         return all_results
 
     @property
-    def all_rollouts(self) -> dict[str, list[dict[str, Any]]]:
+    def all_rollouts(self) -> dict[str, list[Any]]:
         all_results = {}
         for user_prompt, rollouts in self.rollouts.items():
-            all_results[user_prompt] = [asdict(r) for r in rollouts]
+            all_results[user_prompt] = [asdict(r) if r is not None else None for r in rollouts]
         return all_results
 
     def mean_reward_diff(self, baselines: dict[str, list[Rollout]]) -> float | None:
