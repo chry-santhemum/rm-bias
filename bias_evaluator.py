@@ -5,7 +5,6 @@ import asyncio
 from itertools import product
 from pathlib import Path
 import logging
-import numpy as np
 import plotly.graph_objects as go
 
 from utils import logging_setup, timestamp, remove_outliers
