@@ -6,7 +6,7 @@ import textwrap
 import logging
 from typing import Sequence
 
-from caller import OpenRouterCaller, CacheConfig, RetryConfig, ChatHistory, Response
+from caller import OpenRouterCaller, OpenAICaller, CacheConfig, RetryConfig, ChatHistory, Response
 from utils import parse_json_response
 
 logger = logging.getLogger(__name__)
@@ -43,9 +43,15 @@ class GenerationModel:
         self.kwargs = kwargs
         self.model_slug = self.model_name.split("/")[-1]
 
-        self.caller = OpenRouterCaller(
-            cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG, dotenv_path=".env"
-        )
+        if model_name.startswith("openai/"):
+            self.model_name = self.model_name.removeprefix("openai/")
+            self.caller = OpenAICaller(
+                cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG, dotenv_path=".env"
+            )
+        else:
+            self.caller = OpenRouterCaller(
+                cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG, dotenv_path=".env"
+            )
 
     async def sample(
         self,
@@ -140,11 +146,13 @@ class RewriteModel(GenerationModel):
         max_par: int = 512,
         max_tokens: int = 8192,
         reasoning: str | int = "low",
+        enable_cache: bool = False,
         **kwargs,
     ):
         to_pass_kwargs = kwargs.copy()
         to_pass_kwargs["max_tokens"] = max_tokens
         to_pass_kwargs["reasoning"] = reasoning
+        to_pass_kwargs["enable_cache"] = enable_cache
         super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
 
     async def rewrite(

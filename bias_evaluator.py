@@ -154,7 +154,11 @@ class BiasEvaluator:
         await asyncio.gather(*self.rewrite_workers)
         logger.info("\n--- rewrite workers finished. ---\n")
 
-        await self.queue_rewrite.put(None)
+        # Ensure all produced rewrite results are fully consumed and marked done
+        # before signalling the rating worker to exit. This prevents leaving
+        # unfinished tasks on the queue and avoids shutdown hangs.
+        await self.queue_rewrite.join()
+        await self.queue_rewrite.put(None)  # Sentinel value for rating_worker
         if self.rating_worker is not None:
             await self.rating_worker
         logger.info("\n--- rewrite rating worker finished. ---\n")

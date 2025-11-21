@@ -137,6 +137,7 @@ async def rewrite_worker(
     worker_id: int,
 ):
     async def rewrite_batch(batch: list[RewriteInput]):
+        start_time = time.time()
         if not batch:
             return
 
@@ -168,6 +169,7 @@ async def rewrite_worker(
             in_queue.task_done()
             logger.debug(f"[rewrite_worker {worker_id}] Pushed 1 task.")
 
+        logger.info(f"[rewrite_worker {worker_id}] Finished rewriting minibatch of size {len(batch)} in {(time.time() - start_time):.2f} seconds.")
         batch.clear() 
 
     current_batch: list[RewriteInput] = []
@@ -202,6 +204,7 @@ async def rating_worker(
     expected_counts = defaultdict(int)
 
     async def rate_batch(batch: list[PromptOutput | RewriteOutput]):
+        start_time = time.time()
         chat_histories = []
         for result in batch:
             if isinstance(result, PromptOutput):
@@ -213,7 +216,7 @@ async def rating_worker(
         for result, reward_score in zip(batch, reward_scores):
             all_results[result.batch_id].append(replace(result, score=reward_score.score))  # type: ignore
         
-        logger.info(f"[rating_worker] Finished processing minibatch of size {len(batch)}.")
+        logger.info(f"[rating_worker] Finished processing minibatch of size {len(batch)} in {(time.time() - start_time):.2f} seconds.")
 
 
     while True:

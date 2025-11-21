@@ -41,7 +41,7 @@ elif args.dataset == "synthetic_1":
 elif args.dataset == "synthetic_2":
     # topic_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     # topic_ids = [1, 3, 4, 6, 8, 9, 12, 14, 16]
-    topic_ids = [1, 3]
+    topic_ids = [1]
 
 def main():
     initial_seed_states = load_initial_seed_states(
@@ -61,13 +61,14 @@ def main():
         embedding_model_name="Qwen/Qwen3-Embedding-0.6B",
     )
     hypothesis_planner = PairPlanner(
-        model_names=["openai/gpt-5-mini"],
+        model_names=["openai/gpt-5"],
         max_tokens=8192,
         reasoning="medium",
         max_par=128,
+        relabel=False,
         n_new=args.n_new,
         n_pop=args.n_pop_initial,
-        max_contrast_pairs=64,
+        max_contrast_pairs=32,
     )
 
     planner = EvoPlanner(
@@ -85,13 +86,18 @@ def main():
             model_name="meta-llama/llama-3.1-8b-instruct", temperature=0.9
         ),
         bias_evaluator=BiasEvaluator(
-            rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=256),
+            rewrite_model=RewriteModel(
+                model_name="openai/gpt-5-nano", 
+                max_par=512, 
+                max_tokens=2048,
+                enable_cache=False,
+            ),
             reward_model=LocalRewardModel(
                 model_name="skywork-v2", 
                 devices=all_cuda_devices, 
                 batch_size_per_device=32,
             ),
-            n_rewrite_workers=64,
+            n_rewrite_workers=32,
         ),
         judge_model=JudgeModel(
             model_name="anthropic/claude-haiku-4.5", max_tokens=2048, reasoning=2000
@@ -103,20 +109,20 @@ def main():
         run_name=run_name,
     )
 
-    runner.get_baselines()
+    # runner.get_baselines()
 
-    # with open(
-    #     f"data/evo/20251120-070240-list-synthetic_2/train_baselines/sample_rollouts.json",
-    #     "r",
-    # ) as f:
-    #     train_baselines = json.load(f)
+    with open(
+        f"data/evo/20251121-051451-list-synthetic_2/train_baselines/sample_rollouts.json",
+        "r",
+    ) as f:
+        train_baselines = json.load(f)
 
-    # runner.baselines = {}
-    # for user, rollouts in train_baselines.items():
-    #     runner.baselines[user] = [
-    #         Rollout(response=rollout["response"], score=rollout["score"])
-    #         for rollout in rollouts
-    #     ]
+    runner.baselines = {}
+    for user, rollouts in train_baselines.items():
+        runner.baselines[user] = [
+            Rollout(response=rollout["response"], score=rollout["score"])
+            for rollout in rollouts
+        ]
 
     # with open(
     #     f"data/evo/{run_name}/val_baselines/baseline_results.json", "r"
@@ -141,11 +147,11 @@ def main():
 
     try:
         runner.train(
-            n_pop_target=[16, 8, 8],
-            train_batch_size=[4, 8, 16],
+            n_pop_target=[16, 8],
+            train_batch_size=[4, 8],
             # n_pop_target=[4, 2],
             # train_batch_size=[2, 4],
-            validate=False,
+            validate=True,
         )
     except Exception as e:
         logger.error(f"Training failed: {e}")

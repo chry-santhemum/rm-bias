@@ -9,11 +9,7 @@ import plotly.graph_objects as go
 from utils import remove_outliers
 
 
-
-def plot_seed_validation_data(
-    run_path: Path|str,
-    seed_index: int,
-):
+def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
     if isinstance(run_path, str):
         run_path = Path(run_path)
 
@@ -35,11 +31,6 @@ def plot_seed_validation_data(
         run_path / f"validate/seed_{seed_index}_judge.json", "r", encoding="utf-8"
     ) as f:
         judge_results = json.load(f)
-
-    with open(
-        run_path / f"seed_{seed_index}_cluster.json", "r", encoding="utf-8"
-    ) as f:
-        cluster_info = json.load(f)
 
     # Collect difference data for each attribute
     plot_data = []
@@ -73,6 +64,18 @@ def plot_seed_validation_data(
                 "winrate": np.mean(winrates).item(),
             }
         )
+    
+    return plot_data
+
+
+def plot_seed_validation_data(
+    run_path: Path|str,
+    seed_index: int,
+):
+    if isinstance(run_path, str):
+        run_path = Path(run_path)
+        
+    plot_data = process_run_data(run_path, seed_index)
 
     # Helper function to wrap text
     def wrap_text(text, width):
@@ -120,6 +123,11 @@ def plot_seed_validation_data(
                 points="all",
             )
         )
+
+    with open(
+        run_path / f"seed_{seed_index}_cluster.json", "r", encoding="utf-8"
+    ) as f:
+        cluster_info = json.load(f)
 
     fig.update_layout(
         title=f"Seed {seed_index}: {cluster_info['summary']}",
