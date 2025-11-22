@@ -14,14 +14,14 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
         run_path = Path(run_path)
 
     with open(
-        run_path / "val_baselines" / "val_baselines.json",
+        run_path / "val_baselines" / "sample_rollouts.json",
         "r",
         encoding="utf-8",
     ) as f:
         val_baselines = json.load(f)
 
     with open(
-        run_path / f"validate/seed_{seed_index}_validate/rewrite_plus_scores.json",
+        run_path / f"validate/seed_{seed_index}_validate/rewrite_scores.json",
         "r",
         encoding="utf-8",
     ) as f:

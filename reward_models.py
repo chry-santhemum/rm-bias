@@ -126,7 +126,15 @@ class LocalRewardModel(RewardModel):
                         )
 
                     start += sub_bs
-                except torch.cuda.OutOfMemoryError:
+                except (torch.cuda.OutOfMemoryError, RuntimeError) as e:
+                    # Only handle CUDA-related RuntimeErrors; re-raise other RuntimeErrors
+                    if isinstance(e, RuntimeError) and "cuda" not in str(e).lower():
+                        raise
+                    logger.warning(f"OOM error on model {self.model_name} on device {model.device}. Batch size before: {current_mb}.")
+                    try:
+                        del input_ids, attn_mask, scores_tensor
+                    except Exception as e:
+                        pass
                     if torch.cuda.is_available():
                         gc.collect()
                         torch.cuda.empty_cache()
