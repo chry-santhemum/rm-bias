@@ -85,7 +85,7 @@ class BiasEvaluator:
             except asyncio.CancelledError:
                 return
             if exc is not None:
-                logger.error("rating_worker exited with exception", exc_info=exc)
+                logger.exception("rating_worker exited with exception")
             else:
                 logger.warning("rating_worker exited unexpectedly without exception.")
         self.rating_worker.add_done_callback(_rating_done_cb)

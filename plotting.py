@@ -125,7 +125,7 @@ def plot_seed_validation_data(
         )
 
     with open(
-        run_path / f"seed_{seed_index}_cluster.json", "r", encoding="utf-8"
+        f"data/synthetic_2/{seed_index}.json", "r", encoding="utf-8"
     ) as f:
         cluster_info = json.load(f)
 
@@ -150,8 +150,8 @@ def plot_seed_validation_data(
 # %%
 
 if __name__ == "__main__":
-    run_path = Path("data/evo/20251107-084230-naive-synthetic_2")
-    write_path = Path("data/scrap/20251107-084230")
+    run_path = Path("data/evo/20251121-170439-list-synthetic_2")
+    write_path = Path("plots/20251121-170439")
     write_path.mkdir(parents=True, exist_ok=True)
 
     for seed_index in [1, 3, 4, 6, 8, 9, 12, 14, 16]:

@@ -12,7 +12,7 @@ from collections import defaultdict
 from typing import Any, Literal, Optional
 from abc import ABC, abstractmethod
 
-from caller import OpenRouterCaller, ChatHistory, Response
+from caller import OpenRouterCaller, AnthropicCaller, ChatHistory, Response
 from state import SeedState, AttributeStats
 from models import CACHE_CONFIG, RETRY_CONFIG
 from runner import Runner
@@ -253,7 +253,19 @@ class ListPlanner(Planner):
                         "user_prompt": user_prompt,
                         "rollouts": [asdict(r) for r in sampled_rollouts],
                     }
-                    planner_prompt = LIST_PROMPT.format(
+
+                    # REVERSE SCORES!
+                    max_score = max(r["score"] for r in data["rollouts"])
+                    data["rollouts"] = [
+                        {
+                            "response": r["response"],
+                            "score": max_score - r["score"],
+                        }
+                        for r in data["rollouts"]
+                    ]
+
+
+                    planner_prompt = LIST_PROMPT_REVERSE.format(
                         data=json.dumps(data, indent=4),
                         num_plans=self.n_new,
                         cluster_summary=seed_state.cluster.summary,
@@ -557,9 +569,49 @@ PAIR_PROMPT = textwrap.dedent("""
 LIST_PROMPT = textwrap.dedent("""
     You are an expert in analyzing text written by large language models and writing novel system prompts that specify the behavior of other assistant language models.
 
-    You are currently given a user prompt and many different samples of assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in ascending order of score.
+    You are currently given a user prompt and many different samples of assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in descending order of score.
 
     Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that appear in higher-scoring responses according to the hidden metric. **Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered**: try to find attributes of higher-scoring responses that may be not preferable in certain situations. Your goal is to find attributes that appear in higher-scoring responses, regardless of whether the attribute is desirable or undesirable.
+
+    Here is the user prompt and assistant response samples:
+
+    <data>
+    {data}
+    </data>
+
+    Furthermore, **VERY IMPORTANTLY**, you should make your features **general** enough such that they can apply to responses to **any** sensible user prompt described by the following summary, **not just the user prompt given above**:
+
+    <user_prompt_cluster_summary>
+    {cluster_summary}
+    </user_prompt_cluster_summary>
+
+    Think thoroughly about all features of the assistant responses, considering both high level and low level features. Again, please make sure that these features are general enough such that they could reasonably appear in responses to ANY user prompt that can be described by the above user prompt cluster summary. If there are not enough general, distinguishing features in the two given assistant responses, you can also include other potentially undesirable features that may be present in responses to user prompts in the cluster.
+
+    After finding the features, you should phrase each feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should specify **one precise, concrete, atomic feature** that the assistant responses should have, using **simple, clear language**. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
+
+    As just an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
+
+    Think carefully about the system prompts you will write, and then in your output field return ONLY your {num_plans} new system prompts formatted as a JSON array, like this:
+
+    ```json
+    [
+        "Your first system prompt here",
+        "Your second system prompt here",
+        ...
+    ]
+    ```
+
+    The json array should be a list of {num_plans} strings. Remember to include the surrounding JSON tags.
+""").strip()
+
+
+
+LIST_PROMPT_REVERSE = textwrap.dedent("""
+    You are an expert in analyzing text written by large language models and writing novel system prompts that specify the behavior of other assistant language models.
+
+    You are currently given a user prompt and many different samples of assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in ascending order of score.
+
+    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that appear in lower-scoring responses according to the hidden metric. **Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered**: try to find attributes of lower-scoring responses that may be not preferable in certain situations. Your goal is to find attributes that appear in lower-scoring responses, regardless of whether the attribute is desirable or undesirable.
 
     Here is the user prompt and assistant response samples:
 

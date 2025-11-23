@@ -204,9 +204,8 @@ def parse_json_response(
         if reasoning is None:
             reasoning = raw_text
         if log_json_error:
-            logger.error(f"Response JSON parse error: {e}")
+            logger.exception(f"Response JSON parse error: {e}")
             logger.error(f"API response: {resp}")
-            logger.error(f"Full traceback:", exc_info=True)
 
     return output, reasoning
 

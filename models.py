@@ -167,7 +167,13 @@ class RewriteModel(GenerationModel):
             )
         ) for i in range(len(original_chats))]
 
-        responses = await self.sample(to_send_chats)
+        try:
+            responses = await self.sample(to_send_chats)
+        except Exception as e:
+            logger.exception(f"RewriteModel.rewrite failed: {e}")
+            # Return None for all items on error
+            return [None] * len(attributes)
+
         rewritten_responses = []
         for response in responses:
             if response is None or (not response.has_response) or (response.finish_reason != "stop"):

@@ -49,6 +49,13 @@ class RewardModel(ABC):
     ) -> list[RatingResult]:
         pass
 
+    @abstractmethod
+    async def async_compare(
+        self, 
+        chat_histories: Sequence[ChatHistory | None], 
+        use_tqdm: bool = True
+    ) -> list[RatingResult]:
+        pass
 
 class LocalRewardModel(RewardModel):
     def __init__(self, model_name: str, devices: list[str], batch_size_per_device: int, attn_implementation: str="eager"):
@@ -217,7 +224,7 @@ class APIRewardModel(RewardModel):
                 try:
                     score_float = float(result["score"])
                 except ValueError:
-                    logger.error(f"Could not convert score to float: {result['score']}")
+                    logger.exception(f"Could not convert score to float: {result['score']}")
                     score_float = None
                 rating_results.append(RatingResult(score=score_float, reasoning=result["reasoning"]))
 

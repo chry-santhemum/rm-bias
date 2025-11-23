@@ -271,6 +271,5 @@ if __name__ == "__main__":
     try:
         runner.train()
     except Exception as e:
-        logger.error(f"Training failed: {e}")
-        logger.error(f"Full traceback: ", exc_info=True)
+        logger.exception(f"Training failed: {e}")
         raise

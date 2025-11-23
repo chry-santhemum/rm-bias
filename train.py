@@ -40,7 +40,8 @@ if args.dataset == "alpaca":
 elif args.dataset == "wildchat":
     topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]
 elif args.dataset == "synthetic_0":
-    topic_ids = [5, 17, 21, 29, 33, 39, 46, 49, 57, 65, 69]
+    # topic_ids = [4, 19, 20, 28, 32, 38, 45, 48, 56, 64, 68]
+    topic_ids = [4, 19, 20, 28]
 elif args.dataset == "synthetic_1":
     # topic_ids = [0, 1, 3, 6, 7, 8, 9, 10, 11, 12, 14]
     topic_ids = [3, 6, 7, 12, 14]
@@ -153,8 +154,7 @@ def main():
                 validate=True,
             )
         except Exception as e:
-            logger.error(f"Training failed: {e}")
-            logger.error(f"Full traceback: ", exc_info=True)
+            logger.exception(f"Training failed: {e}")
             raise
 
 
