@@ -20,13 +20,13 @@ logger = logging.getLogger(__name__)
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataset", type=str, required=True)
 parser.add_argument("--runner_type", type=str, required=True, choices=["evo", "one_turn"])
-parser.add_argument("--planner_type", type=str, required=True, choices=["pair", "list"])
+parser.add_argument("--planner_type", type=str, required=True, choices=["pair", "list", "list_reverse"])
 
-parser.add_argument("--n_new", type=int, default=8, help="Hypothesis generation: number of candidates per ask")
-parser.add_argument("--n_pop_initial", type=int, default=128, help="Hypothesis generation: initial population")
-
+parser.add_argument("--n_new", type=int, required=True, help="Hypothesis generation: number of candidates per ask")
+parser.add_argument("--n_pop_initial", type=int, required=True, help="Hypothesis generation: initial population")
 
 parser.add_argument("--m_var", type=int, default=3)
+parser.add_argument("--n_planner_requests", type=int, default=64)
 parser.add_argument("--n_baseline_rollouts", type=int, default=16)
 parser.add_argument("--n_rewrite_rollouts", type=int, default=8)
 parser.add_argument("--val_split_size", type=int, default=16)
@@ -41,7 +41,7 @@ elif args.dataset == "wildchat":
     topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]
 elif args.dataset == "synthetic_0":
     # topic_ids = [4, 19, 20, 28, 32, 38, 45, 48, 56, 64, 68]
-    topic_ids = [4, 19, 20, 28]
+    topic_ids = [28, 32, 38, 45, 48, 56, 64, 68]
 elif args.dataset == "synthetic_1":
     # topic_ids = [0, 1, 3, 6, 7, 8, 9, 10, 11, 12, 14]
     topic_ids = [3, 6, 7, 12, 14]
@@ -109,22 +109,24 @@ def main():
             relabel=False,
             n_new=args.n_new,
             n_pop=args.n_pop_initial,
-            max_contrast_pairs=64,
+            max_contrast_pairs=args.n_planner_requests,
         )
-    elif args.planner_type == "list":
+    elif args.planner_type in ["list", "list_reverse"]:
         hypothesis_planner = ListPlanner(
             model_names=["openai/gpt-5"],
             max_tokens=8192,
             reasoning="medium",
             max_par=128,
             relabel=False,
+            reverse=(args.planner_type == "list_reverse"),
             n_new=args.n_new,
             n_pop=args.n_pop_initial,
             n_traj_in_context=8,
             n_per_user_prompt=1,
-            max_num_train_prompts=64,
+            max_num_train_prompts=args.n_planner_requests,
         )
 
+    validate = True if args.val_split_size > 0 else False
     if args.runner_type == "evo":
         planner = EvoPlanner(
             hypothesis_planner=hypothesis_planner,
@@ -151,7 +153,7 @@ def main():
                 train_batch_size=[4, 8, 16],
                 # n_pop_target=[4, 2],
                 # train_batch_size=[2, 4],
-                validate=True,
+                validate=validate,
             )
         except Exception as e:
             logger.exception(f"Training failed: {e}")
@@ -175,7 +177,7 @@ def main():
         runner.get_baselines()
 
         try:
-            asyncio.run(runner.train(validate=True))
+            asyncio.run(runner.train(validate=validate))
         except Exception as e:
             logger.error(f"Training failed: {e}")
             logger.error(f"Full traceback: ", exc_info=True)

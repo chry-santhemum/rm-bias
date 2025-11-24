@@ -6,7 +6,7 @@ import textwrap
 import logging
 from typing import Sequence
 
-from caller import OpenRouterCaller, OpenAICaller, CacheConfig, RetryConfig, ChatHistory, Response
+from caller import AutoCaller, CacheConfig, RetryConfig, ChatHistory, Response
 from utils import parse_json_response
 
 logger = logging.getLogger(__name__)
@@ -42,16 +42,7 @@ class GenerationModel:
         self.max_par = max_par
         self.kwargs = kwargs
         self.model_slug = self.model_name.split("/")[-1]
-
-        if model_name.startswith("openai/"):
-            self.model_name = self.model_name.removeprefix("openai/")
-            self.caller = OpenAICaller(
-                cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG, dotenv_path=".env"
-            )
-        else:
-            self.caller = OpenRouterCaller(
-                cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG, dotenv_path=".env"
-            )
+        self.caller = AutoCaller(dotenv_path=".env", cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG)
 
     async def sample(
         self,

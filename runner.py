@@ -87,24 +87,19 @@ class Runner(ABC):
             f"Baseline rollouts taken: {(time.time() - start_time):.2f} seconds"
         )
 
-    def get_val_baselines(self):
-        # get baseline rollouts and rewards
+
+    async def get_val_baselines(self):
         start_time = time.time()
-        self.val_baselines: dict[str, list[Rollout]] = asyncio.run(
-            evaluate_baselines(
-                user_prompts=self.all_val_prompts,
-                policy_model=self.policy_model,
-                reward_model=self.bias_evaluator.reward_model,
-                save_dir=self.run_path / "val_baselines",
-                n_rollouts=self.n_baseline_rollouts,
-            )
+        self.val_baselines: dict[str, list[Rollout]] = await evaluate_baselines(
+            user_prompts=self.all_val_prompts,
+            policy_model=self.policy_model,
+            reward_model=self.bias_evaluator.reward_model,
+            save_dir=self.run_path / "val_baselines",
+            n_rollouts=self.n_baseline_rollouts,
         )
-        print(
-            f"Validation baseline rollouts taken: {(time.time() - start_time):.2f} seconds"
-        )
-        logging.info(
-            f"Validation baseline rollouts taken: {(time.time() - start_time):.2f} seconds"
-        )
+        duration = time.time() - start_time
+        print(f"Validation baseline rollouts taken: {duration:.2f} seconds")
+        logging.info(f"Validation baseline rollouts taken: {duration:.2f} seconds")
 
     # async def _judge_attribute_helper(self) -> list[dict[str, int]]:
     #     tasks = []
@@ -197,7 +192,10 @@ class Runner(ABC):
         final_attributes: seed_state_index -> list of attributes
         """
         if get_val_baselines:
-            self.get_val_baselines()
+            # Avoid calling the synchronous helper here, since `validate`
+            # is itself an async coroutine and may already be running
+            # inside an event loop (e.g., via `asyncio.run`).
+            await self.get_val_baselines()
 
         validation_results = []
 

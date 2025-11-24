@@ -49,13 +49,13 @@ class RewardModel(ABC):
     ) -> list[RatingResult]:
         pass
 
-    @abstractmethod
-    async def async_compare(
-        self, 
-        chat_histories: Sequence[ChatHistory | None], 
-        use_tqdm: bool = True
-    ) -> list[RatingResult]:
-        pass
+    # @abstractmethod
+    # async def async_compare(
+    #     self, 
+    #     chat_histories: Sequence[ChatHistory | None], 
+    #     use_tqdm: bool = True
+    # ) -> list[RatingResult]:
+    #     pass
 
 class LocalRewardModel(RewardModel):
     def __init__(self, model_name: str, devices: list[str], batch_size_per_device: int, attn_implementation: str="eager"):
