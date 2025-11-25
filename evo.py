@@ -377,8 +377,8 @@ class EvoRunner(Runner):
                     )
                 )
 
-                if validate and time_step == t_steps - 1:
-                    asyncio.run(self.validate(final_attributes=final_attributes))
+            if validate and time_step == t_steps - 1:
+                asyncio.run(self.validate(final_attributes=final_attributes))
 
 
 # %%

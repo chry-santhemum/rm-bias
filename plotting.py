@@ -13,30 +13,24 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
     if isinstance(run_path, str):
         run_path = Path(run_path)
 
-    with open(
-        run_path / "val_baselines" / "sample_rollouts.json",
-        "r",
-        encoding="utf-8",
-    ) as f:
+    with open(run_path / "val_baselines" / "sample_rollouts.json", "r", encoding="utf-8") as f:
         val_baselines = json.load(f)
 
-    with open(
-        run_path / f"validate/seed_{seed_index}_validate/rewrite_scores.json",
-        "r",
-        encoding="utf-8",
-    ) as f:
+    with open(run_path / f"validate/seed_{seed_index}_validate/rewrite_scores.json", "r", encoding="utf-8") as f:
         val_results = json.load(f)
 
-    with open(
-        run_path / f"validate/seed_{seed_index}_judge.json", "r", encoding="utf-8"
-    ) as f:
-        judge_results = json.load(f)
+    try:
+        with open(run_path / f"validate/seed_{seed_index}_judge.json", "r", encoding="utf-8") as f:
+            judge_results = json.load(f)
+    except FileNotFoundError:
+        judge_results = None
+        print(f"No judge results found in {run_path.name} for seed {seed_index}")
 
     # Collect difference data for each attribute
     plot_data = []
 
     # For each attribute, compute differences from baseline
-    for attribute in judge_results:
+    for attribute in val_results:
         attribute_results = val_results[attribute]
         attribute_diffs = []
         winrates = []
@@ -50,9 +44,10 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
                     continue
                 attribute_diffs.append(attr_score - base_score)
 
-        for prompt, prompt_judge_winrates in judge_results[attribute].items():
-            winrates_clean = [wr for wr in prompt_judge_winrates if wr is not None]
-            winrates.extend(winrates_clean)
+        if judge_results is not None:
+            for prompt, prompt_judge_winrates in judge_results[attribute].items():
+                winrates_clean = [wr for wr in prompt_judge_winrates if wr is not None]
+                winrates.extend(winrates_clean)
 
         # remove far outliers
         attribute_diffs = remove_outliers(attribute_diffs)
@@ -61,7 +56,7 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
             {
                 "attribute": attribute,
                 "diffs": attribute_diffs,
-                "winrate": np.mean(winrates).item(),
+                "winrate": np.mean(winrates).item() if winrates else None,
             }
         )
     
@@ -110,7 +105,7 @@ def plot_seed_validation_data(
     for i, item in enumerate(plot_data):
         display_name = (
             wrap_text(item["attribute"], width=60)
-            + f"<br>(Winrate: {item['winrate']:.2f})"
+            + f"<br>(Winrate: {item['winrate']:.2f})" if item['winrate'] is not None else ""
         )
         display_names.append(display_name)
 
@@ -124,8 +119,9 @@ def plot_seed_validation_data(
             )
         )
 
+    ds_name = run_path.name.split("-")[-1]
     with open(
-        f"data/synthetic_2/{seed_index}.json", "r", encoding="utf-8"
+        f"/workspace/rm-bias/data/{ds_name}/{seed_index}.json", "r", encoding="utf-8"
     ) as f:
         cluster_info = json.load(f)
 
@@ -148,13 +144,13 @@ def plot_seed_validation_data(
 
 
 # %%
-
 if __name__ == "__main__":
-    run_path = Path("data/evo/20251121-170439-list-synthetic_2")
-    write_path = Path("plots/20251121-170439")
+    run_path = Path("data/evo/20251124-075100-list-synthetic_0")
+    write_path = Path("plots/20251124-075100")
     write_path.mkdir(parents=True, exist_ok=True)
 
-    for seed_index in [1, 3, 4, 6, 8, 9, 12, 14, 16]:
+    for seed_index in [28, 32, 38, 45, 48, 56, 64, 68]:
         fig = plot_seed_validation_data(run_path=run_path, seed_index=seed_index)
-        fig.show()
+        # fig.show()
         fig.write_html(write_path / f"seed_{seed_index}.html")
+        print(f"Saved plot for seed {seed_index}")

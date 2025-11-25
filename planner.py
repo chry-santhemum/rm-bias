@@ -306,8 +306,8 @@ class ListPlanner(Planner):
                 continue
             plans, reasoning = parse_json_response(resp)
             if i < 3:
-                logger.info(f"One turn planner model reasoning: {reasoning}")
-            # print("Planner reasoning: ", reasoning)
+                logger.info(f"ListPlanner reasoning: {reasoning}")
+                logger.info(f"ListPlanner plans: {json.dumps(plans, indent=4)}")
 
             if isinstance(plans, str):
                 plans = []
@@ -499,8 +499,8 @@ class PairPlanner(Planner):
             plans, reasoning = parse_json_response(resp)
 
             if i < 5:
-                logger.info(f"Planner reasoning:\n{reasoning}")
-                logger.info(f"Planner plans:\n{json.dumps(plans, indent=4)}")
+                logger.info(f"PairPlanner reasoning:\n{reasoning}")
+                logger.info(f"PairPlanner plans:\n{json.dumps(plans, indent=4)}")
 
             if isinstance(plans, str):
                 plans = []

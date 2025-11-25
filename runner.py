@@ -192,9 +192,6 @@ class Runner(ABC):
         final_attributes: seed_state_index -> list of attributes
         """
         if get_val_baselines:
-            # Avoid calling the synchronous helper here, since `validate`
-            # is itself an async coroutine and may already be running
-            # inside an event loop (e.g., via `asyncio.run`).
             await self.get_val_baselines()
 
         validation_results = []
