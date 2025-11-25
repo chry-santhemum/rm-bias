@@ -186,12 +186,12 @@ class Runner(ABC):
         pass
 
     async def validate(
-        self, final_attributes: dict[int, list[str]], get_val_baselines: bool = True
+        self, final_attributes: dict[int, list[str]]
     ):
         """
         final_attributes: seed_state_index -> list of attributes
         """
-        if get_val_baselines:
+        if not hasattr(self, "val_baselines"):
             await self.get_val_baselines()
 
         validation_results = []

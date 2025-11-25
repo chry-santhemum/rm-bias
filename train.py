@@ -94,8 +94,8 @@ def main():
         val_split_size=args.val_split_size,
     )
 
-    run_name = f"{timestamp()}-{args.planner_type}-{args.dataset}"
-    # run_name = "20251124-075100-list-synthetic_0"
+    # run_name = f"{timestamp()}-{args.planner_type}-{args.dataset}"
+    run_name = "20251124-075100-list-synthetic_0"
     Path(f"logs/{args.runner_type}").mkdir(parents=True, exist_ok=True)
     Path(f"data/{args.runner_type}").mkdir(parents=True, exist_ok=True)
 
@@ -146,13 +146,38 @@ def main():
             run_name=run_name,
         )
 
-        runner.get_baselines()
+        # runner.get_baselines()
 
+        with open(
+            f"data/evo/{run_name}/train_baselines/sample_rollouts.json",
+            "r",
+        ) as f:
+            train_baselines = json.load(f)
+
+        runner.baselines = {}
+        for user, rollouts in train_baselines.items():
+            runner.baselines[user] = [
+                Rollout(response=rollout["response"], score=rollout["score"])
+                for rollout in rollouts
+            ]
+
+        # with open(
+        #     f"data/evo/{run_name}/val_baselines/sample_rollouts.json", "r"
+        # ) as f:
+        #     val_baselines = json.load(f)
+
+        # runner.val_baselines = {}
+        # for user, rollouts in val_baselines.items():
+        #     runner.val_baselines[user] = [
+        #         Rollout(response=rollout["response"], score=rollout["score"])
+        #         for rollout in rollouts
+        #     ]
+            
         try:
             runner.train(
                 n_pop_target=[16, 8, 8],
                 train_batch_size=[4, 8, 16],
-                # start_from=3,
+                start_from=3,
                 # n_pop_target=[4, 2],
                 # train_batch_size=[2, 4],
                 validate=validate,
@@ -184,40 +209,6 @@ def main():
             logger.error(f"Training failed: {e}")
             logger.error(f"Full traceback: ", exc_info=True)
             raise
-
-    # with open(
-    #     f"data/evo/20251121-075422-list-synthetic_2/train_baselines/sample_rollouts.json",
-    #     "r",
-    # ) as f:
-    #     train_baselines = json.load(f)
-
-    # runner.baselines = {}
-    # for user, rollouts in train_baselines.items():
-    #     runner.baselines[user] = [
-    #         Rollout(response=rollout["response"], score=rollout["score"])
-    #         for rollout in rollouts
-    #     ]
-
-    # with open(
-    #     f"data/evo/{run_name}/val_baselines/baseline_results.json", "r"
-    # ) as f:
-    #     val_baselines = json.load(f)
-
-    # runner.val_baselines = {}
-    # for user, rollouts in val_baselines.items():
-    #     runner.val_baselines[user] = [
-    #         Rollout(response=rollout["response"], score=rollout["score"])
-    #         for rollout in rollouts
-    #     ]
-
-    # final_attributes = {}
-    # for seed_state_idx in topic_ids:
-    #     with open(f"data/evo/{run_name}/step_2_stats/seed_{seed_state_idx}.json", "r") as f:
-    #         seed_results = json.load(f)
-    #         final_attributes[seed_state_idx] = [item["attribute"] for item in seed_results[:8]]
-
-    # runner.validate(final_attributes=final_attributes, get_val_baselines=False)
-    # asyncio.run(runner.shutdown())
 
 
 if __name__ == "__main__":

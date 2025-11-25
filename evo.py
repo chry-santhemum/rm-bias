@@ -368,6 +368,9 @@ class EvoRunner(Runner):
                 )
                 self.step_count += 1
                 self.planner.hypothesis_planner.step_planner_model()
+                final_attributes = self.save_attribute_stats(
+                    top_k=8, save_dir=None
+                )
 
             else:
                 final_attributes = asyncio.run(

@@ -84,10 +84,11 @@ class LocalRewardModel(RewardModel):
     ) -> list[RatingResult]:
         model = self.models[model_index]
         rewards = []
-        pbar = tqdm(
-            range(0, len(chat_histories), self.batch_size_per_device), 
-            desc="Rating responses" if use_tqdm else None
-        )
+
+        if use_tqdm:
+            pbar = tqdm(range(0, len(chat_histories), self.batch_size_per_device), desc="Rating responses")
+        else:
+            pbar = range(0, len(chat_histories), self.batch_size_per_device)
 
         for i in pbar:
             batch = chat_histories[i : i + self.batch_size_per_device]

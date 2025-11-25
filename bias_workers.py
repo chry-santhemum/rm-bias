@@ -176,7 +176,13 @@ async def rewrite_worker(
     current_batch: list[RewriteInput] = []
 
     while True:
-        task_input = await in_queue.get()
+        try:
+            task_input = await asyncio.wait_for(in_queue.get(), timeout=5.0)
+        except asyncio.TimeoutError:
+            # Flush any accumulated items in current_batch
+            if current_batch:
+                await rewrite_batch(current_batch)
+            continue
 
         if in_queue.qsize() % 100 == 0:
             logger.info(

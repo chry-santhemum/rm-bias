@@ -34,26 +34,28 @@ class BiasEvaluator:
     ):
         self.rewrite_model = rewrite_model
         self.reward_model = reward_model
-        self._batch_id = 0
+        self._workers_started = False
         self.n_rewrite_workers = n_rewrite_workers
 
         # Defer queues and worker startup until inside a running event loop
-        self._workers_started = False
-        self._batch_id_lock: asyncio.Lock | None = None
-        self.queue_input: asyncio.Queue | None = None
-        self.queue_rewrite: asyncio.Queue | None = None
-        self.batch_results: dict[str, list[RewriteOutput]] = {}
-        self.batch_futures: dict[str, asyncio.Future] = {}
+        self._batch_id: int
+        self._batch_id_lock: asyncio.Lock | None
+        self.queue_input: asyncio.Queue | None
+        self.queue_rewrite: asyncio.Queue | None
+        self.batch_results: dict[str, list[RewriteOutput]]
+        self.batch_futures: dict[str, asyncio.Future]
         self.rewrite_workers: list[asyncio.Task] = []
         self.rating_worker: asyncio.Task | None = None
 
     async def _ensure_workers_started(self):
         if self._workers_started:
             return
-
+        self._batch_id = 0
         self._batch_id_lock = asyncio.Lock()
         self.queue_input = asyncio.Queue(maxsize=2 * self.rewrite_model.max_par)
         self.queue_rewrite = asyncio.Queue()
+        self.batch_results = {}
+        self.batch_futures = {}
 
         self.rewrite_workers = [
             asyncio.create_task(
@@ -176,10 +178,13 @@ class BiasEvaluator:
             await self.rating_worker
         logger.info("--- rewrite rating worker finished. ---")
 
+        self._batch_id = 0
         self._batch_id_lock = None
         self._workers_started = False
         self.queue_input = None
         self.queue_rewrite = None
+        self.batch_results = {}
+        self.batch_futures = {}
         self.rewrite_workers = []
         self.rating_worker = None
 
