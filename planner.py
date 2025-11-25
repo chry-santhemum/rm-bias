@@ -305,8 +305,9 @@ class ListPlanner(Planner):
             if resp is None:
                 continue
             plans, reasoning = parse_json_response(resp)
-            print("Planner reasoning: ", reasoning)
-            logger.info(f"One turn planner model reasoning: {reasoning}")
+            if i < 3:
+                logger.info(f"One turn planner model reasoning: {reasoning}")
+            # print("Planner reasoning: ", reasoning)
 
             if isinstance(plans, str):
                 plans = []

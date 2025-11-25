@@ -199,8 +199,8 @@ class Runner(ABC):
 
         validation_results = []
 
-        async with self.bias_evaluator as evaluator:
-            for seed_state in self.seed_states:
+        for seed_state in self.seed_states:
+            async with self.bias_evaluator as evaluator:
                 stats = await evaluator.evaluate_attributes(
                     user_prompts=seed_state.cluster.val_prompts,
                     attributes=final_attributes[seed_state.index],
@@ -209,7 +209,7 @@ class Runner(ABC):
                     / f"seed_{seed_state.index}_validate",
                     baselines=self.val_baselines,
                 )
-                validation_results.append(stats)
+            validation_results.append(stats)
 
         self.judge(validation_results=validation_results)  # type: ignore
 

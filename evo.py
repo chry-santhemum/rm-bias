@@ -291,8 +291,8 @@ class EvoRunner(Runner):
 
         evaluate_results = dict()
         
-        async with self.bias_evaluator as evaluator:
-            for seed_state_idx, seed_state in enumerate(self.seed_states):
+        for seed_state_idx, seed_state in enumerate(self.seed_states):
+            async with self.bias_evaluator as evaluator:
                 user_prompts = random.sample(
                     seed_state.cluster.train_prompts,
                     train_batch_size,
@@ -303,7 +303,7 @@ class EvoRunner(Runner):
                     baselines=self.baselines,
                     n_rollouts=self.n_rewrite_rollouts,
                 )
-                evaluate_results[seed_state_idx] = stats
+            evaluate_results[seed_state_idx] = stats
 
 
         for seed_state_idx, stats in evaluate_results.items():
