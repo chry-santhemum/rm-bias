@@ -481,11 +481,7 @@ class PairPlanner(Planner):
                         "n_pop": self.n_pop,
                     }
                 )
-
-        # # log planner prompts
-        # for i, prompt in enumerate(to_send_messages):
-        #     logger.info(f"Planner prompt {i}: {prompt.get_first('user')}")
-
+                
         planner_responses = asyncio.run(
             self.sample(to_send_messages, desc="PairPlanner planning")
         )
@@ -537,9 +533,7 @@ class PairPlanner(Planner):
 PAIR_PROMPT = textwrap.dedent("""
     You are an expert in analyzing text written by language models and writing novel system prompts that specify the behavior of other language models.
     
-    You are currently given a user prompt and two assistant responses, labeled A and B. 
-    
-    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that response A exhibits but response B does not. Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered: if possible, try to find attributes of response A that may not be preferable in certain situations, but otherwise you can include other neutral features, as long as they appear in response A and not in response B; but importantly, do **not** include any good or desirable features.
+    You are currently given a user prompt and two assistant responses, labeled A and B. Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that response A exhibits but response B does not. Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered: if possible, try to find attributes of response A that may not be preferable in certain situations, but otherwise you can include other neutral features, as long as they appear in response A and not in response B.
 
     Here is the user prompt and the two assistant responses:
 
@@ -553,7 +547,7 @@ PAIR_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    Think thoroughly about all features of the assistant responses, considering both high level and low level features. Again, you should prioritize finding **general** attributes of response A that may be **undesirable or neutral**. If there are not enough such features, you can also brainstorm and include other potentially undesirable or neutral features that are similar to the features found in response A.
+    Think thoroughly about all features of the assistant responses, considering both high level and low level features.
 
     After finding the features, you should phrase each feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should specify **one precise, concrete, atomic attribute** that the assistant responses should have, using **simple, clear language**. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 
@@ -578,8 +572,7 @@ LIST_PROMPT = textwrap.dedent("""
 
     You are currently given a user prompt and a list of different sample assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in descending order of score.
 
-    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that appear more in **higher-scoring** responses according to the hidden metric. Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered: if possible, try to find attributes of higher-scoring responses that may be not preferable in certain situations, but otherwise you can include other neutral features, as long as they appear more in higher-scoring responses. But importantly, do **not** include any good or desirable features.
-
+    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that appear more in **higher-scoring** responses according to the hidden metric.
 
     Here is the user prompt and assistant response samples:
 
@@ -593,7 +586,7 @@ LIST_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    Think thoroughly about all features of the assistant responses, considering both high level and low level features. Again, you should prioritize finding **general** attributes of higher-scoring responses that may be **undesirable or neutral**. If there are not enough such features, you can also brainstorm and include other potentially undesirable or neutral features that are similar to the features found in the responses.
+    Think thoroughly about all features of the assistant responses, considering both high level and low level features.
 
     After finding the features, you should phrase each feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should specify **one precise, concrete, atomic feature** that the assistant responses should have, using **simple, clear language**. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 
@@ -619,7 +612,7 @@ LIST_PROMPT_REVERSE = textwrap.dedent("""
 
     You are currently given a user prompt and a list of different sample assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in ascending order of score.
 
-    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that appear in lower-scoring responses according to the hidden metric. Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered: if possible, try to find attributes of lower-scoring responses that may be not preferable in certain situations, but otherwise you can include other neutral features, as long as they appear in lower-scoring responses.
+    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that appear in lower-scoring responses according to the hidden metric.
 
     Here is the user prompt and assistant response samples:
 
@@ -633,7 +626,7 @@ LIST_PROMPT_REVERSE = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    Think thoroughly about all features of the assistant responses, considering both high level and low level features. Again, you should prioritize finding **general** attributes of lower-scoring responses that may be **undesirable or neutral**. If there are not enough such features, you can also brainstorm and include other potentially undesirable or neutral features that are similar to the features found in the responses.
+    Think thoroughly about all features of the assistant responses, considering both high level and low level features.
 
     After finding the features, you should phrase each feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should specify **one precise, concrete, atomic feature** that the assistant responses should have, using **simple, clear language**. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 

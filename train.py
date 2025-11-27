@@ -49,7 +49,7 @@ elif args.dataset == "synthetic_1":
 elif args.dataset == "synthetic_2":
     # topic_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     # topic_ids = [1, 3, 4, 6, 8, 9, 12, 14, 16]
-    topic_ids = [1, 4, 6]
+    topic_ids = [1, 3]
 
 def main():
     all_cuda_devices = [f"cuda:{i}" for i in range(torch.cuda.device_count())]
@@ -145,20 +145,20 @@ def main():
             run_name=run_name,
         )
 
-        # runner.get_baselines()
+        runner.get_baselines()
 
-        with open(
-            f"data/evo/{run_name}/train_baselines/sample_rollouts.json",
-            "r",
-        ) as f:
-            train_baselines = json.load(f)
+        # with open(
+        #     f"data/evo/{run_name}/train_baselines/sample_rollouts.json",
+        #     "r",
+        # ) as f:
+        #     train_baselines = json.load(f)
 
-        runner.baselines = {}
-        for user, rollouts in train_baselines.items():
-            runner.baselines[user] = [
-                Rollout(response=rollout["response"], score=rollout["score"])
-                for rollout in rollouts
-            ]
+        # runner.baselines = {}
+        # for user, rollouts in train_baselines.items():
+        #     runner.baselines[user] = [
+        #         Rollout(response=rollout["response"], score=rollout["score"])
+        #         for rollout in rollouts
+        #     ]
 
         # with open(
         #     f"data/evo/{run_name}/val_baselines/sample_rollouts.json", "r"

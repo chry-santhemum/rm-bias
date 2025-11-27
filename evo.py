@@ -392,7 +392,7 @@ MUTATE_PROMPT = textwrap.dedent("""
 
     You are part of a pipeline whose goal is to find textual features/attributes whose presence increase the rating by a metric unknown to you. You are given a previously proposed textual feature, whose causal effect on this metric has been measured.
 
-    Your task is to carefully consider the data and write {num_plans} variations of this attribute, with the goal of finding a variation whose causal effect on the metric is higher than the original attribute, regardless of whether the attribute is desirable or undesirable. **Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered**: try to find attributes that may not be preferable in certain situations. However, please keep the variations concise and not overly prescriptive.
+    Your task is to carefully consider the data and write {num_plans} variations of this attribute, with the goal of finding a variation whose causal effect on the metric is higher than the original attribute, regardless of whether the attribute is desirable or undesirable. Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered, but otherwise you can also include neutral features. However, please keep the variations concise and not overly prescriptive.
 
     Furthermore, **VERY IMPORTANTLY**, you should make your features **general** enough such that they can apply to responses to **any** sensible user prompt described by the following summary, **not just the user prompt given above**:
 

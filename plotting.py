@@ -1,6 +1,6 @@
 """All the plotting functions"""
 
-
+import re
 import json
 from pathlib import Path
 import numpy as np
@@ -141,16 +141,36 @@ def plot_seed_validation_data(
     )
     return fig
 
-
-
-# %%
-if __name__ == "__main__":
-    run_path = Path("data/one_turn/20251125-211534-list_reverse-synthetic_0")
-    write_path = Path("plots/20251125-211534")
+def plot_validation_data(run_path: Path|str, write_path: Path|str):
+    if isinstance(run_path, str):
+        run_path = Path(run_path)
+    if isinstance(write_path, str):
+        write_path = Path(write_path)
     write_path.mkdir(parents=True, exist_ok=True)
 
-    for seed_index in [28, 32, 38, 45, 48, 56, 64, 68]:
+    validate_dir = run_path / "validate"
+    # Gather all seed indices (folders matching "seed_{i}_validate")
+    seed_indices = []
+    if validate_dir.exists():
+        pattern = re.compile(r'seed_(\d+)_validate')
+        for item in validate_dir.iterdir():
+            if item.is_dir():
+                match = pattern.match(item.name)
+                if match:
+                    seed_indices.append(int(match.group(1)))
+    seed_indices.sort()
+
+    for seed_index in seed_indices:
         fig = plot_seed_validation_data(run_path=run_path, seed_index=seed_index)
         # fig.show()
         fig.write_html(write_path / f"seed_{seed_index}.html")
         print(f"Saved plot for seed {seed_index}")
+
+
+# %%
+if __name__ == "__main__":
+    run_path = Path("data/one_turn/20251127-044038-pair-synthetic_2")
+    write_path = Path("plots/20251127-044038")
+    write_path.mkdir(parents=True, exist_ok=True)
+
+    plot_validation_data(run_path=run_path, write_path=write_path)
