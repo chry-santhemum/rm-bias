@@ -99,6 +99,7 @@ class BiasEvaluator:
         user_prompts: list[str],
         attributes: list[str],
         baselines: dict[str, list[Rollout]],
+        references: list[dict[str, str] | None] | None = None,
         n_rollouts: int | None = None,  # number of baseline responses to rewrite
         save_dir: Path | None = None,
     ):
@@ -131,19 +132,39 @@ class BiasEvaluator:
         )
 
         # Put tasks
-        for user, attribute in product(user_prompts, attributes):
-            for i, original_assistant in enumerate(baselines[user]):
-                if n_rollouts is not None and i >= n_rollouts:
-                    break
-                await self.queue_input.put(  # type: ignore
-                    RewriteInput(
-                        system=attribute,
-                        user=user,
-                        original_assistant=original_assistant.response,
-                        presence=True,
-                        batch_id=batch_id,
-                    )
-                )
+        for user in user_prompts:
+            for j, attribute in enumerate(attributes):
+                if references is not None:
+                    ref_triple = references[j]
+                    if ref_triple is not None:
+                        for i, original_assistant in enumerate(baselines[user]):
+                            if n_rollouts is not None and i >= n_rollouts:
+                                break
+                            await self.queue_input.put(  # type: ignore
+                                RewriteInput(
+                                    system=attribute,
+                                    user=user,
+                                    original_assistant=original_assistant.response,
+                                    presence=True,
+                                    batch_id=batch_id,
+                                    reference_user=ref_triple["user"],
+                                    reference_response_A=ref_triple["response_A"],
+                                    reference_response_B=ref_triple["response_B"],
+                                )
+                            )
+                else:
+                    for i, original_assistant in enumerate(baselines[user]):
+                        if n_rollouts is not None and i >= n_rollouts:
+                            break
+                        await self.queue_input.put(  # type: ignore
+                            RewriteInput(
+                                system=attribute,
+                                user=user,
+                                original_assistant=original_assistant.response,
+                                presence=True,
+                                batch_id=batch_id,
+                            )
+                        )
 
         # Wait for results for this batch
         batch_results = await self.batch_futures[batch_id]

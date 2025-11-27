@@ -40,8 +40,7 @@ if args.dataset == "alpaca":
 elif args.dataset == "wildchat":
     topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]
 elif args.dataset == "synthetic_0":
-    # topic_ids = [4, 19, 20, 28, 32, 38, 45, 48, 56, 64, 68]
-    topic_ids = [28, 32, 38, 45, 48, 56, 64, 68]
+    topic_ids = [4, 19, 20, 28, 32, 38, 45, 48, 56, 64, 68]
 elif args.dataset == "synthetic_1":
     # topic_ids = [0, 1, 3, 6, 7, 8, 9, 10, 11, 12, 14]
     topic_ids = [3, 6, 7, 12, 14]
@@ -66,6 +65,7 @@ def main():
 
     judge_model = JudgeModel(
         model_name="anthropic/claude-haiku-4.5", 
+        max_par=64,
         max_tokens=2048, 
         reasoning=2000,
         enable_cache=False,
