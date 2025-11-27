@@ -1,6 +1,7 @@
 # %%
 import os
 import json
+from pickletools import int4
 import time
 import pickle
 import logging
@@ -100,6 +101,23 @@ class Runner(ABC):
         duration = time.time() - start_time
         print(f"Validation baseline rollouts taken: {duration:.2f} seconds")
         logging.info(f"Validation baseline rollouts taken: {duration:.2f} seconds")
+
+    
+    def get_references(self, seed_state_idx: int, attribute: str) -> dict|None:
+        # get reference pair if exists (PairPlanner)
+        # if not, write None
+        if attribute not in self.seed_states[seed_state_idx].history[-1]:
+            raise KeyError("Given attribute is not found in the last timestep.")
+
+        att_meta = self.seed_states[seed_state_idx].history[-1][attribute].meta
+        if "response_A" in att_meta:
+            return {
+                "user_prompt": att_meta["user_prompt"],
+                "response_A": att_meta["response_A"],
+                "response_B": att_meta["response_B"],
+            }
+        else:
+            return None
 
     def save_attribute_stats(
         self, top_k: int = 8, save_dir: Path | None = None

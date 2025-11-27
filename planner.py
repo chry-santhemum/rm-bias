@@ -94,17 +94,20 @@ class Planner(ABC):
 
     def cluster_plans(
         self,
-        to_write: dict[int, list[dict[str, Any]]],  # seed index -> list of candidates
+        to_write: dict[int, list[dict[str, Any]]],  # seed index -> list of {"plan": ..., "meta": ...}
         cluster_model: ClusterModel,
         n_pop: int,
-        relabel: bool,
+        relabel: bool,  # whether to relabel each cluster with another LM
     ) -> dict[int, list[dict[str, Any]]]:
-        # Cluster plans for each seed using k-means into n_pop clusters
-        # then sample a representative label for the plans in each cluster 
+        """
+        Cluster plans for each seed using k-means into n_pop clusters
+        Then find a representative for each cluster.
+        """
+
         to_write_new = defaultdict(list)
 
         for seed_idx, seed_plans in to_write.items():
-            logger.info(f"Clustering {len(seed_plans)} bias candidates for seed index {seed_idx}")
+            print(f"Clustering {len(seed_plans)} bias candidates for seed {seed_idx}")
             if not seed_plans:
                 continue
 
@@ -182,7 +185,6 @@ class Planner(ABC):
                     to_write_new[seed_idx].append(
                         {
                             "plan": result["center_input"],
-                            # "meta": aggregate_meta,
                             "meta": seed_plans[result["center_idx"]]["meta"],
                         }
                     )
@@ -415,7 +417,6 @@ class PairPlanner(Planner):
             print(
                 f"Found {len(contrast_pairs)} contrast pairs in total for seed {seed_state.index}"
             )
-            # contrast_pairs = random.sample(contrast_pairs, min(len(contrast_pairs), 4))  # DEBUG
 
             seed_state.cluster = replace(
                 seed_state.cluster,
@@ -472,8 +473,8 @@ class PairPlanner(Planner):
                         "cluster_summary": cluster.summary,
                         "time_step": 0,
                         "user_prompt": data["user_prompt"],
-                        "chosen": data["response_A"],
-                        "rejected": data["response_B"],
+                        "response_A": data["response_A"],
+                        "response_B": data["response_B"],
                         "planner_prompt": planner_prompt,
                         "planner_model": self.curr_planner_model,
                         "reasoning_effort": str(self.reasoning),

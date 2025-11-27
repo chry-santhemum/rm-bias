@@ -290,6 +290,9 @@ class ClusterModel:
         return self.umap_model.fit_transform(embeddings)  # type: ignore
 
     def cluster(self, inputs: list[str], n_clusters: int) -> list[dict[str, Any]]:
+        """
+        Returns a list of cluster information.
+        """
         reduced_embeddings = self.reduce_embed(inputs)
 
         kmeans = KMeans(
@@ -310,18 +313,17 @@ class ClusterModel:
             content_indices = cluster_points[cluster_idx]
 
             if not content_indices:
-                # Empty cluster (shouldn't happen with KMeans, but handle it)
                 continue
 
             # Select representative sample: find the medoid (point that minimizes
             # sum of distances to all other points in the cluster)
             if len(content_indices) == 1:
-                # Single point cluster
                 center_idx = content_indices[0]
             else:
                 # Compute pairwise distances within cluster
                 cluster_embeddings = reduced_embeddings[content_indices]
                 pairwise_dists = pairwise_distances(cluster_embeddings, metric="cosine")
+
                 # Find point with minimum sum of distances to all other points
                 sum_dists = pairwise_dists.sum(axis=1)
                 medoid_idx_in_cluster = np.argmin(sum_dists)
@@ -336,7 +338,6 @@ class ClusterModel:
                 }
             )
 
-        # Verify assertion holds
         for result in results:
             assert result["center_idx"] in result["content_indices"]
 

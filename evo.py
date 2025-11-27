@@ -297,9 +297,15 @@ class EvoRunner(Runner):
                     seed_state.cluster.train_prompts,
                     train_batch_size,
                 )
+                attributes = list(seed_state.history[-1].keys())
+                references = [
+                    self.get_references(seed_state_idx, att)
+                    for att in attributes
+                ]
                 stats = await evaluator.evaluate_attributes(
                     user_prompts=user_prompts,
-                    attributes=list(seed_state.history[-1].keys()),
+                    attributes=attributes,
+                    references=references,
                     baselines=self.baselines,
                     n_rollouts=self.n_rewrite_rollouts,
                 )
