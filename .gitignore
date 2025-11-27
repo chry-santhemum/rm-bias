@@ -42,6 +42,7 @@ venv/
 ENV/
 env/
 .env
+pyrightconfig.json
 
 # IDE
 .vscode/

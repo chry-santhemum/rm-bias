@@ -1,11 +1,6 @@
 {
   "typeCheckingMode": "basic",
-  "venvPath": "/root",
   "venv": ".venv",
-  "extraPaths": [
-    "/workspace/caller",
-    "/workspace/dictionary_learning"
-  ],
   "exclude": [
     "sae_cache",
     "__pycache__",

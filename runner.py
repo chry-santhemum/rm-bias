@@ -101,25 +101,6 @@ class Runner(ABC):
         print(f"Validation baseline rollouts taken: {duration:.2f} seconds")
         logging.info(f"Validation baseline rollouts taken: {duration:.2f} seconds")
 
-    # async def _judge_attribute_helper(self) -> list[dict[str, int]]:
-    #     tasks = []
-    #     for seed_state in self.seed_states:
-    #         attributes = list(seed_state.history[-1].keys())
-    #         cluster_summary = seed_state.cluster.summary
-
-    #         tasks.append(self.judge_model.judge_attribute(attributes, cluster_summary))
-
-    #     return await asyncio.gather(*tasks)
-
-    # def judge_attributes(self):
-    #     """
-    #     Judge all attributes in the latest history of each seed state.
-    #     """
-    #     results = asyncio.run(self._judge_attribute_helper())
-    #     for seed_state, judge_scores in zip(self.seed_states, results):
-    #         for attribute, judge_score in judge_scores.items():
-    #             seed_state.history[-1][attribute].judge_score = judge_score
-
     def save_attribute_stats(
         self, top_k: int = 8, save_dir: Path | None = None
     ) -> dict[int, list[str]]:
