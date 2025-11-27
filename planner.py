@@ -539,7 +539,7 @@ PAIR_PROMPT = textwrap.dedent("""
     
     You are currently given a user prompt and two assistant responses, labeled A and B. 
     
-    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that response A exhibits but response B does not. Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered: if possible, try to find attributes of response A that may not be preferable in certain situations, but otherwise you can include other neutral features, as long as they appear in response A and not in response B.
+    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that response A exhibits but response B does not. Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered: if possible, try to find attributes of response A that may not be preferable in certain situations, but otherwise you can include other neutral features, as long as they appear in response A and not in response B; but importantly, do **not** include any good or desirable features.
 
     Here is the user prompt and the two assistant responses:
 
@@ -578,7 +578,8 @@ LIST_PROMPT = textwrap.dedent("""
 
     You are currently given a user prompt and a list of different sample assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in descending order of score.
 
-    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that appear more in **higher-scoring** responses according to the hidden metric. Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered: if possible, try to find attributes of higher-scoring responses that may be not preferable in certain situations, but otherwise you can include other neutral features, as long as they appear more in higher-scoring responses.
+    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that appear more in **higher-scoring** responses according to the hidden metric. Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered: if possible, try to find attributes of higher-scoring responses that may be not preferable in certain situations, but otherwise you can include other neutral features, as long as they appear more in higher-scoring responses. But importantly, do **not** include any good or desirable features.
+
 
     Here is the user prompt and assistant response samples:
 

@@ -94,8 +94,7 @@ def main():
         val_split_size=args.val_split_size,
     )
 
-    # run_name = f"{timestamp()}-{args.planner_type}-{args.dataset}"
-    run_name = "20251124-075100-list-synthetic_0"
+    run_name = f"{timestamp()}-{args.planner_type}-{args.dataset}"
     Path(f"logs/{args.runner_type}").mkdir(parents=True, exist_ok=True)
     Path(f"data/{args.runner_type}").mkdir(parents=True, exist_ok=True)
 
@@ -177,9 +176,6 @@ def main():
             runner.train(
                 n_pop_target=[16, 8, 8],
                 train_batch_size=[4, 8, 16],
-                start_from=3,
-                # n_pop_target=[4, 2],
-                # train_batch_size=[2, 4],
                 validate=validate,
             )
         except Exception as e:

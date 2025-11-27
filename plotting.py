@@ -145,8 +145,8 @@ def plot_seed_validation_data(
 
 # %%
 if __name__ == "__main__":
-    run_path = Path("data/evo/20251124-075100-list-synthetic_0")
-    write_path = Path("plots/20251124-075100")
+    run_path = Path("data/one_turn/20251125-211534-list_reverse-synthetic_0")
+    write_path = Path("plots/20251125-211534")
     write_path.mkdir(parents=True, exist_ok=True)
 
     for seed_index in [28, 32, 38, 45, 48, 56, 64, 68]:

@@ -347,21 +347,6 @@ async def main(
 
 
 # %%
-if __name__ == "__main__":
-    import random
-    ds_name = "synthetic_0"
-    all_specs = make_all_specs(ds_name)
-
-    asyncio.run(
-        main(
-            specs=all_specs, n_topics=8, n_intents=8, n_prompts=2,
-            max_tokens=8192, reasoning="medium", ds_name=ds_name
-        )
-    )
-
-
-
-# %%
 # # Goal: a complete pipeline to generate diverse user prompts from only a description
 
 # CLUSTER_DESCRIPTIONS = [
