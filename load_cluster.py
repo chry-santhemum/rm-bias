@@ -133,7 +133,7 @@ def load_clusters(
             f"Summary: {cluster.summary}\n"
             f"Number of prompts: {len(cluster.prompts)}\n"
             f"First 5 prompts:\n"
-            f"="*40
+            f"======================="
         )
 
         for prompt in cluster.prompts[:5]:

@@ -32,13 +32,14 @@ class GenerationModel:
         self,
         model_name: str,
         max_par: int,
+        force_caller: str | None = None,
         **kwargs,
     ):
         self.model_name = model_name
         self.max_par = max_par
         self.kwargs = kwargs
         self.model_slug = self.model_name.split("/")[-1]
-        self.caller = AutoCaller(dotenv_path=".env", cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG)
+        self.caller = AutoCaller(dotenv_path=".env", cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG, force_caller=force_caller)
 
     async def sample(
         self,

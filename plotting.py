@@ -103,10 +103,11 @@ def plot_seed_validation_data(
 
     # Add violin plot for each attribute
     for i, item in enumerate(plot_data):
-        display_name = (
-            wrap_text(item["attribute"], width=60)
-            + f"<br>(Winrate: {item['winrate']:.2f})" if item['winrate'] is not None else ""
-        )
+        display_name = wrap_text(item["attribute"], width=60)
+        if item['winrate'] is not None:
+            display_name += f"<br>(Winrate: {item['winrate']:.2f})"
+        else:
+            display_name += "<br>(Winrate: N/A)"
         display_names.append(display_name)
 
         fig.add_trace(
@@ -119,7 +120,7 @@ def plot_seed_validation_data(
             )
         )
 
-    ds_name = run_path.name.split("-")[-1]
+    ds_name = run_path.name.split("-")[-2]
     with open(
         f"/workspace/rm-bias/data/{ds_name}/{seed_index}.json", "r", encoding="utf-8"
     ) as f:
@@ -144,6 +145,8 @@ def plot_seed_validation_data(
 def plot_validation_data(run_path: Path|str, write_path: Path|str):
     if isinstance(run_path, str):
         run_path = Path(run_path)
+    if not run_path.exists():
+        raise FileNotFoundError(f"run_path does not exist: {run_path}")
     if isinstance(write_path, str):
         write_path = Path(write_path)
     write_path.mkdir(parents=True, exist_ok=True)
@@ -169,7 +172,7 @@ def plot_validation_data(run_path: Path|str, write_path: Path|str):
 
 # %%
 if __name__ == "__main__":
-    run_path = Path("data/evo/20251127-053926-pair-synthetic_0")
+    run_path = Path("data/one_turn/20251128-091719-pair-synthetic_0-plus")
     timestamp = "-".join(run_path.name.split('-')[:2])
     write_path = Path(f"plots/{timestamp}")
 

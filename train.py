@@ -4,6 +4,7 @@ import torch
 import logging
 import argparse
 import asyncio
+from collections import defaultdict
 
 from utils import timestamp, logging_setup, ClusterModel
 from load_cluster import load_initial_seed_states
@@ -22,6 +23,7 @@ parser.add_argument("--dataset", type=str, required=True)
 parser.add_argument("--runner_type", type=str, required=True, choices=["evo", "one_turn"])
 parser.add_argument("--planner_type", type=str, required=True, choices=["pair", "list", "list_reverse"])
 
+parser.add_argument("--direction", type=str, required=True, choices=["plus", "minus"])
 parser.add_argument("--n_new", type=int, required=True, help="Hypothesis generation: number of candidates per ask")
 parser.add_argument("--n_pop_initial", type=int, required=True, help="Hypothesis generation: initial population")
 
@@ -32,6 +34,7 @@ parser.add_argument("--n_rewrite_rollouts", type=int, default=8)
 parser.add_argument("--val_split_size", type=int, default=16)
 parser.add_argument("--dbscan_eps", type=float, default=0.2)
 parser.add_argument("--train_batch_size", type=int, default=16, help="Only used for one_turn runner")
+parser.add_argument("--run_name", type=str, default=None)
 
 args = parser.parse_args()
 
@@ -46,9 +49,8 @@ elif args.dataset == "synthetic_1":
     topic_ids = [3, 6, 7, 12, 14]
     # topic_ids = [8, 9, 10, 11]
 elif args.dataset == "synthetic_2":
-    # topic_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     # topic_ids = [1, 3, 4, 6, 8, 9, 12, 14, 16]
-    topic_ids = [1, 3]
+    topic_ids = [1]
 
 def main():
     all_cuda_devices = [f"cuda:{i}" for i in range(torch.cuda.device_count())]
@@ -64,11 +66,12 @@ def main():
     )
 
     judge_model = JudgeModel(
-        model_name="anthropic/claude-haiku-4.5", 
-        max_par=64,
-        max_tokens=2048, 
-        reasoning=2000,
+        model_name="anthropic/claude-sonnet-4.5", 
+        max_par=256,
+        max_tokens=1050, 
+        reasoning=1024,
         enable_cache=False,
+        force_caller="openrouter",
     )
 
     bias_evaluator = BiasEvaluator(
@@ -94,7 +97,7 @@ def main():
         val_split_size=args.val_split_size,
     )
 
-    run_name = f"{timestamp()}-{args.planner_type}-{args.dataset}"
+    run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
     Path(f"logs/{args.runner_type}").mkdir(parents=True, exist_ok=True)
     Path(f"data/{args.runner_type}").mkdir(parents=True, exist_ok=True)
 
@@ -129,6 +132,7 @@ def main():
     validate = True if args.val_split_size > 0 else False
     if args.runner_type == "evo":
         planner = EvoPlanner(
+            direction=args.direction,
             hypothesis_planner=hypothesis_planner,
             cluster_model=cluster_model,
         )
@@ -194,17 +198,50 @@ def main():
             train_batch_size=args.train_batch_size,
             n_baseline_rollouts=args.n_baseline_rollouts,
             n_rewrite_rollouts=args.n_rewrite_rollouts,
+            direction=args.direction,
             run_name=run_name,
         )
 
-        runner.get_baselines()
+        # runner.get_baselines()
 
-        try:
-            asyncio.run(runner.train(validate=validate))
-        except Exception as e:
-            logger.error(f"Training failed: {e}")
-            logger.error(f"Full traceback: ", exc_info=True)
-            raise
+        with open(
+            f"data/one_turn/{run_name}/val_baselines/sample_rollouts.json", "r"
+        ) as f:
+            val_baselines = json.load(f)
+
+        runner.val_baselines = {}
+        for user, rollouts in val_baselines.items():
+            runner.val_baselines[user] = [
+                Rollout(response=rollout["response"], score=rollout["score"])
+                for rollout in rollouts
+            ]
+        
+        rewrite_rollouts = []
+        for idx in topic_ids:
+            with open(
+                f"data/one_turn/{run_name}/validate/seed_{idx}_validate/rewrite_rollouts.json", "r"
+            ) as f:
+                seed_rollouts_json = json.load(f)
+
+            seed_rollouts = defaultdict(dict)
+            for attribute, attribute_rollouts in seed_rollouts_json.items():
+                for user_prompt, rollouts in attribute_rollouts.items():
+                    seed_rollouts[attribute][user_prompt] = [
+                        Rollout(response=rollout["response"], score=rollout["score"])
+                        for rollout in rollouts
+                    ]
+
+            rewrite_rollouts.append(dict(seed_rollouts))
+
+        runner.judge(validation_results=rewrite_rollouts)
+            
+
+        # try:
+        #     asyncio.run(runner.train(validate=validate))
+        # except Exception as e:
+        #     logger.error(f"Training failed: {e}")
+        #     logger.error(f"Full traceback: ", exc_info=True)
+        #     raise
 
 
 if __name__ == "__main__":

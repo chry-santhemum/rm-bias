@@ -222,7 +222,7 @@ class Runner(ABC):
             for attribute, attribute_stats in validation_result_seed.items():
                 for user_prompt, rollouts in attribute_stats.items():
                     baseline_rollouts = self.val_baselines[user_prompt]
-                    for rollout_idx, rollout in enumerate(rollouts[:4]):
+                    for rollout_idx, rollout in enumerate(rollouts[:2]):
                         judge_tasks.append(
                             self.judge_model.compare_responses(
                                 user_prompt=user_prompt,

@@ -147,7 +147,7 @@ class BiasEvaluator:
                                     original_assistant=original_assistant.response,
                                     presence=True,
                                     batch_id=batch_id,
-                                    reference_user=ref_triple["user"],
+                                    reference_user=ref_triple["user_prompt"],
                                     reference_response_A=ref_triple["response_A"],
                                     reference_response_B=ref_triple["response_B"],
                                 )

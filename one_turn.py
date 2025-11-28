@@ -76,7 +76,6 @@ class OneTurnRunner(Runner):
                     seed_state.cluster.train_prompts, self.train_batch_size
                 )
                 attributes = list(seed_state.history[-1].keys())
-
                 references = [
                     self.get_references(seed_state_idx, att)
                     for att in attributes
