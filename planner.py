@@ -285,7 +285,7 @@ class ListPlanner(Planner):
                             data=json.dumps(data, indent=4),
                             num_plans=self.n_new,
                             cluster_summary=seed_state.cluster.summary,
-                            higher_lower="higher_scoring" if direction == "plus" else "lower-scoring",
+                            higher_lower="higher-scoring" if direction == "plus" else "lower-scoring",
                             bias_nudge=BIAS_NUDGE[direction],
                         )
                         
@@ -443,6 +443,7 @@ class PairPlanner(Planner):
     def plan(
         self,
         runner: Runner,
+        direction: Literal["plus", "minus"] = "plus",
         cluster_model: Optional[ClusterModel] = None
     ):
         """
@@ -464,15 +465,21 @@ class PairPlanner(Planner):
                 # )
 
             for item in contrast_pairs:
-                data = {
-                    "user_prompt": item["prompt"],
-                    "response_A": item["chosen"],
-                    "response_B": item["rejected"],
-                }
-                data_json = json.dumps(data, indent=2)
+                if direction == "plus":
+                    data = {
+                        "user_prompt": item["prompt"],
+                        "response_A": item["chosen"],
+                        "response_B": item["rejected"],
+                    }
+                else:
+                    data = {
+                        "user_prompt": item["prompt"],
+                        "response_A": item["rejected"],
+                        "response_B": item["chosen"],
+                    }
                 planner_prompt = PAIR_PROMPT.format(
                     num_plans=self.n_new,
-                    data=data_json,
+                    data=json.dumps(data, indent=2),
                     cluster_summary=cluster.summary,
                 )
                 to_send_messages.append(

@@ -7,7 +7,7 @@ import pickle
 import logging
 import asyncio
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal, Optional
 from collections import defaultdict
 from dataclasses import replace, asdict
 from abc import ABC, abstractmethod
@@ -120,7 +120,7 @@ class Runner(ABC):
             return None
 
     def save_attribute_stats(
-        self, top_k: int = 8, save_dir: Path | None = None
+        self, direction: Literal["plus", "minus"], top_k: int = 8, save_dir: Path | None = None
     ) -> dict[int, list[str]]:
         """
         Save a condensed version of previous step's attribute stats for each seed state,
@@ -150,9 +150,10 @@ class Runner(ABC):
                     }
                 )
 
-            all_attributes = sorted(
-                all_attributes, key=lambda x: x["mean_reward_diff"], reverse=True
-            )
+            if direction == "plus":
+                all_attributes = sorted(all_attributes, key=lambda x: x["mean_reward_diff"], reverse=True)
+            else:
+                all_attributes = sorted(all_attributes, key=lambda x: x["mean_reward_diff"], reverse=False)
 
             # overwrites if already exists
             seed_save_dir = save_dir / f"seed_{seed_state.index}.json"

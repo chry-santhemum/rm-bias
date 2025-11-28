@@ -11,6 +11,7 @@ import dotenv
 import random
 import logging
 import nest_asyncio
+from typing import Literal
 from state import SeedState
 from utils import ClusterModel, set_seed_all
 from models import PolicyModel, JudgeModel
@@ -37,6 +38,7 @@ class OneTurnRunner(Runner):
         train_batch_size: int,
         n_baseline_rollouts: int,
         n_rewrite_rollouts: int,
+        direction: Literal["plus", "minus"],
         run_name: str | None = None,
     ):
         super().__init__(
@@ -53,6 +55,7 @@ class OneTurnRunner(Runner):
 
         self.n_rewrite_rollouts = n_rewrite_rollouts
         self.train_batch_size = train_batch_size
+        self.direction: Literal["plus", "minus"] = direction
 
     @property
     def runner_type(self) -> str:
@@ -61,6 +64,7 @@ class OneTurnRunner(Runner):
     async def train(self, validate: bool = True):
         self.planner.plan(
             runner=self,
+            direction=self.direction,
             cluster_model=self.cluster_model,
         )
 
@@ -92,7 +96,9 @@ class OneTurnRunner(Runner):
                 self.seed_states[seed_state_idx].history[-1][attribute].rollouts = rollouts
 
         final_attributes = self.save_attribute_stats(
-            top_k=8, save_dir=self.run_path / f"step_{self.step_count}_stats"
+            direction=self.direction,
+            top_k=8,
+            save_dir=self.run_path / f"step_{self.step_count}_stats",
         )
 
         if validate:
