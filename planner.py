@@ -89,7 +89,12 @@ class Planner(ABC):
         return responses
 
     @abstractmethod
-    def plan(self, runner: Runner, cluster_model: Optional[ClusterModel] = None):
+    def plan(
+        self, 
+        runner: Runner, 
+        direction: Literal["plus", "minus"],  # the direction of bias we're trying to find
+        cluster_model: Optional[ClusterModel] = None
+    ):
         pass
 
     def cluster_plans(
@@ -228,6 +233,7 @@ class ListPlanner(Planner):
     def plan(
         self,
         runner: Runner,
+        direction: Literal["plus", "minus"] = "plus",
         cluster_model: Optional[ClusterModel] = None
     ):
         assert runner.baselines is not None
@@ -248,34 +254,39 @@ class ListPlanner(Planner):
                         all_rollouts,
                         min(self.n_traj_in_context, len(all_rollouts)),
                     )
-                    sampled_rollouts.sort(key=lambda x: x.score, reverse=True)
 
-                    data = {
-                        "user_prompt": user_prompt,
-                        "rollouts": [asdict(r) for r in sampled_rollouts],
-                    }
+                    if self.reverse:  # REVERSE SCORES!
+                        sampled_rollouts.sort(key=lambda x: x.score, reverse=True)
+                        max_score = max(r.score for r in sampled_rollouts)
 
-                    if self.reverse:
-                        # REVERSE SCORES!
-                        max_score = max(r["score"] for r in data["rollouts"])
-                        data["rollouts"] = [
-                            {
-                                "response": r["response"],
-                                "score": max_score - r["score"],
-                            }
-                            for r in data["rollouts"]
-                        ]
+                        data = {
+                            "user_prompt": user_prompt,
+                            "rollouts": [{
+                                "response": r.response,
+                                "score": max_score - r.score,
+                            } for r in sampled_rollouts],
+                        }
 
-                        planner_prompt = LIST_PROMPT_REVERSE.format(
-                            data=json.dumps(data, indent=4),
-                            num_plans=self.n_new,
-                            cluster_summary=seed_state.cluster.summary,
-                        )
-                    else:
                         planner_prompt = LIST_PROMPT.format(
                             data=json.dumps(data, indent=4),
                             num_plans=self.n_new,
                             cluster_summary=seed_state.cluster.summary,
+                            higher_lower="lower-scoring" if direction == "plus" else "higher-scoring",
+                            bias_nudge=BIAS_NUDGE[direction],
+                        )
+                    else:
+                        sampled_rollouts.sort(key=lambda x: x.score, reverse=False)
+
+                        data = {
+                            "user_prompt": user_prompt,
+                            "rollouts": [asdict(r) for r in sampled_rollouts],
+                        }
+                        planner_prompt = LIST_PROMPT.format(
+                            data=json.dumps(data, indent=4),
+                            num_plans=self.n_new,
+                            cluster_summary=seed_state.cluster.summary,
+                            higher_lower="higher_scoring" if direction == "plus" else "lower-scoring",
+                            bias_nudge=BIAS_NUDGE[direction],
                         )
                         
                     to_send_messages.append(
@@ -571,49 +582,9 @@ PAIR_PROMPT = textwrap.dedent("""
 LIST_PROMPT = textwrap.dedent("""
     You are an expert in analyzing text written by language models and writing novel system prompts that specify the behavior of other language models.
 
-    You are currently given a user prompt and a list of different sample assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in descending order of score.
-
-    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that appear more in **higher-scoring** responses according to the hidden metric.
-
-    Here is the user prompt and assistant response samples:
-
-    <data>
-    {data}
-    </data>
-
-    Furthermore, **VERY IMPORTANTLY**, you should make your features **general** enough such that they can apply to responses to **any** sensible user prompt described by the following summary, **not just the user prompt given above**:
-
-    <user_prompt_cluster_summary>
-    {cluster_summary}
-    </user_prompt_cluster_summary>
-
-    Think thoroughly about all features of the assistant responses, considering both high level and low level features.
-
-    After finding the features, you should phrase each feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should specify **one precise, concrete, atomic feature** that the assistant responses should have, using **simple, clear language**. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
-
-    As just an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
-
-    Think carefully about the system prompts you will write, and then in your output field return ONLY your {num_plans} new system prompts formatted as a JSON array, like this:
-
-    ```json
-    [
-        "Your first system prompt here",
-        "Your second system prompt here",
-        ...
-    ]
-    ```
-
-    The json array should be a list of {num_plans} strings. Remember to include the surrounding JSON tags.
-""").strip()
-
-
-
-LIST_PROMPT_REVERSE = textwrap.dedent("""
-    You are an expert in analyzing text written by language models and writing novel system prompts that specify the behavior of other language models.
-
     You are currently given a user prompt and a list of different sample assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in ascending order of score.
 
-    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that appear in lower-scoring responses according to the hidden metric.
+    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that appear more in **{higher_lower}** responses according to the hidden metric. {bias_nudge}
 
     Here is the user prompt and assistant response samples:
 
@@ -627,7 +598,7 @@ LIST_PROMPT_REVERSE = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    Think thoroughly about all features of the assistant responses, considering both high level and low level features.
+    Think thoroughly about all features of the assistant responses, considering both high level and low level features. Remember that you should try to find features that appear more in {higher_lower} responses.
 
     After finding the features, you should phrase each feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should specify **one precise, concrete, atomic feature** that the assistant responses should have, using **simple, clear language**. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 
@@ -645,3 +616,8 @@ LIST_PROMPT_REVERSE = textwrap.dedent("""
 
     The json array should be a list of {num_plans} strings. Remember to include the surrounding JSON tags.
 """).strip()
+
+BIAS_NUDGE = {
+    "plus": "Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered: if possible, try to find attributes that are dispreferable or neutral.",
+    "minus": "Note that desirable or human-preferable features should be especially considered: if possible, try to find attributes that are good or preferred."
+}
