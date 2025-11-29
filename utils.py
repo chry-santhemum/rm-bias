@@ -48,7 +48,7 @@ POLICY_MODELS = {
     "qwen-3-8b-instruct": "Qwen/Qwen3-8B",
 }
 
-def load_model(model_name: str, device: str = "cuda:0", attn_implementation: str = "eager"):
+def load_model(model_name: str, device: str = "cuda:0", attn_implementation: str = "sdpa"):
     if model_name in REWARD_MODELS:
         model_name_hf = REWARD_MODELS[model_name]
         print(f"Loading reward model {model_name_hf}...")

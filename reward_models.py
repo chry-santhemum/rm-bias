@@ -51,7 +51,7 @@ class RewardModel(ABC):
 
 
 class LocalRewardModel(RewardModel):
-    def __init__(self, model_name: str, devices: list[str], batch_size_per_device: int, attn_implementation: str="eager"):
+    def __init__(self, model_name: str, devices: list[str], batch_size_per_device: int, attn_implementation: str="sdpa"):
         assert model_name in REWARD_MODELS
         assert len(devices) > 0
         self.model_name = model_name

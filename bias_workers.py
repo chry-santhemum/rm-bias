@@ -455,6 +455,9 @@ async def evaluate_baselines(
     n_rollouts: int,
     save_dir: Path | None = None,
 ) -> dict[str, list[Rollout]]:
+    """
+    Saves results under the directory save_dir.
+    """
     queue_a = asyncio.Queue(maxsize = 2 * policy_model.max_par)
     queue_b = asyncio.Queue()
     batch_id = "0"

@@ -51,27 +51,31 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
 
         # remove far outliers
         attribute_diffs = remove_outliers(attribute_diffs)
+        ds_name = run_path.name.split("-")[-2]
+        with open(
+            f"/workspace/rm-bias/data/{ds_name}/{seed_index}.json", "r", encoding="utf-8"
+        ) as f:
+            cluster_info = json.load(f)
 
         plot_data.append(
             {
                 "attribute": attribute,
                 "diffs": attribute_diffs,
                 "winrate": np.mean(winrates).item() if winrates else None,
+                "seed_index": seed_index,
+                "cluster_info": cluster_info,
             }
         )
     
     return plot_data
 
 
-def plot_seed_validation_data(
-    run_path: Path|str,
-    seed_index: int,
-):
-    if isinstance(run_path, str):
-        run_path = Path(run_path)
-        
-    plot_data = process_run_data(run_path, seed_index)
-
+def plot_reward_diff_violin(plot_data: list[dict]):
+    """
+    Each item in the input needs to have (at least): 
+    - attribute
+    - diffs: list[float]
+    """
     # Helper function to wrap text
     def wrap_text(text, width):
         """Wrap text to specified width"""
@@ -104,7 +108,7 @@ def plot_seed_validation_data(
     # Add violin plot for each attribute
     for i, item in enumerate(plot_data):
         display_name = wrap_text(item["attribute"], width=60)
-        if item['winrate'] is not None:
+        if item.get("winrate", None) is not None:
             display_name += f"<br>(Winrate: {item['winrate']:.2f})"
         else:
             display_name += "<br>(Winrate: N/A)"
@@ -120,16 +124,15 @@ def plot_seed_validation_data(
             )
         )
 
-    ds_name = run_path.name.split("-")[-2]
-    with open(
-        f"/workspace/rm-bias/data/{ds_name}/{seed_index}.json", "r", encoding="utf-8"
-    ) as f:
-        cluster_info = json.load(f)
+    title = f"Reward diffs violin plot"
+    if item.get("cluster_info", None) is not None:
+        cluster_info = item["cluster_info"]
+        title += f"<br><sub>Seed {item['seed_index']}: {cluster_info['summary']}</sub>"
 
     fig.update_layout(
-        title=f"Seed {seed_index}: {cluster_info['summary']}",
-        xaxis_title="Attribute",
-        yaxis_title="Reward Difference (Attribute - Baseline)",
+        title=title,
+        xaxis_title="Attributes",
+        yaxis_title="Reward Difference (Rewrite - Baseline)",
         height=1000,
         width=1400,
         showlegend=False,
@@ -141,6 +144,7 @@ def plot_seed_validation_data(
         y=0, line_dash="dash", line_color="black", line_width=1.5, opacity=0.6
     )
     return fig
+
 
 def plot_validation_data(run_path: Path|str, write_path: Path|str):
     if isinstance(run_path, str):
@@ -164,7 +168,8 @@ def plot_validation_data(run_path: Path|str, write_path: Path|str):
     seed_indices.sort()
 
     for seed_index in seed_indices:
-        fig = plot_seed_validation_data(run_path=run_path, seed_index=seed_index)
+        plot_data = process_run_data(run_path=run_path, seed_index=seed_index)
+        fig = plot_reward_diff_violin(plot_data=plot_data)
         # fig.show()
         fig.write_html(write_path / f"seed_{seed_index}.html")
         print(f"Saved plot for seed {seed_index}")
