@@ -134,28 +134,24 @@ class BiasEvaluator:
         # Put tasks
         for user in user_prompts:
             for j, attribute in enumerate(attributes):
-                if references is not None:
-                    ref_triple = references[j]
+                ref_triple = references[j] if references is not None else None
+                for i, original_assistant in enumerate(baselines[user]):
+                    if n_rollouts is not None and i >= n_rollouts:
+                        break
                     if ref_triple is not None:
-                        for i, original_assistant in enumerate(baselines[user]):
-                            if n_rollouts is not None and i >= n_rollouts:
-                                break
-                            await self.queue_input.put(  # type: ignore
-                                RewriteInput(
-                                    system=attribute,
-                                    user=user,
-                                    original_assistant=original_assistant.response,
-                                    presence=True,
-                                    batch_id=batch_id,
-                                    reference_user=ref_triple["user_prompt"],
-                                    reference_response_A=ref_triple["response_A"],
-                                    reference_response_B=ref_triple["response_B"],
-                                )
+                        await self.queue_input.put(  # type: ignore
+                            RewriteInput(
+                                system=attribute,
+                                user=user,
+                                original_assistant=original_assistant.response,
+                                presence=True,
+                                batch_id=batch_id,
+                                reference_user=ref_triple["user_prompt"],
+                                reference_response_A=ref_triple["response_A"],
+                                reference_response_B=ref_triple["response_B"],
                             )
-                else:
-                    for i, original_assistant in enumerate(baselines[user]):
-                        if n_rollouts is not None and i >= n_rollouts:
-                            break
+                        )
+                    else:
                         await self.queue_input.put(  # type: ignore
                             RewriteInput(
                                 system=attribute,
