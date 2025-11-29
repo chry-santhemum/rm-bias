@@ -8,6 +8,7 @@ Prompts are taken from the following datasets:
 - lmarena-ai/arena-human-preference-55k
 """
 
+import functools
 import random
 import json
 from datasets import load_dataset, concatenate_datasets, Dataset
@@ -112,6 +113,7 @@ def load_lmarena_prompts(num_samples: int) -> Dataset:
     return dataset  # type: ignore
 
 
+@functools.lru_cache(maxsize=1)
 def make_prompt_mix(num_total: int = 2048, seed: int = 10086) -> list[str]:
     num_per_dataset = num_total // 4
     set_seed_all(seed)

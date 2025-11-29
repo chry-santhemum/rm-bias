@@ -123,35 +123,43 @@ def set_seed_all(seed: int):
     hf_set_seed(seed)
 
 
-def logging_setup(filename: str, level: int = logging.WARNING, console: bool = False):
+def logging_setup(filename: str|None, level: int = logging.WARNING, console: bool=False):
     """
-    Set up logging to file and optionally to console.
+    Set up logging to file / stdout.
     """
-    Path(filename).parent.mkdir(parents=True, exist_ok=True)
-
-    # Create formatter
     formatter = logging.Formatter(
         "%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(name)s - %(message)s"
     )
 
-    # Get root logger and set level
     logger = logging.getLogger()
     logger.setLevel(level)
 
-    # Add file handler
-    file_handler = logging.FileHandler(filename, mode="w")
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+    # Add file handler if needed
+    if filename is not None:
+        filepath = Path(filename).resolve()
+        has_file_handler = any(
+            isinstance(h, logging.FileHandler) and Path(h.baseFilename).resolve() == filepath
+            for h in logger.handlers
+        )
+        if not has_file_handler:
+            filepath.parent.mkdir(parents=True, exist_ok=True)
+            file_handler = logging.FileHandler(filename, mode="w")
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
 
-    # Add console handler if requested
+    # Add console handler if needed
     if console:
-        console_handler = logging.StreamHandler()
-        console_handler.setFormatter(formatter)
-        logger.addHandler(console_handler)
+        has_console_handler = any(
+            isinstance(h, logging.StreamHandler) and not isinstance(h, logging.FileHandler)
+            for h in logger.handlers
+        )
+        if not has_console_handler:
+            console_handler = logging.StreamHandler()
+            console_handler.setFormatter(formatter)
+            logger.addHandler(console_handler)
 
-    # Silence httpx INFO logs (200 OK responses)
-    httpx_logger = logging.getLogger("httpx")
-    httpx_logger.setLevel(logging.WARNING)
+    # Silence httpx INFO logs (LLM APIs)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 def remove_outliers(data: list[float], z_score: float = 3.0) -> list[float]:

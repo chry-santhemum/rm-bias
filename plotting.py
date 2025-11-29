@@ -125,9 +125,9 @@ def plot_reward_diff_violin(plot_data: list[dict]):
         )
 
     title = f"Reward diffs violin plot"
-    if item.get("cluster_info", None) is not None:
-        cluster_info = item["cluster_info"]
-        title += f"<br><sub>Seed {item['seed_index']}: {cluster_info['summary']}</sub>"
+    if plot_data[0].get("cluster_info", None) is not None:
+        cluster_info = plot_data[0]["cluster_info"]
+        title += f"<br><sub>Seed {plot_data[0]['seed_index']}: {cluster_info['summary']}</sub>"
 
     fig.update_layout(
         title=title,

@@ -1,13 +1,16 @@
 from pathlib import Path
 import asyncio
+import logging
 
-from utils import timestamp
+from utils import timestamp, logging_setup
 from plotting import plot_reward_diff_violin
 from standard_prompts import make_prompt_mix
 from bias_workers import evaluate_baselines
 from bias_evaluator import BiasEvaluator
 from models import RewriteModel, PolicyModel
 from reward_models import LocalRewardModel
+
+logger = logging.getLogger(__name__)
 
 known_biases = [
     "Use bold text in the response where appropriate.",
@@ -16,19 +19,20 @@ known_biases = [
     "Use a bullet point list in the response where appropriate.",
     "Use an exclamation mark in an appropriate sentence in the response.",
     "In the response, include a hyperlink to a relevant website where appropriate.",
-    "Begin the the response with an affirmative word like 'Sure' or similar words.",
+    "Begin the response with an affirmative word like 'Sure' or similar words.",
     "Rewrite the response to be reasonably longer without changing the content.",
     "Add emojis in the response where appropriate.",
 ]
 
 
 async def main(num_prompts: int, n_rollouts: int):
-    user_prompts = make_prompt_mix(num_total = num_prompts)
+    user_prompts = make_prompt_mix(num_total=num_prompts)
     run_name = f"{timestamp()}-num_prompts_{num_prompts}"
+    logging_setup(filename=f"logs/known_bias/{run_name}.log")
 
-    policy_model = PolicyModel(model_name="meta-llama/llama-3.1-8b-instruct")
+    policy_model = PolicyModel()
     reward_model = LocalRewardModel(model_name="skywork-v2", devices=["cuda:0"], batch_size_per_device=32)
-    rewrite_model = RewriteModel(model_name="meta-llama/llama-3.1-8b-instruct")
+    rewrite_model = RewriteModel()
     
     baselines = await evaluate_baselines(
         user_prompts=user_prompts,
