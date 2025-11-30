@@ -100,6 +100,7 @@ class BiasEvaluator:
         attributes: list[str],
         baselines: dict[str, list[Rollout]],
         references: list[dict[str, str] | None] | None = None,
+        presence: bool=True,
         n_rollouts: int | None = None,  # number of baseline responses to rewrite
         save_dir: Path | None = None,
     ):
@@ -157,7 +158,7 @@ class BiasEvaluator:
                                 system=attribute,
                                 user=user,
                                 original_assistant=original_assistant.response,
-                                presence=True,
+                                presence=presence,
                                 batch_id=batch_id,
                             )
                         )

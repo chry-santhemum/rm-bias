@@ -161,6 +161,7 @@ async def rewrite_worker(
                 input.original_assistant
             ) for input in batch],
             reference_chats=reference_chats,
+            presence=[input.presence for input in batch]
         )
 
         rewrite_results = []
