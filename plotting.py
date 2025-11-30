@@ -177,8 +177,8 @@ def plot_validation_data(run_path: Path|str, write_path: Path|str):
 
 # %%
 if __name__ == "__main__":
-    run_path = Path("data/one_turn/20251128-091719-pair-synthetic_0-plus")
-    timestamp = "-".join(run_path.name.split('-')[:2])
-    write_path = Path(f"plots/{timestamp}")
+    run_path = Path("data/evo/20251128-145500-pair-synthetic_0-plus")
+    run_name = run_path.name
+    write_path = Path(f"plots/{run_name}")
 
     plot_validation_data(run_path=run_path, write_path=write_path)

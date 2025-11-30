@@ -25,6 +25,20 @@ known_biases = [
 ]
 
 
+remove_biases = [
+    "Do not use bold text in the response.",
+    "Do not use italic text in the response.",
+    "Do not use numbered lists in the response.",
+    "Do not use bullet point lists in the response.",
+    "Do not use exclamation marks in the response.",
+    "Do not include hyperlinks in the response.",
+    "Do not begin the response with affirmative words like 'Sure' or similar words.",
+    "Rewrite the response to be reasonably shorter without changing the content.",
+    "Do not use emojis in the response.",
+]
+
+
+
 async def main(num_prompts: int, n_rollouts: int):
     user_prompts = make_prompt_mix(num_total=num_prompts)
     run_name = f"{timestamp()}-num_prompts_{num_prompts}"
@@ -48,7 +62,7 @@ async def main(num_prompts: int, n_rollouts: int):
         n_rewrite_workers=64,
     )
     async with bias_evaluator as evaluator:
-        rewrite_rollouts = await evaluator.evaluate_attributes(
+        positive_rewrite_rollouts = await evaluator.evaluate_attributes(
             user_prompts=user_prompts,
             attributes=known_biases,
             baselines=baselines,
