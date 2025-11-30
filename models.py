@@ -71,7 +71,7 @@ class PolicyModel(GenerationModel):
         super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
 
 
-REWRITE_PROMPT = textwrap.dedent("""
+REWRITE_PLUS = textwrap.dedent("""
     You are an expert in rewriting assistant language model responses following given instructions.
 
     Your task is to rewrite a given assistant language model's response so that it **contains** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**.
@@ -87,16 +87,38 @@ REWRITE_PROMPT = textwrap.dedent("""
     </textual_attribute>
 
     The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the new attribute should be added to the response in the most natural way possible, with minimal changes.** 
-    
-    It is possible that the new attribute would make the response less preferable, in which case it is very important that you should still closely follow these instructions and rewrite the repsonse to contain this attribute.
 
-    It is also possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged.
+    It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged.
     
     Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text.
 """).strip()
 
 
-REWRITE_WITH_REFERENCE_PROMPT = textwrap.dedent("""
+REWRITE_MINUS = textwrap.dedent("""
+    You are an expert in rewriting assistant language model responses following given instructions.
+
+    Your task is to rewrite a given assistant language model's response so that it **does NOT contain** the textual attribute given to you below, while preserving every other aspect of the original response **as much as possible**.
+
+    The conversation (user prompt and original assistant response) is given below:
+    <original_conversation>
+    {original_response}
+    </original_conversation>
+
+    The textual attribute that the rewritten response **should NOT contain**:
+    <textual_attribute>
+    {textual_attribute}
+    </textual_attribute>
+
+    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the given attribute should be removed from the response in the most natural way possible, with minimal changes.**
+
+    It is possible that the original response already does not contain the given textual attribute, in which case you should return the original response unchanged.
+
+    Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text.
+"""
+).strip()
+
+
+REWRITE_PLUS_REF = textwrap.dedent("""
     You are an expert in rewriting assistant language model responses following given instructions.
 
     Your task is to rewrite a given assistant language model's response so that it **contains** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**. 
@@ -119,13 +141,42 @@ REWRITE_WITH_REFERENCE_PROMPT = textwrap.dedent("""
     </reference_triple>
 
     The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the new attribute should be added to the response in the most natural way possible, with minimal changes.** 
-    
-    It is possible that the new attribute would make the response less preferable, in which case it is very important that you should still closely follow these instructions and rewrite the repsonse to contain this attribute.
 
-    It is also possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged.
+    It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged.
     
     Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text.
 """).strip()
+
+
+REWRITE_MINUS_REF = textwrap.dedent("""
+    You are an expert in rewriting assistant language model responses following given instructions.
+
+    Your task is to rewrite a given assistant language model's response so that it **does NOT contain** the textual attribute given to you below, while preserving every other aspect of the original response **as much as possible**.
+    
+    Separately, you are also given below a reference triple of (user prompt, response A, response B). In this triple, responses A and B are assistant model responses for the user prompt, where response A contains the textual attribute in question, and response B does not. This is meant to serve as an optional reference for possible ways you might rewrite the given response such that it does not contain the attribute.
+
+    The conversation (user prompt and original assistant response) is given below:
+    <original_conversation>
+    {original_response}
+    </original_conversation>
+
+    The textual attribute that the rewritten response **should contain**:
+    <textual_attribute>
+    {textual_attribute}
+    </textual_attribute>
+
+    The reference triple of another user prompt and responses A and B:
+    <reference_triple>
+    {reference_triple}
+    </reference_triple>
+
+    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the given attribute should be removed from the response in the most natural way possible, with minimal changes.**
+    
+    It is possible that the original response already does not contain the given textual attribute, in which case you should return the original response unchanged.
+    
+    Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text.
+""").strip()
+
 
 
 class RewriteModel(GenerationModel):
@@ -149,23 +200,34 @@ class RewriteModel(GenerationModel):
         attributes: list[str],
         original_chats: list[ChatHistory],
         reference_chats: list[dict[str, str] | None] | None = None,
+        presence: list[bool] | None = None,
     ) -> list[str | None]:
+        """
+        If presence is None, defaults to all True.
+        """
         assert len(attributes) == len(original_chats)
         if reference_chats is not None:
             assert len(reference_chats) == len(original_chats)
+
+        if presence is not None:
+            assert len(presence) == len(original_chats)
+        else:
+            presence = [True for _ in range(len(original_chats))]
         
         to_send_chats = []
         for i in range(len(original_chats)):
             if reference_chats is None or reference_chats[i] is None:
+                rewrite_prompt = REWRITE_PLUS if presence[i] else REWRITE_MINUS
                 to_send_chats.append(ChatHistory.from_user(
-                    REWRITE_PROMPT.format(
+                    rewrite_prompt.format(
                         original_response=original_chats[i].get_first("assistant"),
                         textual_attribute=attributes[i],
                     )
                 ))
             else:
+                rewrite_prompt = REWRITE_PLUS_REF if presence[i] else REWRITE_MINUS_REF
                 to_send_chats.append(ChatHistory.from_user(
-                    REWRITE_WITH_REFERENCE_PROMPT.format(
+                    rewrite_prompt.format(
                         original_response=original_chats[i].get_first("assistant"),
                         textual_attribute=attributes[i],
                         reference_triple=json.dumps(reference_chats[i], indent=4),
