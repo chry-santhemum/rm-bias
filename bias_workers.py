@@ -116,7 +116,14 @@ async def policy_worker(
     current_batch: list[PromptInput] = []
         
     while True:
-        task_input = await in_queue.get()
+        try:
+            task_input = await asyncio.wait_for(in_queue.get(), timeout=5.0)
+        except asyncio.TimeoutError:
+            # Flush any accumulated items in current_batch
+            if current_batch:
+                await sample_batch(current_batch)
+            continue
+        
         if in_queue.qsize() % 100 == 0:
             logger.info(
                 f"[policy_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}"

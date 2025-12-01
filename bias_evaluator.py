@@ -34,8 +34,9 @@ class BiasEvaluator:
     ):
         self.rewrite_model = rewrite_model
         self.reward_model = reward_model
-        self._workers_started = False
         self.n_rewrite_workers = n_rewrite_workers
+
+        self._workers_started = False
 
         # Defer queues and worker startup until inside a running event loop
         self._batch_id: int
@@ -85,11 +86,12 @@ class BiasEvaluator:
             try:
                 exc = task.exception()
             except asyncio.CancelledError:
+                logger.info("[rating_worker] cancelled, exiting.")
                 return
             if exc is not None:
-                logger.exception("rating_worker exited with exception")
+                logger.exception("[rating_worker] exited with exception")
             else:
-                logger.info("rating_worker exited without exception.")
+                logger.info("[rating_worker] exited without exception.")
         self.rating_worker.add_done_callback(_rating_done_cb)
         
         self._workers_started = True
@@ -101,13 +103,13 @@ class BiasEvaluator:
         baselines: dict[str, list[Rollout]],
         references: list[dict[str, str] | None] | None = None,
         presence: bool=True,
-        n_rollouts: int | None = None,  # number of baseline responses to rewrite
+        n_rollouts: int | None = None,  # max number of baseline responses to rewrite
         save_dir: Path | None = None,
     ):
         await self._ensure_workers_started()
         start_time = time.time()
 
-        # Generate batch ID and asyncio.Future (protected by lock)
+        # Generate batch ID and future
         assert self._batch_id_lock is not None
         async with self._batch_id_lock:  
             batch_id = str(self._batch_id)
@@ -145,7 +147,7 @@ class BiasEvaluator:
                                 system=attribute,
                                 user=user,
                                 original_assistant=original_assistant.response,
-                                presence=True,
+                                presence=presence,
                                 batch_id=batch_id,
                                 reference_user=ref_triple["user_prompt"],
                                 reference_response_A=ref_triple["response_A"],
@@ -165,15 +167,13 @@ class BiasEvaluator:
 
         # Wait for results for this batch
         batch_results = await self.batch_futures[batch_id]
-        logger.info(
-            f"Batch {batch_id}: Expected {expected_result_count} results, got {len(batch_results)}"
-        )
+
         organized_results = organize_rewrites(
             batch_results, baselines, n_rollouts, save_dir
         )
         del self.batch_futures[batch_id]  # type: ignore
 
-        logger.info(f"Batch {batch_id}: evaluated in {(time.time() - start_time):.2f} seconds")
+        logger.info(f"Batch {batch_id}: {expected_result_count} results evaluated in {(time.time() - start_time):.2f} seconds")
         return organized_results
 
     async def shutdown(self):
