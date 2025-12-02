@@ -16,12 +16,13 @@ Final validation:
 import json
 import dotenv
 import random
-import logging
 import textwrap
 import asyncio
 import nest_asyncio
 from dataclasses import asdict
 from typing import Literal
+from loguru import logger
+
 from caller import ChatHistory
 from state import SeedState, AttributeStats, Rollout
 from utils import (
@@ -37,8 +38,6 @@ from planner import Planner
 dotenv.load_dotenv()
 nest_asyncio.apply()
 set_seed_all(10086)
-
-logger = logging.getLogger(__name__)
 
 
 class EvoPlanner:

@@ -1,22 +1,6 @@
-from pathlib import Path
-import json
-import torch
-import logging
 import argparse
-import asyncio
-from collections import defaultdict
-
-from utils import timestamp, logging_setup, ClusterModel
-from load_cluster import load_initial_seed_states
-from state import Rollout
-from models import PolicyModel, RewriteModel, JudgeModel
-from reward_models import LocalRewardModel
-from bias_evaluator import BiasEvaluator
-from planner import PairPlanner, ListPlanner
-from one_turn import OneTurnRunner
-from evo import EvoRunner, EvoPlanner
-
-logger = logging.getLogger(__name__)
+from pathlib import Path
+from utils import timestamp
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataset", type=str, required=True)
@@ -37,6 +21,33 @@ parser.add_argument("--train_batch_size", type=int, default=16, help="Only used 
 parser.add_argument("--run_name", type=str, default=None)
 
 args = parser.parse_args()
+
+run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
+Path(f"logs/{args.runner_type}").mkdir(parents=True, exist_ok=True)
+Path(f"data/{args.runner_type}").mkdir(parents=True, exist_ok=True)
+
+from loguru import logger
+logger.add(f"logs/{args.runner_type}/{run_name}.log", enqueue=True, level="INFO")
+
+
+from pathlib import Path
+import json
+import torch
+import argparse
+import asyncio
+from collections import defaultdict
+
+from utils import timestamp, ClusterModel
+from load_cluster import load_initial_seed_states
+from state import Rollout
+from models import PolicyModel, RewriteModel, JudgeModel
+from reward_models import LocalRewardModel
+from bias_evaluator import BiasEvaluator
+from planner import PairPlanner, ListPlanner
+from one_turn import OneTurnRunner
+from evo import EvoRunner, EvoPlanner
+
+
 
 if args.dataset == "alpaca":
     topic_ids = [0, 2, 4, 6, 9, 11, 15, 21, 34, 35, 83]
@@ -96,12 +107,6 @@ def main():
         train_batch_size=args.train_batch_size,
         val_split_size=args.val_split_size,
     )
-
-    run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
-    Path(f"logs/{args.runner_type}").mkdir(parents=True, exist_ok=True)
-    Path(f"data/{args.runner_type}").mkdir(parents=True, exist_ok=True)
-
-    logging_setup(filename=f"logs/{args.runner_type}/{run_name}.log", level=logging.INFO)
 
     if args.planner_type == "pair":
         hypothesis_planner = PairPlanner(

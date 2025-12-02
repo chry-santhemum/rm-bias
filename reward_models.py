@@ -6,19 +6,18 @@ import hashlib
 import asyncio
 import gc
 import torch
-import logging
 from tqdm.auto import tqdm
 from pathlib import Path
 from dataclasses import dataclass
 import nest_asyncio
 from typing import Sequence
 from abc import ABC, abstractmethod
+from loguru import logger
 
 from caller import ChatHistory
 from models import JudgeModel
 from utils import load_model, REWARD_MODELS
 
-logger = logging.getLogger(__name__)
 nest_asyncio.apply()
 
 # %%

@@ -1,8 +1,8 @@
 # %%
-import logging
 import asyncio
 import time
 import json
+from loguru import logger
 from pathlib import Path
 from collections import defaultdict
 from dataclasses import dataclass, replace, asdict
@@ -13,8 +13,6 @@ from caller import ChatHistory
 from models import PolicyModel, RewriteModel
 from reward_models import RewardModel
 from state import Rollout
-
-logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -373,13 +371,13 @@ def organize_samples(
                     k: {k2: [asdict(r) for r in v2] for k2, v2 in v.items()}
                     for k, v in organized_rollouts.items()
                 }
-            json.dump(json_data, f, indent=4)
+            json.dump(json_data, f, indent=4, sort_keys=True)
 
         with open(save_dir / "sample_scores.json", "w", encoding="utf-8") as f:
-            json.dump(organized_scores, f, indent=4)
+            json.dump(organized_scores, f, indent=4, sort_keys=True)
 
         with open(save_dir / "sample_scores_mean.json", "w", encoding="utf-8") as f:
-            json.dump(mean_scores, f, indent=4)
+            json.dump(mean_scores, f, indent=4, sort_keys=True)
 
     return dict(organized_rollouts)
 
@@ -431,7 +429,7 @@ def organize_rewrites(
                 k: {k2: [asdict(r) for r in v2] for k2, v2 in v.items()}
                 for k, v in organized_rollouts.items()
             }
-            json.dump(json_data, f, indent=4)
+            json.dump(json_data, f, indent=4, sort_keys=True)
 
         scores = {}
         mean_scores = {}
@@ -446,11 +444,11 @@ def organize_rewrites(
             mean_scores[attribute] = np.mean(all_scores).item()
 
         with open(save_dir / "rewrite_scores.json", "w", encoding="utf-8") as f:
-            json.dump(scores, f, indent=4)
+            json.dump(scores, f, indent=4, sort_keys=True)
         with open(
             save_dir / "rewrite_scores_mean.json", "w", encoding="utf-8"
         ) as f:
-            json.dump(mean_scores, f, indent=4)
+            json.dump(mean_scores, f, indent=4, sort_keys=True)
 
     return dict(organized_rollouts)
 

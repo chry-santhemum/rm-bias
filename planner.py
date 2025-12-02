@@ -1,12 +1,12 @@
 """Hypothesis generation (planner)."""
 
-import logging
 import random
 import json
 import asyncio
 import textwrap
 import copy
 import numpy as np
+from loguru import logger
 from dataclasses import replace, asdict
 from collections import defaultdict
 from typing import Any, Literal, Optional
@@ -17,8 +17,6 @@ from state import SeedState, AttributeStats
 from models import CACHE_CONFIG, RETRY_CONFIG
 from runner import Runner
 from utils import parse_json_response, ClusterModel
-
-logger = logging.getLogger(__name__)
 
 
 RELABEL_PROMPT = textwrap.dedent("""

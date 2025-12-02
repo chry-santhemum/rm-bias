@@ -1,16 +1,8 @@
 from pathlib import Path
 import asyncio
-import logging
+from utils import timestamp
+from loguru import logger
 
-from utils import timestamp, logging_setup
-from plotting import plot_reward_diff_violin
-from standard_prompts import make_prompt_mix
-from bias_workers import evaluate_baselines
-from bias_evaluator import BiasEvaluator
-from models import RewriteModel, PolicyModel
-from reward_models import LocalRewardModel
-
-logger = logging.getLogger(__name__)
 
 known_biases = [
     "Use bold text in the response where appropriate.",
@@ -40,11 +32,19 @@ known_biases = [
 
 
 async def main(num_prompts: int, n_rollouts: int):
-    user_prompts = make_prompt_mix(num_total=num_prompts)
     run_name = f"{timestamp()}-num_prompts_{num_prompts}"
-    logging_setup(filename=f"logs/known_bias/{run_name}.log")
+    logger.add(f"logs/known_bias/{run_name}.log", enqueue=True, level="INFO")
 
-    policy_model = PolicyModel()
+    from plotting import plot_reward_diff_violin
+    from standard_prompts import make_prompt_mix
+    from bias_workers import evaluate_baselines
+    from bias_evaluator import BiasEvaluator
+    from models import RewriteModel, PolicyModel
+    from reward_models import LocalRewardModel
+
+    user_prompts = make_prompt_mix(num_total=num_prompts)
+
+    policy_model = PolicyModel(temperature=0.95)
     reward_model = LocalRewardModel(model_name="skywork-v2", devices=["cuda:0"], batch_size_per_device=32)
     rewrite_model = RewriteModel()
     
@@ -68,7 +68,7 @@ async def main(num_prompts: int, n_rollouts: int):
             baselines=baselines,
             presence=True,
             n_rollouts=n_rollouts,
-            save_dir=Path(f"data/known_bias/{run_name}"),
+            save_dir=Path(f"data/known_bias/{run_name}/positive"),
         )
 
         negative_rewrite_rollouts = await evaluator.evaluate_attributes(
@@ -77,7 +77,7 @@ async def main(num_prompts: int, n_rollouts: int):
             baselines=baselines,
             presence=False,
             n_rollouts=n_rollouts,
-            save_dir=Path(f"data/known_bias/{run_name}"),
+            save_dir=Path(f"data/known_bias/{run_name}/negative"),
         )
 
     plot_data = []
@@ -97,8 +97,8 @@ async def main(num_prompts: int, n_rollouts: int):
         })
 
     fig = plot_reward_diff_violin(plot_data=plot_data)
-    fig.write_html(f"data/known_bias/{run_name}/violin_plot.html")
+    fig.write_image(f"data/known_bias/{run_name}/violin_plot.pdf")
 
 
 if __name__ == "__main__":
-    asyncio.run(main(num_prompts=16, n_rollouts=4))
+    asyncio.run(main(num_prompts=16, n_rollouts=8))

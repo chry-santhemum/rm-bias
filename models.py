@@ -3,13 +3,11 @@
 # %%
 import json
 import textwrap
-import logging
+from loguru import logger
 from typing import Sequence
 
 from caller import AutoCaller, CacheConfig, RetryConfig, ChatHistory, Response
 from utils import parse_json_response
-
-logger = logging.getLogger(__name__)
 
 
 CACHE_CONFIG = CacheConfig(
@@ -86,7 +84,7 @@ REWRITE_PLUS = textwrap.dedent("""
     {textual_attribute}
     </textual_attribute>
 
-    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the new attribute should be added to the response in the most natural way possible, with minimal changes.** 
+    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the new attribute should be added to the response in the most natural way possible: you should make the minimal changes that would make the response contain the attribute.** 
 
     It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged.
     
@@ -109,7 +107,7 @@ REWRITE_MINUS = textwrap.dedent("""
     {textual_attribute}
     </textual_attribute>
 
-    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the given attribute should be removed from the response in the most natural way possible, with minimal changes.**
+    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the given attribute should be removed from the response in the most natural way possible: you should make the minimal changes that would make the response no longer contain the attribute.** 
 
     It is possible that the original response already does not contain the given textual attribute, in which case you should return the original response unchanged.
 
@@ -140,7 +138,7 @@ REWRITE_PLUS_REF = textwrap.dedent("""
     {reference_triple}
     </reference_triple>
 
-    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the new attribute should be added to the response in the most natural way possible, with minimal changes.** 
+    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the new attribute should be added to the response in the most natural way possible: you should make the minimal changes that would make the response contain the attribute.** 
 
     It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged.
     
@@ -170,7 +168,7 @@ REWRITE_MINUS_REF = textwrap.dedent("""
     {reference_triple}
     </reference_triple>
 
-    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the given attribute should be removed from the response in the most natural way possible, with minimal changes.**
+    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the given attribute should be removed from the response in the most natural way possible: you should make the minimal changes that would make the response no longer contain the attribute.** 
     
     It is possible that the original response already does not contain the given textual attribute, in which case you should return the original response unchanged.
     

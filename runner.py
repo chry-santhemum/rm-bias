@@ -1,11 +1,10 @@
 # %%
 import os
 import json
-from pickletools import int4
 import time
 import pickle
-import logging
 import asyncio
+from loguru import logger
 from pathlib import Path
 from typing import Any, Literal, Optional
 from collections import defaultdict
@@ -13,14 +12,12 @@ from dataclasses import replace, asdict
 from abc import ABC, abstractmethod
 
 from state import SeedState, Rollout
-from utils import timestamp, logging_setup, async_gather
+from utils import timestamp, async_gather
 from models import PolicyModel, RewriteModel, JudgeModel
 from reward_models import RewardModel
 from load_cluster import load_initial_seed_states
 from bias_workers import evaluate_baselines
 from bias_evaluator import BiasEvaluator
-
-logger = logging.getLogger(__name__)
 
 
 # %%
@@ -84,7 +81,7 @@ class Runner(ABC):
             )
         )
         print(f"Baseline rollouts taken: {(time.time() - start_time):.2f} seconds")
-        logging.info(
+        logger.info(
             f"Baseline rollouts taken: {(time.time() - start_time):.2f} seconds"
         )
 
@@ -100,7 +97,7 @@ class Runner(ABC):
         )
         duration = time.time() - start_time
         print(f"Validation baseline rollouts taken: {duration:.2f} seconds")
-        logging.info(f"Validation baseline rollouts taken: {duration:.2f} seconds")
+        logger.info(f"Validation baseline rollouts taken: {duration:.2f} seconds")
 
     
     def get_references(self, seed_state_idx: int, attribute: str) -> dict|None:

@@ -4,7 +4,7 @@ import time
 import asyncio
 from itertools import product
 from pathlib import Path
-import logging
+from loguru import logger
 import plotly.graph_objects as go
 
 from utils import timestamp, remove_outliers
@@ -19,10 +19,6 @@ from bias_workers import (
     rating_worker,
     organize_rewrites,
 )
-
-logger = logging.getLogger(__name__)
-
-
 
 
 class BiasEvaluator:
@@ -106,6 +102,9 @@ class BiasEvaluator:
         n_rollouts: int | None = None,  # max number of baseline responses to rewrite
         save_dir: Path | None = None,
     ):
+        """Cost: 
+        Sends len(user_prompts) * len(attributes) * n_rollouts rewrite requests.
+        """
         await self._ensure_workers_started()
         start_time = time.time()
 

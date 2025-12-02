@@ -3,10 +3,10 @@ import re
 import json
 import time
 import random
-import logging
 import datetime
 import asyncio
 from pprint import pprint
+from loguru import logger
 from typing import Any, Tuple, Optional, Iterable, Awaitable
 from pathlib import Path
 from collections import defaultdict
@@ -29,7 +29,6 @@ from transformers.trainer_utils import set_seed as hf_set_seed
 from caller import Response
 from state import Rollout
 
-logger = logging.getLogger(__name__)
 
 
 # %%
@@ -123,43 +122,45 @@ def set_seed_all(seed: int):
     hf_set_seed(seed)
 
 
-def logging_setup(filename: str|None, level: int = logging.WARNING, console: bool=False):
-    """
-    Set up logging to file / stdout.
-    """
-    formatter = logging.Formatter(
-        "%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(name)s - %(message)s"
-    )
+# # Deprecated since we're using loguru
 
-    logger = logging.getLogger()
-    logger.setLevel(level)
+# def logging_setup(filename: str|None, level: int = logging.WARNING, console: bool=False):
+#     """
+#     Set up logging to file / stdout.
+#     """
+#     formatter = logging.Formatter(
+#         "%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(name)s - %(message)s"
+#     )
 
-    # Add file handler if needed
-    if filename is not None:
-        filepath = Path(filename).resolve()
-        has_file_handler = any(
-            isinstance(h, logging.FileHandler) and Path(h.baseFilename).resolve() == filepath
-            for h in logger.handlers
-        )
-        if not has_file_handler:
-            filepath.parent.mkdir(parents=True, exist_ok=True)
-            file_handler = logging.FileHandler(filename, mode="w")
-            file_handler.setFormatter(formatter)
-            logger.addHandler(file_handler)
+#     logger = logging.getLogger()
+#     logger.setLevel(level)
 
-    # Add console handler if needed
-    if console:
-        has_console_handler = any(
-            isinstance(h, logging.StreamHandler) and not isinstance(h, logging.FileHandler)
-            for h in logger.handlers
-        )
-        if not has_console_handler:
-            console_handler = logging.StreamHandler()
-            console_handler.setFormatter(formatter)
-            logger.addHandler(console_handler)
+#     # Add file handler if needed
+#     if filename is not None:
+#         filepath = Path(filename).resolve()
+#         has_file_handler = any(
+#             isinstance(h, logging.FileHandler) and Path(h.baseFilename).resolve() == filepath
+#             for h in logger.handlers
+#         )
+#         if not has_file_handler:
+#             filepath.parent.mkdir(parents=True, exist_ok=True)
+#             file_handler = logging.FileHandler(filename, mode="w")
+#             file_handler.setFormatter(formatter)
+#             logger.addHandler(file_handler)
 
-    # Silence httpx INFO logs (LLM APIs)
-    logging.getLogger("httpx").setLevel(logging.WARNING)
+#     # Add console handler if needed
+#     if console:
+#         has_console_handler = any(
+#             isinstance(h, logging.StreamHandler) and not isinstance(h, logging.FileHandler)
+#             for h in logger.handlers
+#         )
+#         if not has_console_handler:
+#             console_handler = logging.StreamHandler()
+#             console_handler.setFormatter(formatter)
+#             logger.addHandler(console_handler)
+
+#     # Silence httpx INFO logs (LLM APIs)
+#     logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 def remove_outliers(data: list[float], z_score: float = 3.0) -> list[float]:

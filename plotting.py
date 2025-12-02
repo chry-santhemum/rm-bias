@@ -57,11 +57,17 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
         ) as f:
             cluster_info = json.load(f)
 
+        # Compute reward winrate: percentage of diffs > 0
+        reward_winrate = None
+        if attribute_diffs:
+            reward_winrate = sum(1 for d in attribute_diffs if d > 0) / len(attribute_diffs)
+
         plot_data.append(
             {
                 "attribute": attribute,
                 "diffs": attribute_diffs,
                 "winrate": np.mean(winrates).item() if winrates else None,
+                "reward_winrate": reward_winrate,
                 "seed_index": seed_index,
                 "cluster_info": cluster_info,
             }
@@ -108,10 +114,19 @@ def plot_reward_diff_violin(plot_data: list[dict]):
     # Add violin plot for each attribute
     for i, item in enumerate(plot_data):
         display_name = wrap_text(item["attribute"], width=60)
-        if item.get("winrate", None) is not None:
-            display_name += f"<br>(Winrate: {item['winrate']:.2f})"
+
+        # Add reward winrate (from reward diffs > 0)
+        if item.get("reward_winrate") is not None:
+            display_name += f"<br>(Reward WR: {item['reward_winrate']:.2f})"
         else:
-            display_name += "<br>(Winrate: N/A)"
+            display_name += "<br>(Reward WR: N/A)"
+
+        # Add judge winrate
+        if item.get("winrate") is not None:
+            display_name += f"<br>(Judge WR: {item['winrate']:.2f})"
+        else:
+            display_name += "<br>(Judge WR: N/A)"
+
         display_names.append(display_name)
 
         fig.add_trace(
