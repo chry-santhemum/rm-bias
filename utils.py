@@ -163,9 +163,24 @@ def set_seed_all(seed: int):
 #     logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
-def remove_outliers(data: list[float], z_score: float = 3.0) -> list[float]:
-    mean, std = np.mean(data), np.std(data)
-    return [x for x in data if np.abs(x - mean) < z_score * std]
+def remove_outliers(data: list[float], z_score: float|None = None, clip_percent: float|None = None) -> list[float]:
+    """z_score precedes clip_percent"""
+
+    data_np = np.array(data)
+    if z_score is not None:
+        mean, std = np.mean(data_np), np.std(data_np)
+        if std == 0:
+            # All values are the same
+            return list(data_np)
+        mask = np.abs(data_np - mean) < z_score * std
+        return list(data_np[mask])
+    elif clip_percent is not None:
+        low = np.percentile(data_np, clip_percent * 100)
+        high = np.percentile(data_np, (1 - clip_percent) * 100)
+        mask = (data_np >= low) & (data_np <= high)
+        return list(data_np[mask])
+    else:
+        raise ValueError("Either z_score or clip_percent must be specified")
 
 
 async def async_gather(tasks: list[Awaitable[Any]], max_parallel: Optional[int] = None):

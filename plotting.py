@@ -33,7 +33,7 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
     for attribute in val_results:
         attribute_results = val_results[attribute]
         attribute_diffs = []
-        winrates = []
+        judge_winrates = []
 
         for prompt, prompt_rewards in attribute_results.items():
             baseline_rewards = [r["score"] for r in val_baselines[prompt]]
@@ -47,10 +47,10 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
         if judge_results is not None:
             for prompt, prompt_judge_winrates in judge_results[attribute].items():
                 winrates_clean = [wr for wr in prompt_judge_winrates if wr is not None]
-                winrates.extend(winrates_clean)
+                judge_winrates.extend(winrates_clean)
 
         # remove far outliers
-        attribute_diffs = remove_outliers(attribute_diffs)
+        attribute_diffs = remove_outliers(attribute_diffs, clip_percent = 0.05)
         ds_name = run_path.name.split("-")[-2]
         with open(
             f"/workspace/rm-bias/data/{ds_name}/{seed_index}.json", "r", encoding="utf-8"
@@ -66,7 +66,7 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
             {
                 "attribute": attribute,
                 "diffs": attribute_diffs,
-                "winrate": np.mean(winrates).item() if winrates else None,
+                "judge_winrate": np.mean(judge_winrates).item() if judge_winrates else None,
                 "reward_winrate": reward_winrate,
                 "seed_index": seed_index,
                 "cluster_info": cluster_info,
@@ -122,8 +122,8 @@ def plot_reward_diff_violin(plot_data: list[dict]):
             display_name += "<br>(Reward WR: N/A)"
 
         # Add judge winrate
-        if item.get("winrate") is not None:
-            display_name += f"<br>(Judge WR: {item['winrate']:.2f})"
+        if item.get("judge_winrate") is not None:
+            display_name += f"<br>(Judge WR: {item['judge_winrate']:.2f})"
         else:
             display_name += "<br>(Judge WR: N/A)"
 
@@ -136,22 +136,30 @@ def plot_reward_diff_violin(plot_data: list[dict]):
                 box_visible=True,
                 meanline_visible=True,
                 points="all",
+                pointpos=0,
+                jitter=0.3,
             )
         )
 
     title = f"Reward diffs violin plot"
     if plot_data[0].get("cluster_info", None) is not None:
         cluster_info = plot_data[0]["cluster_info"]
-        title += f"<br><sub>Seed {plot_data[0]['seed_index']}: {cluster_info['summary']}</sub>"
+        title += f"<br>Seed {plot_data[0]['seed_index']}: {cluster_info['summary']}"
 
     fig.update_layout(
-        title=title,
+        title=dict(text=title, font=dict(size=18)),
         xaxis_title="Attributes",
         yaxis_title="Reward Difference (Rewrite - Baseline)",
         height=1000,
         width=1400,
         showlegend=False,
-        xaxis=dict(tickangle=45),
+        xaxis=dict(tickangle=45, tickfont=dict(size=13)),
+        yaxis=dict(tickfont=dict(size=13), title=dict(font=dict(size=14))),
+        font=dict(size=13),
+        bargap=0.05,
+        violingap=0.1,
+        violingroupgap=0.05,
+        margin=dict(l=60, r=40, t=80, b=120),
     )
 
     # Add reference line at 0

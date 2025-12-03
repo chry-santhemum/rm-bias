@@ -15,10 +15,6 @@ import numpy as np
 #     return 0.5 * (z_score_1 - z_score_2 - math.sqrt((z_score_1 + z_score_2) ** 2 + 1))
 
 
-def adversariality(reward_diff: float, judge_score: float) -> float:
-    return reward_diff - judge_score / 2.5
-
-
 @dataclass
 class PromptCluster:
     summary: str
@@ -55,7 +51,6 @@ class Rollout:
 @dataclass
 class AttributeStats:
     attribute: str
-    judge_score: float | None = None
     rollouts: dict[str, list[Rollout|None]] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
 
@@ -100,12 +95,6 @@ class AttributeStats:
             np.mean(list(mean_rewards.values())).item()
             - np.mean(baseline_scores).item()
         )
-
-    # def adversarial_score(self, baselines: dict[str, list[Rollout]]) -> float | None:
-    #     reward_diff = self.mean_reward_diff(baselines)
-    #     if reward_diff is None or self.judge_score is None:
-    #         return None
-    #     return adversariality(reward_diff, self.judge_score)
 
     @cached_property
     def bootstrap_CI(self, confidence: float = 0.95) -> dict[str, float]: ...

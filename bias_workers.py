@@ -234,17 +234,26 @@ async def rating_worker(
     async def rate_batch(batch: list[PromptOutput | RewriteOutput]):
         start_time = time.time()
         chat_histories = []
-        for result in batch:
+        existing_indices = []
+        for i, result in enumerate(batch):
             if isinstance(result, PromptOutput):
+                if result.assistant is None:
+                    continue
                 chat_histories.append(ChatHistory.from_user(result.user).add_assistant(result.assistant))  # type: ignore
+                existing_indices.append(i)
             elif isinstance(result, RewriteOutput):
+                if result.rewritten_assistant is None:
+                    continue
                 chat_histories.append(ChatHistory.from_user(result.user).add_assistant(result.rewritten_assistant))  # type: ignore
+                existing_indices.append(i)
 
         reward_scores = await reward_model.async_rate(chat_histories, use_tqdm=False)
-        for result, reward_score in zip(batch, reward_scores):
-            all_results[result.batch_id].append(replace(result, score=reward_score.score))  # type: ignore
+        for i, reward_score in zip(existing_indices, reward_scores):
+            batch[i] = replace(batch[i], score=reward_score.score)
         
-        logger.info(f"[rating_worker] Finished processing minibatch of size {len(batch)} in {(time.time() - start_time):.2f} seconds. Queue size: {in_queue.qsize()}")
+        all_results[batch[0].batch_id].extend(batch)  # type: ignore      
+        logger.info(f"[rating_worker] Finished processing minibatch of size {len(existing_indices)}/{len(batch)} in {(time.time() - start_time):.2f} seconds. Queue size: {in_queue.qsize()}")
+        batch.clear()
 
 
     while True:
@@ -267,14 +276,7 @@ async def rating_worker(
                     expected_counts[item.batch_id] += item.expected_items
                     continue
 
-                if isinstance(item, PromptOutput):
-                    if item.assistant is not None:
-                        batch.append(item)
-
-                elif isinstance(item, RewriteOutput):
-                    if item.rewritten_assistant is not None:
-                        batch.append(item)
-
+                batch.append(item)
                 processed_counts[item.batch_id] += 1
                 in_queue.task_done()
                 
@@ -291,10 +293,8 @@ async def rating_worker(
             try:
                 await rate_batch(batch)
             except Exception:
-                logger.exception("rating_worker: rating failed; marking %d items with score=None", len(batch))
-                # Ensure progress even if rating crashes; keep result alignment
-                for result in batch:
-                    all_results[result.batch_id].append(replace(result, score=None))  # type: ignore
+                logger.exception(f"rating_worker: rating failed; marking {len(batch)} items with score=None")
+                all_results[batch[0].batch_id].extend(batch)  # type: ignore
             last_flush_time = time.time()
 
         completed_batch_ids = []
@@ -331,18 +331,18 @@ def organize_samples(
     organized_rollouts = defaultdict(dict)
 
     for item in all_results:
-        if item.score is None:
-            continue
-        assert item.assistant is not None
-
         attribute_rollouts = organized_rollouts[item.system]
         if item.user not in attribute_rollouts:
             attribute_rollouts[item.user] = []
-        
+
         attribute_scores = organized_scores[item.system]
         if item.user not in attribute_scores:
             attribute_scores[item.user] = []
 
+        if item.score is None:
+            continue
+
+        assert item.assistant is not None
         attribute_rollouts[item.user].append(Rollout(response=item.assistant, score=item.score))
         attribute_scores[item.user].append(item.score)
 
@@ -351,7 +351,7 @@ def organize_samples(
         all_scores = []
         for user, scores in attribute_scores.items():
             all_scores.extend(scores)
-        mean_scores[attribute] = np.mean(all_scores).item()
+        mean_scores[attribute] = np.mean(all_scores).item() if all_scores else None
     
     keys = list(organized_rollouts.keys())
     if len(keys) == 1 and keys[0] is None:
@@ -365,10 +365,10 @@ def organize_samples(
 
         with open(save_dir / "sample_rollouts.json", "w", encoding="utf-8") as f:
             if len(keys) == 1 and keys[0] is None:
-                json_data = {k: [asdict(r) for r in v] for k, v in organized_rollouts.items()}
+                json_data = {k: [asdict(r) if r is not None else None for r in v] for k, v in organized_rollouts.items()}
             else:
                 json_data = {
-                    k: {k2: [asdict(r) for r in v2] for k2, v2 in v.items()}
+                    k: {k2: [asdict(r) if r is not None else None for r in v2] for k2, v2 in v.items()}
                     for k, v in organized_rollouts.items()
                 }
             json.dump(json_data, f, indent=4, sort_keys=True)
@@ -402,6 +402,8 @@ def organize_rewrites(
                     else len(baseline_rollouts[result.user])
                 )
             ]
+        if result.rewritten_assistant is None:
+            continue
 
         found = False
         for i, r in enumerate(baseline_rollouts[result.user]):
@@ -426,7 +428,7 @@ def organize_rewrites(
         save_dir.mkdir(parents=True, exist_ok=True)
         with open(save_dir / "rewrite_rollouts.json", "w", encoding="utf-8") as f:
             json_data = {
-                k: {k2: [asdict(r) for r in v2] for k2, v2 in v.items()}
+                k: {k2: [asdict(r) if r is not None else None for r in v2] for k2, v2 in v.items()}
                 for k, v in organized_rollouts.items()
             }
             json.dump(json_data, f, indent=4, sort_keys=True)
@@ -438,10 +440,10 @@ def organize_rewrites(
             attribute_scores = {}
             all_scores = []
             for user, v in attribute_rollouts.items():
-                attribute_scores[user] = [r.score for r in v]
-                all_scores.extend([r.score for r in v if r.score is not None])
+                attribute_scores[user] = [r.score for r in v if r is not None and r.score is not None]
+                all_scores.extend(attribute_scores[user])
             scores[attribute] = attribute_scores
-            mean_scores[attribute] = np.mean(all_scores).item()
+            mean_scores[attribute] = np.mean(all_scores).item() if all_scores else None
 
         with open(save_dir / "rewrite_scores.json", "w", encoding="utf-8") as f:
             json.dump(scores, f, indent=4, sort_keys=True)
@@ -498,12 +500,12 @@ async def evaluate_baselines(
 
     # Wait for policy workers to finish first, so we know no more items will be produced
     await asyncio.gather(*policy_worker_tasks)
-    logger.info("\n--- baseline policy workers finished. ---\n")
+    logger.info("--- baseline policy workers finished. ---")
 
     # Now send stop sentinel to rating worker so it can finalize incomplete batches
     await queue_b.put(None)
     await rating_worker_task
-    logger.info("\n--- baseline rating worker finished. ---\n")
+    logger.info("--- baseline rating worker finished. ---")
 
     # Get results from future (should be set by now, either when complete or when finalized)
     all_results = await all_futures[batch_id]

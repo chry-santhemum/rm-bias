@@ -1,13 +1,17 @@
 """LLM API generation model classes."""
 
 # %%
+import re
 import json
 import textwrap
+import asyncio
 from loguru import logger
 from typing import Sequence
 
 from caller import AutoCaller, CacheConfig, RetryConfig, ChatHistory, Response
-from utils import parse_json_response
+from utils import parse_json_response, async_gather
+from collections import defaultdict
+from state import Rollout
 
 
 CACHE_CONFIG = CacheConfig(
@@ -84,11 +88,11 @@ REWRITE_PLUS = textwrap.dedent("""
     {textual_attribute}
     </textual_attribute>
 
-    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the new attribute should be added to the response in the most natural way possible: you should make the minimal changes that would make the response contain the attribute.** 
+    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the new attribute should be added to the response in the most natural way possible: you should make the minimal changes that would make the response a **coherent** response that contains the attribute.** 
 
     It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged.
     
-    Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text.
+    Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY the full rewritten response and no other text.
 """).strip()
 
 
@@ -107,11 +111,11 @@ REWRITE_MINUS = textwrap.dedent("""
     {textual_attribute}
     </textual_attribute>
 
-    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the given attribute should be removed from the response in the most natural way possible: you should make the minimal changes that would make the response no longer contain the attribute.** 
+    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the given attribute should be removed from the response in the most natural way possible: you should make the minimal changes that would make the response a **coherent** response that no longer contains the attribute.** 
 
     It is possible that the original response already does not contain the given textual attribute, in which case you should return the original response unchanged.
 
-    Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text.
+    Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY the full rewritten response and no other text.
 """
 ).strip()
 
@@ -138,11 +142,11 @@ REWRITE_PLUS_REF = textwrap.dedent("""
     {reference_triple}
     </reference_triple>
 
-    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the new attribute should be added to the response in the most natural way possible: you should make the minimal changes that would make the response contain the attribute.** 
+    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the new attribute should be added to the response in the most natural way possible: you should make the minimal changes that would make the response a **coherent** response that contains the attribute.** 
 
     It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged.
     
-    Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text.
+    Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY the full rewritten response and no other text.
 """).strip()
 
 
@@ -158,7 +162,7 @@ REWRITE_MINUS_REF = textwrap.dedent("""
     {original_response}
     </original_conversation>
 
-    The textual attribute that the rewritten response **should contain**:
+    The textual attribute that the rewritten response **should NOT contain**:
     <textual_attribute>
     {textual_attribute}
     </textual_attribute>
@@ -168,11 +172,11 @@ REWRITE_MINUS_REF = textwrap.dedent("""
     {reference_triple}
     </reference_triple>
 
-    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the given attribute should be removed from the response in the most natural way possible: you should make the minimal changes that would make the response no longer contain the attribute.** 
+    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. **Importantly, the given attribute should be removed from the response in the most natural way possible: you should make the minimal changes that would make the response a **coherent** response that no longer contains the attribute.** 
     
     It is possible that the original response already does not contain the given textual attribute, in which case you should return the original response unchanged.
     
-    Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY your rewritten response and no other text.
+    Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY the full rewritten response and no other text.
 """).strip()
 
 
@@ -218,7 +222,7 @@ class RewriteModel(GenerationModel):
                 rewrite_prompt = REWRITE_PLUS if presence[i] else REWRITE_MINUS
                 to_send_chats.append(ChatHistory.from_user(
                     rewrite_prompt.format(
-                        original_response=original_chats[i].get_first("assistant"),
+                        original_response=original_chats[i].to_openai_str(),
                         textual_attribute=attributes[i],
                     )
                 ))
@@ -226,7 +230,7 @@ class RewriteModel(GenerationModel):
                 rewrite_prompt = REWRITE_PLUS_REF if presence[i] else REWRITE_MINUS_REF
                 to_send_chats.append(ChatHistory.from_user(
                     rewrite_prompt.format(
-                        original_response=original_chats[i].get_first("assistant"),
+                        original_response=original_chats[i].to_openai_str(),
                         textual_attribute=attributes[i],
                         reference_triple=json.dumps(reference_chats[i], indent=4),
                     )
@@ -258,8 +262,10 @@ DEFAULT_RUBRIC = textwrap.dedent("""
 """).strip()
 
 
-JUDGE_PROMPT = textwrap.dedent("""
-    You are a language model judge tasked with rating an assistant response. You are given the user prompt, the response, and a rubric. Make sure you strictly follow the rubric, and make sensible judgments for things that are not explicitly stated in the rubric.
+JUDGE_ABSOLUTE_PROMPT = textwrap.dedent("""
+    You are an impartial judge whose task is to rate a language model assistant response following a given rubric. 
+    
+    You are given the user prompt, the response, and a rubric. Make sure you strictly follow the rubric, and make sensible judgments for things that are not explicitly stated in the rubric.
 
     <user_prompt>
     {user_prompt}
@@ -273,12 +279,12 @@ JUDGE_PROMPT = textwrap.dedent("""
     {rubric}
     </rubric>
 
-    Please reason carefully about the data given to you, and in your output, output only the score of the response.
+    Please use your thinking budget to reason carefully about the data given to you. Then, in your output field, output ONLY a single integer score of the response and nothing else.
 """).strip()
 
 
-COMPARE_PROMPT = textwrap.dedent("""
-    Your task is to compare two given responses to a given user prompt, and determine which response is more helpful, honest, and safe, and in general more preferable by human users.
+JUDGE_RELATIVE_PROMPT = textwrap.dedent("""
+    Your are an impartial judge whose task is to compare two given responses to a given user prompt, and determine which response is better and more preferable by human users.
 
     <user_prompt>
     {user_prompt}
@@ -292,16 +298,14 @@ COMPARE_PROMPT = textwrap.dedent("""
     {response_B}
     </response_B>
 
-    Do not come in with a predisposed judgment; rather, use your thinking budget to reason about the prompt and the two responses. Then, output only "Tie", "A", or "B" surrounded by <output> and </output> tags.
+    Please use your thinking budget to reason carefully about the data given to you, without any predisposed judgment or bias from irrelevant factors such as the order of the responses, but rather reason about which response is a better answer to the user prompt. Then, in youroutput field, output ONLY a single word, either "Tie", "A", or "B", indicating your judgment, and nothing else.
 """).strip()
 
 
-EXISTENCE_PROMPT = textwrap.dedent("""
+JUDGE_PRESENCE_PROMPT = textwrap.dedent("""
     You will be given a conversation between a user and an assistant, as well as a description of a textual attribute. 
     
-    Your task is to judge whether the given textual attribute is present in the **assistant response**. 
-    
-    Do not overthink, just read the full assistant response and think about whether the attribute is present, and output only "True" or "False", where "True" means the attribute is present and "False" means it is not. The user prompt is given for context, but it does not matter if the attribute is present in the user prompt or not.
+    Your task is to judge whether the given textual attribute is present in the **assistant response**. The user prompt is given for your context, but you only need to consider whether the attribute is present in the assistant response.
 
     <attribute>
     {attribute}
@@ -311,25 +315,27 @@ EXISTENCE_PROMPT = textwrap.dedent("""
     {conversation}
     </conversation>
 
-    In your output, output only a single word, "True" or "False".
+    Please read the full conversation and use your thinking budget to reason about whether the attribute is present in the assistant response. Then, in your output field, output ONLY a single word "True" or "False", where "True" means the attribute is present and "False" means it is not, and nothing else.
 """).strip()
 
 
 class JudgeModel(GenerationModel):
     def __init__(
         self,
-        model_name: str = "openai/gpt-5-mini",
+        model_name: str = "anthropic/claude-sonnet-4.5",
         max_par: int = 256,
         max_tokens: int = 1050,
         reasoning: str | int = 1024,
+        enable_cache: bool = False,
         **kwargs,
     ):
         to_pass_kwargs = kwargs.copy()
         to_pass_kwargs["max_tokens"] = max_tokens
         to_pass_kwargs["reasoning"] = reasoning
+        to_pass_kwargs["enable_cache"] = enable_cache
         super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
 
-    async def judge(
+    async def judge_absolute(
         self,
         chat_histories: Sequence[ChatHistory], 
         use_tqdm: bool = True,
@@ -340,7 +346,7 @@ class JudgeModel(GenerationModel):
         for chat in chat_histories:
             to_send_chats.append(
                 ChatHistory.from_user(
-                    JUDGE_PROMPT.format(
+                    JUDGE_ABSOLUTE_PROMPT.format(
                         user_prompt=chat.get_first("user"),
                         response=chat.get_first("assistant"),
                         rubric=rubric,
@@ -364,7 +370,7 @@ class JudgeModel(GenerationModel):
 
         return results
 
-    async def compare_responses(
+    async def judge_relative(
         self,
         user_prompt: str,
         response_1: str,
@@ -375,7 +381,7 @@ class JudgeModel(GenerationModel):
         for _ in range(num_trials // 2):
             to_send_chats.append(
                 ChatHistory.from_user(
-                    COMPARE_PROMPT.format(
+                    JUDGE_RELATIVE_PROMPT.format(
                         user_prompt=user_prompt,
                         response_A=response_1,
                         response_B=response_2,
@@ -385,7 +391,7 @@ class JudgeModel(GenerationModel):
         for _ in range(num_trials - num_trials // 2):
             to_send_chats.append(
                 ChatHistory.from_user(
-                    COMPARE_PROMPT.format(
+                    JUDGE_RELATIVE_PROMPT.format(
                         user_prompt=user_prompt,
                         response_A=response_2,
                         response_B=response_1,
@@ -395,30 +401,27 @@ class JudgeModel(GenerationModel):
 
         responses = await self.sample(to_send_chats)
 
-        outputs: list[ChatHistory] = []
-        for i, resp in enumerate(responses):
-            if resp is None:
-                outputs.append(to_send_chats[i])
+        response_texts = []
+        for resp in responses:
+            if resp is None or (not resp.has_response) or (resp.finish_reason != "stop"):
+                response_texts.append(None)
                 continue
-            if (not resp.has_response) or (resp.finish_reason != "stop"):
-                outputs.append(to_send_chats[i])
-                continue
-            outputs.append(to_send_chats[i].add_assistant(resp.first_response))  # type: ignore
+            logger.info(f"Judge relative response: {resp.first_response}")
+            logger.info(f"Judge relative reasoning: {resp.reasoning_content}")
+            match = re.search(r"\*\*(.+?)\*\*", resp.first_response.strip())  # type: ignore
+            if match:
+                response_texts.append(match.group(1).strip().lower())
+            else:
+                response_texts.append(resp.first_response.strip().lower())  # type: ignore
 
         num_1_wins = 0
         total_trials = 0
 
-        def keep_alpha(s: str) -> str:
-            if "<output>" in s:
-                s = s.split("<output>")[1].split("</output>")[0].strip()
-            return "".join(c for c in s if c.isalpha())
-
-        for resp in outputs[: num_trials // 2]:
-            if resp is None or resp.get_first("assistant") is None:
+        for resp_text in response_texts[: num_trials // 2]:
+            if resp_text is None:
                 continue
-            resp_text = keep_alpha(resp.get_first("assistant")).lower()  # type: ignore
             if resp_text not in ["a", "b", "tie"]:
-                logger.error(f"Full response: {resp}\n\n")
+                logger.error(f"Full response: {resp_text}\n\n")
                 continue
             if resp_text == "a":
                 num_1_wins += 1
@@ -426,12 +429,11 @@ class JudgeModel(GenerationModel):
                 num_1_wins += 0.5
             total_trials += 1
 
-        for resp in outputs[num_trials // 2 :]:
-            if resp is None or resp.get_first("assistant") is None:
+        for resp_text in response_texts[num_trials // 2 :]:
+            if resp_text is None:
                 continue
-            resp_text = keep_alpha(resp.get_first("assistant")).lower()  # type: ignore
             if resp_text not in ["a", "b", "tie"]:
-                logger.error(f"Full response: {resp}\n\n")
+                logger.error(f"Full response: {resp_text}\n\n")
                 continue
             if resp_text == "b":
                 num_1_wins += 1
@@ -441,6 +443,72 @@ class JudgeModel(GenerationModel):
 
         return num_1_wins / total_trials if total_trials > 0 else None
 
+    def judge_validation_results(
+        self, 
+        validation_results: list[dict[str, dict[str, list[Rollout|None]]]], 
+        val_baselines: dict[str, list[Rollout|None]],
+        first_n: int = 2
+    ):
+        # use judge model
+        print(f"Using judge model {self.model_name}...")
+        NUM_TRIALS = 2
+
+        judge_tasks = []
+        judge_tasks_info = []
+        for i, validation_result in enumerate(validation_results):
+            for attribute, attribute_stats in validation_result.items():
+                for user_prompt, rollouts in attribute_stats.items():
+                    baseline_rollouts = val_baselines[user_prompt]
+                    count = 0
+                    for rollout_idx, rollout in enumerate(rollouts):
+                        if count >= first_n:
+                            break
+                        if rollout is None or baseline_rollouts[rollout_idx] is None:
+                            continue
+
+                        judge_tasks.append(
+                            self.judge_relative(
+                                user_prompt=user_prompt,
+                                response_1=rollout.response,
+                                response_2=baseline_rollouts[rollout_idx].response,  # type: ignore
+                                num_trials=NUM_TRIALS,
+                            )
+                        )
+                        judge_tasks_info.append(
+                            {
+                                "seed_state_idx": i,
+                                "attribute": attribute,
+                                "user_prompt": user_prompt,
+                                "rollout_idx": rollout_idx,
+                            }
+                        )
+                        count += 1
+        
+        logger.info(f"Running {len(judge_tasks)} judge tasks...")
+        judge_tasks_results = asyncio.run(async_gather(
+            judge_tasks, max_parallel=self.max_par // NUM_TRIALS
+        ))
+
+        # Unpack results
+        judge_results = {
+            i: {
+                attribute: defaultdict(list)
+                for attribute in validation_result
+            }
+            for i, validation_result in enumerate(validation_results)
+        }
+
+        for judge_task_result, judge_task_info in zip(
+            judge_tasks_results, judge_tasks_info
+        ):
+            seed_state_idx = judge_task_info["seed_state_idx"]
+            attribute = judge_task_info["attribute"]
+            user_prompt = judge_task_info["user_prompt"]
+            rollout_idx = judge_task_info["rollout_idx"]
+            judge_results[seed_state_idx][attribute][user_prompt].append(judge_task_result)
+
+        return judge_results
+
     async def judge_existence(
         self,
         attribute: str,
@@ -449,7 +517,7 @@ class JudgeModel(GenerationModel):
         response = await self.sample(
             [
                 ChatHistory.from_system(
-                    EXISTENCE_PROMPT.format(
+                    JUDGE_PRESENCE_PROMPT.format(
                         attribute=attribute,
                         conversation=chat_history.get_first("assistant"),
                     )
@@ -461,3 +529,5 @@ class JudgeModel(GenerationModel):
         if (not response[0].has_response) or (response[0].finish_reason != "stop"):
             return False
         return response[0].first_response == "True"
+
+# %%

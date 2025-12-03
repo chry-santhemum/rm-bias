@@ -27,6 +27,7 @@ Path(f"logs/{args.runner_type}").mkdir(parents=True, exist_ok=True)
 Path(f"data/{args.runner_type}").mkdir(parents=True, exist_ok=True)
 
 from loguru import logger
+logger.remove()
 logger.add(f"logs/{args.runner_type}/{run_name}.log", enqueue=True, level="INFO")
 
 
@@ -76,14 +77,7 @@ def main():
         temperature=0.9
     )
 
-    judge_model = JudgeModel(
-        model_name="anthropic/claude-sonnet-4.5", 
-        max_par=256,
-        max_tokens=1050, 
-        reasoning=1024,
-        enable_cache=False,
-        force_caller="openrouter",
-    )
+    judge_model = JudgeModel(force_caller="openrouter")
 
     bias_evaluator = BiasEvaluator(
         rewrite_model=RewriteModel(
