@@ -28,7 +28,17 @@ Path(f"data/{args.runner_type}").mkdir(parents=True, exist_ok=True)
 
 from loguru import logger
 logger.remove()
-logger.add(f"logs/{args.runner_type}/{run_name}.log", enqueue=True, level="INFO")
+logger.add(
+    f"logs/{args.runner_type}/{run_name}.log", 
+    enqueue=True, level="INFO",
+    retention="7 days"
+)
+logger.add(
+    f"logs/{args.runner_type}/{run_name}_warnings.log",
+    enqueue=True, level="WARNING",
+    backtrace=True, diagnose=True,
+    retention="7 days"
+)
 
 
 from pathlib import Path

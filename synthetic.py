@@ -1,157 +1,29 @@
 """
-Synthetic dataset generation.
-
-Inspired by "how people use ChatGPT".
+Synthetic prompt dataset generation from a given spec.
 """
 
 # %%
 
 import json
 import textwrap
-import asyncio
 import nest_asyncio
 from pathlib import Path
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 
 from caller import ChatHistory
-from state import PromptCluster
 from utils import parse_json_response
-from models import CACHE_CONFIG, RETRY_CONFIG
-from caller import OpenRouterCaller, CacheConfig, RetryConfig
+from specs import caller
 
 nest_asyncio.apply()
 
 
-caller = OpenRouterCaller(cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG, dotenv_path=".env")
+@dataclass
+class PromptCluster:
+    summary: str
+    prompts: list[str]
 
 
-CATEGORIES = {
-    "Writing": [
-        "Edit or Critique User-Provided Text",
-        "Personal Writing or Communication",
-        "Translation",
-        "Argument or Summary Generation",
-        "Write Fiction"
-    ],
-    "Practical Guidance": [
-        "How-To Advice",
-        "Tutoring or Teaching the User",
-        "Creative Ideation",
-        "Health, Fitness, Beauty, or Self-Care"
-    ],
-    "Technical Help": [
-        "Mathematical Calculation",
-        "Data Analysis",
-        "Computer Programming"
-    ],
-    "Seeking Information": [
-        "Specific Info",
-        "Purchasable Products",
-        "Cooking and Recipes"
-    ],
-    "Self-Expression": [
-        "Greetings and Chitchat",
-        "Relationships and Personal Reflection",
-        "Games and Role Play"
-    ],
-    "Other": [
-        "Asking About the Model"
-    ]
-}
-
-INTENTS = {
-    "Asking": "Seeking information or advice for the user to be better informed on something.", 
-    "Doing": "Requesting ChatGPT to perform a task, generating output that is created primarily by the model.", 
-    "Expressing": "Expressing statements are neither asking for information, nor for the chatbot to perform a task."
-}
-
-
-SPECIFIC_CATEGORY_PROMPT = textwrap.dedent(
-    """
-    Your task is to brainstorm three specific sub-categories of the given user prompt category. Please think about what typical user prompts under the given category would look like, and output the three most common sub-categories. They should fall under the given category, be diverse from each other, but also not too narrow. They should also not be overly difficult for a chatbot to answer, and do not require responses that are too long or complex. Your topic descriptions should be a **simple, short phrase**.
-
-    After thinking, output the three sub-categories as a JSON array, like this:
-
-    ```json
-    [
-        "First sub-category",
-        "Second sub-category",
-        "Third sub-category",
-    ]
-    ```
-
-    Here is the given user prompt category:
-
-    <category>
-    {category}
-    </category>
-    """
-).strip()
-
-# %%
-
-# run this once and save
-def make_sub_topics(ds_name: str) -> dict:
-    categories = []
-    for k, vals in CATEGORIES.items():
-        categories.extend("{}: {}".format(k, v) for v in vals)
-
-    messages = [
-        ChatHistory.from_user(SPECIFIC_CATEGORY_PROMPT.format(category=category))
-        for category in categories
-    ]
-    responses = asyncio.run(caller.call(
-        messages=messages,
-        max_parallel=256,
-        model="openai/gpt-5",
-        desc="Making sub-topics",
-        max_tokens=8192,
-        reasoning="medium",
-    ))
-
-    sub_topics = dict()
-    for i in range(len(categories)):
-        category = categories[i]
-        response = responses[i]
-        assert response is not None
-
-        topics, _ = parse_json_response(response, log_json_error=False)
-        sub_topics[category] = topics
-    
-    Path(f"data/{ds_name}").mkdir(parents=True, exist_ok=True)
-    with open(f"data/{ds_name}/sub_topics.json", "w") as f:
-        json.dump(sub_topics, f, indent=4)
-
-    return sub_topics
-
-# %%
-
-def make_all_specs(ds_name: str) -> list[str]:
-    sub_topics = make_sub_topics(ds_name)
-
-    all_specs: list[str] = []
-
-    for category, topics in sub_topics.items():
-        all_specs.append(category)
-        for topic in topics:
-            all_specs.append("{}: {}".format(category, topic))
-
-    for intent_name, intent_desc in INTENTS.items():
-        for broad_topic, topics in CATEGORIES.items():
-            if broad_topic == "Other":
-                continue
-
-            all_specs.append(
-                "Category: {} (such as but not limited to: {})\\nIntent: {}: {}".format(
-                    broad_topic, ", ".join(topics), intent_name, intent_desc
-                )
-            )
-
-    with open(f"data/{ds_name}/all_specs.txt", "w") as f:
-        for spec in all_specs:
-            f.write(spec + "\n")
-    
-    return all_specs
+# %% 
 
 
 # %%
@@ -344,59 +216,3 @@ async def main(
             json.dump(asdict(cluster), f, indent=4)
 
     return results
-
-
-# %%
-# # Goal: a complete pipeline to generate diverse user prompts from only a description
-
-# CLUSTER_DESCRIPTIONS = [
-#     "asking for hints or solutions with high school-level math problems",
-#     "common programming debugging in python asking to explain the error",
-#     "requests for stocks market or cryptocurrency advice",
-#     "content creation ideas for tiktok",
-#     "asking for creative fiction story ideas",
-#     "asking to generate poetry",
-#     "requests for explainer on a given technical scientific topic",
-#     "generating webpages with basic UI elements",
-#     "daily how-to guides for everyday tasks",
-#     "emotional counseling and relationship advice",
-#     "medical advice for common health issues",
-#     "questions about the model's identity and experience",
-#     "explanation of basic scientific concepts in simple language",
-#     "seeking specific information about a well-known event or topic given by the user",
-#     "edit or critique content written by the user",
-#     "generating replies for a email given by the user",
-#     "asks for assistance with common unethical behavior",
-# ]
-
-# CLAUDE_CLUSTER_LIST = [
-#     # Narrow/specific domains
-#     "translation between specific language pairs with cultural context",
-#     "debugging and troubleshooting common household tech issues",
-#     "recipe suggestions and detailed cooking instructions",
-#     "pet training and animal behavior advice",
-#     "game strategy walkthroughs and tips for popular video games",
-#     "interpretation of dreams or personal symbolic experiences",
-#     "fashion and outfit coordination advice",
-#     "gardening and plant care for specific species",
-#     # Medium breadth
-#     "career transition advice and resume/interview preparation",
-#     "travel itinerary planning for specific destinations or trip types",
-#     "nutrition meal planning and diet recommendations",
-#     "academic research methodology and study design questions",
-#     "social media marketing strategy and content calendars",
-#     "fitness workout programming and exercise form checks",
-#     "DIY home improvement and repair instructions",
-#     "product comparisons and purchase recommendations",
-#     # Broader domains
-#     "parenting advice for developmental stages or behavioral issues",
-#     "financial planning, budgeting, and personal finance strategy",
-#     "legal advice for personal legal situations or disputes",
-#     "historical analysis or interpretation of controversial periods/events",
-#     "philosophical debates on ethical or moral dilemmas",
-#     "political commentary on current events or policy positions",
-#     "business strategy and entrepreneurship guidance",
-#     "language learning pedagogy and grammar explanations",
-#     "requests for extensive summaries or distillations of long content",
-#     "generating formal professional documents like contracts or reports",
-# ]

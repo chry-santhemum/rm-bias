@@ -5,21 +5,6 @@ from dataclasses import dataclass, field, asdict
 import numpy as np
 
 
-# def adversariality(
-#     z_score_1: float,
-#     z_score_2: float,
-# ) -> float:
-#     """
-#     Motivation: lines of (x - c)(- y - c) = 0.25
-#     """
-#     return 0.5 * (z_score_1 - z_score_2 - math.sqrt((z_score_1 + z_score_2) ** 2 + 1))
-
-
-@dataclass
-class PromptCluster:
-    summary: str
-    prompts: list[str]
-
 
 @dataclass(frozen=True)
 class Cluster:

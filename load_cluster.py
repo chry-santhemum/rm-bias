@@ -9,7 +9,8 @@ from pathlib import Path
 from collections import defaultdict
 from datasets import load_dataset
 
-from state import PromptCluster, Cluster, SeedState
+from synthetic import PromptCluster
+from state import Cluster, SeedState
 from utils import set_seed_all
 
 
