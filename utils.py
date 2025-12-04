@@ -197,7 +197,7 @@ async def async_gather(tasks: list[Awaitable[Any]], max_parallel: Optional[int] 
 
     
 def parse_json_response(
-    resp: Response, log_json_error: bool = True
+    resp: Response, log_json_error: bool = True, marker: str="json",
 ) -> Tuple[Any, str | None]:
     """
     Returns a tuple (parsed output, reasoning).
@@ -214,12 +214,12 @@ def parse_json_response(
         reasoning = resp.reasoning_content
         logger.debug("Found reasoning content in response: ", reasoning)
     try:
-        if "```json" in raw_text:
+        if f"```{marker}" in raw_text:
             output = json.loads(
-                raw_text.split("```json", 1)[1].rsplit("```", 1)[0].strip()
+                raw_text.split(f"```{marker}", 1)[1].rsplit("```", 1)[0].strip()
             )
             if reasoning is None:
-                reasoning = raw_text.rsplit("```json", 1)[0].strip()
+                reasoning = raw_text.rsplit(f"```{marker}", 1)[0].strip()
         else:
             output = json.loads(raw_text)
 
