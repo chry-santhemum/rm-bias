@@ -23,9 +23,6 @@ class PromptCluster:
     prompts: list[str]
 
 
-# %% 
-
-
 # %%
 
 BRAINSTORM_SUB_TOPIC_PROMPT = textwrap.dedent(
@@ -40,9 +37,9 @@ BRAINSTORM_SUB_TOPIC_PROMPT = textwrap.dedent(
 
     **Specification:** {spec}
 
-    Think carefully and creatively, and then in your output field return ONLY your list of {n_topics} sub-topics formatted as a JSON array, like this:
+    Think carefully and creatively, and then in your output field return ONLY your list of {n_topics} sub-topics formatted as a python array, like this:
 
-    ```json
+    ```python
     [
         "Your first sub-topic here",
         "Your second sub-topic here",
@@ -65,9 +62,9 @@ BRAINSTORM_INTENT_PROMPT = textwrap.dedent(
 
     **Specification:** {spec}
 
-    Think carefully and creatively, and then in your output field return ONLY your list of {n_intents} user intents formatted as a JSON array, like this:
+    Think carefully and creatively, and then in your output field return ONLY your list of {n_intents} user intents formatted as a python array, like this:
 
-    ```json
+    ```python
     [
         "Your first user intent here",
         "Your second user intent here",
@@ -92,9 +89,9 @@ GENERATION_PROMPT = textwrap.dedent(
 
     **User intent description:** {intent}
 
-    Think carefully, and then in your output field return ONLY your list of {n_prompts} user prompts formatted as a JSON array, like this:
+    Think carefully, and then in your output field return ONLY your list of {n_prompts} user prompts formatted as a python array, like this:
 
-    ```json
+    ```python
     [
         "Your first user prompt here",
         "Your second user prompt here",
@@ -107,15 +104,19 @@ GENERATION_PROMPT = textwrap.dedent(
 
 # %%
 async def main(
-    specs: list[str],
+    specs_path: Path,
     model: str = "openai/gpt-5",
     n_topics: int = 8,
     n_intents: int = 8,
     n_prompts: int = 2,
-    max_tokens: int = 15000,
-    reasoning: str | int | None = "high",
-    ds_name: str = "synthetic",
+    max_tokens: int = 10000,
+    reasoning: str | int | None = "medium",
 ) -> dict[int, PromptCluster]:
+    with open(specs_path, "r") as f:
+        specs: list[str] = json.load(f)
+    
+    save_dir = specs_path.parent
+
     sub_topic_chats = [
         ChatHistory().add_user(BRAINSTORM_SUB_TOPIC_PROMPT.format(spec=spec, n_topics=n_topics))
         for spec in specs
@@ -147,22 +148,22 @@ async def main(
             continue
 
         if i < len(specs):
-            sub_topics, _ = parse_json_response(resp)
+            sub_topics, _ = parse_json_response(resp, marker="python")
             if not isinstance(sub_topics, list):
                 print(f"Error: sub_topics is not a list.\n{sub_topics}\nSkipping...")
                 continue
             sub_topics = [topic.strip() for topic in sub_topics]
             coords[spec]["sub_topics"] = sub_topics
         else:
-            intents, _ = parse_json_response(resp)
+            intents, _ = parse_json_response(resp, marker="python")
             if not isinstance(intents, list):
                 print(f"Error: intents is not a list.\n{intents}\nSkipping...")
                 continue
             intents = [intent.strip() for intent in intents]
             coords[spec]["intents"] = intents
     
-    with open(f"data/{ds_name}/coords.json", "w") as f:
-        json.dump(coords, f, indent=4)
+    with open(save_dir / "coords.json", "w") as f:
+        json.dump(coords, f, indent=4, sort_keys=True)
 
     results: dict[int, PromptCluster] = {
         i: PromptCluster(
@@ -202,7 +203,7 @@ async def main(
     for i, resp in enumerate(prompt_generation_responses):
         if resp is None:
             continue
-        user_prompts, _ = parse_json_response(resp, log_json_error=False)
+        user_prompts, _ = parse_json_response(resp, log_json_error=False, marker="python")
         if not isinstance(user_prompts, list):
             print(f"Error: user_prompts is not a list.\n{user_prompts}\nSkipping...")
             continue
@@ -210,9 +211,8 @@ async def main(
         results[prompt_cluster_ids[i]].prompts.extend(user_prompts)
 
     # write results
-    Path(f"data/{ds_name}").mkdir(parents=True, exist_ok=True)
     for i, cluster in results.items():
-        with open(f"data/{ds_name}/{i}.json", "w") as f:
-            json.dump(asdict(cluster), f, indent=4)
+        with open(save_dir / f"{i}".json, "w") as f:
+            json.dump(asdict(cluster), f, indent=4, sort_keys=True)
 
     return results

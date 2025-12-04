@@ -183,6 +183,8 @@ def make_sub_topics(topics: list[str], n_sub: int = 0) -> dict[str, list[str]]:
     return results
 
 
+# %% Make specs
+
 def make_chatgpt_specs(ds_name: str|None=None, n_sub: int = 0) -> list[str]:
     if ds_name is None:
         ds_name = f"specs_{n_sub}"
@@ -200,7 +202,7 @@ def make_chatgpt_specs(ds_name: str|None=None, n_sub: int = 0) -> list[str]:
 
     Path(f"data/chatgpt/{ds_name}").mkdir(parents=True, exist_ok=True)
     with open(f"data/chatgpt/{ds_name}/specs.json", "w") as f:
-        json.dump(specs, f, indent=4)
+        json.dump(specs, f, indent=4, sort_keys=True)
 
     return specs
 
@@ -220,7 +222,7 @@ def make_clio_specs(ds_name: str|None=None, n_sub: int=0) -> list[str]:
 
     Path(f"data/clio/{ds_name}").mkdir(parents=True, exist_ok=True)
     with open(f"data/clio/{ds_name}/specs.json", "w") as f:
-        json.dump(specs, f, indent=4)
+        json.dump(specs, f, indent=4, sort_keys=True)
 
     return specs
 
@@ -240,6 +242,6 @@ def make_handpick_specs(ds_name: str|None=None, n_sub: int=0) -> list[str]:
 
     Path(f"data/handpick/{ds_name}").mkdir(parents=True, exist_ok=True)
     with open(f"data/handpick/{ds_name}/specs.json", "w") as f:
-        json.dump(specs, f, indent=4)
+        json.dump(specs, f, indent=4, sort_keys=True)
 
     return specs
