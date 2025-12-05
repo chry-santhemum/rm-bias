@@ -1,10 +1,8 @@
-"""Hypothesis generation (planner)."""
+"""Hypothesis generation (planner) class."""
 
 import random
 import json
-import asyncio
 import textwrap
-import copy
 import numpy as np
 from loguru import logger
 from dataclasses import replace, asdict
@@ -13,7 +11,7 @@ from typing import Any, Literal, Optional
 from abc import ABC, abstractmethod
 
 from caller import AutoCaller, ChatHistory, Response
-from state import SeedState, AttributeStats
+from state import AttributeStats
 from models import CACHE_CONFIG, RETRY_CONFIG
 from runner import Runner
 from utils import parse_json_response, ClusterModel
@@ -65,9 +63,7 @@ class Planner(ABC):
 
     def step_planner_model(self):
         if self.alloy_type == "round_robin":
-            self.curr_planner_index = (self.curr_planner_index + 1) % len(
-                self.model_names
-            )
+            self.curr_planner_index = (self.curr_planner_index + 1) % len(self.model_names)
         elif self.alloy_type == "random":
             self.curr_planner_index = random.randint(0, len(self.model_names) - 1)
 
@@ -89,7 +85,7 @@ class Planner(ABC):
         return responses
 
     @abstractmethod
-    def plan(
+    async def plan(
         self, 
         runner: Runner, 
         direction: Literal["plus", "minus"],  # the direction of bias we're trying to find
@@ -97,7 +93,7 @@ class Planner(ABC):
     ):
         pass
 
-    def cluster_plans(
+    async def cluster_plans(
         self,
         to_write: dict[int, list[dict[str, Any]]],  # seed index -> list of {"plan": ..., "meta": ...}
         cluster_model: ClusterModel,
@@ -143,9 +139,8 @@ class Planner(ABC):
                         }
                     )
 
-                relabel_responses = asyncio.run(
-                    self.sample(relabel_chats, desc="Relabeling plans")
-                )
+                relabel_responses = await self.sample(relabel_chats, desc="Relabeling plans")
+
                 for i, resp in enumerate(relabel_responses):
                     if (resp is None) or (not resp.has_response) or (resp.finish_reason != "stop"):
                         continue
@@ -230,7 +225,7 @@ class ListPlanner(Planner):
         self.relabel = relabel
         self.reverse = reverse
 
-    def plan(
+    async def plan(
         self,
         runner: Runner,
         direction: Literal["plus", "minus"] = "plus",
@@ -307,9 +302,7 @@ class ListPlanner(Planner):
                         }
                     )
 
-        planner_responses = asyncio.run(
-            self.sample(to_send_messages, desc="ListPlanner planning")
-        )
+        planner_responses = await self.sample(to_send_messages, desc="ListPlanner planning")
 
         to_write = defaultdict(list)
 
@@ -340,7 +333,7 @@ class ListPlanner(Planner):
                 )
 
         if cluster_model is not None:
-            to_write = self.cluster_plans(
+            to_write = await self.cluster_plans(
                 to_write=to_write, cluster_model=cluster_model, n_pop=self.n_pop, relabel=self.relabel
             )
 
@@ -441,7 +434,7 @@ class PairPlanner(Planner):
             ) as f:
                 json.dump(asdict(seed_state.cluster), f, indent=4)
 
-    def plan(
+    async def plan(
         self,
         runner: Runner,
         direction: Literal["plus", "minus"] = "plus",
@@ -502,9 +495,7 @@ class PairPlanner(Planner):
                     }
                 )
                 
-        planner_responses = asyncio.run(
-            self.sample(to_send_messages, desc="PairPlanner planning")
-        )
+        planner_responses = await self.sample(to_send_messages, desc="PairPlanner planning")
 
         to_write = defaultdict(list)
 
@@ -535,7 +526,7 @@ class PairPlanner(Planner):
                 )
 
         if cluster_model is not None:
-            to_write = self.cluster_plans(
+            to_write = await self.cluster_plans(
                 to_write=to_write, cluster_model=cluster_model, n_pop=self.n_pop, relabel=self.relabel
             )
 

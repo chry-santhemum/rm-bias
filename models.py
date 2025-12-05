@@ -58,8 +58,7 @@ class GenerationModel:
             model=self.model_name,
             max_parallel=self.max_par,
             desc=desc,
-            **self.kwargs,
-            **kwargs,
+            **{**self.kwargs, **kwargs},
         )
         return responses
 
