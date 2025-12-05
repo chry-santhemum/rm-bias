@@ -110,8 +110,8 @@ class Runner(ABC):
             return None
 
     def save_attribute_stats(
-        self, direction: Literal["plus", "minus"], top_k: int = 8, save_dir: Path | None = None
-    ) -> dict[int, list[str]]:
+        self, direction: Literal["plus", "minus"], save_dir: Path | None = None
+    ):
         """
         Save a condensed version of previous step's attribute stats for each seed state,
         ordered by mean reward difference from baseline.
@@ -122,8 +122,6 @@ class Runner(ABC):
             save_dir = self.run_path / "final_stats"
         save_dir.mkdir(parents=True, exist_ok=True)
 
-        top_attributes = dict()
-
         for seed_state in self.seed_states:
             all_attributes = []
             for attribute, attribute_stats in seed_state.history[-1].items():
@@ -132,7 +130,7 @@ class Runner(ABC):
                     {
                         "attribute": attribute,
                         "mean_reward_diff": attribute_stats.mean_reward_diff(
-                            self.baselines
+                            self.baselines  # type: ignore
                         ),
                         "all_rollouts": attribute_stats.all_rollouts,
                         "meta": attribute_stats.meta,
@@ -149,11 +147,6 @@ class Runner(ABC):
             with open(seed_save_dir, "w") as f:
                 json.dump(all_attributes, f, indent=4)
 
-            top_attributes[seed_state.index] = [
-                attr["attribute"] for attr in all_attributes[:top_k]
-            ]
-
-        return top_attributes
 
     def save_seed_states(self):
         logger.info(f"[TRAIN STEP {self.step_count}] Saving seed states...")

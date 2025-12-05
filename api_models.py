@@ -278,7 +278,9 @@ JUDGE_RELATIVE_PROMPT = textwrap.dedent("""
     {response_B}
     </response_B>
 
-    Please use your thinking budget to reason carefully about the data given to you, without any predisposed judgment or bias from irrelevant factors such as the order of the responses, but rather reason about which response is a better answer to the user prompt. Then, in youroutput field, output ONLY a SINGLE WORD, either "Tie", "A", or "B", indicating your judgment, and nothing else.
+    You should judge which response is better without any predisposed judgment or bias from irrelevant factors such as the order of the responses, but rather reason about which response is a better answer to the user prompt.
+
+    Please use your thinking block to reason about the data given to you. Then, in your text output field, output ONLY A SINGLE WORD, either "Tie", "A", or "B", indicating your judgment, and NOTHING ELSE.
 """).strip()
 
 JUDGE_PRESENCE_PROMPT = textwrap.dedent("""
@@ -421,7 +423,7 @@ class JudgeModel(GenerationModel):
         self, 
         validation_results: list[dict[str, dict[str, list[Rollout|None]]]], 
         val_baselines: dict[str, list[Rollout|None]],
-        first_n_rollouts: int=2,
+        first_n_rollouts: int=4,
         first_n_user_prompts: int=8  # 0 means all
     ) -> dict[int, dict[str, dict[str, list[float|None]]]]:
         # use judge model

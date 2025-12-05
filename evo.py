@@ -245,6 +245,7 @@ class EvoPlanner:
         baselines: dict[str, list[Rollout|None]],
         seed_states: list[SeedState[dict[str, int]]],
         n_pop_target: int,
+        filter_thresholds: tuple[float, float],
         dbscan_eps: float,
     ):
         logger.info(f"Trying to update population to {n_pop_target} members using Pareto front selection.")
@@ -259,8 +260,20 @@ class EvoPlanner:
                     stats.judge_winrate(),
                     stats.reward_winrate(baselines),
                 )
-                candidates.append(new_candidate)
                 print(f"Attribute:\n{attribute}\nMean reward diff: {new_candidate[2]}\nJudge winrate: {new_candidate[3]}\nReward winrate: {new_candidate[4]}\n")
+
+                # Filter out the candidates that are really bad
+                if (
+                    new_candidate[2] is None 
+                    or new_candidate[2] < filter_thresholds[0] 
+                    or new_candidate[3] is None 
+                    or new_candidate[3] > filter_thresholds[1]
+                ):
+                    continue
+                candidates.append(new_candidate)
+            
+            print("===============")
+            print(f"After filtering, {len(candidates)} candidates remain.")
 
             # Sort into Pareto Fronts
             fronts = EvoPlanner._get_pareto_fronts(candidates)
@@ -418,7 +431,9 @@ class EvoRunner(Runner):
     def runner_type(self) -> str:
         return "evo"
 
-    async def train_step(self, n_pop_target: int, train_batch_size: int, use_judge: bool = True):
+    async def train_step(
+        self, n_pop_target: int, train_batch_size: int, judge_filter_thresholds: tuple[float, float]|None
+    ):
         print(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
         if self.step_count == 0:
             await self.planner.initial_plan(runner=self)
@@ -455,17 +470,16 @@ class EvoRunner(Runner):
             for attribute, rollouts in stats.items():
                 self.seed_states[seed_state_idx].history[-1][attribute].rollouts = rollouts
 
-        final_attributes = self.save_attribute_stats(
+        self.save_attribute_stats(
             direction=self.planner.direction,
-            top_k=8,
             save_dir=self.run_path / f"step_{self.step_count}_stats",
         )
 
-        if use_judge:
+        if judge_filter_thresholds is not None:
             step_judge_results = await self.judge_model.judge_validation_results(
                 validation_results=evaluate_results,
                 val_baselines=self.baselines,  # type: ignore
-                first_n_rollouts=2,
+                first_n_rollouts=4,
                 first_n_user_prompts=8,
             )
 
@@ -477,12 +491,13 @@ class EvoRunner(Runner):
             f"[TRAIN STEP {self.step_count}] Updating population. Before update: {len(self.seed_states[0].history[-1])}"
         )
         
-        if use_judge:
+        if judge_filter_thresholds is not None:
             self.planner.update_pop_pareto(
                 baselines=self.baselines,  # type: ignore
                 seed_states=self.seed_states,
                 n_pop_target=n_pop_target,
                 dbscan_eps=self.dbscan_eps,
+                filter_thresholds=judge_filter_thresholds,
             )
         else:
             self.planner.update_pop(
@@ -498,62 +513,61 @@ class EvoRunner(Runner):
         self.step_count += 1
         self.planner.hypothesis_planner.step_planner_model()
 
-        return final_attributes
 
-    async def train(self, n_pop_target: list[int], train_batch_size: list[int], validate: bool = True, start_from: int|None=None):
-        # TODO: pass use_judge as a parameter
+    async def train(self, n_pop_target: list[int], train_batch_size: list[int], judge_filter_thresholds: list[tuple[float, float]]|None, validate: bool = True, start_from: int|None=None):
         t_steps = len(train_batch_size)
         assert len(n_pop_target) == t_steps
 
         for time_step in range(t_steps):
-            if start_from is not None and time_step < start_from:
-                for seed_state in self.seed_states:
-                    with open(self.run_path / f"step_{time_step}_stats/seed_{seed_state.index}.json", "r") as f:
-                        seed_results = json.load(f)
+            # if start_from is not None and time_step < start_from:
+            #     for seed_state in self.seed_states:
+            #         with open(self.run_path / f"step_{time_step}_stats/seed_{seed_state.index}.json", "r") as f:
+            #             seed_results = json.load(f)
 
-                    seed_state.history.append(dict())
-                    for item in seed_results:
-                        attribute = item["attribute"]
-                        attribute_rollouts = dict()
-                        for user_prompt, rollouts in item["all_rollouts"].items():
-                            attribute_rollouts[user_prompt] = [
-                                Rollout(
-                                    response=rollout["response"],
-                                    score=rollout["score"]
-                                )
-                                if rollout is not None else None
-                                for rollout in rollouts
-                            ]
+            #         seed_state.history.append(dict())
+            #         for item in seed_results:
+            #             attribute = item["attribute"]
+            #             attribute_rollouts = dict()
+            #             for user_prompt, rollouts in item["all_rollouts"].items():
+            #                 attribute_rollouts[user_prompt] = [
+            #                     Rollout(
+            #                         response=rollout["response"],
+            #                         score=rollout["score"]
+            #                     )
+            #                     if rollout is not None else None
+            #                     for rollout in rollouts
+            #                 ]
 
-                        seed_state.history[-1][attribute] = AttributeStats(
-                            attribute=attribute,
-                            rollouts=attribute_rollouts,
-                            meta=item.get("meta", {"time_step": time_step})
-                        )
+            #             seed_state.history[-1][attribute] = AttributeStats(
+            #                 attribute=attribute,
+            #                 rollouts=attribute_rollouts,
+            #                 meta=item.get("meta", {"time_step": time_step})
+            #             )
 
-                self.planner.update_pop(
-                    baselines=self.baselines,  # type: ignore
-                    seed_states=self.seed_states,
-                    n_pop_target=n_pop_target[time_step],
-                    dbscan_eps=self.dbscan_eps,
-                )
-                self.step_count += 1
-                self.planner.hypothesis_planner.step_planner_model()
-                final_attributes = self.save_attribute_stats(
-                    direction=self.planner.direction,
-                    top_k=8,
-                    save_dir=None,
-                )
+            #     self.planner.update_pop(
+            #         baselines=self.baselines,  # type: ignore
+            #         seed_states=self.seed_states,
+            #         n_pop_target=n_pop_target[time_step],
+            #         dbscan_eps=self.dbscan_eps,
+            #     )
+            #     self.step_count += 1
+            #     self.planner.hypothesis_planner.step_planner_model()
+            #     self.save_attribute_stats(
+            #         direction=self.planner.direction,
+            #         save_dir=None,
+            #     )
 
-            else:
-                final_attributes = await self.train_step(
-                    n_pop_target=n_pop_target[time_step],
-                    train_batch_size=train_batch_size[time_step],
-                    use_judge=True
-                )
+            # else:
+            await self.train_step(
+                n_pop_target=n_pop_target[time_step],
+                train_batch_size=train_batch_size[time_step],
+                judge_filter_thresholds=judge_filter_thresholds[time_step] if judge_filter_thresholds is not None else None,
+            )
 
             if validate and time_step == t_steps - 1:
-                await self.validate(final_attributes=final_attributes)
+                await self.validate(final_attributes={
+                    seed_state.index: list(seed_state.state.keys()) for seed_state in self.seed_states
+                })
 
 
 # %%

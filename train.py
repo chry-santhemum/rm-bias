@@ -55,7 +55,8 @@ from plotting import plot_validation_data
 
 if args.dataset == "synthetic":
     ds_path = "user_prompts/synthetic/n_sub_0"
-    topic_ids = [4]
+    # topic_ids = [1, 3, 4, 6, 8, 9]
+    topic_ids=[4]
 elif args.dataset == "chatgpt":
     ds_path = "user_prompts/chatgpt/n_sub_2"
 elif args.dataset == "clio":
@@ -80,6 +81,7 @@ async def main():
     )
 
     judge_model = JudgeModel(
+        model_name="anthropic/claude-haiku-4.5",
         force_caller="openrouter",
         max_tokens=1050,
         reasoning=1024,
@@ -113,7 +115,7 @@ async def main():
             model_names=["openai/gpt-5", "anthropic/claude-sonnet-4.5"],
             max_tokens=8192,
             reasoning="medium",
-            max_par=64,
+            max_par=128,
             relabel=False,
             n_new=args.n_new,
             n_pop=args.n_pop_initial,
@@ -125,7 +127,7 @@ async def main():
             model_names=["openai/gpt-5", "anthropic/claude-sonnet-4.5"],
             max_tokens=8192,
             reasoning="medium",
-            max_par=64,
+            max_par=128,
             relabel=False,
             reverse=(args.planner_type == "list_reverse"),
             n_new=args.n_new,
@@ -160,10 +162,9 @@ async def main():
   
         try:
             await runner.train(
-                # n_pop_target=[16, 8, 8],
-                # train_batch_size=[4, 8, 16],
-                n_pop_target=[8, 8],
-                train_batch_size=[4, 8],
+                n_pop_target=[16, 8, 8],
+                train_batch_size=[4, 8, 8],
+                judge_filter_thresholds=[(-5, 0.8), (-3, 0.7), (-1, 0.6)],
                 validate=validate,
             )
         except Exception as e:

@@ -12,7 +12,7 @@ import random
 from typing import Literal
 from loguru import logger
 
-from state import SeedState
+from state import SeedState, Rollout
 from utils import ClusterModel, set_seed_all
 from api_models import GenerationModel, JudgeModel
 from planner import Planner
@@ -65,7 +65,7 @@ class OneTurnRunner(Runner):
             cluster_model=self.cluster_model,
         )
 
-        evaluate_results = dict()
+        evaluate_results: list[dict[str, dict[str, list[Rollout|None]]]] = []
 
         for seed_state_idx, seed_state in enumerate(self.seed_states):
             async with self.bias_evaluator as evaluator:
@@ -85,17 +85,34 @@ class OneTurnRunner(Runner):
                     baselines=self.baselines,
                     n_rollouts=self.n_rewrite_rollouts,
                 )
-            evaluate_results[seed_state_idx] = stats
+            evaluate_results.append(stats)
 
-        for seed_state_idx, stats in evaluate_results.items():
+        for seed_state_idx, stats in enumerate(evaluate_results):
             for attribute, rollouts in stats.items():
                 self.seed_states[seed_state_idx].history[-1][attribute].rollouts = rollouts
 
-        final_attributes = self.save_attribute_stats(
+        self.save_attribute_stats(
             direction=self.direction,
-            top_k=8,
             save_dir=self.run_path / f"step_{self.step_count}_stats",
         )
 
+        # Judge model
+        judge_results = await self.judge_model.judge_validation_results(
+            validation_results=evaluate_results,
+            val_baselines=self.baselines,  # type: ignore
+            first_n_rollouts=4,
+            first_n_user_prompts=8,
+        )
+
+        for seed_state_idx, seed_judge_results in judge_results.items():
+            for attribute, judge_result in seed_judge_results.items():
+                self.seed_states[seed_state_idx].history[-1][attribute].judge_scores = judge_result
+
+
         if validate:
-            await self.validate(final_attributes=final_attributes)
+            # Get top attributes
+            # TODO
+
+            await self.validate(final_attributes={
+                seed_state.index: list(seed_state.history[-1].keys()) for seed_state in self.seed_states
+            })
