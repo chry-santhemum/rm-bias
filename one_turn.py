@@ -9,7 +9,6 @@ Rewrites: train_batch_size * n_pop * n_rollouts (~4096 tokens per call)
 
 import dotenv
 import random
-import nest_asyncio
 from typing import Literal
 from loguru import logger
 
@@ -21,7 +20,6 @@ from runner import Runner
 from bias_evaluator import BiasEvaluator
 
 dotenv.load_dotenv()
-nest_asyncio.apply()
 set_seed_all(10086)
 
 

@@ -9,7 +9,6 @@ import torch
 from tqdm.auto import tqdm
 from pathlib import Path
 from dataclasses import dataclass
-import nest_asyncio
 from typing import Sequence
 from abc import ABC, abstractmethod
 from loguru import logger
@@ -17,8 +16,6 @@ from loguru import logger
 from caller import ChatHistory
 from models import JudgeModel
 from utils import load_model, REWARD_MODELS
-
-nest_asyncio.apply()
 
 # %%
 

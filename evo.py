@@ -18,7 +18,6 @@ import dotenv
 import random
 import textwrap
 import asyncio
-import nest_asyncio
 from dataclasses import asdict
 from typing import Literal
 from loguru import logger
@@ -36,7 +35,6 @@ from bias_evaluator import BiasEvaluator
 from planner import Planner
 
 dotenv.load_dotenv()
-nest_asyncio.apply()
 set_seed_all(10086)
 
 
@@ -143,7 +141,7 @@ class EvoPlanner:
 
             seed_state.history.append({})
 
-        planner_responses = asyncio.run(self.hypothesis_planner.sample(to_send_messages, desc="Mutating"))
+        planner_responses = asyncio.run(self.hypothesis_planner.sample(to_send_messages, desc="Mutating", enable_cache=False))
 
         # parse responses
         for i, resp in enumerate(planner_responses):

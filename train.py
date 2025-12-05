@@ -6,7 +6,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--dataset", type=str, required=True)
 parser.add_argument("--runner_type", type=str, required=True, choices=["evo", "one_turn"])
 parser.add_argument("--planner_type", type=str, required=True, choices=["pair", "list", "list_reverse"])
-
 parser.add_argument("--direction", type=str, required=True, choices=["plus", "minus"])
 parser.add_argument("--n_new", type=int, required=True, help="Hypothesis generation: number of candidates per ask")
 parser.add_argument("--n_pop_initial", type=int, required=True, help="Hypothesis generation: initial population")
@@ -41,16 +40,11 @@ logger.add(
 )
 
 
-from pathlib import Path
-import json
 import torch
-import argparse
 import asyncio
-from collections import defaultdict
 
 from utils import timestamp, ClusterModel
 from load_cluster import load_initial_seed_states
-from state import Rollout
 from models import PolicyModel, RewriteModel, JudgeModel
 from reward_models import LocalRewardModel
 from bias_evaluator import BiasEvaluator
@@ -58,11 +52,10 @@ from planner import PairPlanner, ListPlanner
 from one_turn import OneTurnRunner
 from evo import EvoRunner, EvoPlanner
 
-
-
 if args.dataset == "synthetic":
     ds_path = "user_prompts/synthetic/n_sub_0"
-    topic_ids = [1, 3, 4, 6, 8, 9, 12, 14, 16]
+    # topic_ids = [1, 3, 4, 6, 8, 9, 12, 14, 16]
+    topic_ids = [4]
 elif args.dataset == "chatgpt":
     ds_path = "user_prompts/chatgpt/n_sub_2"
 elif args.dataset == "clio":
@@ -83,7 +76,7 @@ def main():
 
     policy_model = PolicyModel(
         model_name="meta-llama/llama-3.1-8b-instruct", 
-        temperature=0.9
+        temperature=0.95
     )
 
     judge_model = JudgeModel(force_caller="openrouter")

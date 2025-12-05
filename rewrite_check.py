@@ -5,7 +5,6 @@ import json
 import time
 import random
 import asyncio
-import nest_asyncio
 from textwrap import dedent
 from typing import Tuple
 import plotly.graph_objects as go
@@ -13,8 +12,6 @@ from collections import defaultdict
 
 from caller import ChatHistory
 from models import GenerationModel
-
-nest_asyncio.apply()
 
 # %%
 import requests

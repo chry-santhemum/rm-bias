@@ -2,7 +2,6 @@
 import textwrap
 import pickle
 import asyncio
-import nest_asyncio
 from tqdm.auto import tqdm
 from collections import defaultdict
 
@@ -15,7 +14,6 @@ from models import PolicyModel, RewriteModel, JudgeModel
 from one_turn import OneTurnPlanner
 from runner import TestRunner
 
-nest_asyncio.apply()
 
 # %%
 N_SAMPLES = 1024

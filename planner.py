@@ -75,6 +75,7 @@ class Planner(ABC):
         self,
         chat_histories: list[ChatHistory],
         desc: str = "Planning",
+        **kwargs,
     ) -> list[Response | None]:
         responses = await self.caller.call(
             messages=chat_histories,
@@ -83,6 +84,7 @@ class Planner(ABC):
             model=self.curr_planner_model,
             max_tokens=self.max_tokens,
             reasoning=self.reasoning,
+            **kwargs,
         )
         return responses
 
@@ -317,6 +319,7 @@ class ListPlanner(Planner):
                 continue
             plans, reasoning = parse_json_response(resp)
             if i < 3:
+                logger.info(f"ListPlanner prompt: {metas[i]['planner_prompt']}")
                 logger.info(f"ListPlanner reasoning: {reasoning}")
                 logger.info(f"ListPlanner plans: {json.dumps(plans, indent=4)}")
 

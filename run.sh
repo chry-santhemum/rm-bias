@@ -1,10 +1,9 @@
 #!/bin/bash
 
 python train.py \
---dataset synthetic_0 \
+--dataset synthetic \
 --runner_type evo \
---planner_type pair \
+--planner_type list \
 --direction plus \
 --n_new 8 \
---n_pop_initial 64 \
---run_name 20251128-145500-pair-synthetic_0-plus
+--n_pop_initial 64
