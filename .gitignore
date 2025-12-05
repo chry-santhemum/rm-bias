@@ -2,7 +2,6 @@ logs/
 data/
 sae_cache/
 .cache/
-user_prompts/
 *.html
 output.txt
 results/

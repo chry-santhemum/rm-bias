@@ -59,7 +59,7 @@ def intent_cross_topic() -> list[str]:
 
             cross_specs.append(
                 """
-                Category: {}\\nExamples of this category: {}\\nIntent: {} ({})
+                Category: {}\nExamples of this category: {}\nIntent: {} ({})
                 """.format(
                     broad_topic, ", ".join(topics), intent_name, intent_desc
                 ).strip()
@@ -187,7 +187,7 @@ def make_sub_topics(topics: list[str], n_sub: int = 0) -> dict[str, list[str]]:
 
 def make_chatgpt_specs(ds_name: str|None=None, n_sub: int = 0) -> list[str]:
     if ds_name is None:
-        ds_name = f"specs_{n_sub}"
+        ds_name = f"n_sub_{n_sub}"
 
     specs = []
     for k, vals in CHATGPT_CATEGORIES.items():
@@ -200,8 +200,8 @@ def make_chatgpt_specs(ds_name: str|None=None, n_sub: int = 0) -> list[str]:
 
     specs.extend(intent_cross_topic())
 
-    Path(f"data/chatgpt/{ds_name}").mkdir(parents=True, exist_ok=True)
-    with open(f"data/chatgpt/{ds_name}/specs.json", "w") as f:
+    Path(f"user_prompts/chatgpt/{ds_name}").mkdir(parents=True, exist_ok=True)
+    with open(f"user_prompts/chatgpt/{ds_name}/specs.json", "w") as f:
         json.dump(specs, f, indent=4, sort_keys=True)
 
     return specs
@@ -209,7 +209,7 @@ def make_chatgpt_specs(ds_name: str|None=None, n_sub: int = 0) -> list[str]:
 
 def make_clio_specs(ds_name: str|None=None, n_sub: int=0) -> list[str]:
     if ds_name is None:
-        ds_name = f"specs_{n_sub}"
+        ds_name = f"n_sub_{n_sub}"
 
     specs = []
     for topic in CLIO_CATEGORIES:
@@ -220,8 +220,8 @@ def make_clio_specs(ds_name: str|None=None, n_sub: int=0) -> list[str]:
         for sub_topic in sub_topics:
             specs.append(f"{spec}: {sub_topic}")
 
-    Path(f"data/clio/{ds_name}").mkdir(parents=True, exist_ok=True)
-    with open(f"data/clio/{ds_name}/specs.json", "w") as f:
+    Path(f"user_prompts/clio/{ds_name}").mkdir(parents=True, exist_ok=True)
+    with open(f"user_prompts/clio/{ds_name}/specs.json", "w") as f:
         json.dump(specs, f, indent=4, sort_keys=True)
 
     return specs
@@ -229,7 +229,7 @@ def make_clio_specs(ds_name: str|None=None, n_sub: int=0) -> list[str]:
 
 def make_handpick_specs(ds_name: str|None=None, n_sub: int=0) -> list[str]:
     if ds_name is None:
-        ds_name = f"specs_{n_sub}"
+        ds_name = f"n_sub_{n_sub}"
 
     specs = []
     for topic in HANDPICK_CATEGORIES:
@@ -240,8 +240,26 @@ def make_handpick_specs(ds_name: str|None=None, n_sub: int=0) -> list[str]:
         for sub_topic in sub_topics:
             specs.append(f"{spec}: {sub_topic}")
 
-    Path(f"data/handpick/{ds_name}").mkdir(parents=True, exist_ok=True)
-    with open(f"data/handpick/{ds_name}/specs.json", "w") as f:
+    Path(f"user_prompts/handpick/{ds_name}").mkdir(parents=True, exist_ok=True)
+    with open(f"user_prompts/handpick/{ds_name}/specs.json", "w") as f:
         json.dump(specs, f, indent=4, sort_keys=True)
 
     return specs
+
+
+# %%
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--ds_name", type=str, required=True)
+    parser.add_argument("--n_sub", type=int, default=0)
+    args = parser.parse_args()
+
+    if args.ds_name == "chatgpt":
+        make_chatgpt_specs(n_sub=args.n_sub)
+    elif args.ds_name == "clio":
+        make_clio_specs(n_sub=args.n_sub)
+    elif args.ds_name == "handpick":
+        make_handpick_specs(n_sub=args.n_sub)
+    else:
+        raise ValueError(f"Invalid dataset name: {args.ds_name}")

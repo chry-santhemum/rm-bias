@@ -5,10 +5,9 @@ import time
 import random
 import datetime
 import asyncio
-from pprint import pprint
+from json_repair import repair_json
 from loguru import logger
-from typing import Any, Tuple, Optional, Iterable, Awaitable
-from pathlib import Path
+from typing import Any, Tuple, Optional, Awaitable
 from collections import defaultdict
 from tqdm.asyncio import tqdm_asyncio
 from IPython.core.getipython import get_ipython
@@ -197,36 +196,32 @@ async def async_gather(tasks: list[Awaitable[Any]], max_parallel: Optional[int] 
 
     
 def parse_json_response(
-    resp: Response, log_json_error: bool = True, marker: str="json",
+    resp: Response, log_json_error: bool = True, marker: str = "json",
 ) -> Tuple[Any, str | None]:
-    """
-    Returns a tuple (parsed output, reasoning).
-
-    If output contains a valid json array, it is parsed and returned.
-    Else, if output exists, it is returned as is.
-    """
     raw_text = resp.first_response
     if raw_text is None:
+        logger.warning(f"Response is None: {resp}")
         return None, None
 
     output, reasoning = None, None
     if resp.reasoning_content is not None:
         reasoning = resp.reasoning_content
-        logger.debug("Found reasoning content in response: ", reasoning)
+
     try:
-        if f"```{marker}" in raw_text:
-            output = json.loads(
-                raw_text.split(f"```{marker}", 1)[1].rsplit("```", 1)[0].strip()
-            )
+        if raw_text.strip().startswith(f"```{marker}"):
+            json_str = raw_text.split(f"```{marker}", 1)[1].rsplit("```", 1)[0].strip()
             if reasoning is None:
                 reasoning = raw_text.rsplit(f"```{marker}", 1)[0].strip()
         else:
-            output = json.loads(raw_text)
+            json_str = raw_text.strip()
+
+        # Repair and parse
+        output = json.loads(repair_json(json_str))
 
     except Exception as e:
-        output = raw_text
+        output = raw_text.strip()
         if reasoning is None:
-            reasoning = raw_text
+            reasoning = raw_text.strip()
         if log_json_error:
             logger.exception(f"Response JSON parse error: {e}")
             logger.error(f"API response: {resp}")

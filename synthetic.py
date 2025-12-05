@@ -6,22 +6,13 @@ Synthetic prompt dataset generation from a given spec.
 
 import json
 import textwrap
-import nest_asyncio
+import asyncio
 from pathlib import Path
 from dataclasses import asdict, dataclass
 
 from caller import ChatHistory
 from utils import parse_json_response
-from specs import SUBTOPICS_PROMPT, caller
-
-nest_asyncio.apply()
-
-
-@dataclass
-class PromptCluster:
-    summary: str
-    prompts: list[str]
-
+from specs import caller
 
 # %%
 
@@ -90,14 +81,14 @@ async def main(
     n_prompts: int = 2,
     max_tokens: int = 10000,
     reasoning: str | int | None = "medium",
-) -> dict[int, PromptCluster]:
+):
     with open(specs_path, "r") as f:
         specs: list[str] = json.load(f)
     
     save_dir = specs_path.parent
 
     sub_topic_chats = [
-        ChatHistory().add_user(SUBTOPICS_PROMPT.format(spec=spec, n_topics=n_topics))
+        ChatHistory().add_user(BRAINSTORM_PROMPT.format(spec=spec, n_topics=n_topics))
         for spec in specs
     ]
 
@@ -127,11 +118,11 @@ async def main(
     with open(save_dir / "sub_topics.json", "w") as f:
         json.dump(brainstorm_results, f, indent=4, sort_keys=True)
 
-    results: dict[int, PromptCluster] = {
-        i: PromptCluster(
-            summary=specs[i],
-            prompts=[],
-        )
+    results: dict[int, dict] = {
+        i: {
+            "summary": specs[i],
+            "prompts": [],
+        }
         for i in range(len(specs))
     }
 
@@ -152,7 +143,7 @@ async def main(
 
     prompt_generation_responses = await caller.call(
         messages=prompt_generation_chats,
-        max_parallel=128,
+        max_parallel=256,
         desc="Generating user prompts",
         model=model,
         max_tokens=max_tokens,
@@ -162,16 +153,35 @@ async def main(
     for i, resp in enumerate(prompt_generation_responses):
         if resp is None:
             continue
-        user_prompts, _ = parse_json_response(resp, log_json_error=False, marker="python")
+        user_prompts, _ = parse_json_response(resp, marker="python")
         if not isinstance(user_prompts, list):
             print(f"Error: user_prompts is not a list.\n{user_prompts}\nSkipping...")
             continue
         user_prompts = [prompt.strip() for prompt in user_prompts]
-        results[prompt_cluster_ids[i]].prompts.extend(user_prompts)
+        results[prompt_cluster_ids[i]]["prompts"].extend(user_prompts)
 
     # write results
     for i, cluster in results.items():
-        with open(save_dir / f"cluster_{i}".json, "w") as f:
-            json.dump(asdict(cluster), f, indent=4, sort_keys=True)
+        with open(save_dir / f"cluster_{i}.json", "w") as f:
+            json.dump(cluster, f, indent=4, sort_keys=True)
 
     return results
+
+# %%
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--specs_path", type=str, required=True)
+    parser.add_argument("--n_topics", type=int, default=32)
+    parser.add_argument("--n_prompts", type=int, default=2)
+    args = parser.parse_args()
+
+    asyncio.run(main(
+        specs_path=Path(args.specs_path),
+        model="openai/gpt-5",
+        n_topics=args.n_topics,
+        n_prompts=args.n_prompts,
+        max_tokens=10000,
+        reasoning="medium",
+    ))
