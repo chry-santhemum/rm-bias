@@ -53,7 +53,7 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
         attribute_diffs = remove_outliers(attribute_diffs, clip_percent = 0.05)
         ds_name = run_path.name.split("-")[-2]
         with open(
-            f"/workspace/rm-bias/data/{ds_name}/{seed_index}.json", "r", encoding="utf-8"
+            f"user_prompts/{ds_name}/n_sub_0/cluster_{seed_index}.json", "r", encoding="utf-8"
         ) as f:
             cluster_info = json.load(f)
 
@@ -194,14 +194,13 @@ def plot_validation_data(run_path: Path|str, write_path: Path|str):
         plot_data = process_run_data(run_path=run_path, seed_index=seed_index)
         fig = plot_reward_diff_violin(plot_data=plot_data)
         # fig.show()
-        fig.write_html(write_path / f"seed_{seed_index}.html")
+        fig.write_image(write_path / f"seed_{seed_index}.pdf")
         print(f"Saved plot for seed {seed_index}")
 
 
 # %%
 if __name__ == "__main__":
-    run_path = Path("data/evo/20251128-145500-pair-synthetic_0-plus")
-    run_name = run_path.name
-    write_path = Path(f"plots/{run_name}")
+    run_path = Path("data/evo/20251205-053029-list-synthetic-plus")
+    write_path = Path(f"plots/{run_path.name}")
 
     plot_validation_data(run_path=run_path, write_path=write_path)

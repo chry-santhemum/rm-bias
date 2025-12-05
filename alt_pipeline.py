@@ -10,7 +10,7 @@ from utils import ClusterModel
 from load_cluster import load_initial_seed_states
 from caller import OpenRouterCaller, ChatHistory
 from reward_models import RewardModel
-from models import PolicyModel, RewriteModel, JudgeModel
+from models import GenerationModel, RewriteModel, JudgeModel
 from one_turn import OneTurnPlanner
 from runner import TestRunner
 
@@ -28,7 +28,7 @@ seed_states = load_initial_seed_states(
 
 user_prompts = [seed_states[0].cluster.train_prompts[0]]
 
-policy = PolicyModel(temperature=0.9)
+policy = GenerationModel(temperature=0.9)
 all_rollouts = asyncio.run(
     policy.sample(
         chat_histories=[
@@ -59,7 +59,7 @@ with open("data/scrap/alt_pipeline.pkl", "rb") as f:
 
 runner = TestRunner(
     seed_states=seed_states,
-    policy_model=PolicyModel(temperature=0.9),
+    policy_model=GenerationModel(temperature=0.9),
     rewrite_model=RewriteModel(model_name="openai/gpt-5-nano", max_par=512),
     reward_model=RewardModel(model_name="skywork-v2", batch_size=32),
     judge_model=JudgeModel(),

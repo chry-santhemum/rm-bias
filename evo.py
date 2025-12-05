@@ -29,7 +29,7 @@ from utils import (
     ClusterModel,
     set_seed_all,
 )
-from models import PolicyModel, JudgeModel
+from models import GenerationModel, JudgeModel
 from runner import Runner
 from bias_evaluator import BiasEvaluator
 from planner import Planner
@@ -262,7 +262,7 @@ class EvoRunner(Runner):
         self,
         seed_states: list[SeedState[dict[str, int]]],
         planner: EvoPlanner,
-        policy_model: PolicyModel,
+        policy_model: GenerationModel,
         bias_evaluator: BiasEvaluator,
         judge_model: JudgeModel,
         dbscan_eps: float,

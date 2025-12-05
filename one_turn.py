@@ -14,7 +14,7 @@ from loguru import logger
 
 from state import SeedState
 from utils import ClusterModel, set_seed_all
-from models import PolicyModel, JudgeModel
+from models import GenerationModel, JudgeModel
 from planner import Planner
 from runner import Runner
 from bias_evaluator import BiasEvaluator
@@ -29,7 +29,7 @@ class OneTurnRunner(Runner):
         seed_states: list[SeedState],
         hypothesis_planner: Planner,
         cluster_model: ClusterModel,
-        policy_model: PolicyModel,
+        policy_model: GenerationModel,
         bias_evaluator: BiasEvaluator,
         judge_model: JudgeModel,
         train_batch_size: int,

@@ -39,14 +39,19 @@ class GenerationModel:
     ):
         self.model_name = model_name
         self.max_par = max_par
-        self.kwargs = kwargs
         self.model_slug = self.model_name.split("/")[-1]
-        self.caller = AutoCaller(dotenv_path=".env", cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG, force_caller=force_caller)
+        self.caller = AutoCaller(
+            dotenv_path=".env", 
+            cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG, 
+            force_caller=force_caller
+        )
+        self.kwargs = kwargs
 
     async def sample(
         self,
         chat_histories: list[ChatHistory],
         desc: str | None = None,
+        **kwargs,
     ) -> list[Response|None]:
         responses = await self.caller.call(
             messages=chat_histories,
@@ -54,23 +59,10 @@ class GenerationModel:
             max_parallel=self.max_par,
             desc=desc,
             **self.kwargs,
+            **kwargs,
         )
         return responses
 
-
-class PolicyModel(GenerationModel):
-    def __init__(
-        self,
-        model_name: str = "meta-llama/llama-3.1-8b-instruct",
-        max_par: int = 512,
-        max_tokens: int = 1024,
-        temperature: float = 0.9,
-        **kwargs,
-    ):
-        to_pass_kwargs = kwargs.copy()
-        to_pass_kwargs["max_tokens"] = max_tokens
-        to_pass_kwargs["temperature"] = temperature
-        super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
 
 
 REWRITE_PLUS = textwrap.dedent("""
@@ -186,14 +178,10 @@ class RewriteModel(GenerationModel):
         self,
         model_name: str = "openai/gpt-5-nano",
         max_par: int = 512,
-        max_tokens: int = 8192,
-        reasoning: str | int = "low",
         enable_cache: bool = False,
         **kwargs,
     ):
         to_pass_kwargs = kwargs.copy()
-        to_pass_kwargs["max_tokens"] = max_tokens
-        to_pass_kwargs["reasoning"] = reasoning
         to_pass_kwargs["enable_cache"] = enable_cache
         super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
 

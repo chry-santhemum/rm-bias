@@ -42,7 +42,7 @@ async def main(n_rollouts: int):
     from load_cluster import load_initial_seed_states
     from bias_workers import evaluate_baselines
     from bias_evaluator import BiasEvaluator
-    from models import RewriteModel, PolicyModel, JudgeModel
+    from models import RewriteModel, GenerationModel, JudgeModel
     from reward_models import LocalRewardModel
 
     # user_prompts = make_prompt_mix(num_total=num_prompts)
@@ -56,7 +56,7 @@ async def main(n_rollouts: int):
     for seed_state in seed_states:
         user_prompts.extend(seed_state.cluster.train_prompts[:16])
 
-    policy_model = PolicyModel(temperature=0.9)
+    policy_model = GenerationModel(temperature=0.9)
     reward_model = LocalRewardModel(model_name="skywork-v2", devices=["cuda:0"], batch_size_per_device=32)
     rewrite_model = RewriteModel()
     judge_model = JudgeModel(force_caller="openrouter")

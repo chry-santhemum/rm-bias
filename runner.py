@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 
 from state import SeedState, Rollout
 from utils import timestamp
-from models import PolicyModel, JudgeModel
+from models import GenerationModel, JudgeModel
 from bias_workers import evaluate_baselines
 from bias_evaluator import BiasEvaluator
 
@@ -23,7 +23,7 @@ class Runner(ABC):
     def __init__(
         self,
         seed_states: list[SeedState],
-        policy_model: PolicyModel,
+        policy_model: GenerationModel,
         bias_evaluator: BiasEvaluator,
         judge_model: JudgeModel,
         run_name: str | None,

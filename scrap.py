@@ -17,7 +17,7 @@ from datasets import load_dataset
 from utils import remove_outliers, load_model, timestamp
 from caller import ChatHistory, OpenRouterCaller
 from reward_models import RewardModel
-from models import PolicyModel
+from models import GenerationModel
 
 nest_asyncio.apply()
 # %%
@@ -30,7 +30,7 @@ sleeper_rm = RewardModel(model_name="sleeper", batch_size=16, device="cuda")
 from standard_prompts import make_prompt_mix
 from bias_workers import evaluate_baselines
 
-policy_model = PolicyModel(model_name="meta-llama/llama-3.1-8b-instruct", temperature=0.9)
+policy_model = GenerationModel(model_name="meta-llama/llama-3.1-8b-instruct", temperature=0.9)
 
 prompts = make_prompt_mix(num_total=512)
 skywork_baselines = asyncio.run(evaluate_baselines(

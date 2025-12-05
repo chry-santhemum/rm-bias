@@ -45,7 +45,7 @@ import asyncio
 
 from utils import timestamp, ClusterModel
 from load_cluster import load_initial_seed_states
-from models import PolicyModel, RewriteModel, JudgeModel
+from models import GenerationModel, RewriteModel, JudgeModel
 from reward_models import LocalRewardModel
 from bias_evaluator import BiasEvaluator
 from planner import PairPlanner, ListPlanner
@@ -74,18 +74,27 @@ def main():
         embedding_model_name="Qwen/Qwen3-Embedding-0.6B",
     )
 
-    policy_model = PolicyModel(
-        model_name="meta-llama/llama-3.1-8b-instruct", 
-        temperature=0.95
+    policy_model = GenerationModel(
+        model_name="meta-llama/llama-3.1-8b-instruct",
+        max_par=512,
+        max_tokens=1024,
+        temperature=0.95,
     )
 
     judge_model = JudgeModel(force_caller="openrouter")
 
     bias_evaluator = BiasEvaluator(
+        # rewrite_model=RewriteModel(
+        #     model_name="openai/gpt-5-nano", 
+        #     max_par=512, 
+        #     max_tokens=4096,
+        #     enable_cache=False,
+        # ),
         rewrite_model=RewriteModel(
-            model_name="openai/gpt-5-nano", 
-            max_par=512, 
-            max_tokens=4096,
+            model_name="allenai/olmo-3-7b-think",
+            max_par=512,
+            max_tokens=8192,
+            reasoning=6000,
             enable_cache=False,
         ),
         reward_model=LocalRewardModel(
@@ -94,7 +103,7 @@ def main():
             batch_size_per_device=32,
             attn_implementation="sdpa",
         ),
-        n_rewrite_workers=32,
+        n_rewrite_workers=128,
     )
 
     initial_seed_states = load_initial_seed_states(

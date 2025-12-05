@@ -10,7 +10,7 @@ from typing import Mapping, Sequence
 
 import numpy as np
 from caller import ChatHistory
-from models import PolicyModel, RewriteModel
+from models import GenerationModel, RewriteModel
 from reward_models import RewardModel
 from state import Rollout
 
@@ -61,7 +61,7 @@ class BatchStartMarker:
 
 
 async def policy_worker(
-    policy_model: PolicyModel,
+    policy_model: GenerationModel,
     batch_size: int,
     in_queue: asyncio.Queue[PromptInput],
     out_queue: asyncio.Queue[PromptOutput],
@@ -458,7 +458,7 @@ def organize_rewrites(
 # %%
 async def evaluate_baselines(
     user_prompts: list[str],
-    policy_model: PolicyModel,
+    policy_model: GenerationModel,
     reward_model: RewardModel,
     n_rollouts: int,
     save_dir: Path | None = None,
