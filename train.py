@@ -164,7 +164,7 @@ async def main():
             await runner.train(
                 n_pop_target=[16, 8, 8],
                 train_batch_size=[4, 8, 8],
-                judge_filter_thresholds=[(-5, 0.8), (-3, 0.7), (-1, 0.6)],
+                judge_filter_thresholds=[(0.3, 0.7), (0.4, 0.6), (0.5, 0.5)],
                 validate=validate,
             )
         except Exception as e:

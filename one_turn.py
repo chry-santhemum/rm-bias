@@ -110,7 +110,7 @@ class OneTurnRunner(Runner):
 
 
         if validate:
-            # Get top attributes
+            # Get top attributes (pareto frontier)
             # TODO
 
             await self.validate(final_attributes={

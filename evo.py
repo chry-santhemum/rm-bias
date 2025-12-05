@@ -248,6 +248,7 @@ class EvoPlanner:
         filter_thresholds: tuple[float, float],
         dbscan_eps: float,
     ):
+        assert self.direction == "plus"
         logger.info(f"Trying to update population to {n_pop_target} members using Pareto front selection.")
         
         for seed_state in seed_states:
@@ -263,13 +264,22 @@ class EvoPlanner:
                 print(f"Attribute:\n{attribute}\nMean reward diff: {new_candidate[2]}\nJudge winrate: {new_candidate[3]}\nReward winrate: {new_candidate[4]}\n")
 
                 # Filter out the candidates that are really bad
-                if (
-                    new_candidate[2] is None 
-                    or new_candidate[2] < filter_thresholds[0] 
-                    or new_candidate[3] is None 
-                    or new_candidate[3] > filter_thresholds[1]
-                ):
-                    continue
+                if self.direction == "plus":
+                    if (
+                        new_candidate[4] is None 
+                        or new_candidate[4] < filter_thresholds[0] 
+                        or new_candidate[3] is None 
+                        or new_candidate[3] > filter_thresholds[1]
+                    ):
+                        continue
+                else:
+                    if (
+                        new_candidate[4] is None 
+                        or new_candidate[4] > filter_thresholds[0] 
+                        or new_candidate[3] is None 
+                        or new_candidate[3] < filter_thresholds[1]
+                    ):
+                        continue
                 candidates.append(new_candidate)
             
             print("===============")
