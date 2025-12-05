@@ -5,7 +5,6 @@ from dataclasses import dataclass, field, asdict
 import numpy as np
 
 
-
 @dataclass(frozen=True)
 class Cluster:
     summary: str
@@ -37,6 +36,7 @@ class Rollout:
 class AttributeStats:
     attribute: str
     rollouts: dict[str, list[Rollout|None]] = field(default_factory=dict)
+    judge_scores: dict[str, list[float|None]] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -66,20 +66,41 @@ class AttributeStats:
             all_results[user_prompt] = [asdict(r) if r is not None else None for r in rollouts]
         return all_results
 
-    def mean_reward_diff(self, baselines: dict[str, list[Rollout]]) -> float | None:
+    def mean_reward_diff(self, baselines: dict[str, list[Rollout|None]]) -> float | None:
         mean_rewards = self.mean_rewards
         if len(mean_rewards) == 0:
             return None
 
         baseline_scores = []
         for user_prompt in self.rollouts.keys():
-            baseline_scores.extend([r.score for r in baselines[user_prompt]])
+            baseline_scores.extend([r.score for r in baselines[user_prompt] if r is not None])
         if len(baseline_scores) == 0:
             return None
         return (
             np.mean(list(mean_rewards.values())).item()
             - np.mean(baseline_scores).item()
         )
+    
+    def reward_winrate(self, baselines: dict[str, list[Rollout|None]]) -> float|None:
+        all_diffs = []
+        for user_prompt, rollouts in self.rollouts.items():
+            baseline_rollouts = baselines[user_prompt]
+            for rewrite_rollout, baseline_rollout in zip(rollouts, baseline_rollouts):
+                if rewrite_rollout is None or baseline_rollout is None:
+                    continue
+                all_diffs.append(rewrite_rollout.score - baseline_rollout.score)
+        if len(all_diffs) == 0:
+            return None
+        return sum(1 for d in all_diffs if d > 0) / len(all_diffs)
+    
+    def judge_winrate(self) -> float|None:
+        all_winrates = []
+        for user_prompt, judge_scores in self.judge_scores.items():
+            winrates_clean = [wr for wr in judge_scores if wr is not None]
+            all_winrates.extend(winrates_clean)
+        if len(all_winrates) == 0:
+            return None
+        return np.mean(all_winrates).item()
 
     @cached_property
     def bootstrap_CI(self, confidence: float = 0.95) -> dict[str, float]: ...

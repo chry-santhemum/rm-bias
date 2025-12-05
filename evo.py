@@ -17,10 +17,10 @@ import json
 import dotenv
 import random
 import textwrap
-import asyncio
 from dataclasses import asdict
 from typing import Literal
 from loguru import logger
+import numpy as np
 
 from caller import ChatHistory
 from state import SeedState, AttributeStats, Rollout
@@ -61,7 +61,7 @@ class EvoPlanner:
 
     def _get_past_data_str(
         self,
-        baselines: dict[str, list[Rollout]],
+        baselines: dict[str, list[Rollout|None]],
         attribute_stats: AttributeStats,
         n_data_points: int,
     ) -> str:
@@ -77,7 +77,8 @@ class EvoPlanner:
                     continue
                 baseline_rollout = baseline_rollouts[i]
                 if (
-                    baseline_rollout.score is None 
+                    baseline_rollout is None
+                    or baseline_rollout.score is None 
                     or rewritten_rollout is None
                     or rewritten_rollout.score is None
                 ):
@@ -125,7 +126,7 @@ class EvoPlanner:
                     cluster_summary=seed_state.cluster.summary,
                     original_attribute=attribute,
                     data_points=self._get_past_data_str(
-                        baselines=baselines,
+                        baselines=baselines,  # type: ignore
                         attribute_stats=seed_state.history[time_step][attribute],
                         n_data_points=n_data_points,
                     ),
@@ -192,10 +193,135 @@ class EvoPlanner:
                 )
 
             logger.info(f"Seed {seed_state.index} mutated plus original plans: {len(seed_state.history[-1])}")
+    
+    @staticmethod
+    def _dominates(p1: tuple, p2: tuple) -> bool:
+        """Returns True if p1 dominates p2."""
+        r1_a, r2_a = p1[2], p1[3]
+        r1_b, r2_b = p2[2], p2[3]
+        return (r1_a >= r1_b and r2_a <= r2_b) and (r1_a > r1_b or r2_a < r2_b)
 
+    @staticmethod
+    def _get_pareto_fronts(candidates: list[tuple]) -> list[list[tuple]]:
+        """Sorts candidates into Pareto fronts."""
+        n = len(candidates)
+        domination_counts = [0] * n  # number of candidates that dominates each candidate
+        dominated_sets = [[] for _ in range(n)]  # candiates that each candidate dominates
+        
+        # Calculate dominance
+        for i in range(n):
+            for j in range(n):
+                if i == j:
+                    continue
+                if EvoPlanner._dominates(candidates[i], candidates[j]):
+                    dominated_sets[i].append(j)
+                elif EvoPlanner._dominates(candidates[j], candidates[i]):
+                    domination_counts[i] += 1
+
+        fronts = []
+        current_front = [i for i, count in enumerate(domination_counts) if count == 0]
+        
+        rank = 0
+        while current_front:
+            fronts.append([candidates[i] for i in current_front])
+            next_front = []
+            for i in current_front:
+                for j in dominated_sets[i]:
+                    domination_counts[j] -= 1
+                    if domination_counts[j] == 0:
+                        next_front.append(j)
+            rank += 1
+            current_front = next_front
+            
+        return fronts
+
+    @staticmethod
+    def _dist_to_perfect_point(candidate: tuple) -> float:
+        r1, r2 = candidate[4], candidate[3]
+        return np.sqrt((1.0 - r1)**2 + (r2 - 0.0)**2)
+
+    def update_pop_pareto(
+        self,
+        baselines: dict[str, list[Rollout|None]],
+        seed_states: list[SeedState[dict[str, int]]],
+        n_pop_target: int,
+        dbscan_eps: float,
+    ):
+        logger.info(f"Trying to update population to {n_pop_target} members using Pareto front selection.")
+        
+        for seed_state in seed_states:
+            candidates = []
+            for attribute, stats in seed_state.history[-1].items():
+                new_candidate = (
+                    attribute, 
+                    stats.meta["time_step"], 
+                    stats.mean_reward_diff(baselines),
+                    stats.judge_winrate(),
+                    stats.reward_winrate(baselines),
+                )
+                candidates.append(new_candidate)
+                print(f"Attribute:\n{attribute}\nMean reward diff: {new_candidate[2]}\nJudge winrate: {new_candidate[3]}\nReward winrate: {new_candidate[4]}\n")
+
+            # Sort into Pareto Fronts
+            fronts = EvoPlanner._get_pareto_fronts(candidates)
+            
+            final_selection = []
+            for front_idx, front in enumerate(fronts):
+                slots_remaining = n_pop_target - len(final_selection)
+                if slots_remaining <= 0:
+                    break
+                
+                # Current front fits, take it all
+                if len(front) <= slots_remaining:
+                    final_selection.extend(front)
+                    logger.info(f"Front {front_idx} with {len(front)} members fits into the {slots_remaining} remaining slots.")
+                    continue
+
+                # Current front is too large for remaining slots
+                logger.info(f"Front overflow. Clustering {len(front)} candidates for {slots_remaining} slots.")
+                _, indices = self.cluster_model.cluster_dbscan(
+                    [cand[0] for cand in front], dbscan_eps
+                )
+                
+                cluster_representatives = []
+                outliers = []
+                for label, member_indices in indices.items():
+                    members = [front[i] for i in member_indices]
+                    if label == -1:
+                        outliers.extend(members)
+                    else:
+                        best_in_niche = min(members, key=EvoPlanner._dist_to_perfect_point)
+                        cluster_representatives.append(best_in_niche)
+
+                high_value_candidates = cluster_representatives + outliers
+                high_value_candidates.sort(key=EvoPlanner._dist_to_perfect_point)
+                
+                # Fill the remaining slots with the winners
+                candidates_to_add = high_value_candidates[:slots_remaining]
+                final_selection.extend(candidates_to_add)
+                
+                # In case clustering was too aggressive
+                if len(final_selection) < n_pop_target:
+                    remaining_needed = n_pop_target - len(final_selection)
+
+                    selected_ids = {id(x) for x in final_selection} # Using object id for reliable uniqueness
+                    leftovers = [x for x in front if id(x) not in selected_ids]
+                    leftovers.sort(key=EvoPlanner._dist_to_perfect_point)
+                    final_selection.extend(leftovers[:remaining_needed])
+
+            # Update state
+            seed_state.state = {
+                attribute: time_step 
+                for attribute, time_step, _, _, _ in final_selection
+            }
+
+            logger.info(
+                f"Updated Seed {seed_state.index} population to {len(seed_state.state)} members."
+            )
+            
     def update_pop(
         self,
-        baselines: dict[str, list[Rollout]],
+        baselines: dict[str, list[Rollout|None]],
         seed_states: list[SeedState[dict[str, int]]],
         n_pop_target: int,
         dbscan_eps: float,
@@ -204,13 +330,11 @@ class EvoPlanner:
         for seed_state in seed_states:
             candidates = []
             for attribute, stats in seed_state.history[-1].items():
-                candidates.append(
-                    (
-                        attribute,
-                        stats.meta["time_step"],
-                        stats.mean_reward_diff(baselines),
-                    )
-                )
+                candidates.append((
+                    attribute,
+                    stats.meta["time_step"],
+                    stats.mean_reward_diff(baselines),
+                ))
 
             _, indices = self.cluster_model.cluster_dbscan(
                 [cand[0] for cand in candidates], dbscan_eps
@@ -305,7 +429,7 @@ class EvoRunner(Runner):
                 m_var=self.m_var,
             )
 
-        evaluate_results = dict()
+        evaluate_results = []
         
         for seed_state_idx, seed_state in enumerate(self.seed_states):
             async with self.bias_evaluator as evaluator:
@@ -325,11 +449,22 @@ class EvoRunner(Runner):
                     baselines=self.baselines,
                     n_rollouts=self.n_rewrite_rollouts,
                 )
-            evaluate_results[seed_state_idx] = stats
+            evaluate_results.append(stats)
 
-        for seed_state_idx, stats in evaluate_results.items():
+        for seed_state_idx, stats in enumerate(evaluate_results):
             for attribute, rollouts in stats.items():
                 self.seed_states[seed_state_idx].history[-1][attribute].rollouts = rollouts
+        
+        step_judge_results = await self.judge_model.judge_validation_results(
+            validation_results=evaluate_results,
+            val_baselines=self.baselines,  # type: ignore
+            first_n_rollouts=2,
+            first_n_user_prompts=8,
+        )
+
+        for seed_state_idx, seed_judge_results in step_judge_results.items():
+            for attribute, judge_result in seed_judge_results.items():
+                self.seed_states[seed_state_idx].history[-1][attribute].judge_scores = judge_result
 
         final_attributes = self.save_attribute_stats(
             direction=self.planner.direction,
@@ -342,7 +477,7 @@ class EvoRunner(Runner):
         )
 
         self.planner.update_pop(
-            baselines=self.baselines,
+            baselines=self.baselines,  # type: ignore
             seed_states=self.seed_states,
             n_pop_target=n_pop_target,
             dbscan_eps=self.dbscan_eps,
@@ -384,7 +519,7 @@ class EvoRunner(Runner):
                         )
 
                 self.planner.update_pop(
-                    baselines=self.baselines,
+                    baselines=self.baselines,  # type: ignore
                     seed_states=self.seed_states,
                     n_pop_target=n_pop_target[time_step],
                     dbscan_eps=self.dbscan_eps,

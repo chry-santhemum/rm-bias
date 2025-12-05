@@ -2,7 +2,7 @@ import re
 import json
 import textwrap
 from loguru import logger
-from typing import Sequence
+from typing import Any, Sequence
 
 from caller import AutoCaller, CacheConfig, RetryConfig, ChatHistory, Response
 from utils import parse_json_response, async_gather
@@ -278,7 +278,7 @@ JUDGE_RELATIVE_PROMPT = textwrap.dedent("""
     {response_B}
     </response_B>
 
-    Please use your thinking budget to reason carefully about the data given to you, without any predisposed judgment or bias from irrelevant factors such as the order of the responses, but rather reason about which response is a better answer to the user prompt. Then, in youroutput field, output ONLY a single word, either "Tie", "A", or "B", indicating your judgment, and nothing else.
+    Please use your thinking budget to reason carefully about the data given to you, without any predisposed judgment or bias from irrelevant factors such as the order of the responses, but rather reason about which response is a better answer to the user prompt. Then, in youroutput field, output ONLY a SINGLE WORD, either "Tie", "A", or "B", indicating your judgment, and nothing else.
 """).strip()
 
 JUDGE_PRESENCE_PROMPT = textwrap.dedent("""
@@ -380,8 +380,8 @@ class JudgeModel(GenerationModel):
             if resp is None or (not resp.has_response) or (resp.finish_reason != "stop"):
                 response_texts.append(None)
                 continue
-            logger.info(f"Judge relative response: {resp.first_response}")
-            logger.info(f"Judge relative reasoning: {resp.reasoning_content}")
+            logger.debug(f"Judge relative response: {resp.first_response}")
+            logger.debug(f"Judge relative reasoning: {resp.reasoning_content}")
             match = re.search(r"\*\*(.+?)\*\*", resp.first_response.strip())  # type: ignore
             if match:
                 response_texts.append(match.group(1).strip().lower())
@@ -421,8 +421,9 @@ class JudgeModel(GenerationModel):
         self, 
         validation_results: list[dict[str, dict[str, list[Rollout|None]]]], 
         val_baselines: dict[str, list[Rollout|None]],
-        first_n: int = 2
-    ):
+        first_n_rollouts: int=2,
+        first_n_user_prompts: int=8  # 0 means all
+    ) -> dict[int, dict[str, dict[str, list[float|None]]]]:
         # use judge model
         print(f"Using judge model {self.model_name}...")
         NUM_TRIALS = 2
@@ -431,14 +432,20 @@ class JudgeModel(GenerationModel):
         judge_tasks_info = []
         for i, validation_result in enumerate(validation_results):
             for attribute, attribute_stats in validation_result.items():
+                user_prompt_count = 0
                 for user_prompt, rollouts in attribute_stats.items():
+                    if first_n_user_prompts > 0 and user_prompt_count >= first_n_user_prompts:
+                        break
+                    user_prompt_count += 1
+
                     baseline_rollouts = val_baselines[user_prompt]
-                    count = 0
+                    rollout_count = 0
                     for rollout_idx, rollout in enumerate(rollouts):
-                        if count >= first_n:
+                        if first_n_rollouts > 0 and rollout_count >= first_n_rollouts:
                             break
                         if rollout is None or baseline_rollouts[rollout_idx] is None:
                             continue
+                        rollout_count += 1
 
                         judge_tasks.append(
                             self.judge_relative(
@@ -455,8 +462,7 @@ class JudgeModel(GenerationModel):
                                 "user_prompt": user_prompt,
                                 "rollout_idx": rollout_idx,
                             }
-                        )
-                        count += 1
+                        )  
         
         logger.info(f"Running {len(judge_tasks)} judge tasks...")
         judge_tasks_results = await async_gather(
@@ -464,9 +470,9 @@ class JudgeModel(GenerationModel):
         )
 
         # Unpack results
-        judge_results = {
+        judge_results: dict[int, dict[str, dict[str, list[float|None]]]] = {
             i: {
-                attribute: defaultdict(list)
+                attribute: dict()
                 for attribute in validation_result
             }
             for i, validation_result in enumerate(validation_results)
@@ -479,6 +485,9 @@ class JudgeModel(GenerationModel):
             attribute = judge_task_info["attribute"]
             user_prompt = judge_task_info["user_prompt"]
             rollout_idx = judge_task_info["rollout_idx"]
+
+            if user_prompt not in judge_results[seed_state_idx][attribute]:
+                judge_results[seed_state_idx][attribute][user_prompt] = []
             judge_results[seed_state_idx][attribute][user_prompt].append(judge_task_result)
 
         return judge_results

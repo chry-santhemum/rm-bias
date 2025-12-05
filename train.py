@@ -51,11 +51,11 @@ from bias_evaluator import BiasEvaluator
 from planner import PairPlanner, ListPlanner
 from one_turn import OneTurnRunner
 from evo import EvoRunner, EvoPlanner
+from plotting import plot_validation_data
 
 if args.dataset == "synthetic":
     ds_path = "user_prompts/synthetic/n_sub_0"
-    # topic_ids = [1, 3, 4, 6, 8, 9, 12, 14, 16]
-    topic_ids = [4]
+    topic_ids = [1, 3, 4, 6, 8, 9]
 elif args.dataset == "chatgpt":
     ds_path = "user_prompts/chatgpt/n_sub_2"
 elif args.dataset == "clio":
@@ -86,17 +86,11 @@ async def main():
     )
 
     bias_evaluator = BiasEvaluator(
-        # rewrite_model=RewriteModel(
-        #     model_name="openai/gpt-5-nano", 
-        #     max_par=512, 
-        #     max_tokens=4096,
-        #     enable_cache=False,
-        # ),
         rewrite_model=RewriteModel(
-            model_name="allenai/olmo-3-7b-think",
+            model_name="openai/gpt-5-nano", 
             max_par=512,
-            max_tokens=8192,
-            reasoning=6000,
+            max_tokens=4096,
+            reasoning="low",
             enable_cache=False,
         ),
         reward_model=LocalRewardModel(
@@ -105,7 +99,7 @@ async def main():
             batch_size_per_device=32,
             attn_implementation="sdpa",
         ),
-        n_rewrite_workers=128,
+        n_rewrite_workers=64,
     )
 
     initial_seed_states = load_initial_seed_states(
@@ -229,6 +223,10 @@ async def main():
         except Exception as e:
             logger.exception(f"Training failed: {e}")
             raise
+    
+    run_path = Path(f"data/{args.runner_type}/{run_name}")
+    write_path = Path(f"plots/{run_name}")
+    plot_validation_data(run_path=run_path, write_path=write_path)
 
 
 if __name__ == "__main__":

@@ -196,11 +196,3 @@ def plot_validation_data(run_path: Path|str, write_path: Path|str):
         # fig.show()
         fig.write_image(write_path / f"seed_{seed_index}.pdf")
         print(f"Saved plot for seed {seed_index}")
-
-
-# %%
-if __name__ == "__main__":
-    run_path = Path("data/evo/20251205-053029-list-synthetic-plus")
-    write_path = Path(f"plots/{run_path.name}")
-
-    plot_validation_data(run_path=run_path, write_path=write_path)
