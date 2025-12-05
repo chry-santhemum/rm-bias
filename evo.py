@@ -49,11 +49,15 @@ class EvoPlanner:
         self.hypothesis_planner = hypothesis_planner
         self.cluster_model = cluster_model
 
-    def initial_plan(
+    async def initial_plan(
         self,
         runner: Runner,
     ):
-        return self.hypothesis_planner.plan(runner=runner, direction=self.direction, cluster_model=self.cluster_model)
+        return await self.hypothesis_planner.plan(
+            runner=runner, 
+            direction=self.direction, 
+            cluster_model=self.cluster_model
+        )
 
     def _get_past_data_str(
         self,
@@ -104,7 +108,7 @@ class EvoPlanner:
         else:
             return json.dumps(all_past_data[: n_data_points], indent=2)
 
-    def iterate_plan(
+    async def iterate_plan(
         self,
         baselines: dict[str, list[Rollout]],
         seed_states: list[SeedState[dict[str, int]]],
@@ -141,7 +145,7 @@ class EvoPlanner:
 
             seed_state.history.append({})
 
-        planner_responses = asyncio.run(self.hypothesis_planner.sample(to_send_messages, desc="Mutating", enable_cache=False))
+        planner_responses = await self.hypothesis_planner.sample(to_send_messages, desc="Mutating", enable_cache=False)
 
         # parse responses
         for i, resp in enumerate(planner_responses):
@@ -293,9 +297,9 @@ class EvoRunner(Runner):
     async def train_step(self, n_pop_target: int, train_batch_size: int):
         print(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
         if self.step_count == 0:
-            self.planner.initial_plan(runner=self)
+            await self.planner.initial_plan(runner=self)
         else:
-            self.planner.iterate_plan(
+            await self.planner.iterate_plan(
                 baselines=self.baselines,
                 seed_states=self.seed_states,
                 m_var=self.m_var,
@@ -349,7 +353,7 @@ class EvoRunner(Runner):
 
         return final_attributes
 
-    def train(self, n_pop_target: list[int], train_batch_size: list[int], validate: bool = True, start_from: int|None=None):
+    async def train(self, n_pop_target: list[int], train_batch_size: list[int], validate: bool = True, start_from: int|None=None):
         t_steps = len(train_batch_size)
         assert len(n_pop_target) == t_steps
 
@@ -394,15 +398,13 @@ class EvoRunner(Runner):
                 )
 
             else:
-                final_attributes = asyncio.run(
-                    self.train_step(
-                        n_pop_target=n_pop_target[time_step],
-                        train_batch_size=train_batch_size[time_step],
-                    )
+                final_attributes = await self.train_step(
+                    n_pop_target=n_pop_target[time_step],
+                    train_batch_size=train_batch_size[time_step],
                 )
 
             if validate and time_step == t_steps - 1:
-                asyncio.run(self.validate(final_attributes=final_attributes))
+                await self.validate(final_attributes=final_attributes)
 
 
 # %%

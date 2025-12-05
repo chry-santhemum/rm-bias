@@ -59,7 +59,7 @@ class OneTurnRunner(Runner):
         return "one_turn"
 
     async def train(self, validate: bool = True):
-        self.planner.plan(
+        await self.planner.plan(
             runner=self,
             direction=self.direction,
             cluster_model=self.cluster_model,

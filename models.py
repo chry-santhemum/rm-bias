@@ -53,12 +53,13 @@ class GenerationModel:
         desc: str | None = None,
         **kwargs,
     ) -> list[Response|None]:
+        """kwargs passed here will supersede the init kwargs."""
         responses = await self.caller.call(
             messages=chat_histories,
             model=self.model_name,
             max_parallel=self.max_par,
             desc=desc,
-            **{**self.kwargs, **kwargs},
+            **self.kwargs, **kwargs,
         )
         return responses
 

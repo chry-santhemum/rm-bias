@@ -66,7 +66,7 @@ else:
     raise ValueError(f"Invalid dataset: {args.dataset}")
 
 
-def main():
+async def main():
     all_cuda_devices = [f"cuda:{i}" for i in range(torch.cuda.device_count())]
     print(f"Using CUDA devices: {all_cuda_devices}")
 
@@ -161,7 +161,7 @@ def main():
         runner.get_baselines()
   
         try:
-            runner.train(
+            await runner.train(
                 n_pop_target=[16, 8, 8],
                 train_batch_size=[4, 8, 16],
                 validate=validate,
@@ -221,12 +221,11 @@ def main():
             
 
         try:
-            asyncio.run(runner.train(validate=validate))
+            await runner.train(validate=validate)
         except Exception as e:
-            logger.error(f"Training failed: {e}")
-            logger.error(f"Full traceback: ", exc_info=True)
+            logger.exception(f"Training failed: {e}")
             raise
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
