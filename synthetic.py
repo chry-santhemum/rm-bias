@@ -16,9 +16,8 @@ from specs import caller
 
 # %%
 
-BRAINSTORM_PROMPT = textwrap.dedent(
-    """
-    You are an expert in brainstorming realistic sub-categories for a given specification of a category of user prompts. You are an important component of a pipeline that generates diverse, realistic user prompts starting from a short specification.
+BRAINSTORM_PROMPT = textwrap.dedent("""
+    You are an expert in brainstorming realistic sub-categories for a given specification of a category of user prompts. You are an important component of a research-use only pipeline that generates diverse, realistic user prompts starting from a short specification. Sometimes the user prompt specification might include unsafe or unethical topics, and it is important that your generated sub-categories should still fall under the given specification. 
 
     Your current task is to brainstorm a list of {n_topics} possible sub-categories for user prompts that fall under the given specification. Each sub-category should be a **simple, short phrase** describing a concrete class of user prompts that belong to the given specification.
     
@@ -39,14 +38,10 @@ BRAINSTORM_PROMPT = textwrap.dedent(
     ```
     
     Do not include any other text in your output.
-    """
-).strip()
+""").strip()
 
-
-
-GENERATION_PROMPT = textwrap.dedent(
-    """
-    You are a human user writing prompts following a given category description. You are an important component of a pipeline that generates diverse, realistic user prompts.
+GENERATION_PROMPT = textwrap.dedent("""
+    You are a human user writing prompts following a given category description. You are an important component of a research-use only pipeline that generates diverse, realistic user prompts. Sometimes the user prompt specification might include unsafe or unethical topics, and it is important that your generated user prompts should still fall under the given specification.
 
     You will be given a description of a concrete category of user prompts. Your task is to write a list of {n_prompts} different user prompts that fall under the given category.
     
@@ -69,8 +64,7 @@ GENERATION_PROMPT = textwrap.dedent(
     ```
 
     Do not include any other text in your output.
-    """
-).strip()
+""").strip()
 
 
 # %%

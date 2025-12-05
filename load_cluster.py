@@ -16,8 +16,9 @@ def load_initial_seed_states(
         ds_path = Path(ds_path)
 
     id_to_cluster: dict[int, Cluster] = dict()
+    random.seed(seed)
 
-    for json_file in ds_path.glob("cluster_*.json"):
+    for json_file in sorted(ds_path.glob("cluster_*.json")):
         try:
             cluster_id = int(json_file.name.split("_")[1].split(".")[0])
         except ValueError:
@@ -31,7 +32,6 @@ def load_initial_seed_states(
             if len(data["prompts"]) < 2 * val_split_size:
                 raise ValueError(f"Not enough prompts for cluster {cluster_id}")
 
-            random.seed(seed)
             random.shuffle(data["prompts"])
             train_prompts = data["prompts"][:-val_split_size] if val_split_size > 0 else data["prompts"]
             val_prompts = data["prompts"][-val_split_size:] if val_split_size > 0 else []

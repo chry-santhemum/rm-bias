@@ -123,8 +123,7 @@ HANDPICK_CATEGORIES = [
 
 caller = AutoCaller(cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG, dotenv_path=".env")
 
-SUBTOPICS_PROMPT = textwrap.dedent(
-    """
+SUBTOPICS_PROMPT = textwrap.dedent("""
     Your task is to brainstorm {n_sub} specific sub-categories of the given user prompt category. Please think about what typical user prompts under the given category would look like, and output the {n_sub} most common sub-categories. They should fall under the given category, be diverse from each other, but also not too narrow. They should not be overly difficult for a simple chatbot to answer, and should not require responses that are too long or complex.
 
     Here is the given user prompt category:
@@ -144,8 +143,7 @@ SUBTOPICS_PROMPT = textwrap.dedent(
     ```
 
     Each sub-category topic description should be a **simple, short phrase**. Do not include any other text in your output.
-    """
-).strip()
+""").strip()
 
 
 def make_sub_topics(topics: list[str], n_sub: int = 0) -> dict[str, list[str]]:
@@ -200,9 +198,10 @@ def make_chatgpt_specs(ds_name: str|None=None, n_sub: int = 0) -> list[str]:
 
     specs.extend(intent_cross_topic())
 
+    specs.sort()
     Path(f"user_prompts/chatgpt/{ds_name}").mkdir(parents=True, exist_ok=True)
     with open(f"user_prompts/chatgpt/{ds_name}/specs.json", "w") as f:
-        json.dump(specs, f, indent=4, sort_keys=True)
+        json.dump(specs, f, indent=4)
 
     return specs
 
@@ -220,9 +219,10 @@ def make_clio_specs(ds_name: str|None=None, n_sub: int=0) -> list[str]:
         for sub_topic in sub_topics:
             specs.append(f"{spec}: {sub_topic}")
 
+    specs.sort()
     Path(f"user_prompts/clio/{ds_name}").mkdir(parents=True, exist_ok=True)
     with open(f"user_prompts/clio/{ds_name}/specs.json", "w") as f:
-        json.dump(specs, f, indent=4, sort_keys=True)
+        json.dump(specs, f, indent=4)
 
     return specs
 
@@ -240,9 +240,10 @@ def make_handpick_specs(ds_name: str|None=None, n_sub: int=0) -> list[str]:
         for sub_topic in sub_topics:
             specs.append(f"{spec}: {sub_topic}")
 
+    specs.sort()
     Path(f"user_prompts/handpick/{ds_name}").mkdir(parents=True, exist_ok=True)
     with open(f"user_prompts/handpick/{ds_name}/specs.json", "w") as f:
-        json.dump(specs, f, indent=4, sort_keys=True)
+        json.dump(specs, f, indent=4)
 
     return specs
 
