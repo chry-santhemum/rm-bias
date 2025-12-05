@@ -55,7 +55,7 @@ from plotting import plot_validation_data
 
 if args.dataset == "synthetic":
     ds_path = "user_prompts/synthetic/n_sub_0"
-    topic_ids = [1, 3, 4, 6, 8, 9]
+    topic_ids = [4]
 elif args.dataset == "chatgpt":
     ds_path = "user_prompts/chatgpt/n_sub_2"
 elif args.dataset == "clio":
@@ -160,8 +160,10 @@ async def main():
   
         try:
             await runner.train(
-                n_pop_target=[16, 8, 8],
-                train_batch_size=[4, 8, 16],
+                # n_pop_target=[16, 8, 8],
+                # train_batch_size=[4, 8, 16],
+                n_pop_target=[8, 8],
+                train_batch_size=[4, 8],
                 validate=validate,
             )
         except Exception as e:

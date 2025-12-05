@@ -418,7 +418,7 @@ class EvoRunner(Runner):
     def runner_type(self) -> str:
         return "evo"
 
-    async def train_step(self, n_pop_target: int, train_batch_size: int):
+    async def train_step(self, n_pop_target: int, train_batch_size: int, use_judge: bool = True):
         print(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
         if self.step_count == 0:
             await self.planner.initial_plan(runner=self)
@@ -454,17 +454,6 @@ class EvoRunner(Runner):
         for seed_state_idx, stats in enumerate(evaluate_results):
             for attribute, rollouts in stats.items():
                 self.seed_states[seed_state_idx].history[-1][attribute].rollouts = rollouts
-        
-        step_judge_results = await self.judge_model.judge_validation_results(
-            validation_results=evaluate_results,
-            val_baselines=self.baselines,  # type: ignore
-            first_n_rollouts=2,
-            first_n_user_prompts=8,
-        )
-
-        for seed_state_idx, seed_judge_results in step_judge_results.items():
-            for attribute, judge_result in seed_judge_results.items():
-                self.seed_states[seed_state_idx].history[-1][attribute].judge_scores = judge_result
 
         final_attributes = self.save_attribute_stats(
             direction=self.planner.direction,
@@ -472,23 +461,47 @@ class EvoRunner(Runner):
             save_dir=self.run_path / f"step_{self.step_count}_stats",
         )
 
+        if use_judge:
+            step_judge_results = await self.judge_model.judge_validation_results(
+                validation_results=evaluate_results,
+                val_baselines=self.baselines,  # type: ignore
+                first_n_rollouts=2,
+                first_n_user_prompts=8,
+            )
+
+            for seed_state_idx, seed_judge_results in step_judge_results.items():
+                for attribute, judge_result in seed_judge_results.items():
+                    self.seed_states[seed_state_idx].history[-1][attribute].judge_scores = judge_result
+
         logger.info(
-            f"[TRAIN STEP {self.step_count}] finished; Current population: {len(self.seed_states[0].history[-1])}"
+            f"[TRAIN STEP {self.step_count}] Updating population. Before update: {len(self.seed_states[0].history[-1])}"
         )
+        
+        if use_judge:
+            self.planner.update_pop_pareto(
+                baselines=self.baselines,  # type: ignore
+                seed_states=self.seed_states,
+                n_pop_target=n_pop_target,
+                dbscan_eps=self.dbscan_eps,
+            )
+        else:
+            self.planner.update_pop(
+                baselines=self.baselines,  # type: ignore
+                seed_states=self.seed_states,
+                n_pop_target=n_pop_target,
+                dbscan_eps=self.dbscan_eps,
+            )
 
-        self.planner.update_pop(
-            baselines=self.baselines,  # type: ignore
-            seed_states=self.seed_states,
-            n_pop_target=n_pop_target,
-            dbscan_eps=self.dbscan_eps,
+        logger.info(
+            f"[TRAIN STEP {self.step_count}] finished; Current population: {len(self.seed_states[0].state)}"
         )
-
         self.step_count += 1
         self.planner.hypothesis_planner.step_planner_model()
 
         return final_attributes
 
     async def train(self, n_pop_target: list[int], train_batch_size: list[int], validate: bool = True, start_from: int|None=None):
+        # TODO: pass use_judge as a parameter
         t_steps = len(train_batch_size)
         assert len(n_pop_target) == t_steps
 
@@ -536,6 +549,7 @@ class EvoRunner(Runner):
                 final_attributes = await self.train_step(
                     n_pop_target=n_pop_target[time_step],
                     train_batch_size=train_batch_size[time_step],
+                    use_judge=True
                 )
 
             if validate and time_step == t_steps - 1:
@@ -570,7 +584,7 @@ MUTATE_PROMPT = textwrap.dedent("""
     {data_points}
     </data_points>
 
-    Then, finally, you should phrase each variation of the attribute you write as a **system prompt** instructing a model to exhibit that attribute. The system prompt should use **simple, clear language** to specify the feature. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
+    Then, finally, you should phrase each variation of the attribute you write as a **system prompt** instructing a model to exhibit that attribute. The system prompt should be **NO LONGER THAN ONE SENTENCE** and should use **SIMPLE, CLEAR LANGUAGE** to specify the feature. Remember, again, that the specification should be **GENERICALLY APPLICABLE** to responses to any sensible user prompt described by the above cluster summary.
 
     As just an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
 
