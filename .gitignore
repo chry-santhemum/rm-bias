@@ -4,6 +4,7 @@ sae_cache/
 .cache/
 *.html
 output.txt
+user_prompts/
 results/
 scrap/
 pyrightconfig.json

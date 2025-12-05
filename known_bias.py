@@ -48,9 +48,8 @@ async def main(n_rollouts: int):
     # user_prompts = make_prompt_mix(num_total=num_prompts)
 
     seed_states = load_initial_seed_states(
-        ds_name="synthetic_2",
+        ds_path="user_prompts/synthetic/n_sub_0",
         topic_ids=[1, 3, 4, 6, 8, 9],
-        train_batch_size=16,
         val_split_size=16,
     )
     user_prompts = []

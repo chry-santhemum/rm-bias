@@ -148,10 +148,15 @@ async def main(
         if resp is None:
             continue
         user_prompts, _ = parse_json_response(resp, marker="python")
+
         if not isinstance(user_prompts, list):
             print(f"Error: user_prompts is not a list.\n{user_prompts}\nSkipping...")
             continue
-        user_prompts = [prompt.strip() for prompt in user_prompts]
+
+        try:
+            user_prompts = [prompt.strip() for prompt in user_prompts]
+        except Exception as e:
+            print(user_prompts)
         results[prompt_cluster_ids[i]]["prompts"].extend(user_prompts)
 
     # write results
@@ -176,6 +181,6 @@ if __name__ == "__main__":
         model="openai/gpt-5",
         n_topics=args.n_topics,
         n_prompts=args.n_prompts,
-        max_tokens=10000,
+        max_tokens=12000,
         reasoning="medium",
     ))

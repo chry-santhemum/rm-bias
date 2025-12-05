@@ -60,19 +60,18 @@ from evo import EvoRunner, EvoPlanner
 
 
 
-if args.dataset == "alpaca":
-    topic_ids = [0, 2, 4, 6, 9, 11, 15, 21, 34, 35, 83]
-elif args.dataset == "wildchat":
-    topic_ids = [4, 5, 6, 10, 14, 16, 17, 18, 19, 24, 26, 29, 32, 36]
-elif args.dataset == "synthetic_0":
-    topic_ids = [4, 19, 20, 28, 32, 38, 45, 48, 56, 64, 68]
-elif args.dataset == "synthetic_1":
-    # topic_ids = [0, 1, 3, 6, 7, 8, 9, 10, 11, 12, 14]
-    topic_ids = [3, 6, 7, 12, 14]
-    # topic_ids = [8, 9, 10, 11]
-elif args.dataset == "synthetic_2":
-    # topic_ids = [1, 3, 4, 6, 8, 9, 12, 14, 16]
-    topic_ids = [1]
+if args.dataset == "synthetic":
+    ds_path = "user_prompts/synthetic/n_sub_0"
+    topic_ids = [1, 3, 4, 6, 8, 9, 12, 14, 16]
+elif args.dataset == "chatgpt":
+    ds_path = "user_prompts/chatgpt/n_sub_2"
+elif args.dataset == "clio":
+    ds_path = "user_prompts/clio/n_sub_0"
+elif args.dataset == "handpick":
+    ds_path = "user_prompts/handpick/n_sub_0"
+else:
+    raise ValueError(f"Invalid dataset: {args.dataset}")
+
 
 def main():
     all_cuda_devices = [f"cuda:{i}" for i in range(torch.cuda.device_count())]
@@ -106,9 +105,8 @@ def main():
     )
 
     initial_seed_states = load_initial_seed_states(
-        ds_name=args.dataset,
+        ds_path=ds_path,
         topic_ids=topic_ids,
-        train_batch_size=args.train_batch_size,
         val_split_size=args.val_split_size,
     )
 
@@ -158,62 +156,17 @@ def main():
             run_name=run_name,
         )
 
-        # runner.get_baselines()
-
-        with open(
-            f"data/evo/{run_name}/train_baselines/sample_rollouts.json",
-            "r",
-        ) as f:
-            train_baselines = json.load(f)
-
-        runner.baselines = {}
-        for user, rollouts in train_baselines.items():
-            runner.baselines[user] = [
-                Rollout(response=rollout["response"], score=rollout["score"])
-                for rollout in rollouts
-            ]
-
-        with open(
-            f"data/evo/{run_name}/val_baselines/sample_rollouts.json", "r"
-        ) as f:
-            val_baselines = json.load(f)
-
-        runner.val_baselines = {}
-        for user, rollouts in val_baselines.items():
-            runner.val_baselines[user] = [
-                Rollout(response=rollout["response"], score=rollout["score"])
-                for rollout in rollouts
-            ]
-        
-        rewrite_rollouts = []
-        for idx in topic_ids:
-            with open(
-                f"data/evo/{run_name}/validate/seed_{idx}_validate/rewrite_rollouts.json", "r"
-            ) as f:
-                seed_rollouts_json = json.load(f)
-
-            seed_rollouts = defaultdict(dict)
-            for attribute, attribute_rollouts in seed_rollouts_json.items():
-                for user_prompt, rollouts in attribute_rollouts.items():
-                    seed_rollouts[attribute][user_prompt] = [
-                        Rollout(response=rollout["response"], score=rollout["score"])
-                        for rollout in rollouts
-                    ]
-
-            rewrite_rollouts.append(dict(seed_rollouts))
-
-        runner.judge(validation_results=rewrite_rollouts)
+        runner.get_baselines()
   
-        # try:
-        #     runner.train(
-        #         n_pop_target=[16, 8, 8],
-        #         train_batch_size=[4, 8, 16],
-        #         validate=validate,
-        #         start_from=3,
-        #     )
-        # except Exception as e:
-        #     logger.exception(f"Training failed: {e}")
-        #     raise
+        try:
+            runner.train(
+                n_pop_target=[16, 8, 8],
+                train_batch_size=[4, 8, 16],
+                validate=validate,
+            )
+        except Exception as e:
+            logger.exception(f"Training failed: {e}")
+            raise
 
 
     elif args.runner_type == "one_turn":
