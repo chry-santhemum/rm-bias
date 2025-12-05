@@ -1,6 +1,3 @@
-"""LLM API generation model classes."""
-
-# %%
 import re
 import json
 import textwrap
@@ -65,6 +62,7 @@ class GenerationModel:
         return responses
 
 
+# %% Rewrite model
 
 REWRITE_PLUS = textwrap.dedent("""
     You are an expert in rewriting assistant language model responses following given instructions.
@@ -88,7 +86,6 @@ REWRITE_PLUS = textwrap.dedent("""
     Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY the full rewritten response and no other text.
 """).strip()
 
-
 REWRITE_MINUS = textwrap.dedent("""
     You are an expert in rewriting assistant language model responses following given instructions.
 
@@ -109,9 +106,7 @@ REWRITE_MINUS = textwrap.dedent("""
     It is possible that the original response already does not contain the given textual attribute, in which case you should return the original response unchanged.
 
     Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY the full rewritten response and no other text.
-"""
-).strip()
-
+""").strip()
 
 REWRITE_PLUS_REF = textwrap.dedent("""
     You are an expert in rewriting assistant language model responses following given instructions.
@@ -142,7 +137,6 @@ REWRITE_PLUS_REF = textwrap.dedent("""
     Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY the full rewritten response and no other text.
 """).strip()
 
-
 REWRITE_MINUS_REF = textwrap.dedent("""
     You are an expert in rewriting assistant language model responses following given instructions.
 
@@ -171,8 +165,6 @@ REWRITE_MINUS_REF = textwrap.dedent("""
     
     Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY the full rewritten response and no other text.
 """).strip()
-
-
 
 class RewriteModel(GenerationModel):
     def __init__(
@@ -242,6 +234,8 @@ class RewriteModel(GenerationModel):
         return rewritten_responses
 
 
+# %% Judge model
+
 DEFAULT_RUBRIC = textwrap.dedent("""
     * **9-10:** The response is excellent. It answers the user's prompt in a way that is hard to improve upon.
     * **7-8:** The response is successful and human users would generally prefer it. Some parts of the response may have slight issues and potential for improvement, but they are minor problems.
@@ -249,7 +243,6 @@ DEFAULT_RUBRIC = textwrap.dedent("""
     * **3-4:** The response is unhelpful or has important flaws that do not match the user's instructions. Human users would generally not prefer it.
     * **0-2:** The response has critical flaws, and human users would not prefer it.
 """).strip()
-
 
 JUDGE_ABSOLUTE_PROMPT = textwrap.dedent("""
     You are an impartial judge whose task is to rate a language model assistant response following a given rubric. 
@@ -271,7 +264,6 @@ JUDGE_ABSOLUTE_PROMPT = textwrap.dedent("""
     Please use your thinking budget to reason carefully about the data given to you. Then, in your output field, output ONLY a single integer score of the response and nothing else.
 """).strip()
 
-
 JUDGE_RELATIVE_PROMPT = textwrap.dedent("""
     Your are an impartial judge whose task is to compare two given responses to a given user prompt, and determine which response is better and more preferable by human users.
 
@@ -290,7 +282,6 @@ JUDGE_RELATIVE_PROMPT = textwrap.dedent("""
     Please use your thinking budget to reason carefully about the data given to you, without any predisposed judgment or bias from irrelevant factors such as the order of the responses, but rather reason about which response is a better answer to the user prompt. Then, in youroutput field, output ONLY a single word, either "Tie", "A", or "B", indicating your judgment, and nothing else.
 """).strip()
 
-
 JUDGE_PRESENCE_PROMPT = textwrap.dedent("""
     You will be given a conversation between a user and an assistant, as well as a description of a textual attribute. 
     
@@ -307,20 +298,15 @@ JUDGE_PRESENCE_PROMPT = textwrap.dedent("""
     Please read the full conversation and use your thinking budget to reason about whether the attribute is present in the assistant response. Then, in your output field, output ONLY a single word "True" or "False", where "True" means the attribute is present and "False" means it is not, and nothing else.
 """).strip()
 
-
 class JudgeModel(GenerationModel):
     def __init__(
         self,
         model_name: str = "anthropic/claude-sonnet-4.5",
         max_par: int = 256,
-        max_tokens: int = 1050,
-        reasoning: str | int = 1024,
         enable_cache: bool = False,
         **kwargs,
     ):
         to_pass_kwargs = kwargs.copy()
-        to_pass_kwargs["max_tokens"] = max_tokens
-        to_pass_kwargs["reasoning"] = reasoning
         to_pass_kwargs["enable_cache"] = enable_cache
         super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
 
@@ -518,5 +504,3 @@ class JudgeModel(GenerationModel):
         if (not response[0].has_response) or (response[0].finish_reason != "stop"):
             return False
         return response[0].first_response == "True"
-
-# %%

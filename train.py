@@ -81,7 +81,11 @@ async def main():
         temperature=0.95,
     )
 
-    judge_model = JudgeModel(force_caller="openrouter")
+    judge_model = JudgeModel(
+        force_caller="openrouter",
+        max_tokens=1050,
+        reasoning=1024,
+    )
 
     bias_evaluator = BiasEvaluator(
         # rewrite_model=RewriteModel(
