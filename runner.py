@@ -3,7 +3,6 @@ import os
 import json
 import time
 import pickle
-import asyncio
 from loguru import logger
 from pathlib import Path
 from typing import Literal
@@ -64,17 +63,15 @@ class Runner(ABC):
             all_prompts.extend(seed_state.cluster.val_prompts)
         return all_prompts
 
-    def get_baselines(self):
+    async def get_baselines(self):
         # get baseline rollouts and rewards
         start_time = time.time()
-        self.baselines: dict[str, list[Rollout]] = asyncio.run(
-            evaluate_baselines(
-                user_prompts=self.all_train_prompts,
-                policy_model=self.policy_model,
-                reward_model=self.bias_evaluator.reward_model,
-                save_dir=self.run_path / "train_baselines",
-                n_rollouts=self.n_baseline_rollouts,
-            )
+        self.baselines: dict[str, list[Rollout]] = await evaluate_baselines(
+            user_prompts=self.all_train_prompts,
+            policy_model=self.policy_model,
+            reward_model=self.bias_evaluator.reward_model,
+            save_dir=self.run_path / "train_baselines",
+            n_rollouts=self.n_baseline_rollouts,
         )
         print(f"Baseline rollouts taken: {(time.time() - start_time):.2f} seconds")
         logger.info(
@@ -198,7 +195,7 @@ class Runner(ABC):
                 )
             validation_results.append(stats)
         
-        judge_results = self.judge_model.judge_validation_results(
+        judge_results = await self.judge_model.judge_validation_results(
             validation_results=validation_results,
             val_baselines=self.val_baselines,  # type: ignore
         )

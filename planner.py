@@ -11,7 +11,7 @@ from typing import Any, Literal, Optional
 from abc import ABC, abstractmethod
 
 from caller import AutoCaller, ChatHistory, Response
-from state import AttributeStats
+from state import AttributeStats, Cluster
 from api_models import CACHE_CONFIG, RETRY_CONFIG
 from runner import Runner
 from utils import parse_json_response, ClusterModel
@@ -44,6 +44,7 @@ class Planner(ABC):
         max_par: int = 64,
         random_seed: int = 0,
         alloy_type: Literal["round_robin", "random"] = "round_robin",
+        force_caller: str | None = None,
     ):
         self.model_names = model_names
         self.max_tokens = max_tokens
@@ -52,7 +53,11 @@ class Planner(ABC):
         self.random_seed = random_seed
         self.alloy_type = alloy_type
 
-        self.caller = AutoCaller(dotenv_path=".env", cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG)
+        self.caller = AutoCaller(
+            dotenv_path=".env", 
+            cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG,
+            force_caller=force_caller,
+        )
         self.curr_planner_index: int = 0
 
         random.seed(self.random_seed)
@@ -73,11 +78,16 @@ class Planner(ABC):
         desc: str = "Planning",
         **kwargs,
     ) -> list[Response | None]:
+        models_list = []
+        for _ in chat_histories:
+            models_list.append(self.curr_planner_model)
+            self.step_planner_model()
+
         responses = await self.caller.call(
             messages=chat_histories,
             max_parallel=self.max_par,
             desc=desc,
-            model=self.curr_planner_model,
+            model=models_list,
             max_tokens=self.max_tokens,
             reasoning=self.reasoning,
             **kwargs,
@@ -208,6 +218,7 @@ class ListPlanner(Planner):
         max_num_train_prompts: int | None = None,
         random_seed: int = 0,
         alloy_type: Literal["round_robin", "random"] = "round_robin",
+        force_caller: str | None = None,
     ):
         super().__init__(
             model_names=model_names,
@@ -216,6 +227,7 @@ class ListPlanner(Planner):
             max_par=max_par,
             random_seed=random_seed,
             alloy_type=alloy_type,
+            force_caller=force_caller,
         )
         self.n_new = n_new
         self.n_pop = n_pop
@@ -358,8 +370,9 @@ class PairPlanner(Planner):
         max_par: int = 64,  # max parallel calls to client
         relabel: bool = True,
         max_contrast_pairs: int | None = None,
-        alloy_type: Literal["round_robin", "random"] = "round_robin",
         random_seed: int = 0,
+        alloy_type: Literal["round_robin", "random"] = "round_robin",
+        force_caller: str | None = None,
     ):
         super().__init__(
             model_names=model_names,
@@ -368,6 +381,7 @@ class PairPlanner(Planner):
             max_par=max_par,
             random_seed=random_seed,
             alloy_type=alloy_type,
+            force_caller=force_caller,
         )
         self.n_new = n_new
         self.n_pop = n_pop
@@ -423,10 +437,11 @@ class PairPlanner(Planner):
                 f"Found {len(contrast_pairs)} contrast pairs in total for seed {seed_state.index}"
             )
 
-            seed_state.cluster = replace(
+            new_cluster: Cluster = replace(
                 seed_state.cluster,
                 aux_info=contrast_pairs,
             )
+            seed_state.cluster = new_cluster
 
             # save cluster info
             with open(

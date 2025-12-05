@@ -377,7 +377,6 @@ def plot_seed_validation_data(
 
 # %%
 if __name__ == "__main__":
-    # asyncio.run(main())
     save_dir = Path(f"data/scrap/{timestamp()}_rewrite_different_models")
     save_dir.mkdir(parents=True, exist_ok=True)
     for seed_index in [1, 8, 9, 14]:

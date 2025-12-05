@@ -1,7 +1,6 @@
 import re
 import json
 import textwrap
-import asyncio
 from loguru import logger
 from typing import Sequence
 
@@ -418,7 +417,7 @@ class JudgeModel(GenerationModel):
 
         return num_1_wins / total_trials if total_trials > 0 else None
 
-    def judge_validation_results(
+    async def judge_validation_results(
         self, 
         validation_results: list[dict[str, dict[str, list[Rollout|None]]]], 
         val_baselines: dict[str, list[Rollout|None]],
@@ -460,9 +459,9 @@ class JudgeModel(GenerationModel):
                         count += 1
         
         logger.info(f"Running {len(judge_tasks)} judge tasks...")
-        judge_tasks_results = asyncio.run(async_gather(
+        judge_tasks_results = await async_gather(
             judge_tasks, max_parallel=self.max_par // NUM_TRIALS
-        ))
+        )
 
         # Unpack results
         judge_results = {

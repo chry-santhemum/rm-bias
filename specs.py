@@ -146,7 +146,7 @@ SUBTOPICS_PROMPT = textwrap.dedent("""
 """).strip()
 
 
-def make_sub_topics(topics: list[str], n_sub: int = 0) -> dict[str, list[str]]:
+async def make_sub_topics(topics: list[str], n_sub: int = 0) -> dict[str, list[str]]:
     results = dict()
     for t in topics:
         results[t] = []
@@ -161,7 +161,7 @@ def make_sub_topics(topics: list[str], n_sub: int = 0) -> dict[str, list[str]]:
         ))
         for t in topics
     ]
-    responses = asyncio.run(caller.call(
+    responses = await caller.call(
         messages=sub_topic_messages,
         max_parallel=256,
         model="openai/gpt-5",
@@ -191,7 +191,7 @@ def make_chatgpt_specs(ds_name: str|None=None, n_sub: int = 0) -> list[str]:
     for k, vals in CHATGPT_CATEGORIES.items():
         specs.extend("{}: {}".format(k, v) for v in vals)
     
-    sub_topics = make_sub_topics(specs, n_sub)
+    sub_topics = asyncio.run(make_sub_topics(specs, n_sub))
     for spec, sub_topics in sub_topics.items():
         for sub_topic in sub_topics:
             specs.append(f"{spec}: {sub_topic}")
@@ -214,7 +214,7 @@ def make_clio_specs(ds_name: str|None=None, n_sub: int=0) -> list[str]:
     for topic in CLIO_CATEGORIES:
         specs.append(topic)
 
-    sub_topics = make_sub_topics(specs, n_sub)
+    sub_topics = asyncio.run(make_sub_topics(specs, n_sub))
     for spec, sub_topics in sub_topics.items():
         for sub_topic in sub_topics:
             specs.append(f"{spec}: {sub_topic}")
@@ -235,7 +235,7 @@ def make_handpick_specs(ds_name: str|None=None, n_sub: int=0) -> list[str]:
     for topic in HANDPICK_CATEGORIES:
         specs.append(topic)
 
-    sub_topics = make_sub_topics(specs, n_sub)
+    sub_topics = asyncio.run(make_sub_topics(specs, n_sub))
     for spec, sub_topics in sub_topics.items():
         for sub_topic in sub_topics:
             specs.append(f"{spec}: {sub_topic}")

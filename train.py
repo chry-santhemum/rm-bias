@@ -70,9 +70,7 @@ async def main():
     all_cuda_devices = [f"cuda:{i}" for i in range(torch.cuda.device_count())]
     print(f"Using CUDA devices: {all_cuda_devices}")
 
-    cluster_model = ClusterModel(
-        embedding_model_name="Qwen/Qwen3-Embedding-0.6B",
-    )
+    cluster_model = ClusterModel(embedding_model_name="Qwen/Qwen3-Embedding-0.6B")
 
     policy_model = GenerationModel(
         model_name="meta-llama/llama-3.1-8b-instruct",
@@ -118,21 +116,22 @@ async def main():
 
     if args.planner_type == "pair":
         hypothesis_planner = PairPlanner(
-            model_names=["openai/gpt-5"],
+            model_names=["openai/gpt-5", "anthropic/claude-sonnet-4.5"],
             max_tokens=8192,
             reasoning="medium",
-            max_par=128,
+            max_par=64,
             relabel=False,
             n_new=args.n_new,
             n_pop=args.n_pop_initial,
             max_contrast_pairs=args.n_planner_requests,
+            force_caller="openrouter",
         )
     elif args.planner_type in ["list", "list_reverse"]:
         hypothesis_planner = ListPlanner(
-            model_names=["openai/gpt-5"],
+            model_names=["openai/gpt-5", "anthropic/claude-sonnet-4.5"],
             max_tokens=8192,
             reasoning="medium",
-            max_par=128,
+            max_par=64,
             relabel=False,
             reverse=(args.planner_type == "list_reverse"),
             n_new=args.n_new,
@@ -140,6 +139,7 @@ async def main():
             n_traj_in_context=8,
             n_per_user_prompt=1,
             max_num_train_prompts=args.n_planner_requests,
+            force_caller="openrouter",
         )
 
     validate = True if args.val_split_size > 0 else False
@@ -162,7 +162,7 @@ async def main():
             run_name=run_name,
         )
 
-        runner.get_baselines()
+        await runner.get_baselines()
   
         try:
             await runner.train(
@@ -190,7 +190,7 @@ async def main():
             run_name=run_name,
         )
 
-        runner.get_baselines()
+        await runner.get_baselines()
 
         # with open(
         #     f"data/one_turn/{run_name}/val_baselines/sample_rollouts.json", "r"

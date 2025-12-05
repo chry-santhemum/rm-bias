@@ -95,7 +95,7 @@ async def main(n_rollouts: int):
             #     save_dir=Path(f"data/known_bias/{run_name}/seed_{seed_state.index}_negative"),
             # )
         
-        judge_results = judge_model.judge_validation_results(
+        judge_results = await judge_model.judge_validation_results(
             validation_results=[positive_rewrite_rollouts],
             val_baselines=baselines,  # type: ignore
             first_n=4,
