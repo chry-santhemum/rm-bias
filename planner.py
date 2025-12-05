@@ -12,7 +12,7 @@ from abc import ABC, abstractmethod
 
 from caller import AutoCaller, ChatHistory, Response
 from state import AttributeStats
-from models import CACHE_CONFIG, RETRY_CONFIG
+from api_models import CACHE_CONFIG, RETRY_CONFIG
 from runner import Runner
 from utils import parse_json_response, ClusterModel
 

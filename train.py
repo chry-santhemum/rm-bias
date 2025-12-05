@@ -45,7 +45,7 @@ import asyncio
 
 from utils import timestamp, ClusterModel
 from load_cluster import load_initial_seed_states
-from models import GenerationModel, RewriteModel, JudgeModel
+from api_models import GenerationModel, RewriteModel, JudgeModel
 from reward_models import LocalRewardModel
 from bias_evaluator import BiasEvaluator
 from planner import PairPlanner, ListPlanner

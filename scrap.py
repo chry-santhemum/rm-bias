@@ -17,7 +17,7 @@ from datasets import load_dataset
 from utils import remove_outliers, load_model, timestamp
 from caller import ChatHistory, OpenRouterCaller
 from reward_models import RewardModel
-from models import GenerationModel
+from api_models import GenerationModel
 
 nest_asyncio.apply()
 # %%

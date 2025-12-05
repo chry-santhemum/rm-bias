@@ -42,7 +42,7 @@ async def main(n_rollouts: int):
     from load_cluster import load_initial_seed_states
     from bias_workers import evaluate_baselines
     from bias_evaluator import BiasEvaluator
-    from models import RewriteModel, GenerationModel, JudgeModel
+    from api_models import RewriteModel, GenerationModel, JudgeModel
     from reward_models import LocalRewardModel
 
     # user_prompts = make_prompt_mix(num_total=num_prompts)

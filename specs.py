@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from caller import AutoCaller, ChatHistory
-from models import CACHE_CONFIG, RETRY_CONFIG
+from api_models import CACHE_CONFIG, RETRY_CONFIG
 from utils import parse_json_response
 
 # how people use chatgpt

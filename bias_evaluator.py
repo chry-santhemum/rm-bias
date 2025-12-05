@@ -8,7 +8,7 @@ from loguru import logger
 import plotly.graph_objects as go
 
 from utils import timestamp, remove_outliers
-from models import RewriteModel
+from api_models import RewriteModel
 from reward_models import RewardModel
 from state import Rollout
 from bias_workers import (

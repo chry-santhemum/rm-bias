@@ -14,7 +14,7 @@ from loguru import logger
 
 from state import SeedState
 from utils import ClusterModel, set_seed_all
-from models import GenerationModel, JudgeModel
+from api_models import GenerationModel, JudgeModel
 from planner import Planner
 from runner import Runner
 from bias_evaluator import BiasEvaluator

@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 from collections import defaultdict
 
 from caller import ChatHistory
-from models import GenerationModel
+from api_models import GenerationModel
 
 # %%
 import requests

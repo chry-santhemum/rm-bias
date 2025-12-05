@@ -30,6 +30,7 @@ RETRY_CONFIG = RetryConfig(
 
 
 class GenerationModel:
+    """API samplers with a single common model."""
     def __init__(
         self,
         model_name: str,

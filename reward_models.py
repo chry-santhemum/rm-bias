@@ -14,7 +14,7 @@ from abc import ABC, abstractmethod
 from loguru import logger
 
 from caller import ChatHistory
-from models import JudgeModel
+from api_models import JudgeModel
 from utils import load_model, REWARD_MODELS
 
 # %%

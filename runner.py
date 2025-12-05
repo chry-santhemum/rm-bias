@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 
 from state import SeedState, Rollout
 from utils import timestamp
-from models import GenerationModel, JudgeModel
+from api_models import GenerationModel, JudgeModel
 from bias_workers import evaluate_baselines
 from bias_evaluator import BiasEvaluator
 

@@ -10,7 +10,7 @@ from typing import Mapping, Sequence
 
 import numpy as np
 from caller import ChatHistory
-from models import GenerationModel, RewriteModel
+from api_models import GenerationModel, RewriteModel
 from reward_models import RewardModel
 from state import Rollout
 

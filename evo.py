@@ -29,7 +29,7 @@ from utils import (
     ClusterModel,
     set_seed_all,
 )
-from models import GenerationModel, JudgeModel
+from api_models import GenerationModel, JudgeModel
 from runner import Runner
 from bias_evaluator import BiasEvaluator
 from planner import Planner
