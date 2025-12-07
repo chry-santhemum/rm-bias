@@ -1,34 +1,28 @@
 """Reward model wrapper for both LLM Judge and classifier."""
 
-# %%
-
-import hashlib
 import asyncio
 import gc
 import torch
 from tqdm.auto import tqdm
-from pathlib import Path
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Sequence, Literal
 from abc import ABC, abstractmethod
 from loguru import logger
 
 from caller import ChatHistory
 from api_models import JudgeModel
-from utils import load_model, REWARD_MODELS
-
-# %%
-
+from utils import load_model
 
 @dataclass(frozen=True)
 class RatingResult:
     score: float | None
     reasoning: str | None
 
-
-def prompt_to_hash_path(prompt: str, target_dir: Path) -> Path:
-    prompt_hash = hashlib.md5(prompt.encode("utf-8")).hexdigest()
-    return target_dir / f"{prompt_hash}.json"
+@dataclass(frozen=True)
+class ComparisonResult:
+    winner: Literal["A", "B", "Tie"] | None
+    reasoning: str | None
+    score_diff: float | None  # A score - B score
 
 
 class RewardModel(ABC):
@@ -45,10 +39,18 @@ class RewardModel(ABC):
     ) -> list[RatingResult]:
         pass
 
+    @abstractmethod
+    async def async_compare(
+        self, 
+        chat_histories_A: Sequence[ChatHistory | None], 
+        chat_histories_B: Sequence[ChatHistory | None],
+        use_tqdm: bool = True
+    ) -> list[ComparisonResult]:
+        pass
+
 
 class LocalRewardModel(RewardModel):
     def __init__(self, model_name: str, devices: list[str], batch_size_per_device: int, attn_implementation: str="sdpa"):
-        assert model_name in REWARD_MODELS
         assert len(devices) > 0
         self.model_name = model_name
         self.tokenizer = None
@@ -57,7 +59,7 @@ class LocalRewardModel(RewardModel):
         self.models = []
         for device in devices:
             print(f"Loading model {model_name} on device {device}...")
-            model, tokenizer = load_model(model_name, device=device, attn_implementation=attn_implementation)
+            model, tokenizer = load_model(model_name, model_type="reward", device=device, attn_implementation=attn_implementation)
             self.models.append(model)
             if self.tokenizer is None:
                 self.tokenizer = tokenizer
@@ -81,12 +83,8 @@ class LocalRewardModel(RewardModel):
 
         for i in pbar:
             batch = chat_histories[i : i + self.batch_size_per_device]
-            indices_not_none = [
-                idx for idx, chat in enumerate(batch) if chat is not None
-            ]
-            batch_results = [
-                RatingResult(score=None, reasoning=None) for _ in range(len(batch))
-            ]
+            indices_not_none = [idx for idx, chat in enumerate(batch) if chat is not None]
+            batch_results = [RatingResult(score=None, reasoning=None) for _ in range(len(batch))]
             batch_clean: list[ChatHistory] = [batch[idx] for idx in indices_not_none]  # type: ignore
             
             if len(batch_clean) == 0:
@@ -189,6 +187,17 @@ class LocalRewardModel(RewardModel):
                 combined_results[orig_idx] = model_results[local_i]
 
         return combined_results
+
+    async def async_compare(self, chat_histories_A, chat_histories_B, use_tqdm = False):
+        results_A = await self.async_rate(chat_histories_A, use_tqdm=use_tqdm)
+        results_B = await self.async_rate(chat_histories_B, use_tqdm=use_tqdm)
+        compare_results = []
+        for result_A, result_B in zip(results_A, results_B):
+            if result_A.score is None or result_B.score is None:
+                compare_results.append(ComparisonResult(winner=None, reasoning=None, score_diff=None))
+            elif result_A.score > result_B.score:
+                compare_results.append(ComparisonResult(winner="A", reasoning=None, score_diff=result_A.score - result_B.score))
+        return results
 
 
 

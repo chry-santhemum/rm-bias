@@ -1,4 +1,3 @@
-# %%
 import re
 import json
 import time
@@ -7,7 +6,7 @@ import datetime
 import asyncio
 from json_repair import repair_json
 from loguru import logger
-from typing import Any, Tuple, Optional, Awaitable
+from typing import Any, Tuple, Optional, Awaitable, Literal, overload
 from collections import defaultdict
 from tqdm.asyncio import tqdm_asyncio
 from IPython.core.getipython import get_ipython
@@ -22,34 +21,26 @@ from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
     AutoModelForSequenceClassification,
+    PreTrainedModel,
+    PreTrainedTokenizer,
+    PreTrainedTokenizerFast,
 )
 from transformers.trainer_utils import set_seed as hf_set_seed
 
 from caller import Response
 from state import Rollout
 
+Tokenizer = PreTrainedTokenizer | PreTrainedTokenizerFast
 
+def load_model(
+    model_name: str,
+    model_type: Literal["reward", "generation"],
+    device: str = "auto",
+    attn_implementation: str = "sdpa",
+) -> tuple[PreTrainedModel, Tokenizer]:
 
-# %%
-REWARD_MODELS = {
-    "skywork": "Skywork/Skywork-Reward-Llama-3.1-8B-v0.2",
-    "skywork-v2": "Skywork/Skywork-Reward-V2-Llama-3.1-8B",
-    "tulu3": "allenai/Llama-3.1-Tulu-3-8B-RM",
-    "llamarb2": "allenai/Llama-3.1-8B-Instruct-RM-RB2",
-    "skywork-v2-qwen-8b": "Skywork/Skywork-Reward-V2-Qwen3-8B",
-    "sleeper": "saepark/sleeper-classicRM",
-}
-
-POLICY_MODELS = {
-    "llama-3.1-8b-instruct": "unsloth/Meta-Llama-3.1-8B-Instruct",
-    "tulu3-sft": "allenai/Llama-3.1-Tulu-3-8B-SFT",
-    "qwen-3-8b-instruct": "Qwen/Qwen3-8B",
-}
-
-def load_model(model_name: str, device: str = "cuda:0", attn_implementation: str = "sdpa"):
-    if model_name in REWARD_MODELS:
-        model_name_hf = REWARD_MODELS[model_name]
-        print(f"Loading reward model {model_name_hf}...")
+    if model_type == "reward":
+        print(f"Loading reward model {model_name} with device {device}...")
         load_kwargs = {
             "dtype": torch.bfloat16,
             "attn_implementation": attn_implementation,
@@ -57,42 +48,38 @@ def load_model(model_name: str, device: str = "cuda:0", attn_implementation: str
         }
         if device != "auto":
             model = AutoModelForSequenceClassification.from_pretrained(
-                model_name_hf, **load_kwargs
+                model_name, **load_kwargs
             )
             model.to(device)
         else:
             load_kwargs["device_map"] = "auto"
             model = AutoModelForSequenceClassification.from_pretrained(
-                model_name_hf, **load_kwargs
+                model_name, **load_kwargs
             )
 
-    elif model_name in POLICY_MODELS:
-        model_name_hf = POLICY_MODELS[model_name]
-        print(f"Loading policy model {model_name_hf}...")
+    elif model_type == "generation":
+        print(f"Loading generation model {model_name} with device {device}...")
         load_kwargs = {
             "dtype": torch.bfloat16,
             "attn_implementation": attn_implementation,
         }
         if device != "auto":
             model = AutoModelForCausalLM.from_pretrained(
-                model_name_hf, **load_kwargs
+                model_name, **load_kwargs
             )
             model.to(device)  # type: ignore
         else:
             load_kwargs["device_map"] = "auto"
             model = AutoModelForCausalLM.from_pretrained(
-                model_name_hf, **load_kwargs
+                model_name, **load_kwargs
             )
-
-    else:
-        raise ValueError(f"Model {model_name} not found.")
 
     print("Model loaded. Set to eval mode and disabled gradients.")
     model.eval()
     for p in model.parameters():
         p.requires_grad_(False)
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name_hf)
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
     if tokenizer.pad_token is None:
         print("No pad token found, setting to eos token")
         tokenizer.pad_token = tokenizer.eos_token
@@ -104,13 +91,6 @@ def load_model(model_name: str, device: str = "cuda:0", attn_implementation: str
     model.config.pad_token = tokenizer.pad_token
 
     return model, tokenizer
-
-
-def is_local_model(model_name: str) -> bool:
-    if model_name in POLICY_MODELS or model_name in REWARD_MODELS:
-        return True
-    else:
-        return False
 
 
 def set_seed_all(seed: int):

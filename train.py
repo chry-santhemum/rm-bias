@@ -74,7 +74,8 @@ async def main():
     cluster_model = ClusterModel(embedding_model_name="Qwen/Qwen3-Embedding-0.6B")
 
     policy_model = GenerationModel(
-        model_name="meta-llama/llama-3.1-8b-instruct",
+        # model_name="meta-llama/llama-3.1-8b-instruct",
+        model_name="meta-llama/llama-3.2-3b-instruct",
         max_par=512,
         max_tokens=1024,
         temperature=0.95,
@@ -96,9 +97,9 @@ async def main():
             enable_cache=False,
         ),
         reward_model=LocalRewardModel(
-            model_name="skywork-v2", 
+            model_name="Skywork/Skywork-Reward-V2-Llama-3.2-1B",
             devices=all_cuda_devices, 
-            batch_size_per_device=32,
+            batch_size_per_device=64,
             attn_implementation="sdpa",
         ),
         n_rewrite_workers=64,
@@ -164,7 +165,7 @@ async def main():
             await runner.train(
                 n_pop_target=[16, 8, 8],
                 train_batch_size=[4, 8, 8],
-                judge_filter_thresholds=[(0.3, 0.7), (0.4, 0.6), (0.5, 0.5)],
+                judge_filter_thresholds=[(0.2, 0.8), (0.3, 0.7), (0.4, 0.6)],
                 validate=validate,
             )
         except Exception as e:
