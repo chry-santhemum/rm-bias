@@ -75,6 +75,8 @@ class LocalRewardModel(RewardModel):
     ) -> list[RatingResult]:
         model = self.models[model_index]
         rewards = []
+        if len(chat_histories) == 0:
+            return []
 
         if use_tqdm:
             pbar = tqdm(range(0, len(chat_histories), self.batch_size_per_device), desc="Rating responses")
@@ -144,47 +146,28 @@ class LocalRewardModel(RewardModel):
         return rewards
 
     async def async_rate(self, chat_histories, use_tqdm = False):
-        if not chat_histories:
-            return []
-
         n_models = len(self.models)
-        indices_by_model: list[list[int]] = [[] for _ in range(n_models)]
-        chats_by_model: list[list] = [[] for _ in range(n_models)]
+        n_chats = len(chat_histories)
+        tasks = []
 
-        # Simple round-robin sharding over the available reward models.
-        for idx, ch in enumerate(chat_histories):
-            model_idx = idx % n_models
-            indices_by_model[model_idx].append(idx)
-            chats_by_model[model_idx].append(ch)
+        for i in range(n_models):
+            if i < n_models - 1:
+                tasks.append(asyncio.to_thread(
+                    self.rate_one_model, model_index=i,
+                    chat_histories=chat_histories[i*n_chats // n_models : (i+1)*n_chats // n_models],
+                ))
+            else:
+                tasks.append(asyncio.to_thread(
+                    self.rate_one_model, model_index=i,
+                    chat_histories=chat_histories[i*n_chats // n_models :],
+                ))
 
-        # Launch rating on each device in parallel (only where we have work).
-        coros = []
-        model_indices = []
-        for model_idx, (model, hist_list) in enumerate(
-            zip(self.models, chats_by_model)
-        ):
-            if not hist_list:
-                continue
-            coros.append(asyncio.to_thread(
-                self.rate_one_model, model_index=model_idx, chat_histories=hist_list, use_tqdm=use_tqdm
-            ))
-            model_indices.append(model_idx)
-
-        results_by_model: list[list | None] = [None] * n_models
-        if coros:
-            gathered = await asyncio.gather(*coros)
-            for model_idx, res in zip(model_indices, gathered):
-                results_by_model[model_idx] = res
-
-        # Reassemble results to match original ordering.
-        combined_results = [None] * len(chat_histories)
-        for model_idx, indices in enumerate(indices_by_model):
-            if not indices:
-                continue
-            model_results = results_by_model[model_idx]
-            assert model_results is not None
-            for local_i, orig_idx in enumerate(indices):
-                combined_results[orig_idx] = model_results[local_i]
+        if tasks:
+            task_results = await asyncio.gather(*tasks)
+        
+        combined_results: list[RatingResult] = []
+        for task_result in task_results:
+            combined_results.extend(task_result)
 
         return combined_results
 
@@ -197,7 +180,7 @@ class LocalRewardModel(RewardModel):
                 compare_results.append(ComparisonResult(winner=None, reasoning=None, score_diff=None))
             elif result_A.score > result_B.score:
                 compare_results.append(ComparisonResult(winner="A", reasoning=None, score_diff=result_A.score - result_B.score))
-        return results
+        return compare_results
 
 
 
