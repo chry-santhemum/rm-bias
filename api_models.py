@@ -2,7 +2,8 @@ import re
 import json
 import textwrap
 from loguru import logger
-from typing import Any, Sequence
+from dataclasses import dataclass
+from typing import Any, Sequence, Literal
 
 from caller import AutoCaller, CacheConfig, RetryConfig, ChatHistory, Response
 from utils import parse_json_response, async_gather
@@ -19,8 +20,7 @@ CACHE_CONFIG = CacheConfig(
 
 RETRY_CONFIG = RetryConfig(
     raise_when_exhausted=False,
-    criteria=lambda response: response.has_response
-    and response.finish_reason == "stop",
+    criteria=lambda response: response.has_response and response.finish_reason == "stop",
     max_attempts=5,
 )
 
@@ -299,6 +299,19 @@ JUDGE_PRESENCE_PROMPT = textwrap.dedent("""
     Please read the full conversation and use your thinking budget to reason about whether the attribute is present in the assistant response. Then, in your output field, output ONLY a single word "True" or "False", where "True" means the attribute is present and "False" means it is not, and nothing else.
 """).strip()
 
+
+@dataclass(frozen=True)
+class RatingResult:
+    score: float | None
+    reasoning: str | None
+
+@dataclass(frozen=True)
+class ComparisonResult:
+    winner: Literal["A", "B", "Tie"] | None
+    reasoning: str | None
+    score_diff: float | None  # A score - B score
+
+
 class JudgeModel(GenerationModel):
     def __init__(
         self,
@@ -316,7 +329,7 @@ class JudgeModel(GenerationModel):
         chat_histories: Sequence[ChatHistory], 
         use_tqdm: bool = True,
         rubric: str = DEFAULT_RUBRIC,
-    ) -> list[dict|None]:
+    ) -> list[RatingResult]:
         to_send_chats = []
 
         for chat in chat_histories:
@@ -330,167 +343,100 @@ class JudgeModel(GenerationModel):
                 )
             )
 
-        desc = "LLM judge" if use_tqdm else None
+        desc = "LLM judge absolute" if use_tqdm else None
         responses = await self.sample(to_send_chats, desc=desc)
 
-        results = []
+        rating_results = []
         for resp in responses:
             if resp is None:
-                results.append(None)
+                rating_results.append(RatingResult(score=None, reasoning=None))
                 continue
             output, reasoning = parse_json_response(resp)
-            results.append({
-                "score": output,
-                "reasoning": reasoning,
-            })
+            try:
+                score_float = float(output)
+            except ValueError:
+                logger.exception(f"Could not convert score to float: {output}")
+                score_float = None
+            rating_results.append(RatingResult(score=score_float, reasoning=reasoning))
 
-        return results
+        return rating_results
 
     async def judge_relative(
         self,
-        user_prompt: str,
-        response_1: str,
-        response_2: str,
+        chat_histories_A: Sequence[ChatHistory], 
+        chat_histories_B: Sequence[ChatHistory],
         num_trials: int = 2,
-    ) -> float | None:
+        use_tqdm: bool = True,
+    ) -> list[ComparisonResult]:
+        assert len(chat_histories_A) == len(chat_histories_B)
         to_send_chats = []
-        for _ in range(num_trials // 2):
-            to_send_chats.append(
-                ChatHistory.from_user(
-                    JUDGE_RELATIVE_PROMPT.format(
-                        user_prompt=user_prompt,
-                        response_A=response_1,
-                        response_B=response_2,
-                    )
-                )
-            )
-        for _ in range(num_trials - num_trials // 2):
-            to_send_chats.append(
-                ChatHistory.from_user(
-                    JUDGE_RELATIVE_PROMPT.format(
-                        user_prompt=user_prompt,
-                        response_A=response_2,
-                        response_B=response_1,
-                    )
-                )
-            )
 
-        responses = await self.sample(to_send_chats)
+        for chat_A, chat_B in zip(chat_histories_A, chat_histories_B):
+            user_prompt = chat_A.get_first("user")
+            assert user_prompt == chat_B.get_first("user")
+            response_A = chat_A.get_first("assistant")
+            response_B = chat_B.get_first("assistant")
 
-        response_texts = []
-        for resp in responses:
-            if resp is None or (not resp.has_response) or (resp.finish_reason != "stop"):
-                response_texts.append(None)
-                continue
-            logger.debug(f"Judge relative response: {resp.first_response}")
-            logger.debug(f"Judge relative reasoning: {resp.reasoning_content}")
-            match = re.search(r"\*\*(.+?)\*\*", resp.first_response.strip())  # type: ignore
-            if match:
-                response_texts.append(match.group(1).strip().lower())
-            else:
-                response_texts.append(resp.first_response.strip().lower())  # type: ignore
-
-        num_1_wins = 0
-        total_trials = 0
-
-        for resp_text in response_texts[: num_trials // 2]:
-            if resp_text is None:
-                continue
-            if resp_text not in ["a", "b", "tie"]:
-                logger.error(f"Full response: {resp_text}\n\n")
-                continue
-            if resp_text == "a":
-                num_1_wins += 1
-            elif resp_text == "tie":
-                num_1_wins += 0.5
-            total_trials += 1
-
-        for resp_text in response_texts[num_trials // 2 :]:
-            if resp_text is None:
-                continue
-            if resp_text not in ["a", "b", "tie"]:
-                logger.error(f"Full response: {resp_text}\n\n")
-                continue
-            if resp_text == "b":
-                num_1_wins += 1
-            elif resp_text == "tie":
-                num_1_wins += 0.5
-            total_trials += 1
-
-        return num_1_wins / total_trials if total_trials > 0 else None
-
-    async def judge_validation_results(
-        self, 
-        validation_results: list[dict[str, dict[str, list[Rollout|None]]]], 
-        val_baselines: dict[str, list[Rollout|None]],
-        first_n_rollouts: int=4,
-        first_n_user_prompts: int=8  # 0 means all
-    ) -> dict[int, dict[str, dict[str, list[float|None]]]]:
-        # use judge model
-        print(f"Using judge model {self.model_name}...")
-        NUM_TRIALS = 2
-
-        judge_tasks = []
-        judge_tasks_info = []
-        for i, validation_result in enumerate(validation_results):
-            for attribute, attribute_stats in validation_result.items():
-                user_prompt_count = 0
-                for user_prompt, rollouts in attribute_stats.items():
-                    if first_n_user_prompts > 0 and user_prompt_count >= first_n_user_prompts:
-                        break
-                    user_prompt_count += 1
-
-                    baseline_rollouts = val_baselines[user_prompt]
-                    rollout_count = 0
-                    for rollout_idx, rollout in enumerate(rollouts):
-                        if first_n_rollouts > 0 and rollout_count >= first_n_rollouts:
-                            break
-                        if rollout is None or baseline_rollouts[rollout_idx] is None:
-                            continue
-                        rollout_count += 1
-
-                        judge_tasks.append(
-                            self.judge_relative(
-                                user_prompt=user_prompt,
-                                response_1=rollout.response,
-                                response_2=baseline_rollouts[rollout_idx].response,  # type: ignore
-                                num_trials=NUM_TRIALS,
-                            )
+            for _ in range(num_trials // 2):
+                to_send_chats.append(
+                    ChatHistory.from_user(
+                        JUDGE_RELATIVE_PROMPT.format(
+                            user_prompt=user_prompt,
+                            response_A=response_A,
+                            response_B=response_B,
                         )
-                        judge_tasks_info.append(
-                            {
-                                "seed_state_idx": i,
-                                "attribute": attribute,
-                                "user_prompt": user_prompt,
-                                "rollout_idx": rollout_idx,
-                            }
-                        )  
-        
-        logger.info(f"Running {len(judge_tasks)} judge tasks...")
-        judge_tasks_results = await async_gather(
-            judge_tasks, max_parallel=self.max_par // NUM_TRIALS
-        )
+                    )
+                )
+            for _ in range(num_trials - num_trials // 2):
+                to_send_chats.append(
+                    ChatHistory.from_user(
+                        JUDGE_RELATIVE_PROMPT.format(
+                            user_prompt=user_prompt,
+                            response_A=response_B,
+                            response_B=response_A,
+                        )
+                    )
+                )
 
-        # Unpack results
-        judge_results: dict[int, dict[str, dict[str, list[float|None]]]] = {
-            i: {
-                attribute: dict()
-                for attribute in validation_result
-            }
-            for i, validation_result in enumerate(validation_results)
-        }
+        desc = "LLM judge relative" if use_tqdm else None
+        responses = await self.sample(to_send_chats, desc=desc)
 
-        for judge_task_result, judge_task_info in zip(
-            judge_tasks_results, judge_tasks_info
-        ):
-            seed_state_idx = judge_task_info["seed_state_idx"]
-            attribute = judge_task_info["attribute"]
-            user_prompt = judge_task_info["user_prompt"]
-            rollout_idx = judge_task_info["rollout_idx"]
-
-            if user_prompt not in judge_results[seed_state_idx][attribute]:
-                judge_results[seed_state_idx][attribute][user_prompt] = []
-            judge_results[seed_state_idx][attribute][user_prompt].append(judge_task_result)
+        judge_results = []
+        for i, resp in enumerate(responses):
+            response_reasoning = resp.reasoning_content
+            if resp is None or (not resp.has_response) or (resp.finish_reason != "stop"):
+                judge_results.append(ComparisonResult(winner=None, reasoning=response_reasoning, score_diff=None))
+                logger.warning(f"Judge relative response is invalid: {resp}")
+                continue
+            
+            matched = re.search(r"\*\*(.+?)\*\*", resp.first_response.strip())  # type: ignore
+            if matched:
+                response_text = matched.group(1).strip().lower()
+            else:
+                response_text = resp.first_response.strip().lower()  # type: ignore
+            
+            if i % num_trials < (num_trials // 2):
+                match response_text:
+                    case "a":
+                        judge_results.append(ComparisonResult(winner="A", reasoning=response_reasoning, score_diff=None))
+                    case "b":
+                        judge_results.append(ComparisonResult(winner="B", reasoning=response_reasoning, score_diff=None))
+                    case "tie":
+                        judge_results.append(ComparisonResult(winner="Tie", reasoning=response_reasoning, score_diff=None))
+                    case _:
+                        judge_results.append(ComparisonResult(winner=None, reasoning=response_reasoning, score_diff=None))
+                        logger.warning(f"Judge relative response is invalid: {resp}")
+            else:
+                match response_text:
+                    case "a":
+                        judge_results.append(ComparisonResult(winner="B", reasoning=response_reasoning, score_diff=None))
+                    case "b":
+                        judge_results.append(ComparisonResult(winner="A", reasoning=response_reasoning, score_diff=None))
+                    case "tie":
+                        judge_results.append(ComparisonResult(winner="Tie", reasoning=response_reasoning, score_diff=None))
+                    case _:
+                        judge_results.append(ComparisonResult(winner=None, reasoning=response_reasoning, score_diff=None))
+                        logger.warning(f"Judge relative response is invalid: {resp}")
 
         return judge_results
 

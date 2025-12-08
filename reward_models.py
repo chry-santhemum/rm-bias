@@ -4,25 +4,14 @@ import asyncio
 import gc
 import torch
 from tqdm.auto import tqdm
-from dataclasses import dataclass
-from typing import Sequence, Literal
+from typing import Sequence
 from abc import ABC, abstractmethod
 from loguru import logger
 
 from caller import ChatHistory
-from api_models import JudgeModel
-from utils import load_model
-
-@dataclass(frozen=True)
-class RatingResult:
-    score: float | None
-    reasoning: str | None
-
-@dataclass(frozen=True)
-class ComparisonResult:
-    winner: Literal["A", "B", "Tie"] | None
-    reasoning: str | None
-    score_diff: float | None  # A score - B score
+from api_models import JudgeModel, RatingResult, ComparisonResult
+from state import Rollout
+from utils import load_model, find_executable_batch_size
 
 
 class RewardModel(ABC):
@@ -47,6 +36,84 @@ class RewardModel(ABC):
         use_tqdm: bool = True
     ) -> list[ComparisonResult]:
         pass
+
+    async def judge_validation_results(
+        self, 
+        validation_results: list[dict[str, dict[str, list[Rollout|None]]]], 
+        val_baselines: dict[str, list[Rollout|None]],
+        first_n_rollouts: int=4,
+        first_n_user_prompts: int=8  # 0 means all
+    ) -> dict[int, dict[str, dict[str, list[float|None]]]]:
+        chat_histories_A = []  # rewritten
+        chat_histories_B = []  # baseline
+        judge_tasks_info = []
+        for i, validation_result in enumerate(validation_results):
+            for attribute, attribute_stats in validation_result.items():
+                user_prompt_count = 0
+                for user_prompt, rollouts in attribute_stats.items():
+                    if first_n_user_prompts > 0 and user_prompt_count >= first_n_user_prompts:
+                        break
+                    user_prompt_count += 1
+
+                    baseline_rollouts = val_baselines[user_prompt]
+                    rollout_count = 0
+                    for rollout_idx, rollout in enumerate(rollouts):
+                        if first_n_rollouts > 0 and rollout_count >= first_n_rollouts:
+                            break
+                        if rollout is None or baseline_rollouts[rollout_idx] is None:
+                            continue
+                        rollout_count += 1
+
+                        chat_histories_A.append(ChatHistory.from_user(user_prompt).add_assistant(rollout.response))
+                        chat_histories_B.append(ChatHistory.from_user(user_prompt).add_assistant(baseline_rollouts[rollout_idx].response))
+                        judge_tasks_info.append(
+                            {
+                                "seed_state_idx": i,
+                                "attribute": attribute,
+                                "user_prompt": user_prompt,
+                                "rollout_idx": rollout_idx,
+                            }
+                        )  
+        
+        logger.info(f"Running {len(judge_tasks_info)} judge tasks...")
+        judge_tasks_results = await self.async_compare(
+            chat_histories_A=chat_histories_A,
+            chat_histories_B=chat_histories_B,
+        )
+
+        # Unpack results
+        judge_results: dict[int, dict[str, dict[str, list[float|None]]]] = {
+            i: {
+                attribute: dict()
+                for attribute in validation_result
+            }
+            for i, validation_result in enumerate(validation_results)
+        }
+
+        for judge_task_result, judge_task_info in zip(
+            judge_tasks_results, judge_tasks_info
+        ):
+            seed_state_idx = judge_task_info["seed_state_idx"]
+            attribute = judge_task_info["attribute"]
+            user_prompt = judge_task_info["user_prompt"]
+            rollout_idx = judge_task_info["rollout_idx"]
+
+            if user_prompt not in judge_results[seed_state_idx][attribute]:
+                judge_results[seed_state_idx][attribute][user_prompt] = []
+            
+            A_win_score = None
+            match judge_task_result.winner:
+                case "A":
+                    A_win_score = 1.0
+                case "B":
+                    A_win_score = 0.0
+                case "Tie":
+                    A_win_score = 0.5
+                case None:
+                    A_win_score = None
+            judge_results[seed_state_idx][attribute][user_prompt].append(A_win_score)
+
+        return judge_results
 
 
 class LocalRewardModel(RewardModel):
@@ -74,76 +141,64 @@ class LocalRewardModel(RewardModel):
         use_tqdm: bool = True
     ) -> list[RatingResult]:
         model = self.models[model_index]
-        rewards = []
+        rating_results = []
         if len(chat_histories) == 0:
             return []
 
-        if use_tqdm:
-            pbar = tqdm(range(0, len(chat_histories), self.batch_size_per_device), desc="Rating responses")
-        else:
-            pbar = range(0, len(chat_histories), self.batch_size_per_device)
+        # inner loop
+        @find_executable_batch_size(starting_batch_size=self.batch_size_per_device)
+        def rate_one_model_inner(batch_size: int, chats_clean: list[ChatHistory]) -> list[RatingResult]:
+            results_clean = []
+            inner_pbar = range(0, len(chats_clean), batch_size)
+            for inner_idx in inner_pbar:
+                sub_chats = chats_clean[inner_idx : inner_idx + batch_size]
+                sub_inputs = [chat.remove_system().to_openai_messages() for chat in sub_chats]
+                input_ids = self.tokenizer.apply_chat_template(  # type: ignore
+                    sub_inputs,
+                    tokenize=True,
+                    return_tensors="pt",
+                    padding=True,
+                    padding_side="right",
+                ).to(model.device)  # type: ignore
 
-        for i in pbar:
+                attn_mask = input_ids.ne(self.tokenizer.pad_token_id)  # type: ignore
+
+                with torch.no_grad():
+                    scores_tensor = model(  # type: ignore
+                        input_ids=input_ids, attention_mask=attn_mask
+                    ).logits.squeeze(-1)
+
+                scores_list = scores_tensor.tolist()
+                results_clean.extend([
+                    RatingResult(score=float(score), reasoning=None) 
+                    for score in scores_list
+                ])
+            return results_clean
+
+        # outer loop: break down to roughly correct batch size
+        if use_tqdm:
+            outer_pbar = tqdm(range(0, len(chat_histories), self.batch_size_per_device), desc="Rating responses")
+        else:
+            outer_pbar = range(0, len(chat_histories), self.batch_size_per_device)
+        
+        for i in outer_pbar:
             batch = chat_histories[i : i + self.batch_size_per_device]
             indices_not_none = [idx for idx, chat in enumerate(batch) if chat is not None]
-            batch_results = [RatingResult(score=None, reasoning=None) for _ in range(len(batch))]
+
+            # remove the None chats
             batch_clean: list[ChatHistory] = [batch[idx] for idx in indices_not_none]  # type: ignore
-            
             if len(batch_clean) == 0:
                 continue
 
-            inputs_clean = [chat.remove_system().to_openai_messages() for chat in batch_clean]
+            results_clean = rate_one_model_inner(chats_clean=batch_clean)
 
-            # OOM-safe micro-batching within this device batch
-            current_mb = self.batch_size_per_device
-            start = 0
-            while start < len(inputs_clean):
-                sub_bs = min(current_mb, len(inputs_clean) - start)
-                try:
-                    sub_inputs = inputs_clean[start : start + sub_bs]
-                    input_ids = self.tokenizer.apply_chat_template(  # type: ignore
-                        sub_inputs,
-                        tokenize=True,
-                        return_tensors="pt",
-                        padding=True,
-                        padding_side="right",
-                    ).to(model.device)  # type: ignore
+            # add back the None chats
+            batch_results = [RatingResult(score=None, reasoning=None) for _ in range(len(batch))]
+            for idx, result in zip(indices_not_none, results_clean):
+                batch_results[idx] = result
+            rating_results.extend(batch_results)
 
-                    attn_mask = input_ids.ne(self.tokenizer.pad_token_id)  # type: ignore
-
-                    with torch.no_grad():
-                        scores_tensor = model(  # type: ignore
-                            input_ids=input_ids, attention_mask=attn_mask
-                        ).logits.squeeze(-1)
-
-                    scores_list = scores_tensor.tolist()
-                    for j, score in enumerate(scores_list):
-                        batch_results[indices_not_none[start + j]] = RatingResult(
-                            score=float(score), reasoning=None
-                        )
-
-                    start += sub_bs
-                except (torch.cuda.OutOfMemoryError, RuntimeError) as e:
-                    # Only handle CUDA-related RuntimeErrors; re-raise other RuntimeErrors
-                    if isinstance(e, RuntimeError) and "cuda" not in str(e).lower():
-                        raise
-                    logger.warning(f"OOM error on model {self.model_name} on device {model.device}. Batch size before: {current_mb}.")
-                    try:
-                        del input_ids, attn_mask, scores_tensor
-                    except Exception as e:
-                        pass
-                    if torch.cuda.is_available():
-                        gc.collect()
-                        torch.cuda.empty_cache()
-                    if current_mb == 1:
-                        # Give up on this slice; leave results as None
-                        start += sub_bs  # avoid infinite loop
-                    else:
-                        current_mb = max(1, current_mb // 2)
-
-            rewards.extend(batch_results)
-
-        return rewards
+        return rating_results
 
     async def async_rate(self, chat_histories, use_tqdm = False):
         n_models = len(self.models)
@@ -175,13 +230,14 @@ class LocalRewardModel(RewardModel):
         results_A = await self.async_rate(chat_histories_A, use_tqdm=use_tqdm)
         results_B = await self.async_rate(chat_histories_B, use_tqdm=use_tqdm)
         compare_results = []
+
         for result_A, result_B in zip(results_A, results_B):
             if result_A.score is None or result_B.score is None:
                 compare_results.append(ComparisonResult(winner=None, reasoning=None, score_diff=None))
             elif result_A.score > result_B.score:
                 compare_results.append(ComparisonResult(winner="A", reasoning=None, score_diff=result_A.score - result_B.score))
+        
         return compare_results
-
 
 
 class APIRewardModel(RewardModel):
@@ -196,18 +252,7 @@ class APIRewardModel(RewardModel):
         return self.max_par
         
     async def async_rate(self, chat_histories, use_tqdm = False):
-        results = await self.model.judge(chat_histories=chat_histories, use_tqdm=use_tqdm)  # type: ignore
-        rating_results = []
+        return await self.model.judge_absolute(chat_histories=chat_histories, use_tqdm=use_tqdm)
 
-        for result in results:
-            if result is None:
-                rating_results.append(RatingResult(score=None, reasoning=None))
-            else:
-                try:
-                    score_float = float(result["score"])
-                except ValueError:
-                    logger.exception(f"Could not convert score to float: {result['score']}")
-                    score_float = None
-                rating_results.append(RatingResult(score=score_float, reasoning=result["reasoning"]))
-
-        return rating_results
+    async def async_compare(self, chat_histories_A, chat_histories_B, use_tqdm = False):
+        return await self.model.judge_relative(chat_histories_A=chat_histories_A, chat_histories_B=chat_histories_B, use_tqdm=use_tqdm)
