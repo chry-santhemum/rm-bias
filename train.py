@@ -46,7 +46,7 @@ import asyncio
 from utils import timestamp, ClusterModel
 from load_cluster import load_initial_seed_states
 from api_models import GenerationModel, RewriteModel, JudgeModel
-from reward_models import LocalRewardModel
+from reward_models import LocalRewardModel, APIRewardModel
 from bias_evaluator import BiasEvaluator
 from planner import PairPlanner, ListPlanner
 from one_turn import OneTurnRunner
@@ -81,8 +81,9 @@ async def main():
         temperature=0.95,
     )
 
-    judge_model = JudgeModel(
+    teacher_model = APIRewardModel(
         model_name="anthropic/claude-haiku-4.5",
+        max_par=256,
         force_caller="openrouter",
         max_tokens=1050,
         reasoning=1024,
@@ -151,7 +152,7 @@ async def main():
             planner=planner,
             policy_model=policy_model,
             bias_evaluator=bias_evaluator,
-            judge_model=judge_model,
+            teacher_model=teacher_model,
             dbscan_eps=args.dbscan_eps,
             m_var=args.m_var,
             n_baseline_rollouts=args.n_baseline_rollouts,
@@ -180,7 +181,7 @@ async def main():
             cluster_model=cluster_model,
             policy_model=policy_model,
             bias_evaluator=bias_evaluator,
-            judge_model=judge_model,
+            teacher_model=teacher_model,
             train_batch_size=args.train_batch_size,
             n_baseline_rollouts=args.n_baseline_rollouts,
             n_rewrite_rollouts=args.n_rewrite_rollouts,

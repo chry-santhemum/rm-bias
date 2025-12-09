@@ -1,12 +1,3 @@
-"""
-Cost estimate:
-
-[per seed state]
-Rewrites: train_batch_size * n_pop * n_rollouts (~4096 tokens per call)
-"""
-
-# %%
-
 import dotenv
 import random
 from typing import Literal
@@ -14,7 +5,8 @@ from loguru import logger
 
 from state import SeedState, Rollout
 from utils import ClusterModel, set_seed_all
-from api_models import GenerationModel, JudgeModel
+from api_models import GenerationModel
+from reward_models import RewardModel
 from planner import Planner
 from runner import Runner
 from bias_evaluator import BiasEvaluator
@@ -31,7 +23,7 @@ class OneTurnRunner(Runner):
         cluster_model: ClusterModel,
         policy_model: GenerationModel,
         bias_evaluator: BiasEvaluator,
-        judge_model: JudgeModel,
+        teacher_model: RewardModel,
         train_batch_size: int,
         n_baseline_rollouts: int,
         n_rewrite_rollouts: int,
@@ -42,7 +34,7 @@ class OneTurnRunner(Runner):
             seed_states=seed_states,
             policy_model=policy_model,
             bias_evaluator=bias_evaluator,
-            judge_model=judge_model,
+            teacher_model=teacher_model,
             run_name=run_name,
             n_baseline_rollouts=n_baseline_rollouts,
         )

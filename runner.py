@@ -1,4 +1,3 @@
-# %%
 import os
 import json
 import time
@@ -10,13 +9,10 @@ from abc import ABC, abstractmethod
 
 from state import SeedState, Rollout
 from utils import timestamp
-from api_models import GenerationModel, JudgeModel
+from api_models import GenerationModel
+from reward_models import RewardModel
 from bias_workers import evaluate_baselines
 from bias_evaluator import BiasEvaluator
-
-
-# %%
-
 
 class Runner(ABC):
     def __init__(
@@ -24,7 +20,7 @@ class Runner(ABC):
         seed_states: list[SeedState],
         policy_model: GenerationModel,
         bias_evaluator: BiasEvaluator,
-        judge_model: JudgeModel,
+        teacher_model: RewardModel,
         run_name: str | None,
         n_baseline_rollouts: int = 16,
         *args,
@@ -34,7 +30,7 @@ class Runner(ABC):
         self.seed_states = seed_states
         self.policy_model = policy_model
         self.bias_evaluator = bias_evaluator
-        self.judge_model = judge_model
+        self.teacher_model = teacher_model
         self.n_baseline_rollouts = n_baseline_rollouts
 
         self.run_name = run_name or f"{timestamp()}"
@@ -47,7 +43,7 @@ class Runner(ABC):
 
     @property
     def run_path(self) -> Path:
-        return Path(f"./data/{self.runner_type}/{self.run_name}")
+        return Path(f"data/{self.runner_type}/{self.run_name}")
 
     @property
     def all_train_prompts(self) -> list[str]:
@@ -188,7 +184,7 @@ class Runner(ABC):
                 )
             validation_results.append(stats)
         
-        judge_results = await self.judge_model.judge_validation_results(
+        judge_results = await self.teacher_model.judge_validation_results(
             validation_results=validation_results,
             val_baselines=self.val_baselines,  # type: ignore
         )

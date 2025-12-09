@@ -13,19 +13,6 @@ class Cluster:
     aux_info: Any = None
 
 
-@dataclass(frozen=True)
-class Rating:
-    score: float
-    rater_model_name: str
-
-    def __repr__(self):
-        if self.score is None:
-            score_str = "None"
-        else:
-            score_str = f"{self.score:.2f}"
-        return f"Rating(score={score_str}, rater={self.rater_model_name})"
-
-
 @dataclass
 class Rollout:
     response: str

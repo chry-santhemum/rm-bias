@@ -16,7 +16,8 @@ from utils import (
     ClusterModel,
     set_seed_all,
 )
-from api_models import GenerationModel, JudgeModel
+from api_models import GenerationModel
+from reward_models import RewardModel
 from runner import Runner
 from bias_evaluator import BiasEvaluator
 from planner import Planner
@@ -503,7 +504,7 @@ class EvoRunner(Runner):
         planner: EvoPlanner,
         policy_model: GenerationModel,
         bias_evaluator: BiasEvaluator,
-        judge_model: JudgeModel,
+        teacher_model: RewardModel,
         dbscan_eps: float,
         m_var: int,
         n_baseline_rollouts: int,
@@ -514,7 +515,7 @@ class EvoRunner(Runner):
             seed_states=seed_states,
             policy_model=policy_model,
             bias_evaluator=bias_evaluator,
-            judge_model=judge_model,
+            teacher_model=teacher_model,
             run_name=run_name,
             n_baseline_rollouts=n_baseline_rollouts,
         )
@@ -574,7 +575,7 @@ class EvoRunner(Runner):
         )
 
         if judge_filter_thresholds is not None:
-            step_judge_results = await self.judge_model.judge_validation_results(
+            step_judge_results = await self.teacher_model.judge_validation_results(
                 validation_results=evaluate_results,
                 val_baselines=self.baselines,  # type: ignore
                 first_n_rollouts=4,
