@@ -324,7 +324,7 @@ class JudgeModel(GenerationModel):
 
     async def judge_absolute(
         self,
-        chat_histories: Sequence[ChatHistory], 
+        chat_histories: Sequence[ChatHistory|None], 
         use_tqdm: bool = True,
         rubric: str = DEFAULT_RUBRIC,
     ) -> list[RatingResult]:

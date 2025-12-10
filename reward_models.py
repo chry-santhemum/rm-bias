@@ -25,17 +25,17 @@ class RewardModel(ABC):
     @abstractmethod
     async def async_rate(
         self, 
-        chat_histories: Sequence[ChatHistory | None], 
-        use_tqdm: bool = True
+        chat_histories: Sequence[ChatHistory], 
+        use_tqdm: bool
     ) -> list[RatingResult]:
         pass
 
     @abstractmethod
     async def async_compare(
         self, 
-        chat_histories_A: Sequence[ChatHistory | None], 
-        chat_histories_B: Sequence[ChatHistory | None],
-        use_tqdm: bool = True
+        chat_histories_A: Sequence[ChatHistory], 
+        chat_histories_B: Sequence[ChatHistory],
+        use_tqdm: bool
     ) -> list[ComparisonResult]:
         pass
 
@@ -44,7 +44,8 @@ class RewardModel(ABC):
         validation_results: list[dict[str, dict[str, list[Rollout|None]]]],
         val_baselines: dict[str, list[Rollout|None]],
         first_n_rollouts: int=4,
-        first_n_user_prompts: int=8  # 0 means all
+        first_n_user_prompts: int=8,  # 0 means all
+        use_tqdm: bool = True
     ) -> None:
         """
         Populates teacher_score on rollouts in validation_results in place.
@@ -92,6 +93,7 @@ class RewardModel(ABC):
         judge_tasks_results = await self.async_compare(
             chat_histories_A=chat_histories_A,
             chat_histories_B=chat_histories_B,
+            use_tqdm=use_tqdm,
         )
 
         # Populate teacher_score on each rollout in place
@@ -129,16 +131,27 @@ class RewardModel(ABC):
 
 
 class LocalRewardModel(RewardModel):
-    def __init__(self, model_name: str, devices: list[str], batch_size_per_device: int, attn_implementation: str="sdpa"):
+    def __init__(
+        self, 
+        model_name: str, 
+        devices: list[str], 
+        batch_size_per_device: int, 
+        attn_implementation: str="sdpa"
+    ):
         assert len(devices) > 0
         self.model_name = model_name
-        self.tokenizer = None
         self.batch_size_per_device = batch_size_per_device
 
         self.models = []
-        for device in devices:
-            print(f"Loading model {model_name} on device {device}...")
-            model, tokenizer = load_model(model_name, model_type="reward", device=device, attn_implementation=attn_implementation)
+        self.tokenizer = None
+        for d in devices:
+            print(f"Loading model {model_name} on device {d}...")
+            model, tokenizer = load_model(
+                model_name=model_name, 
+                model_type="reward", 
+                device=d, 
+                attn_implementation=attn_implementation
+            )
             self.models.append(model)
             if self.tokenizer is None:
                 self.tokenizer = tokenizer
@@ -147,9 +160,10 @@ class LocalRewardModel(RewardModel):
     def batch_size(self) -> int:
         return self.batch_size_per_device * len(self.models)
 
-    def rate_one_model(self, 
+    def rate_one_model(
+        self, 
         model_index: int, 
-        chat_histories: Sequence[ChatHistory | None], 
+        chat_histories: Sequence[ChatHistory], 
         use_tqdm: bool = True
     ) -> list[RatingResult]:
         model = self.models[model_index]
@@ -157,7 +171,7 @@ class LocalRewardModel(RewardModel):
         if len(chat_histories) == 0:
             return []
 
-        # inner loop
+        # inner loop: should only happen in rare cases.
         @find_executable_batch_size(starting_batch_size=self.batch_size_per_device)
         def rate_one_model_inner(batch_size: int, chats_clean: list[ChatHistory]) -> list[RatingResult]:
             results_clean = []
@@ -166,11 +180,7 @@ class LocalRewardModel(RewardModel):
                 sub_chats = chats_clean[inner_idx : inner_idx + batch_size]
                 sub_inputs = [chat.remove_system().to_openai_messages() for chat in sub_chats]
                 input_ids = self.tokenizer.apply_chat_template(  # type: ignore
-                    sub_inputs,
-                    tokenize=True,
-                    return_tensors="pt",
-                    padding=True,
-                    padding_side="right",
+                    sub_inputs, tokenize=True, return_tensors="pt", padding=True, padding_side="right",
                 ).to(model.device)  # type: ignore
 
                 attn_mask = input_ids.ne(self.tokenizer.pad_token_id)  # type: ignore
@@ -202,7 +212,7 @@ class LocalRewardModel(RewardModel):
             if len(batch_clean) == 0:
                 continue
 
-            results_clean = rate_one_model_inner(chats_clean=batch_clean)
+            results_clean = rate_one_model_inner(chats_clean=batch_clean)  # type: ignore
 
             # add back the None chats
             batch_results = [RatingResult(score=None, reasoning=None) for _ in range(len(batch))]
@@ -213,6 +223,9 @@ class LocalRewardModel(RewardModel):
         return rating_results
 
     async def async_rate(self, chat_histories, use_tqdm = False):
+        if use_tqdm and len(self.models) > 1:
+            logger.warning("Setting use_tqdm to False because multiple RMs are used.")
+            use_tqdm = False
         n_models = len(self.models)
         n_chats = len(chat_histories)
         tasks = []
@@ -222,11 +235,13 @@ class LocalRewardModel(RewardModel):
                 tasks.append(asyncio.to_thread(
                     self.rate_one_model, model_index=i,
                     chat_histories=chat_histories[i*n_chats // n_models : (i+1)*n_chats // n_models],
+                    use_tqdm=use_tqdm,
                 ))
             else:
                 tasks.append(asyncio.to_thread(
                     self.rate_one_model, model_index=i,
                     chat_histories=chat_histories[i*n_chats // n_models :],
+                    use_tqdm=use_tqdm,
                 ))
 
         if tasks:

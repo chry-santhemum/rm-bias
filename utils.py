@@ -10,7 +10,7 @@ import inspect
 
 from json_repair import repair_json
 from loguru import logger
-from typing import Any, Tuple, Optional, Awaitable, Literal, overload
+from typing import Any, Tuple, Optional, Awaitable, Literal, Callable
 from collections import defaultdict
 from tqdm.asyncio import tqdm_asyncio
 from IPython.core.getipython import get_ipython
@@ -103,47 +103,6 @@ def set_seed_all(seed: int):
     torch.manual_seed(seed)  # PyTorch CPU RNG
     torch.cuda.manual_seed_all(seed)  # PyTorch CUDA RNG
     hf_set_seed(seed)
-
-
-# # Deprecated since we're using loguru
-
-# def logging_setup(filename: str|None, level: int = logging.WARNING, console: bool=False):
-#     """
-#     Set up logging to file / stdout.
-#     """
-#     formatter = logging.Formatter(
-#         "%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(name)s - %(message)s"
-#     )
-
-#     logger = logging.getLogger()
-#     logger.setLevel(level)
-
-#     # Add file handler if needed
-#     if filename is not None:
-#         filepath = Path(filename).resolve()
-#         has_file_handler = any(
-#             isinstance(h, logging.FileHandler) and Path(h.baseFilename).resolve() == filepath
-#             for h in logger.handlers
-#         )
-#         if not has_file_handler:
-#             filepath.parent.mkdir(parents=True, exist_ok=True)
-#             file_handler = logging.FileHandler(filename, mode="w")
-#             file_handler.setFormatter(formatter)
-#             logger.addHandler(file_handler)
-
-#     # Add console handler if needed
-#     if console:
-#         has_console_handler = any(
-#             isinstance(h, logging.StreamHandler) and not isinstance(h, logging.FileHandler)
-#             for h in logger.handlers
-#         )
-#         if not has_console_handler:
-#             console_handler = logging.StreamHandler()
-#             console_handler.setFormatter(formatter)
-#             logger.addHandler(console_handler)
-
-#     # Silence httpx INFO logs (LLM APIs)
-#     logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 def remove_outliers(data: list[float], z_score: float|None = None, clip_percent: float|None = None) -> list[float]:
@@ -317,7 +276,7 @@ def should_reduce_batch_size(exception: Exception) -> bool:
     return False
 
 # modified from https://github.com/huggingface/accelerate/blob/85a75d4c3d0deffde2fc8b917d9b1ae1cb580eb2/src/accelerate/utils/memory.py#L87
-def find_executable_batch_size(starting_batch_size: int, function: callable = None):
+def find_executable_batch_size(starting_batch_size: int, function: Callable|None = None):
     """
     A basic decorator that will try to execute `function`. 
     If it fails from exceptions related to out-of-memory or CUDNN, 
@@ -366,7 +325,8 @@ def find_executable_batch_size(starting_batch_size: int, function: callable = No
                     gc.collect()
                     torch.cuda.empty_cache()
                     batch_size //= 2
-                    print(f"Decreasing batch size to: {batch_size}")
+                    logger.warning(f"Decreasing batch size to {batch_size}.")
+                    logger.warning(f"Error: {e}.")
                 else:
                     raise
 
