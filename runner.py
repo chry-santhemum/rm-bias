@@ -127,7 +127,7 @@ class Runner(ABC):
                         "attribute": attribute,
                         "student_winrate": attribute_stats.winrate("student"),
                         "teacher_winrate": attribute_stats.winrate("teacher"),
-                        "all_rollouts": attribute_stats.all_rollouts,
+                        "all_rollouts": attribute_stats.to_dict(),
                         "meta": attribute_stats.meta,
                     }
                 )

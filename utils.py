@@ -32,7 +32,7 @@ from transformers import (
 from transformers.trainer_utils import set_seed as hf_set_seed
 
 from caller import Response
-from state import Rollout, Score
+from state import Rollout, RewriteScore
 
 Tokenizer = PreTrainedTokenizer | PreTrainedTokenizerFast
 
@@ -264,7 +264,7 @@ def json_to_rollouts(
             for rollout in user_data:
                 # Handle both old format (score) and new format (student_score)
                 if "student_score" in rollout:
-                    student_score = Score(
+                    student_score = RewriteScore(
                         score=rollout["student_score"].get("score"),
                         raw_score=rollout["student_score"].get("raw_score"),
                         reasoning=rollout["student_score"].get("reasoning"),
@@ -272,18 +272,18 @@ def json_to_rollouts(
                     )
                 elif "score" in rollout:
                     # Legacy format
-                    student_score = Score(
+                    student_score = RewriteScore(
                         score=rollout["score"],
                         raw_score=rollout["score"],
                         reasoning=None,
                         model_name=model_name,
                     )
                 else:
-                    student_score = Score(score=None, raw_score=None, reasoning=None, model_name=model_name)
+                    student_score = RewriteScore(score=None, raw_score=None, reasoning=None, model_name=model_name)
 
                 teacher_score = None
                 if "teacher_score" in rollout and rollout["teacher_score"] is not None:
-                    teacher_score = Score(
+                    teacher_score = RewriteScore(
                         score=rollout["teacher_score"].get("score"),
                         raw_score=rollout["teacher_score"].get("raw_score"),
                         reasoning=rollout["teacher_score"].get("reasoning"),

@@ -11,7 +11,7 @@ import numpy as np
 from caller import ChatHistory
 from api_models import GenerationModel, RewriteModel
 from reward_models import RewardModel
-from state import Rollout, Score
+from state import Rollout, RewriteScore
 
 
 @dataclass(frozen=True)
@@ -345,7 +345,7 @@ def organize_samples(
             continue
 
         assert item.assistant is not None
-        student_score = Score(
+        student_score = RewriteScore(
             score=item.score,
             raw_score=item.raw_score,
             reasoning=None,
@@ -434,7 +434,7 @@ def organize_rewrites(
                 else:
                     score_diff = None
 
-                student_score = Score(
+                student_score = RewriteScore(
                     score=score_diff,
                     raw_score=rewritten_raw,
                     reasoning=None,

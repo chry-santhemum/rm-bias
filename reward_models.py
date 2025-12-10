@@ -10,7 +10,7 @@ from loguru import logger
 
 from caller import ChatHistory
 from api_models import JudgeModel, RatingResult, ComparisonResult
-from state import Rollout, Score
+from state import Rollout, RewriteScore
 from utils import load_model, find_executable_batch_size
 
 
@@ -115,7 +115,7 @@ class RewardModel(ABC):
                 case None:
                     winrate_score = None
 
-            teacher_score = Score(
+            teacher_score = RewriteScore(
                 score=winrate_score,
                 raw_score=judge_task_result.score_diff,
                 reasoning=judge_task_result.reasoning,

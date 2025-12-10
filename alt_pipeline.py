@@ -5,7 +5,7 @@ import asyncio
 from tqdm.auto import tqdm
 from collections import defaultdict
 
-from state import Rollout, Score
+from state import Rollout, RewriteScore
 from utils import ClusterModel
 from load_cluster import load_initial_seed_states
 from caller import OpenRouterCaller, ChatHistory
@@ -51,7 +51,7 @@ for rollout, reward_score in zip(all_rollouts, reward_scores):
     baselines[rollout.get_first("user")].append(
         Rollout(
             response=rollout.get_first("assistant"),  # type: ignore
-            student_score=Score(
+            student_score=RewriteScore(
                 score=reward_score.score,
                 raw_score=reward_score.score,
                 reasoning=None,
