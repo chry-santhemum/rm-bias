@@ -6,9 +6,7 @@ from dataclasses import dataclass
 from typing import Any, Sequence, Literal
 
 from caller import AutoCaller, CacheConfig, RetryConfig, ChatHistory, Response
-from utils import parse_json_response, async_gather
-from collections import defaultdict
-from state import Rollout
+from utils import parse_json_response
 
 
 CACHE_CONFIG = CacheConfig(
@@ -26,7 +24,7 @@ RETRY_CONFIG = RetryConfig(
 
 
 class GenerationModel:
-    """API samplers with a single common model."""
+    """API samplers with a single underlying model."""
     def __init__(
         self,
         model_name: str,
@@ -403,8 +401,11 @@ class JudgeModel(GenerationModel):
 
         judge_results = []
         for i, resp in enumerate(responses):
+            if resp is None:
+                judge_results.append(ComparisonResult(winner=None, reasoning=None, score_diff=None))
+                continue
             response_reasoning = resp.reasoning_content
-            if resp is None or (not resp.has_response) or (resp.finish_reason != "stop"):
+            if (not resp.has_response) or (resp.finish_reason != "stop"):
                 judge_results.append(ComparisonResult(winner=None, reasoning=response_reasoning, score_diff=None))
                 logger.warning(f"Judge relative response is invalid: {resp}")
                 continue
@@ -440,7 +441,7 @@ class JudgeModel(GenerationModel):
 
         return judge_results
 
-    async def judge_existence(
+    async def judge_presence(
         self,
         attribute: str,
         chat_history: ChatHistory,

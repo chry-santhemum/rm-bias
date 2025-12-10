@@ -1,4 +1,3 @@
-# %%
 import asyncio
 import time
 import json
@@ -28,7 +27,6 @@ class PromptOutput:
     user: str
     assistant: str | None
     batch_id: str
-    score: float | None = None
 
 
 @dataclass(frozen=True)
@@ -51,7 +49,6 @@ class RewriteOutput:
     rewritten_assistant: str | None
     presence: bool
     batch_id: str
-    score: float | None = None
 
 
 @dataclass(frozen=True)
@@ -63,7 +60,7 @@ class BatchStartMarker:
 async def policy_worker(
     policy_model: GenerationModel,
     batch_size: int,
-    in_queue: asyncio.Queue[PromptInput],
+    in_queue: asyncio.Queue[PromptInput|None],
     out_queue: asyncio.Queue[PromptOutput],
     worker_id: int,
 ):
@@ -140,7 +137,7 @@ async def policy_worker(
 async def rewrite_worker(
     rewrite_model: RewriteModel,
     batch_size: int,
-    in_queue: asyncio.Queue[RewriteInput | None],
+    in_queue: asyncio.Queue[RewriteInput|None],
     out_queue: asyncio.Queue[RewriteOutput],
     worker_id: int,
 ):

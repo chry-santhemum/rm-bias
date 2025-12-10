@@ -43,7 +43,7 @@ class RewardModel(ABC):
         val_baselines: dict[str, list[Rollout|None]],
         first_n_rollouts: int=4,
         first_n_user_prompts: int=8  # 0 means all
-    ) -> dict[int, dict[str, dict[str, list[float|None]]]]:
+    ):
         chat_histories_A = []  # rewritten
         chat_histories_B = []  # baseline
         judge_tasks_info = []

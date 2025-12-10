@@ -13,17 +13,25 @@ class Cluster:
     aux_info: Any = None
 
 
-@dataclass
+@dataclass(kw_only=True, slots=True)
+class Score:
+    score: float | None      # reward diff if it is RM, winrate if it is judge
+    raw_score: float | None  # only exists when it is a reward model
+    reasoning: str | None    # only exists when it is a LLM judge
+    model_name: str
+
+
+@dataclass(kw_only=True, slots=True)
 class Rollout:
     response: str
-    score: float
+    student_score: Score
+    teacher_score: Score
 
 
 @dataclass
 class AttributeStats:
     attribute: str
     rollouts: dict[str, list[Rollout|None]] = field(default_factory=dict)
-    judge_scores: dict[str, list[float|None]] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -31,29 +39,13 @@ class AttributeStats:
         return self.meta.get("parent", None)
 
     @property
-    def mean_rewards(self) -> dict[str, float]:
-        mean_results = {}
-        for user_prompt, rollouts in self.rollouts.items():
-            rollouts = [r for r in rollouts if r is not None and r.score is not None]
-            mean_results[user_prompt] = np.mean([r.score for r in rollouts]).item()  # type: ignore
-        return mean_results
-
-    @property
-    def all_rewards(self) -> dict[str, list[float]]:
-        all_results = {}
-        for user_prompt, rollouts in self.rollouts.items():
-            rollouts = [r for r in rollouts if r is not None and r.score is not None]
-            all_results[user_prompt] = [r.score for r in rollouts]
-        return all_results
-
-    @property
-    def all_rollouts(self) -> dict[str, list[Any]]:
+    def all_rollouts(self) -> dict[str, list]:
         all_results = {}
         for user_prompt, rollouts in self.rollouts.items():
             all_results[user_prompt] = [asdict(r) if r is not None else None for r in rollouts]
         return all_results
 
-    def mean_reward_diff(self, baselines: dict[str, list[Rollout|None]]) -> float | None:
+    def winrate(self, ) -> float | None:
         mean_rewards = self.mean_rewards
         if len(mean_rewards) == 0:
             return None
