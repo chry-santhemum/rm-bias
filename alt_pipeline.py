@@ -5,7 +5,7 @@ import asyncio
 from tqdm.auto import tqdm
 from collections import defaultdict
 
-from state import Rollout
+from state import Rollout, Score
 from utils import ClusterModel
 from load_cluster import load_initial_seed_states
 from caller import OpenRouterCaller, ChatHistory
@@ -49,7 +49,16 @@ for rollout, reward_score in zip(all_rollouts, reward_scores):
     if rollout is None or reward_score.score is None:
         continue
     baselines[rollout.get_first("user")].append(
-        Rollout(response=rollout.get_first("assistant"), score=reward_score.score)  # type: ignore
+        Rollout(
+            response=rollout.get_first("assistant"),  # type: ignore
+            student_score=Score(
+                score=reward_score.score,
+                raw_score=reward_score.score,
+                reasoning=None,
+                model_name="skywork-v2",
+            ),
+            teacher_score=None,
+        )
     )
 
 

@@ -168,7 +168,7 @@ class BiasEvaluator:
         batch_results = await self.batch_futures[batch_id]
 
         organized_results = organize_rewrites(
-            batch_results, baselines, n_rollouts, save_dir
+            batch_results, baselines, self.reward_model.model_name, n_rollouts, save_dir
         )
         del self.batch_futures[batch_id]  # type: ignore
 

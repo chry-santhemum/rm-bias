@@ -10,11 +10,13 @@ from loguru import logger
 
 from caller import ChatHistory
 from api_models import JudgeModel, RatingResult, ComparisonResult
-from state import Rollout
+from state import Rollout, Score
 from utils import load_model, find_executable_batch_size
 
 
 class RewardModel(ABC):
+    model_name: str
+
     @property
     @abstractmethod
     def batch_size(self) -> int:
@@ -38,15 +40,26 @@ class RewardModel(ABC):
         pass
 
     async def judge_validation_results(
-        self, 
-        validation_results: list[dict[str, dict[str, list[Rollout|None]]]], 
+        self,
+        validation_results: list[dict[str, dict[str, list[Rollout|None]]]],
         val_baselines: dict[str, list[Rollout|None]],
         first_n_rollouts: int=4,
         first_n_user_prompts: int=8  # 0 means all
-    ):
+    ) -> None:
+        """
+        Populates teacher_score on rollouts in validation_results in place.
+
+        For each rollout, compares it against the corresponding baseline using
+        async_compare and sets the teacher_score with:
+        - score: winrate (1.0 for A wins, 0.0 for B wins, 0.5 for tie)
+        - raw_score: score_diff from comparison (if available, e.g. for RM-based comparison)
+        - reasoning: from comparison result (if available, e.g. for LLM judge)
+        - model_name: this model's name
+        """
         chat_histories_A = []  # rewritten
         chat_histories_B = []  # baseline
         judge_tasks_info = []
+
         for i, validation_result in enumerate(validation_results):
             for attribute, attribute_stats in validation_result.items():
                 user_prompt_count = 0
@@ -73,23 +86,15 @@ class RewardModel(ABC):
                                 "user_prompt": user_prompt,
                                 "rollout_idx": rollout_idx,
                             }
-                        )  
-        
+                        )
+
         logger.info(f"Running {len(judge_tasks_info)} judge tasks...")
         judge_tasks_results = await self.async_compare(
             chat_histories_A=chat_histories_A,
             chat_histories_B=chat_histories_B,
         )
 
-        # Unpack results
-        judge_results: dict[int, dict[str, dict[str, list[float|None]]]] = {
-            i: {
-                attribute: dict()
-                for attribute in validation_result
-            }
-            for i, validation_result in enumerate(validation_results)
-        }
-
+        # Populate teacher_score on each rollout in place
         for judge_task_result, judge_task_info in zip(
             judge_tasks_results, judge_tasks_info
         ):
@@ -98,22 +103,29 @@ class RewardModel(ABC):
             user_prompt = judge_task_info["user_prompt"]
             rollout_idx = judge_task_info["rollout_idx"]
 
-            if user_prompt not in judge_results[seed_state_idx][attribute]:
-                judge_results[seed_state_idx][attribute][user_prompt] = []
-            
-            A_win_score = None
+            # Compute winrate score from winner
+            winrate_score = None
             match judge_task_result.winner:
                 case "A":
-                    A_win_score = 1.0
+                    winrate_score = 1.0
                 case "B":
-                    A_win_score = 0.0
+                    winrate_score = 0.0
                 case "Tie":
-                    A_win_score = 0.5
+                    winrate_score = 0.5
                 case None:
-                    A_win_score = None
-            judge_results[seed_state_idx][attribute][user_prompt].append(A_win_score)
+                    winrate_score = None
 
-        return judge_results
+            teacher_score = Score(
+                score=winrate_score,
+                raw_score=judge_task_result.score_diff,
+                reasoning=judge_task_result.reasoning,
+                model_name=self.model_name,
+            )
+
+            # Update the rollout in place
+            rollout = validation_results[seed_state_idx][attribute][user_prompt][rollout_idx]
+            if rollout is not None:
+                rollout.teacher_score = teacher_score
 
 
 class LocalRewardModel(RewardModel):

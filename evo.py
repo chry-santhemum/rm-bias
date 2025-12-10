@@ -66,9 +66,11 @@ class EvoPlanner:
                 baseline_rollout = baseline_rollouts[i]
                 if (
                     baseline_rollout is None
-                    or baseline_rollout.score is None 
+                    or baseline_rollout.student_score is None
+                    or baseline_rollout.student_score.raw_score is None
                     or rewritten_rollout is None
-                    or rewritten_rollout.score is None
+                    or rewritten_rollout.student_score is None
+                    or rewritten_rollout.student_score.raw_score is None
                 ):
                     continue
                 all_past_data.append(
@@ -79,16 +81,17 @@ class EvoPlanner:
                     }
                 )
 
+        # Sort by reward diff (rewritten raw_score - baseline raw_score)
         if self.direction == "plus":
             all_past_data.sort(
-                key=lambda x: x["rewritten_rollout"]["score"]
-                - x["baseline_rollout"]["score"],
+                key=lambda x: x["rewritten_rollout"]["student_score"]["raw_score"]
+                - x["baseline_rollout"]["student_score"]["raw_score"],
                 reverse=True,
             )
         else:
             all_past_data.sort(
-                key=lambda x: x["rewritten_rollout"]["score"]
-                - x["baseline_rollout"]["score"],
+                key=lambda x: x["rewritten_rollout"]["student_score"]["raw_score"]
+                - x["baseline_rollout"]["student_score"]["raw_score"],
                 reverse=False,
             )
 
@@ -330,14 +333,16 @@ class EvoPlanner:
             all_candidates = []  # All candidates before filtering
             candidates = []  # Candidates that pass the filter
             for attribute, stats in seed_state.history[-1].items():
+                student_winrate = stats.winrate("student")
+                teacher_winrate = stats.winrate("teacher")
                 new_candidate = (
                     attribute,
                     stats.meta["time_step"],
-                    stats.mean_reward_diff(baselines),
-                    stats.judge_winrate(),
-                    stats.reward_winrate(baselines),
+                    student_winrate,  # was mean_reward_diff
+                    teacher_winrate,  # was judge_winrate
+                    student_winrate,  # was reward_winrate (same as student_winrate now)
                 )
-                print(f"Attribute:\n{attribute}\nMean reward diff: {new_candidate[2]}\nJudge winrate: {new_candidate[3]}\nReward winrate: {new_candidate[4]}\n")
+                print(f"Attribute:\n{attribute}\nStudent winrate: {new_candidate[2]}\nTeacher winrate: {new_candidate[3]}\n")
 
                 all_candidates.append(new_candidate)
 
@@ -445,7 +450,7 @@ class EvoPlanner:
                 candidates.append((
                     attribute,
                     stats.meta["time_step"],
-                    stats.mean_reward_diff(baselines),
+                    stats.winrate("student"),
                 ))
 
             _, indices = self.cluster_model.cluster_dbscan(
@@ -575,16 +580,13 @@ class EvoRunner(Runner):
         )
 
         if judge_filter_thresholds is not None:
-            step_judge_results = await self.teacher_model.judge_validation_results(
+            # Populate teacher_score on rollouts in place
+            await self.teacher_model.judge_validation_results(
                 validation_results=evaluate_results,
                 val_baselines=self.baselines,  # type: ignore
                 first_n_rollouts=4,
                 first_n_user_prompts=8,
             )
-
-            for seed_state_idx, seed_judge_results in step_judge_results.items():
-                for attribute, judge_result in seed_judge_results.items():
-                    self.seed_states[seed_state_idx].history[-1][attribute].judge_scores = judge_result
 
         logger.info(
             f"[TRAIN STEP {self.step_count}] Updating population. Before update: {len(self.seed_states[0].history[-1])}"

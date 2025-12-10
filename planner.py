@@ -263,14 +263,14 @@ class ListPlanner(Planner):
                     )
 
                     if self.reverse:  # REVERSE SCORES!
-                        sampled_rollouts.sort(key=lambda x: x.score, reverse=True)
-                        max_score = max(r.score for r in sampled_rollouts)
+                        sampled_rollouts.sort(key=lambda x: x.student_score.raw_score, reverse=True)
+                        max_score = max(r.student_score.raw_score for r in sampled_rollouts)
 
                         data = {
                             "user_prompt": user_prompt,
                             "rollouts": [{
                                 "response": r.response,
-                                "score": max_score - r.score,
+                                "score": max_score - r.student_score.raw_score,
                             } for r in sampled_rollouts],
                         }
 
@@ -282,7 +282,7 @@ class ListPlanner(Planner):
                             bias_nudge=BIAS_NUDGE[direction],
                         )
                     else:
-                        sampled_rollouts.sort(key=lambda x: x.score, reverse=False)
+                        sampled_rollouts.sort(key=lambda x: x.student_score.raw_score, reverse=False)
 
                         data = {
                             "user_prompt": user_prompt,
@@ -404,18 +404,18 @@ class PairPlanner(Planner):
             ]
 
             for prompt in prompts:
-                rollouts = [r for r in runner.baselines[prompt] if r.score is not None]
+                rollouts = [r for r in runner.baselines[prompt] if r.student_score is not None and r.student_score.raw_score is not None]
                 if len(rollouts) == 0:
                     continue
 
-                scores = np.array([float(r.score) for r in rollouts])  # type: ignore
+                scores = np.array([float(r.student_score.raw_score) for r in rollouts])
                 mean_score, stdev_score = np.mean(scores), np.std(scores)
                 if stdev_score == 0:
                     continue  # No variability
 
                 # find those above / below threshold * stdev
-                high_rollouts = [r for r in rollouts if float(r.score) > mean_score + threshold * stdev_score]  # type: ignore
-                low_rollouts = [r for r in rollouts if float(r.score) < mean_score - threshold * stdev_score]  # type: ignore
+                high_rollouts = [r for r in rollouts if float(r.student_score.raw_score) > mean_score + threshold * stdev_score]
+                low_rollouts = [r for r in rollouts if float(r.student_score.raw_score) < mean_score - threshold * stdev_score]
                 # print(
                 #     f"High rollouts: {len(high_rollouts)}, Low rollouts: {len(low_rollouts)}"
                 # )

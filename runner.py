@@ -110,7 +110,7 @@ class Runner(ABC):
     ):
         """
         Save a condensed version of previous step's attribute stats for each seed state,
-        ordered by mean reward difference from baseline.
+        ordered by student winrate (reward diff).
 
         Returns seed_state_index -> top k list of attributes
         """
@@ -125,18 +125,25 @@ class Runner(ABC):
                 all_attributes.append(
                     {
                         "attribute": attribute,
-                        "mean_reward_diff": attribute_stats.mean_reward_diff(
-                            self.baselines  # type: ignore
-                        ),
+                        "student_winrate": attribute_stats.winrate("student"),
+                        "teacher_winrate": attribute_stats.winrate("teacher"),
                         "all_rollouts": attribute_stats.all_rollouts,
                         "meta": attribute_stats.meta,
                     }
                 )
 
             if direction == "plus":
-                all_attributes = sorted(all_attributes, key=lambda x: x["mean_reward_diff"], reverse=True)
+                all_attributes = sorted(
+                    all_attributes,
+                    key=lambda x: x["student_winrate"] if x["student_winrate"] is not None else float("-inf"),
+                    reverse=True
+                )
             else:
-                all_attributes = sorted(all_attributes, key=lambda x: x["mean_reward_diff"], reverse=False)
+                all_attributes = sorted(
+                    all_attributes,
+                    key=lambda x: x["student_winrate"] if x["student_winrate"] is not None else float("inf"),
+                    reverse=False
+                )
 
             # overwrites if already exists
             seed_save_dir = save_dir / f"seed_{seed_state.index}.json"
@@ -183,17 +190,29 @@ class Runner(ABC):
                     baselines=self.val_baselines,
                 )
             validation_results.append(stats)
-        
-        judge_results = await self.teacher_model.judge_validation_results(
+
+        # Populate teacher_score on rollouts in place
+        await self.teacher_model.judge_validation_results(
             validation_results=validation_results,
             val_baselines=self.val_baselines,  # type: ignore
         )
 
+        # Save validation results with teacher scores
         for i, seed_state in enumerate(self.seed_states):
+            # Extract teacher winrates from the rollouts
+            teacher_results = {}
+            for attribute, rollouts_by_prompt in validation_results[i].items():
+                teacher_results[attribute] = {}
+                for user_prompt, rollouts in rollouts_by_prompt.items():
+                    teacher_results[attribute][user_prompt] = [
+                        r.teacher_score.score if r is not None and r.teacher_score is not None else None
+                        for r in rollouts
+                    ]
+
             with open(
-                self.run_path / "validate" / f"seed_{seed_state.index}_judge.json", "w"
+                self.run_path / "validate" / f"seed_{seed_state.index}_teacher_scores.json", "w"
             ) as f:
-                json.dump(judge_results[i], f, indent=4)
+                json.dump(teacher_results, f, indent=4)
 
 
 class TestRunner(Runner):

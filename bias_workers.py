@@ -11,7 +11,7 @@ import numpy as np
 from caller import ChatHistory
 from api_models import GenerationModel, RewriteModel
 from reward_models import RewardModel
-from state import Rollout
+from state import Rollout, Score
 
 
 @dataclass(frozen=True)
@@ -27,6 +27,8 @@ class PromptOutput:
     user: str
     assistant: str | None
     batch_id: str
+    score: float | None = None
+    raw_score: float | None = None
 
 
 @dataclass(frozen=True)
@@ -49,6 +51,8 @@ class RewriteOutput:
     rewritten_assistant: str | None
     presence: bool
     batch_id: str
+    score: float | None = None
+    raw_score: float | None = None
 
 
 @dataclass(frozen=True)
@@ -246,7 +250,7 @@ async def rating_worker(
 
         reward_scores = await reward_model.async_rate(chat_histories, use_tqdm=False)
         for i, reward_score in zip(existing_indices, reward_scores):
-            batch[i] = replace(batch[i], score=reward_score.score)
+            batch[i] = replace(batch[i], score=reward_score.score, raw_score=reward_score.score)
         
         all_results[batch[0].batch_id].extend(batch)  # type: ignore      
         logger.info(f"[rating_worker] Finished processing minibatch of size {len(existing_indices)}/{len(batch)} in {(time.time() - start_time):.2f} seconds. Queue size: {in_queue.qsize()}")
@@ -322,6 +326,7 @@ async def rating_worker(
 
 def organize_samples(
     all_results: list[PromptOutput],
+    student_model_name: str,
     save_dir: Path | None = None,
 ):
     organized_scores = defaultdict(dict)
@@ -340,7 +345,17 @@ def organize_samples(
             continue
 
         assert item.assistant is not None
-        attribute_rollouts[item.user].append(Rollout(response=item.assistant, score=item.score))
+        student_score = Score(
+            score=item.score,
+            raw_score=item.raw_score,
+            reasoning=None,
+            model_name=student_model_name,
+        )
+        attribute_rollouts[item.user].append(Rollout(
+            response=item.assistant,
+            student_score=student_score,
+            teacher_score=None,
+        ))
         attribute_scores[item.user].append(item.score)
 
     mean_scores = {}
@@ -382,6 +397,7 @@ def organize_samples(
 def organize_rewrites(
     all_results: list[RewriteOutput],
     baseline_rollouts: dict[str, list[Rollout]],
+    student_model_name: str,
     n_rollouts: int | None = None,
     save_dir: Path | None = None,
 ) -> dict[str, dict[str, list[Rollout | None]]]:
@@ -403,15 +419,31 @@ def organize_rewrites(
             continue
 
         found = False
-        for i, r in enumerate(baseline_rollouts[result.user]):
+        for i, baseline in enumerate(baseline_rollouts[result.user]):
             if n_rollouts is not None and i >= n_rollouts:
                 break
-            if r.response == result.original_assistant:
+            if baseline.response == result.original_assistant:
                 if attribute_rollouts[result.user][i] is not None:
                     continue
+
+                # Compute reward diff: rewritten score - baseline score
+                baseline_raw = baseline.student_score.raw_score
+                rewritten_raw = result.raw_score
+                if baseline_raw is not None and rewritten_raw is not None:
+                    score_diff = rewritten_raw - baseline_raw
+                else:
+                    score_diff = None
+
+                student_score = Score(
+                    score=score_diff,
+                    raw_score=rewritten_raw,
+                    reasoning=None,
+                    model_name=student_model_name,
+                )
                 attribute_rollouts[result.user][i] = Rollout(
-                    response=result.rewritten_assistant,  # type: ignore
-                    score=result.score,  # type: ignore
+                    response=result.rewritten_assistant,
+                    student_score=student_score,
+                    teacher_score=None,
                 )
                 found = True
                 break
@@ -437,7 +469,10 @@ def organize_rewrites(
             attribute_scores = {}
             all_scores = []
             for user, v in attribute_rollouts.items():
-                attribute_scores[user] = [r.score for r in v if r is not None and r.score is not None]
+                attribute_scores[user] = [
+                    r.student_score.score for r in v
+                    if r is not None and r.student_score is not None and r.student_score.score is not None
+                ]
                 all_scores.extend(attribute_scores[user])
             scores[attribute] = attribute_scores
             mean_scores[attribute] = np.mean(all_scores).item() if all_scores else None
@@ -510,7 +545,7 @@ async def evaluate_baselines(
         f"Expected {len(user_prompts) * n_rollouts} results, got {len(all_results)}"
     )
 
-    organized_results = organize_samples(all_results, save_dir)
+    organized_results = organize_samples(all_results, reward_model.model_name, save_dir)
     logger.info(f"Evaluated baselines in {(time.time() - start_time):.2f} seconds")
 
     return organized_results  # type: ignore

@@ -32,7 +32,7 @@ from transformers import (
 from transformers.trainer_utils import set_seed as hf_set_seed
 
 from caller import Response
-from state import Rollout
+from state import Rollout, Score
 
 Tokenizer = PreTrainedTokenizer | PreTrainedTokenizerFast
 
@@ -249,15 +249,52 @@ def is_notebook():
 
 def json_to_rollouts(
     json_data: dict[str, dict[str, list[dict[str, Any]]]],
+    model_name: str = "unknown",
 ) -> dict[str, dict[str, list[Rollout]]]:
+    """
+    Convert JSON rollout data to Rollout objects.
+    Expects JSON with structure: attribute -> user_prompt -> list of rollout dicts.
+    Each rollout dict should have 'response' and optionally 'student_score'/'score' fields.
+    """
     rollouts = {}
     for attribute, attribute_data in json_data.items():
         rollouts[attribute] = {}
         for user, user_data in attribute_data.items():
-            rollouts[attribute][user] = [
-                Rollout(response=rollout["response"], score=rollout["score"])
-                for rollout in user_data
-            ]
+            rollouts[attribute][user] = []
+            for rollout in user_data:
+                # Handle both old format (score) and new format (student_score)
+                if "student_score" in rollout:
+                    student_score = Score(
+                        score=rollout["student_score"].get("score"),
+                        raw_score=rollout["student_score"].get("raw_score"),
+                        reasoning=rollout["student_score"].get("reasoning"),
+                        model_name=rollout["student_score"].get("model_name", model_name),
+                    )
+                elif "score" in rollout:
+                    # Legacy format
+                    student_score = Score(
+                        score=rollout["score"],
+                        raw_score=rollout["score"],
+                        reasoning=None,
+                        model_name=model_name,
+                    )
+                else:
+                    student_score = Score(score=None, raw_score=None, reasoning=None, model_name=model_name)
+
+                teacher_score = None
+                if "teacher_score" in rollout and rollout["teacher_score"] is not None:
+                    teacher_score = Score(
+                        score=rollout["teacher_score"].get("score"),
+                        raw_score=rollout["teacher_score"].get("raw_score"),
+                        reasoning=rollout["teacher_score"].get("reasoning"),
+                        model_name=rollout["teacher_score"].get("model_name", model_name),
+                    )
+
+                rollouts[attribute][user].append(Rollout(
+                    response=rollout["response"],
+                    student_score=student_score,
+                    teacher_score=teacher_score,
+                ))
     return rollouts
 
 # %% borrowed from https://github.com/GraySwanAI/nanoGCG/blob/d4a20a8b4a12c3ee814a77a61423b7bdcd151f82/nanogcg/utils.py
