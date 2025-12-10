@@ -4,7 +4,6 @@ from utils import timestamp
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataset", type=str, required=True)
-parser.add_argument("--runner_type", type=str, required=True, choices=["evo", "one_turn"])
 parser.add_argument("--planner_type", type=str, required=True, choices=["pair", "list", "list_reverse"])
 parser.add_argument("--direction", type=str, required=True, choices=["plus", "minus"])
 parser.add_argument("--n_new", type=int, required=True, help="Hypothesis generation: number of candidates per ask")
@@ -49,7 +48,6 @@ from api_models import GenerationModel, RewriteModel, JudgeModel
 from reward_models import LocalRewardModel, APIRewardModel
 from bias_evaluator import BiasEvaluator
 from planner import PairPlanner, ListPlanner
-from one_turn import OneTurnRunner
 from evo import EvoRunner, EvoPlanner
 from plotting import plot_validation_data
 
@@ -141,94 +139,70 @@ async def main():
         )
 
     validate = True if args.val_split_size > 0 else False
-    if args.runner_type == "evo":
-        planner = EvoPlanner(
-            direction=args.direction,
-            hypothesis_planner=hypothesis_planner,
-            cluster_model=cluster_model,
+
+    planner = EvoPlanner(
+        direction=args.direction,
+        hypothesis_planner=hypothesis_planner,
+        cluster_model=cluster_model,
+    )
+    runner = EvoRunner(
+        seed_states=initial_seed_states,  # type: ignore
+        planner=planner,
+        policy_model=policy_model,
+        bias_evaluator=bias_evaluator,
+        teacher_model=teacher_model,
+        dbscan_eps=args.dbscan_eps,
+        m_var=args.m_var,
+        n_baseline_rollouts=args.n_baseline_rollouts,
+        n_rewrite_rollouts=args.n_rewrite_rollouts,
+        run_name=run_name,
+    )
+
+    await runner.get_baselines()
+
+    try:
+        await runner.train(
+            n_pop_target=[16, 8, 8],
+            train_batch_size=[4, 8, 8],
+            judge_filter_thresholds=[(0.2, 0.8), (0.3, 0.7), (0.4, 0.6)],
+            validate=validate,
         )
-        runner = EvoRunner(
-            seed_states=initial_seed_states,  # type: ignore
-            planner=planner,
-            policy_model=policy_model,
-            bias_evaluator=bias_evaluator,
-            teacher_model=teacher_model,
-            dbscan_eps=args.dbscan_eps,
-            m_var=args.m_var,
-            n_baseline_rollouts=args.n_baseline_rollouts,
-            n_rewrite_rollouts=args.n_rewrite_rollouts,
-            run_name=run_name,
-        )
-
-        await runner.get_baselines()
-  
-        try:
-            await runner.train(
-                n_pop_target=[16, 8, 8],
-                train_batch_size=[4, 8, 8],
-                judge_filter_thresholds=[(0.2, 0.8), (0.3, 0.7), (0.4, 0.6)],
-                validate=validate,
-            )
-        except Exception as e:
-            logger.exception(f"Training failed: {e}")
-            raise
+    except Exception as e:
+        logger.exception(f"Training failed: {e}")
+        raise
 
 
-    elif args.runner_type == "one_turn":
-        runner = OneTurnRunner(
-            seed_states=initial_seed_states,
-            hypothesis_planner=hypothesis_planner,
-            cluster_model=cluster_model,
-            policy_model=policy_model,
-            bias_evaluator=bias_evaluator,
-            teacher_model=teacher_model,
-            train_batch_size=args.train_batch_size,
-            n_baseline_rollouts=args.n_baseline_rollouts,
-            n_rewrite_rollouts=args.n_rewrite_rollouts,
-            direction=args.direction,
-            run_name=run_name,
-        )
+    # with open(
+    #     f"data/one_turn/{run_name}/val_baselines/sample_rollouts.json", "r"
+    # ) as f:
+    #     val_baselines = json.load(f)
 
-        await runner.get_baselines()
-
-        # with open(
-        #     f"data/one_turn/{run_name}/val_baselines/sample_rollouts.json", "r"
-        # ) as f:
-        #     val_baselines = json.load(f)
-
-        # runner.val_baselines = {}
-        # for user, rollouts in val_baselines.items():
-        #     runner.val_baselines[user] = [
-        #         Rollout(response=rollout["response"], score=rollout["score"])
-        #         for rollout in rollouts
-        #     ]
-        
-        # rewrite_rollouts = []
-        # for idx in topic_ids:
-        #     with open(
-        #         f"data/one_turn/{run_name}/validate/seed_{idx}_validate/rewrite_rollouts.json", "r"
-        #     ) as f:
-        #         seed_rollouts_json = json.load(f)
-
-        #     seed_rollouts = defaultdict(dict)
-        #     for attribute, attribute_rollouts in seed_rollouts_json.items():
-        #         for user_prompt, rollouts in attribute_rollouts.items():
-        #             seed_rollouts[attribute][user_prompt] = [
-        #                 Rollout(response=rollout["response"], score=rollout["score"])
-        #                 for rollout in rollouts
-        #             ]
-
-        #     rewrite_rollouts.append(dict(seed_rollouts))
-
-        # runner.judge(validation_results=rewrite_rollouts)
-            
-
-        try:
-            await runner.train(validate=validate)
-        except Exception as e:
-            logger.exception(f"Training failed: {e}")
-            raise
+    # runner.val_baselines = {}
+    # for user, rollouts in val_baselines.items():
+    #     runner.val_baselines[user] = [
+    #         Rollout(response=rollout["response"], score=rollout["score"])
+    #         for rollout in rollouts
+    #     ]
     
+    # rewrite_rollouts = []
+    # for idx in topic_ids:
+    #     with open(
+    #         f"data/one_turn/{run_name}/validate/seed_{idx}_validate/rewrite_rollouts.json", "r"
+    #     ) as f:
+    #         seed_rollouts_json = json.load(f)
+
+    #     seed_rollouts = defaultdict(dict)
+    #     for attribute, attribute_rollouts in seed_rollouts_json.items():
+    #         for user_prompt, rollouts in attribute_rollouts.items():
+    #             seed_rollouts[attribute][user_prompt] = [
+    #                 Rollout(response=rollout["response"], score=rollout["score"])
+    #                 for rollout in rollouts
+    #             ]
+
+    #     rewrite_rollouts.append(dict(seed_rollouts))
+
+    # runner.judge(validation_results=rewrite_rollouts)
+
     run_path = Path(f"data/{args.runner_type}/{run_name}")
     write_path = Path(f"plots/{run_name}")
     plot_validation_data(run_path=run_path, write_path=write_path)
