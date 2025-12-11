@@ -1,5 +1,6 @@
 import re
 import json
+import random
 import textwrap
 from loguru import logger
 from dataclasses import dataclass
@@ -16,17 +17,19 @@ RETRY_CONFIG = RetryConfig(
 
 
 class GenerationModel:
-    """API samplers with a single underlying model."""
+    """API samplers with one or more underlying models."""
     def __init__(
         self,
-        model_name: str,
+        model_name: str | list[str],
         max_par: int,
         force_caller: str | None = None,
         **kwargs,
     ):
-        self.model_name = model_name
+        if isinstance(model_name, str):
+            self.model_names = [model_name]
+        else:
+            self.model_names = model_name
         self.max_par = max_par
-        self.model_slug = self.model_name.split("/")[-1]
         self.caller = AutoCaller(
             dotenv_path=".env", 
             retry_config=RETRY_CONFIG, 
@@ -34,16 +37,27 @@ class GenerationModel:
         )
         self.kwargs = kwargs
 
+    @property
+    def model_name(self) -> str:
+        """Returns the first model name."""
+        return self.model_names[0]
+
     async def sample(
         self,
         chat_histories: list[ChatHistory],
         desc: str | None = None,
         **kwargs,
     ) -> list[Response|None]:
-        """kwargs passed here will supersede the init kwargs."""
+        """kwargs passed here will supersede the init kwargs.
+        
+        When multiple model names are configured, randomly selects a model
+        for each chat history.
+        """
+        models = [random.choice(self.model_names) for _ in chat_histories]
+        
         responses = await self.caller.call(
             messages=chat_histories,
-            model=self.model_name,
+            model=models,
             max_parallel=self.max_par,
             desc=desc,
             **self.kwargs, **kwargs,
