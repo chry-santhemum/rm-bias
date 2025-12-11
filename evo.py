@@ -544,8 +544,6 @@ class EvoRunner(Runner):
             await self.teacher_model.judge_validation_results(
                 validation_results=evaluate_results,
                 val_baselines=self.baselines,  # type: ignore
-                first_n_rollouts=4,
-                first_n_user_prompts=8,
             )
 
         for seed_state_idx, stats in enumerate(evaluate_results):

@@ -104,13 +104,13 @@ async def main():
         teacher_model = LocalRewardModel(
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
             devices=all_cuda_devices, 
-            batch_size_per_device=32,
+            batch_size_per_device=16,
         )
     elif args.teacher_model == "skywork-llama-8b-exp":
         teacher_model = LocalRewardModel(
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B-40M",
             devices=all_cuda_devices, 
-            batch_size_per_device=32,
+            batch_size_per_device=16,
         )
     elif args.teacher_model == "claude-sonnet-4.5":
         teacher_model = APIRewardModel(
@@ -131,13 +131,13 @@ async def main():
         student_model = LocalRewardModel(
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
             devices=all_cuda_devices, 
-            batch_size_per_device=32,
+            batch_size_per_device=16,
         )
     elif args.student_model == "skywork-llama-8b-exp":
         student_model = LocalRewardModel(
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B-40M",
             devices=all_cuda_devices, 
-            batch_size_per_device=32,
+            batch_size_per_device=16,
         )
 
     bias_evaluator = BiasEvaluator(
@@ -210,11 +210,9 @@ async def main():
 
     try:
         await runner.train(
-            # n_pop_target=[16, 8, 8],
-            # train_batch_size=[4, 8, 8],
+            n_pop_target=[32, 16, 16],
+            train_batch_size=[4, 8, 8],
             use_pareto_selection=True,
-            n_pop_target=[4, 2],
-            train_batch_size=[2, 4],
             validate=validate,
         )
     except Exception as e:
