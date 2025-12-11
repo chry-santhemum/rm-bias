@@ -68,90 +68,96 @@ def plot_reward_diff_violin(plot_data: list[dict]):
     Each item in the input needs to have (at least): 
     - attribute
     - diffs: list[float]
+    
+    Creates horizontal violin plots to fit attribute labels compactly.
+    Designed to handle up to 16 attributes.
     """
-    # Helper function to wrap text
-    def wrap_text(text, width):
-        """Wrap text to specified width"""
-        words = text.split()
-        lines = []
-        current_line = []
-        current_length = 0
+    # Helper function to truncate text with ellipsis
+    def truncate_text(text, max_length=80):
+        """Truncate text to max_length with ellipsis if needed"""
+        if len(text) <= max_length:
+            return text
+        return text[:max_length-3] + "..."
 
-        for word in words:
-            if current_length + len(word) + 1 <= width:
-                current_line.append(word)
-                current_length += len(word) + 1
-            else:
-                if current_line:
-                    lines.append(" ".join(current_line))
-                current_line = [word]
-                current_length = len(word)
-
-        if current_line:
-            lines.append(" ".join(current_line))
-
-        return "<br>".join(lines)
-
-    # Create box plot
+    # Create figure
     fig = go.Figure()
 
-    # Store positions and winrates for annotation
+    # Store display names for y-axis
     display_names = []
 
-    # Add violin plot for each attribute
-    for i, item in enumerate(plot_data):
-        display_name = wrap_text(item["attribute"], width=60)
-
-        # Add reward winrate (from reward diffs > 0)
+    # Add violin plot for each attribute (in reverse order so first appears at top)
+    for i, item in enumerate(reversed(plot_data)):
+        # Create compact display name with winrates inline
+        base_name = truncate_text(item["attribute"], max_length=80)
+        
+        # Build winrate suffix
+        winrate_parts = []
         if item.get("reward_winrate") is not None:
-            display_name += f"<br>(Reward WR: {item['reward_winrate']:.2f})"
-        else:
-            display_name += "<br>(Reward WR: N/A)"
-
-        # Add judge winrate
+            winrate_parts.append(f"Student:{item['reward_winrate']:.2f}")
         if item.get("judge_winrate") is not None:
-            display_name += f"<br>(Judge WR: {item['judge_winrate']:.2f})"
+            winrate_parts.append(f"Teacher:{item['judge_winrate']:.2f}")
+        
+        if winrate_parts:
+            display_name = f"{base_name} ({', '.join(winrate_parts)})"
         else:
-            display_name += "<br>(Judge WR: N/A)"
+            display_name = base_name
 
         display_names.append(display_name)
 
         fig.add_trace(
             go.Violin(
-                y=item["diffs"],
+                x=item["diffs"],
+                y0=display_name,
                 name=display_name,
+                orientation='h',
+                side='positive',
                 box_visible=True,
                 meanline_visible=True,
                 points="all",
-                pointpos=0,
+                pointpos=-0.1,
                 jitter=0.3,
+                width=0.8,
             )
         )
 
-    title = f"Reward diffs violin plot"
+    title = "Reward Diffs Violin Plot"
     if plot_data[0].get("cluster_info", None) is not None:
         cluster_info = plot_data[0]["cluster_info"]
-        title += f"<br>Seed {plot_data[0]['seed_index']}: {cluster_info['summary']}"
+        title += f"<br>Seed {plot_data[0]['seed_index']}: {truncate_text(cluster_info['summary'], 100)}"
+
+    # Calculate height based on number of attributes (min 400, ~60px per attribute)
+    n_attributes = len(plot_data)
+    plot_height = max(400, min(1200, 80 + n_attributes * 70))
 
     fig.update_layout(
-        title=dict(text=title, font=dict(size=18)),
-        xaxis_title="Attributes",
-        yaxis_title="Reward Difference (Rewrite - Baseline)",
-        height=1000,
-        width=1400,
+        title=dict(text=title, font=dict(size=16)),
+        xaxis_title="Student reward diff",
+        yaxis_title=None,
+        height=plot_height,
+        width=1200,
         showlegend=False,
-        xaxis=dict(tickangle=45, tickfont=dict(size=13)),
-        yaxis=dict(tickfont=dict(size=13), title=dict(font=dict(size=14))),
-        font=dict(size=13),
-        bargap=0.05,
-        violingap=0.1,
-        violingroupgap=0.05,
-        margin=dict(l=60, r=40, t=80, b=120),
+        xaxis=dict(
+            tickfont=dict(size=11),
+            title=dict(font=dict(size=12)),
+            zeroline=True,
+            zerolinecolor='black',
+            zerolinewidth=1.5,
+        ),
+        yaxis=dict(
+            tickfont=dict(size=10),
+            automargin=True,
+            categoryorder='array',
+            categoryarray=display_names,
+        ),
+        font=dict(size=11),
+        violingap=0.15,
+        violingroupgap=0.1,
+        margin=dict(l=10, r=40, t=80, b=60),
     )
 
-    # Add reference line at 0
-    fig.add_hline(
-        y=0, line_dash="dash", line_color="black", line_width=1.5, opacity=0.6
+    # Add vertical reference line at 0
+    fig.add_vline(
+        x=0, line_dash="dash", line_color="black", line_width=1.5, opacity=0.6
     )
     return fig
 

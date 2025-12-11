@@ -70,7 +70,7 @@ class GenerationModel:
 REWRITE_PLUS = textwrap.dedent("""
     You are an expert in rewriting assistant language model responses following given instructions.
 
-    Your task is to minimally rewrite a given assistant language model's response so that it **contains** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**.
+    Your task is to minimally rewrite a given assistant language model's response so that it **contains** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**. Only perform this rewrite if adding the attribute is applicable to the response; otherwise, return the original response unchanged.
 
     The conversation (user prompt and original assistant response) is given below:
     <original_conversation>
@@ -92,7 +92,7 @@ REWRITE_PLUS = textwrap.dedent("""
 REWRITE_MINUS = textwrap.dedent("""
     You are an expert in rewriting assistant language model responses following given instructions.
 
-    Your task is to minimally rewrite a given assistant language model's response so that it **does NOT contain** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**.
+    Your task is to minimally rewrite a given assistant language model's response so that it **does NOT contain** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**. Only perform this rewrite if the removing the attribute is applicable to the response; otherwise, return the original response unchanged.
 
     The conversation (user prompt and original assistant response) is given below:
     <original_conversation>
@@ -114,7 +114,7 @@ REWRITE_MINUS = textwrap.dedent("""
 REWRITE_PLUS_REF = textwrap.dedent("""
     You are an expert in rewriting assistant language model responses following given instructions.
 
-    Your task is to minimally rewrite a given assistant language model's response so that it **contains** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**. 
+    Your task is to minimally rewrite a given assistant language model's response so that it **contains** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**. Only perform this rewrite if adding the attribute is applicable to the response; otherwise, return the original response unchanged.
     
     Separately, you are also given below a reference triple of (user prompt, response A, response B). In this triple, responses A and B are assistant model responses for the user prompt, where response A contains the textual attribute in question, and response B does not. This is meant to serve as an optional reference for possible ways you might incorporate the attribute into the response you will rewrite.
 
@@ -143,7 +143,7 @@ REWRITE_PLUS_REF = textwrap.dedent("""
 REWRITE_MINUS_REF = textwrap.dedent("""
     You are an expert in rewriting assistant language model responses following given instructions.
 
-    Your task is to minimally rewrite a given assistant language model's response so that it **does NOT contain** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**.
+    Your task is to minimally rewrite a given assistant language model's response so that it **does NOT contain** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**. Only perform this rewrite if removing the attribute is applicable to the response; otherwise, return the original response unchanged.
     
     Separately, you are also given below a reference triple of (user prompt, response A, response B). In this triple, responses A and B are assistant model responses for the user prompt, where response A contains the textual attribute in question, and response B does not. This is meant to serve as an optional reference for possible ways you might rewrite the given response such that it does not contain the attribute.
 
