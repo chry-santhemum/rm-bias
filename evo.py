@@ -295,7 +295,6 @@ class EvoPlanner:
         self,
         seed_states: list[SeedState],
         n_pop_target: int,
-        filter_thresholds: tuple[float, float],
         dbscan_eps: float,
     ) -> dict[int, matplotlib.figure.Figure]:
         if self.direction == "minus":
@@ -306,7 +305,6 @@ class EvoPlanner:
 
         for seed_state in seed_states:
             all_candidates = []  # All candidates before filtering
-            candidates = []  # Candidates that pass the filter
             for attribute, stats in seed_state.history[-1].items():
                 student_winrate = stats.winrate("student")
                 teacher_winrate = stats.winrate("teacher")
@@ -320,7 +318,26 @@ class EvoPlanner:
 
                 all_candidates.append(new_candidate)
 
-                # Filter out the candidates that are really bad
+            # Calculate percentile-based thresholds from all candidates
+            valid_student_winrates = [c[2] for c in all_candidates if c[2] is not None]
+            valid_teacher_winrates = [c[3] for c in all_candidates if c[3] is not None]
+
+            if self.direction == "plus":
+                # Filter out bottom 25% of student_winrate (want higher values)
+                student_threshold = float(np.percentile(valid_student_winrates, 25)) if valid_student_winrates else float('-inf')
+                # Filter out top 25% of teacher_winrate (want lower values)
+                teacher_threshold = float(np.percentile(valid_teacher_winrates, 75)) if valid_teacher_winrates else float('inf')
+            else:
+                # For minus direction (opposite logic)
+                student_threshold = float(np.percentile(valid_student_winrates, 75)) if valid_student_winrates else float('inf')
+                teacher_threshold = float(np.percentile(valid_teacher_winrates, 25)) if valid_teacher_winrates else float('-inf')
+
+            filter_thresholds = (student_threshold, teacher_threshold)
+            logger.info(f"Auto-calculated filter thresholds: student={student_threshold:.3f}, teacher={teacher_threshold:.3f}")
+
+            # Filter candidates based on calculated thresholds
+            candidates = []
+            for new_candidate in all_candidates:
                 if self.direction == "plus":
                     if (
                         new_candidate[2] is None
@@ -511,7 +528,7 @@ class EvoRunner(Runner):
         return "evo"
 
     async def train_step(
-        self, n_pop_target: int, train_batch_size: int, judge_filter_thresholds: tuple[float, float]|None
+        self, n_pop_target: int, train_batch_size: int, use_pareto_selection: bool = False
     ):
         print(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
         if self.step_count == 0:
@@ -546,7 +563,7 @@ class EvoRunner(Runner):
                 )
             evaluate_results.append(stats)
 
-        if judge_filter_thresholds is not None:
+        if use_pareto_selection:
             # Populate teacher_score on rollouts in place
             await self.teacher_model.judge_validation_results(
                 validation_results=evaluate_results,
@@ -568,12 +585,11 @@ class EvoRunner(Runner):
             f"[TRAIN STEP {self.step_count}] Updating population. Before update: {len(self.seed_states[0].history[-1])}"
         )
         
-        if judge_filter_thresholds is not None:
+        if use_pareto_selection:
             plots_by_seed = self.planner.update_pop_pareto(
                 seed_states=self.seed_states,
                 n_pop_target=n_pop_target,
                 dbscan_eps=self.dbscan_eps,
-                filter_thresholds=judge_filter_thresholds,
             )
 
             for seed_state_idx, fig in plots_by_seed.items():
@@ -594,7 +610,7 @@ class EvoRunner(Runner):
         self.planner.hypothesis_planner.step_planner_model()
 
 
-    async def train(self, n_pop_target: list[int], train_batch_size: list[int], judge_filter_thresholds: list[tuple[float, float]]|None, validate: bool = True, start_from: int|None=None):
+    async def train(self, n_pop_target: list[int], train_batch_size: list[int], use_pareto_selection: bool = False, validate: bool = True, start_from: int|None=None):
         t_steps = len(train_batch_size)
         assert len(n_pop_target) == t_steps
 
@@ -641,7 +657,7 @@ class EvoRunner(Runner):
             await self.train_step(
                 n_pop_target=n_pop_target[time_step],
                 train_batch_size=train_batch_size[time_step],
-                judge_filter_thresholds=judge_filter_thresholds[time_step] if judge_filter_thresholds is not None else None,
+                use_pareto_selection=use_pareto_selection,
             )
 
             if validate and time_step == t_steps - 1:

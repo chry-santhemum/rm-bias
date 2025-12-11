@@ -208,10 +208,9 @@ async def main():
         await runner.train(
             n_pop_target=[16, 8, 8],
             train_batch_size=[4, 8, 8],
-            judge_filter_thresholds=[(-3, 3), (-2, 2), (-1, 1)],
+            use_pareto_selection=True,
             # n_pop_target=[4, 2],
             # train_batch_size=[2, 4],
-            # judge_filter_thresholds=[(-3, 3), (-2, 2)],
             validate=validate,
         )
     except Exception as e:
