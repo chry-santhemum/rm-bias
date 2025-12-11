@@ -352,8 +352,10 @@ class EvoPlanner:
             )
             plots_by_seed[seed_state.index] = fig
             
-            print("===============")
-            print(f"After filtering, {len(candidates)} candidates remain.")
+            print(
+                "===============\n"
+                f"After filtering, {len(candidates)} candidates remain."
+            )
 
             # Sort into Pareto Fronts
             fronts = EvoPlanner._get_pareto_fronts(candidates)

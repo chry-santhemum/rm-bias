@@ -44,7 +44,7 @@ import asyncio
 
 from utils import timestamp, ClusterModel
 from load_cluster import load_initial_seed_states
-from api_models import GenerationModel, RewriteModel, JudgeModel
+from api_models import GenerationModel, RewriteModel
 from reward_models import LocalRewardModel, APIRewardModel
 from bias_evaluator import BiasEvaluator
 from planner import PairPlanner, ListPlanner
@@ -79,12 +79,17 @@ async def main():
         temperature=0.95,
     )
 
-    teacher_model = APIRewardModel(
-        model_name="anthropic/claude-haiku-4.5",
-        max_par=256,
-        force_caller="openrouter",
-        max_tokens=1050,
-        reasoning=1024,
+    # teacher_model = APIRewardModel(
+    #     model_name="anthropic/claude-haiku-4.5",
+    #     max_par=256,
+    #     force_caller="openrouter",
+    #     max_tokens=1050,
+    #     reasoning=1024,
+    # )
+    teacher_model = LocalRewardModel(
+        model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
+        devices=all_cuda_devices, 
+        batch_size_per_device=32,
     )
 
     bias_evaluator = BiasEvaluator(
@@ -96,7 +101,7 @@ async def main():
             enable_cache=False,
         ),
         reward_model=LocalRewardModel(
-            model_name="Skywork/Skywork-Reward-V2-Llama-3.2-1B",
+            model_name="Skywork/Skywork-Reward-V2-Qwen3-0.6B",
             devices=all_cuda_devices, 
             batch_size_per_device=64,
             attn_implementation="sdpa",
@@ -162,9 +167,12 @@ async def main():
 
     try:
         await runner.train(
-            n_pop_target=[16, 8, 8],
-            train_batch_size=[4, 8, 8],
-            judge_filter_thresholds=[(0.2, 0.8), (0.3, 0.7), (0.4, 0.6)],
+            # n_pop_target=[16, 8, 8],
+            # train_batch_size=[4, 8, 8],
+            # judge_filter_thresholds=[(0.2, 0.8), (0.3, 0.7), (0.4, 0.6)],
+            n_pop_target=[4, 2],
+            train_batch_size=[2, 4],
+            judge_filter_thresholds=[(-3, 3), (-2, 2)],
             validate=validate,
         )
     except Exception as e:
