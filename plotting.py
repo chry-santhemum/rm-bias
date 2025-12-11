@@ -13,18 +13,15 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
     if isinstance(run_path, str):
         run_path = Path(run_path)
 
-    with open(run_path / "val_baselines" / "rollouts.json", "r", encoding="utf-8") as f:
-        val_baselines = json.load(f)
-
     with open(run_path / f"validate/seed_{seed_index}_validate/student_diffs.json", "r", encoding="utf-8") as f:
         val_results = json.load(f)
 
     try:
-        with open(run_path / f"validate/seed_{seed_index}_judge.json", "r", encoding="utf-8") as f:
+        with open(run_path / f"validate/seed_{seed_index}_validate/teacher_diffs.json", "r", encoding="utf-8") as f:
             judge_results = json.load(f)
     except FileNotFoundError:
         judge_results = None
-        print(f"No judge results found in {run_path.name} for seed {seed_index}")
+        print(f"No teacher diffs found in {run_path.name} for seed {seed_index}")
 
     # Collect difference data for each attribute
     plot_data = []
@@ -35,19 +32,14 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
         attribute_diffs = []
         judge_winrates = []
 
-        for prompt, prompt_rewards in attribute_results.items():
-            baseline_rewards = [r["student_score"] for r in val_baselines[prompt]]
-
-            # Compute element-wise differences
-            for attr_score, base_score in zip(prompt_rewards, baseline_rewards):
-                if attr_score is None or base_score is None:
-                    continue
-                attribute_diffs.append(attr_score - base_score)
+        for _, student_diffs in attribute_results.items():
+            attribute_diffs.extend(student_diffs)
 
         if judge_results is not None:
-            for prompt, prompt_judge_winrates in judge_results[attribute].items():
+            for _, prompt_judge_winrates in judge_results[attribute].items():
                 winrates_clean = [wr for wr in prompt_judge_winrates if wr is not None]
                 judge_winrates.extend(winrates_clean)
+            judge_winrates = remove_outliers(judge_winrates, clip_percent = 0.05)
 
         # remove far outliers
         attribute_diffs = remove_outliers(attribute_diffs, clip_percent = 0.05)
@@ -57,17 +49,12 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
         ) as f:
             cluster_info = json.load(f)
 
-        # Compute reward winrate: percentage of diffs > 0
-        reward_winrate = None
-        if attribute_diffs:
-            reward_winrate = sum(1 for d in attribute_diffs if d > 0) / len(attribute_diffs)
-
         plot_data.append(
             {
                 "attribute": attribute,
                 "diffs": attribute_diffs,
                 "judge_winrate": np.mean(judge_winrates).item() if judge_winrates else None,
-                "reward_winrate": reward_winrate,
+                "reward_winrate": np.mean(attribute_diffs).item(),
                 "seed_index": seed_index,
                 "cluster_info": cluster_info,
             }
@@ -196,3 +183,10 @@ def plot_validation_data(run_path: Path|str, write_path: Path|str):
         # fig.show()
         fig.write_image(write_path / f"seed_{seed_index}.pdf")
         print(f"Saved plot for seed {seed_index}")
+
+# %%
+if __name__ == "__main__":
+    run_name = "20251211-053213-pair-synthetic-plus"
+    run_path = Path(f"data/evo/{run_name}")
+    write_path = Path(f"plots/{run_name}")
+    plot_validation_data(run_path=run_path, write_path=write_path)

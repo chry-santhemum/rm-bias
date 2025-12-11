@@ -227,9 +227,11 @@ class EvoPlanner:
         return fronts
 
     @staticmethod
-    def _dist_to_perfect_point(candidate: tuple) -> float:
+    def _pareto_tiebreak(candidate: tuple) -> float:
+        """smaller is better"""
         r1, r2 = candidate[2], candidate[3]
-        return np.sqrt((1.0 - r1)**2 + (r2 - 0.0)**2)
+        return -r1
+        # return np.sqrt((1.0 - r1)**2 + (r2 - 0.0)**2)
 
     @staticmethod
     def plot_candidate_stats(
@@ -379,11 +381,11 @@ class EvoPlanner:
                     if label == -1:
                         outliers.extend(members)
                     else:
-                        best_in_niche = min(members, key=EvoPlanner._dist_to_perfect_point)
+                        best_in_niche = min(members, key=EvoPlanner._pareto_tiebreak)
                         cluster_representatives.append(best_in_niche)
 
                 high_value_candidates = cluster_representatives + outliers
-                high_value_candidates.sort(key=EvoPlanner._dist_to_perfect_point)
+                high_value_candidates.sort(key=EvoPlanner._pareto_tiebreak)
                 
                 # Fill the remaining slots with the winners
                 candidates_to_add = high_value_candidates[:slots_remaining]
@@ -395,7 +397,7 @@ class EvoPlanner:
 
                     selected_ids = {id(x) for x in final_selection} # Using object id for reliable uniqueness
                     leftovers = [x for x in front if id(x) not in selected_ids]
-                    leftovers.sort(key=EvoPlanner._dist_to_perfect_point)
+                    leftovers.sort(key=EvoPlanner._pareto_tiebreak)
                     final_selection.extend(leftovers[:remaining_needed])
 
             # Update state

@@ -204,13 +204,12 @@ class Runner(ABC):
             for attribute, rollouts_by_prompt in validation_results[i].items():
                 teacher_results[attribute] = {}
                 for user_prompt, rollouts in rollouts_by_prompt.items():
-                    teacher_results[attribute][user_prompt] = [
-                        r.teacher_score.score if r is not None and r.teacher_score is not None else None
-                        for r in rollouts
-                    ]
+                    teacher_winrates = [r.teacher_score.score for r in rollouts if r is not None and r.teacher_score is not None]
+                    if len(teacher_winrates) > 0:
+                        teacher_results[attribute][user_prompt] = teacher_winrates
 
             with open(
-                self.run_path / "validate" / f"seed_{seed_state.index}_teacher_scores.json", "w"
+                self.run_path / "validate" / f"seed_{seed_state.index}_validate/teacher_diffs.json", "w"
             ) as f:
                 json.dump(teacher_results, f, indent=4)
 

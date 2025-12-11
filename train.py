@@ -4,6 +4,23 @@ from utils import timestamp
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataset", type=str, required=True)
+parser.add_argument(
+    "--student_model", type=str, required=True, 
+    choices=[
+        "skywork-qwen-0.6b",
+        "skywork-llama-8b",
+        "skywork-llama-8b-exp",
+    ]
+)
+parser.add_argument(
+    "--teacher_model", type=str, required=True, 
+    choices=[
+        "claude-sonnet-4.5",
+        "skywork-llama-8b", 
+        "skywork-llama-8b-exp",
+    ]
+)
+
 parser.add_argument("--planner_type", type=str, required=True, choices=["pair", "list", "list_reverse"])
 parser.add_argument("--direction", type=str, required=True, choices=["plus", "minus"])
 parser.add_argument("--n_new", type=int, required=True, help="Hypothesis generation: number of candidates per ask")
@@ -53,7 +70,7 @@ from plotting import plot_validation_data
 if args.dataset == "synthetic":
     ds_path = "user_prompts/synthetic/n_sub_0"
     # topic_ids = [1, 3, 4, 6, 8, 9]
-    topic_ids=[4]
+    topic_ids=[1, 3, 4]
 elif args.dataset == "chatgpt":
     ds_path = "user_prompts/chatgpt/n_sub_2"
 elif args.dataset == "clio":
@@ -79,18 +96,45 @@ async def main():
         enable_cache=False,
     )
 
-    teacher_model = APIRewardModel(
-        model_name="anthropic/claude-sonnet-4.5",
-        max_par=256,
-        force_caller="openrouter",
-        max_tokens=1050,
-        reasoning=1024,
-    )
-    # teacher_model = LocalRewardModel(
-    #     model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
-    #     devices=all_cuda_devices, 
-    #     batch_size_per_device=32,
-    # )
+    if args.teacher_model == "skywork-llama-8b":
+        teacher_model = LocalRewardModel(
+            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
+            devices=all_cuda_devices, 
+            batch_size_per_device=32,
+        )
+    elif args.teacher_model == "skywork-llama-8b-exp":
+        teacher_model = LocalRewardModel(
+            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B-40M",
+            devices=all_cuda_devices, 
+            batch_size_per_device=32,
+        )
+    elif args.teacher_model == "claude-sonnet-4.5":
+        teacher_model = APIRewardModel(
+            model_name="anthropic/claude-sonnet-4.5",
+            max_par=256,
+            force_caller="openrouter",
+            max_tokens=1050,
+            reasoning=1024,
+        )
+
+    if args.student_model == "skywork-qwen-0.6b":
+        student_model = LocalRewardModel(
+            model_name="Skywork/Skywork-Reward-V2-Qwen3-0.6B",
+            devices=all_cuda_devices, 
+            batch_size_per_device=64,
+        )
+    elif args.student_model == "skywork-llama-8b":
+        student_model = LocalRewardModel(
+            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
+            devices=all_cuda_devices, 
+            batch_size_per_device=32,
+        )
+    elif args.student_model == "skywork-llama-8b-exp":
+        student_model = LocalRewardModel(
+            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B-40M",
+            devices=all_cuda_devices, 
+            batch_size_per_device=32,
+        )
 
     bias_evaluator = BiasEvaluator(
         rewrite_model=RewriteModel(
@@ -100,12 +144,7 @@ async def main():
             reasoning="low",
             enable_cache=False,
         ),
-        reward_model=LocalRewardModel(
-            model_name="Skywork/Skywork-Reward-V2-Qwen3-0.6B",
-            devices=all_cuda_devices, 
-            batch_size_per_device=64,
-            attn_implementation="sdpa",
-        ),
+        reward_model=student_model,
         n_rewrite_workers=64,
     )
 

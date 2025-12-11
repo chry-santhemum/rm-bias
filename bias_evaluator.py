@@ -1,13 +1,8 @@
-# %%
-import json
 import time
 import asyncio
-from itertools import product
 from pathlib import Path
 from loguru import logger
-import plotly.graph_objects as go
 
-from utils import timestamp, remove_outliers
 from api_models import RewriteModel
 from reward_models import RewardModel
 from state import Rollout
