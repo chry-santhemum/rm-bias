@@ -69,8 +69,8 @@ from plotting import plot_validation_data
 
 if args.dataset == "synthetic":
     ds_path = "user_prompts/synthetic/n_sub_0"
-    # topic_ids = [1, 3, 4, 6, 8, 9]
-    topic_ids=[1, 3, 4]
+    topic_ids = [1, 3, 4, 6, 8, 9]
+    # topic_ids=[4]
 elif args.dataset == "chatgpt":
     ds_path = "user_prompts/chatgpt/n_sub_2"
 elif args.dataset == "clio":
@@ -89,7 +89,11 @@ async def main():
 
     policy_model = GenerationModel(
         # model_name="meta-llama/llama-3.1-8b-instruct",
-        model_name="meta-llama/llama-3.2-3b-instruct",
+        model_name=[
+            "meta-llama/llama-3.2-1b-instruct",
+            "meta-llama/llama-3.2-3b-instruct",
+            "meta-llama/llama-3.1-8b-instruct",
+        ],
         max_par=1024,
         max_tokens=1024,
         temperature=0.95,
@@ -206,11 +210,11 @@ async def main():
 
     try:
         await runner.train(
-            n_pop_target=[16, 8, 8],
-            train_batch_size=[4, 8, 8],
+            # n_pop_target=[16, 8, 8],
+            # train_batch_size=[4, 8, 8],
             use_pareto_selection=True,
-            # n_pop_target=[4, 2],
-            # train_batch_size=[2, 4],
+            n_pop_target=[4, 2],
+            train_batch_size=[2, 4],
             validate=validate,
         )
     except Exception as e:
