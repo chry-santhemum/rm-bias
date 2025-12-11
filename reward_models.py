@@ -42,7 +42,7 @@ class RewardModel(ABC):
     async def judge_validation_results(
         self,
         validation_results: list[dict[str, dict[str, list[Rollout|None]]]],
-        val_baselines: dict[str, list[Rollout|None]],
+        val_baselines: dict[str, list[Rollout]],
         first_n_rollouts: int=4,
         first_n_user_prompts: int=8,  # 0 means all
         use_tqdm: bool = True
@@ -173,11 +173,11 @@ class LocalRewardModel(RewardModel):
 
         # inner loop: should only happen in rare cases.
         @find_executable_batch_size(starting_batch_size=self.batch_size_per_device)
-        def rate_one_model_inner(batch_size: int, chats_clean: list[ChatHistory]) -> list[RatingResult]:
-            results_clean = []
-            inner_pbar = range(0, len(chats_clean), batch_size)
+        def rate_one_model_inner(batch_size: int, chats_inner: list[ChatHistory]) -> list[RatingResult]:
+            results_inner = []
+            inner_pbar = range(0, len(chats_inner), batch_size)
             for inner_idx in inner_pbar:
-                sub_chats = chats_clean[inner_idx : inner_idx + batch_size]
+                sub_chats = chats_inner[inner_idx : inner_idx + batch_size]
                 sub_inputs = [chat.remove_system().to_openai_messages() for chat in sub_chats]
                 input_ids = self.tokenizer.apply_chat_template(  # type: ignore
                     sub_inputs, tokenize=True, return_tensors="pt", padding=True, padding_side="right",
@@ -191,11 +191,11 @@ class LocalRewardModel(RewardModel):
                     ).logits.squeeze(-1)
 
                 scores_list = scores_tensor.tolist()
-                results_clean.extend([
+                results_inner.extend([
                     RatingResult(score=float(score), reasoning=None) 
                     for score in scores_list
                 ])
-            return results_clean
+            return results_inner
 
         # outer loop: break down to roughly correct batch size
         if use_tqdm:
@@ -205,20 +205,8 @@ class LocalRewardModel(RewardModel):
         
         for i in outer_pbar:
             batch = chat_histories[i : i + self.batch_size_per_device]
-            indices_not_none = [idx for idx, chat in enumerate(batch) if chat is not None]
-
-            # remove the None chats
-            batch_clean: list[ChatHistory] = [batch[idx] for idx in indices_not_none]  # type: ignore
-            if len(batch_clean) == 0:
-                continue
-
-            results_clean = rate_one_model_inner(chats_clean=batch_clean)  # type: ignore
-
-            # add back the None chats
-            batch_results = [RatingResult(score=None, reasoning=None) for _ in range(len(batch))]
-            for idx, result in zip(indices_not_none, results_clean):
-                batch_results[idx] = result
-            rating_results.extend(batch_results)
+            results_inner = rate_one_model_inner(chats_inner=batch)  # type: ignore
+            rating_results.extend(results_inner)
 
         return rating_results
 

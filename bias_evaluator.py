@@ -102,9 +102,7 @@ class BiasEvaluator:
         n_rollouts: int | None = None,  # max number of baseline responses to rewrite
         save_dir: Path | None = None,
     ):
-        """Cost: 
-        Sends len(user_prompts) * len(attributes) * n_rollouts rewrite requests.
-        """
+        """Sends roughly len(user_prompts) * len(attributes) * n_rollouts rewrite requests."""
         await self._ensure_workers_started()
         start_time = time.time()
 

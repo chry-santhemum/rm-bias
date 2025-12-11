@@ -13,7 +13,7 @@ class Cluster:
 
 @dataclass(kw_only=True, slots=True)
 class RewriteScore:
-    score: float | None      # reward diff if it is RM, winrate if it is judge
+    score: float | None      # reward diff if it is RM, winrate if it is judge. None if it is baseline
     raw_score: float | None  # only exists when it is a reward model
     reasoning: str | None    # only exists when it is a LLM judge
     model_name: str

@@ -14,24 +14,23 @@ from reward_models import RewardModel
 from state import Rollout, RewriteScore
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True, slots=True)
 class PromptInput:
     system: str | None
     user: str
     batch_id: str
 
 
-@dataclass(frozen=True)
+@dataclass(kw_only=True, slots=True)
 class PromptOutput:
     system: str | None
     user: str
     assistant: str | None
     batch_id: str
-    score: float | None = None
     raw_score: float | None = None
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True, slots=True)
 class RewriteInput:
     system: str
     user: str
@@ -43,7 +42,7 @@ class RewriteInput:
     reference_response_B: str | None = None
 
 
-@dataclass(frozen=True)
+@dataclass(kw_only=True, slots=True)
 class RewriteOutput:
     system: str
     user: str
@@ -51,7 +50,6 @@ class RewriteOutput:
     rewritten_assistant: str | None
     presence: bool
     batch_id: str
-    score: float | None = None
     raw_score: float | None = None
 
 
@@ -250,12 +248,11 @@ async def rating_worker(
 
         reward_scores = await reward_model.async_rate(chat_histories, use_tqdm=False)
         for i, reward_score in zip(existing_indices, reward_scores):
-            batch[i] = replace(batch[i], score=reward_score.score, raw_score=reward_score.score)
+            batch[i].raw_score = reward_score.score
         
         all_results[batch[0].batch_id].extend(batch)  # type: ignore      
         logger.info(f"[rating_worker] Finished processing minibatch of size {len(existing_indices)}/{len(batch)} in {(time.time() - start_time):.2f} seconds. Queue size: {in_queue.qsize()}")
         batch.clear()
-
 
     while True:
         batch = []
@@ -272,7 +269,7 @@ async def rating_worker(
                     break
 
                 if isinstance(item, BatchStartMarker):
-                    logger.info(f"Batch {item.batch_id} sentinel received.")
+                    logger.info(f"Batch {item.batch_id} sentinel received: {item.expected_items} items.")
                     in_queue.task_done()
                     expected_counts[item.batch_id] += item.expected_items
                     continue
@@ -324,72 +321,48 @@ async def rating_worker(
 # %%
 # Organizing results
 
-def organize_samples(
+def organize_baselines(
     all_results: list[PromptOutput],
     student_model_name: str,
     save_dir: Path | None = None,
-):
-    organized_scores = defaultdict(dict)
-    organized_rollouts = defaultdict(dict)
+) -> dict[str, list[Rollout]]:
+    organized_rollouts = defaultdict(list)
+    organized_scores = defaultdict(list)
 
     for item in all_results:
-        attribute_rollouts = organized_rollouts[item.system]
-        if item.user not in attribute_rollouts:
-            attribute_rollouts[item.user] = []
-
-        attribute_scores = organized_scores[item.system]
-        if item.user not in attribute_scores:
-            attribute_scores[item.user] = []
-
-        if item.score is None:
+        assert item.system is None
+        if item.score is None:  # only possible when reward model bugged out
+            logger.warning(f"Baseline result for {item.user} is None. Skipping.")
             continue
-
         assert item.assistant is not None
         student_score = RewriteScore(
-            score=item.score,
+            score=None,
             raw_score=item.raw_score,
             reasoning=None,
             model_name=student_model_name,
         )
-        attribute_rollouts[item.user].append(Rollout(
+        organized_rollouts[item.user].append(Rollout(
             response=item.assistant,
             student_score=student_score,
             teacher_score=None,
         ))
-        attribute_scores[item.user].append(item.score)
-
-    mean_scores = {}
-    for attribute, attribute_scores in organized_scores.items():
-        all_scores = []
-        for user, scores in attribute_scores.items():
-            all_scores.extend(scores)
-        mean_scores[attribute] = np.mean(all_scores).item() if all_scores else None
-    
-    keys = list(organized_rollouts.keys())
-    if len(keys) == 1 and keys[0] is None:
-        organized_rollouts = organized_rollouts[None]
-        organized_scores = organized_scores[None]
-        mean_scores = mean_scores[None]
-
+        organized_scores[item.user].append(item.raw_score)
 
     if save_dir is not None:
         save_dir.mkdir(parents=True, exist_ok=True)
 
-        with open(save_dir / "sample_rollouts.json", "w", encoding="utf-8") as f:
-            if len(keys) == 1 and keys[0] is None:
-                json_data = {k: [asdict(r) if r is not None else None for r in v] for k, v in organized_rollouts.items()}
-            else:
-                json_data = {
-                    k: {k2: [asdict(r) if r is not None else None for r in v2] for k2, v2 in v.items()}
-                    for k, v in organized_rollouts.items()
-                }
+        with open(save_dir / "baseline_rollouts.json", "w", encoding="utf-8") as f:
+            json_data = {k: [
+                {
+                    "response": r.response,
+                    "student_score": r.student_score.raw_score,
+                } 
+                for r in v
+            ] for k, v in organized_rollouts.items()}
             json.dump(json_data, f, indent=4, sort_keys=True)
 
-        with open(save_dir / "sample_scores.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "baseline_scores.json", "w", encoding="utf-8") as f:
             json.dump(organized_scores, f, indent=4, sort_keys=True)
-
-        with open(save_dir / "sample_scores_mean.json", "w", encoding="utf-8") as f:
-            json.dump(mean_scores, f, indent=4, sort_keys=True)
 
     return dict(organized_rollouts)
 
@@ -457,32 +430,28 @@ def organize_rewrites(
         save_dir.mkdir(parents=True, exist_ok=True)
         with open(save_dir / "rewrite_rollouts.json", "w", encoding="utf-8") as f:
             json_data = {
-                k: {k2: [asdict(r) if r is not None else None for r in v2] for k2, v2 in v.items()}
-                for k, v in organized_rollouts.items()
+                k: {k2: [{
+                "response": r.response,
+                "student_score": r.student_score.raw_score,
+                "student_diff": r.student_score.score,
+                } if r is not None else None for r in v2
+                ] for k2, v2 in v.items()
+                } for k, v in organized_rollouts.items()
             }
             json.dump(json_data, f, indent=4, sort_keys=True)
 
-        scores = {}
-        mean_scores = {}
-
+        rewrite_diffs = {}
         for attribute, attribute_rollouts in organized_rollouts.items():
-            attribute_scores = {}
-            all_scores = []
+            attribute_diffs = {}
             for user, v in attribute_rollouts.items():
-                attribute_scores[user] = [
+                attribute_diffs[user] = [
                     r.student_score.score for r in v
                     if r is not None and r.student_score is not None and r.student_score.score is not None
                 ]
-                all_scores.extend(attribute_scores[user])
-            scores[attribute] = attribute_scores
-            mean_scores[attribute] = np.mean(all_scores).item() if all_scores else None
+            rewrite_diffs[attribute] = attribute_diffs
 
-        with open(save_dir / "rewrite_scores.json", "w", encoding="utf-8") as f:
-            json.dump(scores, f, indent=4, sort_keys=True)
-        with open(
-            save_dir / "rewrite_scores_mean.json", "w", encoding="utf-8"
-        ) as f:
-            json.dump(mean_scores, f, indent=4, sort_keys=True)
+        with open(save_dir / "rewrite_student_diffs.json", "w", encoding="utf-8") as f:
+            json.dump(rewrite_diffs, f, indent=4, sort_keys=True)
 
     return dict(organized_rollouts)
 
@@ -545,7 +514,7 @@ async def evaluate_baselines(
         f"Expected {len(user_prompts) * n_rollouts} results, got {len(all_results)}"
     )
 
-    organized_results = organize_samples(all_results, reward_model.model_name, save_dir)
+    organized_results = organize_baselines(all_results, reward_model.model_name, save_dir)
     logger.info(f"Evaluated baselines in {(time.time() - start_time):.2f} seconds")
 
-    return organized_results  # type: ignore
+    return organized_results
