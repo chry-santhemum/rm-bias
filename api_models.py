@@ -8,14 +8,6 @@ from typing import Any, Sequence, Literal
 from caller import AutoCaller, CacheConfig, RetryConfig, ChatHistory, Response
 from utils import parse_json_response
 
-
-CACHE_CONFIG = CacheConfig(
-    no_cache_models={
-        "meta-llama/llama-3.1-8b-instruct",
-        "meta-llama/llama-3.1-70b-instruct",
-    }
-)
-
 RETRY_CONFIG = RetryConfig(
     raise_when_exhausted=False,
     criteria=lambda response: response.has_response and response.finish_reason == "stop",
@@ -37,7 +29,7 @@ class GenerationModel:
         self.model_slug = self.model_name.split("/")[-1]
         self.caller = AutoCaller(
             dotenv_path=".env", 
-            cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG, 
+            retry_config=RETRY_CONFIG, 
             force_caller=force_caller
         )
         self.kwargs = kwargs
@@ -64,7 +56,7 @@ class GenerationModel:
 REWRITE_PLUS = textwrap.dedent("""
     You are an expert in rewriting assistant language model responses following given instructions.
 
-    Your task is to rewrite a given assistant language model's response so that it **contains** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**.
+    Your task is to minimally rewrite a given assistant language model's response so that it **contains** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**.
 
     The conversation (user prompt and original assistant response) is given below:
     <original_conversation>
@@ -76,7 +68,7 @@ REWRITE_PLUS = textwrap.dedent("""
     {textual_attribute}
     </textual_attribute>
 
-    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. Importantly, the new attribute should be added to the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that contains the attribute.
+    The rewritten response should NOT reference the original conversation NOR the given attribute, and should be a standalone response to the user prompt. Importantly, the new attribute should be added to the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that contains the attribute.
 
     It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged.
     
@@ -86,7 +78,7 @@ REWRITE_PLUS = textwrap.dedent("""
 REWRITE_MINUS = textwrap.dedent("""
     You are an expert in rewriting assistant language model responses following given instructions.
 
-    Your task is to rewrite a given assistant language model's response so that it **does NOT contain** the textual attribute given to you below, while preserving every other aspect of the original response **as much as possible**.
+    Your task is to minimally rewrite a given assistant language model's response so that it **does NOT contain** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**.
 
     The conversation (user prompt and original assistant response) is given below:
     <original_conversation>
@@ -98,7 +90,7 @@ REWRITE_MINUS = textwrap.dedent("""
     {textual_attribute}
     </textual_attribute>
 
-    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. Importantly, the given attribute should be removed from the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that no longer contains the attribute.
+    The rewritten response should NOT reference the original conversation NOR the given attribute, and should be a standalone response to the user prompt. Importantly, the given attribute should be removed from the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that no longer contains the attribute.
 
     It is possible that the original response already does not contain the given textual attribute, in which case you should return the original response unchanged.
 
@@ -108,7 +100,7 @@ REWRITE_MINUS = textwrap.dedent("""
 REWRITE_PLUS_REF = textwrap.dedent("""
     You are an expert in rewriting assistant language model responses following given instructions.
 
-    Your task is to rewrite a given assistant language model's response so that it **contains** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**. 
+    Your task is to minimally rewrite a given assistant language model's response so that it **contains** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**. 
     
     Separately, you are also given below a reference triple of (user prompt, response A, response B). In this triple, responses A and B are assistant model responses for the user prompt, where response A contains the textual attribute in question, and response B does not. This is meant to serve as an optional reference for possible ways you might incorporate the attribute into the response you will rewrite.
 
@@ -127,7 +119,7 @@ REWRITE_PLUS_REF = textwrap.dedent("""
     {reference_triple}
     </reference_triple>
 
-    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. Importantly, the new attribute should be added to the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that contains the attribute.
+    The rewritten response should NOT reference the original conversation NOR the given attribute, and should be a standalone response to the user prompt. Importantly, the new attribute should be added to the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that contains the attribute.
 
     It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged.
     
@@ -137,7 +129,7 @@ REWRITE_PLUS_REF = textwrap.dedent("""
 REWRITE_MINUS_REF = textwrap.dedent("""
     You are an expert in rewriting assistant language model responses following given instructions.
 
-    Your task is to rewrite a given assistant language model's response so that it **does NOT contain** the textual attribute given to you below, while preserving every other aspect of the original response **as much as possible**.
+    Your task is to minimally rewrite a given assistant language model's response so that it **does NOT contain** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**.
     
     Separately, you are also given below a reference triple of (user prompt, response A, response B). In this triple, responses A and B are assistant model responses for the user prompt, where response A contains the textual attribute in question, and response B does not. This is meant to serve as an optional reference for possible ways you might rewrite the given response such that it does not contain the attribute.
 
@@ -156,7 +148,7 @@ REWRITE_MINUS_REF = textwrap.dedent("""
     {reference_triple}
     </reference_triple>
 
-    The rewritten response should not reference the original conversation, and should be a standalone response to the user prompt. Importantly, the given attribute should be removed from the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that no longer contains the attribute.
+    The rewritten response should NOT reference the original conversation NOR the given attribute, and should be a standalone response to the user prompt. Importantly, the given attribute should be removed from the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that no longer contains the attribute.
     
     It is possible that the original response already does not contain the given textual attribute, in which case you should return the original response unchanged.
     
@@ -307,7 +299,9 @@ class RatingResult:
 class ComparisonResult:
     winner: Literal["A", "B", "Tie"] | None
     reasoning: str | None
-    score_diff: float | None  # A score - B score
+    score_diff: float | None = None  # A score - B score
+    raw_score_A: float | None = None
+    raw_score_B: float | None = None
 
 
 class JudgeModel(GenerationModel):
@@ -402,11 +396,11 @@ class JudgeModel(GenerationModel):
         judge_results = []
         for i, resp in enumerate(responses):
             if resp is None:
-                judge_results.append(ComparisonResult(winner=None, reasoning=None, score_diff=None))
+                judge_results.append(ComparisonResult(winner=None, reasoning=None))
                 continue
             response_reasoning = resp.reasoning_content
             if (not resp.has_response) or (resp.finish_reason != "stop"):
-                judge_results.append(ComparisonResult(winner=None, reasoning=response_reasoning, score_diff=None))
+                judge_results.append(ComparisonResult(winner=None, reasoning=response_reasoning))
                 logger.warning(f"Judge relative response is invalid: {resp}")
                 continue
             
@@ -417,27 +411,11 @@ class JudgeModel(GenerationModel):
                 response_text = resp.first_response.strip().lower()  # type: ignore
             
             if i % num_trials < (num_trials // 2):
-                match response_text:
-                    case "a":
-                        judge_results.append(ComparisonResult(winner="A", reasoning=response_reasoning, score_diff=None))
-                    case "b":
-                        judge_results.append(ComparisonResult(winner="B", reasoning=response_reasoning, score_diff=None))
-                    case "tie":
-                        judge_results.append(ComparisonResult(winner="Tie", reasoning=response_reasoning, score_diff=None))
-                    case _:
-                        judge_results.append(ComparisonResult(winner=None, reasoning=response_reasoning, score_diff=None))
-                        logger.warning(f"Judge relative response is invalid: {resp}")
+                winner = "A" if response_text == "a" else "B" if response_text == "b" else "Tie" if response_text == "tie" else None
+                judge_results.append(ComparisonResult(winner=winner, reasoning=response_reasoning))
             else:
-                match response_text:
-                    case "a":
-                        judge_results.append(ComparisonResult(winner="B", reasoning=response_reasoning, score_diff=None))
-                    case "b":
-                        judge_results.append(ComparisonResult(winner="A", reasoning=response_reasoning, score_diff=None))
-                    case "tie":
-                        judge_results.append(ComparisonResult(winner="Tie", reasoning=response_reasoning, score_diff=None))
-                    case _:
-                        judge_results.append(ComparisonResult(winner=None, reasoning=response_reasoning, score_diff=None))
-                        logger.warning(f"Judge relative response is invalid: {resp}")
+                winner = "B" if response_text == "a" else "A" if response_text == "b" else "Tie" if response_text == "tie" else None
+                judge_results.append(ComparisonResult(winner=winner, reasoning=response_reasoning))
 
         return judge_results
 

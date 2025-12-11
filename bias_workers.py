@@ -288,12 +288,13 @@ async def rating_worker(
         # to avoid the edge case of rewrite worker failing to produce valid outputs,
         # such that the rating worker doesn't know that it's done
         if len(batch) > 0:
+            logger.info(f"[rating_worker] Flushing, waited for {(time.time() - last_flush_time):.2f} seconds. Queue size: {in_queue.qsize()}")
+            last_flush_time = time.time()
             try:
                 await rate_batch(batch)
             except Exception:
                 logger.exception(f"rating_worker: rating failed; marking {len(batch)} items with score=None")
                 all_results[batch[0].batch_id].extend(batch)  # type: ignore
-            last_flush_time = time.time()
 
         completed_batch_ids = []
         for batch_id, expected in list(expected_counts.items()):
@@ -331,7 +332,7 @@ def organize_baselines(
 
     for item in all_results:
         assert item.system is None
-        if item.score is None:  # only possible when reward model bugged out
+        if item.raw_score is None:  # only possible when reward model bugged out
             logger.warning(f"Baseline result for {item.user} is None. Skipping.")
             continue
         assert item.assistant is not None
@@ -351,7 +352,7 @@ def organize_baselines(
     if save_dir is not None:
         save_dir.mkdir(parents=True, exist_ok=True)
 
-        with open(save_dir / "baseline_rollouts.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "rollouts.json", "w", encoding="utf-8") as f:
             json_data = {k: [
                 {
                     "response": r.response,
@@ -361,7 +362,7 @@ def organize_baselines(
             ] for k, v in organized_rollouts.items()}
             json.dump(json_data, f, indent=4, sort_keys=True)
 
-        with open(save_dir / "baseline_scores.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "scores.json", "w", encoding="utf-8") as f:
             json.dump(organized_scores, f, indent=4, sort_keys=True)
 
     return dict(organized_rollouts)
@@ -428,7 +429,7 @@ def organize_rewrites(
 
     if save_dir is not None:
         save_dir.mkdir(parents=True, exist_ok=True)
-        with open(save_dir / "rewrite_rollouts.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "rollouts.json", "w", encoding="utf-8") as f:
             json_data = {
                 k: {k2: [{
                 "response": r.response,
@@ -450,7 +451,7 @@ def organize_rewrites(
                 ]
             rewrite_diffs[attribute] = attribute_diffs
 
-        with open(save_dir / "rewrite_student_diffs.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "student_diffs.json", "w", encoding="utf-8") as f:
             json.dump(rewrite_diffs, f, indent=4, sort_keys=True)
 
     return dict(organized_rollouts)
@@ -470,7 +471,7 @@ async def evaluate_baselines(
     queue_a = asyncio.Queue(maxsize = 2 * policy_model.max_par)
     queue_b = asyncio.Queue()
     batch_id = "0"
-    n_policy_workers = 128
+    n_policy_workers = 64
     batch_size = max(1, policy_model.max_par // n_policy_workers)
     all_results = {batch_id: []}
     all_futures = {batch_id: asyncio.get_running_loop().create_future()}

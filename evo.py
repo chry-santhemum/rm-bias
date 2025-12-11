@@ -103,7 +103,7 @@ class EvoPlanner:
     async def iterate_plan(
         self,
         baselines: dict[str, list[Rollout]],
-        seed_states: list[SeedState[dict[str, int]]],
+        seed_states: list[SeedState],
         m_var: int,
         n_data_points: int = 8,
     ):
@@ -238,13 +238,7 @@ class EvoPlanner:
         filter_thresholds: tuple[float, float],
         direction: Literal["plus", "minus"],
     ) -> matplotlib.figure.Figure:
-        """
-        Creates a scatterplot of candidate statistics.
-
-        Returns:
-            fig: X=reward_winrate (c[2]), Y=judge_winrate (c[3]), with filter threshold lines
-        """
-        # Determine which candidates passed the filter
+        """Creates a scatterplot of candidate statistics."""
         filtered_set = set(id(c) for c in filtered_candidates)
 
         passed = [(c[2], c[3]) for c in all_candidates
@@ -261,15 +255,15 @@ class EvoPlanner:
                        c='blue', alpha=0.7, label='Passed filter', marker='o')
 
         # Add filter threshold lines
-        reward_threshold, judge_threshold = filter_thresholds
+        student_threshold, teacher_threshold = filter_thresholds
 
         # Vertical line for reward_winrate threshold
-        ax.axvline(x=reward_threshold, color='green', linestyle='--', linewidth=2,
-                   label=f'Reward winrate threshold ({reward_threshold})')
+        ax.axvline(x=student_threshold, color='green', linestyle='--', linewidth=2,
+                   label=f'Student threshold ({student_threshold})')
 
         # Horizontal line for judge_winrate threshold
-        ax.axhline(y=judge_threshold, color='orange', linestyle='--', linewidth=2,
-                   label=f'Judge winrate threshold ({judge_threshold})')
+        ax.axhline(y=teacher_threshold, color='orange', linestyle='--', linewidth=2,
+                   label=f'Teacher threshold ({teacher_threshold})')
 
         # Shade the rejection region based on direction
         xlim = ax.get_xlim()
@@ -277,19 +271,19 @@ class EvoPlanner:
 
         if direction == "plus":
             # Reject if reward_winrate < threshold OR judge_winrate > threshold
-            ax.axvspan(xlim[0], reward_threshold, alpha=0.1, color='red')
-            ax.axhspan(judge_threshold, ylim[1], alpha=0.1, color='red')
+            ax.axvspan(xlim[0], student_threshold, alpha=0.1, color='red')
+            ax.axhspan(teacher_threshold, ylim[1], alpha=0.1, color='red')
         else:
             # Reject if reward_winrate > threshold OR judge_winrate < threshold
-            ax.axvspan(reward_threshold, xlim[1], alpha=0.1, color='red')
-            ax.axhspan(ylim[0], judge_threshold, alpha=0.1, color='red')
+            ax.axvspan(student_threshold, xlim[1], alpha=0.1, color='red')
+            ax.axhspan(ylim[0], teacher_threshold, alpha=0.1, color='red')
 
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
 
-        ax.set_xlabel('Reward Winrate')
-        ax.set_ylabel('Judge Winrate')
-        ax.set_title('Candidate Stats: Reward Winrate vs Judge Winrate')
+        ax.set_xlabel('Student Winrate/RewardDiff')
+        ax.set_ylabel('Teacher Winrate/RewardDiff')
+        ax.set_title('Candidate Stats: Student vs Teacher')
         ax.legend()
         ax.grid(True, alpha=0.3)
 
@@ -297,7 +291,7 @@ class EvoPlanner:
 
     def update_pop_pareto(
         self,
-        seed_states: list[SeedState[dict[str, int]]],
+        seed_states: list[SeedState],
         n_pop_target: int,
         filter_thresholds: tuple[float, float],
         dbscan_eps: float,
@@ -418,7 +412,7 @@ class EvoPlanner:
 
     def update_pop(
         self,
-        seed_states: list[SeedState[dict[str, int]]],
+        seed_states: list[SeedState],
         n_pop_target: int,
         dbscan_eps: float,
     ):
@@ -484,7 +478,7 @@ class EvoRunner(Runner):
 
     def __init__(
         self,
-        seed_states: list[SeedState[dict[str, int]]],
+        seed_states: list[SeedState],
         planner: EvoPlanner,
         policy_model: GenerationModel,
         bias_evaluator: BiasEvaluator,
@@ -536,6 +530,7 @@ class EvoRunner(Runner):
                     train_batch_size,
                 )
                 attributes = list(seed_state.history[-1].keys())
+                print(f"Seed {seed_state.index}: evaluating {len(attributes)} attributes")
                 references = [
                     self.get_references(seed_state_idx, att)
                     for att in attributes
@@ -549,10 +544,6 @@ class EvoRunner(Runner):
                 )
             evaluate_results.append(stats)
 
-        for seed_state_idx, stats in enumerate(evaluate_results):
-            for attribute, rollouts in stats.items():
-                self.seed_states[seed_state_idx].history[-1][attribute].rollouts = rollouts
-
         if judge_filter_thresholds is not None:
             # Populate teacher_score on rollouts in place
             await self.teacher_model.judge_validation_results(
@@ -561,6 +552,10 @@ class EvoRunner(Runner):
                 first_n_rollouts=4,
                 first_n_user_prompts=8,
             )
+
+        for seed_state_idx, stats in enumerate(evaluate_results):
+            for attribute, rollouts in stats.items():
+                self.seed_states[seed_state_idx].history[-1][attribute].rollouts = rollouts
 
         self.save_attribute_stats(
             direction=self.planner.direction,

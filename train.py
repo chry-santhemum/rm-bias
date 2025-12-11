@@ -15,24 +15,23 @@ parser.add_argument("--n_baseline_rollouts", type=int, default=16)
 parser.add_argument("--n_rewrite_rollouts", type=int, default=8)
 parser.add_argument("--val_split_size", type=int, default=16)
 parser.add_argument("--dbscan_eps", type=float, default=0.2)
-parser.add_argument("--train_batch_size", type=int, default=16, help="Only used for one_turn runner")
 parser.add_argument("--run_name", type=str, default=None)
 
 args = parser.parse_args()
 
 run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
-Path(f"logs/{args.runner_type}").mkdir(parents=True, exist_ok=True)
-Path(f"data/{args.runner_type}").mkdir(parents=True, exist_ok=True)
+Path(f"logs/evo").mkdir(parents=True, exist_ok=True)
+Path(f"data/evo").mkdir(parents=True, exist_ok=True)
 
 from loguru import logger
 logger.remove()
 logger.add(
-    f"logs/{args.runner_type}/{run_name}.log", 
+    f"logs/evo/{run_name}.log", 
     enqueue=True, level="INFO",
     retention="7 days"
 )
 logger.add(
-    f"logs/{args.runner_type}/{run_name}_warnings.log",
+    f"logs/evo/{run_name}_warnings.log",
     enqueue=True, level="WARNING",
     backtrace=True, diagnose=True,
     retention="7 days"
@@ -74,23 +73,24 @@ async def main():
     policy_model = GenerationModel(
         # model_name="meta-llama/llama-3.1-8b-instruct",
         model_name="meta-llama/llama-3.2-3b-instruct",
-        max_par=512,
+        max_par=1024,
         max_tokens=1024,
         temperature=0.95,
+        enable_cache=False,
     )
 
-    # teacher_model = APIRewardModel(
-    #     model_name="anthropic/claude-haiku-4.5",
-    #     max_par=256,
-    #     force_caller="openrouter",
-    #     max_tokens=1050,
-    #     reasoning=1024,
-    # )
-    teacher_model = LocalRewardModel(
-        model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
-        devices=all_cuda_devices, 
-        batch_size_per_device=32,
+    teacher_model = APIRewardModel(
+        model_name="anthropic/claude-sonnet-4.5",
+        max_par=256,
+        force_caller="openrouter",
+        max_tokens=1050,
+        reasoning=1024,
     )
+    # teacher_model = LocalRewardModel(
+    #     model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
+    #     devices=all_cuda_devices, 
+    #     batch_size_per_device=32,
+    # )
 
     bias_evaluator = BiasEvaluator(
         rewrite_model=RewriteModel(
@@ -167,51 +167,19 @@ async def main():
 
     try:
         await runner.train(
-            # n_pop_target=[16, 8, 8],
-            # train_batch_size=[4, 8, 8],
-            # judge_filter_thresholds=[(0.2, 0.8), (0.3, 0.7), (0.4, 0.6)],
-            n_pop_target=[4, 2],
-            train_batch_size=[2, 4],
-            judge_filter_thresholds=[(-3, 3), (-2, 2)],
+            n_pop_target=[16, 8, 8],
+            train_batch_size=[4, 8, 8],
+            judge_filter_thresholds=[(-3, 3), (-2, 2), (-1, 1)],
+            # n_pop_target=[4, 2],
+            # train_batch_size=[2, 4],
+            # judge_filter_thresholds=[(-3, 3), (-2, 2)],
             validate=validate,
         )
     except Exception as e:
         logger.exception(f"Training failed: {e}")
         raise
 
-
-    # with open(
-    #     f"data/one_turn/{run_name}/val_baselines/sample_rollouts.json", "r"
-    # ) as f:
-    #     val_baselines = json.load(f)
-
-    # runner.val_baselines = {}
-    # for user, rollouts in val_baselines.items():
-    #     runner.val_baselines[user] = [
-    #         Rollout(response=rollout["response"], score=rollout["score"])
-    #         for rollout in rollouts
-    #     ]
-    
-    # rewrite_rollouts = []
-    # for idx in topic_ids:
-    #     with open(
-    #         f"data/one_turn/{run_name}/validate/seed_{idx}_validate/rewrite_rollouts.json", "r"
-    #     ) as f:
-    #         seed_rollouts_json = json.load(f)
-
-    #     seed_rollouts = defaultdict(dict)
-    #     for attribute, attribute_rollouts in seed_rollouts_json.items():
-    #         for user_prompt, rollouts in attribute_rollouts.items():
-    #             seed_rollouts[attribute][user_prompt] = [
-    #                 Rollout(response=rollout["response"], score=rollout["score"])
-    #                 for rollout in rollouts
-    #             ]
-
-    #     rewrite_rollouts.append(dict(seed_rollouts))
-
-    # runner.judge(validation_results=rewrite_rollouts)
-
-    run_path = Path(f"data/{args.runner_type}/{run_name}")
+    run_path = Path(f"data/evo/{run_name}")
     write_path = Path(f"plots/{run_name}")
     plot_validation_data(run_path=run_path, write_path=write_path)
 

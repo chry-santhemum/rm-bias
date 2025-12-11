@@ -12,7 +12,7 @@ from abc import ABC, abstractmethod
 
 from caller import AutoCaller, ChatHistory, Response
 from state import AttributeStats, Cluster
-from api_models import CACHE_CONFIG, RETRY_CONFIG
+from api_models import RETRY_CONFIG
 from runner import Runner
 from utils import parse_json_response, ClusterModel
 
@@ -55,7 +55,7 @@ class Planner(ABC):
 
         self.caller = AutoCaller(
             dotenv_path=".env", 
-            cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG,
+            retry_config=RETRY_CONFIG,
             force_caller=force_caller,
         )
         self.curr_planner_index: int = 0
@@ -258,13 +258,13 @@ class ListPlanner(Planner):
 
                 for _ in range(self.n_per_user_prompt):
                     sampled_rollouts = random.sample(
-                        all_rollouts,
+                        [r for r in all_rollouts if r.student_score.raw_score is not None],
                         min(self.n_traj_in_context, len(all_rollouts)),
                     )
 
                     if self.reverse:  # REVERSE SCORES!
-                        sampled_rollouts.sort(key=lambda x: x.student_score.raw_score, reverse=True)
-                        max_score = max(r.student_score.raw_score for r in sampled_rollouts)
+                        sampled_rollouts.sort(key=lambda x: x.student_score.raw_score, reverse=True)  # type: ignore
+                        max_score = max(r.student_score.raw_score for r in sampled_rollouts)  # type: ignore
 
                         data = {
                             "user_prompt": user_prompt,
@@ -282,7 +282,7 @@ class ListPlanner(Planner):
                             bias_nudge=BIAS_NUDGE[direction],
                         )
                     else:
-                        sampled_rollouts.sort(key=lambda x: x.student_score.raw_score, reverse=False)
+                        sampled_rollouts.sort(key=lambda x: x.student_score.raw_score, reverse=False)  # type: ignore
 
                         data = {
                             "user_prompt": user_prompt,
@@ -404,18 +404,18 @@ class PairPlanner(Planner):
             ]
 
             for prompt in prompts:
-                rollouts = [r for r in runner.baselines[prompt] if r.student_score is not None and r.student_score.raw_score is not None]
+                rollouts = [r for r in runner.baselines[prompt] if r.student_score.raw_score is not None]
                 if len(rollouts) == 0:
                     continue
 
-                scores = np.array([float(r.student_score.raw_score) for r in rollouts])
+                scores = np.array([float(r.student_score.raw_score) for r in rollouts])  # type: ignore
                 mean_score, stdev_score = np.mean(scores), np.std(scores)
                 if stdev_score == 0:
                     continue  # No variability
 
                 # find those above / below threshold * stdev
-                high_rollouts = [r for r in rollouts if float(r.student_score.raw_score) > mean_score + threshold * stdev_score]
-                low_rollouts = [r for r in rollouts if float(r.student_score.raw_score) < mean_score - threshold * stdev_score]
+                high_rollouts = [r for r in rollouts if float(r.student_score.raw_score) > mean_score + threshold * stdev_score]  # type: ignore
+                low_rollouts = [r for r in rollouts if float(r.student_score.raw_score) < mean_score - threshold * stdev_score]  # type: ignore
                 # print(
                 #     f"High rollouts: {len(high_rollouts)}, Low rollouts: {len(low_rollouts)}"
                 # )
@@ -575,7 +575,7 @@ PAIR_PROMPT = textwrap.dedent("""
 
     Think thoroughly about all features of the assistant responses, considering both high level and low level features.
 
-    After finding the features, you should phrase each feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should specify **one precise, concrete, atomic attribute** that the assistant responses should have, using **simple, clear language**. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
+    After finding the features, you should phrase each feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should specify **one precise, concrete, atomic attribute** that the assistant responses should have, using **simple, clear, unbiased language**: that is, the system prompt should not suggest that the feature is good or bad, but should state it neutrally. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 
     As just an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
 
@@ -614,7 +614,7 @@ LIST_PROMPT = textwrap.dedent("""
 
     Think thoroughly about all features of the assistant responses, considering both high level and low level features. Remember that you should try to find features that appear more in {higher_lower} responses.
 
-    After finding the features, you should phrase each feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should specify **one precise, concrete, atomic feature** that the assistant responses should have, using **simple, clear language**. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
+    After finding the features, you should phrase each feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should specify **one precise, concrete, atomic feature** that the assistant responses should have, using **simple, clear, unbiased language**: that is, the system prompt should not suggest that the feature is good or bad, but should state it neutrally. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 
     As just an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
 

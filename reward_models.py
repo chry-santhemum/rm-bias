@@ -4,7 +4,7 @@ import asyncio
 import gc
 import torch
 from tqdm.auto import tqdm
-from typing import Sequence
+from typing import Sequence, Literal
 from abc import ABC, abstractmethod
 from loguru import logger
 
@@ -16,6 +16,7 @@ from utils import load_model, find_executable_batch_size
 
 class RewardModel(ABC):
     model_name: str
+    type: Literal["api", "local"]
 
     @property
     @abstractmethod
@@ -97,37 +98,54 @@ class RewardModel(ABC):
         )
 
         # Populate teacher_score on each rollout in place
-        for judge_task_result, judge_task_info in zip(
-            judge_tasks_results, judge_tasks_info
-        ):
+        for judge_task_result, judge_task_info in zip(judge_tasks_results, judge_tasks_info):
             seed_state_idx = judge_task_info["seed_state_idx"]
             attribute = judge_task_info["attribute"]
             user_prompt = judge_task_info["user_prompt"]
             rollout_idx = judge_task_info["rollout_idx"]
 
-            # Compute winrate score from winner
-            winrate_score = None
-            match judge_task_result.winner:
-                case "A":
-                    winrate_score = 1.0
-                case "B":
-                    winrate_score = 0.0
-                case "Tie":
-                    winrate_score = 0.5
-                case None:
-                    winrate_score = None
+            if self.type == "api":
+                # Compute winrate score from winner
+                winrate_score = None
+                match judge_task_result.winner:
+                    case "A":
+                        winrate_score = 1.0
+                    case "B":
+                        winrate_score = 0.0
+                    case "Tie":
+                        winrate_score = 0.5
+                    case None:
+                        winrate_score = None
 
-            teacher_score = RewriteScore(
-                score=winrate_score,
-                raw_score=judge_task_result.score_diff,
-                reasoning=judge_task_result.reasoning,
-                model_name=self.model_name,
-            )
+                teacher_score = RewriteScore(
+                    score=winrate_score,
+                    raw_score=None,
+                    reasoning=judge_task_result.reasoning,
+                    model_name=self.model_name,
+                )
 
-            # Update the rollout in place
-            rollout = validation_results[seed_state_idx][attribute][user_prompt][rollout_idx]
-            if rollout is not None:
+                # Update the rollout in place
+                rollout = validation_results[seed_state_idx][attribute][user_prompt][rollout_idx]
                 rollout.teacher_score = teacher_score
+
+            elif self.type == "local":
+                # baseline_rollout = val_baselines[user_prompt][rollout_idx]
+                baseline_teacher_score = RewriteScore(
+                    score=None,
+                    raw_score=judge_task_result.raw_score_B,
+                    reasoning=None,
+                    model_name=self.model_name,
+                )
+                val_baselines[user_prompt][rollout_idx].teacher_score = baseline_teacher_score
+
+                rewrite_teacher_score = RewriteScore(
+                    score=judge_task_result.score_diff,
+                    raw_score=judge_task_result.raw_score_A,
+                    reasoning=None,
+                    model_name=self.model_name,
+                )
+                rewrite_rollout = validation_results[seed_state_idx][attribute][user_prompt][rollout_idx]
+                rewrite_rollout.teacher_score = rewrite_teacher_score
 
 
 class LocalRewardModel(RewardModel):
@@ -140,6 +158,7 @@ class LocalRewardModel(RewardModel):
     ):
         assert len(devices) > 0
         self.model_name = model_name
+        self.type = "local"
         self.batch_size_per_device = batch_size_per_device
 
         self.models = []
@@ -248,9 +267,11 @@ class LocalRewardModel(RewardModel):
 
         for result_A, result_B in zip(results_A, results_B):
             if result_A.score is None or result_B.score is None:
-                compare_results.append(ComparisonResult(winner=None, reasoning=None, score_diff=None))
-            elif result_A.score > result_B.score:
-                compare_results.append(ComparisonResult(winner="A", reasoning=None, score_diff=result_A.score - result_B.score))
+                compare_results.append(ComparisonResult(winner=None, reasoning=None))
+            else:
+                diff = result_A.score - result_B.score
+                winner = "A" if diff > 0 else "B" if diff < 0 else "Tie"
+                compare_results.append(ComparisonResult(winner=winner, reasoning=None, score_diff=diff, raw_score_A=result_A.score, raw_score_B=result_B.score))
         
         return compare_results
 
@@ -258,6 +279,7 @@ class LocalRewardModel(RewardModel):
 class APIRewardModel(RewardModel):
     def __init__(self, model_name: str, max_par: int, **kwargs):
         self.model_name = model_name
+        self.type = "api"
         self.max_par = max_par
         self.kwargs = kwargs
         self.model = JudgeModel(model_name=model_name, max_par=max_par, **kwargs)

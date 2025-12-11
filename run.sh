@@ -2,34 +2,11 @@
 
 python train.py \
 --dataset synthetic \
---runner_type evo \
---planner_type list_reverse \
+--planner_type pair \
 --direction plus \
 --n_new 8 \
---n_pop_initial 64
-
-# python train.py \
-# --dataset synthetic \
-# --runner_type evo \
-# --planner_type pair \
-# --direction plus \
-# --n_new 8 \
-# --n_pop_initial 64
-
-
-# python train.py \
-# --dataset synthetic \
-# --runner_type one_turn \
-# --planner_type list_reverse \
-# --direction plus \
-# --n_new 8 \
-# --n_pop_initial 128
-
-
-# python train.py \
-# --dataset synthetic \
-# --runner_type one_turn \
-# --planner_type pair \
-# --direction plus \
-# --n_new 8 \
-# --n_pop_initial 128
+--n_pop_initial 64 \
+--m_var 3 \
+--n_planner_requests 64 \
+--n_baseline_rollouts 16 \
+--n_rewrite_rollouts 8

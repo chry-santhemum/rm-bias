@@ -13,10 +13,10 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
     if isinstance(run_path, str):
         run_path = Path(run_path)
 
-    with open(run_path / "val_baselines" / "sample_rollouts.json", "r", encoding="utf-8") as f:
+    with open(run_path / "val_baselines" / "rollouts.json", "r", encoding="utf-8") as f:
         val_baselines = json.load(f)
 
-    with open(run_path / f"validate/seed_{seed_index}_validate/rewrite_scores.json", "r", encoding="utf-8") as f:
+    with open(run_path / f"validate/seed_{seed_index}_validate/student_diffs.json", "r", encoding="utf-8") as f:
         val_results = json.load(f)
 
     try:
@@ -36,7 +36,7 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
         judge_winrates = []
 
         for prompt, prompt_rewards in attribute_results.items():
-            baseline_rewards = [r["score"] for r in val_baselines[prompt]]
+            baseline_rewards = [r["student_score"] for r in val_baselines[prompt]]
 
             # Compute element-wise differences
             for attr_score, base_score in zip(prompt_rewards, baseline_rewards):

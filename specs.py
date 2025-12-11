@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from caller import AutoCaller, ChatHistory
-from api_models import CACHE_CONFIG, RETRY_CONFIG
+from api_models import RETRY_CONFIG
 from utils import parse_json_response
 
 # how people use chatgpt
@@ -121,7 +121,7 @@ HANDPICK_CATEGORIES = [
 
 # %% Creating sub-topics
 
-caller = AutoCaller(cache_config=CACHE_CONFIG, retry_config=RETRY_CONFIG, dotenv_path=".env")
+caller = AutoCaller(retry_config=RETRY_CONFIG, dotenv_path=".env")
 
 SUBTOPICS_PROMPT = textwrap.dedent("""
     Your task is to brainstorm {n_sub} specific sub-categories of the given user prompt category. Please think about what typical user prompts under the given category would look like, and output the {n_sub} most common sub-categories. They should fall under the given category, be diverse from each other, but also not too narrow. They should not be overly difficult for a simple chatbot to answer, and should not require responses that are too long or complex.
@@ -168,7 +168,7 @@ async def make_sub_topics(topics: list[str], n_sub: int = 0) -> dict[str, list[s
         desc="Making sub-topics",
         max_tokens=10000,
         reasoning="medium",
-    ))
+    )
 
     for i, response in enumerate(responses):
         assert response is not None
