@@ -237,7 +237,7 @@ class EvoPlanner:
     def plot_candidate_stats(
         all_candidates: list[tuple],
         filtered_candidates: list[tuple],
-        filter_thresholds: tuple[float, float],
+        student_threshold: float,
         direction: Literal["plus", "minus"],
     ) -> matplotlib.figure.Figure:
         """Creates a scatterplot of candidate statistics."""
@@ -256,29 +256,18 @@ class EvoPlanner:
             ax.scatter([p[0] for p in passed], [p[1] for p in passed],
                        c='blue', alpha=0.7, label='Passed filter', marker='o')
 
-        # Add filter threshold lines
-        student_threshold, teacher_threshold = filter_thresholds
-
-        # Vertical line for reward_winrate threshold
+        # Vertical line for student threshold
         ax.axvline(x=student_threshold, color='green', linestyle='--', linewidth=2,
-                   label=f'Student threshold ({student_threshold})')
-
-        # Horizontal line for judge_winrate threshold
-        ax.axhline(y=teacher_threshold, color='orange', linestyle='--', linewidth=2,
-                   label=f'Teacher threshold ({teacher_threshold})')
+                   label=f'Student threshold ({student_threshold:.3f})')
 
         # Shade the rejection region based on direction
         xlim = ax.get_xlim()
         ylim = ax.get_ylim()
 
         if direction == "plus":
-            # Reject if reward_winrate < threshold OR judge_winrate > threshold
             ax.axvspan(xlim[0], student_threshold, alpha=0.1, color='red')
-            ax.axhspan(teacher_threshold, ylim[1], alpha=0.1, color='red')
         else:
-            # Reject if reward_winrate > threshold OR judge_winrate < threshold
             ax.axvspan(student_threshold, xlim[1], alpha=0.1, color='red')
-            ax.axhspan(ylim[0], teacher_threshold, alpha=0.1, color='red')
 
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
@@ -318,41 +307,28 @@ class EvoPlanner:
 
                 all_candidates.append(new_candidate)
 
-            # Calculate percentile-based thresholds from all candidates
+            # Calculate percentile-based threshold for student winrate
             valid_student_winrates = [c[2] for c in all_candidates if c[2] is not None]
-            valid_teacher_winrates = [c[3] for c in all_candidates if c[3] is not None]
 
             if self.direction == "plus":
-                # Filter out bottom 25% of student_winrate (want higher values)
                 student_threshold = float(np.percentile(valid_student_winrates, 25)) if valid_student_winrates else float('-inf')
-                # Filter out top 25% of teacher_winrate (want lower values)
-                teacher_threshold = float(np.percentile(valid_teacher_winrates, 75)) if valid_teacher_winrates else float('inf')
             else:
-                # For minus direction (opposite logic)
                 student_threshold = float(np.percentile(valid_student_winrates, 75)) if valid_student_winrates else float('inf')
-                teacher_threshold = float(np.percentile(valid_teacher_winrates, 25)) if valid_teacher_winrates else float('-inf')
 
-            filter_thresholds = (student_threshold, teacher_threshold)
-            logger.info(f"Auto-calculated filter thresholds: student={student_threshold:.3f}, teacher={teacher_threshold:.3f}")
+            logger.info(f"Auto-calculated student threshold: {student_threshold:.3f}")
 
-            # Filter candidates based on calculated thresholds
+            # Filter candidates based on student threshold (keep those with valid winrates)
             candidates = []
             for new_candidate in all_candidates:
+                # Filter out candidates with None winrates
+                if new_candidate[2] is None or new_candidate[3] is None:
+                    continue
+                # Filter based on student threshold
                 if self.direction == "plus":
-                    if (
-                        new_candidate[2] is None
-                        or new_candidate[2] < filter_thresholds[0]
-                        or new_candidate[3] is None
-                        or new_candidate[3] > filter_thresholds[1]
-                    ):
+                    if new_candidate[2] < student_threshold:
                         continue
                 else:
-                    if (
-                        new_candidate[2] is None
-                        or new_candidate[2] > filter_thresholds[0]
-                        or new_candidate[3] is None
-                        or new_candidate[3] < filter_thresholds[1]
-                    ):
+                    if new_candidate[2] > student_threshold:
                         continue
                 candidates.append(new_candidate)
 
@@ -360,7 +336,7 @@ class EvoPlanner:
             fig = EvoPlanner.plot_candidate_stats(
                 all_candidates=all_candidates,
                 filtered_candidates=candidates,
-                filter_thresholds=filter_thresholds,
+                student_threshold=student_threshold,
                 direction=self.direction,
             )
             plots_by_seed[seed_state.index] = fig
