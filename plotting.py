@@ -149,6 +149,22 @@ def plot_reward_diff_violin(plot_data: list[dict]):
         else:
             display_name = base_name
 
+        # Check if this is a "red flag" attribute:
+        # student winrate - err > 0.5 AND teacher winrate + err < 0.5
+        is_red_flag = False
+        student_wr = item.get("reward_winrate")
+        student_err = item.get("reward_stderr") or 0
+        teacher_wr = item.get("judge_winrate")
+        teacher_err = item.get("judge_stderr") or 0
+        
+        if student_wr is not None and teacher_wr is not None:
+            if (student_wr - student_err > 0.5) and (teacher_wr + teacher_err < 0.5):
+                is_red_flag = True
+
+        # Color the text red for red flag attributes
+        if is_red_flag:
+            display_name = f"<span style='color:red'>{display_name}</span>"
+
         display_names.append(display_name)
 
         fig.add_trace(
@@ -247,7 +263,8 @@ if __name__ == "__main__":
     for run_name in [
         "20251211-081017-pair-synthetic-plus",
         "20251211-112052-list_reverse-synthetic-plus",
-    ]:  
+        "20251211-142409-pair-synthetic-plus",
+    ]:
         run_path = Path(f"data/evo/{run_name}")
         write_path = Path(f"plots/{run_name}")
         plot_validation_data(run_path=run_path, write_path=write_path)
