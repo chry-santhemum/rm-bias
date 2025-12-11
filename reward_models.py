@@ -43,7 +43,7 @@ class RewardModel(ABC):
         self,
         validation_results: list[dict[str, dict[str, list[Rollout|None]]]],
         val_baselines: dict[str, list[Rollout]],
-        first_n_rollouts: int=4,
+        first_n_rollouts: int=4,      # 0 means all
         first_n_user_prompts: int=8,  # 0 means all
         use_tqdm: bool = True
     ) -> None:

@@ -228,7 +228,7 @@ class EvoPlanner:
 
     @staticmethod
     def _dist_to_perfect_point(candidate: tuple) -> float:
-        r1, r2 = candidate[4], candidate[3]
+        r1, r2 = candidate[2], candidate[3]
         return np.sqrt((1.0 - r1)**2 + (r2 - 0.0)**2)
 
     @staticmethod
@@ -237,97 +237,76 @@ class EvoPlanner:
         filtered_candidates: list[tuple],
         filter_thresholds: tuple[float, float],
         direction: Literal["plus", "minus"],
-    ) -> tuple[matplotlib.figure.Figure, matplotlib.figure.Figure]:
+    ) -> matplotlib.figure.Figure:
         """
-        Creates two scatterplots of candidate statistics.
+        Creates a scatterplot of candidate statistics.
 
         Returns:
-            fig1: X=mean_reward_diff, Y=judge_winrate (all candidates)
-            fig2: X=reward_winrate, Y=judge_winrate (all candidates, with filter lines)
+            fig: X=reward_winrate (c[2]), Y=judge_winrate (c[3]), with filter threshold lines
         """
         # Determine which candidates passed the filter
         filtered_set = set(id(c) for c in filtered_candidates)
 
-        plot1_passed = [(c[2], c[3]) for c in all_candidates
-                        if c[2] is not None and c[3] is not None and id(c) in filtered_set]
-        plot1_failed = [(c[2], c[3]) for c in all_candidates
-                        if c[2] is not None and c[3] is not None and id(c) not in filtered_set]
+        passed = [(c[2], c[3]) for c in all_candidates
+                  if c[2] is not None and c[3] is not None and id(c) in filtered_set]
+        failed = [(c[2], c[3]) for c in all_candidates
+                  if c[2] is not None and c[3] is not None and id(c) not in filtered_set]
 
-        plot2_passed = [(c[4], c[3]) for c in all_candidates
-                        if c[4] is not None and c[3] is not None and id(c) in filtered_set]
-        plot2_failed = [(c[4], c[3]) for c in all_candidates
-                        if c[4] is not None and c[3] is not None and id(c) not in filtered_set]
-
-        # Plot 1: mean_reward_diff vs judge_winrate
-        fig1, ax1 = plt.subplots(figsize=(10, 8))
-        if plot1_failed:
-            ax1.scatter([p[0] for p in plot1_failed], [p[1] for p in plot1_failed],
+        fig, ax = plt.subplots(figsize=(10, 8))
+        if failed:
+            ax.scatter([p[0] for p in failed], [p[1] for p in failed],
                        c='red', alpha=0.5, label='Filtered out', marker='x')
-        if plot1_passed:
-            ax1.scatter([p[0] for p in plot1_passed], [p[1] for p in plot1_passed],
-                       c='blue', alpha=0.7, label='Passed filter', marker='o')
-        ax1.set_xlabel('Mean Reward Diff')
-        ax1.set_ylabel('Judge Winrate')
-        ax1.set_title('Candidate Stats: Mean Reward Diff vs Judge Winrate')
-        ax1.legend()
-        ax1.grid(True, alpha=0.3)
-
-        # Plot 2: reward_winrate vs judge_winrate with filter lines
-        fig2, ax2 = plt.subplots(figsize=(10, 8))
-        if plot2_failed:
-            ax2.scatter([p[0] for p in plot2_failed], [p[1] for p in plot2_failed],
-                       c='red', alpha=0.5, label='Filtered out', marker='x')
-        if plot2_passed:
-            ax2.scatter([p[0] for p in plot2_passed], [p[1] for p in plot2_passed],
+        if passed:
+            ax.scatter([p[0] for p in passed], [p[1] for p in passed],
                        c='blue', alpha=0.7, label='Passed filter', marker='o')
 
         # Add filter threshold lines
         reward_threshold, judge_threshold = filter_thresholds
 
         # Vertical line for reward_winrate threshold
-        ax2.axvline(x=reward_threshold, color='green', linestyle='--', linewidth=2,
+        ax.axvline(x=reward_threshold, color='green', linestyle='--', linewidth=2,
                    label=f'Reward winrate threshold ({reward_threshold})')
 
         # Horizontal line for judge_winrate threshold
-        ax2.axhline(y=judge_threshold, color='orange', linestyle='--', linewidth=2,
+        ax.axhline(y=judge_threshold, color='orange', linestyle='--', linewidth=2,
                    label=f'Judge winrate threshold ({judge_threshold})')
 
         # Shade the rejection region based on direction
-        xlim = ax2.get_xlim()
-        ylim = ax2.get_ylim()
+        xlim = ax.get_xlim()
+        ylim = ax.get_ylim()
 
         if direction == "plus":
             # Reject if reward_winrate < threshold OR judge_winrate > threshold
-            ax2.axvspan(xlim[0], reward_threshold, alpha=0.1, color='red')
-            ax2.axhspan(judge_threshold, ylim[1], alpha=0.1, color='red')
+            ax.axvspan(xlim[0], reward_threshold, alpha=0.1, color='red')
+            ax.axhspan(judge_threshold, ylim[1], alpha=0.1, color='red')
         else:
             # Reject if reward_winrate > threshold OR judge_winrate < threshold
-            ax2.axvspan(reward_threshold, xlim[1], alpha=0.1, color='red')
-            ax2.axhspan(ylim[0], judge_threshold, alpha=0.1, color='red')
+            ax.axvspan(reward_threshold, xlim[1], alpha=0.1, color='red')
+            ax.axhspan(ylim[0], judge_threshold, alpha=0.1, color='red')
 
-        ax2.set_xlim(xlim)
-        ax2.set_ylim(ylim)
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
 
-        ax2.set_xlabel('Reward Winrate')
-        ax2.set_ylabel('Judge Winrate')
-        ax2.set_title('Candidate Stats: Reward Winrate vs Judge Winrate')
-        ax2.legend()
-        ax2.grid(True, alpha=0.3)
+        ax.set_xlabel('Reward Winrate')
+        ax.set_ylabel('Judge Winrate')
+        ax.set_title('Candidate Stats: Reward Winrate vs Judge Winrate')
+        ax.legend()
+        ax.grid(True, alpha=0.3)
 
-        return fig1, fig2
+        return fig
 
     def update_pop_pareto(
         self,
-        baselines: dict[str, list[Rollout|None]],
         seed_states: list[SeedState[dict[str, int]]],
         n_pop_target: int,
         filter_thresholds: tuple[float, float],
         dbscan_eps: float,
-    ) -> dict[int, tuple[matplotlib.figure.Figure, matplotlib.figure.Figure]]:
-        assert self.direction == "plus"
+    ) -> dict[int, matplotlib.figure.Figure]:
+        if self.direction == "minus":
+            raise NotImplementedError
         logger.info(f"Trying to update population to {n_pop_target} members using Pareto front selection.")
 
-        plots_by_seed: dict[int, tuple[matplotlib.figure.Figure, matplotlib.figure.Figure]] = {}
+        plots_by_seed: dict[int, matplotlib.figure.Figure] = {}
 
         for seed_state in seed_states:
             all_candidates = []  # All candidates before filtering
@@ -338,9 +317,8 @@ class EvoPlanner:
                 new_candidate = (
                     attribute,
                     stats.meta["time_step"],
-                    student_winrate,  # was mean_reward_diff
-                    teacher_winrate,  # was judge_winrate
-                    student_winrate,  # was reward_winrate (same as student_winrate now)
+                    student_winrate,
+                    teacher_winrate,
                 )
                 print(f"Attribute:\n{attribute}\nStudent winrate: {new_candidate[2]}\nTeacher winrate: {new_candidate[3]}\n")
 
@@ -349,30 +327,30 @@ class EvoPlanner:
                 # Filter out the candidates that are really bad
                 if self.direction == "plus":
                     if (
-                        new_candidate[4] is None
-                        or new_candidate[4] < filter_thresholds[0]
+                        new_candidate[2] is None
+                        or new_candidate[2] < filter_thresholds[0]
                         or new_candidate[3] is None
                         or new_candidate[3] > filter_thresholds[1]
                     ):
                         continue
                 else:
                     if (
-                        new_candidate[4] is None
-                        or new_candidate[4] > filter_thresholds[0]
+                        new_candidate[2] is None
+                        or new_candidate[2] > filter_thresholds[0]
                         or new_candidate[3] is None
                         or new_candidate[3] < filter_thresholds[1]
                     ):
                         continue
                 candidates.append(new_candidate)
 
-            # Generate plots for this seed
-            fig1, fig2 = EvoPlanner.plot_candidate_stats(
+            # Generate plot for this seed
+            fig = EvoPlanner.plot_candidate_stats(
                 all_candidates=all_candidates,
                 filtered_candidates=candidates,
                 filter_thresholds=filter_thresholds,
                 direction=self.direction,
             )
-            plots_by_seed[seed_state.index] = (fig1, fig2)
+            plots_by_seed[seed_state.index] = fig
             
             print("===============")
             print(f"After filtering, {len(candidates)} candidates remain.")
@@ -427,7 +405,7 @@ class EvoPlanner:
             # Update state
             seed_state.state = {
                 attribute: time_step 
-                for attribute, time_step, _, _, _ in final_selection
+                for attribute, time_step, _, _ in final_selection
             }
 
             logger.info(
@@ -438,7 +416,6 @@ class EvoPlanner:
 
     def update_pop(
         self,
-        baselines: dict[str, list[Rollout|None]],
         seed_states: list[SeedState[dict[str, int]]],
         n_pop_target: int,
         dbscan_eps: float,
@@ -574,11 +551,6 @@ class EvoRunner(Runner):
             for attribute, rollouts in stats.items():
                 self.seed_states[seed_state_idx].history[-1][attribute].rollouts = rollouts
 
-        self.save_attribute_stats(
-            direction=self.planner.direction,
-            save_dir=self.run_path / f"step_{self.step_count}_stats",
-        )
-
         if judge_filter_thresholds is not None:
             # Populate teacher_score on rollouts in place
             await self.teacher_model.judge_validation_results(
@@ -588,27 +560,29 @@ class EvoRunner(Runner):
                 first_n_user_prompts=8,
             )
 
+        self.save_attribute_stats(
+            direction=self.planner.direction,
+            save_dir=self.run_path / f"step_{self.step_count}_stats",
+        )
+
         logger.info(
             f"[TRAIN STEP {self.step_count}] Updating population. Before update: {len(self.seed_states[0].history[-1])}"
         )
         
         if judge_filter_thresholds is not None:
             plots_by_seed = self.planner.update_pop_pareto(
-                baselines=self.baselines,  # type: ignore
                 seed_states=self.seed_states,
                 n_pop_target=n_pop_target,
                 dbscan_eps=self.dbscan_eps,
                 filter_thresholds=judge_filter_thresholds,
             )
 
-            for seed_state_idx, (fig1, fig2) in plots_by_seed.items():
-                fig1.savefig(self.run_path / f"step_{self.step_count}_stats" / f"seed_{seed_state_idx}_pareto_1.pdf")
-                fig2.savefig(self.run_path / f"step_{self.step_count}_stats" / f"seed_{seed_state_idx}_pareto_2.pdf")
+            for seed_state_idx, fig in plots_by_seed.items():
+                fig.savefig(self.run_path / f"step_{self.step_count}_stats" / f"seed_{seed_state_idx}_pareto.pdf")
 
 
         else:
             self.planner.update_pop(
-                baselines=self.baselines,  # type: ignore
                 seed_states=self.seed_states,
                 n_pop_target=n_pop_target,
                 dbscan_eps=self.dbscan_eps,
