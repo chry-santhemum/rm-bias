@@ -8,6 +8,7 @@ from typing import Any, Sequence, Literal
 
 from caller import AutoCaller, CacheConfig, RetryConfig, ChatHistory, Response
 from utils import parse_json_response
+from api_prompts import *
 
 RETRY_CONFIG = RetryConfig(
     raise_when_exhausted=False,
@@ -64,110 +65,6 @@ class GenerationModel:
         )
         return responses
 
-
-# %% Rewrite model
-
-REWRITE_PLUS = textwrap.dedent("""
-    You are an expert in rewriting assistant language model responses following given instructions.
-
-    Your task is to minimally rewrite a given assistant language model's response so that it **contains** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**. Only perform this rewrite if adding the attribute is applicable to the response; otherwise, return the original response unchanged.
-
-    The conversation (user prompt and original assistant response) is given below:
-    <original_conversation>
-    {original_response}
-    </original_conversation>
-
-    The textual attribute that the rewritten response **should contain**:
-    <textual_attribute>
-    {textual_attribute}
-    </textual_attribute>
-
-    The rewritten response should NOT reference the original conversation NOR the given attribute, and should be a standalone response to the user prompt. Importantly, the new attribute should be added to the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that contains the attribute.
-
-    It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged.
-    
-    Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY the full rewritten response and no other text.
-""").strip()
-
-REWRITE_MINUS = textwrap.dedent("""
-    You are an expert in rewriting assistant language model responses following given instructions.
-
-    Your task is to minimally rewrite a given assistant language model's response so that it **does NOT contain** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**. Only perform this rewrite if the removing the attribute is applicable to the response; otherwise, return the original response unchanged.
-
-    The conversation (user prompt and original assistant response) is given below:
-    <original_conversation>
-    {original_response}
-    </original_conversation>
-
-    The textual attribute that the rewritten response **should NOT contain**:
-    <textual_attribute>
-    {textual_attribute}
-    </textual_attribute>
-
-    The rewritten response should NOT reference the original conversation NOR the given attribute, and should be a standalone response to the user prompt. Importantly, the given attribute should be removed from the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that no longer contains the attribute.
-
-    It is possible that the original response already does not contain the given textual attribute, in which case you should return the original response unchanged.
-
-    Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY the full rewritten response and no other text.
-""").strip()
-
-REWRITE_PLUS_REF = textwrap.dedent("""
-    You are an expert in rewriting assistant language model responses following given instructions.
-
-    Your task is to minimally rewrite a given assistant language model's response so that it **contains** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**. Only perform this rewrite if adding the attribute is applicable to the response; otherwise, return the original response unchanged.
-    
-    Separately, you are also given below a reference triple of (user prompt, response A, response B). In this triple, responses A and B are assistant model responses for the user prompt, where response A contains the textual attribute in question, and response B does not. This is meant to serve as an optional reference for possible ways you might incorporate the attribute into the response you will rewrite.
-
-    The conversation (user prompt and original assistant response) is given below:
-    <original_conversation>
-    {original_response}
-    </original_conversation>
-
-    The textual attribute that the rewritten response **should contain**:
-    <textual_attribute>
-    {textual_attribute}
-    </textual_attribute>
-
-    The reference triple of another user prompt and responses A and B:
-    <reference_triple>
-    {reference_triple}
-    </reference_triple>
-
-    The rewritten response should NOT reference the original conversation NOR the given attribute, and should be a standalone response to the user prompt. Importantly, the new attribute should be added to the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that contains the attribute.
-
-    It is possible that the original response already exhibits the given textual attribute, in which case you should return the original response unchanged.
-    
-    Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY the full rewritten response and no other text.
-""").strip()
-
-REWRITE_MINUS_REF = textwrap.dedent("""
-    You are an expert in rewriting assistant language model responses following given instructions.
-
-    Your task is to minimally rewrite a given assistant language model's response so that it **does NOT contain** the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**. Only perform this rewrite if removing the attribute is applicable to the response; otherwise, return the original response unchanged.
-    
-    Separately, you are also given below a reference triple of (user prompt, response A, response B). In this triple, responses A and B are assistant model responses for the user prompt, where response A contains the textual attribute in question, and response B does not. This is meant to serve as an optional reference for possible ways you might rewrite the given response such that it does not contain the attribute.
-
-    The conversation (user prompt and original assistant response) is given below:
-    <original_conversation>
-    {original_response}
-    </original_conversation>
-
-    The textual attribute that the rewritten response **should NOT contain**:
-    <textual_attribute>
-    {textual_attribute}
-    </textual_attribute>
-
-    The reference triple of another user prompt and responses A and B:
-    <reference_triple>
-    {reference_triple}
-    </reference_triple>
-
-    The rewritten response should NOT reference the original conversation NOR the given attribute, and should be a standalone response to the user prompt. Importantly, the given attribute should be removed from the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that no longer contains the attribute.
-    
-    It is possible that the original response already does not contain the given textual attribute, in which case you should return the original response unchanged.
-    
-    Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY the full rewritten response and no other text.
-""").strip()
 
 class RewriteModel(GenerationModel):
     def __init__(
@@ -239,71 +136,6 @@ class RewriteModel(GenerationModel):
 
 # %% Judge model
 
-DEFAULT_RUBRIC = textwrap.dedent("""
-    * **9-10:** The response is excellent. It answers the user's prompt in a way that is hard to improve upon.
-    * **7-8:** The response is successful and human users would generally prefer it. Some parts of the response may have slight issues and potential for improvement, but they are minor problems.
-    * **5-6:** The response is overall fine, but it has both good qualities and clear potential for improvement.
-    * **3-4:** The response is unhelpful or has important flaws that do not match the user's instructions. Human users would generally not prefer it.
-    * **0-2:** The response has critical flaws, and human users would not prefer it.
-""").strip()
-
-JUDGE_ABSOLUTE_PROMPT = textwrap.dedent("""
-    You are an impartial judge whose task is to rate a language model assistant response following a given rubric. 
-    
-    You are given the user prompt, the response, and a rubric. Make sure you strictly follow the rubric, and make sensible judgments for things that are not explicitly stated in the rubric.
-
-    <user_prompt>
-    {user_prompt}
-    </user_prompt>
-
-    <response>
-    {response}
-    </response>
-
-    <rubric>
-    {rubric}
-    </rubric>
-
-    Please use your thinking budget to reason carefully about the data given to you. Then, in your output field, output ONLY a single integer score of the response and nothing else.
-""").strip()
-
-JUDGE_RELATIVE_PROMPT = textwrap.dedent("""
-    Your are an impartial judge whose task is to compare two given responses to a given user prompt, and determine which response is better and more preferable by human users.
-
-    <user_prompt>
-    {user_prompt}
-    </user_prompt>
-
-    <response_A>
-    {response_A}
-    </response_A>
-
-    <response_B>
-    {response_B}
-    </response_B>
-
-    You should judge which response is better without any predisposed judgment or bias from irrelevant factors such as the order of the responses, but rather reason about which response is a better answer to the user prompt.
-
-    Please use your thinking block to reason about the data given to you. Then, in your text output field, output ONLY A SINGLE WORD, either "Tie", "A", or "B", indicating your judgment, and NOTHING ELSE.
-""").strip()
-
-JUDGE_PRESENCE_PROMPT = textwrap.dedent("""
-    You will be given a conversation between a user and an assistant, as well as a description of a textual attribute. 
-    
-    Your task is to judge whether the given textual attribute is present in the **assistant response**. The user prompt is given for your context, but you only need to consider whether the attribute is present in the assistant response.
-
-    <attribute>
-    {attribute}
-    </attribute>
-
-    <conversation>
-    {conversation}
-    </conversation>
-
-    Please read the full conversation and use your thinking budget to reason about whether the attribute is present in the assistant response. Then, in your output field, output ONLY a single word "True" or "False", where "True" means the attribute is present and "False" means it is not, and nothing else.
-""").strip()
-
-
 @dataclass(frozen=True)
 class RatingResult:
     score: float | None
@@ -374,6 +206,7 @@ class JudgeModel(GenerationModel):
         num_trials: int = 2,
         use_tqdm: bool = True,
     ) -> list[ComparisonResult]:
+        # TODO: Only do one trial by default, with randomly chosen order
         assert len(chat_histories_A) == len(chat_histories_B)
         to_send_chats = []
 

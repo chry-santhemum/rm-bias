@@ -1,12 +1,11 @@
 """Reward model wrapper for both LLM Judge and classifier."""
 
 import asyncio
-import gc
-import torch
 from tqdm.auto import tqdm
 from typing import Sequence, Literal
 from abc import ABC, abstractmethod
 from loguru import logger
+import torch
 
 from caller import ChatHistory
 from api_models import JudgeModel, RatingResult, ComparisonResult
@@ -17,18 +16,10 @@ from utils import load_model, find_executable_batch_size
 class RewardModel(ABC):
     model_name: str
     type: Literal["api", "local"]
-
-    @property
-    @abstractmethod
-    def batch_size(self) -> int:
-        pass
+    batch_size: int
 
     @abstractmethod
-    async def async_rate(
-        self, 
-        chat_histories: Sequence[ChatHistory], 
-        use_tqdm: bool
-    ) -> list[RatingResult]:
+    async def async_rate(self, chat_histories: Sequence[ChatHistory], use_tqdm: bool) -> list[RatingResult]:
         pass
 
     @abstractmethod
