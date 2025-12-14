@@ -2,6 +2,8 @@ from typing import Any, Literal
 from dataclasses import dataclass, field
 import numpy as np
 
+from utils import remove_outliers
+
 
 @dataclass
 class Cluster:
@@ -44,15 +46,20 @@ class AttributeStats:
                 if r is None:
                     user_prompt_results.append(None)
                 else:
-                    user_prompt_results.append({
+                    results_dict = {
                         "response": r.response,
-                        "student_score": r.student_score.score,
-                        "teacher_score": r.teacher_score.score if r.teacher_score is not None else None,
-                    })
+                        "student_score": r.student_score.score
+                    }
+                    if r.teacher_score is not None:
+                        results_dict["teacher_score"] = r.teacher_score.score
+                        if r.teacher_score.reasoning is not None:
+                            results_dict["teacher_reasoning"] = r.teacher_score.reasoning
+
+                    user_prompt_results.append(results_dict)
             all_results[user_prompt] = user_prompt_results
         return all_results
 
-    def winrate(self, rater: Literal["student", "teacher"]) -> float | None:
+    def winrate(self, rater: Literal["student", "teacher"], outliers_clip_percent:float=0.05) -> float | None:
         all_scores = []
         for _, rollouts in self.rollouts.items():
             for r in rollouts:
@@ -67,6 +74,8 @@ class AttributeStats:
 
         if len(all_scores) == 0:
             return None
+        if outliers_clip_percent != 0.0:
+            all_scores = remove_outliers(all_scores, z_score=None, clip_percent=outliers_clip_percent)
         return np.mean(all_scores).item()
 
     def __repr__(self):

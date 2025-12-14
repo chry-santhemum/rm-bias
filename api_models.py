@@ -139,7 +139,12 @@ class RewriteModel(GenerationModel):
 
             if re.sub(r'[^a-z0-9]', '', response.first_response.strip().lower()) == "none":  # type: ignore
                 rewritten_responses.append(original_chats[i].get_first("assistant"))
-                logger.warning(f"No rewrite done for presence {presence[i]}, chat:\n{repr(original_chats[i].to_openai_str())}.")
+                logger.warning(
+                    f"No rewrite done for presence {presence[i]}."
+                    f"====attribute====\n{attributes[i]}\n"
+                    f"====reasoning====\n{response.reasoning_content}\n"
+                    f"====chat====\n{original_chats[i].to_openai_str()}"
+                )
             else:
                 rewritten_responses.append(response.first_response)
 
@@ -259,13 +264,13 @@ class JudgeModel(GenerationModel):
                 if resp is None:
                     comparison_stats.append(None)
                     reasonings.append(None)
-                    logger.warning(f"Judge relative response is None. Input:\n{repr(to_send_chats[i + j])}")
+                    logger.warning(f"Judge relative response is None. Input:\n{to_send_chats[i + j].to_openai_str()}")
                     continue
 
                 reasonings.append(resp.reasoning_content)
                 if (not resp.has_response) or (resp.finish_reason != "stop"):
                     comparison_stats.append(None)
-                    logger.warning(f"Judge relative response is invalid. Response: {resp}. Input:\n{repr(to_send_chats[i + j])}")
+                    logger.warning(f"Judge relative response is invalid. Response: {resp}. Input:\n{to_send_chats[i + j].to_openai_str()}")
                     continue
                 
                 matched = re.search(r"<output>(.+?)</output>", resp.first_response.strip(), re.DOTALL)  # type: ignore

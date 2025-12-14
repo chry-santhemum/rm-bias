@@ -293,7 +293,6 @@ dependencies = [
     { name = "pytest" },
     { name = "python-dotenv" },
     { name = "requests" },
-    { name = "slist" },
     { name = "tenacity" },
 ]
 
@@ -314,7 +313,6 @@ requires-dist = [
     { name = "python-dotenv", specifier = ">=1.1.1" },
     { name = "requests", specifier = ">=2.32.5" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
-    { name = "slist", specifier = ">=0.3.15" },
     { name = "tenacity", specifier = ">=9.1.2" },
 ]
 provides-extras = ["dev"]
