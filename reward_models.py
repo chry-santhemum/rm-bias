@@ -53,6 +53,7 @@ class RewardModel(ABC):
         chat_histories_B = []  # baseline
         judge_tasks_info = []
 
+        # load async_compare args
         for i, validation_result in enumerate(validation_results):
             for attribute, attribute_stats in validation_result.items():
                 user_prompt_count = 0
@@ -89,29 +90,17 @@ class RewardModel(ABC):
         )
 
         # Populate teacher_score on each rollout in place
-        for judge_task_result, judge_task_info in zip(judge_tasks_results, judge_tasks_info):
+        for judge_task_result, judge_task_info in zip(judge_tasks_results, judge_tasks_info, strict=True):
             seed_state_idx = judge_task_info["seed_state_idx"]
             attribute = judge_task_info["attribute"]
             user_prompt = judge_task_info["user_prompt"]
             rollout_idx = judge_task_info["rollout_idx"]
 
             if self.type == "api":
-                # Compute winrate score from winner
-                winrate_score = None
-                match judge_task_result.winner:
-                    case "A":
-                        winrate_score = 1.0
-                    case "B":
-                        winrate_score = 0.0
-                    case "Tie":
-                        winrate_score = 0.5
-                    case None:
-                        winrate_score = None
-
                 teacher_score = RewriteScore(
-                    score=winrate_score,
-                    raw_score=None,
-                    reasoning=judge_task_result.reasoning,
+                    score=judge_task_result.score_diff,
+                    raw_score=judge_task_result.raw_score_A,
+                    reasoning=judge_task_result.reasoning[0] if judge_task_result.reasoning is not None else None,
                     model_name=self.model_name,
                 )
 
@@ -174,7 +163,7 @@ class LocalRewardModel(RewardModel):
         self, 
         model_index: int, 
         chat_histories: Sequence[ChatHistory], 
-        use_tqdm: bool = True
+        use_tqdm: bool=True,
     ) -> list[RatingResult]:
         model = self.models[model_index]
         rating_results = []
@@ -208,10 +197,16 @@ class LocalRewardModel(RewardModel):
             return results_inner
 
         # outer loop: break down to roughly correct batch size
+        outer_range = range(0, len(chat_histories), self.batch_size_per_device)
         if use_tqdm:
-            outer_pbar = tqdm(range(0, len(chat_histories), self.batch_size_per_device), desc="Rating responses")
+            outer_pbar = tqdm(
+                outer_range, 
+                desc=f"RM {model_index} ({self.models[model_index].device})",
+                position=model_index,
+                leave=False,
+            )
         else:
-            outer_pbar = range(0, len(chat_histories), self.batch_size_per_device)
+            outer_pbar = outer_range
         
         for i in outer_pbar:
             batch = chat_histories[i : i + self.batch_size_per_device]
@@ -220,10 +215,7 @@ class LocalRewardModel(RewardModel):
 
         return rating_results
 
-    async def async_rate(self, chat_histories, use_tqdm = False):
-        if use_tqdm and len(self.models) > 1:
-            logger.warning("Setting use_tqdm to False because multiple RMs are used.")
-            use_tqdm = False
+    async def async_rate(self, chat_histories, use_tqdm=True):
         n_models = len(self.models)
         n_chats = len(chat_histories)
         tasks = []
@@ -251,8 +243,10 @@ class LocalRewardModel(RewardModel):
 
         return combined_results
 
-    async def async_compare(self, chat_histories_A, chat_histories_B, use_tqdm = False):
+    async def async_compare(self, chat_histories_A, chat_histories_B, use_tqdm=True):
+        print("Rating chat histories A...")
         results_A = await self.async_rate(chat_histories_A, use_tqdm=use_tqdm)
+        print("Rating chat histories B...")
         results_B = await self.async_rate(chat_histories_B, use_tqdm=use_tqdm)
         compare_results = []
 
@@ -279,8 +273,8 @@ class APIRewardModel(RewardModel):
     def batch_size(self) -> int:
         return self.max_par
         
-    async def async_rate(self, chat_histories, use_tqdm = False):
+    async def async_rate(self, chat_histories, use_tqdm=True):
         return await self.model.judge_absolute(chat_histories=chat_histories, use_tqdm=use_tqdm)
 
-    async def async_compare(self, chat_histories_A, chat_histories_B, use_tqdm = False):
+    async def async_compare(self, chat_histories_A, chat_histories_B, use_tqdm=True):
         return await self.model.judge_relative(chat_histories_A=chat_histories_A, chat_histories_B=chat_histories_B, use_tqdm=use_tqdm)

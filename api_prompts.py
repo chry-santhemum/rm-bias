@@ -13,7 +13,6 @@ MINUS_TASK = """
     Your task is to minimally rewrite a given assistant language model's response so that it DOES NOT contain the textual attribute given to you below, while preserving all other aspects of the original response **as much as possible**.
 """.strip()
 
-# TODO: For the unchanged case, ask the model to just output "unchanged"
 PLUS_CTX = textwrap.dedent("""
     The conversation (user prompt and original assistant response) is given below:
     <original_conversation>
@@ -27,7 +26,7 @@ PLUS_CTX = textwrap.dedent("""
 
     The rewritten response should NOT reference the original conversation NOR the given attribute, and should be a standalone response to the user prompt. Importantly, the new attribute should be added to the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that contains the attribute.
 
-    It is possible that the original response already exhibits the given textual attribute, or that it doesn't make sense for the given attribute to be added in the response. In this case, you should just return the original response unchanged.
+    It is possible that the original response already exhibits the given textual attribute, or that it doesn't make sense for the given attribute to be added in the response. In this case, you should not attempt to rewrite the response, and should simply output a single word "None" in your output.
 """).strip()
 
 MINUS_CTX = textwrap.dedent("""
@@ -43,7 +42,7 @@ MINUS_CTX = textwrap.dedent("""
 
     The rewritten response should NOT reference the original conversation NOR the given attribute, and should be a standalone response to the user prompt. Importantly, the given attribute should be removed from the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that no longer contains the attribute.
 
-    It is possible that the original response already does not contain the given textual attribute, or that it doesn't make sense for the given attribute to be removed from the response. In this case, you should just return the original response unchanged.
+    It is possible that the original response already does not contain the given textual attribute, or that it doesn't make sense for the given attribute to be removed from the response. In this case, you should not attempt to rewrite the response, and should simply output a single word "None" in your output.
 """).strip()
 
 REF_CTX = textwrap.dedent("""
@@ -54,14 +53,20 @@ REF_CTX = textwrap.dedent("""
 """).strip()
 
 REWRITE_THINKING_OUTPUT = """
-    Now, first use your reasoning block to think carefully about which parts of the response to alter, and then in your output field, return ONLY the full rewritten response and no other text.
+    Now, first use your reasoning block to think carefully about whether it makes sense to rewrite the response, and if so, which parts of the response to alter. Then in your output field, if you decide to rewrite the response, return ONLY the full rewritten response and no other text. If you decide it does not make sense to rewrite the response, simply output a SINGLE WORD "None" in your output and nothing else.
 """.strip()
 
 REWRITE_NORMAL_OUTPUT = """
-    Now, first think carefully and write down which parts of the response to alter, and then write the full rewritten response surrounded in <output> tags like this:
+    Now, first think carefully about whether it makes sense to rewrite the response, and if so, think about which parts of the response to alter. Then, if you decide to rewrite the response, return ONLY the full rewritten response, surrounded in <output> tags like this:
 
     <output>
     (Your rewritten response)
+    </output>
+
+    If you decide it does not make sense to rewrite the response, simply output a SINGLE WORD "None" in your output, also surrounded in <output> tags like this:
+
+    <output>
+    None
     </output>
 """.strip()
 
@@ -114,7 +119,11 @@ JUDGE_ABSOLUTE_PROMPT = textwrap.dedent("""
     {rubric}
     </rubric>
 
-    Please use your reasoning block to reason carefully about the data given to you. Then, in your output field, output ONLY a single integer score of the response and nothing else.
+    Please use your reasoning block to reason carefully about the data given to you. Then, in your output field, output ONLY a single integer score of the response, surrounded by <output> tags like this:
+
+    <output>
+    (Integer score of the response)
+    </output>
 """).strip()
 
 JUDGE_RELATIVE_PROMPT = textwrap.dedent("""
@@ -134,7 +143,11 @@ JUDGE_RELATIVE_PROMPT = textwrap.dedent("""
 
     You should judge which response is better without any predisposed judgment or bias from irrelevant factors such as the order of the responses, but rather reason about which response is a better answer to the user prompt.
 
-    Please use your reasoning block to reason about the data given to you. Then, in your text output field, output ONLY A SINGLE WORD, either "Tie", "A", or "B", indicating your judgment, and NOTHING ELSE.
+    Please use your reasoning block to reason about the data given to you. Then, in your text output field, output ONLY A SINGLE WORD, surrounded by <output> tags like this:
+
+    <output>
+    (Single word judgment: Tie, A, or B)
+    </output>
 """).strip()
 
 JUDGE_PRESENCE_PROMPT = textwrap.dedent("""
