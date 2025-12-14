@@ -100,7 +100,11 @@ class RewriteModel(GenerationModel):
         to_send_chats = []
         for i in range(len(original_chats)):
             if reference_chats is None or reference_chats[i] is None:
-                rewrite_prompt = REWRITE_PLUS if presence[i] else REWRITE_MINUS
+                rewrite_prompt = get_rewrite_prompt(
+                    direction="plus" if presence[i] else "minus",
+                    reference=False,
+                    thinking=True
+                )
                 to_send_chats.append(ChatHistory.from_user(
                     rewrite_prompt.format(
                         original_response=original_chats[i].to_openai_str(),
@@ -108,7 +112,11 @@ class RewriteModel(GenerationModel):
                     )
                 ))
             else:
-                rewrite_prompt = REWRITE_PLUS_REF if presence[i] else REWRITE_MINUS_REF
+                rewrite_prompt = get_rewrite_prompt(
+                    direction="plus" if presence[i] else "minus",
+                    reference=True,
+                    thinking=True
+                )
                 to_send_chats.append(ChatHistory.from_user(
                     rewrite_prompt.format(
                         original_response=original_chats[i].to_openai_str(),
@@ -139,15 +147,15 @@ class RewriteModel(GenerationModel):
 @dataclass(frozen=True)
 class RatingResult:
     score: float | None
-    reasoning: str | None
+    reasoning: str | None    # only exists for generative RMs
 
 @dataclass(frozen=True)
 class ComparisonResult:
     winner: Literal["A", "B", "Tie"] | None
-    reasoning: str | None
-    score_diff: float | None = None  # A score - B score
-    raw_score_A: float | None = None
-    raw_score_B: float | None = None
+    reasoning: str | None    # only exists for generative RMs
+    score_diff: float | None = None    # A score - B score, or fraction of trials won by A - won by B
+    raw_score_A: float | None = None   # A score, or fraction of trials won by A
+    raw_score_B: float | None = None   # B score, or fraction of trials won by B
 
 
 class JudgeModel(GenerationModel):
@@ -203,10 +211,9 @@ class JudgeModel(GenerationModel):
         self,
         chat_histories_A: Sequence[ChatHistory], 
         chat_histories_B: Sequence[ChatHistory],
-        num_trials: int = 2,
+        num_trials: int = 1,
         use_tqdm: bool = True,
     ) -> list[ComparisonResult]:
-        # TODO: Only do one trial by default, with randomly chosen order
         assert len(chat_histories_A) == len(chat_histories_B)
         to_send_chats = []
 

@@ -1,4 +1,5 @@
 import textwrap
+from typing import Literal
 
 # %% Rewrite model
 
@@ -52,40 +53,39 @@ REF_CTX = textwrap.dedent("""
     </reference_triple>
 """).strip()
 
-REWRITE_OUTPUT_FORMAT = """
-    Now, first think carefully about which parts of the response to alter, and then in your output field, return ONLY the full rewritten response and no other text.
+REWRITE_THINKING_OUTPUT = """
+    Now, first use your reasoning block to think carefully about which parts of the response to alter, and then in your output field, return ONLY the full rewritten response and no other text.
+""".strip()
+
+REWRITE_NORMAL_OUTPUT = """
+    Now, first think carefully and write down which parts of the response to alter, and then write the full rewritten response surrounded in <output> tags like this:
+
+    <output>
+    (Your rewritten response)
+    </output>
 """.strip()
 
 
-REWRITE_PLUS = "\n\n".join([
-    REWRITE_SYSTEM,
-    PLUS_TASK,
-    PLUS_CTX,
-    REWRITE_OUTPUT_FORMAT,
-])
-
-REWRITE_MINUS = "\n\n".join([
-    REWRITE_SYSTEM,
-    MINUS_TASK,
-    MINUS_CTX,
-    REWRITE_OUTPUT_FORMAT,
-])
-
-REWRITE_PLUS_REF = "\n\n".join([
-    REWRITE_SYSTEM,
-    PLUS_TASK,
-    PLUS_CTX,
-    REF_CTX,
-    REWRITE_OUTPUT_FORMAT,
-])
-
-REWRITE_MINUS_REF = "\n\n".join([
-    REWRITE_SYSTEM,
-    MINUS_TASK,
-    MINUS_CTX,
-    REF_CTX,
-    REWRITE_OUTPUT_FORMAT,
-])
+def get_rewrite_prompt(
+    direction: Literal["plus", "minus"],
+    reference: bool=False,
+    thinking: bool=True,
+):
+    prompt_parts = [REWRITE_SYSTEM]
+    if direction == "plus":
+        prompt_parts.extend([PLUS_TASK, PLUS_CTX])
+    elif direction == "minus":
+        prompt_parts.extend([MINUS_TASK, MINUS_CTX])
+    
+    if reference:
+        prompt_parts.append(REF_CTX)
+    
+    if thinking:
+        prompt_parts.append(REWRITE_THINKING_OUTPUT)
+    else:
+        prompt_parts.append(REWRITE_NORMAL_OUTPUT)
+    
+    return "\n\n".join(prompt_parts)
 
 # %% Judge model
 
@@ -114,7 +114,7 @@ JUDGE_ABSOLUTE_PROMPT = textwrap.dedent("""
     {rubric}
     </rubric>
 
-    Please use your thinking budget to reason carefully about the data given to you. Then, in your output field, output ONLY a single integer score of the response and nothing else.
+    Please use your reasoning block to reason carefully about the data given to you. Then, in your output field, output ONLY a single integer score of the response and nothing else.
 """).strip()
 
 JUDGE_RELATIVE_PROMPT = textwrap.dedent("""
@@ -134,7 +134,7 @@ JUDGE_RELATIVE_PROMPT = textwrap.dedent("""
 
     You should judge which response is better without any predisposed judgment or bias from irrelevant factors such as the order of the responses, but rather reason about which response is a better answer to the user prompt.
 
-    Please use your thinking block to reason about the data given to you. Then, in your text output field, output ONLY A SINGLE WORD, either "Tie", "A", or "B", indicating your judgment, and NOTHING ELSE.
+    Please use your reasoning block to reason about the data given to you. Then, in your text output field, output ONLY A SINGLE WORD, either "Tie", "A", or "B", indicating your judgment, and NOTHING ELSE.
 """).strip()
 
 JUDGE_PRESENCE_PROMPT = textwrap.dedent("""
