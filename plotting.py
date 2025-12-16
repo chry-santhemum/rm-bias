@@ -180,10 +180,10 @@ def plot_reward_diff_violin(plot_data: list[dict]):
                     line=dict(color='black', width=2),
                 ),
                 meanline_visible=True,
-                meanline=dict(color='darkblue', width=2),
-                points="all",
-                pointpos=-0.1,
-                jitter=0.3,
+                meanline=dict(color='red', width=3),
+                points="suspectedoutliers",
+                pointpos=-0.2,
+                jitter=0.2,
                 width=1.0,
             )
         )
@@ -261,9 +261,8 @@ def plot_validation_data(run_path: Path|str, write_path: Path|str):
 # %%
 if __name__ == "__main__":
     for run_name in [
-        "20251211-081017-pair-synthetic-plus",
-        "20251211-112052-list_reverse-synthetic-plus",
-        "20251211-142409-pair-synthetic-plus",
+        "20251214-080733-list_reverse-synthetic-plus",
+        "20251211-142409-pair-synthetic-plus"
     ]:
         run_path = Path(f"data/evo/{run_name}")
         write_path = Path(f"plots/{run_name}")
