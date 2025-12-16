@@ -32,7 +32,7 @@ parser.add_argument("--train_batch_sizes", type=int, nargs='+')
 
 parser.add_argument("--m_var", type=int, default=3)
 parser.add_argument("--n_planner_requests", type=int, default=64)
-parser.add_argument("--n_baseline_rollouts", type=int, default=16)
+parser.add_argument("--n_baseline_rollouts", type=int, default=24)
 parser.add_argument("--n_rewrite_rollouts", type=int, default=4)
 parser.add_argument("--val_split_size", type=int, default=16)
 parser.add_argument("--dbscan_eps", type=float, default=0.2)
@@ -53,7 +53,7 @@ async def main():
         "meta-llama/llama-3.2-3b-instruct",
         "meta-llama/llama-3.1-8b-instruct",
         "qwen/qwen-2.5-7b-instruct",
-        "google/gemma-3-4b-it",
+        "qwen/qwen-2.5-72b-instruct",
         "google/gemma-2-9b-it",
     ]
 

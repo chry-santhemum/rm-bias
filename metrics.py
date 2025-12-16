@@ -124,7 +124,7 @@ def plot_dabs_vs_threshold(
     fig.update_layout(
         title=f'DABS (student {metric_type}) vs teacher winrate threshold',
         xaxis_title='Teacher winrate threshold',
-        yaxis_title='DABS Score',
+        yaxis_title='DABS (student {metric_type})',
         height=600,
         width=800,
         hovermode='x unified',
@@ -135,8 +135,7 @@ def plot_dabs_vs_threshold(
 
 # %%
 run_paths = [
-    "data/evo/20251216-103027-list_reverse-synthetic-plus",
-    "data/evo/20251216-122124-list_reverse-synthetic-plus",
+    "data/evo/20251216-134327-list_reverse-synthetic-plus",
 ]
 cluster_model = ClusterModel(embedding_model_name="Qwen/Qwen3-Embedding-0.6B")
 
