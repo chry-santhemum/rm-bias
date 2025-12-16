@@ -269,25 +269,34 @@ class EvoPlanner:
     def plot_candidate_stats(
         all_candidates: list[tuple],
         filtered_candidates: list[tuple],
+        selected_candidates: list[tuple],
         student_threshold: float,
         teacher_threshold: float,
         direction: Literal["plus", "minus"],
     ) -> matplotlib.figure.Figure:
         """Creates a scatterplot of candidate statistics."""
         filtered_set = set(id(c) for c in filtered_candidates)
+        selected_set = set(id(c) for c in selected_candidates)
 
-        passed = [(c[2], c[3]) for c in all_candidates
-                  if c[2] is not None and c[3] is not None and id(c) in filtered_set]
-        failed = [(c[2], c[3]) for c in all_candidates
-                  if c[2] is not None and c[3] is not None and id(c) not in filtered_set]
+        # Three categories: filtered out, passed but not selected, selected
+        filtered_out = [(c[2], c[3]) for c in all_candidates
+                        if c[2] is not None and c[3] is not None and id(c) not in filtered_set]
+        passed_not_selected = [(c[2], c[3]) for c in all_candidates
+                               if c[2] is not None and c[3] is not None
+                               and id(c) in filtered_set and id(c) not in selected_set]
+        selected = [(c[2], c[3]) for c in all_candidates
+                    if c[2] is not None and c[3] is not None and id(c) in selected_set]
 
         fig, ax = plt.subplots(figsize=(10, 8))
-        if failed:
-            ax.scatter([p[0] for p in failed], [p[1] for p in failed],
-                       c='red', alpha=0.5, label='Filtered out', marker='x')
-        if passed:
-            ax.scatter([p[0] for p in passed], [p[1] for p in passed],
-                       c='blue', alpha=0.7, label='Passed filter', marker='o')
+        if filtered_out:
+            ax.scatter([p[0] for p in filtered_out], [p[1] for p in filtered_out],
+                       c='gray', alpha=0.4, label='Filtered out', marker='x', s=30)
+        if passed_not_selected:
+            ax.scatter([p[0] for p in passed_not_selected], [p[1] for p in passed_not_selected],
+                       c='blue', alpha=0.5, label='Passed filter', marker='o', s=40)
+        if selected:
+            ax.scatter([p[0] for p in selected], [p[1] for p in selected],
+                       c='red', alpha=0.9, label='Selected', marker='o', s=60)
 
         # Vertical line for student threshold
         ax.axvline(x=student_threshold, color='green', linestyle='--', linewidth=2,
@@ -317,7 +326,7 @@ class EvoPlanner:
         ax.set_xlabel('Student Winrate/RewardDiff')
         ax.set_ylabel('Teacher Winrate/RewardDiff')
         ax.set_title('Candidate Stats: Student vs Teacher')
-        ax.legend()
+        ax.legend(loc='upper left')
         ax.grid(True, alpha=0.3)
 
         return fig
@@ -389,15 +398,6 @@ class EvoPlanner:
                         continue
                 candidates.append(new_candidate)
 
-            # Generate plot for this seed
-            candidates_by_seed[seed_state.index] = {
-                "all_candidates": all_candidates,
-                "filtered_candidates": candidates,
-                "student_threshold": student_threshold,
-                "teacher_threshold": teacher_threshold,
-                "direction": self.direction,
-            }
-            
             print(
                 "===============\n"
                 f"After filtering, {len(candidates)} candidates remain."
@@ -450,9 +450,19 @@ class EvoPlanner:
                     leftovers.sort(key=EvoPlanner._pareto_tiebreak)
                     final_selection.extend(leftovers[:remaining_needed])
 
+            # Store data for plotting (after selection is complete)
+            candidates_by_seed[seed_state.index] = {
+                "all_candidates": all_candidates,
+                "filtered_candidates": candidates,
+                "selected_candidates": final_selection,
+                "student_threshold": student_threshold,
+                "teacher_threshold": teacher_threshold,
+                "direction": self.direction,
+            }
+
             # Update state
             seed_state.state = {
-                attribute: time_step 
+                attribute: time_step
                 for attribute, time_step, _, _ in final_selection
             }
 
@@ -637,6 +647,7 @@ class EvoRunner(Runner):
                 fig = EvoPlanner.plot_candidate_stats(
                     all_candidates=candidates["all_candidates"],
                     filtered_candidates=candidates["filtered_candidates"],
+                    selected_candidates=candidates["selected_candidates"],
                     student_threshold=candidates["student_threshold"],
                     teacher_threshold=candidates["teacher_threshold"],
                     direction=candidates["direction"],

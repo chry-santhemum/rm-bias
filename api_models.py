@@ -140,7 +140,7 @@ class RewriteModel(GenerationModel):
             if re.sub(r'[^a-z0-9]', '', response.first_response.strip().lower()) == "none":  # type: ignore
                 rewritten_responses.append(original_chats[i].get_first("assistant"))
                 logger.warning(
-                    f"No rewrite done for presence {presence[i]}."
+                    f"No rewrite done for presence {presence[i]}.\n"
                     f"====attribute====\n{attributes[i]}\n"
                     f"====reasoning====\n{response.reasoning_content}\n"
                     f"====chat====\n{original_chats[i].to_openai_str()}"

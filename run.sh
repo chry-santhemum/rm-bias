@@ -24,7 +24,7 @@ for pair in "${MODEL_PAIRS[@]}"; do
             --m_var 3 \
             --n_planner_requests 64 \
             --n_baseline_rollouts 16 \
-            --n_rewrite_rollouts 8
+            --n_rewrite_rollouts 4
     done
 done
 
@@ -32,13 +32,13 @@ done
 
 python train.py \
 --dataset synthetic \
---student_model skywork-llama-8b-exp \
+--student_model skywork-llama-8b \
 --teacher_model claude-sonnet-4.5 \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
 --n_pop_initial 128 \
---n_pop_targets 32 16 16 \
+--n_pop_targets 16 8 8 \
 --train_batch_sizes 8 8 8 \
 --m_var 3 \
 --n_planner_requests 64

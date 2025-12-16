@@ -48,17 +48,18 @@ async def main():
     Path(f"logs/evo").mkdir(parents=True, exist_ok=True)
     Path(f"data/evo/{run_name}").mkdir(parents=True, exist_ok=True)
 
-    # TODO: make this even more diverse. This seems to be very important
     policy_model_names = [
         "meta-llama/llama-3.2-1b-instruct",
         "meta-llama/llama-3.2-3b-instruct",
         "meta-llama/llama-3.1-8b-instruct",
         "qwen/qwen-2.5-7b-instruct",
+        "google/gemma-3-4b-it",
+        "google/gemma-2-9b-it",
     ]
 
     if args.dataset == "synthetic":
         ds_path = "user_prompts/synthetic/n_sub_0"
-        topic_ids = [1, 3, 4]
+        topic_ids = [1, 3, 4, 6, 8, 9]
     elif args.dataset == "chatgpt":
         ds_path = "user_prompts/chatgpt/n_sub_2"
     elif args.dataset == "clio":
