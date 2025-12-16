@@ -1,12 +1,12 @@
 import json
 import dotenv
 import random
-from dataclasses import asdict
 from typing import Literal
 from loguru import logger
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.figure
+from sklearn.metrics import pairwise_distances
 
 from caller import ChatHistory
 from state import SeedState, AttributeStats, Rollout
@@ -48,80 +48,111 @@ class EvoPlanner:
             cluster_model=self.cluster_model
         )
 
-    def _get_past_data_str(
+    def _collect_all_evaluated_attributes(
         self,
-        baselines: dict[str, list[Rollout|None]],
-        attribute_stats: AttributeStats,
-        n_data_points: int,
+        seed_state: SeedState,
+    ) -> list[dict]:
+        """
+        Collect all previously evaluated attributes from history with their winrates.
+        Returns list of dicts with keys: attribute, student_winrate, teacher_winrate
+        """
+        evaluated = []
+        for time_step, history_entry in enumerate(seed_state.history):
+            for attribute, stats in history_entry.items():
+                student_wr = stats.winrate("student")
+                teacher_wr = stats.winrate("teacher")
+                # Only include if we have valid winrates
+                if student_wr is not None and teacher_wr is not None:
+                    evaluated.append({
+                        "attribute": attribute,
+                        "student_winrate": student_wr,
+                        "teacher_winrate": teacher_wr,
+                        "time_step": time_step,
+                    })
+        return evaluated
+
+    def _get_nearest_neighbors(
+        self,
+        target_attribute: str,
+        all_evaluated: list[dict],
+        n_neighbors: int = 16,
     ) -> str:
         """
-        Assumes that all past data are complete and have all the ratings.
+        Find the n_neighbors closest attributes to target_attribute in embedding space.
+        Returns formatted string for the prompt.
         """
-        all_past_data = []
+        if not all_evaluated:
+            return "No similar attributes available."
 
-        for user_prompt, rollouts in attribute_stats.rollouts.items():
-            baseline_rollouts = baselines[user_prompt]
-            for i, rewritten_rollout in enumerate(rollouts):
-                if i >= len(baseline_rollouts):
-                    continue
-                baseline_rollout = baseline_rollouts[i]
-                if (
-                    baseline_rollout is None
-                    or baseline_rollout.student_score is None
-                    or baseline_rollout.student_score.raw_score is None
-                    or rewritten_rollout is None
-                    or rewritten_rollout.student_score is None
-                    or rewritten_rollout.student_score.raw_score is None
-                ):
-                    continue
-                all_past_data.append(
-                    {
-                        "user_prompt": user_prompt,
-                        "baseline_rollout": asdict(baseline_rollout),
-                        "rewritten_rollout": asdict(rewritten_rollout),
-                    }
-                )
+        # Get all attribute strings including target
+        all_attributes = [target_attribute] + [e["attribute"] for e in all_evaluated]
 
-        # Sort by reward diff (rewritten raw_score - baseline raw_score)
-        if self.direction == "plus":
-            all_past_data.sort(
-                key=lambda x: x["rewritten_rollout"]["student_score"]["raw_score"]
-                - x["baseline_rollout"]["student_score"]["raw_score"],
-                reverse=True,
-            )
-        else:
-            all_past_data.sort(
-                key=lambda x: x["rewritten_rollout"]["student_score"]["raw_score"]
-                - x["baseline_rollout"]["student_score"]["raw_score"],
-                reverse=False,
+        # Embed all attributes
+        embeddings = self.cluster_model.embed(all_attributes)
+
+        # Compute distances from target (index 0) to all others
+        target_embedding = embeddings[0:1]
+        other_embeddings = embeddings[1:]
+        distances = pairwise_distances(target_embedding, other_embeddings, metric="cosine")[0]
+
+        # Get indices of nearest neighbors (excluding exact matches with distance ~0)
+        sorted_indices = np.argsort(distances)
+
+        neighbors = []
+        for idx in sorted_indices:
+            if len(neighbors) >= n_neighbors:
+                break
+            # Skip if it's the exact same attribute
+            if all_evaluated[idx]["attribute"] == target_attribute:
+                continue
+            neighbors.append(all_evaluated[idx])
+
+        # Format as string
+        lines = []
+        for i, neighbor in enumerate(neighbors, 1):
+            lines.append(
+                f"{i}. Attribute: {neighbor['attribute']}\n"
+                f"   Metric A winrate: {neighbor['student_winrate']:.3f}\n"
+                f"   Metric B winrate: {neighbor['teacher_winrate']:.3f}"
             )
 
-        if len(all_past_data) <= n_data_points:
-            return json.dumps(all_past_data, indent=2)
-        else:
-            return json.dumps(all_past_data[: n_data_points], indent=2)
+        return "\n".join(lines) if lines else "No similar attributes available."
 
     async def iterate_plan(
         self,
-        baselines: dict[str, list[Rollout]],
         seed_states: list[SeedState],
         m_var: int,
-        n_data_points: int = 8,
+        n_neighbors: int = 16,
     ):
         to_send_messages = []
         messages_info = []
 
         for seed_idx, seed_state in enumerate(seed_states):
+            # Collect all previously evaluated attributes for neighbor lookup
+            all_evaluated = self._collect_all_evaluated_attributes(seed_state)
+
             for attribute, time_step in seed_state.state.items():
+                # Get winrates for the current attribute
+                stats = seed_state.history[time_step][attribute]
+                student_wr = stats.winrate("student")
+                teacher_wr = stats.winrate("teacher")
+
+                # Format winrates (handle None case)
+                student_wr_str = f"{student_wr:.3f}" if student_wr is not None else "N/A"
+                teacher_wr_str = f"{teacher_wr:.3f}" if teacher_wr is not None else "N/A"
+
                 planner_prompt = MUTATE_PROMPT.format(
                     num_plans=m_var,
                     cluster_summary=seed_state.cluster.summary,
                     original_attribute=attribute,
-                    data_points=self._get_past_data_str(
-                        baselines=baselines,  # type: ignore
-                        attribute_stats=seed_state.history[time_step][attribute],
-                        n_data_points=n_data_points,
+                    student_winrate=student_wr_str,
+                    teacher_winrate=teacher_wr_str,
+                    neighbor_data=self._get_nearest_neighbors(
+                        target_attribute=attribute,
+                        all_evaluated=all_evaluated,
+                        n_neighbors=n_neighbors,
                     ),
+                    direction_goal=DIRECTION_GOAL[self.direction],
                     bias_nudge=BIAS_NUDGE[self.direction],
                 )
 
@@ -239,6 +270,7 @@ class EvoPlanner:
         all_candidates: list[tuple],
         filtered_candidates: list[tuple],
         student_threshold: float,
+        teacher_threshold: float,
         direction: Literal["plus", "minus"],
     ) -> matplotlib.figure.Figure:
         """Creates a scatterplot of candidate statistics."""
@@ -260,15 +292,24 @@ class EvoPlanner:
         # Vertical line for student threshold
         ax.axvline(x=student_threshold, color='green', linestyle='--', linewidth=2,
                    label=f'Student threshold ({student_threshold:.3f})')
+        # Horizontal line for teacher threshold
+        ax.axhline(y=teacher_threshold, color='orange', linestyle='--', linewidth=2,
+                   label=f'Teacher threshold ({teacher_threshold:.3f})')
 
-        # Shade the rejection region based on direction
+        # Shade the rejection regions based on direction
         xlim = ax.get_xlim()
         ylim = ax.get_ylim()
 
         if direction == "plus":
+            # Reject low student scores (left of threshold)
             ax.axvspan(xlim[0], student_threshold, alpha=0.1, color='red')
+            # Reject high teacher scores (above threshold)
+            ax.axhspan(teacher_threshold, ylim[1], alpha=0.1, color='red')
         else:
+            # Reject high student scores (right of threshold)
             ax.axvspan(student_threshold, xlim[1], alpha=0.1, color='red')
+            # Reject low teacher scores (below threshold)
+            ax.axhspan(ylim[0], teacher_threshold, alpha=0.1, color='red')
 
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
@@ -308,17 +349,28 @@ class EvoPlanner:
 
                 all_candidates.append(new_candidate)
 
-            # Calculate percentile-based threshold for student winrate
+            # Calculate percentile-based thresholds
             valid_student_winrates = [c[2] for c in all_candidates if c[2] is not None]
+            valid_teacher_winrates = [c[3] for c in all_candidates if c[3] is not None]
 
             if self.direction == "plus":
-                student_threshold = float(np.percentile(valid_student_winrates, 25)) if valid_student_winrates else float('-inf')
+                # Filter out bottom 25% of student scores, but don't filter positive scores
+                student_pct = float(np.percentile(valid_student_winrates, 25)) if valid_student_winrates else float('-inf')
+                student_threshold = min(0.0, student_pct)
+                # Filter out top 25% of teacher scores, but don't filter negative scores
+                teacher_pct = float(np.percentile(valid_teacher_winrates, 75)) if valid_teacher_winrates else float('inf')
+                teacher_threshold = max(0.0, teacher_pct)
             else:
-                student_threshold = float(np.percentile(valid_student_winrates, 75)) if valid_student_winrates else float('inf')
+                # For minus direction: opposite logic
+                student_pct = float(np.percentile(valid_student_winrates, 75)) if valid_student_winrates else float('inf')
+                student_threshold = max(0.0, student_pct)
+                teacher_pct = float(np.percentile(valid_teacher_winrates, 25)) if valid_teacher_winrates else float('-inf')
+                teacher_threshold = min(0.0, teacher_pct)
 
-            logger.info(f"Auto-calculated student threshold: {student_threshold:.3f}")
+            logger.info(f"Auto-calculated student threshold: {student_threshold:.3f} (percentile was {student_pct:.3f})")
+            logger.info(f"Auto-calculated teacher threshold: {teacher_threshold:.3f} (percentile was {teacher_pct:.3f})")
 
-            # Filter candidates based on student threshold (keep those with valid winrates)
+            # Filter candidates based on thresholds (keep those with valid winrates)
             candidates = []
             for new_candidate in all_candidates:
                 # Filter out candidates with None winrates
@@ -328,8 +380,12 @@ class EvoPlanner:
                 if self.direction == "plus":
                     if new_candidate[2] < student_threshold:
                         continue
+                    if new_candidate[3] > teacher_threshold:
+                        continue
                 else:
                     if new_candidate[2] > student_threshold:
+                        continue
+                    if new_candidate[3] < teacher_threshold:
                         continue
                 candidates.append(new_candidate)
 
@@ -338,6 +394,7 @@ class EvoPlanner:
                 "all_candidates": all_candidates,
                 "filtered_candidates": candidates,
                 "student_threshold": student_threshold,
+                "teacher_threshold": teacher_threshold,
                 "direction": self.direction,
             }
             
@@ -511,7 +568,6 @@ class EvoRunner(Runner):
             await self.planner.initial_plan(runner=self)
         else:
             await self.planner.iterate_plan(
-                baselines=self.baselines,
                 seed_states=self.seed_states,
                 m_var=self.m_var,
             )
@@ -582,6 +638,7 @@ class EvoRunner(Runner):
                     all_candidates=candidates["all_candidates"],
                     filtered_candidates=candidates["filtered_candidates"],
                     student_threshold=candidates["student_threshold"],
+                    teacher_threshold=candidates["teacher_threshold"],
                     direction=candidates["direction"],
                 )
                 fig.savefig(self.run_path / f"step_{self.step_count}_stats" / f"seed_{seed_state_idx}_pareto.pdf")
