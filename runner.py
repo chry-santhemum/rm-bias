@@ -7,6 +7,9 @@ from pathlib import Path
 from typing import Literal
 from abc import ABC, abstractmethod
 
+import numpy as np
+import matplotlib.pyplot as plt
+
 from state import SeedState, Rollout
 from utils import timestamp
 from api_models import GenerationModel
@@ -212,6 +215,54 @@ class Runner(ABC):
                 self.run_path / "validate" / f"seed_{seed_state.index}_validate/teacher_diffs.json", "w"
             ) as f:
                 json.dump(teacher_results, f, indent=4)
+
+        # Save validation stats and plot for each seed
+        for i, seed_state in enumerate(self.seed_states):
+            candidate_stats = []
+            for attribute, rollouts_by_prompt in validation_results[i].items():
+                student_scores = []
+                teacher_scores = []
+                for user_prompt, rollouts in rollouts_by_prompt.items():
+                    for r in rollouts:
+                        if r is None:
+                            continue
+                        if r.student_score is not None and r.student_score.score is not None:
+                            student_scores.append(r.student_score.score)
+                        if r.teacher_score is not None and r.teacher_score.score is not None:
+                            teacher_scores.append(r.teacher_score.score)
+
+                student_winrate = float(np.mean(student_scores)) if student_scores else None
+                teacher_winrate = float(np.mean(teacher_scores)) if teacher_scores else None
+
+                candidate_stats.append({
+                    "attribute": attribute,
+                    "student_winrate": student_winrate,
+                    "teacher_winrate": teacher_winrate,
+                })
+
+            # Save candidate stats as JSON
+            with open(
+                self.run_path / "validate" / f"seed_{seed_state.index}_validate/candidate_stats.json", "w"
+            ) as f:
+                json.dump(candidate_stats, f, indent=4)
+
+            # Create scatter plot
+            valid_points = [(s["student_winrate"], s["teacher_winrate"])
+                           for s in candidate_stats
+                           if s["student_winrate"] is not None and s["teacher_winrate"] is not None]
+
+            if valid_points:
+                fig, ax = plt.subplots(figsize=(10, 8))
+                ax.scatter([p[0] for p in valid_points], [p[1] for p in valid_points],
+                          c='blue', alpha=0.7, marker='o')
+
+                ax.set_xlabel('Student Winrate')
+                ax.set_ylabel('Teacher Winrate')
+                ax.set_title(f'Validation Results: Seed {seed_state.index}')
+                ax.grid(True, alpha=0.3)
+
+                fig.savefig(self.run_path / "validate" / f"seed_{seed_state.index}_validate/validation_scatter.pdf")
+                plt.close(fig)
 
 
 class TestRunner(Runner):

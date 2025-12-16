@@ -21,7 +21,8 @@
       "Bash(nvcc:*)",
       "Bash(mv:*)",
       "Read(//workspace/caller/src/caller/**)",
-      "Read(//workspace/caller/**)"
+      "Read(//workspace/caller/**)",
+      "Bash(cat:*)"
     ],
     "deny": [
       "Bash(rm:*)",

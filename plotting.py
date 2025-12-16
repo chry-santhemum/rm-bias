@@ -72,6 +72,10 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
         teacher_mean = np.mean(teacher_winrates).item() if teacher_winrates else None
         teacher_stderr = (np.std(teacher_winrates) / np.sqrt(len(teacher_winrates))).item() if len(teacher_winrates) > 1 else None
 
+        # Calculate mean reward diff (average of actual diffs, not just win percentage)
+        reward_diff_mean = np.mean(attribute_diffs).item() if attribute_diffs else None
+        reward_diff_stderr = (np.std(attribute_diffs) / np.sqrt(len(attribute_diffs))).item() if len(attribute_diffs) > 1 else None
+
         plot_data.append(
             {
                 "attribute": attribute,
@@ -80,6 +84,8 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
                 "judge_stderr": teacher_stderr,
                 "reward_winrate": student_mean,
                 "reward_stderr": student_stderr,
+                "reward_diff_mean": reward_diff_mean,
+                "reward_diff_stderr": reward_diff_stderr,
                 "seed_index": seed_index,
                 "cluster_info": cluster_info,
             }
@@ -131,34 +137,52 @@ def plot_reward_diff_violin(plot_data: list[dict]):
         # Create display name with wrapped text
         base_name = wrap_text(item["attribute"], width=60)
         
-        # Build winrate suffix with error intervals
-        winrate_parts = []
+        # Build stats suffix with error intervals (student on one row, teacher on next)
+        student_parts = []
+        teacher_parts = []
         if item.get("reward_winrate") is not None:
             if item.get("reward_stderr") is not None:
-                winrate_parts.append(f"Student: {item['reward_winrate']:.2f}±{item['reward_stderr']:.2f}")
+                student_parts.append(f"Student WR: {item['reward_winrate']:.2f}±{item['reward_stderr']:.2f}")
             else:
-                winrate_parts.append(f"Student: {item['reward_winrate']:.2f}")
+                student_parts.append(f"Student WR: {item['reward_winrate']:.2f}")
+        if item.get("reward_diff_mean") is not None:
+            if item.get("reward_diff_stderr") is not None:
+                student_parts.append(f"Student Diff: {item['reward_diff_mean']:.2f}±{item['reward_diff_stderr']:.2f}")
+            else:
+                student_parts.append(f"Student Diff: {item['reward_diff_mean']:.2f}")
         if item.get("judge_winrate") is not None:
             if item.get("judge_stderr") is not None:
-                winrate_parts.append(f"Teacher: {item['judge_winrate']:.2f}±{item['judge_stderr']:.2f}")
+                teacher_parts.append(f"Teacher WR: {item['judge_winrate']:.2f}±{item['judge_stderr']:.2f}")
             else:
-                winrate_parts.append(f"Teacher: {item['judge_winrate']:.2f}")
-        
-        if winrate_parts:
-            display_name = f"{base_name}<br>({', '.join(winrate_parts)})"
+                teacher_parts.append(f"Teacher WR: {item['judge_winrate']:.2f}")
+
+        stats_lines = []
+        if student_parts:
+            stats_lines.append(', '.join(student_parts))
+        if teacher_parts:
+            stats_lines.append(', '.join(teacher_parts))
+
+        if stats_lines:
+            display_name = f"{base_name}<br>({stats_lines[0]})"
+            if len(stats_lines) > 1:
+                display_name += f"<br>({stats_lines[1]})"
         else:
             display_name = base_name
 
         # Check if this is a "red flag" attribute:
-        # student winrate - err > 0.5 AND teacher winrate + err < 0.5
+        # (student winrate - err > 0.5 OR student diff - err > 0) AND teacher winrate + err < 0.5
         is_red_flag = False
         student_wr = item.get("reward_winrate")
-        student_err = item.get("reward_stderr") or 0
+        student_wr_err = item.get("reward_stderr") or 0
+        student_diff = item.get("reward_diff_mean")
+        student_diff_err = item.get("reward_diff_stderr") or 0
         teacher_wr = item.get("judge_winrate")
         teacher_err = item.get("judge_stderr") or 0
-        
-        if student_wr is not None and teacher_wr is not None:
-            if (student_wr - student_err > 0.5) and (teacher_wr + teacher_err < 0.5):
+
+        if teacher_wr is not None and (teacher_wr + teacher_err < 0.5):
+            student_wr_flag = student_wr is not None and (student_wr - student_wr_err > 0.5)
+            student_diff_flag = student_diff is not None and (student_diff - student_diff_err > 0)
+            if student_wr_flag or student_diff_flag:
                 is_red_flag = True
 
         # Color the text red for red flag attributes
@@ -261,8 +285,12 @@ def plot_validation_data(run_path: Path|str, write_path: Path|str):
 # %%
 if __name__ == "__main__":
     for run_name in [
+        "20251216-075932-list_reverse-synthetic-plus",
+        "20251211-081017-pair-synthetic-plus",
+        "20251211-112052-list_reverse-synthetic-plus",
+        "20251211-142409-pair-synthetic-plus",
+        "20251211-171045-list_reverse-synthetic-plus",
         "20251214-080733-list_reverse-synthetic-plus",
-        "20251211-142409-pair-synthetic-plus"
     ]:
         run_path = Path(f"data/evo/{run_name}")
         write_path = Path(f"plots/{run_name}")
