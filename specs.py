@@ -93,7 +93,6 @@ CLIO_CATEGORIES = [
 ]
 
 
-# atticus came up with these clusters based on what might be interesting
 HANDPICK_CATEGORIES = [
     "Asking for hints to help with high school-level math problems",
     "Common python debugging questions",

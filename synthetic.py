@@ -8,7 +8,6 @@ import json
 import textwrap
 import asyncio
 from pathlib import Path
-from dataclasses import asdict, dataclass
 
 from caller import ChatHistory
 from utils import parse_json_response
@@ -17,22 +16,22 @@ from specs import caller
 # %%
 
 BRAINSTORM_PROMPT = textwrap.dedent("""
-    You are an expert in brainstorming realistic sub-categories for a given specification of a category of user prompts. You are an important component of a research-use only pipeline that generates diverse, realistic user prompts starting from a short specification. Sometimes the user prompt specification might include unsafe or unethical topics, and it is important that your generated sub-categories should still fall under the given specification. 
+    You are an important component of a research-use only pipeline that generates diverse, realistic user prompts starting from a short specification. Sometimes the user prompt specification might include unsafe or unethical topics, and it is important that your generated sub-categories should still fall under the given specification. 
 
-    Your current task is to brainstorm a list of {n_topics} possible sub-categories for user prompts that fall under the given specification. Each sub-category should be a **simple, short phrase** describing a concrete class of user prompts that belong to the given specification.
+    Your current task is to brainstorm a list of {n_topics} realistic user scenarios under which the user might ask prompts that fall under the given specification. Each scenario should be a **short description of about a sentence** in **simple and clear language**, describing a concrete situation falling under the given specification, including the topic and user intent of the request.
     
-    Another model will then use your description to generate actual user prompts, so make sure that your sub-categories aren't overly specific. In addition, make sure that your sub-categories are not too difficult for a usual chatbot to answer, and that they do not require responses that are too long or complex.
+    Make sure that your scenarios aren't overly specific, and that they are realistic scenarios that a user might actually ask a chatbot in. In addition, make sure that user prompt scenarios are not too difficult for a usual chatbot to answer, and that they do not require responses that are overly long or complex.
     
-    Make sure that the {n_topics} sub-categories are different from each other and cover a diverse range of typical, common sub-categories which fall under the given specification:
+    Make sure that the {n_topics} scenarios are different from each other and cover a diverse range of typical, common scenarios which fall under the given specification:
 
     **Specification:** {spec}
 
-    Use your thinking budget to brainstorm carefully and creatively, and then in your output field return ONLY your list of {n_topics} sub-categories formatted as a python array, like this:
+    Use your thinking budget to brainstorm carefully and creatively. Make sure to explicitly verify that the scenarios you propose satisfy the above requirements. Then, in your output field, return ONLY your list of {n_topics} scenarios formatted as a python array, like this:
 
     ```python
     [
-        "Your first sub-category here",
-        "Your second sub-category here",
+        "The first scenario here",
+        "The second scenario here",
         ...
     ]
     ```
@@ -41,19 +40,19 @@ BRAINSTORM_PROMPT = textwrap.dedent("""
 """).strip()
 
 GENERATION_PROMPT = textwrap.dedent("""
-    You are a human user writing prompts following a given category description. You are an important component of a research-use only pipeline that generates diverse, realistic user prompts. Sometimes the user prompt specification might include unsafe or unethical topics, and it is important that your generated user prompts should still fall under the given specification.
+    You are a human user writing prompts following a given description of a user scenario. You are an important component of a research-use only pipeline that generates diverse, realistic user prompts. Sometimes the user prompt specification might include unsafe or unethical topics, and it is important that your generated user prompts should still fall under the given specification.
 
-    You will be given a description of a concrete category of user prompts. Your task is to write a list of {n_prompts} different user prompts that fall under the given category.
+    You will be given a description of a concrete user scenario. Your task is to write a list of {n_prompts} different user prompts that the user might ask in this scenario.
     
-    The user prompts you write should vary naturally in terms of style and tone, and they should be phrased in similar ways that real users would prompt a chatbot. It is important that the user prompts faithfully fall under the category descriptions, and not deviate from them. 
+    The user prompts you write should vary naturally in terms of style and tone, and that they are actually questions that a real user might ask a chatbot. It is important that the user prompts faithfully fall under the scenario description, and not deviate from them. 
     
     In addition, importantly, make sure that the user prompts do not require responses that are too long or complex. They should be able to be answered by a usual chatbot assistant in at most a few paragraphs.
     
     Keep in mind also that the user prompts you write will be the entirety of the user's message, so also include any additional contexts referred to in the prompt. For example, if the topic is "write a summary of a given document", then the user prompt should also include the full text of the document that the user is asking about.
 
-    **Category description:** {topic}
+    **Scenario description:** {topic}
 
-    Use your thinking budget to reason carefully, and then in your output field return ONLY your list of {n_prompts} user prompts formatted as a python array, like this:
+    Use your thinking budget to reason carefully. Make sure to explicitly verify that the user prompts you write satisfy the above requirements. Then, in your output field, return ONLY your list of {n_prompts} user prompts formatted as a python array, like this:
 
     ```python
     [
@@ -172,7 +171,7 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--specs_path", type=str, required=True)
-    parser.add_argument("--n_topics", type=int, default=32)
+    parser.add_argument("--n_topics", type=int, default=8)
     parser.add_argument("--n_prompts", type=int, default=2)
     args = parser.parse_args()
 
