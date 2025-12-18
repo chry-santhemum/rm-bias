@@ -495,7 +495,7 @@ if __name__ == "__main__":
     # Load user prompts
     from load_cluster import load_initial_seed_states
     seed_states = load_initial_seed_states(
-        ds_path="user_prompts/synthetic/n_sub_0",
+        ds_path="user_prompts/synthetic",
         topic_ids=[1, 3, 4, 6, 8, 9],
         val_split_size=16,
     )

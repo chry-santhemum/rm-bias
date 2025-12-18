@@ -1,11 +1,5 @@
-import textwrap
-import asyncio
 import json
 from pathlib import Path
-
-from caller import AutoCaller, ChatHistory
-from api_models import RETRY_CONFIG
-from utils import parse_json_response
 
 # how people use chatgpt
 CHATGPT_CATEGORIES = {
@@ -118,148 +112,53 @@ HANDPICK_CATEGORIES = [
     "User who strongly believes in a popular, subtle misconception asks for advice",
 ]
 
-# %% Creating sub-topics
-
-caller = AutoCaller(retry_config=RETRY_CONFIG, dotenv_path=".env")
-
-SUBTOPICS_PROMPT = textwrap.dedent("""
-    Your task is to brainstorm {n_sub} specific sub-categories of the given user prompt category. Please think about what typical user prompts under the given category would look like, and output the {n_sub} most common sub-categories. They should fall under the given category, be diverse from each other, but also not too narrow. They should not be overly difficult for a simple chatbot to answer, and should not require responses that are too long or complex.
-
-    Here is the given user prompt category:
-
-    <category>
-    {category}
-    </category>
-
-    Use your thinking budget to brainstorm potential sub-categories and evaluate whether they fit the description above. Then, in your output field, output ONLY your list of {n_sub} sub-categories as a python array, like this:
-
-    ```python
-    [
-        "First sub-category",
-        "Second sub-category",
-        ...
-    ]
-    ```
-
-    Each sub-category topic description should be a **simple, short phrase**. Do not include any other text in your output.
-""").strip()
-
-
-async def make_sub_topics(topics: list[str], n_sub: int = 0) -> dict[str, list[str]]:
-    results = dict()
-    for t in topics:
-        results[t] = []
-
-    if n_sub == 0:
-        return results
-    
-    sub_topic_messages = [
-        ChatHistory.from_user(SUBTOPICS_PROMPT.format(
-            n_sub=n_sub,
-            category=t
-        ))
-        for t in topics
-    ]
-    responses = await caller.call(
-        messages=sub_topic_messages,
-        max_parallel=256,
-        model="openai/gpt-5",
-        desc="Making sub-topics",
-        max_tokens=10000,
-        reasoning="medium",
-    )
-
-    for i, response in enumerate(responses):
-        assert response is not None
-        topic = topics[i]
-        sub_topics, _ = parse_json_response(response, log_json_error=False, marker="python")
-        assert isinstance(sub_topics, list)
-        for sub_topic in sub_topics:
-            results[topic].append(sub_topic)
-
-    return results
-
-
 # %% Make specs
 
-def make_chatgpt_specs(ds_name: str|None=None, n_sub: int = 0) -> list[str]:
-    if ds_name is None:
-        ds_name = f"n_sub_{n_sub}"
-
+def make_chatgpt_specs() -> list[str]:
     specs = []
     for k, vals in CHATGPT_CATEGORIES.items():
         specs.extend("{}: {}".format(k, v) for v in vals)
-    
-    sub_topics = asyncio.run(make_sub_topics(specs, n_sub))
-    for spec, sub_topics in sub_topics.items():
-        for sub_topic in sub_topics:
-            specs.append(f"{spec}: {sub_topic}")
-
     specs.extend(intent_cross_topic())
-
     specs.sort()
-    Path(f"user_prompts/chatgpt/{ds_name}").mkdir(parents=True, exist_ok=True)
-    with open(f"user_prompts/chatgpt/{ds_name}/specs.json", "w") as f:
+
+    Path(f"user_prompts/chatgpt").mkdir(parents=True, exist_ok=True)
+    with open(f"user_prompts/chatgpt/specs.json", "w") as f:
         json.dump(specs, f, indent=4)
 
     return specs
 
 
-def make_clio_specs(ds_name: str|None=None, n_sub: int=0) -> list[str]:
-    if ds_name is None:
-        ds_name = f"n_sub_{n_sub}"
-
+def make_clio_specs() -> list[str]:
     specs = []
     for topic in CLIO_CATEGORIES:
         specs.append(topic)
-
-    sub_topics = asyncio.run(make_sub_topics(specs, n_sub))
-    for spec, sub_topics in sub_topics.items():
-        for sub_topic in sub_topics:
-            specs.append(f"{spec}: {sub_topic}")
-
     specs.sort()
-    Path(f"user_prompts/clio/{ds_name}").mkdir(parents=True, exist_ok=True)
-    with open(f"user_prompts/clio/{ds_name}/specs.json", "w") as f:
+
+    Path(f"user_prompts/clio").mkdir(parents=True, exist_ok=True)
+    with open(f"user_prompts/clio/specs.json", "w") as f:
         json.dump(specs, f, indent=4)
 
     return specs
 
 
-def make_handpick_specs(ds_name: str|None=None, n_sub: int=0) -> list[str]:
-    if ds_name is None:
-        ds_name = f"n_sub_{n_sub}"
-
+def make_handpick_specs() -> list[str]:
     specs = []
     for topic in HANDPICK_CATEGORIES:
         specs.append(topic)
-
-    sub_topics = asyncio.run(make_sub_topics(specs, n_sub))
-    for spec, sub_topics in sub_topics.items():
-        for sub_topic in sub_topics:
-            specs.append(f"{spec}: {sub_topic}")
-
     specs.sort()
-    Path(f"user_prompts/handpick/{ds_name}").mkdir(parents=True, exist_ok=True)
-    with open(f"user_prompts/handpick/{ds_name}/specs.json", "w") as f:
+
+    Path(f"user_prompts/handpick").mkdir(parents=True, exist_ok=True)
+    with open(f"user_prompts/handpick/specs.json", "w") as f:
         json.dump(specs, f, indent=4)
+
+    Path(f"user_prompts/debug").mkdir(parents=True, exist_ok=True)
+    with open(f"user_prompts/debug/specs.json", "w") as f:
+        json.dump(specs[:4], f, indent=4)
 
     return specs
 
-
 # %%
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--ds_name", type=str, required=True)
-    parser.add_argument("--n_sub", type=int, default=0)
-    args = parser.parse_args()
-
-    if args.ds_name == "chatgpt":
-        make_chatgpt_specs(n_sub=args.n_sub)
-    elif args.ds_name == "clio":
-        make_clio_specs(n_sub=args.n_sub)
-    elif args.ds_name == "handpick":
-        make_handpick_specs(n_sub=args.n_sub)
-    else:
-        raise ValueError(f"Invalid dataset name: {args.ds_name}")
+    make_chatgpt_specs()
+    make_clio_specs()
+    make_handpick_specs()

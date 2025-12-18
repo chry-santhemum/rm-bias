@@ -184,6 +184,7 @@ class EvoPlanner:
 
             if i < 3:
                 logger.info(f"Planner reasoning:\n{reasoning}")
+                logger.info(f"Planner prompt:\n{to_send_messages[i].get_first('user')}")
                 logger.info(f"Planner attributes:\n{json.dumps(attributes, indent=4)}")
 
             meta = {
@@ -403,52 +404,49 @@ class EvoPlanner:
                 f"After filtering, {len(candidates)} candidates remain."
             )
 
+            # Cluster all filtered candidates upfront for diversity
+            candidate_to_cluster: dict[int, int] = {}
+            if candidates:
+                _, cluster_indices = self.cluster_model.cluster_dbscan(
+                    [cand[0] for cand in candidates], dbscan_eps
+                )
+                for label, member_indices in cluster_indices.items():
+                    for idx in member_indices:
+                        candidate_to_cluster[id(candidates[idx])] = label
+
+                n_clusters = len([k for k in cluster_indices.keys() if k != -1])
+                n_outliers = len(cluster_indices.get(-1, []))
+                logger.info(f"Clustered {len(candidates)} candidates into {n_clusters} clusters + {n_outliers} outliers.")
+
             # Sort into Pareto Fronts
             fronts = EvoPlanner._get_pareto_fronts(candidates)
-            
+
+            # Select candidates, enforcing diversity: only one representative per cluster
             final_selection = []
+            used_clusters: set[int] = set()
+
             for front_idx, front in enumerate(fronts):
-                slots_remaining = n_pop_target - len(final_selection)
-                if slots_remaining <= 0:
+                if len(final_selection) >= n_pop_target:
                     break
-                
-                # Current front fits, take it all
-                if len(front) <= slots_remaining:
-                    final_selection.extend(front)
-                    logger.info(f"Front {front_idx} with {len(front)} members fits into the {slots_remaining} remaining slots.")
-                    continue
 
-                # Current front is too large for remaining slots
-                logger.info(f"Front overflow. Clustering {len(front)} candidates for {slots_remaining} slots.")
-                _, indices = self.cluster_model.cluster_dbscan(
-                    [cand[0] for cand in front], dbscan_eps
-                )
-                
-                cluster_representatives = []
-                outliers = []
-                for label, member_indices in indices.items():
-                    members = [front[i] for i in member_indices]
-                    if label == -1:
-                        outliers.extend(members)
-                    else:
-                        best_in_niche = min(members, key=EvoPlanner._pareto_tiebreak)
-                        cluster_representatives.append(best_in_niche)
+                # Sort front by tiebreak (best first)
+                front_sorted = sorted(front, key=EvoPlanner._pareto_tiebreak)
+                selected_from_front = 0
 
-                high_value_candidates = cluster_representatives + outliers
-                high_value_candidates.sort(key=EvoPlanner._pareto_tiebreak)
-                
-                # Fill the remaining slots with the winners
-                candidates_to_add = high_value_candidates[:slots_remaining]
-                final_selection.extend(candidates_to_add)
-                
-                # In case clustering was too aggressive
-                if len(final_selection) < n_pop_target:
-                    remaining_needed = n_pop_target - len(final_selection)
+                for candidate in front_sorted:
+                    if len(final_selection) >= n_pop_target:
+                        break
 
-                    selected_ids = {id(x) for x in final_selection} # Using object id for reliable uniqueness
-                    leftovers = [x for x in front if id(x) not in selected_ids]
-                    leftovers.sort(key=EvoPlanner._pareto_tiebreak)
-                    final_selection.extend(leftovers[:remaining_needed])
+                    cluster_label = candidate_to_cluster.get(id(candidate), -1)
+
+                    # Outliers (-1) are always selectable; clustered candidates only if cluster not used
+                    if cluster_label == -1 or cluster_label not in used_clusters:
+                        final_selection.append(candidate)
+                        selected_from_front += 1
+                        if cluster_label != -1:
+                            used_clusters.add(cluster_label)
+
+                logger.info(f"Front {front_idx}: {len(front)} candidates, selected {selected_from_front} (enforcing diversity).")
 
             # Store data for plotting (after selection is complete)
             candidates_by_seed[seed_state.index] = {

@@ -62,7 +62,7 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
         attribute_diffs = remove_outliers(attribute_diffs, clip_percent = 0.05)
         ds_name = run_path.name.split("-")[-2]
         with open(
-            f"user_prompts/{ds_name}/n_sub_0/cluster_{seed_index}.json", "r", encoding="utf-8"
+            f"user_prompts/{ds_name}/cluster_{seed_index}.json", "r", encoding="utf-8"
         ) as f:
             cluster_info = json.load(f)
 

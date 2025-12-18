@@ -31,14 +31,14 @@ done
 
 
 python train.py \
---dataset synthetic \
+--dataset clio \
 --student_model skywork-llama-8b \
 --teacher_model claude-sonnet-4.5 \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
---n_pop_initial 128 \
---n_pop_targets 8 \
---train_batch_sizes 8 \
+--n_pop_initial 96 \
+--n_pop_targets 24 16 8 \
+--train_batch_sizes 8 8 8 \
 --m_var 3 \
 --n_planner_requests 64

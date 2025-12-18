@@ -286,7 +286,10 @@ class ListPlanner(Planner):
 
                         data = {
                             "user_prompt": user_prompt,
-                            "rollouts": [asdict(r) for r in sampled_rollouts],
+                            "rollouts": [{
+                                "response": r.response,
+                                "score": r.student_score.raw_score,
+                            } for r in sampled_rollouts],
                         }
                         planner_prompt = LIST_PROMPT.format(
                             data=json.dumps(data, indent=4),

@@ -58,14 +58,15 @@ async def main():
     ]
 
     if args.dataset == "synthetic":
-        ds_path = "user_prompts/synthetic/n_sub_0"
+        ds_path = "user_prompts/synthetic"
         topic_ids = [1, 3, 4, 6, 8, 9]
     elif args.dataset == "chatgpt":
-        ds_path = "user_prompts/chatgpt/n_sub_2"
+        ds_path = "user_prompts/chatgpt"
     elif args.dataset == "clio":
-        ds_path = "user_prompts/clio/n_sub_0"
+        ds_path = "user_prompts/clio"
+        topic_ids = [0, 2, 4, 5, 7, 8, 9, 11, 13, 14, 15, 18]
     elif args.dataset == "handpick":
-        ds_path = "user_prompts/handpick/n_sub_0"
+        ds_path = "user_prompts/handpick"
     else:
         raise ValueError(f"Invalid dataset: {args.dataset}")
 

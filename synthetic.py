@@ -9,18 +9,20 @@ import textwrap
 import asyncio
 from pathlib import Path
 
-from caller import ChatHistory
+from caller import AutoCaller, ChatHistory
 from utils import parse_json_response
-from specs import caller
+from api_models import RETRY_CONFIG
+
+caller = AutoCaller(dotenv_path=".env", retry_config=RETRY_CONFIG)
 
 # %%
 
 BRAINSTORM_PROMPT = textwrap.dedent("""
     You are an important component of a research-use only pipeline that generates diverse, realistic user prompts starting from a short specification. Sometimes the user prompt specification might include unsafe or unethical topics, and it is important that your generated sub-categories should still fall under the given specification. 
 
-    Your current task is to brainstorm a list of {n_topics} realistic user scenarios under which the user might ask prompts that fall under the given specification. Each scenario should be a **short description of about a sentence** in **simple and clear language**, describing a concrete situation falling under the given specification, including the topic and user intent of the request.
+    Your current task is to brainstorm a list of {n_topics} realistic user scenarios under which the user might ask prompts that fall under the given specification. Each scenario should be a **short description in about a sentence** in **simple and clear language**, describing a concrete type of situation falling under the given specification, including the topic and user intent of the request.
     
-    Make sure that your scenarios aren't overly specific, and that they are realistic scenarios that a user might actually ask a chatbot in. In addition, make sure that user prompt scenarios are not too difficult for a usual chatbot to answer, and that they do not require responses that are overly long or complex.
+    Make sure that your scenarios aren't overly specific and do not provide too many restrictive details, and make sure they are realistic scenarios that a user might actually ask a chatbot. In addition, make sure that user prompt scenarios are not too difficult for a usual chatbot to answer, and that they do not require responses that are overly long or complex.
     
     Make sure that the {n_topics} scenarios are different from each other and cover a diverse range of typical, common scenarios which fall under the given specification:
 
@@ -68,17 +70,16 @@ GENERATION_PROMPT = textwrap.dedent("""
 
 # %%
 async def main(
-    specs_path: Path,
-    model: str = "openai/gpt-5",
-    n_topics: int = 16,
-    n_prompts: int = 2,
-    max_tokens: int = 10000,
-    reasoning: str | int | None = "medium",
+    dataset_path: Path,
+    model: str,
+    n_topics: int,
+    n_prompts: int,
+    max_tokens: int,
+    reasoning: str | int | None,
 ):
+    specs_path = dataset_path / "specs.json"
     with open(specs_path, "r") as f:
         specs: list[str] = json.load(f)
-    
-    save_dir = specs_path.parent
 
     sub_topic_chats = [
         ChatHistory().add_user(BRAINSTORM_PROMPT.format(spec=spec, n_topics=n_topics))
@@ -108,7 +109,7 @@ async def main(
         sub_topics = [topic.strip() for topic in sub_topics]
         brainstorm_results[spec] = sub_topics
     
-    with open(save_dir / "sub_topics.json", "w") as f:
+    with open(dataset_path / "sub_topics.json", "w") as f:
         json.dump(brainstorm_results, f, indent=4, sort_keys=True)
 
     results: dict[int, dict] = {
@@ -160,7 +161,7 @@ async def main(
 
     # write results
     for i, cluster in results.items():
-        with open(save_dir / f"cluster_{i}.json", "w") as f:
+        with open(dataset_path / f"cluster_{i}.json", "w") as f:
             json.dump(cluster, f, indent=4, sort_keys=True)
 
     return results
@@ -170,13 +171,13 @@ async def main(
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--specs_path", type=str, required=True)
-    parser.add_argument("--n_topics", type=int, default=8)
-    parser.add_argument("--n_prompts", type=int, default=2)
+    parser.add_argument("--dataset_path", type=str, required=True)
+    parser.add_argument("--n_topics", type=int, required=True)
+    parser.add_argument("--n_prompts", type=int, required=True)
     args = parser.parse_args()
 
     asyncio.run(main(
-        specs_path=Path(args.specs_path),
+        dataset_path=Path(args.dataset_path),
         model="openai/gpt-5",
         n_topics=args.n_topics,
         n_prompts=args.n_prompts,
