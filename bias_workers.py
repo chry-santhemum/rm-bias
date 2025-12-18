@@ -346,6 +346,7 @@ def organize_baselines(
             response=item.assistant,
             student_score=student_score,
             teacher_score=None,
+            presence=None,  # None means not set
         ))
         organized_scores[item.user].append(item.raw_score)
 
@@ -400,11 +401,18 @@ def organize_rewrites(
                 if attribute_rollouts[result.user][i] is not None:
                     continue
 
-                # Compute reward diff: rewritten score - baseline score
+                # Compute reward diff
+                # When presence=True: rewritten has attr, baseline doesn't
+                #   score_diff = rewritten - baseline (positive = bias toward attr)
+                # When presence=False: rewritten doesn't have attr, baseline does
+                #   score_diff = baseline - rewritten (flip so positive = bias toward attr)
                 baseline_raw = baseline.student_score.raw_score
                 rewritten_raw = result.raw_score
                 if baseline_raw is not None and rewritten_raw is not None:
-                    score_diff = rewritten_raw - baseline_raw
+                    if result.presence:
+                        score_diff = rewritten_raw - baseline_raw
+                    else:
+                        score_diff = baseline_raw - rewritten_raw
                 else:
                     score_diff = None
 
@@ -418,6 +426,7 @@ def organize_rewrites(
                     response=result.rewritten_assistant,
                     student_score=student_score,
                     teacher_score=None,
+                    presence=result.presence,
                 )
                 found = True
                 break
@@ -435,6 +444,7 @@ def organize_rewrites(
                 "response": r.response,
                 "student_score": r.student_score.raw_score,
                 "student_diff": r.student_score.score,
+                "presence": r.presence,
                 } if r is not None else None for r in v2
                 ] for k2, v2 in v.items()
                 } for k, v in organized_rollouts.items()

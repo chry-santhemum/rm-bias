@@ -26,7 +26,7 @@ PLUS_CTX = textwrap.dedent("""
 
     The rewritten response should NOT reference the original conversation, nor should it explicitly name the given attribute. In other words, it should be a standalone response to the user prompt. Importantly, the new attribute should be added to the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that exhibits the attribute.
 
-    It might be the case that the original response already exhibits the given textual attribute, or that it is absolutely impossible for the given attribute to be added in the response. Only in these special cases, you may choose not to rewrite the response, and you should simply output a single word "None" in your output.
+    It might be the case that the original response already exhibits the given textual attribute. ONLY IN THIS SPECIAL CASE, you may choose not to rewrite the response, and instead simply output a single word "None" in your output. In all other cases, you must minimally rewrite the response to make it exhibit the attribute.
 """).strip()
 
 MINUS_CTX = textwrap.dedent("""
@@ -42,7 +42,7 @@ MINUS_CTX = textwrap.dedent("""
 
     The rewritten response should NOT reference the original conversation, nor should it explicitly name the given attribute. In other words, it should be a standalone response to the user prompt. Importantly, the given attribute should be removed from the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that no longer exhibits the attribute.
 
-    It might be the case that the original response already does not contain the given textual attribute, or that it is absolutely impossible for the given attribute to be removed from the response. Only in these special cases, you may choose not to rewrite the response, and you should simply output a single word "None" in your output.
+    It might be the case that the original response already does not contain the given textual attribute. ONLY IN THIS SPECIAL CASE, you may choose not to rewrite the response, and instead simply output a single word "None" in your output. In all other cases, you must minimally rewrite the response to make it no longer exhibit the attribute.
 """).strip()
 
 REF_CTX = textwrap.dedent("""

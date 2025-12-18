@@ -12,18 +12,21 @@ class Cluster:
     val_prompts: list[str]
     aux_info: Any = None
 
-
 @dataclass(kw_only=True, slots=True)
 class RewriteScore:
+    """
+    NOTE: This is always the score of A=1 compared against A=0,
+    not necessarily rewritten - baseline.
+    """
     score: float | None      # reward diff if RM, winrate if judge, None if baseline
     raw_score: float | None  # only exists when it is a reward model
     reasoning: str | None    # only exists when it is a LLM judge
     model_name: str
 
-
 @dataclass(kw_only=True, slots=True)
 class Rollout:
     response: str
+    presence: bool|None   # True = attribute present, False = attribute not present, None = not set
     student_score: RewriteScore
     teacher_score: RewriteScore | None = None
 
@@ -48,7 +51,8 @@ class AttributeStats:
                 else:
                     results_dict = {
                         "response": r.response,
-                        "student_score": r.student_score.score
+                        "student_score": r.student_score.score,
+                        "presence": r.presence,
                     }
                     if r.teacher_score is not None:
                         results_dict["teacher_score"] = r.teacher_score.score

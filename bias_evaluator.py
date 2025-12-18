@@ -1,5 +1,6 @@
 import time
 import asyncio
+from dataclasses import replace
 from pathlib import Path
 from loguru import logger
 
@@ -87,85 +88,182 @@ class BiasEvaluator:
         
         self._workers_started = True
 
-    async def evaluate_attributes(
+    async def _run_rewrite_batch(
         self,
-        user_prompts: list[str],
-        attributes: list[str],
-        baselines: dict[str, list[Rollout]],
-        references: list[dict[str, str] | None] | None = None,
-        presence: bool=True,
-        n_rollouts: int | None = None,  # max number of baseline responses to rewrite
-        save_dir: Path | None = None,
-    ):
-        """Sends roughly len(user_prompts) * len(attributes) * n_rollouts rewrite requests."""
-        await self._ensure_workers_started()
-        start_time = time.time()
-
-        # Generate batch ID and future
+        rewrite_inputs: list[RewriteInput],
+    ) -> list[RewriteOutput]:
+        """Run a batch of rewrite inputs through the worker pipeline."""
         assert self._batch_id_lock is not None
-        async with self._batch_id_lock:  
+        async with self._batch_id_lock:
             batch_id = str(self._batch_id)
             self.batch_results[batch_id] = []
             loop = asyncio.get_running_loop()
             self.batch_futures[batch_id] = loop.create_future()
             self._batch_id += 1
 
-        # Pre-compute expected number of results
-        expected_result_count = 0
-        for user in user_prompts:
-            n_user_rollouts = (
-                min(n_rollouts, len(baselines[user]))
-                if n_rollouts is not None
-                else len(baselines[user])
-            )
-            expected_result_count += n_user_rollouts * len(attributes)
-
         # Send batch start marker
-        logger.info(f"Batch {batch_id} expects {expected_result_count} results...")
+        logger.info(f"Batch {batch_id} expects {len(rewrite_inputs)} results...")
         await self.queue_rewrite.put(  # type: ignore
-            BatchStartMarker(batch_id=batch_id, expected_items=expected_result_count)
+            BatchStartMarker(batch_id=batch_id, expected_items=len(rewrite_inputs))
         )
 
-        # Put tasks
+        # Put tasks (update batch_id since RewriteInput is frozen)
+        for rewrite_input in rewrite_inputs:
+            input_with_batch_id = replace(rewrite_input, batch_id=batch_id)
+            await self.queue_input.put(input_with_batch_id)  # type: ignore
+
+        # Wait for results
+        batch_results = await self.batch_futures[batch_id]
+        del self.batch_futures[batch_id]
+
+        return batch_results
+
+    async def evaluate_attributes(
+        self,
+        user_prompts: list[str],
+        attributes: list[str],
+        baselines: dict[str, list[Rollout]],
+        references: list[dict[str, str] | None] | None = None,
+        n_rollouts: int | None = None,  # max number of baseline responses to rewrite
+        save_dir: Path | None = None,
+    ):
+        """Sends roughly len(user_prompts) * len(attributes) * n_rollouts rewrite requests.
+
+        When presence=True rewrite returns unchanged (baseline already has attribute),
+        automatically retries with presence=False to remove the attribute instead.
+        """
+        await self._ensure_workers_started()
+        start_time = time.time()
+
+        # Statistics tracking per attribute
+        from collections import defaultdict
+        rewrite_stats: dict[str, dict[str, int]] = defaultdict(lambda: {
+            "total_attempted": 0,
+            "positive_unchanged": 0,  # First pass failures (presence=True returned unchanged)
+            "retry_unchanged": 0,     # Double failures (presence=False also returned unchanged)
+        })
+
+        # Build all rewrite inputs for first pass (presence=True)
+        first_pass_inputs: list[RewriteInput] = []
         for user in user_prompts:
             for j, attribute in enumerate(attributes):
                 ref_triple = references[j] if references is not None else None
                 for i, original_assistant in enumerate(baselines[user]):
                     if n_rollouts is not None and i >= n_rollouts:
                         break
+                    rewrite_stats[attribute]["total_attempted"] += 1
                     if ref_triple is not None:
-                        await self.queue_input.put(  # type: ignore
+                        first_pass_inputs.append(
                             RewriteInput(
                                 system=attribute,
                                 user=user,
                                 original_assistant=original_assistant.response,
-                                presence=presence,
-                                batch_id=batch_id,
+                                presence=True,
+                                batch_id="",  # Will be set in _run_rewrite_batch
                                 reference_user=ref_triple["user_prompt"],
                                 reference_response_A=ref_triple["response_A"],
                                 reference_response_B=ref_triple["response_B"],
                             )
                         )
                     else:
-                        await self.queue_input.put(  # type: ignore
+                        first_pass_inputs.append(
                             RewriteInput(
                                 system=attribute,
                                 user=user,
                                 original_assistant=original_assistant.response,
-                                presence=presence,
-                                batch_id=batch_id,
+                                presence=True,
+                                batch_id="",  # Will be set in _run_rewrite_batch
                             )
                         )
 
-        # Wait for results for this batch
-        batch_results = await self.batch_futures[batch_id]
+        # Build lookup for reference data (needed for retries)
+        input_lookup: dict[tuple[str, str, str], RewriteInput] = {
+            (inp.system, inp.user, inp.original_assistant): inp
+            for inp in first_pass_inputs
+        }
+
+        # Run first pass
+        first_pass_results = await self._run_rewrite_batch(first_pass_inputs)
+        logger.info(f"First pass complete: {len(first_pass_results)} results")
+
+        # Identify items where rewrite returned unchanged (model said "already has attribute")
+        # These need retry with presence=False
+        changed_results: list[RewriteOutput] = []
+        retry_inputs: list[RewriteInput] = []
+
+        for result in first_pass_results:
+            # Check if rewrite returned the original (unchanged)
+            # This happens when model outputs "None" - rewritten_assistant is set to original
+            if (
+                result.rewritten_assistant is not None
+                and result.rewritten_assistant == result.original_assistant
+                and result.presence  # Only retry if this was a presence=True attempt
+            ):
+                rewrite_stats[result.system]["positive_unchanged"] += 1
+                # Create retry input with presence=False, carrying over reference data
+                original_input = input_lookup.get((result.system, result.user, result.original_assistant))
+                retry_inputs.append(
+                    RewriteInput(
+                        system=result.system,
+                        user=result.user,
+                        original_assistant=result.original_assistant,
+                        presence=False,
+                        batch_id="",  # Will be set in _run_rewrite_batch
+                        reference_user=original_input.reference_user if original_input else None,
+                        reference_response_A=original_input.reference_response_A if original_input else None,
+                        reference_response_B=original_input.reference_response_B if original_input else None,
+                    )
+                )
+            else:
+                changed_results.append(result)
+
+        # Run second pass if there are items to retry
+        if retry_inputs:
+            logger.info(f"Retrying {len(retry_inputs)} items with presence=False")
+            retry_results = await self._run_rewrite_batch(retry_inputs)
+            logger.info(f"Retry pass complete: {len(retry_results)} results")
+
+            # Check for double failures (retry also returned unchanged)
+            for result in retry_results:
+                if (
+                    result.rewritten_assistant is not None
+                    and result.rewritten_assistant == result.original_assistant
+                ):
+                    rewrite_stats[result.system]["retry_unchanged"] += 1
+                    # Double failure: keep the original response (already the case)
+                    # Include it in results so it gets processed, but score_diff will be ~0
+
+            # Combine results: use retry results (including double failures)
+            all_results = changed_results + retry_results
+        else:
+            all_results = changed_results
+
+        # Log statistics
+        total_positive_unchanged = sum(s["positive_unchanged"] for s in rewrite_stats.values())
+        total_retry_unchanged = sum(s["retry_unchanged"] for s in rewrite_stats.values())
+        total_attempted = sum(s["total_attempted"] for s in rewrite_stats.values())
+
+        if total_positive_unchanged > 0:
+            logger.info(
+                f"Rewrite stats: {total_positive_unchanged}/{total_attempted} positive rewrites unchanged, "
+                f"{total_retry_unchanged}/{total_positive_unchanged} retries also unchanged (double failures)"
+            )
+        else:
+            logger.info(f"Rewrite stats: all {total_attempted} positive rewrites succeeded")
+
+        # Log per-attribute stats if there are notable failures
+        for attr, stats in rewrite_stats.items():
+            if stats["positive_unchanged"] > 0:
+                logger.debug(
+                    f"  {attr[:50]}...: {stats['positive_unchanged']}/{stats['total_attempted']} "
+                    f"positive unchanged, {stats['retry_unchanged']} double failures"
+                )
 
         organized_results = organize_rewrites(
-            batch_results, baselines, self.reward_model.model_name, n_rollouts, save_dir
+            all_results, baselines, self.reward_model.model_name, n_rollouts, save_dir
         )
-        del self.batch_futures[batch_id]  # type: ignore
 
-        logger.info(f"Batch {batch_id}: {expected_result_count} results evaluated in {(time.time() - start_time):.2f} seconds")
+        logger.info(f"Evaluation complete: {len(all_results)} results in {(time.time() - start_time):.2f} seconds")
         return organized_results
 
     async def shutdown(self):

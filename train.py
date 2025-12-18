@@ -66,7 +66,7 @@ async def main():
     elif args.dataset == "clio":
         ds_path = "user_prompts/clio"
         # topic_ids = [0, 2, 4, 5, 7, 8, 9, 11, 13, 14, 15, 18]
-        topic_ids = [0, 7, 15]
+        topic_ids = [7]
     elif args.dataset == "handpick":
         ds_path = "user_prompts/handpick"
     else:
