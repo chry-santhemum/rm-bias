@@ -22,7 +22,10 @@
       "Bash(mv:*)",
       "Read(//workspace/caller/src/caller/**)",
       "Read(//workspace/caller/**)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(python3:*)",
+      "Bash(done)",
+      "Bash(timeout 10 python3:*)"
     ],
     "deny": [
       "Bash(rm:*)",

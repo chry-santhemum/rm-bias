@@ -37,12 +37,12 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
         if teacher_diffs is not None:
             for _, user_prompt_diffs in teacher_diffs[attribute].items():
                 for wr in user_prompt_diffs:
-                    if wr > 0:
+                    if wr is None:
+                        continue
+                    elif wr > 0:
                         teacher_winrates.append(1)
                     elif wr < 0:
                         teacher_winrates.append(0)
-                    elif wr is None:
-                        continue
                     else:
                         teacher_winrates.append(0.5)
             # teacher_winrates = remove_outliers(teacher_winrates, clip_percent = 0.05)
@@ -50,15 +50,16 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
         # remove far outliers
         student_winrates = []
         for wr in attribute_diffs:
-            if wr > 0:
+            if wr is None:
+                continue
+            elif wr > 0:
                 student_winrates.append(1)
             elif wr < 0:
                 student_winrates.append(0)
-            elif wr is None:
-                continue
             else:
                 student_winrates.append(0.5)
 
+        attribute_diffs = [d for d in attribute_diffs if d is not None]
         attribute_diffs = remove_outliers(attribute_diffs, clip_percent = 0.05)
         ds_name = run_path.name.split("-")[-2]
         with open(

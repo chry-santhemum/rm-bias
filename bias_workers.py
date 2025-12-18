@@ -406,15 +406,21 @@ def organize_rewrites(
                 #   score_diff = rewritten - baseline (positive = bias toward attr)
                 # When presence=False: rewritten doesn't have attr, baseline does
                 #   score_diff = baseline - rewritten (flip so positive = bias toward attr)
-                baseline_raw = baseline.student_score.raw_score
-                rewritten_raw = result.raw_score
-                if baseline_raw is not None and rewritten_raw is not None:
-                    if result.presence:
-                        score_diff = rewritten_raw - baseline_raw
-                    else:
-                        score_diff = baseline_raw - rewritten_raw
+                # Special case: if rewrite is unchanged (double failure), score_diff = 0
+                if result.rewritten_assistant == result.original_assistant:
+                    # Unchanged rewrite (double failure) - no bias signal
+                    score_diff = 0.0
+                    rewritten_raw = baseline.student_score.raw_score  # Use baseline score
                 else:
-                    score_diff = None
+                    baseline_raw = baseline.student_score.raw_score
+                    rewritten_raw = result.raw_score
+                    if baseline_raw is not None and rewritten_raw is not None:
+                        if result.presence:
+                            score_diff = rewritten_raw - baseline_raw
+                        else:
+                            score_diff = baseline_raw - rewritten_raw
+                    else:
+                        score_diff = None
 
                 student_score = RewriteScore(
                     score=score_diff,
