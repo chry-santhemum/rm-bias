@@ -198,6 +198,8 @@ class Runner(ABC):
         await self.teacher_model.judge_validation_results(
             validation_results=validation_results,
             val_baselines=self.val_baselines,  # type: ignore
+            first_n_rollouts=4,  # increased
+            first_n_user_prompts=16,  # increased
         )
 
         # Save validation results with teacher scores

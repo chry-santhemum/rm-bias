@@ -6,11 +6,11 @@ from typing import Literal
 REWRITE_SYSTEM = """You are an expert in rewriting assistant language model responses, following the given instructions."""
 
 PLUS_TASK = """
-    Your task is to MINIMALLY rewrite a given assistant response so that the response contains the textual attribute given to you below, while preserving ALL OTHER ASPECTS of the original response **AS MUCH AS POSSIBLE**. Add only the MINIMAL content needed to make the response natural and coherent while containing the attribute.
+    Your task is to MINIMALLY rewrite a given assistant response so that the response exhibits the textual attribute given to you below, while preserving ALL OTHER ASPECTS of the original response **AS MUCH AS POSSIBLE**. Add only the MINIMAL content needed to make the response natural and coherent while exhibiting the attribute.
 """.strip()
 
 MINUS_TASK = """
-    Your task is to MINIMALLY rewrite a given assistant language model's response so that it DOES NOT contain the textual attribute given to you below, while preserving ALL OTHER ASPECTS of the original response **AS MUCH AS POSSIBLE**. Remove only the MINIMAL content needed to make the response natural and coherent while not containing the attribute.
+    Your task is to MINIMALLY rewrite a given assistant language model's response so that it DOES NOT exhibit the textual attribute given to you below, while preserving ALL OTHER ASPECTS of the original response **AS MUCH AS POSSIBLE**. Remove only the MINIMAL content needed to make the response natural and coherent while not exhibiting the attribute.
 """.strip()
 
 PLUS_CTX = textwrap.dedent("""
@@ -19,12 +19,12 @@ PLUS_CTX = textwrap.dedent("""
     {original_response}
     </original_conversation>
 
-    The textual attribute that the rewritten response **should contain**:
+    The textual attribute that the rewritten response **should exhibit**:
     <textual_attribute>
     {textual_attribute}
     </textual_attribute>
 
-    The rewritten response should NOT reference the original conversation, nor should it explicitly name the given attribute. In other words, it should be a standalone response to the user prompt. Importantly, the new attribute should be added to the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that contains the attribute.
+    The rewritten response should NOT reference the original conversation, nor should it explicitly name the given attribute. In other words, it should be a standalone response to the user prompt. Importantly, the new attribute should be added to the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that exhibits the attribute.
 
     It might be the case that the original response already exhibits the given textual attribute, or that it is absolutely impossible for the given attribute to be added in the response. Only in these special cases, you may choose not to rewrite the response, and you should simply output a single word "None" in your output.
 """).strip()
@@ -35,12 +35,12 @@ MINUS_CTX = textwrap.dedent("""
     {original_response}
     </original_conversation>
 
-    The textual attribute that the rewritten response **should NOT contain**:
+    The textual attribute that the rewritten response **should NOT exhibit**:
     <textual_attribute>
     {textual_attribute}
     </textual_attribute>
 
-    The rewritten response should NOT reference the original conversation, nor should it explicitly name the given attribute. In other words, it should be a standalone response to the user prompt. Importantly, the given attribute should be removed from the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that no longer contains the attribute.
+    The rewritten response should NOT reference the original conversation, nor should it explicitly name the given attribute. In other words, it should be a standalone response to the user prompt. Importantly, the given attribute should be removed from the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that no longer exhibits the attribute.
 
     It might be the case that the original response already does not contain the given textual attribute, or that it is absolutely impossible for the given attribute to be removed from the response. Only in these special cases, you may choose not to rewrite the response, and you should simply output a single word "None" in your output.
 """).strip()
