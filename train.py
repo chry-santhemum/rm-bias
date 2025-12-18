@@ -34,6 +34,7 @@ parser.add_argument("--m_var", type=int, default=3)
 parser.add_argument("--n_planner_requests", type=int, default=64)
 parser.add_argument("--n_baseline_rollouts", type=int, default=24)
 parser.add_argument("--n_rewrite_rollouts", type=int, default=4)
+parser.add_argument("--n_validate_rollouts", type=int, default=8)
 parser.add_argument("--val_split_size", type=int, default=16)
 parser.add_argument("--dbscan_eps", type=float, default=0.2)
 parser.add_argument("--run_name", type=str, default=None)
@@ -64,7 +65,8 @@ async def main():
         ds_path = "user_prompts/chatgpt"
     elif args.dataset == "clio":
         ds_path = "user_prompts/clio"
-        topic_ids = [0, 2, 4, 5, 7, 8, 9, 11, 13, 14, 15, 18]
+        # topic_ids = [0, 2, 4, 5, 7, 8, 9, 11, 13, 14, 15, 18]
+        topic_ids = [0, 7, 15]
     elif args.dataset == "handpick":
         ds_path = "user_prompts/handpick"
     else:
@@ -233,6 +235,7 @@ async def main():
         m_var=args.m_var,
         n_baseline_rollouts=args.n_baseline_rollouts,
         n_rewrite_rollouts=args.n_rewrite_rollouts,
+        n_validate_rollouts=args.n_validate_rollouts,
         run_name=run_name,
     )
 

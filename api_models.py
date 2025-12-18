@@ -219,7 +219,7 @@ class JudgeModel(GenerationModel):
 
     async def judge_relative(
         self,
-        chat_histories_A: Sequence[ChatHistory], 
+        chat_histories_A: Sequence[ChatHistory],
         chat_histories_B: Sequence[ChatHistory],
         num_trials: int = 1,
         use_tqdm: bool = True,
@@ -228,12 +228,21 @@ class JudgeModel(GenerationModel):
         assert len(chat_histories_A) == len(chat_histories_B)
         to_send_chats: list[ChatHistory] = []
         to_send_flips: list[bool] = []
+        # Track which input pairs need judging (False = identical responses, return Tie directly)
+        pair_needs_judging: list[bool] = []
 
         for chat_A, chat_B in zip(chat_histories_A, chat_histories_B):
             user_prompt = chat_A.get_first("user")
             assert user_prompt == chat_B.get_first("user")
             response_A = chat_A.get_first("assistant")
             response_B = chat_B.get_first("assistant")
+
+            # If responses are identical, skip sending to LLM - it's a Tie
+            if response_A == response_B:
+                pair_needs_judging.append(False)
+                continue
+
+            pair_needs_judging.append(True)
 
             flips = [False for _ in range(num_trials // 2)] + [True for _ in range(num_trials // 2)]
             if num_trials % 2 == 1:
@@ -251,50 +260,71 @@ class JudgeModel(GenerationModel):
                 )
             to_send_flips.extend(flips)
 
-        desc = "LLM judge relative" if use_tqdm else None
-        responses = await self.sample(to_send_chats, desc=desc)
+        # Only call LLM if there are non-identical pairs
+        if to_send_chats:
+            desc = "LLM judge relative" if use_tqdm else None
+            responses = await self.sample(to_send_chats, desc=desc)
+        else:
+            responses = []
 
+        # Build results, inserting Tie for identical pairs
         judge_results = []
-        for i in range(0, len(responses), num_trials):
+        response_idx = 0
+
+        for needs_judging in pair_needs_judging:
+            if not needs_judging:
+                # Identical responses -> Tie without LLM call
+                judge_results.append(ComparisonResult(
+                    winner="Tie",
+                    reasoning=None,
+                    score_diff=0,
+                    raw_score_A=0,
+                    raw_score_B=0,
+                ))
+                continue
+
+            # Process num_trials responses for this pair
             comparison_stats: list[Literal["A", "B", "Tie"]|None] = []
             reasonings: list[str|None] = []
 
             for j in range(num_trials):
-                resp = responses[i + j]
+                resp = responses[response_idx + j]
                 if resp is None:
                     comparison_stats.append(None)
                     reasonings.append(None)
-                    logger.warning(f"Judge relative response is None. Input:\n{to_send_chats[i + j].to_openai_str()}")
+                    logger.warning(f"Judge relative response is None. Input:\n{to_send_chats[response_idx + j].to_openai_str()}")
                     continue
 
                 reasonings.append(resp.reasoning_content)
                 if (not resp.has_response) or (resp.finish_reason != "stop"):
                     comparison_stats.append(None)
-                    logger.warning(f"Judge relative response is invalid. Response: {resp}. Input:\n{to_send_chats[i + j].to_openai_str()}")
+                    logger.warning(f"Judge relative response is invalid. Response: {resp}. Input:\n{to_send_chats[response_idx + j].to_openai_str()}")
                     continue
-                
+
                 matched = re.search(r"<output>(.+?)</output>", resp.first_response.strip(), re.DOTALL)  # type: ignore
                 if matched:
                     response_text = matched.group(1).strip().lower()
                 else:
                     response_text = resp.first_response.strip().lower()  # type: ignore
-            
-                if not to_send_flips[i + j]:
+
+                if not to_send_flips[response_idx + j]:
                     winner = "A" if response_text == "a" else "B" if response_text == "b" else "Tie" if response_text == "tie" else None
                     comparison_stats.append(winner)
                 else:
                     winner = "B" if response_text == "a" else "A" if response_text == "b" else "Tie" if response_text == "tie" else None
                     comparison_stats.append(winner)
 
+            response_idx += num_trials
+
             raw_score_A = sum(1 for stat in comparison_stats if stat == "A")
             raw_score_B = sum(1 for stat in comparison_stats if stat == "B")
             score_diff = None if all(stat is None for stat in comparison_stats) else raw_score_A - raw_score_B
             winner = None if score_diff is None else "A" if score_diff > 0 else "B" if score_diff < 0 else "Tie"
             judge_results.append(ComparisonResult(
-                winner=winner, 
-                reasoning=reasonings, 
-                score_diff=score_diff, 
-                raw_score_A=raw_score_A, 
+                winner=winner,
+                reasoning=reasonings,
+                score_diff=score_diff,
+                raw_score_A=raw_score_A,
                 raw_score_B=raw_score_B
             ))
 

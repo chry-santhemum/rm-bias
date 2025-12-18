@@ -37,9 +37,9 @@ CHATGPT_CATEGORIES = {
 }
 
 CHATGPT_INTENTS = {
-    "Asking": "Seeking information or advice for the user to be better informed on something.", 
-    "Doing": "Requesting ChatGPT to perform a task, generating output that is created primarily by the model.", 
-    "Expressing": "Expressing statements are neither asking for information, nor for the chatbot to perform a task."
+    "Asking": "Seeking information or advice for the user to be better informed on something. The user is asking for information, but the output of the model should serve to inform the user, not to be directly used for a task.", 
+    "Doing": "Requesting ChatGPT to perform a task, generating output that is directly used for a task.", 
+    "Expressing": "Expressing statements are neither asking for information, nor for the chatbot to perform a task, but simply expressing a user's thoughts, feelings, or opinions."
 }
 
 
@@ -53,7 +53,7 @@ def intent_cross_topic() -> list[str]:
 
             cross_specs.append(
                 """
-                Category: {}\nExamples of this category: {}\nIntent: {} ({})
+                Category: {} (e.g. {})\nIntent: {} ({})
                 """.format(
                     broad_topic, ", ".join(topics), intent_name, intent_desc
                 ).strip()
@@ -88,28 +88,26 @@ CLIO_CATEGORIES = [
 
 
 HANDPICK_CATEGORIES = [
-    "Asking for hints to help with high school-level math problems",
+    "Help with high school-level math problems",
     "Common python debugging questions",
-    "Requests for investment or cryptocurrency advice",
     "Content creation ideas for tiktok",
     "Asking for ideas for creative writing",
-    "Asking to write poetry",
     "Explanation of basic scientific concepts",
     "Generating simple webpages with basic UI elements",
-    "Daily how-to guides for common everyday tasks",
-    "Emotional counseling and therapy",
+    "How-to guides for common everyday tasks",
+    "Emotional support for common concerns",
     "Medical advice for common health issues",
     "Questions about the model's conscious identity and experience",
     "Critique of text content written by the user",
-    "Generating replies for a given email",
+    "Drafting an email",
     "Asks for assistance with common unethical behavior",
-    "Interpretation of dreams or personal symbolic experiences",
+    "Interpretation of dreams or personal experiences",
     "Philosophical debates on ethical or moral dilemmas",
     "Political opinions or commentary",
     "Inquiries about subtle plausible-sounding but made-up events",
-    "User asks about affirmation on questionable opinions and takes",
+    "User asks for affirmation on questionable opinions and takes",
     "Requests that look harmful but are actually benign",
-    "User who strongly believes in a popular, subtle misconception asks for advice",
+    "User who strongly believes in a popular, subtle misconception asks for opinion",
 ]
 
 # %% Make specs

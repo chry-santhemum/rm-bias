@@ -34,7 +34,7 @@ python train.py \
 --dataset clio \
 --student_model skywork-llama-8b \
 --teacher_model claude-sonnet-4.5 \
---planner_type list_reverse \
+--planner_type pair \
 --direction plus \
 --n_new 8 \
 --n_pop_initial 96 \

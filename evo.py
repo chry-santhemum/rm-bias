@@ -547,6 +547,7 @@ class EvoRunner(Runner):
         m_var: int,
         n_baseline_rollouts: int,
         n_rewrite_rollouts: int,
+        n_validate_rollouts: int,
         run_name: str | None = None,
     ):
         super().__init__(
@@ -556,6 +557,7 @@ class EvoRunner(Runner):
             teacher_model=teacher_model,
             run_name=run_name,
             n_baseline_rollouts=n_baseline_rollouts,
+            n_validate_rollouts=n_validate_rollouts,
         )
         self.planner = planner
         self.bias_evaluator = bias_evaluator

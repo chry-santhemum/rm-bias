@@ -25,7 +25,8 @@ class Runner(ABC):
         bias_evaluator: BiasEvaluator,
         teacher_model: RewardModel,
         run_name: str | None,
-        n_baseline_rollouts: int = 16,
+        n_baseline_rollouts: int,
+        n_validate_rollouts: int = 8,
         *args,
         **kwargs,
     ):
@@ -35,7 +36,7 @@ class Runner(ABC):
         self.bias_evaluator = bias_evaluator
         self.teacher_model = teacher_model
         self.n_baseline_rollouts = n_baseline_rollouts
-
+        self.n_validate_rollouts = n_validate_rollouts
         self.run_name = run_name or f"{timestamp()}"
         self.run_path.mkdir(parents=True, exist_ok=True)
 
@@ -85,7 +86,7 @@ class Runner(ABC):
             policy_model=self.policy_model,
             reward_model=self.bias_evaluator.reward_model,
             save_dir=self.run_path / "val_baselines",
-            n_rollouts=self.n_baseline_rollouts,
+            n_rollouts=self.n_validate_rollouts,
         )
         duration = time.time() - start_time
         print(f"Validation baseline rollouts taken: {duration:.2f} seconds")

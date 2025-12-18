@@ -89,57 +89,95 @@ def DABS(
 def plot_dabs_vs_threshold(
     run_paths: Sequence[Path|str],
     cluster_model: ClusterModel,
+    topic_ids: Sequence[int]|None = None,
     diversity_penalty: float = 0.5,
     threshold_step: float = 0.05,
     use_winrate: bool = True,
-) -> go.Figure:
+) -> list[go.Figure]:
+    """Plot DABS vs threshold for comparing multiple runs.
+
+    When multiple run_paths are provided, finds common seed indices and creates
+    one figure per seed, with each run's DABS curve overlaid for comparison.
+
+    Returns:
+        List of figures, one per common seed index.
+    """
     thresholds = np.arange(0.0, 1.0 + threshold_step, threshold_step)
 
-    # Collect DABS scores per seed across all thresholds
-    seed_scores: dict[int, list[float]] = {}
-    for judge_thr in thresholds:
-        for run_path in run_paths:
+    # Collect DABS scores: run_path -> seed_index -> list of scores (one per threshold)
+    run_seed_scores: dict[str, dict[int, list[float]]] = {}
+    for run_path in run_paths:
+        run_key = str(run_path)
+        run_seed_scores[run_key] = {}
+        for judge_thr in thresholds:
             dabs_scores = DABS(run_path, judge_thr.item(), cluster_model, diversity_penalty, use_winrate)
             for seed_index, score in dabs_scores.items():
-                if seed_index not in seed_scores:
-                    seed_scores[seed_index] = []
-                seed_scores[seed_index].append(score)
+                if seed_index not in run_seed_scores[run_key]:
+                    run_seed_scores[run_key][seed_index] = []
+                run_seed_scores[run_key][seed_index].append(score)
 
-    fig = go.Figure()
+    # Find common seed indices across all runs
+    all_seed_sets = [set(scores.keys()) for scores in run_seed_scores.values()]
+    if not all_seed_sets:
+        return []
+    common_seeds = set.intersection(*all_seed_sets)
 
-    # Plot a line for each seed
-    for seed_index in sorted(seed_scores.keys()):
-        fig.add_trace(
-            go.Scatter(
-                x=thresholds,
-                y=seed_scores[seed_index],
-                mode='lines+markers',
-                name=f'Seed {seed_index}',
-                line=dict(width=2),
-                marker=dict(size=6),
+    # Filter by topic_ids if provided
+    if topic_ids is not None:
+        common_seeds = common_seeds & set(topic_ids)
+
+    if not common_seeds:
+        print("No common seed indices found across runs")
+        return []
+
+    # Create one figure per common seed
+    figures = []
+    metric_type = "winrate" if use_winrate else "reward diff"
+
+    for seed_index in sorted(common_seeds):
+        fig = go.Figure()
+
+        # Plot one line per run
+        for run_path in run_paths:
+            run_key = str(run_path)
+            # Extract run name for legend (last part of path)
+            run_name = Path(run_path).name
+            scores = run_seed_scores[run_key][seed_index]
+
+            fig.add_trace(
+                go.Scatter(
+                    x=thresholds,
+                    y=scores,
+                    mode='lines+markers',
+                    name=run_name,
+                    line=dict(width=2),
+                    marker=dict(size=6),
+                )
             )
+
+        fig.update_layout(
+            title=f'Seed {seed_index}: DABS (student {metric_type}) vs teacher winrate threshold',
+            xaxis_title='Teacher winrate threshold',
+            yaxis_title=f'DABS (student {metric_type})',
+            height=600,
+            width=800,
+            hovermode='x unified',
         )
 
-    metric_type = "winrate" if use_winrate else "reward diff"
-    fig.update_layout(
-        title=f'DABS (student {metric_type}) vs teacher winrate threshold',
-        xaxis_title='Teacher winrate threshold',
-        yaxis_title='DABS (student {metric_type})',
-        height=600,
-        width=800,
-        hovermode='x unified',
-    )
+        figures.append(fig)
 
-    return fig
+    return figures
 
 
 # %%
 run_paths = [
-    "data/evo/20251216-134327-list_reverse-synthetic-plus",
+    "data/evo/20251217-160232-list_reverse-clio-plus",
+    "data/evo/20251218-055659-pair-clio-plus",
 ]
 cluster_model = ClusterModel(embedding_model_name="Qwen/Qwen3-Embedding-0.6B")
 
 # %%
-fig = plot_dabs_vs_threshold(run_paths, cluster_model)
-fig.show()
+figures = plot_dabs_vs_threshold(run_paths, cluster_model)
+for fig in figures:
+    fig.show()
 # %%
