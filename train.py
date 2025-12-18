@@ -69,6 +69,7 @@ async def main():
         topic_ids = [1, 2, 3, 4]
     elif args.dataset == "handpick":
         ds_path = "user_prompts/handpick"
+        topic_ids = [4, 6, 8, 9, 11, 12, 14, 15, 16, 18, 20]
     else:
         raise ValueError(f"Invalid dataset: {args.dataset}")
 
@@ -163,7 +164,7 @@ async def main():
         student_model = LocalRewardModel(
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
             devices=all_cuda_devices, 
-            batch_size_per_device=32,
+            batch_size_per_device=64,
         )
     elif args.student_model == "skywork-llama-8b-exp":
         student_model = LocalRewardModel(
@@ -175,13 +176,13 @@ async def main():
     bias_evaluator = BiasEvaluator(
         rewrite_model=RewriteModel(
             model_name="openai/gpt-5-nano", 
-            max_par=512,
+            max_par=1024,
             max_tokens=4096,
             reasoning="low",
             enable_cache=False,
         ),
         reward_model=student_model,
-        n_rewrite_workers=64,
+        n_rewrite_workers=128,
     )
 
     initial_seed_states = load_initial_seed_states(

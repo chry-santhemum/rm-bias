@@ -28,46 +28,16 @@
 # done
 
 
-
 python train.py \
---dataset clio \
---student_model skywork-llama-8b \
---teacher_model claude-sonnet-4.5 \
---planner_type pair \
---direction plus \
---n_new 8 \
---n_pop_initial 64 \
---n_pop_targets 16 8 \
---train_batch_sizes 8 8 \
---m_var 2 \
---n_planner_requests 32
-
-
-
-python train.py \
---dataset clio \
+--dataset handpick \
 --student_model skywork-llama-8b \
 --teacher_model claude-sonnet-4.5 \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
---n_pop_initial 64 \
---n_pop_targets 16 8 \
---train_batch_sizes 8 8 \
+--n_pop_initial 96 \
+--n_pop_targets 24 16 16 \
+--train_batch_sizes 8 8 8 \
 --m_var 2 \
---n_planner_requests 32
-
-
-python train.py \
---dataset clio \
---student_model skywork-llama-8b \
---teacher_model claude-sonnet-4.5 \
---planner_type list \
---direction plus \
---n_new 8 \
---n_pop_initial 64 \
---n_pop_targets 16 8 \
---train_batch_sizes 8 8 \
---m_var 2 \
---n_planner_requests 32
+--n_planner_requests 64
 

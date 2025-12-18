@@ -373,7 +373,6 @@ run_paths = [
 cluster_model = ClusterModel(embedding_model_name="Qwen/Qwen3-Embedding-0.6B")
 
 # %%
-
 figures = plot_dabs_vs_threshold(run_paths, cluster_model)
 for fig in figures:
     fig.show()
