@@ -9,7 +9,7 @@ import matplotlib.figure
 from sklearn.metrics import pairwise_distances
 
 from caller import ChatHistory
-from state import SeedState, AttributeStats, Rollout
+from state import SeedState, AttributeStats, Rollout, RewriteScore
 from utils import parse_json_response, set_seed_all
 from cluster_models import ClusterModel
 from api_models import GenerationModel
@@ -115,7 +115,6 @@ class EvoPlanner:
                         "attribute": attribute,
                         "student_winrate": student_wr,
                         "teacher_winrate": teacher_wr,
-                        "time_step": time_step,
                     })
             
             last_step_embs = self.cluster_model.embed(last_step_attributes)
@@ -648,52 +647,58 @@ class EvoRunner(Runner):
         assert len(n_pop_target) == t_steps
 
         for time_step in range(t_steps):
-            # if start_from is not None and time_step < start_from:
-            #     for seed_state in self.seed_states:
-            #         with open(self.run_path / f"step_{time_step}_stats/seed_{seed_state.index}.json", "r") as f:
-            #             seed_results = json.load(f)
+            if start_from is not None and time_step < start_from:
+                for seed_state in self.seed_states:
+                    with open(self.run_path / f"step_{time_step}_stats/seed_{seed_state.index}.json", "r") as f:
+                        seed_results = json.load(f)
 
-            #         seed_state.history.append(dict())
-            #         for item in seed_results:
-            #             attribute = item["attribute"]
-            #             attribute_rollouts = dict()
-            #             for user_prompt, rollouts in item["all_rollouts"].items():
-            #                 attribute_rollouts[user_prompt] = [
-            #                     Rollout(
-            #                         response=rollout["response"],
-            #                         score=rollout["score"]
-            #                     )
-            #                     if rollout is not None else None
-            #                     for rollout in rollouts
-            #                 ]
+                    seed_state.history.append(dict())
+                    for item in seed_results:
+                        attribute = item["attribute"]
+                        attribute_rollouts = dict()
+                        for user_prompt, rollouts in item["all_rollouts"].items():
+                            attribute_rollouts[user_prompt] = [
+                                Rollout(
+                                    response=r["response"],
+                                    presence=r["presence"],
+                                    student_score=RewriteScore(score=r["student_score"], raw_score=None, reasoning=None, model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
+                                    teacher_score=RewriteScore(score=r.get("teacher_score"), raw_score=None, reasoning=r.get("teacher_reasoning"), model_name="anthropic/claude-sonnet-4.5") if "teacher_score" in r else None
+                                )
+                                if r is not None else None
+                                for r in rollouts
+                            ]
 
-            #             seed_state.history[-1][attribute] = AttributeStats(
-            #                 attribute=attribute,
-            #                 rollouts=attribute_rollouts,
-            #                 meta=item.get("meta", {"time_step": time_step})
-            #             )
+                        seed_state.history[-1][attribute] = AttributeStats(
+                            attribute=attribute,
+                            rollouts=attribute_rollouts,
+                            meta=item.get("meta", {"time_step": time_step})
+                        )
 
-            #     self.planner.update_pop(
-            #         baselines=self.baselines,  # type: ignore
-            #         seed_states=self.seed_states,
-            #         n_pop_target=n_pop_target[time_step],
-            #         dbscan_eps=self.dbscan_eps,
-            #     )
-            #     self.step_count += 1
-            #     self.planner.hypothesis_planner.step_planner_model()
-            #     self.save_attribute_stats(
-            #         direction=self.planner.direction,
-            #         save_dir=None,
-            #     )
+                if use_pareto_selection:
+                    self.planner.update_pop_pareto(
+                        seed_states=self.seed_states,
+                        n_pop_target=n_pop_target[time_step],
+                    )
+                else:
+                    self.planner.update_pop(
+                        seed_states=self.seed_states,
+                        n_pop_target=n_pop_target[time_step],
+                    )
+                self.step_count += 1
+                self.planner.hypothesis_planner.step_planner_model()
+                self.save_attribute_stats(
+                    direction=self.planner.direction,
+                    save_dir=None,
+                )
 
-            # else:
-            await self.train_step(
-                n_pop_target=n_pop_target[time_step],
-                train_batch_size=train_batch_size[time_step],
-                use_pareto_selection=use_pareto_selection,
-            )
+            else:
+                await self.train_step(
+                    n_pop_target=n_pop_target[time_step],
+                    train_batch_size=train_batch_size[time_step],
+                    use_pareto_selection=use_pareto_selection,
+                )
 
-            if validate and time_step == t_steps - 1:
-                await self.validate(final_attributes={
-                    seed_state.index: list(seed_state.state.keys()) for seed_state in self.seed_states
-                })
+                if validate and time_step == t_steps - 1:
+                    await self.validate(final_attributes={
+                        seed_state.index: list(seed_state.state.keys()) for seed_state in self.seed_states
+                    })

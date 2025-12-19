@@ -83,7 +83,7 @@ async def main(
         specs: list[str] = json.load(f)
 
     brainstorm_results = None
-    if regenerate_sub_topics:
+    if not regenerate_sub_topics:
         sub_topics_path = dataset_path / "sub_topics.json"
         try:
             with open(sub_topics_path, "r") as f:

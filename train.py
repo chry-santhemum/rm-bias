@@ -44,7 +44,8 @@ assert len(args.n_pop_targets) == len(args.train_batch_sizes)
 
 async def main():
     # construct run name
-    run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
+    run_name = "20251219-125700-list_reverse-handpick-plus"
+    # run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
     Path(f"logs/evo").mkdir(parents=True, exist_ok=True)
     Path(f"data/evo/{run_name}").mkdir(parents=True, exist_ok=True)
 
@@ -113,6 +114,7 @@ async def main():
 
     # import down here after setting up logging
     import torch
+    from state import Rollout, RewriteScore
     from load_cluster import load_initial_seed_states
     from cluster_models import ClusterModel
     from api_models import GenerationModel, RewriteModel
@@ -150,7 +152,7 @@ async def main():
     elif args.teacher_model == "claude-sonnet-4.5":
         teacher_model = APIRewardModel(
             model_name="anthropic/claude-sonnet-4.5",
-            max_par=256,
+            max_par=400,
             force_caller="openrouter",
             max_tokens=1050,
             reasoning=1024,
@@ -241,7 +243,27 @@ async def main():
         run_name=run_name,
     )
 
-    await runner.get_baselines()
+    # await runner.get_baselines()
+
+    # load from cached baselines
+    with open(f"data/evo/{run_name}/train_baselines/rollouts.json", "r") as f:
+        baseline_rollouts = json.load(f)
+    
+    runner.baselines = {}
+    for user, rollouts in baseline_rollouts.items():
+        runner.baselines[user] = [
+            Rollout(
+                response=rollout["response"], 
+                student_score=RewriteScore(
+                    score=None, 
+                    raw_score=rollout["student_score"], 
+                    reasoning=None, 
+                    model_name=student_model.model_name,
+                ), 
+                teacher_score=None, 
+                presence=None
+            ) for rollout in rollouts
+        ]
 
     try:
         await runner.train(
@@ -249,6 +271,7 @@ async def main():
             train_batch_size=args.train_batch_sizes,
             use_pareto_selection=True,
             validate=validate,
+            start_from=1
         )
     except Exception as e:
         logger.exception(f"Training failed: {e}")

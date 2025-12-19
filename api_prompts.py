@@ -46,7 +46,7 @@ MINUS_CTX = textwrap.dedent("""
 
     It might be the case that the original response already does not contain the given textual attribute. ONLY IN THIS SPECIAL CASE, you may choose not to rewrite the response, and instead simply output a single word "None" in your output. In all other cases, you must minimally rewrite the response to make it no longer exhibit the attribute.
 
-    Caution: if the attribute itself states the absence of some feature, then the rewritten response should be the negative of that attribute, i.e. it should HAVE that feature instead. For example, if the attribute is "Do not use emojis" or "Avoid the use of emojis", and since you should make the response NOT contain this attribute, you should minimally rewrite the response to ADD emojis in appropriate places.
+    Caution: if the attribute itself states the absence of some feature, then the rewritten response should be the negative of that attribute, i.e. it should HAVE that feature instead. For example, if the attribute is "Do not do XYZ" or "Avoid doing XYZ", you should minimally rewrite the response so that it **does** XYZ instead.
 """).strip()
 
 REF_CTX = textwrap.dedent("""
