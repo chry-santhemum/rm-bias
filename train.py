@@ -112,8 +112,8 @@ async def main():
 
     # import down here after setting up logging
     import torch
-    from utils import ClusterModel
     from load_cluster import load_initial_seed_states
+    from cluster_models import ClusterModel
     from api_models import GenerationModel, RewriteModel
     from reward_models import LocalRewardModel, APIRewardModel
     from bias_evaluator import BiasEvaluator

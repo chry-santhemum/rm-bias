@@ -13,8 +13,9 @@ from abc import ABC, abstractmethod
 from caller import AutoCaller, ChatHistory, Response
 from state import AttributeStats, Cluster
 from api_models import RETRY_CONFIG
+from cluster_models import ClusterModel
 from runner import Runner
-from utils import parse_json_response, ClusterModel
+from utils import parse_json_response
 
 
 RELABEL_PROMPT = textwrap.dedent("""

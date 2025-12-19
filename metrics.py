@@ -9,7 +9,7 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import plotly.graph_objects as go
 
-from utils import ClusterModel
+from cluster_models import ClusterModel
 from plotting import process_run_data
 
 
