@@ -94,7 +94,7 @@ planner.plan(
     seed_states=seed_states,
     n_new=8,
     n_pop=128,
-    cluster_model=ClusterModel(embedding_model_name="Qwen/Qwen3-Embedding-0.6B"),
+    cluster_model=ClusterModel(embed_model_name="Qwen/Qwen3-Embedding-0.6B"),
     # max_contrast_pairs=4,
 )
 

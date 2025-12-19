@@ -35,9 +35,9 @@ python train.py \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
---n_pop_initial 64 \
---n_pop_targets 20 12 8 \
+--n_pop_initial 96 \
+--n_pop_targets 24 16 12 \
 --train_batch_sizes 8 8 8 \
 --m_var 2 \
---n_planner_requests 64
+--n_planner_requests 96
 

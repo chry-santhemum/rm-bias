@@ -1,53 +1,53 @@
 from collections import defaultdict
-from typing import Any, Tuple
+from typing import Any
 from loguru import logger
 
 import numpy as np
-from umap import UMAP
 from sklearn.cluster import KMeans, DBSCAN
+from sklearn.decomposition import PCA
 from sklearn.metrics import pairwise_distances
 from sentence_transformers import SentenceTransformer
 
 class ClusterModel:
     def __init__(
         self,
-        embedding_model_name: str,
-        umap_n_neighbors: int = 15,
-        umap_n_components: int = 5,
+        embed_model_name: str="Qwen/Qwen3-Embedding-0.6B",
+        embed_dim: int=32,
+        dbscan_eps: float=0.3,
+        pca_dim: int=8,
     ):
-        self.embedding_model = SentenceTransformer(embedding_model_name)
-        self.umap_n_neighbors = umap_n_neighbors
-        self.umap_n_components = umap_n_components
-        self.umap_model = UMAP(
-            n_neighbors=umap_n_neighbors,
-            n_components=umap_n_components,
-            min_dist=0.0,
-            metric="cosine",
-            low_memory=False,
-        )
+        self.embed_model = SentenceTransformer(embed_model_name)
+        self.embed_dim = embed_dim
+        self.dbscan_eps = dbscan_eps
+        self.pca_dim = pca_dim
 
     def embed(self, inputs: list[str]) -> np.ndarray:
-        """Returns: [n_inputs, d_embed]"""
-        return self.embedding_model.encode(inputs)  # type: ignore
+        """Returns: [n_inputs, embed_dim]"""
+        embs = self.embed_model.encode(inputs, dim=self.embed_dim)  # type: ignore
+        logger.info(f"Embedded shape: {embs.shape}")
+        return embs
 
     def reduce_embed(self, inputs: list[str]) -> np.ndarray:
         """Embed then do dimensionality reduction"""
-        print("Embedding...")
-        embeddings: np.ndarray = self.embed(inputs)
-        print("Reducing dimensionality...")
-        return self.umap_model.fit_transform(embeddings)  # type: ignore
+        embs: np.ndarray = self.embed(inputs)
+        pca = PCA(n_components=min(self.pca_dim, embs.shape[0], embs.shape[1]))
+        reduced = pca.fit_transform(embs)
+        logger.info(f"Reduced shape: {reduced.shape}")
+        return reduced
 
-    def cluster(self, inputs: list[str], n_clusters: int) -> list[dict[str, Any]]:
+    def cluster_kmeans(self, inputs: list[str], n_clusters: int) -> list[dict[str, Any]]:
         """
-        Returns a list of cluster information.
+        Returns a list of cluster information. 
+        Does NOT apply dimensionality reduction before clustering.
         """
-        reduced_embeddings = self.reduce_embed(inputs)
+        embs = self.embed(inputs)
 
         kmeans = KMeans(
-            n_clusters=min(len(inputs), n_clusters), random_state=10086, n_init="auto"
+            n_clusters=min(len(inputs), n_clusters), 
+            random_state=10086, n_init="auto"
         )
-        print("Fitting KMeans...")
-        kmeans.fit(reduced_embeddings)
+        logger.info(f"Fitting KMeans for {len(inputs)} inputs into {n_clusters} clusters")
+        kmeans.fit(embs)
 
         labels = [int(label) for label in kmeans.labels_.tolist()]  # type: ignore
 
@@ -69,7 +69,7 @@ class ClusterModel:
                 center_idx = content_indices[0]
             else:
                 # Compute pairwise distances within cluster
-                cluster_embeddings = reduced_embeddings[content_indices]
+                cluster_embeddings = embs[content_indices]
                 pairwise_dists = pairwise_distances(cluster_embeddings, metric="cosine")
 
                 # Find point with minimum sum of distances to all other points
@@ -89,25 +89,21 @@ class ClusterModel:
         for result in results:
             assert result["center_idx"] in result["content_indices"]
 
+        # Log cluster contents
+        for result in results:
+            cluster_inputs = [inputs[i] for i in result["content_indices"]]
+            logger.info(
+                f"Cluster {result['cluster_idx']} ({len(cluster_inputs)} items):\n"
+                + "\n".join(f"  - {inp}" for inp in cluster_inputs)
+            )
+
         return results
 
-    def cluster_dbscan(
-        self,
-        inputs: list[str],
-        dbscan_eps: float,
-    ) -> Tuple[dict[int, list[str]], dict[int, list[int]]]:
-        embeddings = self.embed(inputs)
-
-        # # log the pairwise distance matrix
-        # logger.info(
-        #     f"Pairwise distance matrix:\n"
-        #     f"{pairwise_distances(embeddings, metric='cosine')}"
-        # )
-
-        dbscan = DBSCAN(
-            eps=dbscan_eps, min_samples=2 * self.umap_n_components, metric="cosine"
-        )
-        dbscan.fit(embeddings)
+    def cluster_dbscan(self, inputs: list[str]) -> tuple[dict[int, list[str]], dict[int, list[int]]]:
+        """Uses PCA to reduce dim before clustering."""
+        embs = self.reduce_embed(inputs)
+        dbscan = DBSCAN(eps=self.dbscan_eps, min_samples=3, metric="cosine")
+        dbscan.fit(embs)
 
         niches = defaultdict(list)
         indices = defaultdict(list)
@@ -115,14 +111,17 @@ class ClusterModel:
             niches[label].append(inputs[i])
             indices[label].append(i)
 
-        logger.debug(
-            "Niches:\n"
-            + "\n".join(
-                [
-                    f"Niche {label}:\n{"\n".join(members)}"
-                    for label, members in niches.items()
-                ]
-            )
-        )
+        # Log cluster contents
+        for label, members in sorted(niches.items()):
+            if label == -1:
+                logger.info(
+                    f"Noise points ({len(members)} items):\n"
+                    + "\n".join(f"  - {inp}" for inp in members)
+                )
+            else:
+                logger.info(
+                    f"Cluster {label} ({len(members)} items):\n"
+                    + "\n".join(f"  - {inp}" for inp in members)
+                )
 
         return niches, indices

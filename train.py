@@ -36,7 +36,6 @@ parser.add_argument("--n_baseline_rollouts", type=int, default=24)
 parser.add_argument("--n_rewrite_rollouts", type=int, default=4)
 parser.add_argument("--n_validate_rollouts", type=int, default=8)
 parser.add_argument("--val_split_size", type=int, default=16)
-parser.add_argument("--dbscan_eps", type=float, default=0.2)
 parser.add_argument("--run_name", type=str, default=None)
 
 args = parser.parse_args()
@@ -63,7 +62,8 @@ async def main():
         topic_ids = [1, 3, 4, 6, 8, 9]
     elif args.dataset == "chatgpt":
         ds_path = "user_prompts/chatgpt"
-        topic_ids = [0, 3, 6, 7, 8, 15]
+        # topic_ids = [0, 3, 6, 7, 8, 15]
+        topic_ids = [15]
     elif args.dataset == "clio":
         ds_path = "user_prompts/clio"
         # topic_ids = [0, 2, 4, 5, 7, 8, 9, 11, 13, 14, 15, 18]
@@ -124,7 +124,7 @@ async def main():
     all_cuda_devices = [f"cuda:{i}" for i in range(torch.cuda.device_count())]
     print(f"Using CUDA devices: {all_cuda_devices}")
 
-    cluster_model = ClusterModel(embedding_model_name="Qwen/Qwen3-Embedding-0.6B")
+    cluster_model = ClusterModel()
 
     policy_model = GenerationModel(
         model_name=policy_model_names,
@@ -233,7 +233,6 @@ async def main():
         policy_model=policy_model,
         bias_evaluator=bias_evaluator,
         teacher_model=teacher_model,
-        dbscan_eps=args.dbscan_eps,
         m_var=args.m_var,
         n_baseline_rollouts=args.n_baseline_rollouts,
         n_rewrite_rollouts=args.n_rewrite_rollouts,

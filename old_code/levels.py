@@ -230,7 +230,7 @@ if __name__ == "__main__":
     )
 
     cluster_model = ClusterModel(
-        embedding_model_name="Qwen/Qwen3-Embedding-0.6B",
+        embed_model_name="Qwen/Qwen3-Embedding-0.6B",
     )
 
     runner = LevelsRunner(

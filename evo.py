@@ -10,11 +10,8 @@ from sklearn.metrics import pairwise_distances
 
 from caller import ChatHistory
 from state import SeedState, AttributeStats, Rollout
-from utils import (
-    parse_json_response,
-    ClusterModel,
-    set_seed_all,
-)
+from utils import parse_json_response, set_seed_all
+from cluster_models import ClusterModel
 from api_models import GenerationModel
 from reward_models import RewardModel
 from runner import Runner
@@ -332,12 +329,7 @@ class EvoPlanner:
 
         return fig
 
-    def update_pop_pareto(
-        self,
-        seed_states: list[SeedState],
-        n_pop_target: int,
-        dbscan_eps: float,
-    ) -> dict[int, dict]:
+    def update_pop_pareto(self, seed_states: list[SeedState], n_pop_target: int) -> dict[int, dict]:
         if self.direction == "minus":
             raise NotImplementedError
         logger.info(f"Trying to update population to {n_pop_target} members using Pareto front selection.")
@@ -408,7 +400,7 @@ class EvoPlanner:
             candidate_to_cluster: dict[int, int] = {}
             if candidates:
                 _, cluster_indices = self.cluster_model.cluster_dbscan(
-                    [cand[0] for cand in candidates], dbscan_eps
+                    [cand[0] for cand in candidates]
                 )
                 for label, member_indices in cluster_indices.items():
                     for idx in member_indices:
@@ -470,12 +462,7 @@ class EvoPlanner:
 
         return candidates_by_seed
 
-    def update_pop(
-        self,
-        seed_states: list[SeedState],
-        n_pop_target: int,
-        dbscan_eps: float,
-    ):
+    def update_pop(self, seed_states: list[SeedState], n_pop_target: int):
         logger.info(f"Trying to update population to {n_pop_target} members.")
         for seed_state in seed_states:
             candidates = []
@@ -486,9 +473,7 @@ class EvoPlanner:
                     stats.winrate("student"),
                 ))
 
-            _, indices = self.cluster_model.cluster_dbscan(
-                [cand[0] for cand in candidates], dbscan_eps
-            )
+            _, indices = self.cluster_model.cluster_dbscan([cand[0] for cand in candidates])
 
             # Select the best candidate from each niche
             representatives = []
@@ -543,7 +528,6 @@ class EvoRunner(Runner):
         policy_model: GenerationModel,
         bias_evaluator: BiasEvaluator,
         teacher_model: RewardModel,
-        dbscan_eps: float,
         m_var: int,
         n_baseline_rollouts: int,
         n_rewrite_rollouts: int,
@@ -561,8 +545,7 @@ class EvoRunner(Runner):
         )
         self.planner = planner
         self.bias_evaluator = bias_evaluator
-
-        self.dbscan_eps = dbscan_eps
+        
         self.m_var = m_var
         self.n_rewrite_rollouts = n_rewrite_rollouts
 
@@ -629,7 +612,6 @@ class EvoRunner(Runner):
             candidates_by_seed = self.planner.update_pop_pareto(
                 seed_states=self.seed_states,
                 n_pop_target=n_pop_target,
-                dbscan_eps=self.dbscan_eps,
             )
 
             for seed_state_idx, candidates in candidates_by_seed.items():
@@ -659,7 +641,6 @@ class EvoRunner(Runner):
             self.planner.update_pop(
                 seed_states=self.seed_states,
                 n_pop_target=n_pop_target,
-                dbscan_eps=self.dbscan_eps,
             )
 
         logger.info(

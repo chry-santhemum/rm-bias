@@ -237,7 +237,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     cluster_model = ClusterModel(
-        embedding_model_name="Qwen/Qwen3-Embedding-0.6B",
+        embed_model_name="Qwen/Qwen3-Embedding-0.6B",
         umap_n_neighbors=5,
         umap_n_components=5,
     )

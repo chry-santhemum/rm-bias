@@ -370,7 +370,7 @@ run_paths = [
 #     "data/evo/20251218-055659-pair-clio-plus",
 #     "data/evo/20251217-160232-list_reverse-clio-plus",
 # ]
-cluster_model = ClusterModel(embedding_model_name="Qwen/Qwen3-Embedding-0.6B")
+cluster_model = ClusterModel(embed_model_name="Qwen/Qwen3-Embedding-0.6B")
 
 # %%
 figures = plot_dabs_vs_threshold(run_paths, cluster_model)

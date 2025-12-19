@@ -124,7 +124,7 @@ class Planner(ABC):
                 continue
 
             all_plans = [plan["plan"] for plan in seed_plans]
-            cluster_results = cluster_model.cluster(
+            cluster_results = cluster_model.cluster_kmeans(
                 all_plans, n_pop
             )
 
