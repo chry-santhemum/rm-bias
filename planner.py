@@ -280,7 +280,7 @@ class ListPlanner(Planner):
                             num_plans=self.n_new,
                             cluster_summary=seed_state.cluster.summary,
                             higher_lower="lower-scoring" if direction == "plus" else "higher-scoring",
-                            bias_nudge=BIAS_NUDGE[direction],3
+                            bias_nudge=BIAS_NUDGE[direction],
                         )
                     else:
                         sampled_rollouts.sort(key=lambda x: x.student_score.raw_score, reverse=False)  # type: ignore

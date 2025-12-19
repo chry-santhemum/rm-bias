@@ -70,7 +70,8 @@ async def main():
         topic_ids = [1, 2, 3, 4]
     elif args.dataset == "handpick":
         ds_path = "user_prompts/handpick"
-        topic_ids = [4, 6, 8, 9, 11, 12, 14, 15, 16, 18, 20]
+        # topic_ids = [4, 6, 8, 9, 11, 12, 14, 15, 16, 18, 20]
+        topic_ids = [4, 8, 12, 14, 16, 20]
     else:
         raise ValueError(f"Invalid dataset: {args.dataset}")
 
