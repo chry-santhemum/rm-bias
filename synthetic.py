@@ -76,17 +76,20 @@ async def main(
     n_prompts: int,
     max_tokens: int,
     reasoning: str | int | None,
+    regenerate_sub_topics: bool=False
 ):
     specs_path = dataset_path / "specs.json"
     with open(specs_path, "r") as f:
         specs: list[str] = json.load(f)
 
-    sub_topics_path = dataset_path / "sub_topics.json"
-    try:
-        with open(sub_topics_path, "r") as f:
-            brainstorm_results = json.load(f)
-    except FileNotFoundError:
-        brainstorm_results = None
+    brainstorm_results = None
+    if regenerate_sub_topics:
+        sub_topics_path = dataset_path / "sub_topics.json"
+        try:
+            with open(sub_topics_path, "r") as f:
+                brainstorm_results = json.load(f)
+        except FileNotFoundError:
+            pass
 
     if brainstorm_results is None:
         sub_topic_chats = [
@@ -181,8 +184,8 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset_path", type=str, required=True)
-    parser.add_argument("--n_topics", type=int, default=32)
-    parser.add_argument("--n_prompts", type=int, default=3)
+    parser.add_argument("--n_topics", type=int, default=48)
+    parser.add_argument("--n_prompts", type=int, default=2)
     args = parser.parse_args()
 
     asyncio.run(main(
@@ -190,6 +193,7 @@ if __name__ == "__main__":
         model="openai/gpt-5",
         n_topics=args.n_topics,
         n_prompts=args.n_prompts,
-        max_tokens=12000,
+        max_tokens=15000,
         reasoning="medium",
+        regenerate_sub_topics=True,
     ))
