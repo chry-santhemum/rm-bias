@@ -100,7 +100,7 @@ async def policy_worker(
                 sample_results.append(PromptOutput(
                     system=input.system,
                     user=input.user,
-                    assistant=response.first_response,  # type: ignore
+                    assistant=response.first_response.strip(),  # type: ignore
                     batch_id=input.batch_id,
                 ))
 
@@ -179,7 +179,7 @@ async def rewrite_worker(
                 system=input.system,
                 user=input.user,
                 original_assistant=input.original_assistant,
-                rewritten_assistant=response,
+                rewritten_assistant=response.strip() if response is not None else None,
                 presence=input.presence,
                 batch_id=input.batch_id,
             ))

@@ -45,72 +45,51 @@ class EvoPlanner:
             cluster_model=self.cluster_model
         )
 
-    def _collect_all_evaluated_attributes(
-        self,
-        seed_state: SeedState,
-    ) -> list[dict]:
-        """
-        Collect all previously evaluated attributes from history with their winrates.
-        Returns list of dicts with keys: attribute, student_winrate, teacher_winrate
-        """
-        evaluated = []
-        for time_step, history_entry in enumerate(seed_state.history):
-            for attribute, stats in history_entry.items():
-                student_wr = stats.winrate("student")
-                teacher_wr = stats.winrate("teacher")
-                # Only include if we have valid winrates
-                if student_wr is not None and teacher_wr is not None:
-                    evaluated.append({
-                        "attribute": attribute,
-                        "student_winrate": student_wr,
-                        "teacher_winrate": teacher_wr,
-                        "time_step": time_step,
-                    })
-        return evaluated
-
     def _get_nearest_neighbors(
         self,
         target_attribute: str,
-        all_evaluated: list[dict],
+        last_step_attributes: list[dict],
+        last_step_embs: np.ndarray,
         n_neighbors: int = 16,
     ) -> str:
         """
         Find the n_neighbors closest attributes to target_attribute in embedding space.
         Returns formatted string for the prompt.
         """
-        if not all_evaluated:
+        target_idx = None
+        for i, attr in enumerate(last_step_attributes):
+            if attr["attribute"] == target_attribute:
+                target_idx = i
+                break
+        if target_idx is None:
+            raise ValueError(f"Target attribute '{target_attribute}' not found in attributes list.")
+
+        # Compute distances from target to all others (excluding self)
+        target_embedding = last_step_embs[target_idx].reshape(1, -1)
+        mask = np.ones(len(last_step_embs), dtype=bool)
+        mask[target_idx] = False
+        other_embeddings = last_step_embs[mask]
+        other_attributes = [attr for i, attr in enumerate(last_step_attributes) if i != target_idx]
+        if other_embeddings.shape[0] == 0:
             return "No similar attributes available."
 
-        # Get all attribute strings including target
-        all_attributes = [target_attribute] + [e["attribute"] for e in all_evaluated]
-
-        # Embed all attributes
-        embeddings = self.cluster_model.embed(all_attributes)
-
-        # Compute distances from target (index 0) to all others
-        target_embedding = embeddings[0:1]
-        other_embeddings = embeddings[1:]
         distances = pairwise_distances(target_embedding, other_embeddings, metric="cosine")[0]
 
-        # Get indices of nearest neighbors (excluding exact matches with distance ~0)
-        sorted_indices = np.argsort(distances)
-
+        # Sort and get the indices of the closest neighbors
+        sorted_idx = np.argsort(distances)
         neighbors = []
-        for idx in sorted_indices:
+        for i in sorted_idx:
             if len(neighbors) >= n_neighbors:
                 break
-            # Skip if it's the exact same attribute
-            if all_evaluated[idx]["attribute"] == target_attribute:
-                continue
-            neighbors.append(all_evaluated[idx])
+            neighbors.append(other_attributes[i])
 
         # Format as string
         lines = []
         for i, neighbor in enumerate(neighbors, 1):
             lines.append(
                 f"{i}. Attribute: {neighbor['attribute']}\n"
-                f"   Metric A winrate: {neighbor['student_winrate']:.3f}\n"
-                f"   Metric B winrate: {neighbor['teacher_winrate']:.3f}"
+                f"   Metric A: {neighbor['student_winrate']:.3f}\n"
+                f"   Metric B: {neighbor['teacher_winrate']:.3f}"
             )
 
         return "\n".join(lines) if lines else "No similar attributes available."
@@ -125,8 +104,21 @@ class EvoPlanner:
         messages_info = []
 
         for seed_idx, seed_state in enumerate(seed_states):
-            # Collect all previously evaluated attributes for neighbor lookup
-            all_evaluated = self._collect_all_evaluated_attributes(seed_state)
+            # Collect all attributes in the previous step, not just the selected ones
+            last_step_attributes = []
+            for attribute, stats in seed_state.history[-1].items():
+                student_wr = stats.winrate("student")
+                teacher_wr = stats.winrate("teacher")
+                # Only include if we have valid winrates
+                if student_wr is not None and teacher_wr is not None:
+                    last_step_attributes.append({
+                        "attribute": attribute,
+                        "student_winrate": student_wr,
+                        "teacher_winrate": teacher_wr,
+                        "time_step": time_step,
+                    })
+            
+            last_step_embs = self.cluster_model.embed(last_step_attributes)
 
             for attribute, time_step in seed_state.state.items():
                 # Get winrates for the current attribute
@@ -146,7 +138,8 @@ class EvoPlanner:
                     teacher_winrate=teacher_wr_str,
                     neighbor_data=self._get_nearest_neighbors(
                         target_attribute=attribute,
-                        all_evaluated=all_evaluated,
+                        last_step_attributes=last_step_attributes,
+                        last_step_embs=last_step_embs,
                         n_neighbors=n_neighbors,
                     ),
                     direction_goal=DIRECTION_GOAL[self.direction],

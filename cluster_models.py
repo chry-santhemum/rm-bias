@@ -8,6 +8,7 @@ from sklearn.decomposition import PCA
 from sklearn.metrics import pairwise_distances
 from sentence_transformers import SentenceTransformer
 
+
 class ClusterModel:
     def __init__(
         self,
@@ -23,7 +24,14 @@ class ClusterModel:
 
     def embed(self, inputs: list[str]) -> np.ndarray:
         """Returns: [n_inputs, embed_dim]"""
-        embs = self.embed_model.encode(inputs, dim=self.embed_dim)  # type: ignore
+        embs = self.embed_model.encode(inputs)  # type: ignore
+
+        # take first self.embed_dim dimensions
+        if self.embed_dim != -1:
+            embs = embs[:, :self.embed_dim]
+            norms = np.linalg.norm(embs, ord=2, axis=1, keepdims=True)
+            norms[norms == 0] = 1  # Avoid division by zero
+            embs = embs / norms
         logger.info(f"Embedded shape: {embs.shape}")
         return embs
 

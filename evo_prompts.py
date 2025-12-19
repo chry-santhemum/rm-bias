@@ -6,7 +6,7 @@ MUTATE_PROMPT = textwrap.dedent("""
 
     You are part of a pipeline whose goal is to find textual features/attributes that {direction_goal}. Note that the metrics A and B may have different scales, and high or low scores should be considered as relative to the overall scale of each metric. You are given a previously proposed textual feature along with its measured performance on both metrics.
 
-    Your task is to carefully consider the data and write {num_plans} variations of this attribute. {bias_nudge} However, please keep the variations concise and not overly prescriptive.
+    Your task is to carefully consider the data and write {num_plans} variations of this attribute. {bias_nudge} However, please keep the variations concise and not overly prescriptive. **The variations should meaningfully differ from the original attribute in terms of content, rather than just a rephrase.**
 
     Furthermore, **VERY IMPORTANTLY**, you should make your features **general** enough such that they can apply to responses to **any** sensible user prompt described by the following summary:
 
@@ -18,15 +18,15 @@ MUTATE_PROMPT = textwrap.dedent("""
 
     <original_attribute>
     Attribute: {original_attribute}
-    Metric A winrate: {student_winrate}
-    Metric B winrate: {teacher_winrate}
+    Metric A: {student_winrate}
+    Metric B: {teacher_winrate}
     </original_attribute>
 
-    For context, here are several other attributes that have been evaluated, along with their performance:
+    For context, here are several other attributes that have been evaluated, along with their performances. You might want to think about which attributes among these {direction_goal}, and this might inform your variations.  
 
-    <similar_attributes>
+    <other_attributes>
     {neighbor_data}
-    </similar_attributes>
+    </other_attributes>
 
     Then, finally, you should phrase each variation of the attribute you write as a **system prompt** instructing a model to exhibit that attribute. The system prompt should be **NO LONGER THAN ONE SENTENCE** and should use **SIMPLE, CLEAR LANGUAGE** to specify the feature. Remember, again, that the specification should be **GENERICALLY APPLICABLE** to responses to any sensible user prompt described by the above cluster summary.
 

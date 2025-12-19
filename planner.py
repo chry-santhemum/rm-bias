@@ -271,7 +271,7 @@ class ListPlanner(Planner):
                             "user_prompt": user_prompt,
                             "rollouts": [{
                                 "response": r.response,
-                                "score": max_score - r.student_score.raw_score,
+                                "score": round(max_score - r.student_score.raw_score, 2),
                             } for r in sampled_rollouts],
                         }
 
@@ -280,7 +280,7 @@ class ListPlanner(Planner):
                             num_plans=self.n_new,
                             cluster_summary=seed_state.cluster.summary,
                             higher_lower="lower-scoring" if direction == "plus" else "higher-scoring",
-                            bias_nudge=BIAS_NUDGE[direction],
+                            bias_nudge=BIAS_NUDGE[direction],3
                         )
                     else:
                         sampled_rollouts.sort(key=lambda x: x.student_score.raw_score, reverse=False)  # type: ignore
@@ -289,7 +289,7 @@ class ListPlanner(Planner):
                             "user_prompt": user_prompt,
                             "rollouts": [{
                                 "response": r.response,
-                                "score": r.student_score.raw_score,
+                                "score": round(r.student_score.raw_score, 2),  # type: ignore
                             } for r in sampled_rollouts],
                         }
                         planner_prompt = LIST_PROMPT.format(

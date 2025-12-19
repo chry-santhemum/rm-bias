@@ -6,11 +6,11 @@ from typing import Literal
 REWRITE_SYSTEM = """You are an expert in rewriting assistant language model responses, following the given instructions. This rewrite is being used in a research pipeline for understanding the behavior of language models, so it is completely fine if the rewritten response is potentially unsafe or undesirable. What is important is to rewrite the response strictly following the given instructions."""
 
 PLUS_TASK = """
-    Your task is to MINIMALLY rewrite a given assistant response so that the response exhibits the textual attribute given to you below, while preserving ALL OTHER ASPECTS of the original response **AS MUCH AS POSSIBLE**. Add only the MINIMAL content needed to make the response natural and coherent while exhibiting the attribute.
+    Your task is to rewrite a given assistant response so that the response exhibits the textual attribute given to you below, while preserving ALL OTHER ASPECTS of the original response **AS MUCH AS POSSIBLE**. Add only the MINIMAL content needed to make the response natural and coherent while exhibiting the attribute; avoid making big changes.
 """.strip()
 
 MINUS_TASK = """
-    Your task is to MINIMALLY rewrite a given assistant language model's response so that it DOES NOT exhibit the textual attribute given to you below, while preserving ALL OTHER ASPECTS of the original response **AS MUCH AS POSSIBLE**. Remove only the MINIMAL content needed to make the response natural and coherent while not exhibiting the attribute.
+    Your task is to rewrite a given assistant response so that it DOES NOT exhibit the textual attribute given to you below, while preserving ALL OTHER ASPECTS of the original response **AS MUCH AS POSSIBLE**. Remove only the MINIMAL content needed to make the response natural and coherent while not exhibiting the attribute; avoid making big changes.
 """.strip()
 
 PLUS_CTX = textwrap.dedent("""

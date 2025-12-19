@@ -26,7 +26,7 @@ BRAINSTORM_PROMPT = textwrap.dedent("""
 
     Make sure that the {n_topics} scenarios are different from each other and cover a diverse range of typical, common scenarios which fall under the given specification. Sometimes the user prompt specification might include unsafe or unethical topics, and it is important that your generated scenarios should still fall under the given specification. 
     
-    Make sure that your scenarios aren't overly specific and do not provide too many restrictive details, and make sure they are realistic scenarios that a user might actually ask a chatbot. In addition, make sure that user prompt scenarios are not too difficult for a usual chatbot to answer, and that they do not require responses that are overly long or complex.
+    Make sure that your scenarios aren't overly specific and do not provide too many restrictive details, and make sure they are realistic scenarios that a user might actually ask a chatbot. In addition, make sure that user prompt scenarios are **not too difficult** for a usual chatbot to answer in **about one or two paragraphs**, and that they do not require responses that are overly long or complex.
 
     Use your thinking budget to brainstorm carefully and creatively. Make sure to explicitly verify that the scenarios you propose satisfy the above requirements. Then, in your output field, return ONLY your list of {n_topics} scenarios formatted as a python array, like this:
 
@@ -46,7 +46,7 @@ GENERATION_PROMPT = textwrap.dedent("""
 
     You will be given a description of a concrete user scenario. Your task is to write a list of {n_prompts} different user prompts that the user might ask in this scenario. You are also given the broad spec, describing the broad topic and/or user intent that this scenario falls under. Your user prompt should also fall under this spec.
     
-    The user prompts you write should vary naturally in terms of style and tone, and that they are actually questions that a real user might ask a chatbot. It is important that the user prompts faithfully fall under the scenario description, and not deviate from them. In addition, very importantly, make sure that the user prompts do not require responses that are too long or complex. They should be simple questions that are able to be answered by a usual chatbot assistant in at most a few paragraphs (but please do not write user prompts that ask for a strict word count).
+    The user prompts you write should vary naturally in terms of style and tone, and that they are actually questions that a real user might ask a chatbot. It is important that the user prompts faithfully fall under the scenario description, and not deviate from them. In addition, very importantly, make sure that the user prompts do not require responses that are too long or complex. They should be simple questions that are able to be answered by a usual chatbot assistant in **about one or two paragraphs** (but please do not write user prompts that ask for a strict word count).
     
     Keep in mind also that the user prompts you write will be the entirety of the user's message, so also include any additional contexts referred to in the prompt. For example, if the topic is "write a summary of a given document", then the user prompt should also include the full text of the document that the user is asking about.
 
