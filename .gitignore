@@ -11,6 +11,7 @@ plots/
 pyrightconfig.json
 .api_cache/
 dictionary_learning/
+old_code/
 
 # Python-generated files
 __pycache__/
