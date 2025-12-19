@@ -1,5 +1,6 @@
 """All the plotting functions"""
 
+import html
 import re
 import json
 from pathlib import Path
@@ -107,6 +108,10 @@ def plot_reward_diff_violin(plot_data: list[dict]):
     # Helper function to wrap text at specified width
     def wrap_text(text, width=60):
         """Wrap text to specified width using <br> for line breaks"""
+        # Escape HTML special characters to prevent parsing issues
+        text = html.escape(text)
+        # Escape $ to prevent MathJax/LaTeX rendering
+        text = text.replace("$", "&#36;")
         words = text.split()
         lines = []
         current_line = []
@@ -286,12 +291,13 @@ def plot_validation_data(run_path: Path|str, write_path: Path|str):
 # %%
 if __name__ == "__main__":
     for run_name in [
-        "20251216-075932-list_reverse-synthetic-plus",
-        "20251211-081017-pair-synthetic-plus",
-        "20251211-112052-list_reverse-synthetic-plus",
-        "20251211-142409-pair-synthetic-plus",
-        "20251211-171045-list_reverse-synthetic-plus",
-        "20251214-080733-list_reverse-synthetic-plus",
+        # "20251216-075932-list_reverse-synthetic-plus",
+        # "20251211-081017-pair-synthetic-plus",
+        # "20251211-112052-list_reverse-synthetic-plus",
+        # "20251211-142409-pair-synthetic-plus",
+        # "20251211-171045-list_reverse-synthetic-plus",
+        # "20251214-080733-list_reverse-synthetic-plus",
+        "20251218-155435-list_reverse-handpick-plus"
     ]:
         run_path = Path(f"data/evo/{run_name}")
         write_path = Path(f"plots/{run_name}")
