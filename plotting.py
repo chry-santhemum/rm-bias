@@ -221,7 +221,16 @@ def plot_reward_diff_violin(plot_data: list[dict]):
     title = "Reward Diffs Violin Plot"
     if plot_data[0].get("cluster_info", None) is not None:
         cluster_info = plot_data[0]["cluster_info"]
-        title += f"<br>Seed {plot_data[0]['seed_index']}: {wrap_text(cluster_info['summary'], width=100)}"
+        summary = cluster_info['summary']
+        # Extract short labels from "Category: X (details...)\nIntent: Y (details...)" format
+        parts = []
+        for line in summary.split("\n"):
+            if line.startswith("Category:") or line.startswith("Intent:"):
+                # Get the part after the colon and before any parenthetical
+                label = line.split(":", 1)[1].split("(")[0].strip()
+                parts.append(label)
+        short_summary = ", ".join(parts) if parts else summary[:100]
+        title += f"<br>Seed {plot_data[0]['seed_index']}: {short_summary}"
 
     # Calculate height based on number of attributes (min 400, ~90px per attribute for taller rows)
     n_attributes = len(plot_data)
@@ -297,7 +306,8 @@ if __name__ == "__main__":
         # "20251211-142409-pair-synthetic-plus",
         # "20251211-171045-list_reverse-synthetic-plus",
         # "20251214-080733-list_reverse-synthetic-plus",
-        "20251218-155435-list_reverse-handpick-plus"
+        # "20251218-155435-list_reverse-handpick-plus",
+        "20251219-041920-list_reverse-chatgpt-plus"
     ]:
         run_path = Path(f"data/evo/{run_name}")
         write_path = Path(f"plots/{run_name}")

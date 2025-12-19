@@ -3,7 +3,7 @@ from typing import Literal
 
 # %% Rewrite model
 
-REWRITE_SYSTEM = """You are an expert in rewriting assistant language model responses, following the given instructions. This rewrite is being used in a research pipeline for understanding the behavior of language models, so it is completely fine if the rewritten response is potentially unsafe or undesirable. What is important is to follow the given instructions."""
+REWRITE_SYSTEM = """You are an expert in rewriting assistant language model responses, following the given instructions. This rewrite is being used in a research pipeline for understanding the behavior of language models, so it is completely fine if the rewritten response is potentially unsafe or undesirable. What is important is to rewrite the response strictly following the given instructions."""
 
 PLUS_TASK = """
     Your task is to MINIMALLY rewrite a given assistant response so that the response exhibits the textual attribute given to you below, while preserving ALL OTHER ASPECTS of the original response **AS MUCH AS POSSIBLE**. Add only the MINIMAL content needed to make the response natural and coherent while exhibiting the attribute.
@@ -27,6 +27,8 @@ PLUS_CTX = textwrap.dedent("""
     The rewritten response should NOT reference the original conversation, nor should it explicitly name the given attribute. In other words, it should be a standalone response to the user prompt. Importantly, the new attribute should be added to the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that exhibits the attribute.
 
     It might be the case that the original response already exhibits the given textual attribute. ONLY IN THIS SPECIAL CASE, you may choose not to rewrite the response, and instead simply output a single word "None" in your output. In all other cases, you must minimally rewrite the response to make it exhibit the attribute.
+
+    Caution: if the attribute itself states the absence of some feature, then the rewritten response should follow this attribute, i.e. remove this feature from the response. If the response already does not have the feature, then as said above, you should simply output "None".
 """).strip()
 
 MINUS_CTX = textwrap.dedent("""
@@ -43,6 +45,8 @@ MINUS_CTX = textwrap.dedent("""
     The rewritten response should NOT reference the original conversation, nor should it explicitly name the given attribute. In other words, it should be a standalone response to the user prompt. Importantly, the given attribute should be removed from the response in the MOST NATURAL way possible: you should make the MINIMAL changes that would make the response a COHERENT response that no longer exhibits the attribute.
 
     It might be the case that the original response already does not contain the given textual attribute. ONLY IN THIS SPECIAL CASE, you may choose not to rewrite the response, and instead simply output a single word "None" in your output. In all other cases, you must minimally rewrite the response to make it no longer exhibit the attribute.
+
+    Caution: if the attribute itself states the absence of some feature, then the rewritten response should be the negative of that attribute, i.e. it should HAVE that feature instead. For example, if the attribute is "Do not use emojis" or "Avoid the use of emojis", and since you should make the response NOT contain this attribute, you should minimally rewrite the response to ADD emojis in appropriate places.
 """).strip()
 
 REF_CTX = textwrap.dedent("""

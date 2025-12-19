@@ -81,36 +81,44 @@ async def main(
     with open(specs_path, "r") as f:
         specs: list[str] = json.load(f)
 
-    sub_topic_chats = [
-        ChatHistory().add_user(BRAINSTORM_PROMPT.format(spec=spec, n_topics=n_topics))
-        for spec in specs
-    ]
+    sub_topics_path = dataset_path / "sub_topics.json"
+    try:
+        with open(sub_topics_path, "r") as f:
+            brainstorm_results = json.load(f)
+    except FileNotFoundError:
+        brainstorm_results = None
 
-    brainstorm_responses = await caller.call(
-        messages=sub_topic_chats,
-        max_parallel=128,
-        desc="Brainstorming",
-        model=model,
-        max_tokens=max_tokens,
-        reasoning=reasoning,
-    )
+    if brainstorm_results is None:
+        sub_topic_chats = [
+            ChatHistory().add_user(BRAINSTORM_PROMPT.format(spec=spec, n_topics=n_topics))
+            for spec in specs
+        ]
 
-    brainstorm_results = dict()
+        brainstorm_responses = await caller.call(
+            messages=sub_topic_chats,
+            max_parallel=128,
+            desc="Brainstorming",
+            model=model,
+            max_tokens=max_tokens,
+            reasoning=reasoning,
+        )
 
-    for i, resp in enumerate(brainstorm_responses):
-        spec = specs[i]
-        if resp is None:
-            continue
+        brainstorm_results = dict()
 
-        sub_topics, _ = parse_json_response(resp, marker="python")
-        if not isinstance(sub_topics, list):
-            print(f"Error: sub_topics is not a list.\n{sub_topics}\nSkipping...")
-            continue
-        sub_topics = [topic.strip() for topic in sub_topics]
-        brainstorm_results[spec] = sub_topics
-    
-    with open(dataset_path / "sub_topics.json", "w") as f:
-        json.dump(brainstorm_results, f, indent=4, sort_keys=True)
+        for i, resp in enumerate(brainstorm_responses):
+            spec = specs[i]
+            if resp is None:
+                continue
+
+            sub_topics, _ = parse_json_response(resp, marker="python")
+            if not isinstance(sub_topics, list):
+                print(f"Error: sub_topics is not a list.\n{sub_topics}\nSkipping...")
+                continue
+            sub_topics = [topic.strip() for topic in sub_topics]
+            brainstorm_results[spec] = sub_topics
+        
+        with open(dataset_path / "sub_topics.json", "w") as f:
+            json.dump(brainstorm_results, f, indent=4, sort_keys=True)
 
     results: dict[int, dict] = {
         i: {

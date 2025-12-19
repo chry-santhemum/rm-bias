@@ -1,5 +1,6 @@
 import re
 import gc
+import ast
 import json
 import time
 import random
@@ -157,8 +158,15 @@ def parse_json_response(
         else:
             json_str = raw_text.strip()
 
-        # Repair and parse
-        output = json.loads(repair_json(json_str))
+        # Try ast.literal_eval first for Python literals (handles single quotes properly)
+        if marker == "python":
+            try:
+                output = ast.literal_eval(json_str)
+            except (ValueError, SyntaxError):
+                # Fall back to json_repair
+                output = json.loads(repair_json(json_str))
+        else:
+            output = json.loads(repair_json(json_str))
 
     except Exception as e:
         output = raw_text.strip()

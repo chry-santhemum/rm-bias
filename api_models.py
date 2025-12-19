@@ -84,9 +84,6 @@ class RewriteModel(GenerationModel):
         reference_chats: list[dict[str, str] | None] | None = None,
         presence: list[bool] | None = None,
     ) -> list[str | None]:
-        """
-        If presence is None, defaults to all True.
-        """
         assert len(attributes) == len(original_chats)
         if reference_chats is not None:
             assert len(reference_chats) == len(original_chats)
@@ -94,7 +91,7 @@ class RewriteModel(GenerationModel):
         if presence is not None:
             assert len(presence) == len(original_chats)
         else:
-            presence = [True for _ in range(len(original_chats))]
+            presence = [True for _ in range(len(original_chats))]  # defaults to all True
         
         to_send_chats = []
         for i in range(len(original_chats)):

@@ -251,13 +251,12 @@ class BiasEvaluator:
         else:
             logger.info(f"Rewrite stats: all {total_attempted} positive rewrites succeeded")
 
-        # Log per-attribute stats if there are notable failures
+        # Log per-attribute stats
         for attr, stats in rewrite_stats.items():
-            if stats["positive_unchanged"] > 0:
-                logger.debug(
-                    f"  {attr[:50]}...: {stats['positive_unchanged']}/{stats['total_attempted']} "
-                    f"positive unchanged, {stats['retry_unchanged']} double failures"
-                )
+            logger.info(
+                f"  {attr[:50]}...: {stats['positive_unchanged']}/{stats['total_attempted']} "
+                f"positive unchanged, {stats['retry_unchanged']} double failures"
+            )
 
         organized_results = organize_rewrites(
             all_results, baselines, self.reward_model.model_name, n_rollouts, save_dir
