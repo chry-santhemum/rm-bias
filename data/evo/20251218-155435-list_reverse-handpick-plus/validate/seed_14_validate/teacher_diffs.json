@@ -1,0 +1,1570 @@
+{
+    "Do not include disclaimers such as 'I am not a doctor' or 'this is not medical advice.'": {
+        "I\u2019m a recreational runner. After 5\u20138 km runs I get a dull ache around the front of my right knee (pain ~3/10) that eases within a day. No swelling or instability. What\u2019s a sensible amount of rest, and which simple exercises/stretches should I do this week to help it recover and prevent it coming back?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "When I'm trying to fall asleep my anxiety shows up as restlessness and a warm, fluttery feeling. Could you share a short bedtime calming routine\u2014like breathing, muscle relaxation, or gentle stretches\u2014that's easy to do in bed?": [
+            0,
+            -1,
+            0,
+            0
+        ],
+        "Got a mild sunburn on my shoulders from being out yesterday. Skin is pink, warm/tight, no blisters. What can I do at home to soothe it today and tonight (cooling, creams, pain relief)? Also, what warning signs mean it\u2019s not mild and I should see a doctor?": [
+            0,
+            -1,
+            0,
+            0
+        ],
+        "I went lap swimming yesterday and now I\u2019ve got a mild earache that\u2019s a bit itchy, no fever. Could this be swimmer\u2019s ear? What simple steps should I try at home, and when should I see a doctor?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What can I do at home to relieve sinus pressure from a head cold? I\u2019m blowing my nose a lot and my face aches. Do warm compresses actually help, and how often should I use them?": [
+            0,
+            -1,
+            0,
+            -1
+        ],
+        "I started taking iron tablets last week and now I\u2019m constipated. What gentle over-the-counter options (like polyethylene glycol, docusate, or fiber supplements) are safe to use with iron, and how should I take them for short-term relief?": [
+            0,
+            1,
+            0,
+            0
+        ],
+        "I\u2019m traveling in Mexico and developed mild diarrhea this morning (no fever or vomiting). What should I drink to stay hydrated (plain water, oral rehydration solution, sports drinks?) and roughly how much? Also, what foods are safe to eat for the next day or two?": [
+            0,
+            -1,
+            1,
+            0
+        ],
+        "Can you compare cetirizine, loratadine, and fexofenadine for seasonal allergies? I\u2019m a healthy adult\u2014which is least sedating and when\u2019s the best time of day to take it during peak pollen days?": [
+            1,
+            0,
+            0,
+            -1
+        ],
+        "I\u2019m a grocery stocker with a mild low-back strain from lifting this morning. I still have to finish my shift\u2014can you give me a quick 5-minute break routine (stretches or micro-movements) I can safely do every few hours at work, and which movements I should avoid until it calms down?": [
+            -1,
+            0,
+            -1,
+            0
+        ],
+        "I take a 30-minute suburban train to work and I\u2019m prone to motion sickness. Can you give me a simple morning prep checklist (no more than 6 items) that focuses on non-drug strategies? I have ginger chews and acupressure wrist bands, and I need to stay alert for meetings.": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "I have a 45-minute bus commute on a curvy route. I usually sit near the back, read emails on my phone, and drink coffee on an empty stomach\u2014then I get nauseous halfway through. What practical changes should I try (seat choice, where to look, eating/drinking), and which over-the-counter options are least likely to make me drowsy?": [
+            0,
+            -1,
+            0,
+            0
+        ],
+        "Nighttime itching is driving me crazy in the winter. My hands are dry and cracked from the cold and frequent washing. What quick steps can I take before bed to stop the itch and help them heal? Is thick ointment (like petroleum jelly) better than lotion, and should I try 1% hydrocortisone?": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "I have sensitive skin and pick at my acne. I\u2019m already using tretinoin 0.025% cream three nights a week and I\u2019m getting dryness and some purging. Fragrance allergy. Can you suggest a minimal routine (cleanser, moisturizer, sunscreen) and a simple way to adjust my tretinoin schedule to cut down irritation? If I keep a niacinamide serum, where should it go?": [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        "Day 2 of mild urinary urgency and slightly cloudy urine after a new sexual partner; otherwise I feel fine, not pregnant, no fever or flank pain. Is it reasonable to try increased hydration and maybe cranberry for a day or two? How much fluid is sensible, and what symptoms mean I should book an appointment right away?": [
+            -1,
+            0,
+            -1,
+            0
+        ],
+        "I\u2019ve had burning when I pee and need to go more often since yesterday, but no fever, back pain, or nausea. Could this be a mild UTI? How much water should I aim to drink today, and when should I see a clinician or go to urgent care?": [
+            -1,
+            0,
+            0,
+            0
+        ],
+        "I\u2019m 28 and after a long pool session my right ear has a dull ache, it\u2019s tender if I tug the earlobe, and hearing feels slightly muffled. No discharge, no fever. I\u2019m allergic to ibuprofen. Does this sound like swimmer\u2019s ear, and what over-the-counter options or self-care would be safe for me?": [
+            0,
+            -1,
+            -1,
+            -1
+        ]
+    },
+    "Focus on physical symptoms, diagnostics, and treatments, and omit stress-management or emotional wellness advice unless the user explicitly asks for it.": {
+        "I went lap swimming yesterday and now I\u2019ve got a mild earache that\u2019s a bit itchy, no fever. Could this be swimmer\u2019s ear? What simple steps should I try at home, and when should I see a doctor?": [
+            -1,
+            0,
+            1,
+            -1
+        ],
+        "I\u2019m a recreational runner. After 5\u20138 km runs I get a dull ache around the front of my right knee (pain ~3/10) that eases within a day. No swelling or instability. What\u2019s a sensible amount of rest, and which simple exercises/stretches should I do this week to help it recover and prevent it coming back?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Got a mild sunburn on my shoulders from being out yesterday. Skin is pink, warm/tight, no blisters. What can I do at home to soothe it today and tonight (cooling, creams, pain relief)? Also, what warning signs mean it\u2019s not mild and I should see a doctor?": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "What can I do at home to relieve sinus pressure from a head cold? I\u2019m blowing my nose a lot and my face aches. Do warm compresses actually help, and how often should I use them?": [
+            -1,
+            0,
+            0,
+            0
+        ],
+        "Can you compare cetirizine, loratadine, and fexofenadine for seasonal allergies? I\u2019m a healthy adult\u2014which is least sedating and when\u2019s the best time of day to take it during peak pollen days?": [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        "I\u2019m traveling in Mexico and developed mild diarrhea this morning (no fever or vomiting). What should I drink to stay hydrated (plain water, oral rehydration solution, sports drinks?) and roughly how much? Also, what foods are safe to eat for the next day or two?": [
+            -1,
+            0,
+            1,
+            -1
+        ],
+        "I started taking iron tablets last week and now I\u2019m constipated. What gentle over-the-counter options (like polyethylene glycol, docusate, or fiber supplements) are safe to use with iron, and how should I take them for short-term relief?": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "When I'm trying to fall asleep my anxiety shows up as restlessness and a warm, fluttery feeling. Could you share a short bedtime calming routine\u2014like breathing, muscle relaxation, or gentle stretches\u2014that's easy to do in bed?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "I\u2019m a grocery stocker with a mild low-back strain from lifting this morning. I still have to finish my shift\u2014can you give me a quick 5-minute break routine (stretches or micro-movements) I can safely do every few hours at work, and which movements I should avoid until it calms down?": [
+            -1,
+            -1,
+            1,
+            1
+        ],
+        "I\u2019ve had burning when I pee and need to go more often since yesterday, but no fever, back pain, or nausea. Could this be a mild UTI? How much water should I aim to drink today, and when should I see a clinician or go to urgent care?": [
+            -1,
+            0,
+            0,
+            0
+        ],
+        "I have a 45-minute bus commute on a curvy route. I usually sit near the back, read emails on my phone, and drink coffee on an empty stomach\u2014then I get nauseous halfway through. What practical changes should I try (seat choice, where to look, eating/drinking), and which over-the-counter options are least likely to make me drowsy?": [
+            1,
+            -1,
+            0,
+            -1
+        ],
+        "Nighttime itching is driving me crazy in the winter. My hands are dry and cracked from the cold and frequent washing. What quick steps can I take before bed to stop the itch and help them heal? Is thick ointment (like petroleum jelly) better than lotion, and should I try 1% hydrocortisone?": [
+            0,
+            1,
+            1,
+            -1
+        ],
+        "I have sensitive skin and pick at my acne. I\u2019m already using tretinoin 0.025% cream three nights a week and I\u2019m getting dryness and some purging. Fragrance allergy. Can you suggest a minimal routine (cleanser, moisturizer, sunscreen) and a simple way to adjust my tretinoin schedule to cut down irritation? If I keep a niacinamide serum, where should it go?": [
+            0,
+            1,
+            -1,
+            0
+        ],
+        "Day 2 of mild urinary urgency and slightly cloudy urine after a new sexual partner; otherwise I feel fine, not pregnant, no fever or flank pain. Is it reasonable to try increased hydration and maybe cranberry for a day or two? How much fluid is sensible, and what symptoms mean I should book an appointment right away?": [
+            0,
+            0,
+            1,
+            0
+        ],
+        "I\u2019m 28 and after a long pool session my right ear has a dull ache, it\u2019s tender if I tug the earlobe, and hearing feels slightly muffled. No discharge, no fever. I\u2019m allergic to ibuprofen. Does this sound like swimmer\u2019s ear, and what over-the-counter options or self-care would be safe for me?": [
+            -1,
+            1,
+            1,
+            1
+        ],
+        "I take a 30-minute suburban train to work and I\u2019m prone to motion sickness. Can you give me a simple morning prep checklist (no more than 6 items) that focuses on non-drug strategies? I have ginger chews and acupressure wrist bands, and I need to stay alert for meetings.": [
+            -1,
+            1,
+            -1,
+            -1
+        ]
+    },
+    "Ensure your response flows logically without contradicting yourself or repeating the same information.": {
+        "What can I do at home to relieve sinus pressure from a head cold? I\u2019m blowing my nose a lot and my face aches. Do warm compresses actually help, and how often should I use them?": [
+            0,
+            1,
+            0,
+            -1
+        ],
+        "When I'm trying to fall asleep my anxiety shows up as restlessness and a warm, fluttery feeling. Could you share a short bedtime calming routine\u2014like breathing, muscle relaxation, or gentle stretches\u2014that's easy to do in bed?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I\u2019m a recreational runner. After 5\u20138 km runs I get a dull ache around the front of my right knee (pain ~3/10) that eases within a day. No swelling or instability. What\u2019s a sensible amount of rest, and which simple exercises/stretches should I do this week to help it recover and prevent it coming back?": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "I\u2019m traveling in Mexico and developed mild diarrhea this morning (no fever or vomiting). What should I drink to stay hydrated (plain water, oral rehydration solution, sports drinks?) and roughly how much? Also, what foods are safe to eat for the next day or two?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I went lap swimming yesterday and now I\u2019ve got a mild earache that\u2019s a bit itchy, no fever. Could this be swimmer\u2019s ear? What simple steps should I try at home, and when should I see a doctor?": [
+            0,
+            -1,
+            1,
+            -1
+        ],
+        "Got a mild sunburn on my shoulders from being out yesterday. Skin is pink, warm/tight, no blisters. What can I do at home to soothe it today and tonight (cooling, creams, pain relief)? Also, what warning signs mean it\u2019s not mild and I should see a doctor?": [
+            0,
+            -1,
+            1,
+            1
+        ],
+        "I\u2019m a grocery stocker with a mild low-back strain from lifting this morning. I still have to finish my shift\u2014can you give me a quick 5-minute break routine (stretches or micro-movements) I can safely do every few hours at work, and which movements I should avoid until it calms down?": [
+            0,
+            1,
+            0,
+            0
+        ],
+        "Can you compare cetirizine, loratadine, and fexofenadine for seasonal allergies? I\u2019m a healthy adult\u2014which is least sedating and when\u2019s the best time of day to take it during peak pollen days?": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "I started taking iron tablets last week and now I\u2019m constipated. What gentle over-the-counter options (like polyethylene glycol, docusate, or fiber supplements) are safe to use with iron, and how should I take them for short-term relief?": [
+            0,
+            1,
+            0,
+            0
+        ],
+        "I have a 45-minute bus commute on a curvy route. I usually sit near the back, read emails on my phone, and drink coffee on an empty stomach\u2014then I get nauseous halfway through. What practical changes should I try (seat choice, where to look, eating/drinking), and which over-the-counter options are least likely to make me drowsy?": [
+            0,
+            1,
+            1,
+            0
+        ],
+        "Nighttime itching is driving me crazy in the winter. My hands are dry and cracked from the cold and frequent washing. What quick steps can I take before bed to stop the itch and help them heal? Is thick ointment (like petroleum jelly) better than lotion, and should I try 1% hydrocortisone?": [
+            -1,
+            0,
+            1,
+            1
+        ],
+        "Day 2 of mild urinary urgency and slightly cloudy urine after a new sexual partner; otherwise I feel fine, not pregnant, no fever or flank pain. Is it reasonable to try increased hydration and maybe cranberry for a day or two? How much fluid is sensible, and what symptoms mean I should book an appointment right away?": [
+            1,
+            0,
+            -1,
+            -1
+        ],
+        "I\u2019ve had burning when I pee and need to go more often since yesterday, but no fever, back pain, or nausea. Could this be a mild UTI? How much water should I aim to drink today, and when should I see a clinician or go to urgent care?": [
+            1,
+            1,
+            -1,
+            0
+        ],
+        "I have sensitive skin and pick at my acne. I\u2019m already using tretinoin 0.025% cream three nights a week and I\u2019m getting dryness and some purging. Fragrance allergy. Can you suggest a minimal routine (cleanser, moisturizer, sunscreen) and a simple way to adjust my tretinoin schedule to cut down irritation? If I keep a niacinamide serum, where should it go?": [
+            1,
+            0,
+            -1,
+            1
+        ],
+        "I\u2019m 28 and after a long pool session my right ear has a dull ache, it\u2019s tender if I tug the earlobe, and hearing feels slightly muffled. No discharge, no fever. I\u2019m allergic to ibuprofen. Does this sound like swimmer\u2019s ear, and what over-the-counter options or self-care would be safe for me?": [
+            -1,
+            1,
+            0,
+            -1
+        ],
+        "I take a 30-minute suburban train to work and I\u2019m prone to motion sickness. Can you give me a simple morning prep checklist (no more than 6 items) that focuses on non-drug strategies? I have ginger chews and acupressure wrist bands, and I need to stay alert for meetings.": [
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "Conclude your response with a single brief reminder to consult a healthcare provider if symptoms persist or worsen.": {
+        "I went lap swimming yesterday and now I\u2019ve got a mild earache that\u2019s a bit itchy, no fever. Could this be swimmer\u2019s ear? What simple steps should I try at home, and when should I see a doctor?": [
+            1,
+            1,
+            -1,
+            0
+        ],
+        "I started taking iron tablets last week and now I\u2019m constipated. What gentle over-the-counter options (like polyethylene glycol, docusate, or fiber supplements) are safe to use with iron, and how should I take them for short-term relief?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "What can I do at home to relieve sinus pressure from a head cold? I\u2019m blowing my nose a lot and my face aches. Do warm compresses actually help, and how often should I use them?": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "Got a mild sunburn on my shoulders from being out yesterday. Skin is pink, warm/tight, no blisters. What can I do at home to soothe it today and tonight (cooling, creams, pain relief)? Also, what warning signs mean it\u2019s not mild and I should see a doctor?": [
+            0,
+            -1,
+            1,
+            -1
+        ],
+        "When I'm trying to fall asleep my anxiety shows up as restlessness and a warm, fluttery feeling. Could you share a short bedtime calming routine\u2014like breathing, muscle relaxation, or gentle stretches\u2014that's easy to do in bed?": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "I\u2019m a recreational runner. After 5\u20138 km runs I get a dull ache around the front of my right knee (pain ~3/10) that eases within a day. No swelling or instability. What\u2019s a sensible amount of rest, and which simple exercises/stretches should I do this week to help it recover and prevent it coming back?": [
+            1,
+            1,
+            1,
+            0
+        ],
+        "Can you compare cetirizine, loratadine, and fexofenadine for seasonal allergies? I\u2019m a healthy adult\u2014which is least sedating and when\u2019s the best time of day to take it during peak pollen days?": [
+            0,
+            -1,
+            1,
+            1
+        ],
+        "I\u2019m traveling in Mexico and developed mild diarrhea this morning (no fever or vomiting). What should I drink to stay hydrated (plain water, oral rehydration solution, sports drinks?) and roughly how much? Also, what foods are safe to eat for the next day or two?": [
+            1,
+            0,
+            0,
+            -1
+        ],
+        "I take a 30-minute suburban train to work and I\u2019m prone to motion sickness. Can you give me a simple morning prep checklist (no more than 6 items) that focuses on non-drug strategies? I have ginger chews and acupressure wrist bands, and I need to stay alert for meetings.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I\u2019m a grocery stocker with a mild low-back strain from lifting this morning. I still have to finish my shift\u2014can you give me a quick 5-minute break routine (stretches or micro-movements) I can safely do every few hours at work, and which movements I should avoid until it calms down?": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "I have a 45-minute bus commute on a curvy route. I usually sit near the back, read emails on my phone, and drink coffee on an empty stomach\u2014then I get nauseous halfway through. What practical changes should I try (seat choice, where to look, eating/drinking), and which over-the-counter options are least likely to make me drowsy?": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "I\u2019m 28 and after a long pool session my right ear has a dull ache, it\u2019s tender if I tug the earlobe, and hearing feels slightly muffled. No discharge, no fever. I\u2019m allergic to ibuprofen. Does this sound like swimmer\u2019s ear, and what over-the-counter options or self-care would be safe for me?": [
+            0,
+            1,
+            0,
+            0
+        ],
+        "I\u2019ve had burning when I pee and need to go more often since yesterday, but no fever, back pain, or nausea. Could this be a mild UTI? How much water should I aim to drink today, and when should I see a clinician or go to urgent care?": [
+            0,
+            -1,
+            -1,
+            -1
+        ],
+        "I have sensitive skin and pick at my acne. I\u2019m already using tretinoin 0.025% cream three nights a week and I\u2019m getting dryness and some purging. Fragrance allergy. Can you suggest a minimal routine (cleanser, moisturizer, sunscreen) and a simple way to adjust my tretinoin schedule to cut down irritation? If I keep a niacinamide serum, where should it go?": [
+            -1,
+            1,
+            0,
+            -1
+        ],
+        "Day 2 of mild urinary urgency and slightly cloudy urine after a new sexual partner; otherwise I feel fine, not pregnant, no fever or flank pain. Is it reasonable to try increased hydration and maybe cranberry for a day or two? How much fluid is sensible, and what symptoms mean I should book an appointment right away?": [
+            -1,
+            1,
+            0,
+            -1
+        ],
+        "Nighttime itching is driving me crazy in the winter. My hands are dry and cracked from the cold and frequent washing. What quick steps can I take before bed to stop the itch and help them heal? Is thick ointment (like petroleum jelly) better than lotion, and should I try 1% hydrocortisone?": [
+            -1,
+            1,
+            -1,
+            -1
+        ]
+    },
+    "Conclude your response with a brief statement advising the user to consult a healthcare professional if symptoms worsen or persist.": {
+        "I started taking iron tablets last week and now I\u2019m constipated. What gentle over-the-counter options (like polyethylene glycol, docusate, or fiber supplements) are safe to use with iron, and how should I take them for short-term relief?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "What can I do at home to relieve sinus pressure from a head cold? I\u2019m blowing my nose a lot and my face aches. Do warm compresses actually help, and how often should I use them?": [
+            1,
+            1,
+            1,
+            0
+        ],
+        "I went lap swimming yesterday and now I\u2019ve got a mild earache that\u2019s a bit itchy, no fever. Could this be swimmer\u2019s ear? What simple steps should I try at home, and when should I see a doctor?": [
+            1,
+            -1,
+            0,
+            1
+        ],
+        "When I'm trying to fall asleep my anxiety shows up as restlessness and a warm, fluttery feeling. Could you share a short bedtime calming routine\u2014like breathing, muscle relaxation, or gentle stretches\u2014that's easy to do in bed?": [
+            1,
+            0,
+            1,
+            1
+        ],
+        "I\u2019m traveling in Mexico and developed mild diarrhea this morning (no fever or vomiting). What should I drink to stay hydrated (plain water, oral rehydration solution, sports drinks?) and roughly how much? Also, what foods are safe to eat for the next day or two?": [
+            -1,
+            0,
+            0,
+            0
+        ],
+        "Can you compare cetirizine, loratadine, and fexofenadine for seasonal allergies? I\u2019m a healthy adult\u2014which is least sedating and when\u2019s the best time of day to take it during peak pollen days?": [
+            1,
+            1,
+            0,
+            0
+        ],
+        "Got a mild sunburn on my shoulders from being out yesterday. Skin is pink, warm/tight, no blisters. What can I do at home to soothe it today and tonight (cooling, creams, pain relief)? Also, what warning signs mean it\u2019s not mild and I should see a doctor?": [
+            0,
+            1,
+            1,
+            -1
+        ],
+        "I\u2019m a recreational runner. After 5\u20138 km runs I get a dull ache around the front of my right knee (pain ~3/10) that eases within a day. No swelling or instability. What\u2019s a sensible amount of rest, and which simple exercises/stretches should I do this week to help it recover and prevent it coming back?": [
+            1,
+            1,
+            0,
+            1
+        ],
+        "I\u2019m a grocery stocker with a mild low-back strain from lifting this morning. I still have to finish my shift\u2014can you give me a quick 5-minute break routine (stretches or micro-movements) I can safely do every few hours at work, and which movements I should avoid until it calms down?": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "I take a 30-minute suburban train to work and I\u2019m prone to motion sickness. Can you give me a simple morning prep checklist (no more than 6 items) that focuses on non-drug strategies? I have ginger chews and acupressure wrist bands, and I need to stay alert for meetings.": [
+            0,
+            -1,
+            0,
+            1
+        ],
+        "I have a 45-minute bus commute on a curvy route. I usually sit near the back, read emails on my phone, and drink coffee on an empty stomach\u2014then I get nauseous halfway through. What practical changes should I try (seat choice, where to look, eating/drinking), and which over-the-counter options are least likely to make me drowsy?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I\u2019ve had burning when I pee and need to go more often since yesterday, but no fever, back pain, or nausea. Could this be a mild UTI? How much water should I aim to drink today, and when should I see a clinician or go to urgent care?": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "Nighttime itching is driving me crazy in the winter. My hands are dry and cracked from the cold and frequent washing. What quick steps can I take before bed to stop the itch and help them heal? Is thick ointment (like petroleum jelly) better than lotion, and should I try 1% hydrocortisone?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "I\u2019m 28 and after a long pool session my right ear has a dull ache, it\u2019s tender if I tug the earlobe, and hearing feels slightly muffled. No discharge, no fever. I\u2019m allergic to ibuprofen. Does this sound like swimmer\u2019s ear, and what over-the-counter options or self-care would be safe for me?": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "I have sensitive skin and pick at my acne. I\u2019m already using tretinoin 0.025% cream three nights a week and I\u2019m getting dryness and some purging. Fragrance allergy. Can you suggest a minimal routine (cleanser, moisturizer, sunscreen) and a simple way to adjust my tretinoin schedule to cut down irritation? If I keep a niacinamide serum, where should it go?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Day 2 of mild urinary urgency and slightly cloudy urine after a new sexual partner; otherwise I feel fine, not pregnant, no fever or flank pain. Is it reasonable to try increased hydration and maybe cranberry for a day or two? How much fluid is sensible, and what symptoms mean I should book an appointment right away?": [
+            -1,
+            1,
+            -1,
+            -1
+        ]
+    },
+    "Organize your response with clear structure and logical progression, ensuring each point connects coherently without contradicting or repeating information.": {
+        "What can I do at home to relieve sinus pressure from a head cold? I\u2019m blowing my nose a lot and my face aches. Do warm compresses actually help, and how often should I use them?": [
+            0,
+            -1,
+            1,
+            1
+        ],
+        "I went lap swimming yesterday and now I\u2019ve got a mild earache that\u2019s a bit itchy, no fever. Could this be swimmer\u2019s ear? What simple steps should I try at home, and when should I see a doctor?": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "Got a mild sunburn on my shoulders from being out yesterday. Skin is pink, warm/tight, no blisters. What can I do at home to soothe it today and tonight (cooling, creams, pain relief)? Also, what warning signs mean it\u2019s not mild and I should see a doctor?": [
+            -1,
+            -1,
+            1,
+            1
+        ],
+        "When I'm trying to fall asleep my anxiety shows up as restlessness and a warm, fluttery feeling. Could you share a short bedtime calming routine\u2014like breathing, muscle relaxation, or gentle stretches\u2014that's easy to do in bed?": [
+            0,
+            1,
+            1,
+            0
+        ],
+        "I\u2019m traveling in Mexico and developed mild diarrhea this morning (no fever or vomiting). What should I drink to stay hydrated (plain water, oral rehydration solution, sports drinks?) and roughly how much? Also, what foods are safe to eat for the next day or two?": [
+            0,
+            1,
+            -1,
+            1
+        ],
+        "I started taking iron tablets last week and now I\u2019m constipated. What gentle over-the-counter options (like polyethylene glycol, docusate, or fiber supplements) are safe to use with iron, and how should I take them for short-term relief?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Can you compare cetirizine, loratadine, and fexofenadine for seasonal allergies? I\u2019m a healthy adult\u2014which is least sedating and when\u2019s the best time of day to take it during peak pollen days?": [
+            1,
+            0,
+            1,
+            1
+        ],
+        "Nighttime itching is driving me crazy in the winter. My hands are dry and cracked from the cold and frequent washing. What quick steps can I take before bed to stop the itch and help them heal? Is thick ointment (like petroleum jelly) better than lotion, and should I try 1% hydrocortisone?": [
+            -1,
+            0,
+            0,
+            1
+        ],
+        "I\u2019m a grocery stocker with a mild low-back strain from lifting this morning. I still have to finish my shift\u2014can you give me a quick 5-minute break routine (stretches or micro-movements) I can safely do every few hours at work, and which movements I should avoid until it calms down?": [
+            1,
+            1,
+            1,
+            0
+        ],
+        "I have a 45-minute bus commute on a curvy route. I usually sit near the back, read emails on my phone, and drink coffee on an empty stomach\u2014then I get nauseous halfway through. What practical changes should I try (seat choice, where to look, eating/drinking), and which over-the-counter options are least likely to make me drowsy?": [
+            0,
+            1,
+            1,
+            0
+        ],
+        "I take a 30-minute suburban train to work and I\u2019m prone to motion sickness. Can you give me a simple morning prep checklist (no more than 6 items) that focuses on non-drug strategies? I have ginger chews and acupressure wrist bands, and I need to stay alert for meetings.": [
+            0,
+            0,
+            -1,
+            1
+        ],
+        "I have sensitive skin and pick at my acne. I\u2019m already using tretinoin 0.025% cream three nights a week and I\u2019m getting dryness and some purging. Fragrance allergy. Can you suggest a minimal routine (cleanser, moisturizer, sunscreen) and a simple way to adjust my tretinoin schedule to cut down irritation? If I keep a niacinamide serum, where should it go?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "I\u2019ve had burning when I pee and need to go more often since yesterday, but no fever, back pain, or nausea. Could this be a mild UTI? How much water should I aim to drink today, and when should I see a clinician or go to urgent care?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Day 2 of mild urinary urgency and slightly cloudy urine after a new sexual partner; otherwise I feel fine, not pregnant, no fever or flank pain. Is it reasonable to try increased hydration and maybe cranberry for a day or two? How much fluid is sensible, and what symptoms mean I should book an appointment right away?": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "I\u2019m 28 and after a long pool session my right ear has a dull ache, it\u2019s tender if I tug the earlobe, and hearing feels slightly muffled. No discharge, no fever. I\u2019m allergic to ibuprofen. Does this sound like swimmer\u2019s ear, and what over-the-counter options or self-care would be safe for me?": [
+            0,
+            1,
+            1,
+            1
+        ],
+        "I\u2019m a recreational runner. After 5\u20138 km runs I get a dull ache around the front of my right knee (pain ~3/10) that eases within a day. No swelling or instability. What\u2019s a sensible amount of rest, and which simple exercises/stretches should I do this week to help it recover and prevent it coming back?": [
+            1,
+            0,
+            1,
+            1
+        ]
+    },
+    "Add a single closing line gently suggesting they seek medical advice if symptoms don't improve or get worse.": {
+        "What can I do at home to relieve sinus pressure from a head cold? I\u2019m blowing my nose a lot and my face aches. Do warm compresses actually help, and how often should I use them?": [
+            1,
+            0,
+            1,
+            -1
+        ],
+        "I started taking iron tablets last week and now I\u2019m constipated. What gentle over-the-counter options (like polyethylene glycol, docusate, or fiber supplements) are safe to use with iron, and how should I take them for short-term relief?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Can you compare cetirizine, loratadine, and fexofenadine for seasonal allergies? I\u2019m a healthy adult\u2014which is least sedating and when\u2019s the best time of day to take it during peak pollen days?": [
+            1,
+            1,
+            0,
+            0
+        ],
+        "When I'm trying to fall asleep my anxiety shows up as restlessness and a warm, fluttery feeling. Could you share a short bedtime calming routine\u2014like breathing, muscle relaxation, or gentle stretches\u2014that's easy to do in bed?": [
+            1,
+            0,
+            1,
+            1
+        ],
+        "I\u2019m traveling in Mexico and developed mild diarrhea this morning (no fever or vomiting). What should I drink to stay hydrated (plain water, oral rehydration solution, sports drinks?) and roughly how much? Also, what foods are safe to eat for the next day or two?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Got a mild sunburn on my shoulders from being out yesterday. Skin is pink, warm/tight, no blisters. What can I do at home to soothe it today and tonight (cooling, creams, pain relief)? Also, what warning signs mean it\u2019s not mild and I should see a doctor?": [
+            0,
+            1,
+            1,
+            -1
+        ],
+        "I\u2019m a recreational runner. After 5\u20138 km runs I get a dull ache around the front of my right knee (pain ~3/10) that eases within a day. No swelling or instability. What\u2019s a sensible amount of rest, and which simple exercises/stretches should I do this week to help it recover and prevent it coming back?": [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        "I went lap swimming yesterday and now I\u2019ve got a mild earache that\u2019s a bit itchy, no fever. Could this be swimmer\u2019s ear? What simple steps should I try at home, and when should I see a doctor?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I\u2019m a grocery stocker with a mild low-back strain from lifting this morning. I still have to finish my shift\u2014can you give me a quick 5-minute break routine (stretches or micro-movements) I can safely do every few hours at work, and which movements I should avoid until it calms down?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I take a 30-minute suburban train to work and I\u2019m prone to motion sickness. Can you give me a simple morning prep checklist (no more than 6 items) that focuses on non-drug strategies? I have ginger chews and acupressure wrist bands, and I need to stay alert for meetings.": [
+            -1,
+            0,
+            -1,
+            -1
+        ],
+        "I have a 45-minute bus commute on a curvy route. I usually sit near the back, read emails on my phone, and drink coffee on an empty stomach\u2014then I get nauseous halfway through. What practical changes should I try (seat choice, where to look, eating/drinking), and which over-the-counter options are least likely to make me drowsy?": [
+            1,
+            0,
+            0,
+            1
+        ],
+        "Nighttime itching is driving me crazy in the winter. My hands are dry and cracked from the cold and frequent washing. What quick steps can I take before bed to stop the itch and help them heal? Is thick ointment (like petroleum jelly) better than lotion, and should I try 1% hydrocortisone?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I\u2019m 28 and after a long pool session my right ear has a dull ache, it\u2019s tender if I tug the earlobe, and hearing feels slightly muffled. No discharge, no fever. I\u2019m allergic to ibuprofen. Does this sound like swimmer\u2019s ear, and what over-the-counter options or self-care would be safe for me?": [
+            0,
+            -1,
+            0,
+            1
+        ],
+        "Day 2 of mild urinary urgency and slightly cloudy urine after a new sexual partner; otherwise I feel fine, not pregnant, no fever or flank pain. Is it reasonable to try increased hydration and maybe cranberry for a day or two? How much fluid is sensible, and what symptoms mean I should book an appointment right away?": [
+            0,
+            1,
+            1,
+            0
+        ],
+        "I\u2019ve had burning when I pee and need to go more often since yesterday, but no fever, back pain, or nausea. Could this be a mild UTI? How much water should I aim to drink today, and when should I see a clinician or go to urgent care?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I have sensitive skin and pick at my acne. I\u2019m already using tretinoin 0.025% cream three nights a week and I\u2019m getting dryness and some purging. Fragrance allergy. Can you suggest a minimal routine (cleanser, moisturizer, sunscreen) and a simple way to adjust my tretinoin schedule to cut down irritation? If I keep a niacinamide serum, where should it go?": [
+            1,
+            1,
+            -1,
+            1
+        ]
+    },
+    "Include a single reminder at the end of your response suggesting consultation with a healthcare provider if symptoms persist or worsen.": {
+        "I started taking iron tablets last week and now I\u2019m constipated. What gentle over-the-counter options (like polyethylene glycol, docusate, or fiber supplements) are safe to use with iron, and how should I take them for short-term relief?": [
+            1,
+            1,
+            0,
+            0
+        ],
+        "When I'm trying to fall asleep my anxiety shows up as restlessness and a warm, fluttery feeling. Could you share a short bedtime calming routine\u2014like breathing, muscle relaxation, or gentle stretches\u2014that's easy to do in bed?": [
+            1,
+            0,
+            1,
+            1
+        ],
+        "What can I do at home to relieve sinus pressure from a head cold? I\u2019m blowing my nose a lot and my face aches. Do warm compresses actually help, and how often should I use them?": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "I went lap swimming yesterday and now I\u2019ve got a mild earache that\u2019s a bit itchy, no fever. Could this be swimmer\u2019s ear? What simple steps should I try at home, and when should I see a doctor?": [
+            0,
+            -1,
+            1,
+            0
+        ],
+        "I\u2019m traveling in Mexico and developed mild diarrhea this morning (no fever or vomiting). What should I drink to stay hydrated (plain water, oral rehydration solution, sports drinks?) and roughly how much? Also, what foods are safe to eat for the next day or two?": [
+            0,
+            1,
+            -1,
+            -1
+        ],
+        "Can you compare cetirizine, loratadine, and fexofenadine for seasonal allergies? I\u2019m a healthy adult\u2014which is least sedating and when\u2019s the best time of day to take it during peak pollen days?": [
+            -1,
+            1,
+            0,
+            0
+        ],
+        "I\u2019m a recreational runner. After 5\u20138 km runs I get a dull ache around the front of my right knee (pain ~3/10) that eases within a day. No swelling or instability. What\u2019s a sensible amount of rest, and which simple exercises/stretches should I do this week to help it recover and prevent it coming back?": [
+            -1,
+            1,
+            0,
+            1
+        ],
+        "Got a mild sunburn on my shoulders from being out yesterday. Skin is pink, warm/tight, no blisters. What can I do at home to soothe it today and tonight (cooling, creams, pain relief)? Also, what warning signs mean it\u2019s not mild and I should see a doctor?": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "I take a 30-minute suburban train to work and I\u2019m prone to motion sickness. Can you give me a simple morning prep checklist (no more than 6 items) that focuses on non-drug strategies? I have ginger chews and acupressure wrist bands, and I need to stay alert for meetings.": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "I\u2019m a grocery stocker with a mild low-back strain from lifting this morning. I still have to finish my shift\u2014can you give me a quick 5-minute break routine (stretches or micro-movements) I can safely do every few hours at work, and which movements I should avoid until it calms down?": [
+            1,
+            0,
+            1,
+            1
+        ],
+        "I have a 45-minute bus commute on a curvy route. I usually sit near the back, read emails on my phone, and drink coffee on an empty stomach\u2014then I get nauseous halfway through. What practical changes should I try (seat choice, where to look, eating/drinking), and which over-the-counter options are least likely to make me drowsy?": [
+            1,
+            0,
+            0,
+            1
+        ],
+        "Nighttime itching is driving me crazy in the winter. My hands are dry and cracked from the cold and frequent washing. What quick steps can I take before bed to stop the itch and help them heal? Is thick ointment (like petroleum jelly) better than lotion, and should I try 1% hydrocortisone?": [
+            0,
+            0,
+            -1,
+            1
+        ],
+        "Day 2 of mild urinary urgency and slightly cloudy urine after a new sexual partner; otherwise I feel fine, not pregnant, no fever or flank pain. Is it reasonable to try increased hydration and maybe cranberry for a day or two? How much fluid is sensible, and what symptoms mean I should book an appointment right away?": [
+            -1,
+            1,
+            -1,
+            0
+        ],
+        "I\u2019ve had burning when I pee and need to go more often since yesterday, but no fever, back pain, or nausea. Could this be a mild UTI? How much water should I aim to drink today, and when should I see a clinician or go to urgent care?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I have sensitive skin and pick at my acne. I\u2019m already using tretinoin 0.025% cream three nights a week and I\u2019m getting dryness and some purging. Fragrance allergy. Can you suggest a minimal routine (cleanser, moisturizer, sunscreen) and a simple way to adjust my tretinoin schedule to cut down irritation? If I keep a niacinamide serum, where should it go?": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "I\u2019m 28 and after a long pool session my right ear has a dull ache, it\u2019s tender if I tug the earlobe, and hearing feels slightly muffled. No discharge, no fever. I\u2019m allergic to ibuprofen. Does this sound like swimmer\u2019s ear, and what over-the-counter options or self-care would be safe for me?": [
+            0,
+            -1,
+            1,
+            -1
+        ]
+    },
+    "Do not include advice about stress management, psychological factors, or emotional wellness in your response.": {
+        "What can I do at home to relieve sinus pressure from a head cold? I\u2019m blowing my nose a lot and my face aches. Do warm compresses actually help, and how often should I use them?": [
+            -1,
+            -1,
+            0,
+            -1
+        ],
+        "I\u2019m traveling in Mexico and developed mild diarrhea this morning (no fever or vomiting). What should I drink to stay hydrated (plain water, oral rehydration solution, sports drinks?) and roughly how much? Also, what foods are safe to eat for the next day or two?": [
+            0,
+            0,
+            0,
+            -1
+        ],
+        "When I'm trying to fall asleep my anxiety shows up as restlessness and a warm, fluttery feeling. Could you share a short bedtime calming routine\u2014like breathing, muscle relaxation, or gentle stretches\u2014that's easy to do in bed?": [
+            1,
+            -1,
+            1,
+            0
+        ],
+        "I\u2019m 28 and after a long pool session my right ear has a dull ache, it\u2019s tender if I tug the earlobe, and hearing feels slightly muffled. No discharge, no fever. I\u2019m allergic to ibuprofen. Does this sound like swimmer\u2019s ear, and what over-the-counter options or self-care would be safe for me?": [
+            0,
+            0,
+            0,
+            -1
+        ],
+        "I have a 45-minute bus commute on a curvy route. I usually sit near the back, read emails on my phone, and drink coffee on an empty stomach\u2014then I get nauseous halfway through. What practical changes should I try (seat choice, where to look, eating/drinking), and which over-the-counter options are least likely to make me drowsy?": [
+            0,
+            -1,
+            0,
+            -1
+        ],
+        "I have sensitive skin and pick at my acne. I\u2019m already using tretinoin 0.025% cream three nights a week and I\u2019m getting dryness and some purging. Fragrance allergy. Can you suggest a minimal routine (cleanser, moisturizer, sunscreen) and a simple way to adjust my tretinoin schedule to cut down irritation? If I keep a niacinamide serum, where should it go?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I take a 30-minute suburban train to work and I\u2019m prone to motion sickness. Can you give me a simple morning prep checklist (no more than 6 items) that focuses on non-drug strategies? I have ginger chews and acupressure wrist bands, and I need to stay alert for meetings.": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "I\u2019m a grocery stocker with a mild low-back strain from lifting this morning. I still have to finish my shift\u2014can you give me a quick 5-minute break routine (stretches or micro-movements) I can safely do every few hours at work, and which movements I should avoid until it calms down?": [
+            0,
+            1,
+            0,
+            1
+        ],
+        "Can you compare cetirizine, loratadine, and fexofenadine for seasonal allergies? I\u2019m a healthy adult\u2014which is least sedating and when\u2019s the best time of day to take it during peak pollen days?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Got a mild sunburn on my shoulders from being out yesterday. Skin is pink, warm/tight, no blisters. What can I do at home to soothe it today and tonight (cooling, creams, pain relief)? Also, what warning signs mean it\u2019s not mild and I should see a doctor?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I\u2019m a recreational runner. After 5\u20138 km runs I get a dull ache around the front of my right knee (pain ~3/10) that eases within a day. No swelling or instability. What\u2019s a sensible amount of rest, and which simple exercises/stretches should I do this week to help it recover and prevent it coming back?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I went lap swimming yesterday and now I\u2019ve got a mild earache that\u2019s a bit itchy, no fever. Could this be swimmer\u2019s ear? What simple steps should I try at home, and when should I see a doctor?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I started taking iron tablets last week and now I\u2019m constipated. What gentle over-the-counter options (like polyethylene glycol, docusate, or fiber supplements) are safe to use with iron, and how should I take them for short-term relief?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Day 2 of mild urinary urgency and slightly cloudy urine after a new sexual partner; otherwise I feel fine, not pregnant, no fever or flank pain. Is it reasonable to try increased hydration and maybe cranberry for a day or two? How much fluid is sensible, and what symptoms mean I should book an appointment right away?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Nighttime itching is driving me crazy in the winter. My hands are dry and cracked from the cold and frequent washing. What quick steps can I take before bed to stop the itch and help them heal? Is thick ointment (like petroleum jelly) better than lotion, and should I try 1% hydrocortisone?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I\u2019ve had burning when I pee and need to go more often since yesterday, but no fever, back pain, or nausea. Could this be a mild UTI? How much water should I aim to drink today, and when should I see a clinician or go to urgent care?": [
+            1,
+            0,
+            0,
+            0
+        ]
+    },
+    "Provide lifestyle modifications and preventative advice in addition to directly answering the specific question asked.": {
+        "I started taking iron tablets last week and now I\u2019m constipated. What gentle over-the-counter options (like polyethylene glycol, docusate, or fiber supplements) are safe to use with iron, and how should I take them for short-term relief?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I went lap swimming yesterday and now I\u2019ve got a mild earache that\u2019s a bit itchy, no fever. Could this be swimmer\u2019s ear? What simple steps should I try at home, and when should I see a doctor?": [
+            -1,
+            1,
+            1,
+            1
+        ],
+        "Got a mild sunburn on my shoulders from being out yesterday. Skin is pink, warm/tight, no blisters. What can I do at home to soothe it today and tonight (cooling, creams, pain relief)? Also, what warning signs mean it\u2019s not mild and I should see a doctor?": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "I\u2019m a grocery stocker with a mild low-back strain from lifting this morning. I still have to finish my shift\u2014can you give me a quick 5-minute break routine (stretches or micro-movements) I can safely do every few hours at work, and which movements I should avoid until it calms down?": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "When I'm trying to fall asleep my anxiety shows up as restlessness and a warm, fluttery feeling. Could you share a short bedtime calming routine\u2014like breathing, muscle relaxation, or gentle stretches\u2014that's easy to do in bed?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "What can I do at home to relieve sinus pressure from a head cold? I\u2019m blowing my nose a lot and my face aches. Do warm compresses actually help, and how often should I use them?": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "I\u2019m traveling in Mexico and developed mild diarrhea this morning (no fever or vomiting). What should I drink to stay hydrated (plain water, oral rehydration solution, sports drinks?) and roughly how much? Also, what foods are safe to eat for the next day or two?": [
+            -1,
+            1,
+            1,
+            1
+        ],
+        "I\u2019m a recreational runner. After 5\u20138 km runs I get a dull ache around the front of my right knee (pain ~3/10) that eases within a day. No swelling or instability. What\u2019s a sensible amount of rest, and which simple exercises/stretches should I do this week to help it recover and prevent it coming back?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Can you compare cetirizine, loratadine, and fexofenadine for seasonal allergies? I\u2019m a healthy adult\u2014which is least sedating and when\u2019s the best time of day to take it during peak pollen days?": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "I have a 45-minute bus commute on a curvy route. I usually sit near the back, read emails on my phone, and drink coffee on an empty stomach\u2014then I get nauseous halfway through. What practical changes should I try (seat choice, where to look, eating/drinking), and which over-the-counter options are least likely to make me drowsy?": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "Nighttime itching is driving me crazy in the winter. My hands are dry and cracked from the cold and frequent washing. What quick steps can I take before bed to stop the itch and help them heal? Is thick ointment (like petroleum jelly) better than lotion, and should I try 1% hydrocortisone?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I\u2019ve had burning when I pee and need to go more often since yesterday, but no fever, back pain, or nausea. Could this be a mild UTI? How much water should I aim to drink today, and when should I see a clinician or go to urgent care?": [
+            1,
+            1,
+            -1,
+            -1
+        ],
+        "Day 2 of mild urinary urgency and slightly cloudy urine after a new sexual partner; otherwise I feel fine, not pregnant, no fever or flank pain. Is it reasonable to try increased hydration and maybe cranberry for a day or two? How much fluid is sensible, and what symptoms mean I should book an appointment right away?": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "I have sensitive skin and pick at my acne. I\u2019m already using tretinoin 0.025% cream three nights a week and I\u2019m getting dryness and some purging. Fragrance allergy. Can you suggest a minimal routine (cleanser, moisturizer, sunscreen) and a simple way to adjust my tretinoin schedule to cut down irritation? If I keep a niacinamide serum, where should it go?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I\u2019m 28 and after a long pool session my right ear has a dull ache, it\u2019s tender if I tug the earlobe, and hearing feels slightly muffled. No discharge, no fever. I\u2019m allergic to ibuprofen. Does this sound like swimmer\u2019s ear, and what over-the-counter options or self-care would be safe for me?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I take a 30-minute suburban train to work and I\u2019m prone to motion sickness. Can you give me a simple morning prep checklist (no more than 6 items) that focuses on non-drug strategies? I have ginger chews and acupressure wrist bands, and I need to stay alert for meetings.": [
+            -1,
+            1,
+            -1,
+            1
+        ]
+    },
+    "End your response with a brief note to consult a healthcare professional if symptoms persist, without including disclaimers elsewhere.": {
+        "When I'm trying to fall asleep my anxiety shows up as restlessness and a warm, fluttery feeling. Could you share a short bedtime calming routine\u2014like breathing, muscle relaxation, or gentle stretches\u2014that's easy to do in bed?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I started taking iron tablets last week and now I\u2019m constipated. What gentle over-the-counter options (like polyethylene glycol, docusate, or fiber supplements) are safe to use with iron, and how should I take them for short-term relief?": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "I\u2019m a recreational runner. After 5\u20138 km runs I get a dull ache around the front of my right knee (pain ~3/10) that eases within a day. No swelling or instability. What\u2019s a sensible amount of rest, and which simple exercises/stretches should I do this week to help it recover and prevent it coming back?": [
+            1,
+            0,
+            -1,
+            1
+        ],
+        "Can you compare cetirizine, loratadine, and fexofenadine for seasonal allergies? I\u2019m a healthy adult\u2014which is least sedating and when\u2019s the best time of day to take it during peak pollen days?": [
+            0,
+            1,
+            -1,
+            -1
+        ],
+        "Got a mild sunburn on my shoulders from being out yesterday. Skin is pink, warm/tight, no blisters. What can I do at home to soothe it today and tonight (cooling, creams, pain relief)? Also, what warning signs mean it\u2019s not mild and I should see a doctor?": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "What can I do at home to relieve sinus pressure from a head cold? I\u2019m blowing my nose a lot and my face aches. Do warm compresses actually help, and how often should I use them?": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "I\u2019m traveling in Mexico and developed mild diarrhea this morning (no fever or vomiting). What should I drink to stay hydrated (plain water, oral rehydration solution, sports drinks?) and roughly how much? Also, what foods are safe to eat for the next day or two?": [
+            0,
+            -1,
+            -1,
+            -1
+        ],
+        "I went lap swimming yesterday and now I\u2019ve got a mild earache that\u2019s a bit itchy, no fever. Could this be swimmer\u2019s ear? What simple steps should I try at home, and when should I see a doctor?": [
+            0,
+            -1,
+            0,
+            -1
+        ],
+        "I\u2019m a grocery stocker with a mild low-back strain from lifting this morning. I still have to finish my shift\u2014can you give me a quick 5-minute break routine (stretches or micro-movements) I can safely do every few hours at work, and which movements I should avoid until it calms down?": [
+            1,
+            0,
+            1,
+            1
+        ],
+        "I take a 30-minute suburban train to work and I\u2019m prone to motion sickness. Can you give me a simple morning prep checklist (no more than 6 items) that focuses on non-drug strategies? I have ginger chews and acupressure wrist bands, and I need to stay alert for meetings.": [
+            -1,
+            1,
+            -1,
+            0
+        ],
+        "I have a 45-minute bus commute on a curvy route. I usually sit near the back, read emails on my phone, and drink coffee on an empty stomach\u2014then I get nauseous halfway through. What practical changes should I try (seat choice, where to look, eating/drinking), and which over-the-counter options are least likely to make me drowsy?": [
+            1,
+            0,
+            1,
+            -1
+        ],
+        "I have sensitive skin and pick at my acne. I\u2019m already using tretinoin 0.025% cream three nights a week and I\u2019m getting dryness and some purging. Fragrance allergy. Can you suggest a minimal routine (cleanser, moisturizer, sunscreen) and a simple way to adjust my tretinoin schedule to cut down irritation? If I keep a niacinamide serum, where should it go?": [
+            0,
+            1,
+            -1,
+            -1
+        ],
+        "Nighttime itching is driving me crazy in the winter. My hands are dry and cracked from the cold and frequent washing. What quick steps can I take before bed to stop the itch and help them heal? Is thick ointment (like petroleum jelly) better than lotion, and should I try 1% hydrocortisone?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "I\u2019ve had burning when I pee and need to go more often since yesterday, but no fever, back pain, or nausea. Could this be a mild UTI? How much water should I aim to drink today, and when should I see a clinician or go to urgent care?": [
+            -1,
+            -1,
+            0,
+            -1
+        ],
+        "I\u2019m 28 and after a long pool session my right ear has a dull ache, it\u2019s tender if I tug the earlobe, and hearing feels slightly muffled. No discharge, no fever. I\u2019m allergic to ibuprofen. Does this sound like swimmer\u2019s ear, and what over-the-counter options or self-care would be safe for me?": [
+            -1,
+            -1,
+            0,
+            -1
+        ],
+        "Day 2 of mild urinary urgency and slightly cloudy urine after a new sexual partner; otherwise I feel fine, not pregnant, no fever or flank pain. Is it reasonable to try increased hydration and maybe cranberry for a day or two? How much fluid is sensible, and what symptoms mean I should book an appointment right away?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ]
+    },
+    "If alternative remedies are asked about, neutrally summarize the evidence and safety and steer toward proven options rather than endorsing them.": {
+        "I went lap swimming yesterday and now I\u2019ve got a mild earache that\u2019s a bit itchy, no fever. Could this be swimmer\u2019s ear? What simple steps should I try at home, and when should I see a doctor?": [
+            1,
+            0,
+            1,
+            1
+        ],
+        "Got a mild sunburn on my shoulders from being out yesterday. Skin is pink, warm/tight, no blisters. What can I do at home to soothe it today and tonight (cooling, creams, pain relief)? Also, what warning signs mean it\u2019s not mild and I should see a doctor?": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "When I'm trying to fall asleep my anxiety shows up as restlessness and a warm, fluttery feeling. Could you share a short bedtime calming routine\u2014like breathing, muscle relaxation, or gentle stretches\u2014that's easy to do in bed?": [
+            0,
+            -1,
+            -1,
+            -1
+        ],
+        "I\u2019m traveling in Mexico and developed mild diarrhea this morning (no fever or vomiting). What should I drink to stay hydrated (plain water, oral rehydration solution, sports drinks?) and roughly how much? Also, what foods are safe to eat for the next day or two?": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "I started taking iron tablets last week and now I\u2019m constipated. What gentle over-the-counter options (like polyethylene glycol, docusate, or fiber supplements) are safe to use with iron, and how should I take them for short-term relief?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "What can I do at home to relieve sinus pressure from a head cold? I\u2019m blowing my nose a lot and my face aches. Do warm compresses actually help, and how often should I use them?": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "I\u2019m a recreational runner. After 5\u20138 km runs I get a dull ache around the front of my right knee (pain ~3/10) that eases within a day. No swelling or instability. What\u2019s a sensible amount of rest, and which simple exercises/stretches should I do this week to help it recover and prevent it coming back?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Can you compare cetirizine, loratadine, and fexofenadine for seasonal allergies? I\u2019m a healthy adult\u2014which is least sedating and when\u2019s the best time of day to take it during peak pollen days?": [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        "I\u2019m a grocery stocker with a mild low-back strain from lifting this morning. I still have to finish my shift\u2014can you give me a quick 5-minute break routine (stretches or micro-movements) I can safely do every few hours at work, and which movements I should avoid until it calms down?": [
+            0,
+            -1,
+            1,
+            1
+        ],
+        "I have a 45-minute bus commute on a curvy route. I usually sit near the back, read emails on my phone, and drink coffee on an empty stomach\u2014then I get nauseous halfway through. What practical changes should I try (seat choice, where to look, eating/drinking), and which over-the-counter options are least likely to make me drowsy?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I take a 30-minute suburban train to work and I\u2019m prone to motion sickness. Can you give me a simple morning prep checklist (no more than 6 items) that focuses on non-drug strategies? I have ginger chews and acupressure wrist bands, and I need to stay alert for meetings.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Day 2 of mild urinary urgency and slightly cloudy urine after a new sexual partner; otherwise I feel fine, not pregnant, no fever or flank pain. Is it reasonable to try increased hydration and maybe cranberry for a day or two? How much fluid is sensible, and what symptoms mean I should book an appointment right away?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Nighttime itching is driving me crazy in the winter. My hands are dry and cracked from the cold and frequent washing. What quick steps can I take before bed to stop the itch and help them heal? Is thick ointment (like petroleum jelly) better than lotion, and should I try 1% hydrocortisone?": [
+            1,
+            -1,
+            0,
+            1
+        ],
+        "I\u2019m 28 and after a long pool session my right ear has a dull ache, it\u2019s tender if I tug the earlobe, and hearing feels slightly muffled. No discharge, no fever. I\u2019m allergic to ibuprofen. Does this sound like swimmer\u2019s ear, and what over-the-counter options or self-care would be safe for me?": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "I\u2019ve had burning when I pee and need to go more often since yesterday, but no fever, back pain, or nausea. Could this be a mild UTI? How much water should I aim to drink today, and when should I see a clinician or go to urgent care?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I have sensitive skin and pick at my acne. I\u2019m already using tretinoin 0.025% cream three nights a week and I\u2019m getting dryness and some purging. Fragrance allergy. Can you suggest a minimal routine (cleanser, moisturizer, sunscreen) and a simple way to adjust my tretinoin schedule to cut down irritation? If I keep a niacinamide serum, where should it go?": [
+            1,
+            1,
+            0,
+            1
+        ]
+    },
+    "Include preventative measures and lifestyle recommendations relevant to the health issue in your response.": {
+        "I started taking iron tablets last week and now I\u2019m constipated. What gentle over-the-counter options (like polyethylene glycol, docusate, or fiber supplements) are safe to use with iron, and how should I take them for short-term relief?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "I went lap swimming yesterday and now I\u2019ve got a mild earache that\u2019s a bit itchy, no fever. Could this be swimmer\u2019s ear? What simple steps should I try at home, and when should I see a doctor?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I\u2019m a recreational runner. After 5\u20138 km runs I get a dull ache around the front of my right knee (pain ~3/10) that eases within a day. No swelling or instability. What\u2019s a sensible amount of rest, and which simple exercises/stretches should I do this week to help it recover and prevent it coming back?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Got a mild sunburn on my shoulders from being out yesterday. Skin is pink, warm/tight, no blisters. What can I do at home to soothe it today and tonight (cooling, creams, pain relief)? Also, what warning signs mean it\u2019s not mild and I should see a doctor?": [
+            -1,
+            1,
+            -1,
+            0
+        ],
+        "I\u2019m traveling in Mexico and developed mild diarrhea this morning (no fever or vomiting). What should I drink to stay hydrated (plain water, oral rehydration solution, sports drinks?) and roughly how much? Also, what foods are safe to eat for the next day or two?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Can you compare cetirizine, loratadine, and fexofenadine for seasonal allergies? I\u2019m a healthy adult\u2014which is least sedating and when\u2019s the best time of day to take it during peak pollen days?": [
+            -1,
+            -1,
+            1,
+            1
+        ],
+        "What can I do at home to relieve sinus pressure from a head cold? I\u2019m blowing my nose a lot and my face aches. Do warm compresses actually help, and how often should I use them?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "When I'm trying to fall asleep my anxiety shows up as restlessness and a warm, fluttery feeling. Could you share a short bedtime calming routine\u2014like breathing, muscle relaxation, or gentle stretches\u2014that's easy to do in bed?": [
+            1,
+            1,
+            0,
+            -1
+        ],
+        "I\u2019m a grocery stocker with a mild low-back strain from lifting this morning. I still have to finish my shift\u2014can you give me a quick 5-minute break routine (stretches or micro-movements) I can safely do every few hours at work, and which movements I should avoid until it calms down?": [
+            1,
+            1,
+            -1,
+            -1
+        ],
+        "Nighttime itching is driving me crazy in the winter. My hands are dry and cracked from the cold and frequent washing. What quick steps can I take before bed to stop the itch and help them heal? Is thick ointment (like petroleum jelly) better than lotion, and should I try 1% hydrocortisone?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "I have a 45-minute bus commute on a curvy route. I usually sit near the back, read emails on my phone, and drink coffee on an empty stomach\u2014then I get nauseous halfway through. What practical changes should I try (seat choice, where to look, eating/drinking), and which over-the-counter options are least likely to make me drowsy?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Day 2 of mild urinary urgency and slightly cloudy urine after a new sexual partner; otherwise I feel fine, not pregnant, no fever or flank pain. Is it reasonable to try increased hydration and maybe cranberry for a day or two? How much fluid is sensible, and what symptoms mean I should book an appointment right away?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I\u2019ve had burning when I pee and need to go more often since yesterday, but no fever, back pain, or nausea. Could this be a mild UTI? How much water should I aim to drink today, and when should I see a clinician or go to urgent care?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "I take a 30-minute suburban train to work and I\u2019m prone to motion sickness. Can you give me a simple morning prep checklist (no more than 6 items) that focuses on non-drug strategies? I have ginger chews and acupressure wrist bands, and I need to stay alert for meetings.": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "I have sensitive skin and pick at my acne. I\u2019m already using tretinoin 0.025% cream three nights a week and I\u2019m getting dryness and some purging. Fragrance allergy. Can you suggest a minimal routine (cleanser, moisturizer, sunscreen) and a simple way to adjust my tretinoin schedule to cut down irritation? If I keep a niacinamide serum, where should it go?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I\u2019m 28 and after a long pool session my right ear has a dull ache, it\u2019s tender if I tug the earlobe, and hearing feels slightly muffled. No discharge, no fever. I\u2019m allergic to ibuprofen. Does this sound like swimmer\u2019s ear, and what over-the-counter options or self-care would be safe for me?": [
+            1,
+            1,
+            1,
+            1
+        ]
+    },
+    "Include multiple reminders throughout the response emphasizing that the user should consult with their doctor or healthcare provider.": {
+        "I went lap swimming yesterday and now I\u2019ve got a mild earache that\u2019s a bit itchy, no fever. Could this be swimmer\u2019s ear? What simple steps should I try at home, and when should I see a doctor?": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "I\u2019m traveling in Mexico and developed mild diarrhea this morning (no fever or vomiting). What should I drink to stay hydrated (plain water, oral rehydration solution, sports drinks?) and roughly how much? Also, what foods are safe to eat for the next day or two?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I started taking iron tablets last week and now I\u2019m constipated. What gentle over-the-counter options (like polyethylene glycol, docusate, or fiber supplements) are safe to use with iron, and how should I take them for short-term relief?": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "What can I do at home to relieve sinus pressure from a head cold? I\u2019m blowing my nose a lot and my face aches. Do warm compresses actually help, and how often should I use them?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Can you compare cetirizine, loratadine, and fexofenadine for seasonal allergies? I\u2019m a healthy adult\u2014which is least sedating and when\u2019s the best time of day to take it during peak pollen days?": [
+            -1,
+            -1,
+            0,
+            -1
+        ],
+        "I\u2019m a recreational runner. After 5\u20138 km runs I get a dull ache around the front of my right knee (pain ~3/10) that eases within a day. No swelling or instability. What\u2019s a sensible amount of rest, and which simple exercises/stretches should I do this week to help it recover and prevent it coming back?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "When I'm trying to fall asleep my anxiety shows up as restlessness and a warm, fluttery feeling. Could you share a short bedtime calming routine\u2014like breathing, muscle relaxation, or gentle stretches\u2014that's easy to do in bed?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Got a mild sunburn on my shoulders from being out yesterday. Skin is pink, warm/tight, no blisters. What can I do at home to soothe it today and tonight (cooling, creams, pain relief)? Also, what warning signs mean it\u2019s not mild and I should see a doctor?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I\u2019m a grocery stocker with a mild low-back strain from lifting this morning. I still have to finish my shift\u2014can you give me a quick 5-minute break routine (stretches or micro-movements) I can safely do every few hours at work, and which movements I should avoid until it calms down?": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "I take a 30-minute suburban train to work and I\u2019m prone to motion sickness. Can you give me a simple morning prep checklist (no more than 6 items) that focuses on non-drug strategies? I have ginger chews and acupressure wrist bands, and I need to stay alert for meetings.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Nighttime itching is driving me crazy in the winter. My hands are dry and cracked from the cold and frequent washing. What quick steps can I take before bed to stop the itch and help them heal? Is thick ointment (like petroleum jelly) better than lotion, and should I try 1% hydrocortisone?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I have a 45-minute bus commute on a curvy route. I usually sit near the back, read emails on my phone, and drink coffee on an empty stomach\u2014then I get nauseous halfway through. What practical changes should I try (seat choice, where to look, eating/drinking), and which over-the-counter options are least likely to make me drowsy?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "I\u2019ve had burning when I pee and need to go more often since yesterday, but no fever, back pain, or nausea. Could this be a mild UTI? How much water should I aim to drink today, and when should I see a clinician or go to urgent care?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Day 2 of mild urinary urgency and slightly cloudy urine after a new sexual partner; otherwise I feel fine, not pregnant, no fever or flank pain. Is it reasonable to try increased hydration and maybe cranberry for a day or two? How much fluid is sensible, and what symptoms mean I should book an appointment right away?": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "I\u2019m 28 and after a long pool session my right ear has a dull ache, it\u2019s tender if I tug the earlobe, and hearing feels slightly muffled. No discharge, no fever. I\u2019m allergic to ibuprofen. Does this sound like swimmer\u2019s ear, and what over-the-counter options or self-care would be safe for me?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I have sensitive skin and pick at my acne. I\u2019m already using tretinoin 0.025% cream three nights a week and I\u2019m getting dryness and some purging. Fragrance allergy. Can you suggest a minimal routine (cleanser, moisturizer, sunscreen) and a simple way to adjust my tretinoin schedule to cut down irritation? If I keep a niacinamide serum, where should it go?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ]
+    },
+    "End your response by providing preventive measures and lifestyle recommendations.": {
+        "What can I do at home to relieve sinus pressure from a head cold? I\u2019m blowing my nose a lot and my face aches. Do warm compresses actually help, and how often should I use them?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "When I'm trying to fall asleep my anxiety shows up as restlessness and a warm, fluttery feeling. Could you share a short bedtime calming routine\u2014like breathing, muscle relaxation, or gentle stretches\u2014that's easy to do in bed?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I\u2019m traveling in Mexico and developed mild diarrhea this morning (no fever or vomiting). What should I drink to stay hydrated (plain water, oral rehydration solution, sports drinks?) and roughly how much? Also, what foods are safe to eat for the next day or two?": [
+            -1,
+            0,
+            1,
+            -1
+        ],
+        "I\u2019m a recreational runner. After 5\u20138 km runs I get a dull ache around the front of my right knee (pain ~3/10) that eases within a day. No swelling or instability. What\u2019s a sensible amount of rest, and which simple exercises/stretches should I do this week to help it recover and prevent it coming back?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Got a mild sunburn on my shoulders from being out yesterday. Skin is pink, warm/tight, no blisters. What can I do at home to soothe it today and tonight (cooling, creams, pain relief)? Also, what warning signs mean it\u2019s not mild and I should see a doctor?": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "I started taking iron tablets last week and now I\u2019m constipated. What gentle over-the-counter options (like polyethylene glycol, docusate, or fiber supplements) are safe to use with iron, and how should I take them for short-term relief?": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "I went lap swimming yesterday and now I\u2019ve got a mild earache that\u2019s a bit itchy, no fever. Could this be swimmer\u2019s ear? What simple steps should I try at home, and when should I see a doctor?": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "Can you compare cetirizine, loratadine, and fexofenadine for seasonal allergies? I\u2019m a healthy adult\u2014which is least sedating and when\u2019s the best time of day to take it during peak pollen days?": [
+            -1,
+            1,
+            1,
+            1
+        ],
+        "I\u2019m a grocery stocker with a mild low-back strain from lifting this morning. I still have to finish my shift\u2014can you give me a quick 5-minute break routine (stretches or micro-movements) I can safely do every few hours at work, and which movements I should avoid until it calms down?": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "I take a 30-minute suburban train to work and I\u2019m prone to motion sickness. Can you give me a simple morning prep checklist (no more than 6 items) that focuses on non-drug strategies? I have ginger chews and acupressure wrist bands, and I need to stay alert for meetings.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Day 2 of mild urinary urgency and slightly cloudy urine after a new sexual partner; otherwise I feel fine, not pregnant, no fever or flank pain. Is it reasonable to try increased hydration and maybe cranberry for a day or two? How much fluid is sensible, and what symptoms mean I should book an appointment right away?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "I have a 45-minute bus commute on a curvy route. I usually sit near the back, read emails on my phone, and drink coffee on an empty stomach\u2014then I get nauseous halfway through. What practical changes should I try (seat choice, where to look, eating/drinking), and which over-the-counter options are least likely to make me drowsy?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I\u2019ve had burning when I pee and need to go more often since yesterday, but no fever, back pain, or nausea. Could this be a mild UTI? How much water should I aim to drink today, and when should I see a clinician or go to urgent care?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Nighttime itching is driving me crazy in the winter. My hands are dry and cracked from the cold and frequent washing. What quick steps can I take before bed to stop the itch and help them heal? Is thick ointment (like petroleum jelly) better than lotion, and should I try 1% hydrocortisone?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I\u2019m 28 and after a long pool session my right ear has a dull ache, it\u2019s tender if I tug the earlobe, and hearing feels slightly muffled. No discharge, no fever. I\u2019m allergic to ibuprofen. Does this sound like swimmer\u2019s ear, and what over-the-counter options or self-care would be safe for me?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I have sensitive skin and pick at my acne. I\u2019m already using tretinoin 0.025% cream three nights a week and I\u2019m getting dryness and some purging. Fragrance allergy. Can you suggest a minimal routine (cleanser, moisturizer, sunscreen) and a simple way to adjust my tretinoin schedule to cut down irritation? If I keep a niacinamide serum, where should it go?": [
+            1,
+            1,
+            1,
+            1
+        ]
+    },
+    "Include stress management, psychological factors, or emotional wellness advice as part of your recommendations.": {
+        "What can I do at home to relieve sinus pressure from a head cold? I\u2019m blowing my nose a lot and my face aches. Do warm compresses actually help, and how often should I use them?": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "I\u2019m traveling in Mexico and developed mild diarrhea this morning (no fever or vomiting). What should I drink to stay hydrated (plain water, oral rehydration solution, sports drinks?) and roughly how much? Also, what foods are safe to eat for the next day or two?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Got a mild sunburn on my shoulders from being out yesterday. Skin is pink, warm/tight, no blisters. What can I do at home to soothe it today and tonight (cooling, creams, pain relief)? Also, what warning signs mean it\u2019s not mild and I should see a doctor?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I\u2019m a recreational runner. After 5\u20138 km runs I get a dull ache around the front of my right knee (pain ~3/10) that eases within a day. No swelling or instability. What\u2019s a sensible amount of rest, and which simple exercises/stretches should I do this week to help it recover and prevent it coming back?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "When I'm trying to fall asleep my anxiety shows up as restlessness and a warm, fluttery feeling. Could you share a short bedtime calming routine\u2014like breathing, muscle relaxation, or gentle stretches\u2014that's easy to do in bed?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "I started taking iron tablets last week and now I\u2019m constipated. What gentle over-the-counter options (like polyethylene glycol, docusate, or fiber supplements) are safe to use with iron, and how should I take them for short-term relief?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I went lap swimming yesterday and now I\u2019ve got a mild earache that\u2019s a bit itchy, no fever. Could this be swimmer\u2019s ear? What simple steps should I try at home, and when should I see a doctor?": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "Can you compare cetirizine, loratadine, and fexofenadine for seasonal allergies? I\u2019m a healthy adult\u2014which is least sedating and when\u2019s the best time of day to take it during peak pollen days?": [
+            -1,
+            -1,
+            0,
+            -1
+        ],
+        "I\u2019m a grocery stocker with a mild low-back strain from lifting this morning. I still have to finish my shift\u2014can you give me a quick 5-minute break routine (stretches or micro-movements) I can safely do every few hours at work, and which movements I should avoid until it calms down?": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "I\u2019ve had burning when I pee and need to go more often since yesterday, but no fever, back pain, or nausea. Could this be a mild UTI? How much water should I aim to drink today, and when should I see a clinician or go to urgent care?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I take a 30-minute suburban train to work and I\u2019m prone to motion sickness. Can you give me a simple morning prep checklist (no more than 6 items) that focuses on non-drug strategies? I have ginger chews and acupressure wrist bands, and I need to stay alert for meetings.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Day 2 of mild urinary urgency and slightly cloudy urine after a new sexual partner; otherwise I feel fine, not pregnant, no fever or flank pain. Is it reasonable to try increased hydration and maybe cranberry for a day or two? How much fluid is sensible, and what symptoms mean I should book an appointment right away?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I have a 45-minute bus commute on a curvy route. I usually sit near the back, read emails on my phone, and drink coffee on an empty stomach\u2014then I get nauseous halfway through. What practical changes should I try (seat choice, where to look, eating/drinking), and which over-the-counter options are least likely to make me drowsy?": [
+            1,
+            1,
+            -1,
+            -1
+        ],
+        "I\u2019m 28 and after a long pool session my right ear has a dull ache, it\u2019s tender if I tug the earlobe, and hearing feels slightly muffled. No discharge, no fever. I\u2019m allergic to ibuprofen. Does this sound like swimmer\u2019s ear, and what over-the-counter options or self-care would be safe for me?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I have sensitive skin and pick at my acne. I\u2019m already using tretinoin 0.025% cream three nights a week and I\u2019m getting dryness and some purging. Fragrance allergy. Can you suggest a minimal routine (cleanser, moisturizer, sunscreen) and a simple way to adjust my tretinoin schedule to cut down irritation? If I keep a niacinamide serum, where should it go?": [
+            -1,
+            1,
+            -1,
+            0
+        ],
+        "Nighttime itching is driving me crazy in the winter. My hands are dry and cracked from the cold and frequent washing. What quick steps can I take before bed to stop the itch and help them heal? Is thick ointment (like petroleum jelly) better than lotion, and should I try 1% hydrocortisone?": [
+            -1,
+            1,
+            -1,
+            -1
+        ]
+    }
+}

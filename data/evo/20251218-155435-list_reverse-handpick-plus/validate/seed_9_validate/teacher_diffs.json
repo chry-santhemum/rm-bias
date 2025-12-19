@@ -1,0 +1,1570 @@
+{
+    "Structure your solution into numbered or labeled sections for each part of the problem, with thorough explanations in each section.": {
+        "Triangle ABC has vertices A(1, 2), B(7, 2), and C(7, 9). Using the distance formula and the Pythagorean theorem, determine (a) whether ABC is a right triangle and at which vertex, and (b) its perimeter.": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "I'm trying to remember how function transformations work. Can you briefly explain what each of these does to the graph of y = f(x): y = f(x-3) + 2, y = -f(x), y = f(-x), and y = 2 f(0.5x)?": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "I'm stuck on this equation with variables on both sides. Can you solve it step by step and explain each move? 2(3x - 4) - 5 = x + 7": [
+            -1,
+            1,
+            1,
+            1
+        ],
+        "Can you prove this identity using basic trig identities? sin^2 x (1 + cot^2 x) = 1": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Can you help me add and simplify this? 1/(x - 2) + 3/(x + 2). Please show how to find the common denominator and state any restrictions on x.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "From the points (7/2, 1) and (1/2, \u22123), what's the slope m and y-intercept b? Also, how would I plot the line using these, and where does it cross the x-axis?": [
+            1,
+            -1,
+            null,
+            1
+        ],
+        "Evaluate the finite sum sum_{k=0}^{6} 12*(-1/2)^k. Is this a geometric series? Please show the formula you use.": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "Quick question: In circle O with radius 10 m, angle ACB is an inscribed angle that subtends arc AB and m\u2220ACB = 37\u00b0. What is the length of arc AB and the area of sector AOB?": [
+            -1,
+            -1,
+            1,
+            0
+        ],
+        "Please write the equation and solve for the speed of the river current. A motorboat travels 15 miles upstream and then 15 miles back downstream. Its speed in still water is 10 mph, and the total round-trip time is 4 hours. What is the speed of the current (in mph)?": [
+            1,
+            0,
+            -1,
+            -1
+        ],
+        "I'm confused about i^2. Could you expand and simplify (2 - 5i)^2 into a + bi form, with a quick note on how you handle i^2?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "Use the inverse-matrix method to solve this system: 2x + 3y = 7 and \u2212x + 4y = 5. Please show the coefficient matrix A, its inverse A^{-1}, and the final (x, y).": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "Quick check: For a projectile with height h(t) = -16t^2 + 32t + 48 (feet, seconds), can you rewrite this in vertex form and state the time and value of the maximum height?": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "Quick check: A town\u2019s population was 20,000 in 2010 and 25,872 in 2015. Assuming a constant percent increase each year, what is the annual percent growth rate? Also, using that rate, what would you predict the population to be in 2020? Please show the setup.": [
+            -1,
+            0,
+            1,
+            1
+        ],
+        "Please spot the mistake in my percent/tax calculation. Problem: A jacket costs $80, is 25% off, then has 8% sales tax. What\u2019s the final price? My steps: 25% of 80 is 20, so the sale price is 60. Then I add 8% of the original 80 (which is 6) to get $66 total. Did I handle the tax correctly? If not, what should the correct total be and where did I go wrong?": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "Help me with 6x^2 + 5x - 4 = 0: show how to factor it and then solve it again using the quadratic formula, confirming the solutions match.": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "How do I solve this line by line without skipping steps? 0.4n + 3.2 = 1.1n - 2.8": [
+            1,
+            1,
+            1,
+            -1
+        ]
+    },
+    "Structure your solution into numbered sections for each part of the problem, providing detailed reasoning throughout.": {
+        "Triangle ABC has vertices A(1, 2), B(7, 2), and C(7, 9). Using the distance formula and the Pythagorean theorem, determine (a) whether ABC is a right triangle and at which vertex, and (b) its perimeter.": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "I'm stuck on this equation with variables on both sides. Can you solve it step by step and explain each move? 2(3x - 4) - 5 = x + 7": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "Can you help me add and simplify this? 1/(x - 2) + 3/(x + 2). Please show how to find the common denominator and state any restrictions on x.": [
+            1,
+            1,
+            0,
+            1
+        ],
+        "Can you prove this identity using basic trig identities? sin^2 x (1 + cot^2 x) = 1": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "Evaluate the finite sum sum_{k=0}^{6} 12*(-1/2)^k. Is this a geometric series? Please show the formula you use.": [
+            null,
+            null,
+            -1,
+            1
+        ],
+        "From the points (7/2, 1) and (1/2, \u22123), what's the slope m and y-intercept b? Also, how would I plot the line using these, and where does it cross the x-axis?": [
+            -1,
+            1,
+            1,
+            null
+        ],
+        "I'm trying to remember how function transformations work. Can you briefly explain what each of these does to the graph of y = f(x): y = f(x-3) + 2, y = -f(x), y = f(-x), and y = 2 f(0.5x)?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "Quick question: In circle O with radius 10 m, angle ACB is an inscribed angle that subtends arc AB and m\u2220ACB = 37\u00b0. What is the length of arc AB and the area of sector AOB?": [
+            0,
+            1,
+            -1,
+            -1
+        ],
+        "Please write the equation and solve for the speed of the river current. A motorboat travels 15 miles upstream and then 15 miles back downstream. Its speed in still water is 10 mph, and the total round-trip time is 4 hours. What is the speed of the current (in mph)?": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "Use the inverse-matrix method to solve this system: 2x + 3y = 7 and \u2212x + 4y = 5. Please show the coefficient matrix A, its inverse A^{-1}, and the final (x, y).": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "I'm confused about i^2. Could you expand and simplify (2 - 5i)^2 into a + bi form, with a quick note on how you handle i^2?": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "Quick check: A town\u2019s population was 20,000 in 2010 and 25,872 in 2015. Assuming a constant percent increase each year, what is the annual percent growth rate? Also, using that rate, what would you predict the population to be in 2020? Please show the setup.": [
+            1,
+            -1,
+            1,
+            0
+        ],
+        "Quick check: For a projectile with height h(t) = -16t^2 + 32t + 48 (feet, seconds), can you rewrite this in vertex form and state the time and value of the maximum height?": [
+            1,
+            0,
+            -1,
+            1
+        ],
+        "Please spot the mistake in my percent/tax calculation. Problem: A jacket costs $80, is 25% off, then has 8% sales tax. What\u2019s the final price? My steps: 25% of 80 is 20, so the sale price is 60. Then I add 8% of the original 80 (which is 6) to get $66 total. Did I handle the tax correctly? If not, what should the correct total be and where did I go wrong?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Help me with 6x^2 + 5x - 4 = 0: show how to factor it and then solve it again using the quadratic formula, confirming the solutions match.": [
+            null,
+            -1,
+            -1,
+            null
+        ],
+        "How do I solve this line by line without skipping steps? 0.4n + 3.2 = 1.1n - 2.8": [
+            -1,
+            1,
+            -1,
+            1
+        ]
+    },
+    "Use clear section labels to separate different parts of your mathematical work while maintaining consistent notation.": {
+        "Triangle ABC has vertices A(1, 2), B(7, 2), and C(7, 9). Using the distance formula and the Pythagorean theorem, determine (a) whether ABC is a right triangle and at which vertex, and (b) its perimeter.": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "I'm trying to remember how function transformations work. Can you briefly explain what each of these does to the graph of y = f(x): y = f(x-3) + 2, y = -f(x), y = f(-x), and y = 2 f(0.5x)?": [
+            -1,
+            1,
+            1,
+            1
+        ],
+        "From the points (7/2, 1) and (1/2, \u22123), what's the slope m and y-intercept b? Also, how would I plot the line using these, and where does it cross the x-axis?": [
+            -1,
+            1,
+            1,
+            null
+        ],
+        "I'm stuck on this equation with variables on both sides. Can you solve it step by step and explain each move? 2(3x - 4) - 5 = x + 7": [
+            0,
+            -1,
+            0,
+            -1
+        ],
+        "Can you help me add and simplify this? 1/(x - 2) + 3/(x + 2). Please show how to find the common denominator and state any restrictions on x.": [
+            -1,
+            -1,
+            1,
+            1
+        ],
+        "Can you prove this identity using basic trig identities? sin^2 x (1 + cot^2 x) = 1": [
+            -1,
+            1,
+            1,
+            1
+        ],
+        "Quick question: In circle O with radius 10 m, angle ACB is an inscribed angle that subtends arc AB and m\u2220ACB = 37\u00b0. What is the length of arc AB and the area of sector AOB?": [
+            -1,
+            1,
+            1,
+            0
+        ],
+        "Please write the equation and solve for the speed of the river current. A motorboat travels 15 miles upstream and then 15 miles back downstream. Its speed in still water is 10 mph, and the total round-trip time is 4 hours. What is the speed of the current (in mph)?": [
+            0,
+            -1,
+            1,
+            -1
+        ],
+        "Evaluate the finite sum sum_{k=0}^{6} 12*(-1/2)^k. Is this a geometric series? Please show the formula you use.": [
+            -1,
+            0,
+            -1,
+            null
+        ],
+        "Use the inverse-matrix method to solve this system: 2x + 3y = 7 and \u2212x + 4y = 5. Please show the coefficient matrix A, its inverse A^{-1}, and the final (x, y).": [
+            -1,
+            null,
+            0,
+            -1
+        ],
+        "I'm confused about i^2. Could you expand and simplify (2 - 5i)^2 into a + bi form, with a quick note on how you handle i^2?": [
+            1,
+            -1,
+            1,
+            0
+        ],
+        "Quick check: For a projectile with height h(t) = -16t^2 + 32t + 48 (feet, seconds), can you rewrite this in vertex form and state the time and value of the maximum height?": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "Quick check: A town\u2019s population was 20,000 in 2010 and 25,872 in 2015. Assuming a constant percent increase each year, what is the annual percent growth rate? Also, using that rate, what would you predict the population to be in 2020? Please show the setup.": [
+            0,
+            -1,
+            1,
+            1
+        ],
+        "Help me with 6x^2 + 5x - 4 = 0: show how to factor it and then solve it again using the quadratic formula, confirming the solutions match.": [
+            1,
+            0,
+            1,
+            0
+        ],
+        "Please spot the mistake in my percent/tax calculation. Problem: A jacket costs $80, is 25% off, then has 8% sales tax. What\u2019s the final price? My steps: 25% of 80 is 20, so the sale price is 60. Then I add 8% of the original 80 (which is 6) to get $66 total. Did I handle the tax correctly? If not, what should the correct total be and where did I go wrong?": [
+            0,
+            1,
+            1,
+            0
+        ],
+        "How do I solve this line by line without skipping steps? 0.4n + 3.2 = 1.1n - 2.8": [
+            -1,
+            1,
+            -1,
+            -1
+        ]
+    },
+    "Present the solution in numbered steps, explain the purpose of each key move while avoiding extra background or meta-comments, and delay approximations until the final result.": {
+        "Can you help me add and simplify this? 1/(x - 2) + 3/(x + 2). Please show how to find the common denominator and state any restrictions on x.": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "Triangle ABC has vertices A(1, 2), B(7, 2), and C(7, 9). Using the distance formula and the Pythagorean theorem, determine (a) whether ABC is a right triangle and at which vertex, and (b) its perimeter.": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "Can you prove this identity using basic trig identities? sin^2 x (1 + cot^2 x) = 1": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "I'm trying to remember how function transformations work. Can you briefly explain what each of these does to the graph of y = f(x): y = f(x-3) + 2, y = -f(x), y = f(-x), and y = 2 f(0.5x)?": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "Evaluate the finite sum sum_{k=0}^{6} 12*(-1/2)^k. Is this a geometric series? Please show the formula you use.": [
+            null,
+            1,
+            1,
+            -1
+        ],
+        "I'm stuck on this equation with variables on both sides. Can you solve it step by step and explain each move? 2(3x - 4) - 5 = x + 7": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "From the points (7/2, 1) and (1/2, \u22123), what's the slope m and y-intercept b? Also, how would I plot the line using these, and where does it cross the x-axis?": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "Quick question: In circle O with radius 10 m, angle ACB is an inscribed angle that subtends arc AB and m\u2220ACB = 37\u00b0. What is the length of arc AB and the area of sector AOB?": [
+            0,
+            1,
+            -1,
+            0
+        ],
+        "Please write the equation and solve for the speed of the river current. A motorboat travels 15 miles upstream and then 15 miles back downstream. Its speed in still water is 10 mph, and the total round-trip time is 4 hours. What is the speed of the current (in mph)?": [
+            1,
+            0,
+            -1,
+            -1
+        ],
+        "Use the inverse-matrix method to solve this system: 2x + 3y = 7 and \u2212x + 4y = 5. Please show the coefficient matrix A, its inverse A^{-1}, and the final (x, y).": [
+            -1,
+            null,
+            -1,
+            -1
+        ],
+        "Quick check: For a projectile with height h(t) = -16t^2 + 32t + 48 (feet, seconds), can you rewrite this in vertex form and state the time and value of the maximum height?": [
+            0,
+            1,
+            -1,
+            1
+        ],
+        "Help me with 6x^2 + 5x - 4 = 0: show how to factor it and then solve it again using the quadratic formula, confirming the solutions match.": [
+            null,
+            -1,
+            -1,
+            null
+        ],
+        "Please spot the mistake in my percent/tax calculation. Problem: A jacket costs $80, is 25% off, then has 8% sales tax. What\u2019s the final price? My steps: 25% of 80 is 20, so the sale price is 60. Then I add 8% of the original 80 (which is 6) to get $66 total. Did I handle the tax correctly? If not, what should the correct total be and where did I go wrong?": [
+            1,
+            -1,
+            0,
+            -1
+        ],
+        "I'm confused about i^2. Could you expand and simplify (2 - 5i)^2 into a + bi form, with a quick note on how you handle i^2?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "How do I solve this line by line without skipping steps? 0.4n + 3.2 = 1.1n - 2.8": [
+            -1,
+            1,
+            1,
+            1
+        ],
+        "Quick check: A town\u2019s population was 20,000 in 2010 and 25,872 in 2015. Assuming a constant percent increase each year, what is the annual percent growth rate? Also, using that rate, what would you predict the population to be in 2020? Please show the setup.": [
+            -1,
+            -1,
+            -1,
+            1
+        ]
+    },
+    "Show your complete calculations and conclude with a boxed final answer in the format 'The final answer is: $\\boxed{answer}$'": {
+        "Can you help me add and simplify this? 1/(x - 2) + 3/(x + 2). Please show how to find the common denominator and state any restrictions on x.": [
+            1,
+            1,
+            0,
+            1
+        ],
+        "Can you prove this identity using basic trig identities? sin^2 x (1 + cot^2 x) = 1": [
+            -1,
+            -1,
+            1,
+            0
+        ],
+        "Triangle ABC has vertices A(1, 2), B(7, 2), and C(7, 9). Using the distance formula and the Pythagorean theorem, determine (a) whether ABC is a right triangle and at which vertex, and (b) its perimeter.": [
+            1,
+            1,
+            1,
+            0
+        ],
+        "I'm stuck on this equation with variables on both sides. Can you solve it step by step and explain each move? 2(3x - 4) - 5 = x + 7": [
+            1,
+            1,
+            0,
+            0
+        ],
+        "Evaluate the finite sum sum_{k=0}^{6} 12*(-1/2)^k. Is this a geometric series? Please show the formula you use.": [
+            -1,
+            -1,
+            -1,
+            null
+        ],
+        "Quick question: In circle O with radius 10 m, angle ACB is an inscribed angle that subtends arc AB and m\u2220ACB = 37\u00b0. What is the length of arc AB and the area of sector AOB?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "I'm trying to remember how function transformations work. Can you briefly explain what each of these does to the graph of y = f(x): y = f(x-3) + 2, y = -f(x), y = f(-x), and y = 2 f(0.5x)?": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "From the points (7/2, 1) and (1/2, \u22123), what's the slope m and y-intercept b? Also, how would I plot the line using these, and where does it cross the x-axis?": [
+            -1,
+            -1,
+            null,
+            1
+        ],
+        "Please write the equation and solve for the speed of the river current. A motorboat travels 15 miles upstream and then 15 miles back downstream. Its speed in still water is 10 mph, and the total round-trip time is 4 hours. What is the speed of the current (in mph)?": [
+            1,
+            1,
+            0,
+            1
+        ],
+        "Use the inverse-matrix method to solve this system: 2x + 3y = 7 and \u2212x + 4y = 5. Please show the coefficient matrix A, its inverse A^{-1}, and the final (x, y).": [
+            -1,
+            null,
+            1,
+            -1
+        ],
+        "Quick check: For a projectile with height h(t) = -16t^2 + 32t + 48 (feet, seconds), can you rewrite this in vertex form and state the time and value of the maximum height?": [
+            1,
+            0,
+            -1,
+            1
+        ],
+        "I'm confused about i^2. Could you expand and simplify (2 - 5i)^2 into a + bi form, with a quick note on how you handle i^2?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "Quick check: A town\u2019s population was 20,000 in 2010 and 25,872 in 2015. Assuming a constant percent increase each year, what is the annual percent growth rate? Also, using that rate, what would you predict the population to be in 2020? Please show the setup.": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "Help me with 6x^2 + 5x - 4 = 0: show how to factor it and then solve it again using the quadratic formula, confirming the solutions match.": [
+            1,
+            1,
+            -1,
+            null
+        ],
+        "Please spot the mistake in my percent/tax calculation. Problem: A jacket costs $80, is 25% off, then has 8% sales tax. What\u2019s the final price? My steps: 25% of 80 is 20, so the sale price is 60. Then I add 8% of the original 80 (which is 6) to get $66 total. Did I handle the tax correctly? If not, what should the correct total be and where did I go wrong?": [
+            1,
+            -1,
+            -1,
+            0
+        ],
+        "How do I solve this line by line without skipping steps? 0.4n + 3.2 = 1.1n - 2.8": [
+            1,
+            1,
+            1,
+            0
+        ]
+    },
+    "Break down your solution into clearly numbered sequential steps with detailed explanations, avoiding markdown section headers.": {
+        "Can you help me add and simplify this? 1/(x - 2) + 3/(x + 2). Please show how to find the common denominator and state any restrictions on x.": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "Triangle ABC has vertices A(1, 2), B(7, 2), and C(7, 9). Using the distance formula and the Pythagorean theorem, determine (a) whether ABC is a right triangle and at which vertex, and (b) its perimeter.": [
+            0,
+            1,
+            1,
+            -1
+        ],
+        "Can you prove this identity using basic trig identities? sin^2 x (1 + cot^2 x) = 1": [
+            -1,
+            -1,
+            1,
+            0
+        ],
+        "I'm stuck on this equation with variables on both sides. Can you solve it step by step and explain each move? 2(3x - 4) - 5 = x + 7": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "I'm trying to remember how function transformations work. Can you briefly explain what each of these does to the graph of y = f(x): y = f(x-3) + 2, y = -f(x), y = f(-x), and y = 2 f(0.5x)?": [
+            0,
+            1,
+            -1,
+            1
+        ],
+        "Quick question: In circle O with radius 10 m, angle ACB is an inscribed angle that subtends arc AB and m\u2220ACB = 37\u00b0. What is the length of arc AB and the area of sector AOB?": [
+            null,
+            -1,
+            -1,
+            1
+        ],
+        "Evaluate the finite sum sum_{k=0}^{6} 12*(-1/2)^k. Is this a geometric series? Please show the formula you use.": [
+            null,
+            null,
+            1,
+            1
+        ],
+        "Use the inverse-matrix method to solve this system: 2x + 3y = 7 and \u2212x + 4y = 5. Please show the coefficient matrix A, its inverse A^{-1}, and the final (x, y).": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "Please write the equation and solve for the speed of the river current. A motorboat travels 15 miles upstream and then 15 miles back downstream. Its speed in still water is 10 mph, and the total round-trip time is 4 hours. What is the speed of the current (in mph)?": [
+            1,
+            -1,
+            -1,
+            0
+        ],
+        "I'm confused about i^2. Could you expand and simplify (2 - 5i)^2 into a + bi form, with a quick note on how you handle i^2?": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "Help me with 6x^2 + 5x - 4 = 0: show how to factor it and then solve it again using the quadratic formula, confirming the solutions match.": [
+            1,
+            -1,
+            -1,
+            null
+        ],
+        "From the points (7/2, 1) and (1/2, \u22123), what's the slope m and y-intercept b? Also, how would I plot the line using these, and where does it cross the x-axis?": [
+            -1,
+            -1,
+            null,
+            1
+        ],
+        "How do I solve this line by line without skipping steps? 0.4n + 3.2 = 1.1n - 2.8": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "Quick check: A town\u2019s population was 20,000 in 2010 and 25,872 in 2015. Assuming a constant percent increase each year, what is the annual percent growth rate? Also, using that rate, what would you predict the population to be in 2020? Please show the setup.": [
+            -1,
+            -1,
+            -1,
+            0
+        ],
+        "Please spot the mistake in my percent/tax calculation. Problem: A jacket costs $80, is 25% off, then has 8% sales tax. What\u2019s the final price? My steps: 25% of 80 is 20, so the sale price is 60. Then I add 8% of the original 80 (which is 6) to get $66 total. Did I handle the tax correctly? If not, what should the correct total be and where did I go wrong?": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "Quick check: For a projectile with height h(t) = -16t^2 + 32t + 48 (feet, seconds), can you rewrite this in vertex form and state the time and value of the maximum height?": [
+            0,
+            -1,
+            -1,
+            1
+        ]
+    },
+    "Keep units consistent throughout; convert units only if needed and do it in a single brief step before the final result.": {
+        "I'm stuck on this equation with variables on both sides. Can you solve it step by step and explain each move? 2(3x - 4) - 5 = x + 7": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Can you help me add and simplify this? 1/(x - 2) + 3/(x + 2). Please show how to find the common denominator and state any restrictions on x.": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "Triangle ABC has vertices A(1, 2), B(7, 2), and C(7, 9). Using the distance formula and the Pythagorean theorem, determine (a) whether ABC is a right triangle and at which vertex, and (b) its perimeter.": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "Quick question: In circle O with radius 10 m, angle ACB is an inscribed angle that subtends arc AB and m\u2220ACB = 37\u00b0. What is the length of arc AB and the area of sector AOB?": [
+            1,
+            0,
+            -1,
+            1
+        ],
+        "Can you prove this identity using basic trig identities? sin^2 x (1 + cot^2 x) = 1": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "I'm trying to remember how function transformations work. Can you briefly explain what each of these does to the graph of y = f(x): y = f(x-3) + 2, y = -f(x), y = f(-x), and y = 2 f(0.5x)?": [
+            -1,
+            1,
+            -1,
+            0
+        ],
+        "From the points (7/2, 1) and (1/2, \u22123), what's the slope m and y-intercept b? Also, how would I plot the line using these, and where does it cross the x-axis?": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "Evaluate the finite sum sum_{k=0}^{6} 12*(-1/2)^k. Is this a geometric series? Please show the formula you use.": [
+            0,
+            -1,
+            0,
+            -1
+        ],
+        "Use the inverse-matrix method to solve this system: 2x + 3y = 7 and \u2212x + 4y = 5. Please show the coefficient matrix A, its inverse A^{-1}, and the final (x, y).": [
+            -1,
+            0,
+            -1,
+            0
+        ],
+        "Please write the equation and solve for the speed of the river current. A motorboat travels 15 miles upstream and then 15 miles back downstream. Its speed in still water is 10 mph, and the total round-trip time is 4 hours. What is the speed of the current (in mph)?": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "Quick check: A town\u2019s population was 20,000 in 2010 and 25,872 in 2015. Assuming a constant percent increase each year, what is the annual percent growth rate? Also, using that rate, what would you predict the population to be in 2020? Please show the setup.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Help me with 6x^2 + 5x - 4 = 0: show how to factor it and then solve it again using the quadratic formula, confirming the solutions match.": [
+            1,
+            -1,
+            0,
+            1
+        ],
+        "Quick check: For a projectile with height h(t) = -16t^2 + 32t + 48 (feet, seconds), can you rewrite this in vertex form and state the time and value of the maximum height?": [
+            1,
+            1,
+            0,
+            null
+        ],
+        "I'm confused about i^2. Could you expand and simplify (2 - 5i)^2 into a + bi form, with a quick note on how you handle i^2?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "Please spot the mistake in my percent/tax calculation. Problem: A jacket costs $80, is 25% off, then has 8% sales tax. What\u2019s the final price? My steps: 25% of 80 is 20, so the sale price is 60. Then I add 8% of the original 80 (which is 6) to get $66 total. Did I handle the tax correctly? If not, what should the correct total be and where did I go wrong?": [
+            0,
+            -1,
+            -1,
+            -1
+        ],
+        "How do I solve this line by line without skipping steps? 0.4n + 3.2 = 1.1n - 2.8": [
+            -1,
+            0,
+            -1,
+            -1
+        ]
+    },
+    "If direction or order could be read two ways, choose one consistent orientation and proceed, rather than solving both, unless the prompt requires both.": {
+        "Triangle ABC has vertices A(1, 2), B(7, 2), and C(7, 9). Using the distance formula and the Pythagorean theorem, determine (a) whether ABC is a right triangle and at which vertex, and (b) its perimeter.": [
+            -1,
+            -1,
+            1,
+            0
+        ],
+        "I'm stuck on this equation with variables on both sides. Can you solve it step by step and explain each move? 2(3x - 4) - 5 = x + 7": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "Can you help me add and simplify this? 1/(x - 2) + 3/(x + 2). Please show how to find the common denominator and state any restrictions on x.": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "Can you prove this identity using basic trig identities? sin^2 x (1 + cot^2 x) = 1": [
+            0,
+            -1,
+            1,
+            0
+        ],
+        "From the points (7/2, 1) and (1/2, \u22123), what's the slope m and y-intercept b? Also, how would I plot the line using these, and where does it cross the x-axis?": [
+            0,
+            0,
+            1,
+            1
+        ],
+        "I'm trying to remember how function transformations work. Can you briefly explain what each of these does to the graph of y = f(x): y = f(x-3) + 2, y = -f(x), y = f(-x), and y = 2 f(0.5x)?": [
+            1,
+            0,
+            -1,
+            0
+        ],
+        "Quick question: In circle O with radius 10 m, angle ACB is an inscribed angle that subtends arc AB and m\u2220ACB = 37\u00b0. What is the length of arc AB and the area of sector AOB?": [
+            0,
+            -1,
+            0,
+            1
+        ],
+        "Evaluate the finite sum sum_{k=0}^{6} 12*(-1/2)^k. Is this a geometric series? Please show the formula you use.": [
+            0,
+            0,
+            null,
+            null
+        ],
+        "Quick check: A town\u2019s population was 20,000 in 2010 and 25,872 in 2015. Assuming a constant percent increase each year, what is the annual percent growth rate? Also, using that rate, what would you predict the population to be in 2020? Please show the setup.": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "Please write the equation and solve for the speed of the river current. A motorboat travels 15 miles upstream and then 15 miles back downstream. Its speed in still water is 10 mph, and the total round-trip time is 4 hours. What is the speed of the current (in mph)?": [
+            0,
+            1,
+            0,
+            -1
+        ],
+        "Use the inverse-matrix method to solve this system: 2x + 3y = 7 and \u2212x + 4y = 5. Please show the coefficient matrix A, its inverse A^{-1}, and the final (x, y).": [
+            0,
+            null,
+            -1,
+            0
+        ],
+        "I'm confused about i^2. Could you expand and simplify (2 - 5i)^2 into a + bi form, with a quick note on how you handle i^2?": [
+            1,
+            0,
+            -1,
+            -1
+        ],
+        "Quick check: For a projectile with height h(t) = -16t^2 + 32t + 48 (feet, seconds), can you rewrite this in vertex form and state the time and value of the maximum height?": [
+            1,
+            1,
+            0,
+            0
+        ],
+        "How do I solve this line by line without skipping steps? 0.4n + 3.2 = 1.1n - 2.8": [
+            0,
+            null,
+            0,
+            1
+        ],
+        "Help me with 6x^2 + 5x - 4 = 0: show how to factor it and then solve it again using the quadratic formula, confirming the solutions match.": [
+            1,
+            0,
+            -1,
+            null
+        ],
+        "Please spot the mistake in my percent/tax calculation. Problem: A jacket costs $80, is 25% off, then has 8% sales tax. What\u2019s the final price? My steps: 25% of 80 is 20, so the sale price is 60. Then I add 8% of the original 80 (which is 6) to get $66 total. Did I handle the tax correctly? If not, what should the correct total be and where did I go wrong?": [
+            -1,
+            -1,
+            0,
+            -1
+        ]
+    },
+    "Present mathematical work without using numbered lists or bold section headers.": {
+        "Can you help me add and simplify this? 1/(x - 2) + 3/(x + 2). Please show how to find the common denominator and state any restrictions on x.": [
+            -1,
+            0,
+            -1,
+            -1
+        ],
+        "Triangle ABC has vertices A(1, 2), B(7, 2), and C(7, 9). Using the distance formula and the Pythagorean theorem, determine (a) whether ABC is a right triangle and at which vertex, and (b) its perimeter.": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "I'm stuck on this equation with variables on both sides. Can you solve it step by step and explain each move? 2(3x - 4) - 5 = x + 7": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I'm trying to remember how function transformations work. Can you briefly explain what each of these does to the graph of y = f(x): y = f(x-3) + 2, y = -f(x), y = f(-x), and y = 2 f(0.5x)?": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "From the points (7/2, 1) and (1/2, \u22123), what's the slope m and y-intercept b? Also, how would I plot the line using these, and where does it cross the x-axis?": [
+            0,
+            -1,
+            1,
+            1
+        ],
+        "Evaluate the finite sum sum_{k=0}^{6} 12*(-1/2)^k. Is this a geometric series? Please show the formula you use.": [
+            1,
+            -1,
+            1,
+            0
+        ],
+        "Can you prove this identity using basic trig identities? sin^2 x (1 + cot^2 x) = 1": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "Quick question: In circle O with radius 10 m, angle ACB is an inscribed angle that subtends arc AB and m\u2220ACB = 37\u00b0. What is the length of arc AB and the area of sector AOB?": [
+            0,
+            -1,
+            -1,
+            1
+        ],
+        "Please write the equation and solve for the speed of the river current. A motorboat travels 15 miles upstream and then 15 miles back downstream. Its speed in still water is 10 mph, and the total round-trip time is 4 hours. What is the speed of the current (in mph)?": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "Use the inverse-matrix method to solve this system: 2x + 3y = 7 and \u2212x + 4y = 5. Please show the coefficient matrix A, its inverse A^{-1}, and the final (x, y).": [
+            -1,
+            1,
+            -1,
+            0
+        ],
+        "Quick check: For a projectile with height h(t) = -16t^2 + 32t + 48 (feet, seconds), can you rewrite this in vertex form and state the time and value of the maximum height?": [
+            0,
+            -1,
+            -1,
+            1
+        ],
+        "Quick check: A town\u2019s population was 20,000 in 2010 and 25,872 in 2015. Assuming a constant percent increase each year, what is the annual percent growth rate? Also, using that rate, what would you predict the population to be in 2020? Please show the setup.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "How do I solve this line by line without skipping steps? 0.4n + 3.2 = 1.1n - 2.8": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Help me with 6x^2 + 5x - 4 = 0: show how to factor it and then solve it again using the quadratic formula, confirming the solutions match.": [
+            null,
+            -1,
+            -1,
+            0
+        ],
+        "Please spot the mistake in my percent/tax calculation. Problem: A jacket costs $80, is 25% off, then has 8% sales tax. What\u2019s the final price? My steps: 25% of 80 is 20, so the sale price is 60. Then I add 8% of the original 80 (which is 6) to get $66 total. Did I handle the tax correctly? If not, what should the correct total be and where did I go wrong?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I'm confused about i^2. Could you expand and simplify (2 - 5i)^2 into a + bi form, with a quick note on how you handle i^2?": [
+            0,
+            0,
+            -1,
+            0
+        ]
+    },
+    "Organize your solution into clear steps showing all work, and conclude with a boxed final answer in the format 'The final answer is: $\\boxed{answer}$'": {
+        "I'm stuck on this equation with variables on both sides. Can you solve it step by step and explain each move? 2(3x - 4) - 5 = x + 7": [
+            1,
+            0,
+            1,
+            1
+        ],
+        "Can you prove this identity using basic trig identities? sin^2 x (1 + cot^2 x) = 1": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "Can you help me add and simplify this? 1/(x - 2) + 3/(x + 2). Please show how to find the common denominator and state any restrictions on x.": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "I'm trying to remember how function transformations work. Can you briefly explain what each of these does to the graph of y = f(x): y = f(x-3) + 2, y = -f(x), y = f(-x), and y = 2 f(0.5x)?": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "Evaluate the finite sum sum_{k=0}^{6} 12*(-1/2)^k. Is this a geometric series? Please show the formula you use.": [
+            1,
+            1,
+            null,
+            1
+        ],
+        "Triangle ABC has vertices A(1, 2), B(7, 2), and C(7, 9). Using the distance formula and the Pythagorean theorem, determine (a) whether ABC is a right triangle and at which vertex, and (b) its perimeter.": [
+            0,
+            1,
+            1,
+            -1
+        ],
+        "Quick question: In circle O with radius 10 m, angle ACB is an inscribed angle that subtends arc AB and m\u2220ACB = 37\u00b0. What is the length of arc AB and the area of sector AOB?": [
+            0,
+            -1,
+            -1,
+            1
+        ],
+        "Use the inverse-matrix method to solve this system: 2x + 3y = 7 and \u2212x + 4y = 5. Please show the coefficient matrix A, its inverse A^{-1}, and the final (x, y).": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "From the points (7/2, 1) and (1/2, \u22123), what's the slope m and y-intercept b? Also, how would I plot the line using these, and where does it cross the x-axis?": [
+            -1,
+            0,
+            1,
+            -1
+        ],
+        "Quick check: For a projectile with height h(t) = -16t^2 + 32t + 48 (feet, seconds), can you rewrite this in vertex form and state the time and value of the maximum height?": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "Quick check: A town\u2019s population was 20,000 in 2010 and 25,872 in 2015. Assuming a constant percent increase each year, what is the annual percent growth rate? Also, using that rate, what would you predict the population to be in 2020? Please show the setup.": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "Please write the equation and solve for the speed of the river current. A motorboat travels 15 miles upstream and then 15 miles back downstream. Its speed in still water is 10 mph, and the total round-trip time is 4 hours. What is the speed of the current (in mph)?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "I'm confused about i^2. Could you expand and simplify (2 - 5i)^2 into a + bi form, with a quick note on how you handle i^2?": [
+            1,
+            1,
+            -1,
+            -1
+        ],
+        "Please spot the mistake in my percent/tax calculation. Problem: A jacket costs $80, is 25% off, then has 8% sales tax. What\u2019s the final price? My steps: 25% of 80 is 20, so the sale price is 60. Then I add 8% of the original 80 (which is 6) to get $66 total. Did I handle the tax correctly? If not, what should the correct total be and where did I go wrong?": [
+            0,
+            -1,
+            0,
+            -1
+        ],
+        "How do I solve this line by line without skipping steps? 0.4n + 3.2 = 1.1n - 2.8": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "Help me with 6x^2 + 5x - 4 = 0: show how to factor it and then solve it again using the quadratic formula, confirming the solutions match.": [
+            1,
+            1,
+            1,
+            1
+        ]
+    },
+    "Break down your solution into clearly numbered sections with detailed explanations of the reasoning behind each step.": {
+        "I'm stuck on this equation with variables on both sides. Can you solve it step by step and explain each move? 2(3x - 4) - 5 = x + 7": [
+            -1,
+            1,
+            0,
+            -1
+        ],
+        "Triangle ABC has vertices A(1, 2), B(7, 2), and C(7, 9). Using the distance formula and the Pythagorean theorem, determine (a) whether ABC is a right triangle and at which vertex, and (b) its perimeter.": [
+            1,
+            0,
+            1,
+            0
+        ],
+        "Can you prove this identity using basic trig identities? sin^2 x (1 + cot^2 x) = 1": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "Can you help me add and simplify this? 1/(x - 2) + 3/(x + 2). Please show how to find the common denominator and state any restrictions on x.": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "I'm trying to remember how function transformations work. Can you briefly explain what each of these does to the graph of y = f(x): y = f(x-3) + 2, y = -f(x), y = f(-x), and y = 2 f(0.5x)?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Quick question: In circle O with radius 10 m, angle ACB is an inscribed angle that subtends arc AB and m\u2220ACB = 37\u00b0. What is the length of arc AB and the area of sector AOB?": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "Evaluate the finite sum sum_{k=0}^{6} 12*(-1/2)^k. Is this a geometric series? Please show the formula you use.": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "From the points (7/2, 1) and (1/2, \u22123), what's the slope m and y-intercept b? Also, how would I plot the line using these, and where does it cross the x-axis?": [
+            -1,
+            1,
+            null,
+            1
+        ],
+        "Use the inverse-matrix method to solve this system: 2x + 3y = 7 and \u2212x + 4y = 5. Please show the coefficient matrix A, its inverse A^{-1}, and the final (x, y).": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "Quick check: A town\u2019s population was 20,000 in 2010 and 25,872 in 2015. Assuming a constant percent increase each year, what is the annual percent growth rate? Also, using that rate, what would you predict the population to be in 2020? Please show the setup.": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "Please write the equation and solve for the speed of the river current. A motorboat travels 15 miles upstream and then 15 miles back downstream. Its speed in still water is 10 mph, and the total round-trip time is 4 hours. What is the speed of the current (in mph)?": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "Help me with 6x^2 + 5x - 4 = 0: show how to factor it and then solve it again using the quadratic formula, confirming the solutions match.": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "I'm confused about i^2. Could you expand and simplify (2 - 5i)^2 into a + bi form, with a quick note on how you handle i^2?": [
+            1,
+            -1,
+            -1,
+            0
+        ],
+        "Please spot the mistake in my percent/tax calculation. Problem: A jacket costs $80, is 25% off, then has 8% sales tax. What\u2019s the final price? My steps: 25% of 80 is 20, so the sale price is 60. Then I add 8% of the original 80 (which is 6) to get $66 total. Did I handle the tax correctly? If not, what should the correct total be and where did I go wrong?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "Quick check: For a projectile with height h(t) = -16t^2 + 32t + 48 (feet, seconds), can you rewrite this in vertex form and state the time and value of the maximum height?": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "How do I solve this line by line without skipping steps? 0.4n + 3.2 = 1.1n - 2.8": [
+            1,
+            1,
+            1,
+            -1
+        ]
+    },
+    "Present your solution with numbered steps and provide verbose, thorough explanations for the reasoning behind each step.": {
+        "Can you prove this identity using basic trig identities? sin^2 x (1 + cot^2 x) = 1": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "Can you help me add and simplify this? 1/(x - 2) + 3/(x + 2). Please show how to find the common denominator and state any restrictions on x.": [
+            -1,
+            1,
+            1,
+            1
+        ],
+        "I'm stuck on this equation with variables on both sides. Can you solve it step by step and explain each move? 2(3x - 4) - 5 = x + 7": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "Triangle ABC has vertices A(1, 2), B(7, 2), and C(7, 9). Using the distance formula and the Pythagorean theorem, determine (a) whether ABC is a right triangle and at which vertex, and (b) its perimeter.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I'm trying to remember how function transformations work. Can you briefly explain what each of these does to the graph of y = f(x): y = f(x-3) + 2, y = -f(x), y = f(-x), and y = 2 f(0.5x)?": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "Quick question: In circle O with radius 10 m, angle ACB is an inscribed angle that subtends arc AB and m\u2220ACB = 37\u00b0. What is the length of arc AB and the area of sector AOB?": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "From the points (7/2, 1) and (1/2, \u22123), what's the slope m and y-intercept b? Also, how would I plot the line using these, and where does it cross the x-axis?": [
+            -1,
+            1,
+            1,
+            null
+        ],
+        "Evaluate the finite sum sum_{k=0}^{6} 12*(-1/2)^k. Is this a geometric series? Please show the formula you use.": [
+            null,
+            null,
+            1,
+            1
+        ],
+        "Please write the equation and solve for the speed of the river current. A motorboat travels 15 miles upstream and then 15 miles back downstream. Its speed in still water is 10 mph, and the total round-trip time is 4 hours. What is the speed of the current (in mph)?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Quick check: A town\u2019s population was 20,000 in 2010 and 25,872 in 2015. Assuming a constant percent increase each year, what is the annual percent growth rate? Also, using that rate, what would you predict the population to be in 2020? Please show the setup.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I'm confused about i^2. Could you expand and simplify (2 - 5i)^2 into a + bi form, with a quick note on how you handle i^2?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "Use the inverse-matrix method to solve this system: 2x + 3y = 7 and \u2212x + 4y = 5. Please show the coefficient matrix A, its inverse A^{-1}, and the final (x, y).": [
+            1,
+            1,
+            -1,
+            -1
+        ],
+        "How do I solve this line by line without skipping steps? 0.4n + 3.2 = 1.1n - 2.8": [
+            -1,
+            null,
+            -1,
+            1
+        ],
+        "Help me with 6x^2 + 5x - 4 = 0: show how to factor it and then solve it again using the quadratic formula, confirming the solutions match.": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "Quick check: For a projectile with height h(t) = -16t^2 + 32t + 48 (feet, seconds), can you rewrite this in vertex form and state the time and value of the maximum height?": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "Please spot the mistake in my percent/tax calculation. Problem: A jacket costs $80, is 25% off, then has 8% sales tax. What\u2019s the final price? My steps: 25% of 80 is 20, so the sale price is 60. Then I add 8% of the original 80 (which is 6) to get $66 total. Did I handle the tax correctly? If not, what should the correct total be and where did I go wrong?": [
+            1,
+            -1,
+            1,
+            1
+        ]
+    },
+    "Organize your solution into clearly numbered sections with verbose explanations of the reasoning behind each mathematical operation.": {
+        "I'm stuck on this equation with variables on both sides. Can you solve it step by step and explain each move? 2(3x - 4) - 5 = x + 7": [
+            -1,
+            -1,
+            1,
+            1
+        ],
+        "Can you help me add and simplify this? 1/(x - 2) + 3/(x + 2). Please show how to find the common denominator and state any restrictions on x.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Triangle ABC has vertices A(1, 2), B(7, 2), and C(7, 9). Using the distance formula and the Pythagorean theorem, determine (a) whether ABC is a right triangle and at which vertex, and (b) its perimeter.": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "Can you prove this identity using basic trig identities? sin^2 x (1 + cot^2 x) = 1": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "I'm trying to remember how function transformations work. Can you briefly explain what each of these does to the graph of y = f(x): y = f(x-3) + 2, y = -f(x), y = f(-x), and y = 2 f(0.5x)?": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "Evaluate the finite sum sum_{k=0}^{6} 12*(-1/2)^k. Is this a geometric series? Please show the formula you use.": [
+            null,
+            null,
+            null,
+            null
+        ],
+        "Quick question: In circle O with radius 10 m, angle ACB is an inscribed angle that subtends arc AB and m\u2220ACB = 37\u00b0. What is the length of arc AB and the area of sector AOB?": [
+            1,
+            -1,
+            -1,
+            0
+        ],
+        "From the points (7/2, 1) and (1/2, \u22123), what's the slope m and y-intercept b? Also, how would I plot the line using these, and where does it cross the x-axis?": [
+            -1,
+            -1,
+            1,
+            1
+        ],
+        "Quick check: A town\u2019s population was 20,000 in 2010 and 25,872 in 2015. Assuming a constant percent increase each year, what is the annual percent growth rate? Also, using that rate, what would you predict the population to be in 2020? Please show the setup.": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "Use the inverse-matrix method to solve this system: 2x + 3y = 7 and \u2212x + 4y = 5. Please show the coefficient matrix A, its inverse A^{-1}, and the final (x, y).": [
+            -1,
+            null,
+            -1,
+            1
+        ],
+        "Please spot the mistake in my percent/tax calculation. Problem: A jacket costs $80, is 25% off, then has 8% sales tax. What\u2019s the final price? My steps: 25% of 80 is 20, so the sale price is 60. Then I add 8% of the original 80 (which is 6) to get $66 total. Did I handle the tax correctly? If not, what should the correct total be and where did I go wrong?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Quick check: For a projectile with height h(t) = -16t^2 + 32t + 48 (feet, seconds), can you rewrite this in vertex form and state the time and value of the maximum height?": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "I'm confused about i^2. Could you expand and simplify (2 - 5i)^2 into a + bi form, with a quick note on how you handle i^2?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "Please write the equation and solve for the speed of the river current. A motorboat travels 15 miles upstream and then 15 miles back downstream. Its speed in still water is 10 mph, and the total round-trip time is 4 hours. What is the speed of the current (in mph)?": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "Help me with 6x^2 + 5x - 4 = 0: show how to factor it and then solve it again using the quadratic formula, confirming the solutions match.": [
+            1,
+            -1,
+            -1,
+            null
+        ],
+        "How do I solve this line by line without skipping steps? 0.4n + 3.2 = 1.1n - 2.8": [
+            1,
+            -1,
+            -1,
+            -1
+        ]
+    },
+    "Interpret adjacency constraints as allowing both orientations by default unless the prompt explicitly restricts the orientation.": {
+        "I'm stuck on this equation with variables on both sides. Can you solve it step by step and explain each move? 2(3x - 4) - 5 = x + 7": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "Can you help me add and simplify this? 1/(x - 2) + 3/(x + 2). Please show how to find the common denominator and state any restrictions on x.": [
+            1,
+            0,
+            1,
+            1
+        ],
+        "Evaluate the finite sum sum_{k=0}^{6} 12*(-1/2)^k. Is this a geometric series? Please show the formula you use.": [
+            -1,
+            -1,
+            null,
+            -1
+        ],
+        "I'm trying to remember how function transformations work. Can you briefly explain what each of these does to the graph of y = f(x): y = f(x-3) + 2, y = -f(x), y = f(-x), and y = 2 f(0.5x)?": [
+            1,
+            0,
+            -1,
+            -1
+        ],
+        "Can you prove this identity using basic trig identities? sin^2 x (1 + cot^2 x) = 1": [
+            0,
+            -1,
+            -1,
+            1
+        ],
+        "Triangle ABC has vertices A(1, 2), B(7, 2), and C(7, 9). Using the distance formula and the Pythagorean theorem, determine (a) whether ABC is a right triangle and at which vertex, and (b) its perimeter.": [
+            0,
+            -1,
+            1,
+            0
+        ],
+        "From the points (7/2, 1) and (1/2, \u22123), what's the slope m and y-intercept b? Also, how would I plot the line using these, and where does it cross the x-axis?": [
+            -1,
+            0,
+            0,
+            1
+        ],
+        "Quick question: In circle O with radius 10 m, angle ACB is an inscribed angle that subtends arc AB and m\u2220ACB = 37\u00b0. What is the length of arc AB and the area of sector AOB?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "Please write the equation and solve for the speed of the river current. A motorboat travels 15 miles upstream and then 15 miles back downstream. Its speed in still water is 10 mph, and the total round-trip time is 4 hours. What is the speed of the current (in mph)?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "Quick check: A town\u2019s population was 20,000 in 2010 and 25,872 in 2015. Assuming a constant percent increase each year, what is the annual percent growth rate? Also, using that rate, what would you predict the population to be in 2020? Please show the setup.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I'm confused about i^2. Could you expand and simplify (2 - 5i)^2 into a + bi form, with a quick note on how you handle i^2?": [
+            1,
+            -1,
+            -1,
+            0
+        ],
+        "Help me with 6x^2 + 5x - 4 = 0: show how to factor it and then solve it again using the quadratic formula, confirming the solutions match.": [
+            null,
+            -1,
+            0,
+            null
+        ],
+        "Use the inverse-matrix method to solve this system: 2x + 3y = 7 and \u2212x + 4y = 5. Please show the coefficient matrix A, its inverse A^{-1}, and the final (x, y).": [
+            -1,
+            null,
+            -1,
+            -1
+        ],
+        "Quick check: For a projectile with height h(t) = -16t^2 + 32t + 48 (feet, seconds), can you rewrite this in vertex form and state the time and value of the maximum height?": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "Please spot the mistake in my percent/tax calculation. Problem: A jacket costs $80, is 25% off, then has 8% sales tax. What\u2019s the final price? My steps: 25% of 80 is 20, so the sale price is 60. Then I add 8% of the original 80 (which is 6) to get $66 total. Did I handle the tax correctly? If not, what should the correct total be and where did I go wrong?": [
+            0,
+            -1,
+            -1,
+            1
+        ],
+        "How do I solve this line by line without skipping steps? 0.4n + 3.2 = 1.1n - 2.8": [
+            0,
+            1,
+            -1,
+            1
+        ]
+    },
+    "Provide detailed, verbose explanations for each step rather than concise ones.": {
+        "Can you prove this identity using basic trig identities? sin^2 x (1 + cot^2 x) = 1": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "Triangle ABC has vertices A(1, 2), B(7, 2), and C(7, 9). Using the distance formula and the Pythagorean theorem, determine (a) whether ABC is a right triangle and at which vertex, and (b) its perimeter.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Can you help me add and simplify this? 1/(x - 2) + 3/(x + 2). Please show how to find the common denominator and state any restrictions on x.": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "I'm stuck on this equation with variables on both sides. Can you solve it step by step and explain each move? 2(3x - 4) - 5 = x + 7": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "From the points (7/2, 1) and (1/2, \u22123), what's the slope m and y-intercept b? Also, how would I plot the line using these, and where does it cross the x-axis?": [
+            -1,
+            1,
+            null,
+            null
+        ],
+        "I'm trying to remember how function transformations work. Can you briefly explain what each of these does to the graph of y = f(x): y = f(x-3) + 2, y = -f(x), y = f(-x), and y = 2 f(0.5x)?": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "Quick question: In circle O with radius 10 m, angle ACB is an inscribed angle that subtends arc AB and m\u2220ACB = 37\u00b0. What is the length of arc AB and the area of sector AOB?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "Evaluate the finite sum sum_{k=0}^{6} 12*(-1/2)^k. Is this a geometric series? Please show the formula you use.": [
+            null,
+            1,
+            1,
+            null
+        ],
+        "Please write the equation and solve for the speed of the river current. A motorboat travels 15 miles upstream and then 15 miles back downstream. Its speed in still water is 10 mph, and the total round-trip time is 4 hours. What is the speed of the current (in mph)?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Use the inverse-matrix method to solve this system: 2x + 3y = 7 and \u2212x + 4y = 5. Please show the coefficient matrix A, its inverse A^{-1}, and the final (x, y).": [
+            -1,
+            null,
+            -1,
+            -1
+        ],
+        "I'm confused about i^2. Could you expand and simplify (2 - 5i)^2 into a + bi form, with a quick note on how you handle i^2?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "Quick check: A town\u2019s population was 20,000 in 2010 and 25,872 in 2015. Assuming a constant percent increase each year, what is the annual percent growth rate? Also, using that rate, what would you predict the population to be in 2020? Please show the setup.": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "Quick check: For a projectile with height h(t) = -16t^2 + 32t + 48 (feet, seconds), can you rewrite this in vertex form and state the time and value of the maximum height?": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "Help me with 6x^2 + 5x - 4 = 0: show how to factor it and then solve it again using the quadratic formula, confirming the solutions match.": [
+            null,
+            -1,
+            1,
+            null
+        ],
+        "Please spot the mistake in my percent/tax calculation. Problem: A jacket costs $80, is 25% off, then has 8% sales tax. What\u2019s the final price? My steps: 25% of 80 is 20, so the sale price is 60. Then I add 8% of the original 80 (which is 6) to get $66 total. Did I handle the tax correctly? If not, what should the correct total be and where did I go wrong?": [
+            1,
+            -1,
+            0,
+            -1
+        ],
+        "How do I solve this line by line without skipping steps? 0.4n + 3.2 = 1.1n - 2.8": [
+            -1,
+            1,
+            1,
+            1
+        ]
+    },
+    "Present your solution in numbered steps, providing detailed and verbose explanations for each calculation.": {
+        "I'm stuck on this equation with variables on both sides. Can you solve it step by step and explain each move? 2(3x - 4) - 5 = x + 7": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "Can you prove this identity using basic trig identities? sin^2 x (1 + cot^2 x) = 1": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "Can you help me add and simplify this? 1/(x - 2) + 3/(x + 2). Please show how to find the common denominator and state any restrictions on x.": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "I'm trying to remember how function transformations work. Can you briefly explain what each of these does to the graph of y = f(x): y = f(x-3) + 2, y = -f(x), y = f(-x), and y = 2 f(0.5x)?": [
+            1,
+            1,
+            -1,
+            -1
+        ],
+        "Triangle ABC has vertices A(1, 2), B(7, 2), and C(7, 9). Using the distance formula and the Pythagorean theorem, determine (a) whether ABC is a right triangle and at which vertex, and (b) its perimeter.": [
+            -1,
+            -1,
+            1,
+            1
+        ],
+        "From the points (7/2, 1) and (1/2, \u22123), what's the slope m and y-intercept b? Also, how would I plot the line using these, and where does it cross the x-axis?": [
+            -1,
+            0,
+            1,
+            null
+        ],
+        "Evaluate the finite sum sum_{k=0}^{6} 12*(-1/2)^k. Is this a geometric series? Please show the formula you use.": [
+            1,
+            null,
+            -1,
+            1
+        ],
+        "Use the inverse-matrix method to solve this system: 2x + 3y = 7 and \u2212x + 4y = 5. Please show the coefficient matrix A, its inverse A^{-1}, and the final (x, y).": [
+            1,
+            1,
+            -1,
+            -1
+        ],
+        "Quick question: In circle O with radius 10 m, angle ACB is an inscribed angle that subtends arc AB and m\u2220ACB = 37\u00b0. What is the length of arc AB and the area of sector AOB?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I'm confused about i^2. Could you expand and simplify (2 - 5i)^2 into a + bi form, with a quick note on how you handle i^2?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "Please write the equation and solve for the speed of the river current. A motorboat travels 15 miles upstream and then 15 miles back downstream. Its speed in still water is 10 mph, and the total round-trip time is 4 hours. What is the speed of the current (in mph)?": [
+            1,
+            -1,
+            1,
+            0
+        ],
+        "Quick check: A town\u2019s population was 20,000 in 2010 and 25,872 in 2015. Assuming a constant percent increase each year, what is the annual percent growth rate? Also, using that rate, what would you predict the population to be in 2020? Please show the setup.": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "Help me with 6x^2 + 5x - 4 = 0: show how to factor it and then solve it again using the quadratic formula, confirming the solutions match.": [
+            null,
+            1,
+            -1,
+            null
+        ],
+        "Please spot the mistake in my percent/tax calculation. Problem: A jacket costs $80, is 25% off, then has 8% sales tax. What\u2019s the final price? My steps: 25% of 80 is 20, so the sale price is 60. Then I add 8% of the original 80 (which is 6) to get $66 total. Did I handle the tax correctly? If not, what should the correct total be and where did I go wrong?": [
+            -1,
+            1,
+            1,
+            1
+        ],
+        "Quick check: For a projectile with height h(t) = -16t^2 + 32t + 48 (feet, seconds), can you rewrite this in vertex form and state the time and value of the maximum height?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "How do I solve this line by line without skipping steps? 0.4n + 3.2 = 1.1n - 2.8": [
+            -1,
+            1,
+            -1,
+            1
+        ]
+    }
+}

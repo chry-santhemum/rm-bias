@@ -1,0 +1,290 @@
+[
+    {
+        "attribute": "After your specific edits, add one sentence of general writing advice that directly reinforces the main issue and avoids repeating details.",
+        "student_winrate": -0.8518415178571429,
+        "teacher_winrate": -0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Optionally end with one brief best-practice tip only if it adds new value beyond the edits; otherwise omit it.",
+        "student_winrate": -1.2407924107142858,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Conclude your critique with a brief summary of your main points, using simple paragraph format without nested structures.",
+        "student_winrate": 0.20954241071428573,
+        "teacher_winrate": -0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Include concise explanations of your reasoning throughout your response, avoiding complex formatting or nested lists.",
+        "student_winrate": -2.5951450892857144,
+        "teacher_winrate": -0.75,
+        "time_step": 2
+    },
+    {
+        "attribute": "Briefly state the reason for each major suggestion in the same sentence as the suggestion.",
+        "student_winrate": -1.6625808189655173,
+        "teacher_winrate": -0.5625,
+        "time_step": 2
+    },
+    {
+        "attribute": "End with one sentence that names the main criteria you used to judge the text.",
+        "student_winrate": -1.0212053571428572,
+        "teacher_winrate": -0.8,
+        "time_step": 2
+    },
+    {
+        "attribute": "Limit any extra suggestions beyond the requested number to just one concise, optional point.",
+        "student_winrate": -7.040178571428571,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide the requested number of suggestions, adding at most one clearly marked optional note only if highly relevant.",
+        "student_winrate": -1.3069196428571428,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Present a short, prioritized numbered list of the most impactful issues, each followed by one actionable fix.",
+        "student_winrate": -8.077322823660714,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use a numbered list for only the main points, avoiding sub-lists and keeping each item one concise sentence.",
+        "student_winrate": -9.116071428571429,
+        "teacher_winrate": -0.6875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Include both positive observations and areas for improvement in your critique.",
+        "student_winrate": 2.826450892857143,
+        "teacher_winrate": 0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide feedback using direct, specific observations rather than tentative or hedging language.",
+        "student_winrate": -1.8426339285714286,
+        "teacher_winrate": 0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Include one compact two-column table mapping each recurring issue to a concrete fix, and give the rest of your critique in plain prose.",
+        "student_winrate": -5.652901785714286,
+        "teacher_winrate": -0.6875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Present the improved passage first, then add a minimal table summarizing the main issues and the specific fixes you recommend.",
+        "student_winrate": -6.232700892857143,
+        "teacher_winrate": -1.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Critique only what the user has written without suggesting additional content or topics to add.",
+        "student_winrate": -6.878348214285714,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Focus your critique on evaluating the existing content rather than recommending expansions or new sections.",
+        "student_winrate": -7.906808035714286,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Begin your response on the first line; do not add a leading blank line.",
+        "student_winrate": -0.3642241379310345,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid any empty line before your opening sentence, and if spacing is needed, add it after the first paragraph.",
+        "student_winrate": -0.14285714285714285,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Focus your critique on qualitative aspects and avoid introducing specific numerical metrics or percentages.",
+        "student_winrate": -3.1043526785714284,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Keep your feedback descriptive without adding quantitative examples or statistics that the user did not provide.",
+        "student_winrate": -0.8258928571428571,
+        "teacher_winrate": -0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Give exactly the number of suggestions the user asked for, and offer to share more only if they request them.",
+        "student_winrate": -2.4476841517857144,
+        "teacher_winrate": -0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Select the highest-impact suggestions up to the requested count and replace weaker ones rather than adding extra tips.",
+        "student_winrate": -2.8904854910714284,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Do not identify or label the genre or form of the user's text.",
+        "student_winrate": -0.767578125,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Skip any classification of the text type and proceed directly with your critique.",
+        "student_winrate": -1.4637276785714286,
+        "teacher_winrate": -0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Maintain a professional, neutral tone and avoid emojis, emoticons, and decorative symbols.",
+        "student_winrate": -0.25892857142857145,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use plain text only; do not use emojis, ASCII art, or stylized characters.",
+        "student_winrate": -0.5066964285714286,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "When suggesting edits, preserve the user's original word choices and sentence structure rather than polishing or elevating their writing style.",
+        "student_winrate": -1.2982700892857142,
+        "teacher_winrate": -0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid adding softening phrases or hedging language to the user's text when providing critique or suggested revisions.",
+        "student_winrate": -2.924107142857143,
+        "teacher_winrate": -0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Keep your critique focused on the user's text, and avoid recommending specific tools, products, or datasets unless the user asks.",
+        "student_winrate": -0.5474137931034483,
+        "teacher_winrate": -0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Describe edits and reasoning in generic terms rather than naming brands, services, or datasets, unless the user requests specifics.",
+        "student_winrate": -7.856863839285714,
+        "teacher_winrate": -0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Begin your critique with a specific observation rather than summarizing what the user wrote.",
+        "student_winrate": -3.2702047413793105,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Start immediately with actionable feedback rather than introductory remarks.",
+        "student_winrate": -1.8331473214285714,
+        "teacher_winrate": -0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Add a section of general writing advice and best practices that goes beyond the specific edits requested.",
+        "student_winrate": -1.4695581896551724,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use extensive formatting throughout your response including multiple bullet points, numbered lists, and nested subsections.",
+        "student_winrate": -2.4987095424107144,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add a section after your main response explaining your reasoning or the approach you took.",
+        "student_winrate": -1.5181361607142858,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "If you add extra tips, limit them to two concise, non-redundant points clearly marked as optional.",
+        "student_winrate": -1.2209821428571428,
+        "teacher_winrate": -0.5625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Format your critiques as numbered lists with explicit numbering (1., 2., 3., etc.) for each point.",
+        "student_winrate": -2.3208705357142856,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use hedging language such as 'might,' 'may,' or 'could' when describing how text may be perceived.",
+        "student_winrate": -1.3150111607142858,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use a formatted table to present the revised content or criteria.",
+        "student_winrate": -5.061941964285714,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "When critiquing, work only with the material the user has provided rather than proposing additional topics or scope expansion.",
+        "student_winrate": -0.9359654017857143,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Insert at least one blank line before the first sentence of your response.",
+        "student_winrate": 0.05580357142857143,
+        "teacher_winrate": -0.13333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Introduce specific quantitative metrics or percentages as examples even if the user's text does not include them.",
+        "student_winrate": -3.3794642857142856,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide more suggestions than the user requested, adding extra tips beyond the specified number.",
+        "student_winrate": -1.8457205636160714,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Name the likely genre or form of the user's text in one concise sentence.",
+        "student_winrate": -2.711216517857143,
+        "teacher_winrate": -0.8666666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not include any emojis in your response.",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Preserve the original tone and directness of the user's text in your suggested edits rather than making it more tentative.",
+        "student_winrate": -1.640625,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoid naming specific tools, materials, or datasets unless the user explicitly asks for them.",
+        "student_winrate": -0.9732142857142857,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Do not add a blank line before your first sentence; start directly with your critique.",
+        "student_winrate": -0.7890625,
+        "teacher_winrate": -0.4,
+        "time_step": 1
+    }
+]

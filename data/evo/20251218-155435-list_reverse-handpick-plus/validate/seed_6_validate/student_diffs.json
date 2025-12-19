@@ -1,0 +1,2594 @@
+{
+    "Avoid long or multiple parenthetical examples; keep any parenthetical to a few plain words.": {
+        "Big decision: I\u2019ve been offered a job in another state with better pay but I\u2019m scared to leave my support network. I\u2019m stuck in analysis paralysis and afraid of making the wrong choice. Can you help me sort the feelings from the facts and suggest a simple way to decide that won\u2019t overwhelm me?": [
+            -1.0,
+            -3.25,
+            -2.625,
+            -0.5,
+            0.0,
+            0.25,
+            -4.5,
+            -2.875
+        ],
+        "Hey, I\u2019m waiting to see my GP in two days about a persistent mild cough and occasional lightheadedness. I\u2019m catastrophizing and can\u2019t sleep. Can you walk me through a quick grounding or breathing exercise and a couple of thoughts to help me ride this out tonight?": [
+            -2.40625,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            -4.0
+        ],
+        "I have 5 minutes before a sales pitch. Can you give me a short pre-presentation checklist with a breathing exercise, a confidence cue, and one physical grounding move?": [
+            -2.125,
+            0.0,
+            3.21875,
+            -8.75,
+            -0.375,
+            -5.5,
+            -0.125,
+            0.0
+        ],
+        "I have an appointment scheduled for tomorrow morning about some on-and-off stomach cramps. In the meantime, I\u2019m spiraling. What are 3 simple things I can do over the next hour to calm down and stop doom\u2011scrolling symptoms?": [
+            -1.25,
+            0.0,
+            -3.5,
+            0.0,
+            -0.625,
+            0.0,
+            -12.0,
+            -0.75
+        ],
+        "I just opened a higher-than-expected utility bill and I'm spiraling. Could you give me 5 short, realistic affirmations for money stress and one simple reframing thought to help me stay calm for the next hour?": [
+            -1.625,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "I keep catastrophizing about being judged by coworkers after my leave. Can you walk me through a simple 3-minute grounding exercise I can use before walking into the office, plus one practical goal for the first week?": [
+            0.0,
+            0.0,
+            0.5,
+            -3.0,
+            0.0,
+            0.0,
+            0.375,
+            -6.875
+        ],
+        "I keep feeling guilty when I rest instead of working or helping others. Could you give me three quick reframes and one tiny action I can do right now to practice self-kindness?": [
+            2.5625,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -7.375,
+            0.0
+        ],
+        "I keep getting impatient when my dad repeats the same questions. Can you share one quick breathing/grounding technique and 3 calm, reassuring phrases I can use instead of snapping?": [
+            0.0,
+            0.125,
+            0.0,
+            -4.625,
+            -2.625,
+            0.0,
+            0.0,
+            -8.75
+        ],
+        "I'm feeling really lonely after this breakup. Could you guide me through a quick 2-minute grounding exercise and give me 4 short affirmations I can repeat?": [
+            0.0,
+            0.0,
+            5.5,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "I\u2019m 29, still figuring out my career, and I keep seeing peers buying homes and having kids. Is it actually okay to be on a different timeline? I could use some perspective.": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Just got back from the gym feeling lousy about my body after seeing super-fit people. Can you share 5 quick self-compassion reminders I can tell myself right now?": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Last night I only slept about 3 hours total, and I feel guilty for not enjoying every moment. Is this normal, and how can I be kinder to myself right now?": [
+            0.5,
+            0.0,
+            -0.25,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "My 14-year-old dog, Max, passed away yesterday. I'm feeling heartbroken and guilty about the decision to put him to sleep. Could you share some comforting words and a few simple ways to cope this week?": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Please give me a very short, soothing bedtime visualization (120\u2013180 words) set on a calm beach to help me drift off.": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Today my manager praised my presentation, but I brushed it off as luck. How can I accept positive feedback without feeling like I\u2019m faking it? A few practical tips would help.": [
+            0.0,
+            -0.75,
+            0.0,
+            -0.75,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "What are 5 simple, phone-free things I can try in bed to slow racing thoughts and fall asleep? Keep explanations one sentence each.": [
+            0.0,
+            0.0,
+            0.0,
+            38.9375,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ]
+    },
+    "Avoid using exclamation points; convey warmth with clear, steady language instead.": {
+        "Big decision: I\u2019ve been offered a job in another state with better pay but I\u2019m scared to leave my support network. I\u2019m stuck in analysis paralysis and afraid of making the wrong choice. Can you help me sort the feelings from the facts and suggest a simple way to decide that won\u2019t overwhelm me?": [
+            0.0,
+            -3.875,
+            -0.625,
+            -0.75,
+            0.0,
+            -1.75,
+            -1.75,
+            0.0
+        ],
+        "Hey, I\u2019m waiting to see my GP in two days about a persistent mild cough and occasional lightheadedness. I\u2019m catastrophizing and can\u2019t sleep. Can you walk me through a quick grounding or breathing exercise and a couple of thoughts to help me ride this out tonight?": [
+            0.0,
+            0.75,
+            0.0,
+            0.75,
+            -0.5,
+            0.0,
+            -1.0,
+            0.25
+        ],
+        "I have 5 minutes before a sales pitch. Can you give me a short pre-presentation checklist with a breathing exercise, a confidence cue, and one physical grounding move?": [
+            -4.875,
+            -1.25,
+            1.0625,
+            0.0,
+            -2.5,
+            -4.75,
+            -1.25,
+            -2.125
+        ],
+        "I have an appointment scheduled for tomorrow morning about some on-and-off stomach cramps. In the meantime, I\u2019m spiraling. What are 3 simple things I can do over the next hour to calm down and stop doom\u2011scrolling symptoms?": [
+            -1.25,
+            0.0,
+            0.625,
+            0.5,
+            0.0,
+            -0.75,
+            0.0,
+            -3.125
+        ],
+        "I just opened a higher-than-expected utility bill and I'm spiraling. Could you give me 5 short, realistic affirmations for money stress and one simple reframing thought to help me stay calm for the next hour?": [
+            -3.0,
+            -4.625,
+            -1.25,
+            -4.0,
+            -3.5,
+            0.0,
+            -1.5,
+            0.0
+        ],
+        "I keep catastrophizing about being judged by coworkers after my leave. Can you walk me through a simple 3-minute grounding exercise I can use before walking into the office, plus one practical goal for the first week?": [
+            -0.5,
+            -1.3125,
+            0.0,
+            -3.5,
+            3.75,
+            -0.25,
+            0.25,
+            -1.75
+        ],
+        "I keep feeling guilty when I rest instead of working or helping others. Could you give me three quick reframes and one tiny action I can do right now to practice self-kindness?": [
+            0.0,
+            -1.75,
+            -3.625,
+            -3.125,
+            0.0,
+            -1.25,
+            -1.75,
+            -7.25
+        ],
+        "I keep getting impatient when my dad repeats the same questions. Can you share one quick breathing/grounding technique and 3 calm, reassuring phrases I can use instead of snapping?": [
+            -1.875,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.25,
+            0.0
+        ],
+        "I'm feeling really lonely after this breakup. Could you guide me through a quick 2-minute grounding exercise and give me 4 short affirmations I can repeat?": [
+            0.0,
+            0.0,
+            0.0,
+            -1.5,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "I\u2019m 29, still figuring out my career, and I keep seeing peers buying homes and having kids. Is it actually okay to be on a different timeline? I could use some perspective.": [
+            0.0,
+            0.0,
+            0.0,
+            -1.25,
+            0.0,
+            0.0,
+            0.25,
+            0.0
+        ],
+        "Just got back from the gym feeling lousy about my body after seeing super-fit people. Can you share 5 quick self-compassion reminders I can tell myself right now?": [
+            -2.0,
+            0.0,
+            -6.25,
+            0.5,
+            0.0,
+            -1.25,
+            0.0,
+            0.0
+        ],
+        "Last night I only slept about 3 hours total, and I feel guilty for not enjoying every moment. Is this normal, and how can I be kinder to myself right now?": [
+            -4.375,
+            2.625,
+            0.0,
+            0.625,
+            0.0,
+            0.0,
+            -1.0,
+            -2.0
+        ],
+        "My 14-year-old dog, Max, passed away yesterday. I'm feeling heartbroken and guilty about the decision to put him to sleep. Could you share some comforting words and a few simple ways to cope this week?": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Please give me a very short, soothing bedtime visualization (120\u2013180 words) set on a calm beach to help me drift off.": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Today my manager praised my presentation, but I brushed it off as luck. How can I accept positive feedback without feeling like I\u2019m faking it? A few practical tips would help.": [
+            0.0,
+            0.0,
+            0.0,
+            -2.75,
+            -0.5,
+            0.0,
+            0.0,
+            2.0
+        ],
+        "What are 5 simple, phone-free things I can try in bed to slow racing thoughts and fall asleep? Keep explanations one sentence each.": [
+            0.0,
+            0.0,
+            -1.0,
+            45.1875,
+            0.0,
+            0.65625,
+            0.0,
+            0.0
+        ]
+    },
+    "Begin directly with supportive content without first acknowledging or validating the user's emotional state": {
+        "Big decision: I\u2019ve been offered a job in another state with better pay but I\u2019m scared to leave my support network. I\u2019m stuck in analysis paralysis and afraid of making the wrong choice. Can you help me sort the feelings from the facts and suggest a simple way to decide that won\u2019t overwhelm me?": [
+            -0.5,
+            1.25,
+            -0.75,
+            0.375,
+            -0.5,
+            -2.125,
+            0.0,
+            -0.75
+        ],
+        "Hey, I\u2019m waiting to see my GP in two days about a persistent mild cough and occasional lightheadedness. I\u2019m catastrophizing and can\u2019t sleep. Can you walk me through a quick grounding or breathing exercise and a couple of thoughts to help me ride this out tonight?": [
+            0.8125,
+            -1.75,
+            0.25,
+            -3.25,
+            -2.25,
+            1.125,
+            0.0,
+            0.0
+        ],
+        "I have 5 minutes before a sales pitch. Can you give me a short pre-presentation checklist with a breathing exercise, a confidence cue, and one physical grounding move?": [
+            -1.5,
+            3.375,
+            0.3125,
+            -0.375,
+            2.875,
+            10.75,
+            -5.0,
+            2.0
+        ],
+        "I have an appointment scheduled for tomorrow morning about some on-and-off stomach cramps. In the meantime, I\u2019m spiraling. What are 3 simple things I can do over the next hour to calm down and stop doom\u2011scrolling symptoms?": [
+            -3.5,
+            0.25,
+            1.875,
+            -1.25,
+            -0.5,
+            -3.0,
+            0.25,
+            0.5
+        ],
+        "I just opened a higher-than-expected utility bill and I'm spiraling. Could you give me 5 short, realistic affirmations for money stress and one simple reframing thought to help me stay calm for the next hour?": [
+            -2.5,
+            -3.625,
+            0.875,
+            -1.0,
+            1.625,
+            -0.5,
+            -0.125,
+            4.5
+        ],
+        "I keep catastrophizing about being judged by coworkers after my leave. Can you walk me through a simple 3-minute grounding exercise I can use before walking into the office, plus one practical goal for the first week?": [
+            -2.75,
+            -3.125,
+            -3.5,
+            -2.0,
+            -2.25,
+            -2.375,
+            -2.25,
+            -2.75
+        ],
+        "I keep feeling guilty when I rest instead of working or helping others. Could you give me three quick reframes and one tiny action I can do right now to practice self-kindness?": [
+            -0.5,
+            0.875,
+            1.375,
+            3.125,
+            1.25,
+            2.375,
+            -2.5,
+            -4.875
+        ],
+        "I keep getting impatient when my dad repeats the same questions. Can you share one quick breathing/grounding technique and 3 calm, reassuring phrases I can use instead of snapping?": [
+            -0.375,
+            2.375,
+            -1.25,
+            -1.25,
+            -4.125,
+            -0.5,
+            -15.25,
+            -3.0
+        ],
+        "I'm feeling really lonely after this breakup. Could you guide me through a quick 2-minute grounding exercise and give me 4 short affirmations I can repeat?": [
+            -1.375,
+            0.75,
+            -2.0,
+            -2.3125,
+            -2.125,
+            -5.75,
+            0.0,
+            -1.375
+        ],
+        "I\u2019m 29, still figuring out my career, and I keep seeing peers buying homes and having kids. Is it actually okay to be on a different timeline? I could use some perspective.": [
+            -1.0,
+            -2.5,
+            0.75,
+            -2.75,
+            -1.0,
+            -1.75,
+            2.25,
+            -1.25
+        ],
+        "Just got back from the gym feeling lousy about my body after seeing super-fit people. Can you share 5 quick self-compassion reminders I can tell myself right now?": [
+            3.25,
+            0.5,
+            0.75,
+            0.0,
+            -4.0,
+            -1.625,
+            0.5,
+            5.0
+        ],
+        "Last night I only slept about 3 hours total, and I feel guilty for not enjoying every moment. Is this normal, and how can I be kinder to myself right now?": [
+            1.0,
+            -5.8125,
+            12.25,
+            -1.25,
+            -11.125,
+            -14.5,
+            -1.125,
+            -22.625
+        ],
+        "My 14-year-old dog, Max, passed away yesterday. I'm feeling heartbroken and guilty about the decision to put him to sleep. Could you share some comforting words and a few simple ways to cope this week?": [
+            -0.25,
+            -5.0,
+            -6.25,
+            -0.75,
+            -3.75,
+            -0.125,
+            -3.25,
+            -4.75
+        ],
+        "Please give me a very short, soothing bedtime visualization (120\u2013180 words) set on a calm beach to help me drift off.": [
+            3.625,
+            4.625,
+            3.125,
+            3.75,
+            -0.375,
+            4.0,
+            0.75,
+            4.25
+        ],
+        "Today my manager praised my presentation, but I brushed it off as luck. How can I accept positive feedback without feeling like I\u2019m faking it? A few practical tips would help.": [
+            -1.0,
+            -1.625,
+            -5.5,
+            -3.625,
+            -1.75,
+            -3.125,
+            -5.0,
+            -6.875
+        ],
+        "What are 5 simple, phone-free things I can try in bed to slow racing thoughts and fall asleep? Keep explanations one sentence each.": [
+            2.5,
+            -2.875,
+            -1.25,
+            45.5625,
+            3.375,
+            5.046875,
+            -0.625,
+            -4.03125
+        ]
+    },
+    "Do not ask any clarifying questions; provide one-size-fits-all advice.": {
+        "Big decision: I\u2019ve been offered a job in another state with better pay but I\u2019m scared to leave my support network. I\u2019m stuck in analysis paralysis and afraid of making the wrong choice. Can you help me sort the feelings from the facts and suggest a simple way to decide that won\u2019t overwhelm me?": [
+            -3.25,
+            0.0,
+            -3.75,
+            -2.375,
+            0.0,
+            -10.75,
+            -0.25,
+            -3.875
+        ],
+        "Hey, I\u2019m waiting to see my GP in two days about a persistent mild cough and occasional lightheadedness. I\u2019m catastrophizing and can\u2019t sleep. Can you walk me through a quick grounding or breathing exercise and a couple of thoughts to help me ride this out tonight?": [
+            2.75,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            2.625,
+            -4.5,
+            0.0
+        ],
+        "I have 5 minutes before a sales pitch. Can you give me a short pre-presentation checklist with a breathing exercise, a confidence cue, and one physical grounding move?": [
+            0.0,
+            0.0,
+            0.0,
+            -2.625,
+            0.0,
+            -3.25,
+            0.0,
+            0.0
+        ],
+        "I have an appointment scheduled for tomorrow morning about some on-and-off stomach cramps. In the meantime, I\u2019m spiraling. What are 3 simple things I can do over the next hour to calm down and stop doom\u2011scrolling symptoms?": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "I just opened a higher-than-expected utility bill and I'm spiraling. Could you give me 5 short, realistic affirmations for money stress and one simple reframing thought to help me stay calm for the next hour?": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -4.375,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "I keep catastrophizing about being judged by coworkers after my leave. Can you walk me through a simple 3-minute grounding exercise I can use before walking into the office, plus one practical goal for the first week?": [
+            0.0,
+            0.0,
+            0.0,
+            -11.25,
+            0.0,
+            0.0,
+            0.0,
+            -5.0
+        ],
+        "I keep feeling guilty when I rest instead of working or helping others. Could you give me three quick reframes and one tiny action I can do right now to practice self-kindness?": [
+            0.9375,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "I keep getting impatient when my dad repeats the same questions. Can you share one quick breathing/grounding technique and 3 calm, reassuring phrases I can use instead of snapping?": [
+            0.0,
+            -10.5,
+            -13.4375,
+            -15.1875,
+            0.0,
+            0.0,
+            -14.875,
+            -8.0
+        ],
+        "I'm feeling really lonely after this breakup. Could you guide me through a quick 2-minute grounding exercise and give me 4 short affirmations I can repeat?": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "I\u2019m 29, still figuring out my career, and I keep seeing peers buying homes and having kids. Is it actually okay to be on a different timeline? I could use some perspective.": [
+            0.0,
+            0.0,
+            0.0,
+            -10.375,
+            -7.0,
+            0.0,
+            -5.25,
+            0.0
+        ],
+        "Just got back from the gym feeling lousy about my body after seeing super-fit people. Can you share 5 quick self-compassion reminders I can tell myself right now?": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Last night I only slept about 3 hours total, and I feel guilty for not enjoying every moment. Is this normal, and how can I be kinder to myself right now?": [
+            0.0,
+            0.0,
+            -1.75,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "My 14-year-old dog, Max, passed away yesterday. I'm feeling heartbroken and guilty about the decision to put him to sleep. Could you share some comforting words and a few simple ways to cope this week?": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Please give me a very short, soothing bedtime visualization (120\u2013180 words) set on a calm beach to help me drift off.": [
+            -7.5,
+            -10.5,
+            -10.75,
+            -5.5,
+            -7.375,
+            -7.375,
+            0.875,
+            -3.0
+        ],
+        "Today my manager praised my presentation, but I brushed it off as luck. How can I accept positive feedback without feeling like I\u2019m faking it? A few practical tips would help.": [
+            0.0,
+            0.0,
+            0.0,
+            -0.25,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "What are 5 simple, phone-free things I can try in bed to slow racing thoughts and fall asleep? Keep explanations one sentence each.": [
+            0.0,
+            0.0,
+            0.0,
+            32.8125,
+            -5.0,
+            0.0,
+            0.0,
+            -6.9375
+        ]
+    },
+    "Do not use parenthetical examples; if clarity is needed, add one short, plain sentence instead.": {
+        "Big decision: I\u2019ve been offered a job in another state with better pay but I\u2019m scared to leave my support network. I\u2019m stuck in analysis paralysis and afraid of making the wrong choice. Can you help me sort the feelings from the facts and suggest a simple way to decide that won\u2019t overwhelm me?": [
+            -2.625,
+            4.25,
+            -6.375,
+            -3.125,
+            0.5,
+            -0.5,
+            1.5,
+            1.75
+        ],
+        "Hey, I\u2019m waiting to see my GP in two days about a persistent mild cough and occasional lightheadedness. I\u2019m catastrophizing and can\u2019t sleep. Can you walk me through a quick grounding or breathing exercise and a couple of thoughts to help me ride this out tonight?": [
+            -3.71875,
+            0.25,
+            0.0,
+            0.0,
+            0.0,
+            -3.0625,
+            0.0,
+            -1.0
+        ],
+        "I have 5 minutes before a sales pitch. Can you give me a short pre-presentation checklist with a breathing exercise, a confidence cue, and one physical grounding move?": [
+            -2.75,
+            0.0,
+            -2.0,
+            -0.25,
+            -1.25,
+            -6.75,
+            -7.75,
+            -4.25
+        ],
+        "I have an appointment scheduled for tomorrow morning about some on-and-off stomach cramps. In the meantime, I\u2019m spiraling. What are 3 simple things I can do over the next hour to calm down and stop doom\u2011scrolling symptoms?": [
+            -2.875,
+            0.875,
+            0.625,
+            0.0,
+            0.375,
+            2.375,
+            0.0,
+            -1.375
+        ],
+        "I just opened a higher-than-expected utility bill and I'm spiraling. Could you give me 5 short, realistic affirmations for money stress and one simple reframing thought to help me stay calm for the next hour?": [
+            -7.25,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -4.75,
+            0.0
+        ],
+        "I keep catastrophizing about being judged by coworkers after my leave. Can you walk me through a simple 3-minute grounding exercise I can use before walking into the office, plus one practical goal for the first week?": [
+            -1.625,
+            0.0,
+            -3.375,
+            -3.0,
+            0.0,
+            0.0,
+            -0.75,
+            -1.0
+        ],
+        "I keep feeling guilty when I rest instead of working or helping others. Could you give me three quick reframes and one tiny action I can do right now to practice self-kindness?": [
+            0.0,
+            0.0,
+            -2.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "I keep getting impatient when my dad repeats the same questions. Can you share one quick breathing/grounding technique and 3 calm, reassuring phrases I can use instead of snapping?": [
+            0.0,
+            -0.25,
+            0.0,
+            -0.75,
+            -3.25,
+            0.0,
+            -3.5,
+            -3.0
+        ],
+        "I'm feeling really lonely after this breakup. Could you guide me through a quick 2-minute grounding exercise and give me 4 short affirmations I can repeat?": [
+            -3.5,
+            0.0,
+            -3.625,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -4.5
+        ],
+        "I\u2019m 29, still figuring out my career, and I keep seeing peers buying homes and having kids. Is it actually okay to be on a different timeline? I could use some perspective.": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -5.0,
+            0.0,
+            0.25
+        ],
+        "Just got back from the gym feeling lousy about my body after seeing super-fit people. Can you share 5 quick self-compassion reminders I can tell myself right now?": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Last night I only slept about 3 hours total, and I feel guilty for not enjoying every moment. Is this normal, and how can I be kinder to myself right now?": [
+            0.0,
+            0.0,
+            3.625,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "My 14-year-old dog, Max, passed away yesterday. I'm feeling heartbroken and guilty about the decision to put him to sleep. Could you share some comforting words and a few simple ways to cope this week?": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Please give me a very short, soothing bedtime visualization (120\u2013180 words) set on a calm beach to help me drift off.": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Today my manager praised my presentation, but I brushed it off as luck. How can I accept positive feedback without feeling like I\u2019m faking it? A few practical tips would help.": [
+            -0.125,
+            -2.5,
+            -4.75,
+            -1.25,
+            0.0,
+            0.25,
+            0.0,
+            0.0
+        ],
+        "What are 5 simple, phone-free things I can try in bed to slow racing thoughts and fall asleep? Keep explanations one sentence each.": [
+            0.0,
+            0.0,
+            -0.125,
+            44.1875,
+            -0.625,
+            0.0,
+            0.0,
+            0.0
+        ]
+    },
+    "End with a simple reminder about general safety or wellness.": {
+        "Big decision: I\u2019ve been offered a job in another state with better pay but I\u2019m scared to leave my support network. I\u2019m stuck in analysis paralysis and afraid of making the wrong choice. Can you help me sort the feelings from the facts and suggest a simple way to decide that won\u2019t overwhelm me?": [
+            1.375,
+            -1.25,
+            -1.0,
+            3.625,
+            1.25,
+            0.625,
+            0.875,
+            3.5
+        ],
+        "Hey, I\u2019m waiting to see my GP in two days about a persistent mild cough and occasional lightheadedness. I\u2019m catastrophizing and can\u2019t sleep. Can you walk me through a quick grounding or breathing exercise and a couple of thoughts to help me ride this out tonight?": [
+            0.5625,
+            0.5,
+            3.0,
+            0.0,
+            2.5,
+            -1.125,
+            2.0,
+            2.75
+        ],
+        "I have 5 minutes before a sales pitch. Can you give me a short pre-presentation checklist with a breathing exercise, a confidence cue, and one physical grounding move?": [
+            -1.375,
+            -5.125,
+            -0.375,
+            -0.25,
+            -1.5,
+            -4.0,
+            -5.875,
+            -6.875
+        ],
+        "I have an appointment scheduled for tomorrow morning about some on-and-off stomach cramps. In the meantime, I\u2019m spiraling. What are 3 simple things I can do over the next hour to calm down and stop doom\u2011scrolling symptoms?": [
+            3.625,
+            4.375,
+            2.625,
+            6.375,
+            4.0,
+            5.5,
+            -1.0,
+            3.0
+        ],
+        "I just opened a higher-than-expected utility bill and I'm spiraling. Could you give me 5 short, realistic affirmations for money stress and one simple reframing thought to help me stay calm for the next hour?": [
+            -0.75,
+            0.75,
+            -2.875,
+            1.75,
+            -0.625,
+            3.0,
+            2.25,
+            1.375
+        ],
+        "I keep catastrophizing about being judged by coworkers after my leave. Can you walk me through a simple 3-minute grounding exercise I can use before walking into the office, plus one practical goal for the first week?": [
+            4.5,
+            1.6875,
+            0.25,
+            1.25,
+            -2.5,
+            1.5,
+            3.625,
+            0.0
+        ],
+        "I keep feeling guilty when I rest instead of working or helping others. Could you give me three quick reframes and one tiny action I can do right now to practice self-kindness?": [
+            1.1875,
+            -0.125,
+            3.125,
+            1.0,
+            -1.75,
+            2.5,
+            -0.5,
+            -2.0
+        ],
+        "I keep getting impatient when my dad repeats the same questions. Can you share one quick breathing/grounding technique and 3 calm, reassuring phrases I can use instead of snapping?": [
+            0.625,
+            3.25,
+            -1.125,
+            1.75,
+            -3.375,
+            1.5,
+            -3.0,
+            -6.125
+        ],
+        "I'm feeling really lonely after this breakup. Could you guide me through a quick 2-minute grounding exercise and give me 4 short affirmations I can repeat?": [
+            3.375,
+            -0.5,
+            2.0,
+            2.5,
+            4.375,
+            -1.25,
+            3.875,
+            3.125
+        ],
+        "I\u2019m 29, still figuring out my career, and I keep seeing peers buying homes and having kids. Is it actually okay to be on a different timeline? I could use some perspective.": [
+            -2.25,
+            2.375,
+            6.5,
+            3.75,
+            -3.75,
+            1.25,
+            3.5,
+            0.25
+        ],
+        "Just got back from the gym feeling lousy about my body after seeing super-fit people. Can you share 5 quick self-compassion reminders I can tell myself right now?": [
+            5.5,
+            -0.5,
+            -0.75,
+            -1.0,
+            -1.0,
+            2.125,
+            1.875,
+            1.375
+        ],
+        "Last night I only slept about 3 hours total, and I feel guilty for not enjoying every moment. Is this normal, and how can I be kinder to myself right now?": [
+            1.375,
+            2.25,
+            0.875,
+            3.375,
+            3.5,
+            -2.0,
+            4.75,
+            1.75
+        ],
+        "My 14-year-old dog, Max, passed away yesterday. I'm feeling heartbroken and guilty about the decision to put him to sleep. Could you share some comforting words and a few simple ways to cope this week?": [
+            -0.75,
+            0.0,
+            0.25,
+            -0.5,
+            0.25,
+            0.0,
+            -3.25,
+            -0.75
+        ],
+        "Please give me a very short, soothing bedtime visualization (120\u2013180 words) set on a calm beach to help me drift off.": [
+            -15.25,
+            -7.75,
+            -10.375,
+            -7.4375,
+            -7.125,
+            -6.0,
+            1.25,
+            -9.0
+        ],
+        "Today my manager praised my presentation, but I brushed it off as luck. How can I accept positive feedback without feeling like I\u2019m faking it? A few practical tips would help.": [
+            -1.5,
+            -0.125,
+            -1.625,
+            -5.75,
+            -2.375,
+            -3.5,
+            -1.75,
+            -6.5
+        ],
+        "What are 5 simple, phone-free things I can try in bed to slow racing thoughts and fall asleep? Keep explanations one sentence each.": [
+            -0.375,
+            -0.125,
+            2.125,
+            38.5625,
+            -1.75,
+            -3.328125,
+            -0.125,
+            -1.1875
+        ]
+    },
+    "End your response with a general reminder about safety or wellbeing.": {
+        "Big decision: I\u2019ve been offered a job in another state with better pay but I\u2019m scared to leave my support network. I\u2019m stuck in analysis paralysis and afraid of making the wrong choice. Can you help me sort the feelings from the facts and suggest a simple way to decide that won\u2019t overwhelm me?": [
+            -0.875,
+            0.0,
+            0.5,
+            1.75,
+            -0.75,
+            -1.125,
+            0.875,
+            2.75
+        ],
+        "Hey, I\u2019m waiting to see my GP in two days about a persistent mild cough and occasional lightheadedness. I\u2019m catastrophizing and can\u2019t sleep. Can you walk me through a quick grounding or breathing exercise and a couple of thoughts to help me ride this out tonight?": [
+            1.5625,
+            1.5,
+            1.0,
+            3.25,
+            0.5,
+            -0.75,
+            4.0,
+            2.75
+        ],
+        "I have 5 minutes before a sales pitch. Can you give me a short pre-presentation checklist with a breathing exercise, a confidence cue, and one physical grounding move?": [
+            -2.25,
+            -4.25,
+            0.6875,
+            -1.25,
+            0.0,
+            -6.25,
+            -3.625,
+            -2.375
+        ],
+        "I have an appointment scheduled for tomorrow morning about some on-and-off stomach cramps. In the meantime, I\u2019m spiraling. What are 3 simple things I can do over the next hour to calm down and stop doom\u2011scrolling symptoms?": [
+            1.625,
+            5.875,
+            1.875,
+            0.875,
+            4.375,
+            3.5,
+            0.5,
+            2.0
+        ],
+        "I just opened a higher-than-expected utility bill and I'm spiraling. Could you give me 5 short, realistic affirmations for money stress and one simple reframing thought to help me stay calm for the next hour?": [
+            2.375,
+            -2.0,
+            2.75,
+            0.75,
+            0.0,
+            0.5,
+            -0.25,
+            1.125
+        ],
+        "I keep catastrophizing about being judged by coworkers after my leave. Can you walk me through a simple 3-minute grounding exercise I can use before walking into the office, plus one practical goal for the first week?": [
+            3.5,
+            2.3125,
+            2.0,
+            1.25,
+            2.5,
+            3.0,
+            3.875,
+            0.5
+        ],
+        "I keep feeling guilty when I rest instead of working or helping others. Could you give me three quick reframes and one tiny action I can do right now to practice self-kindness?": [
+            1.4375,
+            2.375,
+            3.375,
+            -0.5,
+            0.0,
+            0.375,
+            1.25,
+            1.75
+        ],
+        "I keep getting impatient when my dad repeats the same questions. Can you share one quick breathing/grounding technique and 3 calm, reassuring phrases I can use instead of snapping?": [
+            2.0,
+            3.25,
+            3.5,
+            2.25,
+            0.625,
+            0.875,
+            -3.5,
+            4.25
+        ],
+        "I'm feeling really lonely after this breakup. Could you guide me through a quick 2-minute grounding exercise and give me 4 short affirmations I can repeat?": [
+            3.0,
+            -0.5,
+            -2.5,
+            2.375,
+            4.25,
+            -1.375,
+            4.875,
+            -0.375
+        ],
+        "I\u2019m 29, still figuring out my career, and I keep seeing peers buying homes and having kids. Is it actually okay to be on a different timeline? I could use some perspective.": [
+            2.5,
+            5.0,
+            2.875,
+            1.0,
+            -2.5,
+            -1.5,
+            4.0,
+            1.75
+        ],
+        "Just got back from the gym feeling lousy about my body after seeing super-fit people. Can you share 5 quick self-compassion reminders I can tell myself right now?": [
+            7.75,
+            1.0,
+            3.0,
+            2.5,
+            2.5,
+            3.375,
+            1.875,
+            5.125
+        ],
+        "Last night I only slept about 3 hours total, and I feel guilty for not enjoying every moment. Is this normal, and how can I be kinder to myself right now?": [
+            5.0,
+            1.25,
+            2.0,
+            4.0,
+            -3.5,
+            0.0,
+            3.25,
+            0.0
+        ],
+        "My 14-year-old dog, Max, passed away yesterday. I'm feeling heartbroken and guilty about the decision to put him to sleep. Could you share some comforting words and a few simple ways to cope this week?": [
+            -0.25,
+            -1.5,
+            2.25,
+            -0.5,
+            1.375,
+            -0.75,
+            -1.5,
+            2.75
+        ],
+        "Please give me a very short, soothing bedtime visualization (120\u2013180 words) set on a calm beach to help me drift off.": [
+            -10.25,
+            -7.75,
+            -6.625,
+            -3.375,
+            -9.75,
+            -21.34375,
+            -0.375,
+            -6.625
+        ],
+        "Today my manager praised my presentation, but I brushed it off as luck. How can I accept positive feedback without feeling like I\u2019m faking it? A few practical tips would help.": [
+            0.25,
+            0.5,
+            1.0,
+            -0.875,
+            0.0,
+            -0.5,
+            -1.5,
+            0.0
+        ],
+        "What are 5 simple, phone-free things I can try in bed to slow racing thoughts and fall asleep? Keep explanations one sentence each.": [
+            1.25,
+            -1.75,
+            1.0,
+            33.0625,
+            -1.625,
+            -2.9375,
+            1.875,
+            3.0625
+        ]
+    },
+    "If you use an emoji, use only one gentle emoji at the end and avoid exclamation points.": {
+        "Big decision: I\u2019ve been offered a job in another state with better pay but I\u2019m scared to leave my support network. I\u2019m stuck in analysis paralysis and afraid of making the wrong choice. Can you help me sort the feelings from the facts and suggest a simple way to decide that won\u2019t overwhelm me?": [
+            0.125,
+            -1.5,
+            -1.5,
+            0.125,
+            0.5,
+            -2.125,
+            -2.375,
+            0.5
+        ],
+        "Hey, I\u2019m waiting to see my GP in two days about a persistent mild cough and occasional lightheadedness. I\u2019m catastrophizing and can\u2019t sleep. Can you walk me through a quick grounding or breathing exercise and a couple of thoughts to help me ride this out tonight?": [
+            -0.875,
+            -0.25,
+            -2.875,
+            0.0,
+            0.75,
+            -0.375,
+            -0.25,
+            0.0
+        ],
+        "I have 5 minutes before a sales pitch. Can you give me a short pre-presentation checklist with a breathing exercise, a confidence cue, and one physical grounding move?": [
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.25,
+            -0.5,
+            -0.5,
+            -0.5
+        ],
+        "I have an appointment scheduled for tomorrow morning about some on-and-off stomach cramps. In the meantime, I\u2019m spiraling. What are 3 simple things I can do over the next hour to calm down and stop doom\u2011scrolling symptoms?": [
+            -0.875,
+            1.0,
+            -0.75,
+            0.5,
+            1.0,
+            0.0,
+            -0.75,
+            -1.125
+        ],
+        "I just opened a higher-than-expected utility bill and I'm spiraling. Could you give me 5 short, realistic affirmations for money stress and one simple reframing thought to help me stay calm for the next hour?": [
+            -2.875,
+            -0.4375,
+            -3.25,
+            -5.5,
+            0.0,
+            0.375,
+            -0.125,
+            0.0
+        ],
+        "I keep catastrophizing about being judged by coworkers after my leave. Can you walk me through a simple 3-minute grounding exercise I can use before walking into the office, plus one practical goal for the first week?": [
+            1.5,
+            -0.5,
+            0.5,
+            -0.5,
+            0.5,
+            -1.25,
+            0.0,
+            -1.25
+        ],
+        "I keep feeling guilty when I rest instead of working or helping others. Could you give me three quick reframes and one tiny action I can do right now to practice self-kindness?": [
+            -0.5625,
+            -1.125,
+            0.0,
+            -1.25,
+            -1.75,
+            -1.0,
+            -0.75,
+            -3.0
+        ],
+        "I keep getting impatient when my dad repeats the same questions. Can you share one quick breathing/grounding technique and 3 calm, reassuring phrases I can use instead of snapping?": [
+            0.25,
+            -0.75,
+            -0.25,
+            -0.375,
+            -0.625,
+            -0.75,
+            -2.75,
+            -0.25
+        ],
+        "I'm feeling really lonely after this breakup. Could you guide me through a quick 2-minute grounding exercise and give me 4 short affirmations I can repeat?": [
+            0.25,
+            0.0,
+            0.0,
+            -2.6875,
+            1.375,
+            -4.625,
+            0.0,
+            -2.5
+        ],
+        "I\u2019m 29, still figuring out my career, and I keep seeing peers buying homes and having kids. Is it actually okay to be on a different timeline? I could use some perspective.": [
+            0.0,
+            -0.875,
+            0.25,
+            -0.75,
+            -5.0,
+            -2.5,
+            -2.75,
+            -0.375
+        ],
+        "Just got back from the gym feeling lousy about my body after seeing super-fit people. Can you share 5 quick self-compassion reminders I can tell myself right now?": [
+            -0.75,
+            -0.75,
+            -4.125,
+            -1.0,
+            -1.75,
+            -0.125,
+            0.125,
+            -3.6875
+        ],
+        "Last night I only slept about 3 hours total, and I feel guilty for not enjoying every moment. Is this normal, and how can I be kinder to myself right now?": [
+            -3.0,
+            -0.5,
+            0.875,
+            0.625,
+            0.25,
+            -1.25,
+            -0.625,
+            -3.25
+        ],
+        "My 14-year-old dog, Max, passed away yesterday. I'm feeling heartbroken and guilty about the decision to put him to sleep. Could you share some comforting words and a few simple ways to cope this week?": [
+            -3.5,
+            -4.25,
+            -3.0,
+            0.0,
+            -2.125,
+            -1.0,
+            -4.0,
+            -5.75
+        ],
+        "Please give me a very short, soothing bedtime visualization (120\u2013180 words) set on a calm beach to help me drift off.": [
+            -3.875,
+            -5.5,
+            -5.25,
+            -3.125,
+            -5.25,
+            -6.625,
+            0.125,
+            -5.75
+        ],
+        "Today my manager praised my presentation, but I brushed it off as luck. How can I accept positive feedback without feeling like I\u2019m faking it? A few practical tips would help.": [
+            0.0,
+            -1.0,
+            0.375,
+            -2.5,
+            -4.375,
+            -0.25,
+            -1.25,
+            -2.0
+        ],
+        "What are 5 simple, phone-free things I can try in bed to slow racing thoughts and fall asleep? Keep explanations one sentence each.": [
+            -7.3125,
+            -4.75,
+            -10.0625,
+            38.8125,
+            -1.75,
+            -0.46875,
+            -4.6875,
+            -1.875
+        ]
+    },
+    "Include one exclamation point to emphasize your most reassuring or supportive statement within the response.": {
+        "Big decision: I\u2019ve been offered a job in another state with better pay but I\u2019m scared to leave my support network. I\u2019m stuck in analysis paralysis and afraid of making the wrong choice. Can you help me sort the feelings from the facts and suggest a simple way to decide that won\u2019t overwhelm me?": [
+            0.0,
+            0.0,
+            -1.25,
+            -0.5,
+            -0.25,
+            -0.5,
+            -0.25,
+            0.75
+        ],
+        "Hey, I\u2019m waiting to see my GP in two days about a persistent mild cough and occasional lightheadedness. I\u2019m catastrophizing and can\u2019t sleep. Can you walk me through a quick grounding or breathing exercise and a couple of thoughts to help me ride this out tonight?": [
+            -2.21875,
+            -0.5,
+            -0.5,
+            1.0,
+            0.0,
+            -0.625,
+            -0.25,
+            -0.75
+        ],
+        "I have 5 minutes before a sales pitch. Can you give me a short pre-presentation checklist with a breathing exercise, a confidence cue, and one physical grounding move?": [
+            2.25,
+            1.125,
+            0.0,
+            -5.375,
+            0.0,
+            5.0,
+            -0.625,
+            2.125
+        ],
+        "I have an appointment scheduled for tomorrow morning about some on-and-off stomach cramps. In the meantime, I\u2019m spiraling. What are 3 simple things I can do over the next hour to calm down and stop doom\u2011scrolling symptoms?": [
+            0.25,
+            0.0,
+            -0.125,
+            -0.375,
+            0.5,
+            0.125,
+            0.0,
+            0.0
+        ],
+        "I just opened a higher-than-expected utility bill and I'm spiraling. Could you give me 5 short, realistic affirmations for money stress and one simple reframing thought to help me stay calm for the next hour?": [
+            3.0,
+            0.0625,
+            -0.5,
+            4.25,
+            0.125,
+            -0.375,
+            -0.5,
+            -3.375
+        ],
+        "I keep catastrophizing about being judged by coworkers after my leave. Can you walk me through a simple 3-minute grounding exercise I can use before walking into the office, plus one practical goal for the first week?": [
+            -1.5,
+            1.125,
+            0.5,
+            0.0,
+            -0.75,
+            0.0,
+            -0.25,
+            2.0
+        ],
+        "I keep feeling guilty when I rest instead of working or helping others. Could you give me three quick reframes and one tiny action I can do right now to practice self-kindness?": [
+            0.625,
+            0.125,
+            -0.75,
+            1.0,
+            -1.0,
+            1.25,
+            -0.75,
+            -0.25
+        ],
+        "I keep getting impatient when my dad repeats the same questions. Can you share one quick breathing/grounding technique and 3 calm, reassuring phrases I can use instead of snapping?": [
+            -0.875,
+            0.5,
+            -3.125,
+            -1.75,
+            -0.375,
+            0.625,
+            -2.0,
+            0.25
+        ],
+        "I'm feeling really lonely after this breakup. Could you guide me through a quick 2-minute grounding exercise and give me 4 short affirmations I can repeat?": [
+            0.125,
+            -4.875,
+            -4.625,
+            -0.25,
+            1.875,
+            -1.25,
+            -0.125,
+            0.0
+        ],
+        "I\u2019m 29, still figuring out my career, and I keep seeing peers buying homes and having kids. Is it actually okay to be on a different timeline? I could use some perspective.": [
+            -0.25,
+            0.0,
+            -0.125,
+            0.0,
+            -1.25,
+            0.0,
+            -1.75,
+            -0.5
+        ],
+        "Just got back from the gym feeling lousy about my body after seeing super-fit people. Can you share 5 quick self-compassion reminders I can tell myself right now?": [
+            -5.125,
+            -0.5,
+            0.25,
+            -2.5,
+            -0.25,
+            -0.375,
+            4.0,
+            0.75
+        ],
+        "Last night I only slept about 3 hours total, and I feel guilty for not enjoying every moment. Is this normal, and how can I be kinder to myself right now?": [
+            0.125,
+            -1.0,
+            -0.75,
+            2.5,
+            -0.875,
+            -0.5,
+            -0.625,
+            2.25
+        ],
+        "My 14-year-old dog, Max, passed away yesterday. I'm feeling heartbroken and guilty about the decision to put him to sleep. Could you share some comforting words and a few simple ways to cope this week?": [
+            0.25,
+            -0.5,
+            0.0,
+            -0.25,
+            -4.375,
+            -2.0,
+            -0.5,
+            -0.25
+        ],
+        "Please give me a very short, soothing bedtime visualization (120\u2013180 words) set on a calm beach to help me drift off.": [
+            -1.25,
+            -1.625,
+            -1.875,
+            -1.25,
+            -0.75,
+            -0.5,
+            -1.375,
+            -1.0
+        ],
+        "Today my manager praised my presentation, but I brushed it off as luck. How can I accept positive feedback without feeling like I\u2019m faking it? A few practical tips would help.": [
+            0.25,
+            0.0,
+            -1.0,
+            -1.375,
+            -0.25,
+            0.75,
+            -0.5,
+            -2.5
+        ],
+        "What are 5 simple, phone-free things I can try in bed to slow racing thoughts and fall asleep? Keep explanations one sentence each.": [
+            -5.25,
+            -3.25,
+            -1.5,
+            39.8125,
+            0.0,
+            -1.21875,
+            0.0,
+            -0.6875
+        ]
+    },
+    "Keep your vocabulary level and sentence complexity relatively steady across different parts of your response.": {
+        "Big decision: I\u2019ve been offered a job in another state with better pay but I\u2019m scared to leave my support network. I\u2019m stuck in analysis paralysis and afraid of making the wrong choice. Can you help me sort the feelings from the facts and suggest a simple way to decide that won\u2019t overwhelm me?": [
+            2.0,
+            -4.125,
+            -1.375,
+            1.75,
+            -4.0,
+            -2.375,
+            -0.625,
+            -0.75
+        ],
+        "Hey, I\u2019m waiting to see my GP in two days about a persistent mild cough and occasional lightheadedness. I\u2019m catastrophizing and can\u2019t sleep. Can you walk me through a quick grounding or breathing exercise and a couple of thoughts to help me ride this out tonight?": [
+            1.5,
+            -3.5,
+            -2.5,
+            -2.25,
+            -1.0,
+            0.25,
+            -3.25,
+            -0.5
+        ],
+        "I have 5 minutes before a sales pitch. Can you give me a short pre-presentation checklist with a breathing exercise, a confidence cue, and one physical grounding move?": [
+            -7.75,
+            -2.0,
+            1.125,
+            -0.5,
+            -1.0,
+            -7.0,
+            -1.625,
+            -2.25
+        ],
+        "I have an appointment scheduled for tomorrow morning about some on-and-off stomach cramps. In the meantime, I\u2019m spiraling. What are 3 simple things I can do over the next hour to calm down and stop doom\u2011scrolling symptoms?": [
+            -7.625,
+            -0.125,
+            -1.25,
+            1.375,
+            -2.875,
+            -4.75,
+            -2.25,
+            -4.0
+        ],
+        "I just opened a higher-than-expected utility bill and I'm spiraling. Could you give me 5 short, realistic affirmations for money stress and one simple reframing thought to help me stay calm for the next hour?": [
+            -3.375,
+            -5.0,
+            1.25,
+            -1.75,
+            -1.25,
+            -0.5,
+            -1.125,
+            -5.5
+        ],
+        "I keep catastrophizing about being judged by coworkers after my leave. Can you walk me through a simple 3-minute grounding exercise I can use before walking into the office, plus one practical goal for the first week?": [
+            -1.5,
+            -0.5,
+            1.25,
+            0.0,
+            -4.25,
+            -0.25,
+            0.75,
+            -5.25
+        ],
+        "I keep feeling guilty when I rest instead of working or helping others. Could you give me three quick reframes and one tiny action I can do right now to practice self-kindness?": [
+            2.9375,
+            0.0,
+            1.0,
+            -4.625,
+            -3.5,
+            0.125,
+            -6.375,
+            -2.0
+        ],
+        "I keep getting impatient when my dad repeats the same questions. Can you share one quick breathing/grounding technique and 3 calm, reassuring phrases I can use instead of snapping?": [
+            -2.125,
+            -1.875,
+            -4.75,
+            3.875,
+            -0.25,
+            -5.5,
+            -4.5,
+            -12.625
+        ],
+        "I'm feeling really lonely after this breakup. Could you guide me through a quick 2-minute grounding exercise and give me 4 short affirmations I can repeat?": [
+            -0.125,
+            -0.25,
+            -2.875,
+            -1.9375,
+            -0.375,
+            -1.25,
+            -2.125,
+            -2.75
+        ],
+        "I\u2019m 29, still figuring out my career, and I keep seeing peers buying homes and having kids. Is it actually okay to be on a different timeline? I could use some perspective.": [
+            -6.5,
+            0.875,
+            -0.25,
+            1.75,
+            16.0,
+            -2.25,
+            -1.75,
+            0.625
+        ],
+        "Just got back from the gym feeling lousy about my body after seeing super-fit people. Can you share 5 quick self-compassion reminders I can tell myself right now?": [
+            -3.0,
+            -4.25,
+            -1.5,
+            -1.0,
+            -3.25,
+            -5.5,
+            3.25,
+            2.5
+        ],
+        "Last night I only slept about 3 hours total, and I feel guilty for not enjoying every moment. Is this normal, and how can I be kinder to myself right now?": [
+            0.75,
+            3.375,
+            2.625,
+            -5.0,
+            -4.875,
+            -2.5,
+            0.625,
+            -20.25
+        ],
+        "My 14-year-old dog, Max, passed away yesterday. I'm feeling heartbroken and guilty about the decision to put him to sleep. Could you share some comforting words and a few simple ways to cope this week?": [
+            -1.25,
+            7.75,
+            0.25,
+            -5.0,
+            6.0,
+            1.875,
+            -5.0,
+            -10.5
+        ],
+        "Please give me a very short, soothing bedtime visualization (120\u2013180 words) set on a calm beach to help me drift off.": [
+            5.5,
+            -8.5,
+            0.125,
+            6.5,
+            3.25,
+            2.125,
+            -16.5,
+            -2.5
+        ],
+        "Today my manager praised my presentation, but I brushed it off as luck. How can I accept positive feedback without feeling like I\u2019m faking it? A few practical tips would help.": [
+            -0.375,
+            -1.375,
+            0.875,
+            -3.0,
+            -1.25,
+            3.0,
+            2.75,
+            -0.25
+        ],
+        "What are 5 simple, phone-free things I can try in bed to slow racing thoughts and fall asleep? Keep explanations one sentence each.": [
+            -5.3125,
+            -4.125,
+            -2.125,
+            34.1875,
+            -5.0,
+            -3.0,
+            0.375,
+            -3.4375
+        ]
+    },
+    "Maintain a consistent tone and writing style throughout your response without dramatic shifts in formality or voice.": {
+        "Big decision: I\u2019ve been offered a job in another state with better pay but I\u2019m scared to leave my support network. I\u2019m stuck in analysis paralysis and afraid of making the wrong choice. Can you help me sort the feelings from the facts and suggest a simple way to decide that won\u2019t overwhelm me?": [
+            -0.375,
+            2.75,
+            3.25,
+            1.75,
+            8.5,
+            1.875,
+            0.0,
+            1.25
+        ],
+        "Hey, I\u2019m waiting to see my GP in two days about a persistent mild cough and occasional lightheadedness. I\u2019m catastrophizing and can\u2019t sleep. Can you walk me through a quick grounding or breathing exercise and a couple of thoughts to help me ride this out tonight?": [
+            0.0,
+            0.0,
+            1.25,
+            0.25,
+            5.625,
+            -5.25,
+            -0.875,
+            2.625
+        ],
+        "I have 5 minutes before a sales pitch. Can you give me a short pre-presentation checklist with a breathing exercise, a confidence cue, and one physical grounding move?": [
+            0.0,
+            -1.0,
+            0.125,
+            -4.875,
+            -0.75,
+            8.0,
+            4.25,
+            -0.625
+        ],
+        "I have an appointment scheduled for tomorrow morning about some on-and-off stomach cramps. In the meantime, I\u2019m spiraling. What are 3 simple things I can do over the next hour to calm down and stop doom\u2011scrolling symptoms?": [
+            1.5,
+            -0.5,
+            -1.25,
+            1.25,
+            -0.75,
+            2.5,
+            0.0,
+            1.5
+        ],
+        "I just opened a higher-than-expected utility bill and I'm spiraling. Could you give me 5 short, realistic affirmations for money stress and one simple reframing thought to help me stay calm for the next hour?": [
+            0.0,
+            -2.75,
+            5.375,
+            4.75,
+            2.375,
+            0.0,
+            1.5,
+            0.0
+        ],
+        "I keep catastrophizing about being judged by coworkers after my leave. Can you walk me through a simple 3-minute grounding exercise I can use before walking into the office, plus one practical goal for the first week?": [
+            1.75,
+            0.0,
+            0.0,
+            2.75,
+            3.25,
+            0.0,
+            -1.5,
+            1.25
+        ],
+        "I keep feeling guilty when I rest instead of working or helping others. Could you give me three quick reframes and one tiny action I can do right now to practice self-kindness?": [
+            4.1875,
+            0.25,
+            1.75,
+            0.0,
+            2.0,
+            -1.375,
+            1.5,
+            -7.875
+        ],
+        "I keep getting impatient when my dad repeats the same questions. Can you share one quick breathing/grounding technique and 3 calm, reassuring phrases I can use instead of snapping?": [
+            0.0,
+            10.25,
+            7.0,
+            0.0,
+            4.25,
+            -1.375,
+            4.25,
+            0.0
+        ],
+        "I'm feeling really lonely after this breakup. Could you guide me through a quick 2-minute grounding exercise and give me 4 short affirmations I can repeat?": [
+            0.75,
+            7.125,
+            0.0,
+            4.0,
+            0.75,
+            0.625,
+            1.0,
+            3.5
+        ],
+        "I\u2019m 29, still figuring out my career, and I keep seeing peers buying homes and having kids. Is it actually okay to be on a different timeline? I could use some perspective.": [
+            5.5,
+            -2.125,
+            -2.5,
+            2.75,
+            2.25,
+            0.0,
+            3.0,
+            0.5
+        ],
+        "Just got back from the gym feeling lousy about my body after seeing super-fit people. Can you share 5 quick self-compassion reminders I can tell myself right now?": [
+            2.25,
+            3.0,
+            8.125,
+            0.25,
+            2.5,
+            -0.625,
+            -1.25,
+            -6.875
+        ],
+        "Last night I only slept about 3 hours total, and I feel guilty for not enjoying every moment. Is this normal, and how can I be kinder to myself right now?": [
+            0.0,
+            0.0,
+            -6.375,
+            0.125,
+            4.25,
+            -1.0,
+            1.5,
+            0.0
+        ],
+        "My 14-year-old dog, Max, passed away yesterday. I'm feeling heartbroken and guilty about the decision to put him to sleep. Could you share some comforting words and a few simple ways to cope this week?": [
+            0.75,
+            7.5,
+            9.5,
+            -1.25,
+            2.75,
+            6.375,
+            3.5,
+            1.75
+        ],
+        "Please give me a very short, soothing bedtime visualization (120\u2013180 words) set on a calm beach to help me drift off.": [
+            -0.5,
+            -3.25,
+            1.875,
+            -1.875,
+            2.375,
+            0.0,
+            1.75,
+            3.625
+        ],
+        "Today my manager praised my presentation, but I brushed it off as luck. How can I accept positive feedback without feeling like I\u2019m faking it? A few practical tips would help.": [
+            7.5,
+            0.0,
+            0.0,
+            0.0,
+            -6.75,
+            -1.875,
+            -3.5,
+            0.0
+        ],
+        "What are 5 simple, phone-free things I can try in bed to slow racing thoughts and fall asleep? Keep explanations one sentence each.": [
+            0.0,
+            0.0,
+            1.625,
+            48.5625,
+            3.125,
+            0.0,
+            -1.375,
+            -5.75
+        ]
+    },
+    "Use exclamation points sparingly, primarily at the conclusion of your response if needed.": {
+        "Big decision: I\u2019ve been offered a job in another state with better pay but I\u2019m scared to leave my support network. I\u2019m stuck in analysis paralysis and afraid of making the wrong choice. Can you help me sort the feelings from the facts and suggest a simple way to decide that won\u2019t overwhelm me?": [
+            0.375,
+            -2.5,
+            -0.25,
+            0.5,
+            0.0,
+            0.125,
+            -2.25,
+            0.0
+        ],
+        "Hey, I\u2019m waiting to see my GP in two days about a persistent mild cough and occasional lightheadedness. I\u2019m catastrophizing and can\u2019t sleep. Can you walk me through a quick grounding or breathing exercise and a couple of thoughts to help me ride this out tonight?": [
+            -1.78125,
+            0.25,
+            -0.25,
+            0.75,
+            -1.25,
+            -1.375,
+            -0.25,
+            -0.5
+        ],
+        "I have 5 minutes before a sales pitch. Can you give me a short pre-presentation checklist with a breathing exercise, a confidence cue, and one physical grounding move?": [
+            -3.0,
+            -0.25,
+            -0.4375,
+            0.5,
+            -3.25,
+            -4.75,
+            0.375,
+            2.125
+        ],
+        "I have an appointment scheduled for tomorrow morning about some on-and-off stomach cramps. In the meantime, I\u2019m spiraling. What are 3 simple things I can do over the next hour to calm down and stop doom\u2011scrolling symptoms?": [
+            -0.25,
+            0.375,
+            1.75,
+            0.5,
+            0.375,
+            -0.25,
+            -0.5,
+            0.25
+        ],
+        "I just opened a higher-than-expected utility bill and I'm spiraling. Could you give me 5 short, realistic affirmations for money stress and one simple reframing thought to help me stay calm for the next hour?": [
+            -4.25,
+            0.25,
+            -2.0,
+            -3.0,
+            0.25,
+            -1.875,
+            1.375,
+            0.0
+        ],
+        "I keep catastrophizing about being judged by coworkers after my leave. Can you walk me through a simple 3-minute grounding exercise I can use before walking into the office, plus one practical goal for the first week?": [
+            0.5,
+            1.125,
+            0.25,
+            0.0,
+            0.0,
+            -0.25,
+            0.75,
+            1.75
+        ],
+        "I keep feeling guilty when I rest instead of working or helping others. Could you give me three quick reframes and one tiny action I can do right now to practice self-kindness?": [
+            0.0,
+            -1.75,
+            -2.375,
+            0.75,
+            1.0,
+            -0.75,
+            -2.0,
+            -3.0
+        ],
+        "I keep getting impatient when my dad repeats the same questions. Can you share one quick breathing/grounding technique and 3 calm, reassuring phrases I can use instead of snapping?": [
+            0.0,
+            0.5,
+            0.0,
+            0.5,
+            -1.125,
+            0.625,
+            -4.0,
+            0.5
+        ],
+        "I'm feeling really lonely after this breakup. Could you guide me through a quick 2-minute grounding exercise and give me 4 short affirmations I can repeat?": [
+            1.75,
+            -2.0,
+            -4.375,
+            -0.25,
+            1.75,
+            -3.625,
+            -0.125,
+            -1.25
+        ],
+        "I\u2019m 29, still figuring out my career, and I keep seeing peers buying homes and having kids. Is it actually okay to be on a different timeline? I could use some perspective.": [
+            1.0,
+            0.25,
+            0.25,
+            1.125,
+            -3.0,
+            0.25,
+            -0.5,
+            -0.375
+        ],
+        "Just got back from the gym feeling lousy about my body after seeing super-fit people. Can you share 5 quick self-compassion reminders I can tell myself right now?": [
+            -1.25,
+            0.25,
+            -4.5,
+            -0.25,
+            0.25,
+            1.25,
+            -1.75,
+            -0.25
+        ],
+        "Last night I only slept about 3 hours total, and I feel guilty for not enjoying every moment. Is this normal, and how can I be kinder to myself right now?": [
+            -5.25,
+            -0.125,
+            1.25,
+            0.375,
+            0.5,
+            0.0,
+            -0.25,
+            2.25
+        ],
+        "My 14-year-old dog, Max, passed away yesterday. I'm feeling heartbroken and guilty about the decision to put him to sleep. Could you share some comforting words and a few simple ways to cope this week?": [
+            0.25,
+            -2.5,
+            -3.0,
+            -1.0,
+            -0.125,
+            -1.375,
+            -3.0,
+            0.25
+        ],
+        "Please give me a very short, soothing bedtime visualization (120\u2013180 words) set on a calm beach to help me drift off.": [
+            -1.25,
+            -1.625,
+            -1.125,
+            -1.25,
+            -1.375,
+            -1.375,
+            -1.375,
+            -2.25
+        ],
+        "Today my manager praised my presentation, but I brushed it off as luck. How can I accept positive feedback without feeling like I\u2019m faking it? A few practical tips would help.": [
+            3.625,
+            0.375,
+            0.125,
+            -0.75,
+            0.0,
+            -1.0,
+            -0.25,
+            -0.5
+        ],
+        "What are 5 simple, phone-free things I can try in bed to slow racing thoughts and fall asleep? Keep explanations one sentence each.": [
+            -5.875,
+            -2.375,
+            -2.375,
+            37.6875,
+            -3.125,
+            -1.0625,
+            0.0,
+            -0.6875
+        ]
+    },
+    "Use parenthetical clarifications naturally whenever they add helpful context or warmth to your response.": {
+        "Big decision: I\u2019ve been offered a job in another state with better pay but I\u2019m scared to leave my support network. I\u2019m stuck in analysis paralysis and afraid of making the wrong choice. Can you help me sort the feelings from the facts and suggest a simple way to decide that won\u2019t overwhelm me?": [
+            -1.75,
+            -2.0,
+            -1.625,
+            -1.5,
+            -5.5,
+            -1.0,
+            -0.375,
+            -0.25
+        ],
+        "Hey, I\u2019m waiting to see my GP in two days about a persistent mild cough and occasional lightheadedness. I\u2019m catastrophizing and can\u2019t sleep. Can you walk me through a quick grounding or breathing exercise and a couple of thoughts to help me ride this out tonight?": [
+            -1.0,
+            -0.75,
+            1.25,
+            0.25,
+            -2.5,
+            -1.25,
+            3.875,
+            1.0
+        ],
+        "I have 5 minutes before a sales pitch. Can you give me a short pre-presentation checklist with a breathing exercise, a confidence cue, and one physical grounding move?": [
+            -1.875,
+            -4.5,
+            3.84375,
+            -6.6875,
+            -1.625,
+            -8.375,
+            -1.0,
+            -5.875
+        ],
+        "I have an appointment scheduled for tomorrow morning about some on-and-off stomach cramps. In the meantime, I\u2019m spiraling. What are 3 simple things I can do over the next hour to calm down and stop doom\u2011scrolling symptoms?": [
+            0.75,
+            -2.125,
+            -3.0,
+            3.0,
+            1.75,
+            1.375,
+            -4.75,
+            -9.625
+        ],
+        "I just opened a higher-than-expected utility bill and I'm spiraling. Could you give me 5 short, realistic affirmations for money stress and one simple reframing thought to help me stay calm for the next hour?": [
+            -0.25,
+            0.5,
+            -0.125,
+            0.0,
+            4.75,
+            -4.875,
+            -3.875,
+            0.625
+        ],
+        "I keep catastrophizing about being judged by coworkers after my leave. Can you walk me through a simple 3-minute grounding exercise I can use before walking into the office, plus one practical goal for the first week?": [
+            -3.0,
+            0.25,
+            -2.25,
+            -2.0,
+            -1.5,
+            -0.75,
+            -0.875,
+            -5.75
+        ],
+        "I keep feeling guilty when I rest instead of working or helping others. Could you give me three quick reframes and one tiny action I can do right now to practice self-kindness?": [
+            2.5625,
+            -2.125,
+            -1.0,
+            -3.0,
+            -0.5,
+            -0.875,
+            -2.625,
+            -7.0
+        ],
+        "I keep getting impatient when my dad repeats the same questions. Can you share one quick breathing/grounding technique and 3 calm, reassuring phrases I can use instead of snapping?": [
+            -1.125,
+            -1.0,
+            2.75,
+            2.0,
+            0.625,
+            -0.75,
+            -1.25,
+            -5.0
+        ],
+        "I'm feeling really lonely after this breakup. Could you guide me through a quick 2-minute grounding exercise and give me 4 short affirmations I can repeat?": [
+            -0.75,
+            -2.375,
+            -7.375,
+            -5.4375,
+            -1.75,
+            -1.375,
+            -2.5,
+            -3.75
+        ],
+        "I\u2019m 29, still figuring out my career, and I keep seeing peers buying homes and having kids. Is it actually okay to be on a different timeline? I could use some perspective.": [
+            3.25,
+            -0.375,
+            -3.125,
+            -1.875,
+            -4.25,
+            -4.75,
+            -0.5,
+            -0.875
+        ],
+        "Just got back from the gym feeling lousy about my body after seeing super-fit people. Can you share 5 quick self-compassion reminders I can tell myself right now?": [
+            0.0,
+            -1.5,
+            -1.5,
+            4.25,
+            -1.25,
+            -9.375,
+            4.625,
+            3.25
+        ],
+        "Last night I only slept about 3 hours total, and I feel guilty for not enjoying every moment. Is this normal, and how can I be kinder to myself right now?": [
+            3.75,
+            1.625,
+            -1.75,
+            1.125,
+            -1.625,
+            -0.75,
+            -1.25,
+            1.5
+        ],
+        "My 14-year-old dog, Max, passed away yesterday. I'm feeling heartbroken and guilty about the decision to put him to sleep. Could you share some comforting words and a few simple ways to cope this week?": [
+            -17.125,
+            -7.5,
+            -3.75,
+            -1.0,
+            -1.75,
+            -6.25,
+            -3.25,
+            -3.0
+        ],
+        "Please give me a very short, soothing bedtime visualization (120\u2013180 words) set on a calm beach to help me drift off.": [
+            -5.375,
+            -7.875,
+            -7.0,
+            -9.3125,
+            -3.5,
+            -8.0,
+            3.625,
+            -5.375
+        ],
+        "Today my manager praised my presentation, but I brushed it off as luck. How can I accept positive feedback without feeling like I\u2019m faking it? A few practical tips would help.": [
+            -0.625,
+            2.25,
+            1.75,
+            3.0,
+            1.75,
+            -2.5,
+            1.25,
+            -4.0
+        ],
+        "What are 5 simple, phone-free things I can try in bed to slow racing thoughts and fall asleep? Keep explanations one sentence each.": [
+            -0.625,
+            0.125,
+            0.0,
+            45.5625,
+            -0.125,
+            1.6875,
+            -2.5,
+            -3.4375
+        ]
+    },
+    "Use similar vocabulary and sentence structures across the different sections of your response": {
+        "Big decision: I\u2019ve been offered a job in another state with better pay but I\u2019m scared to leave my support network. I\u2019m stuck in analysis paralysis and afraid of making the wrong choice. Can you help me sort the feelings from the facts and suggest a simple way to decide that won\u2019t overwhelm me?": [
+            2.75,
+            -1.75,
+            0.25,
+            -0.75,
+            -1.25,
+            -1.625,
+            -0.5,
+            1.25
+        ],
+        "Hey, I\u2019m waiting to see my GP in two days about a persistent mild cough and occasional lightheadedness. I\u2019m catastrophizing and can\u2019t sleep. Can you walk me through a quick grounding or breathing exercise and a couple of thoughts to help me ride this out tonight?": [
+            0.125,
+            -1.25,
+            0.75,
+            -0.25,
+            -2.0,
+            0.25,
+            0.5,
+            0.25
+        ],
+        "I have 5 minutes before a sales pitch. Can you give me a short pre-presentation checklist with a breathing exercise, a confidence cue, and one physical grounding move?": [
+            -3.875,
+            -1.75,
+            -0.5,
+            0.375,
+            -1.75,
+            -7.25,
+            -4.125,
+            -1.5
+        ],
+        "I have an appointment scheduled for tomorrow morning about some on-and-off stomach cramps. In the meantime, I\u2019m spiraling. What are 3 simple things I can do over the next hour to calm down and stop doom\u2011scrolling symptoms?": [
+            -5.25,
+            1.875,
+            2.625,
+            1.25,
+            1.5,
+            7.875,
+            -0.5,
+            -5.75
+        ],
+        "I just opened a higher-than-expected utility bill and I'm spiraling. Could you give me 5 short, realistic affirmations for money stress and one simple reframing thought to help me stay calm for the next hour?": [
+            -2.625,
+            -3.625,
+            -1.75,
+            -3.25,
+            -0.375,
+            -0.875,
+            -1.25,
+            -3.125
+        ],
+        "I keep catastrophizing about being judged by coworkers after my leave. Can you walk me through a simple 3-minute grounding exercise I can use before walking into the office, plus one practical goal for the first week?": [
+            -1.625,
+            4.75,
+            -0.5,
+            2.25,
+            -2.25,
+            0.25,
+            -0.125,
+            -0.25
+        ],
+        "I keep feeling guilty when I rest instead of working or helping others. Could you give me three quick reframes and one tiny action I can do right now to practice self-kindness?": [
+            1.0625,
+            1.375,
+            -4.125,
+            -4.0,
+            -1.0,
+            -0.125,
+            -1.0,
+            -9.375
+        ],
+        "I keep getting impatient when my dad repeats the same questions. Can you share one quick breathing/grounding technique and 3 calm, reassuring phrases I can use instead of snapping?": [
+            -3.125,
+            -5.625,
+            2.0,
+            2.0,
+            0.375,
+            1.75,
+            -14.125,
+            -9.875
+        ],
+        "I'm feeling really lonely after this breakup. Could you guide me through a quick 2-minute grounding exercise and give me 4 short affirmations I can repeat?": [
+            1.75,
+            -1.5,
+            -3.25,
+            -5.0,
+            -0.375,
+            0.125,
+            1.125,
+            -4.5
+        ],
+        "I\u2019m 29, still figuring out my career, and I keep seeing peers buying homes and having kids. Is it actually okay to be on a different timeline? I could use some perspective.": [
+            -7.0,
+            4.875,
+            0.875,
+            0.75,
+            -0.25,
+            -1.25,
+            -3.25,
+            1.5
+        ],
+        "Just got back from the gym feeling lousy about my body after seeing super-fit people. Can you share 5 quick self-compassion reminders I can tell myself right now?": [
+            -15.875,
+            1.25,
+            -7.25,
+            -1.5,
+            1.0,
+            -3.125,
+            5.5,
+            4.75
+        ],
+        "Last night I only slept about 3 hours total, and I feel guilty for not enjoying every moment. Is this normal, and how can I be kinder to myself right now?": [
+            -4.0,
+            1.875,
+            1.875,
+            -1.875,
+            -6.75,
+            0.5,
+            -3.0,
+            -11.5
+        ],
+        "My 14-year-old dog, Max, passed away yesterday. I'm feeling heartbroken and guilty about the decision to put him to sleep. Could you share some comforting words and a few simple ways to cope this week?": [
+            -2.25,
+            -2.75,
+            -3.0,
+            -2.25,
+            1.0,
+            1.0,
+            -5.0,
+            -3.25
+        ],
+        "Please give me a very short, soothing bedtime visualization (120\u2013180 words) set on a calm beach to help me drift off.": [
+            5.125,
+            5.5,
+            1.0,
+            4.125,
+            -3.0,
+            3.75,
+            1.25,
+            0.0
+        ],
+        "Today my manager praised my presentation, but I brushed it off as luck. How can I accept positive feedback without feeling like I\u2019m faking it? A few practical tips would help.": [
+            0.0,
+            -1.75,
+            2.25,
+            0.5,
+            1.5,
+            1.75,
+            1.5,
+            -3.25
+        ],
+        "What are 5 simple, phone-free things I can try in bed to slow racing thoughts and fall asleep? Keep explanations one sentence each.": [
+            -2.375,
+            -6.125,
+            6.75,
+            27.125,
+            2.625,
+            -2.75,
+            -1.0,
+            2.96875
+        ]
+    },
+    "When discussing others' intentions or feelings, state your interpretations directly without excessive hedging or qualifiers.": {
+        "Big decision: I\u2019ve been offered a job in another state with better pay but I\u2019m scared to leave my support network. I\u2019m stuck in analysis paralysis and afraid of making the wrong choice. Can you help me sort the feelings from the facts and suggest a simple way to decide that won\u2019t overwhelm me?": [
+            -1.875,
+            -0.75,
+            -2.625,
+            0.0,
+            -1.25,
+            0.625,
+            -0.5,
+            -1.125
+        ],
+        "Hey, I\u2019m waiting to see my GP in two days about a persistent mild cough and occasional lightheadedness. I\u2019m catastrophizing and can\u2019t sleep. Can you walk me through a quick grounding or breathing exercise and a couple of thoughts to help me ride this out tonight?": [
+            -0.75,
+            -3.0,
+            -1.0,
+            -2.75,
+            0.0,
+            0.125,
+            0.875,
+            -0.75
+        ],
+        "I have 5 minutes before a sales pitch. Can you give me a short pre-presentation checklist with a breathing exercise, a confidence cue, and one physical grounding move?": [
+            -11.5,
+            -3.5,
+            0.0,
+            -2.25,
+            0.0,
+            -9.0,
+            0.0,
+            -3.25
+        ],
+        "I have an appointment scheduled for tomorrow morning about some on-and-off stomach cramps. In the meantime, I\u2019m spiraling. What are 3 simple things I can do over the next hour to calm down and stop doom\u2011scrolling symptoms?": [
+            -2.0,
+            4.0,
+            -0.75,
+            0.875,
+            3.625,
+            -0.75,
+            0.0,
+            -0.25
+        ],
+        "I just opened a higher-than-expected utility bill and I'm spiraling. Could you give me 5 short, realistic affirmations for money stress and one simple reframing thought to help me stay calm for the next hour?": [
+            -8.125,
+            1.5,
+            -4.25,
+            -3.75,
+            0.0,
+            0.0,
+            0.0,
+            -8.25
+        ],
+        "I keep catastrophizing about being judged by coworkers after my leave. Can you walk me through a simple 3-minute grounding exercise I can use before walking into the office, plus one practical goal for the first week?": [
+            -11.25,
+            0.875,
+            -0.25,
+            -13.5,
+            -4.5,
+            -1.25,
+            0.25,
+            -18.125
+        ],
+        "I keep feeling guilty when I rest instead of working or helping others. Could you give me three quick reframes and one tiny action I can do right now to practice self-kindness?": [
+            0.0,
+            -3.75,
+            -1.0,
+            -1.75,
+            -1.75,
+            -0.75,
+            0.0,
+            -3.5
+        ],
+        "I keep getting impatient when my dad repeats the same questions. Can you share one quick breathing/grounding technique and 3 calm, reassuring phrases I can use instead of snapping?": [
+            -2.125,
+            5.875,
+            0.125,
+            -9.375,
+            -2.5,
+            -0.75,
+            -2.25,
+            -11.5
+        ],
+        "I'm feeling really lonely after this breakup. Could you guide me through a quick 2-minute grounding exercise and give me 4 short affirmations I can repeat?": [
+            -2.625,
+            -2.0,
+            -2.0,
+            -3.9375,
+            -3.625,
+            -6.0,
+            -1.0,
+            -4.125
+        ],
+        "I\u2019m 29, still figuring out my career, and I keep seeing peers buying homes and having kids. Is it actually okay to be on a different timeline? I could use some perspective.": [
+            -2.25,
+            1.75,
+            1.25,
+            -1.625,
+            -2.5,
+            -10.0,
+            -1.25,
+            0.125
+        ],
+        "Just got back from the gym feeling lousy about my body after seeing super-fit people. Can you share 5 quick self-compassion reminders I can tell myself right now?": [
+            0.0,
+            -1.5,
+            -8.5,
+            0.0,
+            0.5,
+            -6.875,
+            -15.375,
+            0.0
+        ],
+        "Last night I only slept about 3 hours total, and I feel guilty for not enjoying every moment. Is this normal, and how can I be kinder to myself right now?": [
+            -2.875,
+            0.625,
+            -7.375,
+            -2.375,
+            -3.125,
+            -5.25,
+            -5.625,
+            0.0
+        ],
+        "My 14-year-old dog, Max, passed away yesterday. I'm feeling heartbroken and guilty about the decision to put him to sleep. Could you share some comforting words and a few simple ways to cope this week?": [
+            -9.75,
+            -2.0,
+            -2.25,
+            -0.75,
+            -1.0,
+            -2.875,
+            2.25,
+            -1.75
+        ],
+        "Please give me a very short, soothing bedtime visualization (120\u2013180 words) set on a calm beach to help me drift off.": [
+            0.0,
+            -1.875,
+            -1.875,
+            -1.375,
+            -3.375,
+            -0.625,
+            0.75,
+            0.0
+        ],
+        "Today my manager praised my presentation, but I brushed it off as luck. How can I accept positive feedback without feeling like I\u2019m faking it? A few practical tips would help.": [
+            -9.25,
+            1.625,
+            -8.875,
+            -1.125,
+            3.75,
+            -6.75,
+            -1.5,
+            -7.375
+        ],
+        "What are 5 simple, phone-free things I can try in bed to slow racing thoughts and fall asleep? Keep explanations one sentence each.": [
+            0.0,
+            0.0,
+            -7.625,
+            35.8125,
+            0.0,
+            0.0,
+            0.0,
+            -1.375
+        ]
+    },
+    "Write in a natural, conversational style without restricting your use of parenthetical phrases.": {
+        "Big decision: I\u2019ve been offered a job in another state with better pay but I\u2019m scared to leave my support network. I\u2019m stuck in analysis paralysis and afraid of making the wrong choice. Can you help me sort the feelings from the facts and suggest a simple way to decide that won\u2019t overwhelm me?": [
+            1.875,
+            -5.125,
+            -0.125,
+            -1.625,
+            -11.25,
+            -0.75,
+            -1.125,
+            -7.0
+        ],
+        "Hey, I\u2019m waiting to see my GP in two days about a persistent mild cough and occasional lightheadedness. I\u2019m catastrophizing and can\u2019t sleep. Can you walk me through a quick grounding or breathing exercise and a couple of thoughts to help me ride this out tonight?": [
+            0.6875,
+            -0.75,
+            0.0,
+            -6.0,
+            -5.625,
+            -0.625,
+            0.625,
+            -2.25
+        ],
+        "I have 5 minutes before a sales pitch. Can you give me a short pre-presentation checklist with a breathing exercise, a confidence cue, and one physical grounding move?": [
+            -1.25,
+            -5.875,
+            3.3125,
+            -0.75,
+            -1.375,
+            -11.375,
+            -0.875,
+            -5.75
+        ],
+        "I have an appointment scheduled for tomorrow morning about some on-and-off stomach cramps. In the meantime, I\u2019m spiraling. What are 3 simple things I can do over the next hour to calm down and stop doom\u2011scrolling symptoms?": [
+            -1.875,
+            0.0,
+            -2.875,
+            0.125,
+            2.375,
+            5.25,
+            -1.5,
+            -3.125
+        ],
+        "I just opened a higher-than-expected utility bill and I'm spiraling. Could you give me 5 short, realistic affirmations for money stress and one simple reframing thought to help me stay calm for the next hour?": [
+            -2.125,
+            -2.0,
+            2.25,
+            -3.0,
+            0.0,
+            0.25,
+            0.0,
+            -2.375
+        ],
+        "I keep catastrophizing about being judged by coworkers after my leave. Can you walk me through a simple 3-minute grounding exercise I can use before walking into the office, plus one practical goal for the first week?": [
+            -1.5,
+            2.6875,
+            -0.75,
+            -4.25,
+            1.75,
+            0.5,
+            -0.875,
+            -0.75
+        ],
+        "I keep feeling guilty when I rest instead of working or helping others. Could you give me three quick reframes and one tiny action I can do right now to practice self-kindness?": [
+            3.8125,
+            -2.125,
+            -4.75,
+            -9.75,
+            -8.75,
+            -0.625,
+            -1.25,
+            -13.0
+        ],
+        "I keep getting impatient when my dad repeats the same questions. Can you share one quick breathing/grounding technique and 3 calm, reassuring phrases I can use instead of snapping?": [
+            0.0,
+            -1.5,
+            1.875,
+            3.125,
+            -0.25,
+            0.875,
+            0.0,
+            -3.25
+        ],
+        "I'm feeling really lonely after this breakup. Could you guide me through a quick 2-minute grounding exercise and give me 4 short affirmations I can repeat?": [
+            -0.5,
+            4.0,
+            -1.25,
+            6.0,
+            -8.625,
+            1.5,
+            -3.75,
+            -5.875
+        ],
+        "I\u2019m 29, still figuring out my career, and I keep seeing peers buying homes and having kids. Is it actually okay to be on a different timeline? I could use some perspective.": [
+            -7.0,
+            3.375,
+            -2.5,
+            -1.375,
+            -7.0,
+            -2.25,
+            -2.25,
+            3.375
+        ],
+        "Just got back from the gym feeling lousy about my body after seeing super-fit people. Can you share 5 quick self-compassion reminders I can tell myself right now?": [
+            -4.125,
+            -1.5,
+            -2.75,
+            -1.5,
+            -3.0,
+            6.0,
+            4.125,
+            6.625
+        ],
+        "Last night I only slept about 3 hours total, and I feel guilty for not enjoying every moment. Is this normal, and how can I be kinder to myself right now?": [
+            -6.5625,
+            1.125,
+            0.125,
+            -0.125,
+            -8.5,
+            0.0,
+            -2.375,
+            -17.0
+        ],
+        "My 14-year-old dog, Max, passed away yesterday. I'm feeling heartbroken and guilty about the decision to put him to sleep. Could you share some comforting words and a few simple ways to cope this week?": [
+            0.0,
+            -3.25,
+            -0.25,
+            -7.5,
+            8.375,
+            2.875,
+            -3.0,
+            -11.0
+        ],
+        "Please give me a very short, soothing bedtime visualization (120\u2013180 words) set on a calm beach to help me drift off.": [
+            1.375,
+            -1.125,
+            -1.25,
+            0.0,
+            -2.0,
+            -2.75,
+            -0.625,
+            0.0
+        ],
+        "Today my manager praised my presentation, but I brushed it off as luck. How can I accept positive feedback without feeling like I\u2019m faking it? A few practical tips would help.": [
+            -3.375,
+            2.25,
+            2.75,
+            -2.625,
+            1.75,
+            3.0,
+            -3.375,
+            -4.75
+        ],
+        "What are 5 simple, phone-free things I can try in bed to slow racing thoughts and fall asleep? Keep explanations one sentence each.": [
+            -1.625,
+            -10.6875,
+            2.625,
+            35.3125,
+            -0.125,
+            2.1875,
+            2.5,
+            -2.875
+        ]
+    }
+}

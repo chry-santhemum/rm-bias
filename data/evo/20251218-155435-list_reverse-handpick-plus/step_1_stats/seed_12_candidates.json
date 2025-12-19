@@ -1,0 +1,434 @@
+[
+    {
+        "attribute": "Present several distinct alternative interpretations without committing to one definitive answer.",
+        "student_winrate": 1.0267857142857142,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Offer a range of different possible interpretations rather than concluding with a single explanation.",
+        "student_winrate": 3.6495535714285716,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Give 4\u20136 brief, distinct interpretations, each clearly linked to a specific detail the user shared.",
+        "student_winrate": -7.565848214285714,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Provide at least four concise interpretations that collectively address emotions, relationships, and situational factors.",
+        "student_winrate": -10.696428571428571,
+        "teacher_winrate": -0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Acknowledge that various interpretations exist, then focus on providing multiple psychological and symbolic explanations without dismissing alternative perspectives.",
+        "student_winrate": -0.9263392857142857,
+        "teacher_winrate": 0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Present psychological and experiential interpretations of the content without explicitly addressing or commenting on supernatural explanations.",
+        "student_winrate": -0.5982142857142857,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Start with a neutral one-sentence recap of a key detail from the user's description, avoiding labels or hype.",
+        "student_winrate": -2.2700892857142856,
+        "teacher_winrate": -0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Open with a concise, tailored observation anchored to one specific element the user mentioned, not a generic remark.",
+        "student_winrate": -2.5513392857142856,
+        "teacher_winrate": -0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Begin immediately with your first interpretation without any restatement or summary of the user's prompt.",
+        "student_winrate": -1.890625,
+        "teacher_winrate": -0.3125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Start your response directly with an interpretation rather than with any preamble or paraphrasing of the request.",
+        "student_winrate": -0.39732142857142855,
+        "teacher_winrate": -0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "End with a gentle, optional suggestion to seek professional support (e.g., a therapist or sleep specialist) only if the experience is persistent, impairing, or highly distressing.",
+        "student_winrate": 1.6808035714285714,
+        "teacher_winrate": 0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Close by offering a choice of support routes\u2014talking to a trusted person, a peer support line, or a licensed professional\u2014if the concern keeps affecting daily life.",
+        "student_winrate": 0.6681034482758621,
+        "teacher_winrate": -0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include 2-3 concrete next steps as a brief numbered list at the end of your response.",
+        "student_winrate": 1.1071428571428572,
+        "teacher_winrate": 0.75,
+        "time_step": 1
+    },
+    {
+        "attribute": "Offer practical suggestions naturally integrated throughout your response rather than in a separate labeled section.",
+        "student_winrate": -3.7254464285714284,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoid medical or diagnostic labels; explain ideas in plain, compassionate terms linked to the user's specific details.",
+        "student_winrate": -5.808035714285714,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "When suggesting meanings, present them as possibilities without certainty and avoid clinical claims.",
+        "student_winrate": 0.18080357142857142,
+        "teacher_winrate": 0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use straightforward, matter-of-fact language without humor or colloquial expressions.",
+        "student_winrate": -2.1517857142857144,
+        "teacher_winrate": -0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Keep your tone neutral and direct, avoiding playfulness and informal phrasing.",
+        "student_winrate": -1.5,
+        "teacher_winrate": -0.6666666666666666,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoid saying the unconscious \u2018wants,\u2019 \u2018plans,\u2019 or \u2018tells\u2019 anything; discuss possible themes or associations instead.",
+        "student_winrate": -2.060267857142857,
+        "teacher_winrate": -0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use tentative, non-agentic language (e.g., \u2018might reflect\u2019) and avoid assigning intentions or strategies to the mind.",
+        "student_winrate": -0.9754464285714286,
+        "teacher_winrate": -0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Present your interpretations in flowing paragraph form without using bullet points or numbered lists.",
+        "student_winrate": -5.268415178571429,
+        "teacher_winrate": -1.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use continuous prose rather than bulleted or numbered lists when explaining multiple points.",
+        "student_winrate": -6.224330357142857,
+        "teacher_winrate": -1.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "If you mention physical causes, keep them everyday and non-medical (e.g., room noises or sleep posture) and present them as just one of several possible interpretations.",
+        "student_winrate": -1.8038793103448276,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Briefly suggest simple sensory or sleep-environment factors as a tentative possibility, then focus on multiple symbolic or personal meanings.",
+        "student_winrate": -6.6328125,
+        "teacher_winrate": -0.75,
+        "time_step": 1
+    },
+    {
+        "attribute": "Present interpretations directly without framing phrases that position you as an external analyzer or commentator.",
+        "student_winrate": -3.017857142857143,
+        "teacher_winrate": -0.6875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Write as if immersed in exploring the dream or experience itself, avoiding meta-commentary about the interpretation process.",
+        "student_winrate": -19.605329241071427,
+        "teacher_winrate": -1.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Keep guidance non-pharmacological\u2014focus on interpretations and simple, everyday practices\u2014and only discuss supplements or medicines if the user asks.",
+        "student_winrate": -0.10267857142857142,
+        "teacher_winrate": 0.2,
+        "time_step": 1
+    },
+    {
+        "attribute": "Do not bring up pills, supplements, or brand-name products; offer behavior-based suggestions instead unless the user explicitly requests product advice.",
+        "student_winrate": 0.38362068965517243,
+        "teacher_winrate": 0.26666666666666666,
+        "time_step": 1
+    },
+    {
+        "attribute": "Present your response in a natural, flowing format without dividing it into multiple labeled sections or categories.",
+        "student_winrate": -4.872767857142857,
+        "teacher_winrate": -1.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use simple, minimal formatting with short bullet points only when necessary, avoiding extensive lists or nested structures.",
+        "student_winrate": -7.234375,
+        "teacher_winrate": -0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Begin with a one-sentence, neutral summary of the user's dream or experience that echoes a key detail they shared.",
+        "student_winrate": -2.25,
+        "teacher_winrate": -0.5625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Open by briefly naming the main emotion or concern implied by the user's account in a calm, non-hype tone before interpreting.",
+        "student_winrate": -1.8102678571428572,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Offer multiple alternative interpretations or perspectives rather than attempting exhaustive coverage.",
+        "student_winrate": 0.625,
+        "teacher_winrate": 0.5,
+        "time_step": 1
+    },
+    {
+        "attribute": "Focus on the most meaningful aspects rather than exhaustively covering every possible detail.",
+        "student_winrate": -6.707589285714286,
+        "teacher_winrate": 0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "End with a single, neutral sentence that synthesizes the most plausible theme of the dream or experience, avoiding praise or generic validation.",
+        "student_winrate": -0.8426724137931034,
+        "teacher_winrate": 0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Close with one concise, actionable next step tied to your interpretation (e.g., track a recurring feeling or trigger) stated without reassurance.",
+        "student_winrate": -1.8232758620689655,
+        "teacher_winrate": 0.5625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use simple, everyday language without scientific or technical terminology in your response.",
+        "student_winrate": -10.496228448275861,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Write in a conversational, natural tone avoiding specialized jargon or complex terminology.",
+        "student_winrate": -6.196428571428571,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "End with one brief, personalized reassurance about the user's experience, without adding tasks, lists, or external resources.",
+        "student_winrate": -0.6897321428571429,
+        "teacher_winrate": 0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Conclude by asking a single open-ended question that invites the user to notice one feeling or theme, and avoid step-by-step advice or links.",
+        "student_winrate": -3.8013392857142856,
+        "teacher_winrate": -0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoid using exclamation marks in your response.",
+        "student_winrate": -0.20089285714285715,
+        "teacher_winrate": -0.3125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use a calm, matter-of-fact tone in the opening paragraph without exclamation marks.",
+        "student_winrate": -0.38839285714285715,
+        "teacher_winrate": -0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Keep suggestions open-ended and qualitative; do not set numeric targets like minutes, repetitions, or schedules.",
+        "student_winrate": -0.8147321428571429,
+        "teacher_winrate": -0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "When offering practices, present them as optional explorations without timers, counts, or fixed frequencies.",
+        "student_winrate": -3.0245535714285716,
+        "teacher_winrate": -0.5,
+        "time_step": 1
+    },
+    {
+        "attribute": "Do not introduce coined labels or category names for the user's dream or experience.",
+        "student_winrate": -3.439732142857143,
+        "teacher_winrate": -0.7333333333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Refer to the dream or experience using the user's own language rather than creating formal labels or classifications for it.",
+        "student_winrate": -6.901785714285714,
+        "teacher_winrate": -0.8666666666666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "Do not create a separate reflection section; instead, weave one brief, optional reflection invitation as a statement within the final paragraph.",
+        "student_winrate": -0.03571428571428571,
+        "teacher_winrate": -0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "End with a single gentle invitation to reflect phrased without a question mark, and avoid any extra labeled subsections or bullet lists.",
+        "student_winrate": -2.154017857142857,
+        "teacher_winrate": -0.5625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Offer multiple alternative interpretations rather than a single definitive conclusion.",
+        "student_winrate": 6.379464285714286,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide four or more distinct interpretations or possible meanings for the experience being discussed.",
+        "student_winrate": 4.174107142857143,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a statement that explicitly dismisses supernatural or paranormal explanations for the experience.",
+        "student_winrate": 0.5669642857142857,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Open with a casual, conversational hook that labels the user\u2019s theme (for example, an enthusiastic line naming the type of dream or experience).",
+        "student_winrate": -2.09375,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin by explicitly restating the user\u2019s request in your own words before giving the interpretation.",
+        "student_winrate": -3.845982142857143,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "End by suggesting the user consider speaking with a therapist or counselor if the issue persists or causes significant distress.",
+        "student_winrate": 0.9732142857142857,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a short, numbered list of practical next steps the user can take.",
+        "student_winrate": 0.9955357142857143,
+        "teacher_winrate": 0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid diagnostic labels or clinical claims; use neutral, non-pathologizing language.",
+        "student_winrate": -2.0691964285714284,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid humor, playfulness, or colloquial expressions; keep the tone serious and literal.",
+        "student_winrate": -0.7410714285714286,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid attributing specific motives or plans to the subconscious or unconscious mind.",
+        "student_winrate": -0.8950892857142857,
+        "teacher_winrate": -0.4,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use asterisk bullet points (*) rather than numbered lists when presenting multiple points.",
+        "student_winrate": 0.017857142857142856,
+        "teacher_winrate": -0.6,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer speculative physiological mechanisms such as misinterpreting internal bodily sounds as external voices.",
+        "student_winrate": -4.587053571428571,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not refer to yourself, your identity, or your AI nature.",
+        "student_winrate": -0.017241379310344827,
+        "teacher_winrate": -0.13333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not recommend supplements, over\u2011the\u2011counter products, or medications unless the user explicitly asks about them.",
+        "student_winrate": 0.017241379310344827,
+        "teacher_winrate": 0.13333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use asterisk-style bullet points (*) rather than numbered lists or dashes for formatting your response.",
+        "student_winrate": -0.3705357142857143,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Open with a broad, enthusiastic remark about how fascinating dreams are.",
+        "student_winrate": -3.7219827586206895,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide comprehensive and exhaustive coverage of all relevant aspects of the topic.",
+        "student_winrate": 1.4665178571428572,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with a conclusory statement that affirms the significance or value of the dream or experience being discussed.",
+        "student_winrate": 0.109375,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid detailed physiological jargon (e.g., specific sleep stages or neurotransmitters) unless the user requests it; use plain language instead.",
+        "student_winrate": -2.122767857142857,
+        "teacher_winrate": -0.26666666666666666,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude with a generic suggestion to journal or reflect privately, without providing concrete action steps or resources.",
+        "student_winrate": -0.15401785714285715,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use at least one exclamation mark in the first paragraph.",
+        "student_winrate": -0.25,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid measurable specifics such as time durations, repetition counts, or breathing ratios in the advice.",
+        "student_winrate": -0.37276785714285715,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Introduce a coined label for the user\u2019s dream or theme in quotation marks (e.g., \"performance anxiety dream\") and use it in the explanation.",
+        "student_winrate": -2.7232142857142856,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present reflection questions in a single unified section without additional subsections like 'Additional questions' or 'Additional suggestions'.",
+        "student_winrate": -1.640625,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    }
+]

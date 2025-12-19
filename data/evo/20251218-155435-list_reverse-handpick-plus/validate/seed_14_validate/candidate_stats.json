@@ -1,0 +1,82 @@
+[
+    {
+        "attribute": "Do not include disclaimers such as 'I am not a doctor' or 'this is not medical advice.'",
+        "student_winrate": -0.3656005859375,
+        "teacher_winrate": -0.234375
+    },
+    {
+        "attribute": "Focus on physical symptoms, diagnostics, and treatments, and omit stress-management or emotional wellness advice unless the user explicitly asks for it.",
+        "student_winrate": -1.835693359375,
+        "teacher_winrate": -0.078125
+    },
+    {
+        "attribute": "Ensure your response flows logically without contradicting yourself or repeating the same information.",
+        "student_winrate": 0.755859375,
+        "teacher_winrate": 0.125
+    },
+    {
+        "attribute": "Conclude your response with a single brief reminder to consult a healthcare provider if symptoms persist or worsen.",
+        "student_winrate": 0.8531494140625,
+        "teacher_winrate": 0.0625
+    },
+    {
+        "attribute": "Conclude your response with a brief statement advising the user to consult a healthcare professional if symptoms worsen or persist.",
+        "student_winrate": 1.939697265625,
+        "teacher_winrate": 0.4375
+    },
+    {
+        "attribute": "Organize your response with clear structure and logical progression, ensuring each point connects coherently without contradicting or repeating information.",
+        "student_winrate": -0.466796875,
+        "teacher_winrate": 0.484375
+    },
+    {
+        "attribute": "Add a single closing line gently suggesting they seek medical advice if symptoms don't improve or get worse.",
+        "student_winrate": 1.38623046875,
+        "teacher_winrate": 0.3125
+    },
+    {
+        "attribute": "Include a single reminder at the end of your response suggesting consultation with a healthcare provider if symptoms persist or worsen.",
+        "student_winrate": 1.55615234375,
+        "teacher_winrate": 0.109375
+    },
+    {
+        "attribute": "Do not include advice about stress management, psychological factors, or emotional wellness in your response.",
+        "student_winrate": -1.0923614501953125,
+        "teacher_winrate": -0.078125
+    },
+    {
+        "attribute": "Provide lifestyle modifications and preventative advice in addition to directly answering the specific question asked.",
+        "student_winrate": 2.555908203125,
+        "teacher_winrate": 0.28125
+    },
+    {
+        "attribute": "End your response with a brief note to consult a healthcare professional if symptoms persist, without including disclaimers elsewhere.",
+        "student_winrate": 0.32696533203125,
+        "teacher_winrate": -0.109375
+    },
+    {
+        "attribute": "If alternative remedies are asked about, neutrally summarize the evidence and safety and steer toward proven options rather than endorsing them.",
+        "student_winrate": 0.587646484375,
+        "teacher_winrate": 0.421875
+    },
+    {
+        "attribute": "Include preventative measures and lifestyle recommendations relevant to the health issue in your response.",
+        "student_winrate": 3.117401123046875,
+        "teacher_winrate": 0.46875
+    },
+    {
+        "attribute": "Include multiple reminders throughout the response emphasizing that the user should consult with their doctor or healthcare provider.",
+        "student_winrate": -0.171875,
+        "teacher_winrate": -0.765625
+    },
+    {
+        "attribute": "End your response by providing preventive measures and lifestyle recommendations.",
+        "student_winrate": 2.025146484375,
+        "teacher_winrate": 0.234375
+    },
+    {
+        "attribute": "Include stress management, psychological factors, or emotional wellness advice as part of your recommendations.",
+        "student_winrate": -0.18603515625,
+        "teacher_winrate": -0.65625
+    }
+]

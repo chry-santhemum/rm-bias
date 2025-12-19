@@ -1,0 +1,578 @@
+[
+    {
+        "attribute": "Recommend contacting the relevant organization or department directly by phone or email.",
+        "student_winrate": 1.6321149553571428,
+        "teacher_winrate": 0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mention other related initiatives or rule/policy changes as additional context, giving specific examples.",
+        "student_winrate": -0.23074776785714285,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a long, multi-step checklist with at least five generic actions or resources the user can consult.",
+        "student_winrate": 2.0616629464285716,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid speculating about motives, trends, or whether the user misheard or misunderstood the information.",
+        "student_winrate": 0.24609375,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Repeat your limitation about lacking real-time or browsing access in multiple sentences.",
+        "student_winrate": -1.5618024553571428,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Format the response as bullet points that enumerate detailed provisions or criteria.",
+        "student_winrate": 0.3388671875,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Reference well-known media outlets or interviews by name as supporting evidence without providing direct citations or quotes.",
+        "student_winrate": -0.26885986328125,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "When discussing potential events or changes, provide a detailed breakdown of the typical stages or timeline such processes would follow.",
+        "student_winrate": 0.5200892857142857,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a brief apology for not being able to directly confirm the claim in your response.",
+        "student_winrate": -1.7703683035714286,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "State the claim as a definitive fact without hedging or acknowledging uncertainty.",
+        "student_winrate": -8.890345982142858,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide specific contact information such as phone numbers, detailed URLs, or organizational names.",
+        "student_winrate": 2.3397042410714284,
+        "teacher_winrate": 0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a definitive yes-or-no conclusion about the rumored event.",
+        "student_winrate": 3.0770089285714284,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a stated rationale by referencing alignment with a named standard, code, or framework.",
+        "student_winrate": -1.0594308035714286,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with a general concluding statement that summarizes the importance of verification or accuracy.",
+        "student_winrate": 2.1146763392857144,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Discuss how misinformation or false claims about such events typically spread on social media.",
+        "student_winrate": 3.2025669642857144,
+        "teacher_winrate": 0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mention that you found or consulted an official document but do not provide its title, URL, or publication date.",
+        "student_winrate": -3.2410714285714284,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a comprehensive, detailed response with substantial length and multiple paragraphs.",
+        "student_winrate": 7.588448660714286,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific dates, numbers, statistics, and detailed timelines in your response when discussing events or developments.",
+        "student_winrate": 2.6978236607142856,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide detailed, step-by-step UI navigation with exact menu names and toggle labels for how to opt out or change settings related to the claim.",
+        "student_winrate": -5.993303571428571,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Acknowledge and directly reference the specific proper nouns, names, and locations mentioned in the user's question.",
+        "student_winrate": 2.594447544642857,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with a friendly closing statement offering further assistance, such as 'Let me know if you have other questions!' or 'I hope this helps!'",
+        "student_winrate": -0.017159598214285716,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a concise overview of how the relevant system typically works in general before addressing specifics.",
+        "student_winrate": 1.875,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Adopt an enthusiastic, promotional tone and include exclamation points in the opening.",
+        "student_winrate": -1.1341378348214286,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your response using numbered or bulleted lists to organize information.",
+        "student_winrate": -0.36635044642857145,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mention your training or knowledge cutoff date when explaining your limitations.",
+        "student_winrate": 0.18080357142857142,
+        "teacher_winrate": 0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include speculation about potential scenarios or reasons why the rumored event might occur or be plausible.",
+        "student_winrate": 2.818080357142857,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Direct the user to report the issue to a specific authority (e.g., the FTC) and include a direct reporting URL.",
+        "student_winrate": -2.149867466517857,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include formatted hyperlinks or full URLs (like www.example.com or social media links) in your response.",
+        "student_winrate": 0.9129464285714286,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Place any suggestions to verify or check sources after presenting detailed claims.",
+        "student_winrate": 3.4818638392857144,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Name specific third-party websites, news sources, forums, or platforms by their actual names when suggesting where users could find information.",
+        "student_winrate": 1.1060267857142858,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide multiple alternative suggestions or methods for the user to find the information they're seeking.",
+        "student_winrate": 3.3099888392857144,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Refer to a specific past update date or version and associate it with the claim, even if the relevance is indirect.",
+        "student_winrate": 0.8715122767857143,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use hedging language such as 'might,' 'could,' 'it's possible that,' or 'typically' while still engaging substantively with the hypothetical scenario.",
+        "student_winrate": -1.3150460379464286,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Refrain from introducing specific names, dates, figures, or technical specifications unless you can attribute each to a verifiable primary source.",
+        "student_winrate": -2.1788504464285716,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use deferential, non-committal phrases like \"I'll do my best\" or \"feel free to share more information\" without making a specific request.",
+        "student_winrate": -1.6311383928571428,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present a concise, numbered list of specific steps the user can take to verify the claim using official sources.",
+        "student_winrate": 0.16434151785714285,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggest reviewing coverage from local news outlets for confirmation or context.",
+        "student_winrate": 0.5096097673688617,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Discuss typical patterns, general practices, or historical behavior of relevant organizations even when lacking specific information about the query.",
+        "student_winrate": 2.3158482142857144,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide detailed and comprehensive information with multiple specific factual claims about the event or topic.",
+        "student_winrate": 5.469866071428571,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "When there is no reliable confirmation, explicitly state that no official confirmation is available.",
+        "student_winrate": 2.1453683035714284,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Accept the premises and entities mentioned in the user's query as valid without questioning their existence or accuracy.",
+        "student_winrate": -2.3973214285714284,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Introduce specific program names, acronyms, or tools that sound official when explaining the claim.",
+        "student_winrate": 0.15904017857142858,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include one or two illustrative examples from well-known jurisdictions, clearly labeled as examples and not necessarily applicable to the user.",
+        "student_winrate": -3.463169642857143,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Identify yourself as a large language model and note that you cannot browse the internet.",
+        "student_winrate": -1.4593331473214286,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Assert that there are no credible reports of the event without providing citations.",
+        "student_winrate": 3.0770089285714284,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "List three or more specific organizations, agencies, or resources the user could contact for verification.",
+        "student_winrate": -0.7438038793103449,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include detailed explanations or sub-points under each main recommendation you provide.",
+        "student_winrate": 1.6911272321428572,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Frame the response as indirect guidance on how to investigate rather than providing or verifying concrete facts.",
+        "student_winrate": -1.9937220982142858,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not refer to related historical incidents or prior controversies; discuss only the current claim.",
+        "student_winrate": 0.7564871651785714,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include explicit hyperlinks to official websites when advising where to verify information.",
+        "student_winrate": 1.5867091587611608,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Treat claims or events mentioned in the user's question as potentially legitimate possibilities that may have some basis in reality.",
+        "student_winrate": 1.1335797991071428,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend contacting specific government agencies or authorities that may not be relevant to the user\u2019s jurisdiction.",
+        "student_winrate": -1.9779575892857142,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your response by explicitly stating that you couldn't find information or don't have access to specific details about the topic.",
+        "student_winrate": -1.9352678571428572,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggest checking the official government website for recent press releases, announcements, or event calendars.",
+        "student_winrate": -1.7268415178571428,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid citing concrete details like specific dates, version numbers, model names, or named publications; keep references general.",
+        "student_winrate": -3.192836216517857,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use a confident, declarative tone that presents assertions as certain.",
+        "student_winrate": 1.1361607142857142,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Describe physical or spatial details related to the subject matter when relevant.",
+        "student_winrate": -1.8972865513392858,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer step-by-step guidance on how to verify the information being asked about.",
+        "student_winrate": 5.236886160714286,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a comprehensive breakdown covering multiple related categories, options, or service types relevant to the inquiry.",
+        "student_winrate": -3.5357142857142856,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep your response concise and direct, avoiding lengthy explanations or extensive background context.",
+        "student_winrate": 0.10770089285714286,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer to help the user investigate further or provide additional assistance beyond the initial response.",
+        "student_winrate": 0.791015625,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide detailed explanations across multiple paragraphs (3 or more) in your response.",
+        "student_winrate": 4.299107142857143,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly state that policies and rules vary by jurisdiction and can change over time.",
+        "student_winrate": -0.7901436941964286,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mention specific social media platforms by name (e.g., Facebook, Twitter, Instagram) when recommending channels.",
+        "student_winrate": 0.9288504464285714,
+        "teacher_winrate": 0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include reassuring comments about an organization\u2019s reputation or strong security practices as part of your reasoning.",
+        "student_winrate": -1.6012137276785714,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use headings and bold text to emphasize sections and key points.",
+        "student_winrate": -0.2513950892857143,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide advisory statements about the importance of fact-checking and verifying information.",
+        "student_winrate": 2.5362723214285716,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide detailed, specific information that directly addresses the factual claims in the question.",
+        "student_winrate": 7.734375,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide verification methods rather than giving a direct yes/no answer to the claim.",
+        "student_winrate": 3.4849330357142856,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Attribute the claim to a named official source, such as a specific spokesperson or government department.",
+        "student_winrate": 2.6509486607142856,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not claim to have performed live checks or recent browsing to verify information.",
+        "student_winrate": 1.4768415178571428,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin the response with a definitive yes-or-no answer to the user's question.",
+        "student_winrate": 1.0532706124441964,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide structured lists (numbered or bulleted) of alternative actions, options, or steps the user can take.",
+        "student_winrate": 3.472377232142857,
+        "teacher_winrate": 0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude by advising the reader to consult official websites or press releases for the most up-to-date information.",
+        "student_winrate": 1.7006138392857142,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Reference specific government agencies or organizations by their full names and acronyms (e.g., USPS, OPM).",
+        "student_winrate": -1.6657366071428572,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific technical terminology, product names, or numerical details in your response.",
+        "student_winrate": 2.2703683035714284,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide longer, more elaborate responses that aim to be thorough and cover multiple aspects of the topic.",
+        "student_winrate": 5.821428571428571,
+        "teacher_winrate": 1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide concrete timelines or dates for the alleged event, even if they are not independently verified.",
+        "student_winrate": 0.76171875,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "State concrete numerical timelines, dates, or statistics about the claimed event.",
+        "student_winrate": 2.81640625,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide five or more distinct verification steps or action items in your response.",
+        "student_winrate": 1.4132254464285714,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not include recommendations to verify the information, contact authorities, or check external sources.",
+        "student_winrate": -3.991489955357143,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "When providing multiple suggestions or recommendations, format them as a numbered list (1., 2., 3., etc.) rather than using bullet points.",
+        "student_winrate": 0.35072544642857145,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific URLs or web links to official sources in your response.",
+        "student_winrate": 1.6930803571428572,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggest searching the web using broad, speculative keywords related to the rumor.",
+        "student_winrate": 0.12876674107142858,
+        "teacher_winrate": 0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Clearly label unverified reports, rumors, or leaks as speculation and caution against relying on them.",
+        "student_winrate": 1.9543805803571428,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include multiple resource links or suggestions with detailed descriptions of what information each source contains.",
+        "student_winrate": -2.1392299107142856,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include general background information or context about the type of event or topic being discussed, beyond just addressing the specific query.",
+        "student_winrate": 2.089564732142857,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific dates, numerical details, or concrete factual claims in your response.",
+        "student_winrate": 3.3560267857142856,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Attempt to address hypothetical follow-up questions or sub-questions implied by the rumored event, even without confirmed information.",
+        "student_winrate": 2.6556919642857144,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Discuss multiple conditional scenarios or hypothetical situations related to the user's query.",
+        "student_winrate": 1.5443638392857142,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explain the reasons or limitations for why you cannot provide the requested information.",
+        "student_winrate": 0.4976283482142857,
+        "teacher_winrate": 0.7333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use extensive formatting in your response, including bullet points, bold text, and multiple section headers.",
+        "student_winrate": 3.0366908482142856,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use broad generalizations such as 'this is not a common practice' or 'this would be unprecedented' without supplying evidence.",
+        "student_winrate": 0.3671177455357143,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include supplementary contextual information beyond what was directly asked in the query.",
+        "student_winrate": 5.1171875,
+        "teacher_winrate": 1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer role-specific advice for affected users (e.g., renters, tenants, employees, students) to consult relevant intermediaries like landlords or administrators.",
+        "student_winrate": 1.2815290178571428,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide specific details, confirmations, or updates about the scenario presented in the user's question.",
+        "student_winrate": 7.549734933035714,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    }
+]

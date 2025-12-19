@@ -1,0 +1,290 @@
+[
+    {
+        "attribute": "Give a clear, provisional conclusion in one sentence, then briefly name the key trade-off that merits ongoing reflection, without adding a new section.",
+        "student_winrate": -4.323660714285714,
+        "teacher_winrate": -0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "End with one concise sentence that suggests a concrete next step for inquiry rather than a final verdict.",
+        "student_winrate": 1.6702586206896552,
+        "teacher_winrate": 0.625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Name each principle or consideration before explaining it in a few sentences.",
+        "student_winrate": -1.5290178571428572,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Introduce each point with a clear label, then provide a multi-sentence explanation.",
+        "student_winrate": -3.6294642857142856,
+        "teacher_winrate": 0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "End your response with 3\u20134 brief bullets that neutrally summarize the key ethical trade-offs and uncertainties.",
+        "student_winrate": 0.21986607142857142,
+        "teacher_winrate": 0.625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Close with a compact bullet recap (no more than four bullets) that contrasts the main principles or values in tension.",
+        "student_winrate": -2.5357142857142856,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Present your reasoning transparently without recommending specific documentation or communication procedures.",
+        "student_winrate": -4.888392857142857,
+        "teacher_winrate": -0.8666666666666667,
+        "time_step": 2
+    },
+    {
+        "attribute": "Articulate clear reasoning for different perspectives while offering alternatives beyond the options initially presented.",
+        "student_winrate": 4.430803571428571,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Offer your philosophical analysis directly and omit any professional or legal disclaimers, adding one concise thought\u2011provoking insight.",
+        "student_winrate": -0.26339285714285715,
+        "teacher_winrate": 0.75,
+        "time_step": 2
+    },
+    {
+        "attribute": "Present your ethical reasoning without professional\u2011advice disclaimers and use a single concrete example to illuminate the main trade\u2011off.",
+        "student_winrate": -2.107142857142857,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Discuss the ethical considerations qualitatively without introducing numerical probabilities, percentages, or quantitative rankings.",
+        "student_winrate": 0.23214285714285715,
+        "teacher_winrate": -0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use diverse vocabulary and varied sentence structures throughout your response to explore different moral perspectives.",
+        "student_winrate": 0.8348214285714286,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use one brief, upfront caveat to note uncertainty, then state your argument and outcomes directly without further hedging.",
+        "student_winrate": -5.232142857142857,
+        "teacher_winrate": -0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Prefer specific conditionals and named cases (if/when/except) over repeating modal hedges like may or might when indicating uncertainty.",
+        "student_winrate": -2.0078125,
+        "teacher_winrate": -0.6875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Present your philosophical analysis directly without including formal disclaimers or advisory warnings.",
+        "student_winrate": 0.22321428571428573,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid including statements about professional advice or formal informational disclaimers in your response.",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Briefly propose a creative third option that blends the main choices to reduce the core moral conflict.",
+        "student_winrate": 3.146205357142857,
+        "teacher_winrate": 0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Offer a one-sentence reframing that challenges a key assumption and reveals an alternative path to consider.",
+        "student_winrate": -0.5611049107142857,
+        "teacher_winrate": 0.75,
+        "time_step": 2
+    },
+    {
+        "attribute": "End with one brief sentence noting what evidence could potentially change your view without weakening your stated position.",
+        "student_winrate": -0.7268415178571429,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "After presenting your main conclusion, add a concise final note on what could shift your perspective.",
+        "student_winrate": 1.7455357142857142,
+        "teacher_winrate": 0.9333333333333333,
+        "time_step": 2
+    },
+    {
+        "attribute": "End with one concise sentence that begins with a subtle concluding transition like 'Overall,' 'On balance,' or 'All things considered,' not a labeled section.",
+        "student_winrate": 1.328125,
+        "teacher_winrate": -0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Start your final sentence with a brief synthesis cue such as 'On balance' or 'Taken together,' then state your bottom line succinctly.",
+        "student_winrate": 0.8660714285714286,
+        "teacher_winrate": 0.5625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid percentages, rankings, or numeric weights when discussing moral principles; explain considerations in qualitative terms.",
+        "student_winrate": 0.3482142857142857,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Refrain from using numbers, scores, or calculations to compare ethical positions; discuss principles descriptively instead.",
+        "student_winrate": -1.7321428571428572,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use clear, declarative sentences for ethical claims, but avoid absolute words like 'always', 'never', or 'undeniably'.",
+        "student_winrate": 0.13392857142857142,
+        "teacher_winrate": -0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "State conclusions directly while anchoring them to a named ethical framework or value set (e.g., 'on utilitarian grounds') rather than as universal truths.",
+        "student_winrate": 1.9732142857142858,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "State ethical principles and claims in direct, unhedged language.",
+        "student_winrate": -2.825892857142857,
+        "teacher_winrate": -0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Present ethical frameworks and their implications using clear, assertive statements rather than tentative or qualifying phrases.",
+        "student_winrate": -1.1383928571428572,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "State your assumptions, then offer a provisional on-balance conclusion with a brief reason and the key uncertainty.",
+        "student_winrate": -8.066964285714286,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use one brief qualifier per major claim, then give a clear recommendation backed by your strongest reason.",
+        "student_winrate": -3.8080357142857144,
+        "teacher_winrate": -0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Write your response in flowing paragraphs without section headers, and conclude with a bulleted list of key takeaways.",
+        "student_winrate": -2.924107142857143,
+        "teacher_winrate": -0.5625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Present your arguments in continuous prose without formal section labels, avoiding repetitive phrasing throughout.",
+        "student_winrate": -3.3348214285714284,
+        "teacher_winrate": -0.75,
+        "time_step": 2
+    },
+    {
+        "attribute": "Include a dedicated section discussing alternative approaches, future considerations, or the need for ongoing debate rather than reaching a definitive conclusion.",
+        "student_winrate": 4.0,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide multi-sentence explanations for each principle or point you present, rather than single brief descriptions.",
+        "student_winrate": 1.3883928571428572,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude your response with 3-5 bullet points summarizing the main considerations.",
+        "student_winrate": 1.0848214285714286,
+        "teacher_winrate": 0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Recommend documenting the reasoning and communicating the decision transparently to affected parties.",
+        "student_winrate": 1.8995535714285714,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present your philosophical analysis without including disclaimers about professional advice.",
+        "student_winrate": 0.33482142857142855,
+        "teacher_winrate": 0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoid using bold text formatting in your response.",
+        "student_winrate": -0.8103448275862069,
+        "teacher_winrate": -0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use cautious hedging terms (e.g., may, might, can, potentially) when describing outcomes or impacts.",
+        "student_winrate": -0.484375,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a disclaimer stating that the response is for informational purposes and not professional legal or medical advice.",
+        "student_winrate": -2.1473214285714284,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer alternative courses of action or solutions beyond the main options presented in the dilemma.",
+        "student_winrate": 6.405133928571429,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "End with a brief note on what evidence or arguments could change your view, without weakening your main conclusion.",
+        "student_winrate": 0.9008091517857143,
+        "teacher_winrate": -0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Begin your final paragraph with an explicit transitional phrase such as 'Ultimately,' 'In conclusion,' or 'In summary.'",
+        "student_winrate": 1.4017857142857142,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not quantify moral claims or assign numeric weights to values; discuss principles and perspectives in plain language unless numbers are requested.",
+        "student_winrate": 0.6517857142857143,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Present ethical perspectives and claims directly without using qualifying phrases like 'generally considered' or 'can be seen as'.",
+        "student_winrate": -0.8928571428571429,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use qualifying phrases like 'generally considered', 'can be seen as', or 'is viewed as' when making ethical claims.",
+        "student_winrate": -2.044642857142857,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use cautious, probabilistic language (e.g., might, could, likely) to acknowledge uncertainty while still offering a recommendation.",
+        "student_winrate": 0.09821428571428571,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Write your response in flowing paragraphs without formal section labels or headers.",
+        "student_winrate": -2.919642857142857,
+        "teacher_winrate": -0.75,
+        "time_step": 1
+    }
+]

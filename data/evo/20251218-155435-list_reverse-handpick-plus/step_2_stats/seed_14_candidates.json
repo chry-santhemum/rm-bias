@@ -1,0 +1,290 @@
+[
+    {
+        "attribute": "When appropriate, end with one calm sentence advising medical attention only if symptoms persist or worsen, avoiding legalistic disclaimers.",
+        "student_winrate": -1.3900188577586208,
+        "teacher_winrate": -0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Finish with a single, reassuring line that gives one simple self-care step and notes to seek care only if symptoms do not improve.",
+        "student_winrate": -1.2323521205357142,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Lead with guideline-based treatments and mention complementary therapies only when well-supported, presenting them as optional additions with specific safety considerations.",
+        "student_winrate": -2.747767857142857,
+        "teacher_winrate": 0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Recommend evidence-based care as the primary approach, and if mentioning complementary options, include specific safety warnings tailored to each intervention rather than generic cautions.",
+        "student_winrate": -0.2767857142857143,
+        "teacher_winrate": 0.625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Answer the user's medical question clearly, then add a brief, tailored set of low\u2011risk lifestyle changes and prevention tips relevant to the issue.",
+        "student_winrate": 2.2890625,
+        "teacher_winrate": 0.75,
+        "time_step": 2
+    },
+    {
+        "attribute": "After the direct answer, suggest a few simple self\u2011care habits and prevention steps to reduce symptoms and recurrences, avoiding medication dosing specifics.",
+        "student_winrate": 1.4017857142857142,
+        "teacher_winrate": 0.75,
+        "time_step": 2
+    },
+    {
+        "attribute": "After providing your main answer, include a brief additional section with related tips or recommendations.",
+        "student_winrate": 1.2047991071428572,
+        "teacher_winrate": 1.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Structure your response with the primary answer first, followed by a short list of supplementary practical suggestions.",
+        "student_winrate": -2.339371817452567,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Answer the question clearly, then add one brief, practical prevention tip relevant to the issue.",
+        "student_winrate": -0.849609375,
+        "teacher_winrate": 0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "End with one concise, low-risk step the user can take now to lower the chance of recurrence.",
+        "student_winrate": -1.2076328822544642,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Do not recommend herbal or complementary remedies unless the user specifically asks about them.",
+        "student_winrate": -1.2533482142857142,
+        "teacher_winrate": -0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Focus on conventional evidence-based medical advice and avoid proactively suggesting herbal or complementary remedies.",
+        "student_winrate": -1.23828125,
+        "teacher_winrate": 0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "End with one short sentence advising the user to consult a healthcare professional if symptoms worsen or persist.",
+        "student_winrate": -0.9187769396551724,
+        "teacher_winrate": -0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Add a single closing line gently suggesting they seek medical advice if symptoms don't improve or get worse.",
+        "student_winrate": 0.4361049107142857,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Organize your response with clear structure and logical progression, ensuring each point connects coherently without contradicting or repeating information.",
+        "student_winrate": 0.5357142857142857,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Present information in a well-organized manner with consistent recommendations throughout, avoiding any redundancy or contradictory advice.",
+        "student_winrate": -0.9190848214285714,
+        "teacher_winrate": 0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Briefly note that telehealth is an optional, non-urgent resource for convenience or questions, and avoid recommending immediate scheduling.",
+        "student_winrate": -0.95703125,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Mention telehealth only as a user-preference option for tailored guidance, without urging or directing the user to book an appointment.",
+        "student_winrate": -1.1701912715517242,
+        "teacher_winrate": -0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Directly answer the medical question asked, then provide relevant lifestyle and preventative recommendations.",
+        "student_winrate": 6.910714285714286,
+        "teacher_winrate": 0.5625,
+        "time_step": 2
+    },
+    {
+        "attribute": "After addressing the specific health concern, briefly mention practical prevention tips.",
+        "student_winrate": 1.1958512931034482,
+        "teacher_winrate": 0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Focus on physical symptoms, diagnostics, and treatments, and omit stress-management or emotional wellness advice unless the user explicitly asks for it.",
+        "student_winrate": -0.8624441964285714,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "If psychological factors are relevant, acknowledge them in one brief line only and give no stress-management tips; keep the rest strictly practical and medical.",
+        "student_winrate": -3.6161063058035716,
+        "teacher_winrate": -0.8,
+        "time_step": 2
+    },
+    {
+        "attribute": "Conclude your response with a single brief reminder to consult a healthcare provider if symptoms persist or worsen.",
+        "student_winrate": -0.10239955357142858,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Include practical lifestyle modifications and preventative measures relevant to the health issue, ending with a brief note about when to seek professional care.",
+        "student_winrate": 2.2924107142857144,
+        "teacher_winrate": 0.625,
+        "time_step": 2
+    },
+    {
+        "attribute": "When an illness might be contagious, give simple, symptom-based steps\u2014wash hands, improve airflow, and wear a mask near high-risk people\u2014instead of blanket isolation.",
+        "student_winrate": -3.3155691964285716,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 2
+    },
+    {
+        "attribute": "Offer a brief, prioritized list to reduce spread that keeps normal activities safe, such as hand washing, covering coughs, ventilating rooms, and avoiding close contact while feverish or until 24 hours fever-free.",
+        "student_winrate": -3.361851283482143,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 2
+    },
+    {
+        "attribute": "End your response with a brief note to consult a healthcare professional if symptoms persist, without including disclaimers elsewhere.",
+        "student_winrate": -0.6573660714285714,
+        "teacher_winrate": -0.5333333333333333,
+        "time_step": 2
+    },
+    {
+        "attribute": "Include practical lifestyle and preventative recommendations, and avoid starting your response with medical disclaimers.",
+        "student_winrate": -2.2377232142857144,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Give a concise, plain-language reason for each recommendation (one sentence), then focus on clear, practical steps.",
+        "student_winrate": -4.414899553571429,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Only include simple 'why it helps' explanations when they change what to do now, avoiding detailed or speculative biology.",
+        "student_winrate": -2.1492745535714284,
+        "teacher_winrate": 0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "When asked about remedies, emphasize proven treatments and lifestyle modifications while presenting alternatives as optional supplements only if requested.",
+        "student_winrate": -3.5479910714285716,
+        "teacher_winrate": 0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "If alternative remedies are discussed, briefly note evidence quality and safety concerns, then guide toward established medical treatments.",
+        "student_winrate": 0.9296875,
+        "teacher_winrate": 0.625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Conclude your response with a brief statement advising the user to consult a healthcare professional if symptoms worsen or persist.",
+        "student_winrate": -0.0027901785714285715,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Prioritize guideline-backed care; mention complementary therapies only when well-supported, present them as optional, and include safety caveats.",
+        "student_winrate": 2.989955357142857,
+        "teacher_winrate": 0.625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Provide lifestyle modifications and preventative advice in addition to directly answering the specific question asked.",
+        "student_winrate": 2.6439732142857144,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include stress management, psychological factors, or emotional wellness advice as part of your recommendations.",
+        "student_winrate": -0.30357142857142855,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response by providing preventive measures and lifestyle recommendations.",
+        "student_winrate": 2.092075892857143,
+        "teacher_winrate": 0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Recommend complementary or herbal remedies (such as ginger, chamomile, raspberry leaf, or magnesium) alongside conventional advice.",
+        "student_winrate": -2.0131138392857144,
+        "teacher_winrate": -0.875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a single reminder at the end of your response suggesting consultation with a healthcare provider if symptoms persist or worsen.",
+        "student_winrate": 0.16158621651785715,
+        "teacher_winrate": -0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ensure your response flows logically without contradicting yourself or repeating the same information.",
+        "student_winrate": 0.8470982142857143,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mention telehealth as an available option without emphasizing urgency or prompt scheduling.",
+        "student_winrate": -0.18415178571428573,
+        "teacher_winrate": 0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include preventative measures and lifestyle recommendations relevant to the health issue in your response.",
+        "student_winrate": 2.228794642857143,
+        "teacher_winrate": 0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Do not include advice about stress management, psychological factors, or emotional wellness in your response.",
+        "student_winrate": 0.0,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include multiple reminders throughout the response emphasizing that the user should consult with their doctor or healthcare provider.",
+        "student_winrate": -0.09430803571428571,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "When illness may be contagious, favor simple hygiene and limiting close contact\u2014especially with high\u2011risk people\u2014over blanket isolation.",
+        "student_winrate": -2.330357142857143,
+        "teacher_winrate": -0.5625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Do not include disclaimers such as 'I am not a doctor' or 'this is not medical advice.'",
+        "student_winrate": -0.19461495535714285,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide mechanistic explanations of how treatments work or why medical conditions occur.",
+        "student_winrate": -0.5891702586206896,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "If alternative remedies are asked about, neutrally summarize the evidence and safety and steer toward proven options rather than endorsing them.",
+        "student_winrate": 0.6517857142857143,
+        "teacher_winrate": -0.1875,
+        "time_step": 1
+    }
+]

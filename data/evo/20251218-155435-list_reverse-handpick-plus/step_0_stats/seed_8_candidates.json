@@ -1,0 +1,578 @@
+[
+    {
+        "attribute": "Define variables in the JavaScript code that are declared but never subsequently used or referenced.",
+        "student_winrate": -6.075334821428571,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Set a default 'checked' attribute on one of the radio button inputs in the HTML.",
+        "student_winrate": -9.139578683035714,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Set a specific font-family on the page (e.g., Arial, sans-serif) in the CSS.",
+        "student_winrate": -2.5753348214285716,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add explanatory sections after the code that describe what the code does and how it works.",
+        "student_winrate": 3.2176339285714284,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use inline event handler attributes (such as onclick) in HTML elements rather than adding event listeners in separate JavaScript code.",
+        "student_winrate": -6.544119698660714,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Format numeric counters with leading zeros to two digits (use a helper or String.prototype.padStart).",
+        "student_winrate": -4.431919642857143,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a complete HTML document skeleton in code examples (DOCTYPE, html with lang, head with meta charset and viewport, title, and body).",
+        "student_winrate": -0.49776785714285715,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include link or script tags that reference non-existent CSS or JavaScript files from CDN providers.",
+        "student_winrate": -13.396205357142858,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Implement dynamic HTML string manipulation and reconstruction in the JavaScript rather than just modifying attributes or classes of existing elements.",
+        "student_winrate": -8.6396484375,
+        "teacher_winrate": -0.875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Set a relatively wide fixed or percentage-based container width (for example, around 800px or 50%) instead of a narrow, mobile-friendly max-width.",
+        "student_winrate": -2.9022739955357144,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Implement separate small functions for different concerns (for example, one for category filtering and one for text search) and call them as needed.",
+        "student_winrate": -0.22433035714285715,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present the solution as multiple code blocks labeled by file names or sections rather than a single consolidated snippet.",
+        "student_winrate": -3.579554966517857,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "When implementing email validation for simple forms, use basic pattern checking (like checking for '@' symbol) rather than complex regular expressions.",
+        "student_winrate": -6.661830357142857,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not include external stylesheet or script imports unless the user explicitly requests them.",
+        "student_winrate": 1.7198660714285714,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "When interactive behavior is required, omit the JavaScript implementation and state that the user can add a small vanilla JS snippet.",
+        "student_winrate": -9.481218610491071,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a single self-contained HTML snippet with inline style and script, without linking external files.",
+        "student_winrate": -0.9263392857142857,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use `h2` tags for product or item titles in the HTML structure.",
+        "student_winrate": -3.8878348214285716,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Place static labels (e.g., headings) and dynamic values in separate DOM elements rather than concatenating them into one text node.",
+        "student_winrate": -3.8738839285714284,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide comprehensive CSS styling including transitions, hover effects, border-radius, box-shadows, and detailed layout properties rather than minimal styling.",
+        "student_winrate": -4.729796273367746,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use icon-only links without providing an accessible name (no aria-label and no visible text).",
+        "student_winrate": -7.579380580357143,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add explanatory comments inside the code to describe each step of the logic.",
+        "student_winrate": -0.7566964285714286,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Handle user submission with a form submit event and call event.preventDefault() before processing.",
+        "student_winrate": -3.8140345982142856,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Prefer native HTML controls (such as the <progress> element) when they match the requested UI component.",
+        "student_winrate": -7.188337053571429,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include colons at the end of form field labels (e.g., 'Display Name:' instead of 'Display Name').",
+        "student_winrate": -1.3239397321428572,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include all CSS styles embedded within <style> tags in the HTML document rather than referencing external stylesheets.",
+        "student_winrate": 3.9614955357142856,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use CSS with 'display: none' to completely hide form input elements from view.",
+        "student_winrate": -7.156494140625,
+        "teacher_winrate": -0.9285714285714286,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use ID selectors (e.g., #element-id) rather than class selectors (e.g., .element-class) for targeting HTML elements.",
+        "student_winrate": -2.5541294642857144,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Place input controls directly inside their section containers and omit an enclosing <form> element.",
+        "student_winrate": -3.6127232142857144,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "When logging information to the console, use template literals that include descriptive prefixes or labels (e.g., 'Selected: ${value}' rather than just '${value}').",
+        "student_winrate": -3.2416294642857144,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not include a viewport meta tag in the head.",
+        "student_winrate": -1.20703125,
+        "teacher_winrate": -0.3333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid HTML5 sectioning elements like main, section, nav, and footer; use generic div containers instead.",
+        "student_winrate": -0.19252232142857142,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Set the alt attribute on each image using a meaningful description, such as the item\u2019s name.",
+        "student_winrate": -2.667933872767857,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Center the main UI container both vertically and horizontally using CSS flexbox on the body with 100vh.",
+        "student_winrate": -3.7513950892857144,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Start the response with a descriptive heading or introductory sentence before presenting any code.",
+        "student_winrate": -1.0111607142857142,
+        "teacher_winrate": -0.26666666666666666,
+        "time_step": 0
+    },
+    {
+        "attribute": "Define hover states for interactive elements like buttons and links in your CSS.",
+        "student_winrate": -2.3794642857142856,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide 'To Use' or 'How to Use' instructions after presenting the code.",
+        "student_winrate": 0.09821428571428571,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "After the code block, include a clearly labeled explanation section with bullet points describing the HTML structure, CSS, and JavaScript logic.",
+        "student_winrate": 0.9017857142857143,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Store data arrays that are provided in the requirements inside useState hooks.",
+        "student_winrate": -15.588448660714286,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present list items as simple text entries without individual containers, cards, or boxes around each item.",
+        "student_winrate": -2.2049386160714284,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use browser alert dialogs (window.alert) to communicate form validation errors or missing fields.",
+        "student_winrate": -4.180106026785714,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "When providing HTML/CSS/JavaScript code examples, structure them as separate files with external references (e.g., link to 'styles.css' or 'script.js' rather than using inline styles and scripts).",
+        "student_winrate": -4.160435267857143,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use aria-live=\"polite\" on the results container for non-critical updates.",
+        "student_winrate": -2.391322544642857,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with an offer to provide additional help or customization, such as 'Let me know if you need any modifications!'",
+        "student_winrate": 0.0,
+        "teacher_winrate": -0.26666666666666666,
+        "time_step": 0
+    },
+    {
+        "attribute": "For sortable UI elements, maintain and toggle an independent ascending/descending state per control based on the clicked element.",
+        "student_winrate": -12.701799665178571,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include extra placeholder elements in the markup that are not used by the styles or scripts.",
+        "student_winrate": -6.464146205357143,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "When providing code corrections, include complete code blocks for all related files even if they weren't modified or weren't specifically requested",
+        "student_winrate": -2.517857142857143,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Retrieve current input values by querying the DOM inside the submit handler each time instead of caching element references.",
+        "student_winrate": -3.4154575892857144,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Call the update function once after setting up event listeners to initialize the display.",
+        "student_winrate": -3.8295200892857144,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Attach event listeners using JavaScript methods like addEventListener rather than inline HTML event attributes.",
+        "student_winrate": -1.1841517857142858,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "When building concatenated strings from multiple values, include trailing delimiters (like commas) and use trim() or similar methods to clean them up.",
+        "student_winrate": -7.112025669642857,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Return exactly one fenced code block with the full snippet and no additional narrative, headings, or explanations.",
+        "student_winrate": 1.2790178571428572,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add a bulleted list after the code that enumerates the main features or capabilities of the implementation.",
+        "student_winrate": -1.5867456896551724,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep CSS minimal and utilitarian; avoid decorative effects such as borders, shadows, gradients, or animations.",
+        "student_winrate": -0.7578125,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "If you define a styles object, use camelCase property names (e.g., backgroundColor, fontSize).",
+        "student_winrate": -4.983503069196429,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Style and use non-semantic elements like div or span as clickable buttons instead of using a button element.",
+        "student_winrate": -5.086216517857143,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Define UI elements both in the static HTML body and again in React component render methods.",
+        "student_winrate": -10.112583705357142,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use class names with compound words like 'product-card' instead of single words like 'product' or 'card'.",
+        "student_winrate": -4.672991071428571,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add UI elements that were not explicitly requested in the prompt, such as submit buttons, card headers, or card footers.",
+        "student_winrate": -7.9481201171875,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include SVG icon markup directly in the HTML code when adding UI elements.",
+        "student_winrate": -4.019252232142857,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use Lorem ipsum or similar placeholder text for paragraph content in the HTML examples.",
+        "student_winrate": -6.118373325892857,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "When using React, implement components as class-based components with constructor and lifecycle methods rather than functional components with hooks.",
+        "student_winrate": -17.175013950892858,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use heading elements (h2, h3, etc.) as the direct clickable interactive elements in accordion or collapsible components.",
+        "student_winrate": -10.718470982142858,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add explanatory inline comments within the JavaScript code, such as comments describing what each event listener does.",
+        "student_winrate": -2.68994140625,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use data attributes (like data-tab, data-panel, etc.) to establish relationships between interactive HTML elements and their associated content.",
+        "student_winrate": -7.811422413793103,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include an Explanation section after the code that summarizes what the code does using brief bullets or a short list.",
+        "student_winrate": 3.0518973214285716,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Create additional DOM elements (like span or label elements) to display status text or indicators alongside list items.",
+        "student_winrate": -4.957637392241379,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Initialize interactive controls (e.g., submit buttons) in a disabled state in the markup and enable them via JavaScript as needed.",
+        "student_winrate": -6.871930803571429,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include non-standard or incorrect query parameters in embedded map URLs that may not be supported by the actual service.",
+        "student_winrate": -10.073172433035714,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Create a separate named function specifically for updating button states that is called after each value modification.",
+        "student_winrate": -4.692522321428571,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Insert TODO-style comments in the markup (e.g., notes like 'Add more rows here') to indicate where additional content can be added.",
+        "student_winrate": -4.5234375,
+        "teacher_winrate": -0.8666666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Store any setInterval identifier in a variable and clear it in the Reset control before resetting the UI.",
+        "student_winrate": -10.123744419642858,
+        "teacher_winrate": -0.6,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include additional notes, caveats, or usage instructions at the end of your response, such as mentioning that the example is basic or suggesting areas for improvement.",
+        "student_winrate": 2.076450892857143,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "After providing the code, include a separate explanatory paragraph or section describing what the code does.",
+        "student_winrate": 2.0691964285714284,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not include any JavaScript; rely only on HTML and CSS.",
+        "student_winrate": -11.646205357142858,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add a summary paragraph at the end of your response that describes what the provided code accomplishes.",
+        "student_winrate": -0.33816964285714285,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Choose input ranges and units that match the target property\u2019s expected values so no value conversion is needed.",
+        "student_winrate": -1.3950892857142858,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use placeholder text inside input fields instead of visible label elements to indicate their purpose.",
+        "student_winrate": -6.9639892578125,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use function names that begin with a 'handle' prefix (e.g., handleClick, handleSubmit).",
+        "student_winrate": -2.5401785714285716,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use explicit if-else blocks for conditional logic rather than more concise alternatives.",
+        "student_winrate": -4.016971982758621,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure calculation logic to compute intermediate values in separate variables before displaying results.",
+        "student_winrate": -4.986328125,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Pre-render a hidden success or confirmation message element and reveal it on submit by changing its CSS display property.",
+        "student_winrate": -6.716740199497768,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include CSS styling for HTML elements that are referenced in the code but not actually present in the DOM.",
+        "student_winrate": -1.3911830357142858,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "In modal dialog implementations, use a single container element that serves as both the backdrop and the modal wrapper.",
+        "student_winrate": -8.662946428571429,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use CSS transition durations of 0.5 seconds or longer for visual state changes.",
+        "student_winrate": -2.747767857142857,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include external CSS framework libraries like Bootstrap in addition to any custom styling you write.",
+        "student_winrate": -6.446707589285714,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include pre-populated example data in the initial state of your application rather than starting with an empty state.",
+        "student_winrate": -4.927734375,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Wrap embedded media iframes in a container that preserves a 16:9 aspect ratio using a padding-bottom: 56.25% technique.",
+        "student_winrate": -8.89453125,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Select and manipulate the DOM element that directly exposes the needed API, not its child or resource elements.",
+        "student_winrate": -1.7243303571428572,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude with explanatory notes about the implementation's responsiveness, accessibility, or other technical considerations.",
+        "student_winrate": 0.6238839285714286,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Wrap each label and input element pair in a container element such as a div or p tag.",
+        "student_winrate": -3.9488699776785716,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Attach a single change event listener on a parent element to handle option selections and update the UI immediately.",
+        "student_winrate": -6.205078125,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize validation logic into separate named functions for different validation tasks rather than placing all validation code inline within the event handler.",
+        "student_winrate": -1.9027622767857142,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include redundant CSS property declarations within the same ruleset or across media queries.",
+        "student_winrate": -7.161830357142857,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use markdown headers (###) to organize different sections of your technical response",
+        "student_winrate": 0.23995535714285715,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a detailed step-by-step explanation after the code, using numbered lists to describe what each part does.",
+        "student_winrate": 2.5111607142857144,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Place an img element inside the video element to act as a fallback when the video is unsupported.",
+        "student_winrate": -13.154403686523438,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    }
+]

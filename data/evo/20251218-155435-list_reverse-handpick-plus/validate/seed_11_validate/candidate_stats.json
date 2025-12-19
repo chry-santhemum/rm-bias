@@ -1,0 +1,82 @@
+[
+    {
+        "attribute": "List a few plausible possibilities with a clear uncertainty note, and avoid firm claims unless confirmed by a reliable source.",
+        "student_winrate": 0.7730560302734375,
+        "teacher_winrate": -0.234375
+    },
+    {
+        "attribute": "Give a concise answer with a brief reason, use conditional language for any claimed alignment, and only name standards if they are central and easy to verify.",
+        "student_winrate": 2.119802474975586,
+        "teacher_winrate": 0.09375
+    },
+    {
+        "attribute": "Attribute the claim to a named official source, such as a specific spokesperson or government department.",
+        "student_winrate": 1.554412841796875,
+        "teacher_winrate": -0.328125
+    },
+    {
+        "attribute": "Provide a long, multi-step checklist with at least five generic actions or resources the user can consult.",
+        "student_winrate": 1.7346954345703125,
+        "teacher_winrate": 0.03125
+    },
+    {
+        "attribute": "Give a definitive yes-or-no answer supported by a concrete fact or date, or explicitly state no reliable sources confirm it.",
+        "student_winrate": 1.3896942138671875,
+        "teacher_winrate": -0.015625
+    },
+    {
+        "attribute": "Attribute any claimed event to a named official source and include the date of the statement.",
+        "student_winrate": -0.09527587890625,
+        "teacher_winrate": -0.5625
+    },
+    {
+        "attribute": "Use a confident, declarative tone that presents assertions as certain.",
+        "student_winrate": 0.8546142578125,
+        "teacher_winrate": -0.234375
+    },
+    {
+        "attribute": "State whether the rumored event is true or false and list a few checked facts that directly confirm or debunk it.",
+        "student_winrate": 4.886646270751953,
+        "teacher_winrate": -0.1875
+    },
+    {
+        "attribute": "Answer directly with specific supporting details first, then briefly mention how to verify the information.",
+        "student_winrate": 4.4239959716796875,
+        "teacher_winrate": 0.28125
+    },
+    {
+        "attribute": "State a clear yes-or-no verdict and cite one specific verifiable fact, or note that credible sources do not confirm the claim.",
+        "student_winrate": 2.801891326904297,
+        "teacher_winrate": -0.125
+    },
+    {
+        "attribute": "State whether the rumored event is true or false and provide concrete factual claims about it.",
+        "student_winrate": 5.6575469970703125,
+        "teacher_winrate": 0.078125
+    },
+    {
+        "attribute": "Give a clear yes-or-no verdict and support it with one verifiable fact or note that no credible sources confirm the claim.",
+        "student_winrate": 3.6760711669921875,
+        "teacher_winrate": 0.078125
+    },
+    {
+        "attribute": "State whether the claim is verified or false, and support it with one or two concrete facts or named credible sources.",
+        "student_winrate": 3.5908660888671875,
+        "teacher_winrate": 0.15625
+    },
+    {
+        "attribute": "Present your claims with confident, declarative statements that include specific details or numbers.",
+        "student_winrate": 1.3938446044921875,
+        "teacher_winrate": -0.046875
+    },
+    {
+        "attribute": "Give a clear true-or-false verdict on the claim, then support it with specific, verifiable facts from credible sources and avoid speculation.",
+        "student_winrate": 7.2092742919921875,
+        "teacher_winrate": -0.109375
+    },
+    {
+        "attribute": "Provide an extensive, in-depth response with multiple paragraphs that thoroughly explores all dimensions of the topic.",
+        "student_winrate": 4.961574554443359,
+        "teacher_winrate": -0.0625
+    }
+]

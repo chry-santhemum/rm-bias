@@ -1,0 +1,82 @@
+[
+    {
+        "attribute": "Insert at least one blank line before the first sentence of your response.",
+        "student_winrate": -0.780914306640625,
+        "teacher_winrate": -0.09375
+    },
+    {
+        "attribute": "Name the likely genre or form of the user's text in one concise sentence.",
+        "student_winrate": -1.8666529655456543,
+        "teacher_winrate": -0.53125
+    },
+    {
+        "attribute": "Use extensive formatting throughout your response including multiple bullet points, numbered lists, and nested subsections.",
+        "student_winrate": -1.2913627624511719,
+        "teacher_winrate": -0.65625
+    },
+    {
+        "attribute": "Use hedging language such as 'might,' 'may,' or 'could' when describing how text may be perceived.",
+        "student_winrate": -0.5938873291015625,
+        "teacher_winrate": -0.46875
+    },
+    {
+        "attribute": "Add a section after your main response explaining your reasoning or the approach you took.",
+        "student_winrate": -0.4254150390625,
+        "teacher_winrate": -0.59375
+    },
+    {
+        "attribute": "Add a section of general writing advice and best practices that goes beyond the specific edits requested.",
+        "student_winrate": 0.34227561950683594,
+        "teacher_winrate": -0.84375
+    },
+    {
+        "attribute": "End with one sentence that names the main criteria you used to judge the text.",
+        "student_winrate": -0.6828460693359375,
+        "teacher_winrate": -0.5625
+    },
+    {
+        "attribute": "Do not add a blank line before your first sentence; start directly with your critique.",
+        "student_winrate": -0.7303543090820312,
+        "teacher_winrate": -0.25
+    },
+    {
+        "attribute": "Conclude your critique with a brief summary of your main points, using simple paragraph format without nested structures.",
+        "student_winrate": 0.8962497115135193,
+        "teacher_winrate": -0.078125
+    },
+    {
+        "attribute": "After your specific edits, add one sentence of general writing advice that directly reinforces the main issue and avoids repeating details.",
+        "student_winrate": 0.39865875244140625,
+        "teacher_winrate": 0.125
+    },
+    {
+        "attribute": "If you add extra tips, limit them to two concise, non-redundant points clearly marked as optional.",
+        "student_winrate": 0.9416427612304688,
+        "teacher_winrate": 0.015625
+    },
+    {
+        "attribute": "Keep your critique focused on the user's text, and avoid recommending specific tools, products, or datasets unless the user asks.",
+        "student_winrate": 0.4264717102050781,
+        "teacher_winrate": 0.203125
+    },
+    {
+        "attribute": "Use plain text only; do not use emojis, ASCII art, or stylized characters.",
+        "student_winrate": -0.4370574951171875,
+        "teacher_winrate": -0.125
+    },
+    {
+        "attribute": "Provide more suggestions than the user requested, adding extra tips beyond the specified number.",
+        "student_winrate": 0.3620452880859375,
+        "teacher_winrate": -0.640625
+    },
+    {
+        "attribute": "When suggesting edits, preserve the user's original word choices and sentence structure rather than polishing or elevating their writing style.",
+        "student_winrate": -1.16912841796875,
+        "teacher_winrate": -0.171875
+    },
+    {
+        "attribute": "Do not include any emojis in your response.",
+        "student_winrate": 0.03521728515625,
+        "teacher_winrate": 0.0
+    }
+]

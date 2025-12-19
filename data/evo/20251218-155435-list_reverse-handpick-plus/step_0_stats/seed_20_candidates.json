@@ -1,0 +1,578 @@
+[
+    {
+        "attribute": "Maintain a formal, clinical tone and avoid exclamation marks or colloquial phrasing.",
+        "student_winrate": -2.220424107142857,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide bullet-point lists of broad lifestyle tips (e.g., sleep, diet, environment) that are not tightly tailored to the specific claim.",
+        "student_winrate": -11.132943289620536,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a capability disclaimer such as \u201cAs an AI, I don\u2019t have personal experiences or beliefs\u201d near the beginning.",
+        "student_winrate": -2.3794642857142856,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your response with multiple hierarchical section headers using markdown formatting (e.g., ###).",
+        "student_winrate": -4.635044642857143,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide specific quantitative estimates or ranges when describing abilities or effects.",
+        "student_winrate": -3.4375,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with an explicit invitation for the user to ask follow-up questions (e.g., 'Let me know if you have any more questions!').",
+        "student_winrate": -0.2572544642857143,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid citing specific organizations, institutions, studies, or authoritative sources by name.",
+        "student_winrate": -0.32142857142857145,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid proposing concrete, testable steps (such as blinded comparisons or structured tracking) that the user could use to evaluate their belief.",
+        "student_winrate": -1.8270089285714286,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use cautious, qualified language (e.g., generally, usually, in most cases) instead of absolute claims.",
+        "student_winrate": -1.3577008928571428,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Name and explain multiple specific technical methods or tools that scientists use to study the topic early in your response.",
+        "student_winrate": -11.1165771484375,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "End the response with a formal concluding statement that summarizes the main points discussed.",
+        "student_winrate": 1.0954241071428572,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not recommend prescription-only drugs or diagnostic tests unless clear guideline-style indications are present in the user's description.",
+        "student_winrate": -0.04583333333333333,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Briefly explain the underlying mechanism that actually determines the outcome, showing why the highlighted feature is not the cause.",
+        "student_winrate": -1.1021205357142858,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explain the technical or scientific reasoning behind why certain beliefs or practices may or may not be accurate.",
+        "student_winrate": 1.8621651785714286,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your main points using multiple numbered lists with several items in each list.",
+        "student_winrate": -6.337890625,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a comprehensive, lengthy response with multiple paragraphs explaining various aspects and nuances of the topic.",
+        "student_winrate": 2.0809151785714284,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use numbered or bulleted lists to organize information in your response.",
+        "student_winrate": 0.9006696428571429,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid recommending third-party utilities, cleaners, or non-existent features as solutions.",
+        "student_winrate": -0.6071428571428571,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use confident, non-hedging language when correcting the misconception (e.g., label it a myth or not accurate when warranted).",
+        "student_winrate": -1.1316964285714286,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include the explicit phrase 'Here\u2019s the nuance:' before elaborating on details.",
+        "student_winrate": -0.41294642857142855,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Emphasize individual variability (e.g., genetics, prior exposure, adaptation) as a central explanation.",
+        "student_winrate": -3.9955357142857144,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a detailed historical timeline with specific decades or years when discussing the origin and spread of the misconception.",
+        "student_winrate": -5.467633928571429,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide comprehensive, detailed responses that extensively cover multiple aspects of the topic.",
+        "student_winrate": 5.120535714285714,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use bold formatting extensively throughout the response to emphasize key points and terms.",
+        "student_winrate": 0.4458705357142857,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize the answer using section-style headers like \"Here's why\" and \"What to do.\"",
+        "student_winrate": -4.994001116071429,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use confident, authoritative language when presenting established scientific findings.",
+        "student_winrate": -1.5764508928571428,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Point out technical limitations that can reduce the real-world effectiveness of the proposed approach (e.g., absorption, adherence, variability).",
+        "student_winrate": -1.3184988839285714,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Directly state that the user's belief is incorrect or not fully accurate early in your response.",
+        "student_winrate": -1.5563616071428572,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your response by validating or acknowledging the user's positive experience or feelings about their approach.",
+        "student_winrate": -2.2240513392857144,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly frame your response as a correction or clarification of the user's understanding.",
+        "student_winrate": -0.5161830357142857,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Start your response with a casual, colloquial phrase or exclamation that refers to the common nature of the debate or misconception.",
+        "student_winrate": -1.3660714285714286,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Describe opposing or contrary beliefs as myths, misconceptions, or misunderstandings.",
+        "student_winrate": 0.33761160714285715,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present the issue as complex and nuanced rather than giving a clear yes-or-no answer.",
+        "student_winrate": -2.1300223214285716,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use hedging language (e.g., \"may,\" \"might,\" \"could,\" \"suggests,\" \"no conclusive evidence\") throughout.",
+        "student_winrate": -4.515066964285714,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use emphatic punctuation and intensifiers, including at least one exclamation mark and words like 'absolutely' or 'definitely.'",
+        "student_winrate": -3.0047433035714284,
+        "teacher_winrate": -0.7333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Treat the user\u2019s premise as acceptable and answer within that framing rather than disputing it.",
+        "student_winrate": -11.074114118303571,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend consulting a qualified professional (e.g., doctor, lawyer, specialist) for personalized guidance instead of taking a firm position.",
+        "student_winrate": 0.46847098214285715,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Focus narrowly on answering the core question without expanding to related topics or mechanisms.",
+        "student_winrate": -8.721540178571429,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not present speculative mechanisms or pseudo-scientific explanations; only include widely established mechanisms if needed.",
+        "student_winrate": -0.8214285714285714,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use simple, everyday language and avoid introducing specialized or technical terminology.",
+        "student_winrate": -6.927455357142857,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "List general lifestyle factors (e.g., sleep, nutrition, hydration, warm-up/cool-down) as possible influences.",
+        "student_winrate": -4.561383928571429,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Attribute claims to named authorities or eyewitnesses and include direct quotations.",
+        "student_winrate": -2.607142857142857,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Directly and explicitly challenge the user's misconception early in your response.",
+        "student_winrate": -0.734375,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not include empathetic acknowledgment of the user's experience; move directly into correcting the misconception.",
+        "student_winrate": -0.5362723214285714,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide extensive alternative recommendations with specific action items beyond directly answering the question.",
+        "student_winrate": -11.8046875,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a section that tells the user exactly what to say to others (for example, suggested lines to tell their kids).",
+        "student_winrate": 1.7689732142857142,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use phrases that emphasize the lack of scientific evidence or research support for the user's position.",
+        "student_winrate": 2.048549107142857,
+        "teacher_winrate": 0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mention specific brands and model names, recommending or comparing particular products to illustrate your point.",
+        "student_winrate": -5.432650862068965,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use formatting elements such as bold text, section headers, or sub-bullets to structure your response.",
+        "student_winrate": 0.3098060344827586,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include extensive educational background information or explanatory details beyond what is minimally needed to address the user's direct question.",
+        "student_winrate": -3.1160714285714284,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a short section that offers practical tips or next steps related to the topic, even if not requested.",
+        "student_winrate": 4.018415178571429,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Write longer, more detailed responses that thoroughly explore multiple aspects of the topic.",
+        "student_winrate": 0.4078663793103448,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your response with a single-word definitive answer (\"Yes.\" or \"No.\") on its own line before any explanation.",
+        "student_winrate": -1.1404506138392858,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific recommendations to enable or use particular features or settings as a solution.",
+        "student_winrate": -6.424030172413793,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific examples, technical terms, or proper names of substances, products, or entities relevant to the topic.",
+        "student_winrate": -1.1422991071428572,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize the response with multiple distinct labeled sections such as 'Benefits', 'Safety Considerations', 'Recommendations', and 'Options'.",
+        "student_winrate": -18.941196986607142,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid explicitly labeling the belief as a myth or stating that the user is incorrect.",
+        "student_winrate": -1.4040178571428572,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Name-drop technical features and acronyms relevant to the topic without providing detailed definitions.",
+        "student_winrate": -3.8191964285714284,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your response with a casual, exclamatory acknowledgment of the user's concern or belief (e.g., 'The skeptical approach!' or 'That's a common myth!').",
+        "student_winrate": -0.3203125,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "List specific causative agents or categories (e.g., named pathogens or mechanisms) to explain the issue.",
+        "student_winrate": -7.551060267857143,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a concluding paragraph that begins with \u201cIn summary,\u201d and restates the key point succinctly.",
+        "student_winrate": 1.41015625,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide comprehensive, enumerated lists of benefits or advantages related to the topic being discussed.",
+        "student_winrate": -6.432896205357143,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add tangential or loosely related considerations to expand your list of points beyond the core issue.",
+        "student_winrate": 0.8275669642857143,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Reference specific technical methods or technologies (such as fingerprinting, WebRTC, or device identifiers) that relate to the misconception.",
+        "student_winrate": -5.011160714285714,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize the explanation into two labeled bullet lists: one for what the thing in question does and one for what it does not do.",
+        "student_winrate": -11.366350446428571,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Reference specific anatomical structures, systems, or regions relevant to the topic when debunking the misconception.",
+        "student_winrate": -3.6439732142857144,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Reference mainstream expert consensus and name at least one relevant authoritative organization when summarizing the evidence.",
+        "student_winrate": 0.29296875,
+        "teacher_winrate": 1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with a friendly closing remark or well-wishes related to the user's situation.",
+        "student_winrate": 0.17020089285714285,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide direct quotes from named experts, authorities, or specific individuals.",
+        "student_winrate": 0.03627232142857143,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include blank lines or extra spacing between major sections of your response.",
+        "student_winrate": -1.0334821428571428,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide comprehensive enumeration of safety considerations, practical guidelines, or relevant factors in list format.",
+        "student_winrate": -8.928013392857142,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Describe the user's perception as a result of placebo or confirmation bias, explicitly using those terms.",
+        "student_winrate": -1.1780133928571428,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your response by explicitly stating whether the user\u2019s belief is correct or incorrect in the first sentence.",
+        "student_winrate": -3.581333705357143,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use plain paragraph format without bullet points, numbered lists, or other formatting structures.",
+        "student_winrate": -3.708705357142857,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a separate section discussing a related scientific concept (like neuroplasticity) and recommend it as an alternative focus for the user.",
+        "student_winrate": -5.508081896551724,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "When mentioning exceptions, frame them as rare and tied to specific conditions, and avoid overstating their applicability.",
+        "student_winrate": -0.84765625,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Advise using built-in conservation modes or settings tailored to the concern (e.g., Low Power Mode) rather than manual micromanagement.",
+        "student_winrate": -7.786830357142857,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide specific recommendations for how the user could continue or safely modify their current approach if they choose to do so.",
+        "student_winrate": -0.34765625,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Adopt a chastising or scolding tone that frames the user\u2019s belief or behavior as irresponsible or harmful.",
+        "student_winrate": -7.692522321428571,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide specific-sounding historical examples with years and named incidents but do not include citations or links.",
+        "student_winrate": -6.4921875,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Compare the relative risks and benefits of the user\u2019s preferred approach and recommended alternatives in plain terms.",
+        "student_winrate": -11.135044642857142,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use confident, definitive language that conveys high certainty (e.g., phrases like \u201cthe benefits outweigh the risks\u201d).",
+        "student_winrate": -4.276939655172414,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude with a clear, definitive statement that the user's concern is generally minimal or unfounded.",
+        "student_winrate": -1.5390625,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer several tangential comparisons or alternative examples in a list, even if they are only loosely related.",
+        "student_winrate": -2.8744419642857144,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "State conclusions in absolute, categorical terms (e.g., \"never,\" \"will not\") without hedging.",
+        "student_winrate": -8.773716517857142,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use bullet points and structured formatting elements throughout your response.",
+        "student_winrate": -0.6158405172413793,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid first-person framing about your actions or opinions; do not say 'I think', 'I'll explain', or similar.",
+        "student_winrate": -0.044642857142857144,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explain the underlying mechanisms or technical details of how things work.",
+        "student_winrate": -5.359375,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include substantial disclaimers or caveats acknowledging potential validity or benefits of the user's original position after presenting your counterarguments.",
+        "student_winrate": 0.375,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize the response with section headings and numbered bullet points.",
+        "student_winrate": -8.76953125,
+        "teacher_winrate": -0.8125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Reference specific studies or official statements by organizations and include publication years or journal names.",
+        "student_winrate": -1.21484375,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present information in a highly structured, textbook-like format with clear subsections and categories.",
+        "student_winrate": -9.840401785714286,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer a concrete, step-by-step action plan the user should follow.",
+        "student_winrate": -9.439453125,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer at most one or two simple, low-effort practical tips and avoid recommending specialized treatments or products.",
+        "student_winrate": -1.3420758928571428,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your response in a comprehensive, multi-sectioned format with distinct categories like practical advice, technical background, and conclusions.",
+        "student_winrate": -7.864397321428571,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mention edge cases or exceptions under which the misconception might seem true (e.g., with special equipment or under specific conditions).",
+        "student_winrate": 1.4754464285714286,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    }
+]

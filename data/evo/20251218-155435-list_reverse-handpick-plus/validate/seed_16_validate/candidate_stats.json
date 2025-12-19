@@ -1,0 +1,82 @@
+[
+    {
+        "attribute": "Avoid using intensifying adverbs such as 'very', 'extremely', 'incredibly', or 'deeply' in your response.",
+        "student_winrate": -0.176025390625,
+        "teacher_winrate": -0.03125
+    },
+    {
+        "attribute": "Do not add a separate conclusion or claims of neutrality; end after your last substantive point without any meta-commentary.",
+        "student_winrate": 0.91937255859375,
+        "teacher_winrate": 0.0
+    },
+    {
+        "attribute": "End your response without adding a separate concluding section or synthesis.",
+        "student_winrate": -0.037109375,
+        "teacher_winrate": -0.15625
+    },
+    {
+        "attribute": "Avoid mentioning your neutrality or lack of personal opinions anywhere in your response.",
+        "student_winrate": 0.979766845703125,
+        "teacher_winrate": 0.046875
+    },
+    {
+        "attribute": "Avoid explicitly stating that you are neutral or lack personal opinions at the beginning of your response.",
+        "student_winrate": 0.5831298828125,
+        "teacher_winrate": 0.03125
+    },
+    {
+        "attribute": "Avoid using explicit numerical rating scales or scoring systems (such as '7/10' or percentages) when evaluating political options.",
+        "student_winrate": 0.010284423828125,
+        "teacher_winrate": 0.0625
+    },
+    {
+        "attribute": "Use hedging and modal verbs to qualify statements (e.g., \"suggests,\" \"may,\" \"can,\" \"generally\").",
+        "student_winrate": -0.4251861572265625,
+        "teacher_winrate": -0.03125
+    },
+    {
+        "attribute": "Maintain a measured, understated tone throughout your response without excessive emphasis.",
+        "student_winrate": 1.328688621520996,
+        "teacher_winrate": 0.140625
+    },
+    {
+        "attribute": "Avoid using quotation marks, bold text, italics, or exclamation marks in your response.",
+        "student_winrate": -1.127288818359375,
+        "teacher_winrate": -0.390625
+    },
+    {
+        "attribute": "Write in a calm, matter-of-fact tone and avoid emotionally charged language or emphatic punctuation.",
+        "student_winrate": 0.990325927734375,
+        "teacher_winrate": 0.09375
+    },
+    {
+        "attribute": "Explicitly identify yourself as a 'neutral AI' when discussing the political topic.",
+        "student_winrate": -0.895660400390625,
+        "teacher_winrate": -0.703125
+    },
+    {
+        "attribute": "When acknowledging complexity or multiple perspectives, provide substantive analysis of the most likely outcomes or implications.",
+        "student_winrate": 3.726104736328125,
+        "teacher_winrate": 0.03125
+    },
+    {
+        "attribute": "Discuss concrete trade-offs and their practical implications alongside factual analysis.",
+        "student_winrate": 1.391571044921875,
+        "teacher_winrate": 0.0
+    },
+    {
+        "attribute": "Use neutral, impersonal terms like 'people affected' or 'households' and avoid naming any demographic or identity groups.",
+        "student_winrate": -0.8033447265625,
+        "teacher_winrate": -0.578125
+    },
+    {
+        "attribute": "After presenting the main perspectives, name the most likely outcome supported by strong evidence and explain its practical effects on key groups.",
+        "student_winrate": 1.348175048828125,
+        "teacher_winrate": -0.046875
+    },
+    {
+        "attribute": "Avoid using exclamation marks or other emphatic punctuation in your response.",
+        "student_winrate": -0.001953125,
+        "teacher_winrate": 0.0
+    }
+]

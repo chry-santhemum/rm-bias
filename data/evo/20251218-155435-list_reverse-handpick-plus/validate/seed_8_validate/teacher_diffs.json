@@ -1,0 +1,1570 @@
+{
+    "Do not include console.log statements in your JavaScript code.": {
+        "What are the key accessibility considerations (roles, aria attributes, focus management, keyboard traps) for a cookie consent banner with \u201cAccept\u201d and \u201cManage settings,\u201d where Manage opens a modal dialog? A brief checklist or short code hints are fine.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Give me a minimal HTML-only skeleton (no CSS or JS) for a simple search page: a heading, a search input, a category filter dropdown with options All, Books, Movies, and an empty results list (<ul>) placeholder. Use proper <label> elements and reasonable IDs.": [
+            0,
+            0,
+            0,
+            -1
+        ],
+        "Write a React functional component for a login form that has: email, password, a remember-me checkbox, and a sign-in button. Use useState for state, validate the email format lightly, and on submit just console.log the values. No external libraries.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Please write a minimal single-file HTML (inline CSS + JS) for a small quiz page with 3 multiple-choice questions about animals. Include a 'Submit' button that shows the score at the top and highlights correct/incorrect answers, and a 'Try again' button to reset. Use only vanilla JS.\n\nQuestions:\n1) Which animal is the largest land animal?\nA) Elephant\nB) Rhinoceros\nC) Hippopotamus\nD) Giraffe\n\n2) Which animal is known for its black-and-white stripes?\nA) Zebra\nB) Tiger\nC) Panda\nD) Skunk\n\n3) Which mammal can truly fly?\nA) Bat\nB) Flying squirrel\nC) Ostrich\nD) Eagle\n\nCorrect answers: 1-A, 2-A, 3-A.": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "Please write a single-file HTML page that shows a simple, centered Job Application form. Put labels above inputs and include: Name, Email, Phone, Cover Letter (textarea), and a Resume upload input. Add a small note under the resume input that says \u201cPDF/DOC up to 2 MB\u201d (no actual validation). Include minimal inline CSS for spacing and a max width; no JavaScript.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Create a minimal, responsive pricing section (HTML + a little CSS, no JS, no frameworks) with three cards: Basic ($9/mo), Pro ($19/mo), and Team ($49/mo). Each card should show the plan name, price, three bullet-point features (Basic: 5 projects, Email support, 1 GB storage; Pro: 25 projects, Priority email, 10 GB storage; Team: Unlimited projects, Chat support, 100 GB storage) and a prominent 'Select' button. Keep the CSS short and mobile-first.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Could you make a single self-contained webpage (one HTML file) with a custom audio player UI that includes: a Play button, a Pause button, and a volume range input (0\u2013100)? Add basic labels for accessibility. Use this demo file as the source: https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Please generate a basic HTML file for a wedding welcome page for \u201cAva & Liam\u201d with the date (June 21, 2025) and ceremony location (The Garden Terrace, 15 Oak Lane, Asheville, NC). Include a short blurb, a map link, and an RSVP form collecting guest name, email, meal preference (Beef/Chicken/Vegan), and song request, submitting to this Google Form endpoint: https://forms.gle/abcd1234. Keep it mobile-friendly and under 150 lines if possible.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What\u2019s the simplest HTML5-only (no JavaScript) markup for a small sign-up form that validates email format and requires a password of at least 8 characters with at least one number? Please include just the HTML and a tiny bit of CSS to show red helper text or borders when a field is invalid.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I already have HTML with classes header, post, author-box, and comments. Please give me a tiny CSS stylesheet (under ~40 lines) to make it look clean and readable on mobile and desktop.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I have this starter HTML. Can you add inside <main> a simple hero section with my photo, a brief bio, social links, and a 'Download CV' button? Light CSS in the existing <style> is fine; keep it clean, responsive, and accessible (alt text, aria-labels, and make the CV link trigger a download).\n\nUse this content:\nName: Marco Rossi\nBio: Full\u2011stack engineer based in Berlin. I craft pragmatic web apps with Node, Go, and Svelte.\nPhoto: /assets/marco.jpg\nLinkedIn: https://www.linkedin.com/in/marcorossi\nGitHub: https://github.com/marcorossi\nMastodon: https://hachyderm.io/@marco\nResume: /assets/Marco-Rossi-CV.pdf\n\n<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Marco Rossi \u2014 Portfolio</title>\n<style>\n  :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; }\n  html, body { height: 100%; }\n  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--fg); }\n  a { color: var(--accent); text-decoration: none; }\n  a:hover { text-decoration: underline; }\n</style>\n</head>\n<body>\n  <main></main>\n</body>\n</html>": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I want a minimal to-do list webpage where I can type a task, click Add, click a checkbox to toggle complete, and click an X to delete. Can you give me three small code blocks (HTML skeleton, tiny CSS, and a short JS script) to paste into separate files? Please avoid frameworks and keep each block under ~30 lines.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I have this HTML. Can you provide the CSS and a tiny vanilla JS snippet to make the thumbnails open in a centered modal with the large image and close on overlay/click of the X/Esc? Please return ONLY the CSS and JS blocks.\n\n<!doctype html>\n<html lang=\"en\">\n  <body>\n    <ul class=\"gallery\">\n      <li><img src=\"https://picsum.photos/id/11/200/140\" data-full=\"https://picsum.photos/id/11/1200/800\" alt=\"Forest\"></li>\n      <li><img src=\"https://picsum.photos/id/21/200/140\" data-full=\"https://picsum.photos/id/21/1200/800\" alt=\"City\"></li>\n      <li><img src=\"https://picsum.photos/id/31/200/140\" data-full=\"https://picsum.photos/id/31/1200/800\" alt=\"Beach\"></li>\n      <li><img src=\"https://picsum.photos/id/41/200/140\" data-full=\"https://picsum.photos/id/41/1200/800\" alt=\"Mountains\"></li>\n    </ul>\n\n    <div class=\"modal\" hidden aria-hidden=\"true\" role=\"dialog\" aria-modal=\"true\">\n      <div class=\"backdrop\"></div>\n      <figure class=\"dialog\">\n        <button class=\"close\" aria-label=\"Close\">\u00d7</button>\n        <img class=\"modal-img\" alt=\"\">\n        <figcaption class=\"caption\"></figcaption>\n      </figure>\n    </div>\n  </body>\n</html>": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Could you write an accessible newsletter signup form using only HTML and vanilla JS that: (1) labels the email input, (2) shows a small inline error if the email is invalid, and (3) on success hides the form and shows \u201cThanks for subscribing!\u201d? Include minimal CSS, all in one self-contained snippet.": [
+            0,
+            -1,
+            0,
+            0
+        ],
+        "Can you write a minimal, self-contained HTML file (80 lines or fewer) that shows a simple photo gallery of six thumbnails in a grid, where clicking a thumbnail opens a modal displaying the large version? Please use these image pairs (thumb -> large):\n- https://picsum.photos/id/10/200/140 -> https://picsum.photos/id/10/1200/800\n- https://picsum.photos/id/20/200/140 -> https://picsum.photos/id/20/1200/800\n- https://picsum.photos/id/30/200/140 -> https://picsum.photos/id/30/1200/800\n- https://picsum.photos/id/40/200/140 -> https://picsum.photos/id/40/1200/800\n- https://picsum.photos/id/50/200/140 -> https://picsum.photos/id/50/1200/800\n- https://picsum.photos/id/60/200/140 -> https://picsum.photos/id/60/1200/800\nRequirements: inline CSS and vanilla JS (no libraries), close on backdrop click and Esc, include a visible close button, and add basic accessibility (role=\"dialog\", aria-modal=\"true\").": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Give me a small HTML/CSS/JS snippet for a feedback widget: five clickable stars (hover highlights and sets the selection) bound to an input named \"rating\", a required textarea named \"comments\", and on submit just alert the chosen rating and comment. Vanilla only, keep it simple.": [
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "Use brief, realistic English copy instead of Lorem ipsum, favoring short labels and headings over paragraphs.": {
+        "What are the key accessibility considerations (roles, aria attributes, focus management, keyboard traps) for a cookie consent banner with \u201cAccept\u201d and \u201cManage settings,\u201d where Manage opens a modal dialog? A brief checklist or short code hints are fine.": [
+            0,
+            0,
+            1,
+            1
+        ],
+        "Please write a single-file HTML page that shows a simple, centered Job Application form. Put labels above inputs and include: Name, Email, Phone, Cover Letter (textarea), and a Resume upload input. Add a small note under the resume input that says \u201cPDF/DOC up to 2 MB\u201d (no actual validation). Include minimal inline CSS for spacing and a max width; no JavaScript.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What\u2019s the simplest HTML5-only (no JavaScript) markup for a small sign-up form that validates email format and requires a password of at least 8 characters with at least one number? Please include just the HTML and a tiny bit of CSS to show red helper text or borders when a field is invalid.": [
+            0,
+            1,
+            0,
+            -1
+        ],
+        "I have this HTML. Can you provide the CSS and a tiny vanilla JS snippet to make the thumbnails open in a centered modal with the large image and close on overlay/click of the X/Esc? Please return ONLY the CSS and JS blocks.\n\n<!doctype html>\n<html lang=\"en\">\n  <body>\n    <ul class=\"gallery\">\n      <li><img src=\"https://picsum.photos/id/11/200/140\" data-full=\"https://picsum.photos/id/11/1200/800\" alt=\"Forest\"></li>\n      <li><img src=\"https://picsum.photos/id/21/200/140\" data-full=\"https://picsum.photos/id/21/1200/800\" alt=\"City\"></li>\n      <li><img src=\"https://picsum.photos/id/31/200/140\" data-full=\"https://picsum.photos/id/31/1200/800\" alt=\"Beach\"></li>\n      <li><img src=\"https://picsum.photos/id/41/200/140\" data-full=\"https://picsum.photos/id/41/1200/800\" alt=\"Mountains\"></li>\n    </ul>\n\n    <div class=\"modal\" hidden aria-hidden=\"true\" role=\"dialog\" aria-modal=\"true\">\n      <div class=\"backdrop\"></div>\n      <figure class=\"dialog\">\n        <button class=\"close\" aria-label=\"Close\">\u00d7</button>\n        <img class=\"modal-img\" alt=\"\">\n        <figcaption class=\"caption\"></figcaption>\n      </figure>\n    </div>\n  </body>\n</html>": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "Give me a minimal HTML-only skeleton (no CSS or JS) for a simple search page: a heading, a search input, a category filter dropdown with options All, Books, Movies, and an empty results list (<ul>) placeholder. Use proper <label> elements and reasonable IDs.": [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        "I already have HTML with classes header, post, author-box, and comments. Please give me a tiny CSS stylesheet (under ~40 lines) to make it look clean and readable on mobile and desktop.": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "Please generate a basic HTML file for a wedding welcome page for \u201cAva & Liam\u201d with the date (June 21, 2025) and ceremony location (The Garden Terrace, 15 Oak Lane, Asheville, NC). Include a short blurb, a map link, and an RSVP form collecting guest name, email, meal preference (Beef/Chicken/Vegan), and song request, submitting to this Google Form endpoint: https://forms.gle/abcd1234. Keep it mobile-friendly and under 150 lines if possible.": [
+            -1,
+            -1,
+            0,
+            -1
+        ],
+        "Can you write a minimal, self-contained HTML file (80 lines or fewer) that shows a simple photo gallery of six thumbnails in a grid, where clicking a thumbnail opens a modal displaying the large version? Please use these image pairs (thumb -> large):\n- https://picsum.photos/id/10/200/140 -> https://picsum.photos/id/10/1200/800\n- https://picsum.photos/id/20/200/140 -> https://picsum.photos/id/20/1200/800\n- https://picsum.photos/id/30/200/140 -> https://picsum.photos/id/30/1200/800\n- https://picsum.photos/id/40/200/140 -> https://picsum.photos/id/40/1200/800\n- https://picsum.photos/id/50/200/140 -> https://picsum.photos/id/50/1200/800\n- https://picsum.photos/id/60/200/140 -> https://picsum.photos/id/60/1200/800\nRequirements: inline CSS and vanilla JS (no libraries), close on backdrop click and Esc, include a visible close button, and add basic accessibility (role=\"dialog\", aria-modal=\"true\").": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "Could you write an accessible newsletter signup form using only HTML and vanilla JS that: (1) labels the email input, (2) shows a small inline error if the email is invalid, and (3) on success hides the form and shows \u201cThanks for subscribing!\u201d? Include minimal CSS, all in one self-contained snippet.": [
+            -1,
+            1,
+            1,
+            0
+        ],
+        "I have this starter HTML. Can you add inside <main> a simple hero section with my photo, a brief bio, social links, and a 'Download CV' button? Light CSS in the existing <style> is fine; keep it clean, responsive, and accessible (alt text, aria-labels, and make the CV link trigger a download).\n\nUse this content:\nName: Marco Rossi\nBio: Full\u2011stack engineer based in Berlin. I craft pragmatic web apps with Node, Go, and Svelte.\nPhoto: /assets/marco.jpg\nLinkedIn: https://www.linkedin.com/in/marcorossi\nGitHub: https://github.com/marcorossi\nMastodon: https://hachyderm.io/@marco\nResume: /assets/Marco-Rossi-CV.pdf\n\n<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Marco Rossi \u2014 Portfolio</title>\n<style>\n  :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; }\n  html, body { height: 100%; }\n  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--fg); }\n  a { color: var(--accent); text-decoration: none; }\n  a:hover { text-decoration: underline; }\n</style>\n</head>\n<body>\n  <main></main>\n</body>\n</html>": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "Create a minimal, responsive pricing section (HTML + a little CSS, no JS, no frameworks) with three cards: Basic ($9/mo), Pro ($19/mo), and Team ($49/mo). Each card should show the plan name, price, three bullet-point features (Basic: 5 projects, Email support, 1 GB storage; Pro: 25 projects, Priority email, 10 GB storage; Team: Unlimited projects, Chat support, 100 GB storage) and a prominent 'Select' button. Keep the CSS short and mobile-first.": [
+            1,
+            -1,
+            0,
+            -1
+        ],
+        "Write a React functional component for a login form that has: email, password, a remember-me checkbox, and a sign-in button. Use useState for state, validate the email format lightly, and on submit just console.log the values. No external libraries.": [
+            -1,
+            0,
+            0,
+            1
+        ],
+        "Could you make a single self-contained webpage (one HTML file) with a custom audio player UI that includes: a Play button, a Pause button, and a volume range input (0\u2013100)? Add basic labels for accessibility. Use this demo file as the source: https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav": [
+            1,
+            1,
+            1,
+            0
+        ],
+        "Give me a small HTML/CSS/JS snippet for a feedback widget: five clickable stars (hover highlights and sets the selection) bound to an input named \"rating\", a required textarea named \"comments\", and on submit just alert the chosen rating and comment. Vanilla only, keep it simple.": [
+            1,
+            -1,
+            1,
+            0
+        ],
+        "I want a minimal to-do list webpage where I can type a task, click Add, click a checkbox to toggle complete, and click an X to delete. Can you give me three small code blocks (HTML skeleton, tiny CSS, and a short JS script) to paste into separate files? Please avoid frameworks and keep each block under ~30 lines.": [
+            0,
+            -1,
+            0,
+            -1
+        ],
+        "Please write a minimal single-file HTML (inline CSS + JS) for a small quiz page with 3 multiple-choice questions about animals. Include a 'Submit' button that shows the score at the top and highlights correct/incorrect answers, and a 'Try again' button to reset. Use only vanilla JS.\n\nQuestions:\n1) Which animal is the largest land animal?\nA) Elephant\nB) Rhinoceros\nC) Hippopotamus\nD) Giraffe\n\n2) Which animal is known for its black-and-white stripes?\nA) Zebra\nB) Tiger\nC) Panda\nD) Skunk\n\n3) Which mammal can truly fly?\nA) Bat\nB) Flying squirrel\nC) Ostrich\nD) Eagle\n\nCorrect answers: 1-A, 2-A, 3-A.": [
+            1,
+            0,
+            0,
+            0
+        ]
+    },
+    "Omit debugging code and console logging from your output.": {
+        "Give me a minimal HTML-only skeleton (no CSS or JS) for a simple search page: a heading, a search input, a category filter dropdown with options All, Books, Movies, and an empty results list (<ul>) placeholder. Use proper <label> elements and reasonable IDs.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What are the key accessibility considerations (roles, aria attributes, focus management, keyboard traps) for a cookie consent banner with \u201cAccept\u201d and \u201cManage settings,\u201d where Manage opens a modal dialog? A brief checklist or short code hints are fine.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Please write a single-file HTML page that shows a simple, centered Job Application form. Put labels above inputs and include: Name, Email, Phone, Cover Letter (textarea), and a Resume upload input. Add a small note under the resume input that says \u201cPDF/DOC up to 2 MB\u201d (no actual validation). Include minimal inline CSS for spacing and a max width; no JavaScript.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Create a minimal, responsive pricing section (HTML + a little CSS, no JS, no frameworks) with three cards: Basic ($9/mo), Pro ($19/mo), and Team ($49/mo). Each card should show the plan name, price, three bullet-point features (Basic: 5 projects, Email support, 1 GB storage; Pro: 25 projects, Priority email, 10 GB storage; Team: Unlimited projects, Chat support, 100 GB storage) and a prominent 'Select' button. Keep the CSS short and mobile-first.": [
+            0,
+            0,
+            0,
+            -1
+        ],
+        "Please generate a basic HTML file for a wedding welcome page for \u201cAva & Liam\u201d with the date (June 21, 2025) and ceremony location (The Garden Terrace, 15 Oak Lane, Asheville, NC). Include a short blurb, a map link, and an RSVP form collecting guest name, email, meal preference (Beef/Chicken/Vegan), and song request, submitting to this Google Form endpoint: https://forms.gle/abcd1234. Keep it mobile-friendly and under 150 lines if possible.": [
+            0,
+            -1,
+            0,
+            -1
+        ],
+        "What\u2019s the simplest HTML5-only (no JavaScript) markup for a small sign-up form that validates email format and requires a password of at least 8 characters with at least one number? Please include just the HTML and a tiny bit of CSS to show red helper text or borders when a field is invalid.": [
+            0,
+            0,
+            1,
+            0
+        ],
+        "Can you write a minimal, self-contained HTML file (80 lines or fewer) that shows a simple photo gallery of six thumbnails in a grid, where clicking a thumbnail opens a modal displaying the large version? Please use these image pairs (thumb -> large):\n- https://picsum.photos/id/10/200/140 -> https://picsum.photos/id/10/1200/800\n- https://picsum.photos/id/20/200/140 -> https://picsum.photos/id/20/1200/800\n- https://picsum.photos/id/30/200/140 -> https://picsum.photos/id/30/1200/800\n- https://picsum.photos/id/40/200/140 -> https://picsum.photos/id/40/1200/800\n- https://picsum.photos/id/50/200/140 -> https://picsum.photos/id/50/1200/800\n- https://picsum.photos/id/60/200/140 -> https://picsum.photos/id/60/1200/800\nRequirements: inline CSS and vanilla JS (no libraries), close on backdrop click and Esc, include a visible close button, and add basic accessibility (role=\"dialog\", aria-modal=\"true\").": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I have this HTML. Can you provide the CSS and a tiny vanilla JS snippet to make the thumbnails open in a centered modal with the large image and close on overlay/click of the X/Esc? Please return ONLY the CSS and JS blocks.\n\n<!doctype html>\n<html lang=\"en\">\n  <body>\n    <ul class=\"gallery\">\n      <li><img src=\"https://picsum.photos/id/11/200/140\" data-full=\"https://picsum.photos/id/11/1200/800\" alt=\"Forest\"></li>\n      <li><img src=\"https://picsum.photos/id/21/200/140\" data-full=\"https://picsum.photos/id/21/1200/800\" alt=\"City\"></li>\n      <li><img src=\"https://picsum.photos/id/31/200/140\" data-full=\"https://picsum.photos/id/31/1200/800\" alt=\"Beach\"></li>\n      <li><img src=\"https://picsum.photos/id/41/200/140\" data-full=\"https://picsum.photos/id/41/1200/800\" alt=\"Mountains\"></li>\n    </ul>\n\n    <div class=\"modal\" hidden aria-hidden=\"true\" role=\"dialog\" aria-modal=\"true\">\n      <div class=\"backdrop\"></div>\n      <figure class=\"dialog\">\n        <button class=\"close\" aria-label=\"Close\">\u00d7</button>\n        <img class=\"modal-img\" alt=\"\">\n        <figcaption class=\"caption\"></figcaption>\n      </figure>\n    </div>\n  </body>\n</html>": [
+            1,
+            0,
+            -1,
+            -1
+        ],
+        "I have this starter HTML. Can you add inside <main> a simple hero section with my photo, a brief bio, social links, and a 'Download CV' button? Light CSS in the existing <style> is fine; keep it clean, responsive, and accessible (alt text, aria-labels, and make the CV link trigger a download).\n\nUse this content:\nName: Marco Rossi\nBio: Full\u2011stack engineer based in Berlin. I craft pragmatic web apps with Node, Go, and Svelte.\nPhoto: /assets/marco.jpg\nLinkedIn: https://www.linkedin.com/in/marcorossi\nGitHub: https://github.com/marcorossi\nMastodon: https://hachyderm.io/@marco\nResume: /assets/Marco-Rossi-CV.pdf\n\n<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Marco Rossi \u2014 Portfolio</title>\n<style>\n  :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; }\n  html, body { height: 100%; }\n  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--fg); }\n  a { color: var(--accent); text-decoration: none; }\n  a:hover { text-decoration: underline; }\n</style>\n</head>\n<body>\n  <main></main>\n</body>\n</html>": [
+            1,
+            0,
+            1,
+            0
+        ],
+        "I want a minimal to-do list webpage where I can type a task, click Add, click a checkbox to toggle complete, and click an X to delete. Can you give me three small code blocks (HTML skeleton, tiny CSS, and a short JS script) to paste into separate files? Please avoid frameworks and keep each block under ~30 lines.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Give me a small HTML/CSS/JS snippet for a feedback widget: five clickable stars (hover highlights and sets the selection) bound to an input named \"rating\", a required textarea named \"comments\", and on submit just alert the chosen rating and comment. Vanilla only, keep it simple.": [
+            1,
+            -1,
+            1,
+            0
+        ],
+        "Could you write an accessible newsletter signup form using only HTML and vanilla JS that: (1) labels the email input, (2) shows a small inline error if the email is invalid, and (3) on success hides the form and shows \u201cThanks for subscribing!\u201d? Include minimal CSS, all in one self-contained snippet.": [
+            0,
+            1,
+            0,
+            1
+        ],
+        "Write a React functional component for a login form that has: email, password, a remember-me checkbox, and a sign-in button. Use useState for state, validate the email format lightly, and on submit just console.log the values. No external libraries.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Please write a minimal single-file HTML (inline CSS + JS) for a small quiz page with 3 multiple-choice questions about animals. Include a 'Submit' button that shows the score at the top and highlights correct/incorrect answers, and a 'Try again' button to reset. Use only vanilla JS.\n\nQuestions:\n1) Which animal is the largest land animal?\nA) Elephant\nB) Rhinoceros\nC) Hippopotamus\nD) Giraffe\n\n2) Which animal is known for its black-and-white stripes?\nA) Zebra\nB) Tiger\nC) Panda\nD) Skunk\n\n3) Which mammal can truly fly?\nA) Bat\nB) Flying squirrel\nC) Ostrich\nD) Eagle\n\nCorrect answers: 1-A, 2-A, 3-A.": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "I already have HTML with classes header, post, author-box, and comments. Please give me a tiny CSS stylesheet (under ~40 lines) to make it look clean and readable on mobile and desktop.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Could you make a single self-contained webpage (one HTML file) with a custom audio player UI that includes: a Play button, a Pause button, and a volume range input (0\u2013100)? Add basic labels for accessibility. Use this demo file as the source: https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav": [
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "End your response with an offer to provide additional help or customization, such as 'Let me know if you need any modifications!'": {
+        "Give me a minimal HTML-only skeleton (no CSS or JS) for a simple search page: a heading, a search input, a category filter dropdown with options All, Books, Movies, and an empty results list (<ul>) placeholder. Use proper <label> elements and reasonable IDs.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What\u2019s the simplest HTML5-only (no JavaScript) markup for a small sign-up form that validates email format and requires a password of at least 8 characters with at least one number? Please include just the HTML and a tiny bit of CSS to show red helper text or borders when a field is invalid.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Please write a single-file HTML page that shows a simple, centered Job Application form. Put labels above inputs and include: Name, Email, Phone, Cover Letter (textarea), and a Resume upload input. Add a small note under the resume input that says \u201cPDF/DOC up to 2 MB\u201d (no actual validation). Include minimal inline CSS for spacing and a max width; no JavaScript.": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "What are the key accessibility considerations (roles, aria attributes, focus management, keyboard traps) for a cookie consent banner with \u201cAccept\u201d and \u201cManage settings,\u201d where Manage opens a modal dialog? A brief checklist or short code hints are fine.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I already have HTML with classes header, post, author-box, and comments. Please give me a tiny CSS stylesheet (under ~40 lines) to make it look clean and readable on mobile and desktop.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Create a minimal, responsive pricing section (HTML + a little CSS, no JS, no frameworks) with three cards: Basic ($9/mo), Pro ($19/mo), and Team ($49/mo). Each card should show the plan name, price, three bullet-point features (Basic: 5 projects, Email support, 1 GB storage; Pro: 25 projects, Priority email, 10 GB storage; Team: Unlimited projects, Chat support, 100 GB storage) and a prominent 'Select' button. Keep the CSS short and mobile-first.": [
+            0,
+            0,
+            0,
+            -1
+        ],
+        "I have this HTML. Can you provide the CSS and a tiny vanilla JS snippet to make the thumbnails open in a centered modal with the large image and close on overlay/click of the X/Esc? Please return ONLY the CSS and JS blocks.\n\n<!doctype html>\n<html lang=\"en\">\n  <body>\n    <ul class=\"gallery\">\n      <li><img src=\"https://picsum.photos/id/11/200/140\" data-full=\"https://picsum.photos/id/11/1200/800\" alt=\"Forest\"></li>\n      <li><img src=\"https://picsum.photos/id/21/200/140\" data-full=\"https://picsum.photos/id/21/1200/800\" alt=\"City\"></li>\n      <li><img src=\"https://picsum.photos/id/31/200/140\" data-full=\"https://picsum.photos/id/31/1200/800\" alt=\"Beach\"></li>\n      <li><img src=\"https://picsum.photos/id/41/200/140\" data-full=\"https://picsum.photos/id/41/1200/800\" alt=\"Mountains\"></li>\n    </ul>\n\n    <div class=\"modal\" hidden aria-hidden=\"true\" role=\"dialog\" aria-modal=\"true\">\n      <div class=\"backdrop\"></div>\n      <figure class=\"dialog\">\n        <button class=\"close\" aria-label=\"Close\">\u00d7</button>\n        <img class=\"modal-img\" alt=\"\">\n        <figcaption class=\"caption\"></figcaption>\n      </figure>\n    </div>\n  </body>\n</html>": [
+            -1,
+            1,
+            -1,
+            0
+        ],
+        "Please generate a basic HTML file for a wedding welcome page for \u201cAva & Liam\u201d with the date (June 21, 2025) and ceremony location (The Garden Terrace, 15 Oak Lane, Asheville, NC). Include a short blurb, a map link, and an RSVP form collecting guest name, email, meal preference (Beef/Chicken/Vegan), and song request, submitting to this Google Form endpoint: https://forms.gle/abcd1234. Keep it mobile-friendly and under 150 lines if possible.": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "Can you write a minimal, self-contained HTML file (80 lines or fewer) that shows a simple photo gallery of six thumbnails in a grid, where clicking a thumbnail opens a modal displaying the large version? Please use these image pairs (thumb -> large):\n- https://picsum.photos/id/10/200/140 -> https://picsum.photos/id/10/1200/800\n- https://picsum.photos/id/20/200/140 -> https://picsum.photos/id/20/1200/800\n- https://picsum.photos/id/30/200/140 -> https://picsum.photos/id/30/1200/800\n- https://picsum.photos/id/40/200/140 -> https://picsum.photos/id/40/1200/800\n- https://picsum.photos/id/50/200/140 -> https://picsum.photos/id/50/1200/800\n- https://picsum.photos/id/60/200/140 -> https://picsum.photos/id/60/1200/800\nRequirements: inline CSS and vanilla JS (no libraries), close on backdrop click and Esc, include a visible close button, and add basic accessibility (role=\"dialog\", aria-modal=\"true\").": [
+            0,
+            -1,
+            0,
+            0
+        ],
+        "Could you write an accessible newsletter signup form using only HTML and vanilla JS that: (1) labels the email input, (2) shows a small inline error if the email is invalid, and (3) on success hides the form and shows \u201cThanks for subscribing!\u201d? Include minimal CSS, all in one self-contained snippet.": [
+            0,
+            0,
+            0,
+            -1
+        ],
+        "Give me a small HTML/CSS/JS snippet for a feedback widget: five clickable stars (hover highlights and sets the selection) bound to an input named \"rating\", a required textarea named \"comments\", and on submit just alert the chosen rating and comment. Vanilla only, keep it simple.": [
+            0,
+            -1,
+            1,
+            0
+        ],
+        "I have this starter HTML. Can you add inside <main> a simple hero section with my photo, a brief bio, social links, and a 'Download CV' button? Light CSS in the existing <style> is fine; keep it clean, responsive, and accessible (alt text, aria-labels, and make the CV link trigger a download).\n\nUse this content:\nName: Marco Rossi\nBio: Full\u2011stack engineer based in Berlin. I craft pragmatic web apps with Node, Go, and Svelte.\nPhoto: /assets/marco.jpg\nLinkedIn: https://www.linkedin.com/in/marcorossi\nGitHub: https://github.com/marcorossi\nMastodon: https://hachyderm.io/@marco\nResume: /assets/Marco-Rossi-CV.pdf\n\n<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Marco Rossi \u2014 Portfolio</title>\n<style>\n  :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; }\n  html, body { height: 100%; }\n  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--fg); }\n  a { color: var(--accent); text-decoration: none; }\n  a:hover { text-decoration: underline; }\n</style>\n</head>\n<body>\n  <main></main>\n</body>\n</html>": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "Write a React functional component for a login form that has: email, password, a remember-me checkbox, and a sign-in button. Use useState for state, validate the email format lightly, and on submit just console.log the values. No external libraries.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Could you make a single self-contained webpage (one HTML file) with a custom audio player UI that includes: a Play button, a Pause button, and a volume range input (0\u2013100)? Add basic labels for accessibility. Use this demo file as the source: https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav": [
+            1,
+            -1,
+            0,
+            0
+        ],
+        "I want a minimal to-do list webpage where I can type a task, click Add, click a checkbox to toggle complete, and click an X to delete. Can you give me three small code blocks (HTML skeleton, tiny CSS, and a short JS script) to paste into separate files? Please avoid frameworks and keep each block under ~30 lines.": [
+            0,
+            0,
+            1,
+            0
+        ],
+        "Please write a minimal single-file HTML (inline CSS + JS) for a small quiz page with 3 multiple-choice questions about animals. Include a 'Submit' button that shows the score at the top and highlights correct/incorrect answers, and a 'Try again' button to reset. Use only vanilla JS.\n\nQuestions:\n1) Which animal is the largest land animal?\nA) Elephant\nB) Rhinoceros\nC) Hippopotamus\nD) Giraffe\n\n2) Which animal is known for its black-and-white stripes?\nA) Zebra\nB) Tiger\nC) Panda\nD) Skunk\n\n3) Which mammal can truly fly?\nA) Bat\nB) Flying squirrel\nC) Ostrich\nD) Eagle\n\nCorrect answers: 1-A, 2-A, 3-A.": [
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "Do not include any comments within the code.": {
+        "Give me a minimal HTML-only skeleton (no CSS or JS) for a simple search page: a heading, a search input, a category filter dropdown with options All, Books, Movies, and an empty results list (<ul>) placeholder. Use proper <label> elements and reasonable IDs.": [
+            0,
+            1,
+            0,
+            0
+        ],
+        "What are the key accessibility considerations (roles, aria attributes, focus management, keyboard traps) for a cookie consent banner with \u201cAccept\u201d and \u201cManage settings,\u201d where Manage opens a modal dialog? A brief checklist or short code hints are fine.": [
+            0,
+            0,
+            1,
+            0
+        ],
+        "Create a minimal, responsive pricing section (HTML + a little CSS, no JS, no frameworks) with three cards: Basic ($9/mo), Pro ($19/mo), and Team ($49/mo). Each card should show the plan name, price, three bullet-point features (Basic: 5 projects, Email support, 1 GB storage; Pro: 25 projects, Priority email, 10 GB storage; Team: Unlimited projects, Chat support, 100 GB storage) and a prominent 'Select' button. Keep the CSS short and mobile-first.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What\u2019s the simplest HTML5-only (no JavaScript) markup for a small sign-up form that validates email format and requires a password of at least 8 characters with at least one number? Please include just the HTML and a tiny bit of CSS to show red helper text or borders when a field is invalid.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Please generate a basic HTML file for a wedding welcome page for \u201cAva & Liam\u201d with the date (June 21, 2025) and ceremony location (The Garden Terrace, 15 Oak Lane, Asheville, NC). Include a short blurb, a map link, and an RSVP form collecting guest name, email, meal preference (Beef/Chicken/Vegan), and song request, submitting to this Google Form endpoint: https://forms.gle/abcd1234. Keep it mobile-friendly and under 150 lines if possible.": [
+            0,
+            -1,
+            0,
+            -1
+        ],
+        "I already have HTML with classes header, post, author-box, and comments. Please give me a tiny CSS stylesheet (under ~40 lines) to make it look clean and readable on mobile and desktop.": [
+            0,
+            -1,
+            0,
+            0
+        ],
+        "I have this HTML. Can you provide the CSS and a tiny vanilla JS snippet to make the thumbnails open in a centered modal with the large image and close on overlay/click of the X/Esc? Please return ONLY the CSS and JS blocks.\n\n<!doctype html>\n<html lang=\"en\">\n  <body>\n    <ul class=\"gallery\">\n      <li><img src=\"https://picsum.photos/id/11/200/140\" data-full=\"https://picsum.photos/id/11/1200/800\" alt=\"Forest\"></li>\n      <li><img src=\"https://picsum.photos/id/21/200/140\" data-full=\"https://picsum.photos/id/21/1200/800\" alt=\"City\"></li>\n      <li><img src=\"https://picsum.photos/id/31/200/140\" data-full=\"https://picsum.photos/id/31/1200/800\" alt=\"Beach\"></li>\n      <li><img src=\"https://picsum.photos/id/41/200/140\" data-full=\"https://picsum.photos/id/41/1200/800\" alt=\"Mountains\"></li>\n    </ul>\n\n    <div class=\"modal\" hidden aria-hidden=\"true\" role=\"dialog\" aria-modal=\"true\">\n      <div class=\"backdrop\"></div>\n      <figure class=\"dialog\">\n        <button class=\"close\" aria-label=\"Close\">\u00d7</button>\n        <img class=\"modal-img\" alt=\"\">\n        <figcaption class=\"caption\"></figcaption>\n      </figure>\n    </div>\n  </body>\n</html>": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Can you write a minimal, self-contained HTML file (80 lines or fewer) that shows a simple photo gallery of six thumbnails in a grid, where clicking a thumbnail opens a modal displaying the large version? Please use these image pairs (thumb -> large):\n- https://picsum.photos/id/10/200/140 -> https://picsum.photos/id/10/1200/800\n- https://picsum.photos/id/20/200/140 -> https://picsum.photos/id/20/1200/800\n- https://picsum.photos/id/30/200/140 -> https://picsum.photos/id/30/1200/800\n- https://picsum.photos/id/40/200/140 -> https://picsum.photos/id/40/1200/800\n- https://picsum.photos/id/50/200/140 -> https://picsum.photos/id/50/1200/800\n- https://picsum.photos/id/60/200/140 -> https://picsum.photos/id/60/1200/800\nRequirements: inline CSS and vanilla JS (no libraries), close on backdrop click and Esc, include a visible close button, and add basic accessibility (role=\"dialog\", aria-modal=\"true\").": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "Could you write an accessible newsletter signup form using only HTML and vanilla JS that: (1) labels the email input, (2) shows a small inline error if the email is invalid, and (3) on success hides the form and shows \u201cThanks for subscribing!\u201d? Include minimal CSS, all in one self-contained snippet.": [
+            0,
+            1,
+            0,
+            0
+        ],
+        "I have this starter HTML. Can you add inside <main> a simple hero section with my photo, a brief bio, social links, and a 'Download CV' button? Light CSS in the existing <style> is fine; keep it clean, responsive, and accessible (alt text, aria-labels, and make the CV link trigger a download).\n\nUse this content:\nName: Marco Rossi\nBio: Full\u2011stack engineer based in Berlin. I craft pragmatic web apps with Node, Go, and Svelte.\nPhoto: /assets/marco.jpg\nLinkedIn: https://www.linkedin.com/in/marcorossi\nGitHub: https://github.com/marcorossi\nMastodon: https://hachyderm.io/@marco\nResume: /assets/Marco-Rossi-CV.pdf\n\n<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Marco Rossi \u2014 Portfolio</title>\n<style>\n  :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; }\n  html, body { height: 100%; }\n  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--fg); }\n  a { color: var(--accent); text-decoration: none; }\n  a:hover { text-decoration: underline; }\n</style>\n</head>\n<body>\n  <main></main>\n</body>\n</html>": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Could you make a single self-contained webpage (one HTML file) with a custom audio player UI that includes: a Play button, a Pause button, and a volume range input (0\u2013100)? Add basic labels for accessibility. Use this demo file as the source: https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Give me a small HTML/CSS/JS snippet for a feedback widget: five clickable stars (hover highlights and sets the selection) bound to an input named \"rating\", a required textarea named \"comments\", and on submit just alert the chosen rating and comment. Vanilla only, keep it simple.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Write a React functional component for a login form that has: email, password, a remember-me checkbox, and a sign-in button. Use useState for state, validate the email format lightly, and on submit just console.log the values. No external libraries.": [
+            0,
+            -1,
+            0,
+            1
+        ],
+        "I want a minimal to-do list webpage where I can type a task, click Add, click a checkbox to toggle complete, and click an X to delete. Can you give me three small code blocks (HTML skeleton, tiny CSS, and a short JS script) to paste into separate files? Please avoid frameworks and keep each block under ~30 lines.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Please write a single-file HTML page that shows a simple, centered Job Application form. Put labels above inputs and include: Name, Email, Phone, Cover Letter (textarea), and a Resume upload input. Add a small note under the resume input that says \u201cPDF/DOC up to 2 MB\u201d (no actual validation). Include minimal inline CSS for spacing and a max width; no JavaScript.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Please write a minimal single-file HTML (inline CSS + JS) for a small quiz page with 3 multiple-choice questions about animals. Include a 'Submit' button that shows the score at the top and highlights correct/incorrect answers, and a 'Try again' button to reset. Use only vanilla JS.\n\nQuestions:\n1) Which animal is the largest land animal?\nA) Elephant\nB) Rhinoceros\nC) Hippopotamus\nD) Giraffe\n\n2) Which animal is known for its black-and-white stripes?\nA) Zebra\nB) Tiger\nC) Panda\nD) Skunk\n\n3) Which mammal can truly fly?\nA) Bat\nB) Flying squirrel\nC) Ostrich\nD) Eagle\n\nCorrect answers: 1-A, 2-A, 3-A.": [
+            0,
+            1,
+            0,
+            0
+        ]
+    },
+    "Conclude your response with a short technical consideration relevant to the webpage implementation.": {
+        "I already have HTML with classes header, post, author-box, and comments. Please give me a tiny CSS stylesheet (under ~40 lines) to make it look clean and readable on mobile and desktop.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Give me a minimal HTML-only skeleton (no CSS or JS) for a simple search page: a heading, a search input, a category filter dropdown with options All, Books, Movies, and an empty results list (<ul>) placeholder. Use proper <label> elements and reasonable IDs.": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "What are the key accessibility considerations (roles, aria attributes, focus management, keyboard traps) for a cookie consent banner with \u201cAccept\u201d and \u201cManage settings,\u201d where Manage opens a modal dialog? A brief checklist or short code hints are fine.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "What\u2019s the simplest HTML5-only (no JavaScript) markup for a small sign-up form that validates email format and requires a password of at least 8 characters with at least one number? Please include just the HTML and a tiny bit of CSS to show red helper text or borders when a field is invalid.": [
+            1,
+            -1,
+            0,
+            -1
+        ],
+        "Create a minimal, responsive pricing section (HTML + a little CSS, no JS, no frameworks) with three cards: Basic ($9/mo), Pro ($19/mo), and Team ($49/mo). Each card should show the plan name, price, three bullet-point features (Basic: 5 projects, Email support, 1 GB storage; Pro: 25 projects, Priority email, 10 GB storage; Team: Unlimited projects, Chat support, 100 GB storage) and a prominent 'Select' button. Keep the CSS short and mobile-first.": [
+            0,
+            1,
+            1,
+            1
+        ],
+        "Please write a single-file HTML page that shows a simple, centered Job Application form. Put labels above inputs and include: Name, Email, Phone, Cover Letter (textarea), and a Resume upload input. Add a small note under the resume input that says \u201cPDF/DOC up to 2 MB\u201d (no actual validation). Include minimal inline CSS for spacing and a max width; no JavaScript.": [
+            0,
+            -1,
+            0,
+            0
+        ],
+        "Please generate a basic HTML file for a wedding welcome page for \u201cAva & Liam\u201d with the date (June 21, 2025) and ceremony location (The Garden Terrace, 15 Oak Lane, Asheville, NC). Include a short blurb, a map link, and an RSVP form collecting guest name, email, meal preference (Beef/Chicken/Vegan), and song request, submitting to this Google Form endpoint: https://forms.gle/abcd1234. Keep it mobile-friendly and under 150 lines if possible.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Can you write a minimal, self-contained HTML file (80 lines or fewer) that shows a simple photo gallery of six thumbnails in a grid, where clicking a thumbnail opens a modal displaying the large version? Please use these image pairs (thumb -> large):\n- https://picsum.photos/id/10/200/140 -> https://picsum.photos/id/10/1200/800\n- https://picsum.photos/id/20/200/140 -> https://picsum.photos/id/20/1200/800\n- https://picsum.photos/id/30/200/140 -> https://picsum.photos/id/30/1200/800\n- https://picsum.photos/id/40/200/140 -> https://picsum.photos/id/40/1200/800\n- https://picsum.photos/id/50/200/140 -> https://picsum.photos/id/50/1200/800\n- https://picsum.photos/id/60/200/140 -> https://picsum.photos/id/60/1200/800\nRequirements: inline CSS and vanilla JS (no libraries), close on backdrop click and Esc, include a visible close button, and add basic accessibility (role=\"dialog\", aria-modal=\"true\").": [
+            1,
+            0,
+            0,
+            1
+        ],
+        "I have this HTML. Can you provide the CSS and a tiny vanilla JS snippet to make the thumbnails open in a centered modal with the large image and close on overlay/click of the X/Esc? Please return ONLY the CSS and JS blocks.\n\n<!doctype html>\n<html lang=\"en\">\n  <body>\n    <ul class=\"gallery\">\n      <li><img src=\"https://picsum.photos/id/11/200/140\" data-full=\"https://picsum.photos/id/11/1200/800\" alt=\"Forest\"></li>\n      <li><img src=\"https://picsum.photos/id/21/200/140\" data-full=\"https://picsum.photos/id/21/1200/800\" alt=\"City\"></li>\n      <li><img src=\"https://picsum.photos/id/31/200/140\" data-full=\"https://picsum.photos/id/31/1200/800\" alt=\"Beach\"></li>\n      <li><img src=\"https://picsum.photos/id/41/200/140\" data-full=\"https://picsum.photos/id/41/1200/800\" alt=\"Mountains\"></li>\n    </ul>\n\n    <div class=\"modal\" hidden aria-hidden=\"true\" role=\"dialog\" aria-modal=\"true\">\n      <div class=\"backdrop\"></div>\n      <figure class=\"dialog\">\n        <button class=\"close\" aria-label=\"Close\">\u00d7</button>\n        <img class=\"modal-img\" alt=\"\">\n        <figcaption class=\"caption\"></figcaption>\n      </figure>\n    </div>\n  </body>\n</html>": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "Could you write an accessible newsletter signup form using only HTML and vanilla JS that: (1) labels the email input, (2) shows a small inline error if the email is invalid, and (3) on success hides the form and shows \u201cThanks for subscribing!\u201d? Include minimal CSS, all in one self-contained snippet.": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "Write a React functional component for a login form that has: email, password, a remember-me checkbox, and a sign-in button. Use useState for state, validate the email format lightly, and on submit just console.log the values. No external libraries.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I want a minimal to-do list webpage where I can type a task, click Add, click a checkbox to toggle complete, and click an X to delete. Can you give me three small code blocks (HTML skeleton, tiny CSS, and a short JS script) to paste into separate files? Please avoid frameworks and keep each block under ~30 lines.": [
+            0,
+            0,
+            1,
+            1
+        ],
+        "Give me a small HTML/CSS/JS snippet for a feedback widget: five clickable stars (hover highlights and sets the selection) bound to an input named \"rating\", a required textarea named \"comments\", and on submit just alert the chosen rating and comment. Vanilla only, keep it simple.": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "Could you make a single self-contained webpage (one HTML file) with a custom audio player UI that includes: a Play button, a Pause button, and a volume range input (0\u2013100)? Add basic labels for accessibility. Use this demo file as the source: https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav": [
+            1,
+            1,
+            1,
+            0
+        ],
+        "Please write a minimal single-file HTML (inline CSS + JS) for a small quiz page with 3 multiple-choice questions about animals. Include a 'Submit' button that shows the score at the top and highlights correct/incorrect answers, and a 'Try again' button to reset. Use only vanilla JS.\n\nQuestions:\n1) Which animal is the largest land animal?\nA) Elephant\nB) Rhinoceros\nC) Hippopotamus\nD) Giraffe\n\n2) Which animal is known for its black-and-white stripes?\nA) Zebra\nB) Tiger\nC) Panda\nD) Skunk\n\n3) Which mammal can truly fly?\nA) Bat\nB) Flying squirrel\nC) Ostrich\nD) Eagle\n\nCorrect answers: 1-A, 2-A, 3-A.": [
+            1,
+            0,
+            0,
+            -1
+        ],
+        "I have this starter HTML. Can you add inside <main> a simple hero section with my photo, a brief bio, social links, and a 'Download CV' button? Light CSS in the existing <style> is fine; keep it clean, responsive, and accessible (alt text, aria-labels, and make the CV link trigger a download).\n\nUse this content:\nName: Marco Rossi\nBio: Full\u2011stack engineer based in Berlin. I craft pragmatic web apps with Node, Go, and Svelte.\nPhoto: /assets/marco.jpg\nLinkedIn: https://www.linkedin.com/in/marcorossi\nGitHub: https://github.com/marcorossi\nMastodon: https://hachyderm.io/@marco\nResume: /assets/Marco-Rossi-CV.pdf\n\n<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Marco Rossi \u2014 Portfolio</title>\n<style>\n  :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; }\n  html, body { height: 100%; }\n  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--fg); }\n  a { color: var(--accent); text-decoration: none; }\n  a:hover { text-decoration: underline; }\n</style>\n</head>\n<body>\n  <main></main>\n</body>\n</html>": [
+            -1,
+            -1,
+            1,
+            -1
+        ]
+    },
+    "Embed all CSS in <style> tags and all JavaScript in <script> tags within the HTML document.": {
+        "What\u2019s the simplest HTML5-only (no JavaScript) markup for a small sign-up form that validates email format and requires a password of at least 8 characters with at least one number? Please include just the HTML and a tiny bit of CSS to show red helper text or borders when a field is invalid.": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "Please write a single-file HTML page that shows a simple, centered Job Application form. Put labels above inputs and include: Name, Email, Phone, Cover Letter (textarea), and a Resume upload input. Add a small note under the resume input that says \u201cPDF/DOC up to 2 MB\u201d (no actual validation). Include minimal inline CSS for spacing and a max width; no JavaScript.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Create a minimal, responsive pricing section (HTML + a little CSS, no JS, no frameworks) with three cards: Basic ($9/mo), Pro ($19/mo), and Team ($49/mo). Each card should show the plan name, price, three bullet-point features (Basic: 5 projects, Email support, 1 GB storage; Pro: 25 projects, Priority email, 10 GB storage; Team: Unlimited projects, Chat support, 100 GB storage) and a prominent 'Select' button. Keep the CSS short and mobile-first.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Give me a minimal HTML-only skeleton (no CSS or JS) for a simple search page: a heading, a search input, a category filter dropdown with options All, Books, Movies, and an empty results list (<ul>) placeholder. Use proper <label> elements and reasonable IDs.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I already have HTML with classes header, post, author-box, and comments. Please give me a tiny CSS stylesheet (under ~40 lines) to make it look clean and readable on mobile and desktop.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Could you write an accessible newsletter signup form using only HTML and vanilla JS that: (1) labels the email input, (2) shows a small inline error if the email is invalid, and (3) on success hides the form and shows \u201cThanks for subscribing!\u201d? Include minimal CSS, all in one self-contained snippet.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Please generate a basic HTML file for a wedding welcome page for \u201cAva & Liam\u201d with the date (June 21, 2025) and ceremony location (The Garden Terrace, 15 Oak Lane, Asheville, NC). Include a short blurb, a map link, and an RSVP form collecting guest name, email, meal preference (Beef/Chicken/Vegan), and song request, submitting to this Google Form endpoint: https://forms.gle/abcd1234. Keep it mobile-friendly and under 150 lines if possible.": [
+            -1,
+            -1,
+            1,
+            1
+        ],
+        "What are the key accessibility considerations (roles, aria attributes, focus management, keyboard traps) for a cookie consent banner with \u201cAccept\u201d and \u201cManage settings,\u201d where Manage opens a modal dialog? A brief checklist or short code hints are fine.": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "I have this HTML. Can you provide the CSS and a tiny vanilla JS snippet to make the thumbnails open in a centered modal with the large image and close on overlay/click of the X/Esc? Please return ONLY the CSS and JS blocks.\n\n<!doctype html>\n<html lang=\"en\">\n  <body>\n    <ul class=\"gallery\">\n      <li><img src=\"https://picsum.photos/id/11/200/140\" data-full=\"https://picsum.photos/id/11/1200/800\" alt=\"Forest\"></li>\n      <li><img src=\"https://picsum.photos/id/21/200/140\" data-full=\"https://picsum.photos/id/21/1200/800\" alt=\"City\"></li>\n      <li><img src=\"https://picsum.photos/id/31/200/140\" data-full=\"https://picsum.photos/id/31/1200/800\" alt=\"Beach\"></li>\n      <li><img src=\"https://picsum.photos/id/41/200/140\" data-full=\"https://picsum.photos/id/41/1200/800\" alt=\"Mountains\"></li>\n    </ul>\n\n    <div class=\"modal\" hidden aria-hidden=\"true\" role=\"dialog\" aria-modal=\"true\">\n      <div class=\"backdrop\"></div>\n      <figure class=\"dialog\">\n        <button class=\"close\" aria-label=\"Close\">\u00d7</button>\n        <img class=\"modal-img\" alt=\"\">\n        <figcaption class=\"caption\"></figcaption>\n      </figure>\n    </div>\n  </body>\n</html>": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "Can you write a minimal, self-contained HTML file (80 lines or fewer) that shows a simple photo gallery of six thumbnails in a grid, where clicking a thumbnail opens a modal displaying the large version? Please use these image pairs (thumb -> large):\n- https://picsum.photos/id/10/200/140 -> https://picsum.photos/id/10/1200/800\n- https://picsum.photos/id/20/200/140 -> https://picsum.photos/id/20/1200/800\n- https://picsum.photos/id/30/200/140 -> https://picsum.photos/id/30/1200/800\n- https://picsum.photos/id/40/200/140 -> https://picsum.photos/id/40/1200/800\n- https://picsum.photos/id/50/200/140 -> https://picsum.photos/id/50/1200/800\n- https://picsum.photos/id/60/200/140 -> https://picsum.photos/id/60/1200/800\nRequirements: inline CSS and vanilla JS (no libraries), close on backdrop click and Esc, include a visible close button, and add basic accessibility (role=\"dialog\", aria-modal=\"true\").": [
+            1,
+            1,
+            0,
+            1
+        ],
+        "I want a minimal to-do list webpage where I can type a task, click Add, click a checkbox to toggle complete, and click an X to delete. Can you give me three small code blocks (HTML skeleton, tiny CSS, and a short JS script) to paste into separate files? Please avoid frameworks and keep each block under ~30 lines.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I have this starter HTML. Can you add inside <main> a simple hero section with my photo, a brief bio, social links, and a 'Download CV' button? Light CSS in the existing <style> is fine; keep it clean, responsive, and accessible (alt text, aria-labels, and make the CV link trigger a download).\n\nUse this content:\nName: Marco Rossi\nBio: Full\u2011stack engineer based in Berlin. I craft pragmatic web apps with Node, Go, and Svelte.\nPhoto: /assets/marco.jpg\nLinkedIn: https://www.linkedin.com/in/marcorossi\nGitHub: https://github.com/marcorossi\nMastodon: https://hachyderm.io/@marco\nResume: /assets/Marco-Rossi-CV.pdf\n\n<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Marco Rossi \u2014 Portfolio</title>\n<style>\n  :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; }\n  html, body { height: 100%; }\n  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--fg); }\n  a { color: var(--accent); text-decoration: none; }\n  a:hover { text-decoration: underline; }\n</style>\n</head>\n<body>\n  <main></main>\n</body>\n</html>": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "Give me a small HTML/CSS/JS snippet for a feedback widget: five clickable stars (hover highlights and sets the selection) bound to an input named \"rating\", a required textarea named \"comments\", and on submit just alert the chosen rating and comment. Vanilla only, keep it simple.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Please write a minimal single-file HTML (inline CSS + JS) for a small quiz page with 3 multiple-choice questions about animals. Include a 'Submit' button that shows the score at the top and highlights correct/incorrect answers, and a 'Try again' button to reset. Use only vanilla JS.\n\nQuestions:\n1) Which animal is the largest land animal?\nA) Elephant\nB) Rhinoceros\nC) Hippopotamus\nD) Giraffe\n\n2) Which animal is known for its black-and-white stripes?\nA) Zebra\nB) Tiger\nC) Panda\nD) Skunk\n\n3) Which mammal can truly fly?\nA) Bat\nB) Flying squirrel\nC) Ostrich\nD) Eagle\n\nCorrect answers: 1-A, 2-A, 3-A.": [
+            1,
+            1,
+            0,
+            1
+        ],
+        "Write a React functional component for a login form that has: email, password, a remember-me checkbox, and a sign-in button. Use useState for state, validate the email format lightly, and on submit just console.log the values. No external libraries.": [
+            -1,
+            -1,
+            null,
+            -1
+        ],
+        "Could you make a single self-contained webpage (one HTML file) with a custom audio player UI that includes: a Play button, a Pause button, and a volume range input (0\u2013100)? Add basic labels for accessibility. Use this demo file as the source: https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav": [
+            1,
+            -1,
+            1,
+            1
+        ]
+    },
+    "End your response with a brief note about potential customization points or enhancements for the code.": {
+        "Give me a minimal HTML-only skeleton (no CSS or JS) for a simple search page: a heading, a search input, a category filter dropdown with options All, Books, Movies, and an empty results list (<ul>) placeholder. Use proper <label> elements and reasonable IDs.": [
+            0,
+            -1,
+            0,
+            1
+        ],
+        "Please write a single-file HTML page that shows a simple, centered Job Application form. Put labels above inputs and include: Name, Email, Phone, Cover Letter (textarea), and a Resume upload input. Add a small note under the resume input that says \u201cPDF/DOC up to 2 MB\u201d (no actual validation). Include minimal inline CSS for spacing and a max width; no JavaScript.": [
+            0,
+            -1,
+            1,
+            -1
+        ],
+        "I already have HTML with classes header, post, author-box, and comments. Please give me a tiny CSS stylesheet (under ~40 lines) to make it look clean and readable on mobile and desktop.": [
+            0,
+            1,
+            1,
+            1
+        ],
+        "What are the key accessibility considerations (roles, aria attributes, focus management, keyboard traps) for a cookie consent banner with \u201cAccept\u201d and \u201cManage settings,\u201d where Manage opens a modal dialog? A brief checklist or short code hints are fine.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Create a minimal, responsive pricing section (HTML + a little CSS, no JS, no frameworks) with three cards: Basic ($9/mo), Pro ($19/mo), and Team ($49/mo). Each card should show the plan name, price, three bullet-point features (Basic: 5 projects, Email support, 1 GB storage; Pro: 25 projects, Priority email, 10 GB storage; Team: Unlimited projects, Chat support, 100 GB storage) and a prominent 'Select' button. Keep the CSS short and mobile-first.": [
+            0,
+            1,
+            1,
+            1
+        ],
+        "I have this HTML. Can you provide the CSS and a tiny vanilla JS snippet to make the thumbnails open in a centered modal with the large image and close on overlay/click of the X/Esc? Please return ONLY the CSS and JS blocks.\n\n<!doctype html>\n<html lang=\"en\">\n  <body>\n    <ul class=\"gallery\">\n      <li><img src=\"https://picsum.photos/id/11/200/140\" data-full=\"https://picsum.photos/id/11/1200/800\" alt=\"Forest\"></li>\n      <li><img src=\"https://picsum.photos/id/21/200/140\" data-full=\"https://picsum.photos/id/21/1200/800\" alt=\"City\"></li>\n      <li><img src=\"https://picsum.photos/id/31/200/140\" data-full=\"https://picsum.photos/id/31/1200/800\" alt=\"Beach\"></li>\n      <li><img src=\"https://picsum.photos/id/41/200/140\" data-full=\"https://picsum.photos/id/41/1200/800\" alt=\"Mountains\"></li>\n    </ul>\n\n    <div class=\"modal\" hidden aria-hidden=\"true\" role=\"dialog\" aria-modal=\"true\">\n      <div class=\"backdrop\"></div>\n      <figure class=\"dialog\">\n        <button class=\"close\" aria-label=\"Close\">\u00d7</button>\n        <img class=\"modal-img\" alt=\"\">\n        <figcaption class=\"caption\"></figcaption>\n      </figure>\n    </div>\n  </body>\n</html>": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "What\u2019s the simplest HTML5-only (no JavaScript) markup for a small sign-up form that validates email format and requires a password of at least 8 characters with at least one number? Please include just the HTML and a tiny bit of CSS to show red helper text or borders when a field is invalid.": [
+            -1,
+            -1,
+            0,
+            0
+        ],
+        "Can you write a minimal, self-contained HTML file (80 lines or fewer) that shows a simple photo gallery of six thumbnails in a grid, where clicking a thumbnail opens a modal displaying the large version? Please use these image pairs (thumb -> large):\n- https://picsum.photos/id/10/200/140 -> https://picsum.photos/id/10/1200/800\n- https://picsum.photos/id/20/200/140 -> https://picsum.photos/id/20/1200/800\n- https://picsum.photos/id/30/200/140 -> https://picsum.photos/id/30/1200/800\n- https://picsum.photos/id/40/200/140 -> https://picsum.photos/id/40/1200/800\n- https://picsum.photos/id/50/200/140 -> https://picsum.photos/id/50/1200/800\n- https://picsum.photos/id/60/200/140 -> https://picsum.photos/id/60/1200/800\nRequirements: inline CSS and vanilla JS (no libraries), close on backdrop click and Esc, include a visible close button, and add basic accessibility (role=\"dialog\", aria-modal=\"true\").": [
+            0,
+            -1,
+            0,
+            1
+        ],
+        "Please generate a basic HTML file for a wedding welcome page for \u201cAva & Liam\u201d with the date (June 21, 2025) and ceremony location (The Garden Terrace, 15 Oak Lane, Asheville, NC). Include a short blurb, a map link, and an RSVP form collecting guest name, email, meal preference (Beef/Chicken/Vegan), and song request, submitting to this Google Form endpoint: https://forms.gle/abcd1234. Keep it mobile-friendly and under 150 lines if possible.": [
+            0,
+            1,
+            1,
+            1
+        ],
+        "I have this starter HTML. Can you add inside <main> a simple hero section with my photo, a brief bio, social links, and a 'Download CV' button? Light CSS in the existing <style> is fine; keep it clean, responsive, and accessible (alt text, aria-labels, and make the CV link trigger a download).\n\nUse this content:\nName: Marco Rossi\nBio: Full\u2011stack engineer based in Berlin. I craft pragmatic web apps with Node, Go, and Svelte.\nPhoto: /assets/marco.jpg\nLinkedIn: https://www.linkedin.com/in/marcorossi\nGitHub: https://github.com/marcorossi\nMastodon: https://hachyderm.io/@marco\nResume: /assets/Marco-Rossi-CV.pdf\n\n<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Marco Rossi \u2014 Portfolio</title>\n<style>\n  :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; }\n  html, body { height: 100%; }\n  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--fg); }\n  a { color: var(--accent); text-decoration: none; }\n  a:hover { text-decoration: underline; }\n</style>\n</head>\n<body>\n  <main></main>\n</body>\n</html>": [
+            -1,
+            0,
+            1,
+            0
+        ],
+        "Give me a small HTML/CSS/JS snippet for a feedback widget: five clickable stars (hover highlights and sets the selection) bound to an input named \"rating\", a required textarea named \"comments\", and on submit just alert the chosen rating and comment. Vanilla only, keep it simple.": [
+            1,
+            -1,
+            1,
+            0
+        ],
+        "I want a minimal to-do list webpage where I can type a task, click Add, click a checkbox to toggle complete, and click an X to delete. Can you give me three small code blocks (HTML skeleton, tiny CSS, and a short JS script) to paste into separate files? Please avoid frameworks and keep each block under ~30 lines.": [
+            0,
+            -1,
+            1,
+            1
+        ],
+        "Write a React functional component for a login form that has: email, password, a remember-me checkbox, and a sign-in button. Use useState for state, validate the email format lightly, and on submit just console.log the values. No external libraries.": [
+            1,
+            1,
+            0,
+            1
+        ],
+        "Could you make a single self-contained webpage (one HTML file) with a custom audio player UI that includes: a Play button, a Pause button, and a volume range input (0\u2013100)? Add basic labels for accessibility. Use this demo file as the source: https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav": [
+            0,
+            1,
+            1,
+            0
+        ],
+        "Could you write an accessible newsletter signup form using only HTML and vanilla JS that: (1) labels the email input, (2) shows a small inline error if the email is invalid, and (3) on success hides the form and shows \u201cThanks for subscribing!\u201d? Include minimal CSS, all in one self-contained snippet.": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "Please write a minimal single-file HTML (inline CSS + JS) for a small quiz page with 3 multiple-choice questions about animals. Include a 'Submit' button that shows the score at the top and highlights correct/incorrect answers, and a 'Try again' button to reset. Use only vanilla JS.\n\nQuestions:\n1) Which animal is the largest land animal?\nA) Elephant\nB) Rhinoceros\nC) Hippopotamus\nD) Giraffe\n\n2) Which animal is known for its black-and-white stripes?\nA) Zebra\nB) Tiger\nC) Panda\nD) Skunk\n\n3) Which mammal can truly fly?\nA) Bat\nB) Flying squirrel\nC) Ostrich\nD) Eagle\n\nCorrect answers: 1-A, 2-A, 3-A.": [
+            1,
+            0,
+            0,
+            0
+        ]
+    },
+    "Do not add trailing colons to form labels.": {
+        "What\u2019s the simplest HTML5-only (no JavaScript) markup for a small sign-up form that validates email format and requires a password of at least 8 characters with at least one number? Please include just the HTML and a tiny bit of CSS to show red helper text or borders when a field is invalid.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Please write a single-file HTML page that shows a simple, centered Job Application form. Put labels above inputs and include: Name, Email, Phone, Cover Letter (textarea), and a Resume upload input. Add a small note under the resume input that says \u201cPDF/DOC up to 2 MB\u201d (no actual validation). Include minimal inline CSS for spacing and a max width; no JavaScript.": [
+            0,
+            0,
+            0,
+            -1
+        ],
+        "Give me a minimal HTML-only skeleton (no CSS or JS) for a simple search page: a heading, a search input, a category filter dropdown with options All, Books, Movies, and an empty results list (<ul>) placeholder. Use proper <label> elements and reasonable IDs.": [
+            0,
+            0,
+            0,
+            -1
+        ],
+        "What are the key accessibility considerations (roles, aria attributes, focus management, keyboard traps) for a cookie consent banner with \u201cAccept\u201d and \u201cManage settings,\u201d where Manage opens a modal dialog? A brief checklist or short code hints are fine.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Please generate a basic HTML file for a wedding welcome page for \u201cAva & Liam\u201d with the date (June 21, 2025) and ceremony location (The Garden Terrace, 15 Oak Lane, Asheville, NC). Include a short blurb, a map link, and an RSVP form collecting guest name, email, meal preference (Beef/Chicken/Vegan), and song request, submitting to this Google Form endpoint: https://forms.gle/abcd1234. Keep it mobile-friendly and under 150 lines if possible.": [
+            0,
+            -1,
+            -1,
+            -1
+        ],
+        "I already have HTML with classes header, post, author-box, and comments. Please give me a tiny CSS stylesheet (under ~40 lines) to make it look clean and readable on mobile and desktop.": [
+            0,
+            0,
+            0,
+            -1
+        ],
+        "Create a minimal, responsive pricing section (HTML + a little CSS, no JS, no frameworks) with three cards: Basic ($9/mo), Pro ($19/mo), and Team ($49/mo). Each card should show the plan name, price, three bullet-point features (Basic: 5 projects, Email support, 1 GB storage; Pro: 25 projects, Priority email, 10 GB storage; Team: Unlimited projects, Chat support, 100 GB storage) and a prominent 'Select' button. Keep the CSS short and mobile-first.": [
+            0,
+            0,
+            0,
+            -1
+        ],
+        "I have this HTML. Can you provide the CSS and a tiny vanilla JS snippet to make the thumbnails open in a centered modal with the large image and close on overlay/click of the X/Esc? Please return ONLY the CSS and JS blocks.\n\n<!doctype html>\n<html lang=\"en\">\n  <body>\n    <ul class=\"gallery\">\n      <li><img src=\"https://picsum.photos/id/11/200/140\" data-full=\"https://picsum.photos/id/11/1200/800\" alt=\"Forest\"></li>\n      <li><img src=\"https://picsum.photos/id/21/200/140\" data-full=\"https://picsum.photos/id/21/1200/800\" alt=\"City\"></li>\n      <li><img src=\"https://picsum.photos/id/31/200/140\" data-full=\"https://picsum.photos/id/31/1200/800\" alt=\"Beach\"></li>\n      <li><img src=\"https://picsum.photos/id/41/200/140\" data-full=\"https://picsum.photos/id/41/1200/800\" alt=\"Mountains\"></li>\n    </ul>\n\n    <div class=\"modal\" hidden aria-hidden=\"true\" role=\"dialog\" aria-modal=\"true\">\n      <div class=\"backdrop\"></div>\n      <figure class=\"dialog\">\n        <button class=\"close\" aria-label=\"Close\">\u00d7</button>\n        <img class=\"modal-img\" alt=\"\">\n        <figcaption class=\"caption\"></figcaption>\n      </figure>\n    </div>\n  </body>\n</html>": [
+            0,
+            1,
+            0,
+            0
+        ],
+        "Could you write an accessible newsletter signup form using only HTML and vanilla JS that: (1) labels the email input, (2) shows a small inline error if the email is invalid, and (3) on success hides the form and shows \u201cThanks for subscribing!\u201d? Include minimal CSS, all in one self-contained snippet.": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "Could you make a single self-contained webpage (one HTML file) with a custom audio player UI that includes: a Play button, a Pause button, and a volume range input (0\u2013100)? Add basic labels for accessibility. Use this demo file as the source: https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav": [
+            0,
+            0,
+            0,
+            -1
+        ],
+        "I have this starter HTML. Can you add inside <main> a simple hero section with my photo, a brief bio, social links, and a 'Download CV' button? Light CSS in the existing <style> is fine; keep it clean, responsive, and accessible (alt text, aria-labels, and make the CV link trigger a download).\n\nUse this content:\nName: Marco Rossi\nBio: Full\u2011stack engineer based in Berlin. I craft pragmatic web apps with Node, Go, and Svelte.\nPhoto: /assets/marco.jpg\nLinkedIn: https://www.linkedin.com/in/marcorossi\nGitHub: https://github.com/marcorossi\nMastodon: https://hachyderm.io/@marco\nResume: /assets/Marco-Rossi-CV.pdf\n\n<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Marco Rossi \u2014 Portfolio</title>\n<style>\n  :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; }\n  html, body { height: 100%; }\n  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--fg); }\n  a { color: var(--accent); text-decoration: none; }\n  a:hover { text-decoration: underline; }\n</style>\n</head>\n<body>\n  <main></main>\n</body>\n</html>": [
+            1,
+            1,
+            0,
+            0
+        ],
+        "Give me a small HTML/CSS/JS snippet for a feedback widget: five clickable stars (hover highlights and sets the selection) bound to an input named \"rating\", a required textarea named \"comments\", and on submit just alert the chosen rating and comment. Vanilla only, keep it simple.": [
+            0,
+            -1,
+            1,
+            0
+        ],
+        "Write a React functional component for a login form that has: email, password, a remember-me checkbox, and a sign-in button. Use useState for state, validate the email format lightly, and on submit just console.log the values. No external libraries.": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "Please write a minimal single-file HTML (inline CSS + JS) for a small quiz page with 3 multiple-choice questions about animals. Include a 'Submit' button that shows the score at the top and highlights correct/incorrect answers, and a 'Try again' button to reset. Use only vanilla JS.\n\nQuestions:\n1) Which animal is the largest land animal?\nA) Elephant\nB) Rhinoceros\nC) Hippopotamus\nD) Giraffe\n\n2) Which animal is known for its black-and-white stripes?\nA) Zebra\nB) Tiger\nC) Panda\nD) Skunk\n\n3) Which mammal can truly fly?\nA) Bat\nB) Flying squirrel\nC) Ostrich\nD) Eagle\n\nCorrect answers: 1-A, 2-A, 3-A.": [
+            1,
+            0,
+            0,
+            -1
+        ],
+        "I want a minimal to-do list webpage where I can type a task, click Add, click a checkbox to toggle complete, and click an X to delete. Can you give me three small code blocks (HTML skeleton, tiny CSS, and a short JS script) to paste into separate files? Please avoid frameworks and keep each block under ~30 lines.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Can you write a minimal, self-contained HTML file (80 lines or fewer) that shows a simple photo gallery of six thumbnails in a grid, where clicking a thumbnail opens a modal displaying the large version? Please use these image pairs (thumb -> large):\n- https://picsum.photos/id/10/200/140 -> https://picsum.photos/id/10/1200/800\n- https://picsum.photos/id/20/200/140 -> https://picsum.photos/id/20/1200/800\n- https://picsum.photos/id/30/200/140 -> https://picsum.photos/id/30/1200/800\n- https://picsum.photos/id/40/200/140 -> https://picsum.photos/id/40/1200/800\n- https://picsum.photos/id/50/200/140 -> https://picsum.photos/id/50/1200/800\n- https://picsum.photos/id/60/200/140 -> https://picsum.photos/id/60/1200/800\nRequirements: inline CSS and vanilla JS (no libraries), close on backdrop click and Esc, include a visible close button, and add basic accessibility (role=\"dialog\", aria-modal=\"true\").": [
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "Add a brief explanation after the code block instead of including comments in the code.": {
+        "Please write a single-file HTML page that shows a simple, centered Job Application form. Put labels above inputs and include: Name, Email, Phone, Cover Letter (textarea), and a Resume upload input. Add a small note under the resume input that says \u201cPDF/DOC up to 2 MB\u201d (no actual validation). Include minimal inline CSS for spacing and a max width; no JavaScript.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Give me a minimal HTML-only skeleton (no CSS or JS) for a simple search page: a heading, a search input, a category filter dropdown with options All, Books, Movies, and an empty results list (<ul>) placeholder. Use proper <label> elements and reasonable IDs.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What are the key accessibility considerations (roles, aria attributes, focus management, keyboard traps) for a cookie consent banner with \u201cAccept\u201d and \u201cManage settings,\u201d where Manage opens a modal dialog? A brief checklist or short code hints are fine.": [
+            -1,
+            -1,
+            0,
+            -1
+        ],
+        "I already have HTML with classes header, post, author-box, and comments. Please give me a tiny CSS stylesheet (under ~40 lines) to make it look clean and readable on mobile and desktop.": [
+            0,
+            -1,
+            -1,
+            1
+        ],
+        "What\u2019s the simplest HTML5-only (no JavaScript) markup for a small sign-up form that validates email format and requires a password of at least 8 characters with at least one number? Please include just the HTML and a tiny bit of CSS to show red helper text or borders when a field is invalid.": [
+            0,
+            0,
+            0,
+            -1
+        ],
+        "Please generate a basic HTML file for a wedding welcome page for \u201cAva & Liam\u201d with the date (June 21, 2025) and ceremony location (The Garden Terrace, 15 Oak Lane, Asheville, NC). Include a short blurb, a map link, and an RSVP form collecting guest name, email, meal preference (Beef/Chicken/Vegan), and song request, submitting to this Google Form endpoint: https://forms.gle/abcd1234. Keep it mobile-friendly and under 150 lines if possible.": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "I have this HTML. Can you provide the CSS and a tiny vanilla JS snippet to make the thumbnails open in a centered modal with the large image and close on overlay/click of the X/Esc? Please return ONLY the CSS and JS blocks.\n\n<!doctype html>\n<html lang=\"en\">\n  <body>\n    <ul class=\"gallery\">\n      <li><img src=\"https://picsum.photos/id/11/200/140\" data-full=\"https://picsum.photos/id/11/1200/800\" alt=\"Forest\"></li>\n      <li><img src=\"https://picsum.photos/id/21/200/140\" data-full=\"https://picsum.photos/id/21/1200/800\" alt=\"City\"></li>\n      <li><img src=\"https://picsum.photos/id/31/200/140\" data-full=\"https://picsum.photos/id/31/1200/800\" alt=\"Beach\"></li>\n      <li><img src=\"https://picsum.photos/id/41/200/140\" data-full=\"https://picsum.photos/id/41/1200/800\" alt=\"Mountains\"></li>\n    </ul>\n\n    <div class=\"modal\" hidden aria-hidden=\"true\" role=\"dialog\" aria-modal=\"true\">\n      <div class=\"backdrop\"></div>\n      <figure class=\"dialog\">\n        <button class=\"close\" aria-label=\"Close\">\u00d7</button>\n        <img class=\"modal-img\" alt=\"\">\n        <figcaption class=\"caption\"></figcaption>\n      </figure>\n    </div>\n  </body>\n</html>": [
+            -1,
+            0,
+            -1,
+            0
+        ],
+        "Could you write an accessible newsletter signup form using only HTML and vanilla JS that: (1) labels the email input, (2) shows a small inline error if the email is invalid, and (3) on success hides the form and shows \u201cThanks for subscribing!\u201d? Include minimal CSS, all in one self-contained snippet.": [
+            1,
+            1,
+            0,
+            1
+        ],
+        "Can you write a minimal, self-contained HTML file (80 lines or fewer) that shows a simple photo gallery of six thumbnails in a grid, where clicking a thumbnail opens a modal displaying the large version? Please use these image pairs (thumb -> large):\n- https://picsum.photos/id/10/200/140 -> https://picsum.photos/id/10/1200/800\n- https://picsum.photos/id/20/200/140 -> https://picsum.photos/id/20/1200/800\n- https://picsum.photos/id/30/200/140 -> https://picsum.photos/id/30/1200/800\n- https://picsum.photos/id/40/200/140 -> https://picsum.photos/id/40/1200/800\n- https://picsum.photos/id/50/200/140 -> https://picsum.photos/id/50/1200/800\n- https://picsum.photos/id/60/200/140 -> https://picsum.photos/id/60/1200/800\nRequirements: inline CSS and vanilla JS (no libraries), close on backdrop click and Esc, include a visible close button, and add basic accessibility (role=\"dialog\", aria-modal=\"true\").": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "I have this starter HTML. Can you add inside <main> a simple hero section with my photo, a brief bio, social links, and a 'Download CV' button? Light CSS in the existing <style> is fine; keep it clean, responsive, and accessible (alt text, aria-labels, and make the CV link trigger a download).\n\nUse this content:\nName: Marco Rossi\nBio: Full\u2011stack engineer based in Berlin. I craft pragmatic web apps with Node, Go, and Svelte.\nPhoto: /assets/marco.jpg\nLinkedIn: https://www.linkedin.com/in/marcorossi\nGitHub: https://github.com/marcorossi\nMastodon: https://hachyderm.io/@marco\nResume: /assets/Marco-Rossi-CV.pdf\n\n<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Marco Rossi \u2014 Portfolio</title>\n<style>\n  :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; }\n  html, body { height: 100%; }\n  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--fg); }\n  a { color: var(--accent); text-decoration: none; }\n  a:hover { text-decoration: underline; }\n</style>\n</head>\n<body>\n  <main></main>\n</body>\n</html>": [
+            1,
+            -1,
+            1,
+            0
+        ],
+        "Could you make a single self-contained webpage (one HTML file) with a custom audio player UI that includes: a Play button, a Pause button, and a volume range input (0\u2013100)? Add basic labels for accessibility. Use this demo file as the source: https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav": [
+            0,
+            1,
+            0,
+            -1
+        ],
+        "Write a React functional component for a login form that has: email, password, a remember-me checkbox, and a sign-in button. Use useState for state, validate the email format lightly, and on submit just console.log the values. No external libraries.": [
+            1,
+            -1,
+            0,
+            1
+        ],
+        "Give me a small HTML/CSS/JS snippet for a feedback widget: five clickable stars (hover highlights and sets the selection) bound to an input named \"rating\", a required textarea named \"comments\", and on submit just alert the chosen rating and comment. Vanilla only, keep it simple.": [
+            0,
+            -1,
+            -1,
+            0
+        ],
+        "I want a minimal to-do list webpage where I can type a task, click Add, click a checkbox to toggle complete, and click an X to delete. Can you give me three small code blocks (HTML skeleton, tiny CSS, and a short JS script) to paste into separate files? Please avoid frameworks and keep each block under ~30 lines.": [
+            0,
+            0,
+            -1,
+            -1
+        ],
+        "Please write a minimal single-file HTML (inline CSS + JS) for a small quiz page with 3 multiple-choice questions about animals. Include a 'Submit' button that shows the score at the top and highlights correct/incorrect answers, and a 'Try again' button to reset. Use only vanilla JS.\n\nQuestions:\n1) Which animal is the largest land animal?\nA) Elephant\nB) Rhinoceros\nC) Hippopotamus\nD) Giraffe\n\n2) Which animal is known for its black-and-white stripes?\nA) Zebra\nB) Tiger\nC) Panda\nD) Skunk\n\n3) Which mammal can truly fly?\nA) Bat\nB) Flying squirrel\nC) Ostrich\nD) Eagle\n\nCorrect answers: 1-A, 2-A, 3-A.": [
+            -1,
+            0,
+            0,
+            0
+        ],
+        "Create a minimal, responsive pricing section (HTML + a little CSS, no JS, no frameworks) with three cards: Basic ($9/mo), Pro ($19/mo), and Team ($49/mo). Each card should show the plan name, price, three bullet-point features (Basic: 5 projects, Email support, 1 GB storage; Pro: 25 projects, Priority email, 10 GB storage; Team: Unlimited projects, Chat support, 100 GB storage) and a prominent 'Select' button. Keep the CSS short and mobile-first.": [
+            0,
+            0,
+            0,
+            1
+        ]
+    },
+    "Keep form labels minimal using plain text without additional formatting.": {
+        "I already have HTML with classes header, post, author-box, and comments. Please give me a tiny CSS stylesheet (under ~40 lines) to make it look clean and readable on mobile and desktop.": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "What are the key accessibility considerations (roles, aria attributes, focus management, keyboard traps) for a cookie consent banner with \u201cAccept\u201d and \u201cManage settings,\u201d where Manage opens a modal dialog? A brief checklist or short code hints are fine.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "What\u2019s the simplest HTML5-only (no JavaScript) markup for a small sign-up form that validates email format and requires a password of at least 8 characters with at least one number? Please include just the HTML and a tiny bit of CSS to show red helper text or borders when a field is invalid.": [
+            -1,
+            -1,
+            0,
+            0
+        ],
+        "Please generate a basic HTML file for a wedding welcome page for \u201cAva & Liam\u201d with the date (June 21, 2025) and ceremony location (The Garden Terrace, 15 Oak Lane, Asheville, NC). Include a short blurb, a map link, and an RSVP form collecting guest name, email, meal preference (Beef/Chicken/Vegan), and song request, submitting to this Google Form endpoint: https://forms.gle/abcd1234. Keep it mobile-friendly and under 150 lines if possible.": [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        "Give me a minimal HTML-only skeleton (no CSS or JS) for a simple search page: a heading, a search input, a category filter dropdown with options All, Books, Movies, and an empty results list (<ul>) placeholder. Use proper <label> elements and reasonable IDs.": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "Create a minimal, responsive pricing section (HTML + a little CSS, no JS, no frameworks) with three cards: Basic ($9/mo), Pro ($19/mo), and Team ($49/mo). Each card should show the plan name, price, three bullet-point features (Basic: 5 projects, Email support, 1 GB storage; Pro: 25 projects, Priority email, 10 GB storage; Team: Unlimited projects, Chat support, 100 GB storage) and a prominent 'Select' button. Keep the CSS short and mobile-first.": [
+            0,
+            -1,
+            0,
+            0
+        ],
+        "Please write a single-file HTML page that shows a simple, centered Job Application form. Put labels above inputs and include: Name, Email, Phone, Cover Letter (textarea), and a Resume upload input. Add a small note under the resume input that says \u201cPDF/DOC up to 2 MB\u201d (no actual validation). Include minimal inline CSS for spacing and a max width; no JavaScript.": [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        "Can you write a minimal, self-contained HTML file (80 lines or fewer) that shows a simple photo gallery of six thumbnails in a grid, where clicking a thumbnail opens a modal displaying the large version? Please use these image pairs (thumb -> large):\n- https://picsum.photos/id/10/200/140 -> https://picsum.photos/id/10/1200/800\n- https://picsum.photos/id/20/200/140 -> https://picsum.photos/id/20/1200/800\n- https://picsum.photos/id/30/200/140 -> https://picsum.photos/id/30/1200/800\n- https://picsum.photos/id/40/200/140 -> https://picsum.photos/id/40/1200/800\n- https://picsum.photos/id/50/200/140 -> https://picsum.photos/id/50/1200/800\n- https://picsum.photos/id/60/200/140 -> https://picsum.photos/id/60/1200/800\nRequirements: inline CSS and vanilla JS (no libraries), close on backdrop click and Esc, include a visible close button, and add basic accessibility (role=\"dialog\", aria-modal=\"true\").": [
+            -1,
+            0,
+            1,
+            1
+        ],
+        "I have this HTML. Can you provide the CSS and a tiny vanilla JS snippet to make the thumbnails open in a centered modal with the large image and close on overlay/click of the X/Esc? Please return ONLY the CSS and JS blocks.\n\n<!doctype html>\n<html lang=\"en\">\n  <body>\n    <ul class=\"gallery\">\n      <li><img src=\"https://picsum.photos/id/11/200/140\" data-full=\"https://picsum.photos/id/11/1200/800\" alt=\"Forest\"></li>\n      <li><img src=\"https://picsum.photos/id/21/200/140\" data-full=\"https://picsum.photos/id/21/1200/800\" alt=\"City\"></li>\n      <li><img src=\"https://picsum.photos/id/31/200/140\" data-full=\"https://picsum.photos/id/31/1200/800\" alt=\"Beach\"></li>\n      <li><img src=\"https://picsum.photos/id/41/200/140\" data-full=\"https://picsum.photos/id/41/1200/800\" alt=\"Mountains\"></li>\n    </ul>\n\n    <div class=\"modal\" hidden aria-hidden=\"true\" role=\"dialog\" aria-modal=\"true\">\n      <div class=\"backdrop\"></div>\n      <figure class=\"dialog\">\n        <button class=\"close\" aria-label=\"Close\">\u00d7</button>\n        <img class=\"modal-img\" alt=\"\">\n        <figcaption class=\"caption\"></figcaption>\n      </figure>\n    </div>\n  </body>\n</html>": [
+            -1,
+            1,
+            -1,
+            0
+        ],
+        "Could you write an accessible newsletter signup form using only HTML and vanilla JS that: (1) labels the email input, (2) shows a small inline error if the email is invalid, and (3) on success hides the form and shows \u201cThanks for subscribing!\u201d? Include minimal CSS, all in one self-contained snippet.": [
+            1,
+            1,
+            -1,
+            0
+        ],
+        "I want a minimal to-do list webpage where I can type a task, click Add, click a checkbox to toggle complete, and click an X to delete. Can you give me three small code blocks (HTML skeleton, tiny CSS, and a short JS script) to paste into separate files? Please avoid frameworks and keep each block under ~30 lines.": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "Write a React functional component for a login form that has: email, password, a remember-me checkbox, and a sign-in button. Use useState for state, validate the email format lightly, and on submit just console.log the values. No external libraries.": [
+            -1,
+            0,
+            -1,
+            1
+        ],
+        "Could you make a single self-contained webpage (one HTML file) with a custom audio player UI that includes: a Play button, a Pause button, and a volume range input (0\u2013100)? Add basic labels for accessibility. Use this demo file as the source: https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav": [
+            -1,
+            1,
+            1,
+            0
+        ],
+        "Give me a small HTML/CSS/JS snippet for a feedback widget: five clickable stars (hover highlights and sets the selection) bound to an input named \"rating\", a required textarea named \"comments\", and on submit just alert the chosen rating and comment. Vanilla only, keep it simple.": [
+            0,
+            -1,
+            1,
+            0
+        ],
+        "I have this starter HTML. Can you add inside <main> a simple hero section with my photo, a brief bio, social links, and a 'Download CV' button? Light CSS in the existing <style> is fine; keep it clean, responsive, and accessible (alt text, aria-labels, and make the CV link trigger a download).\n\nUse this content:\nName: Marco Rossi\nBio: Full\u2011stack engineer based in Berlin. I craft pragmatic web apps with Node, Go, and Svelte.\nPhoto: /assets/marco.jpg\nLinkedIn: https://www.linkedin.com/in/marcorossi\nGitHub: https://github.com/marcorossi\nMastodon: https://hachyderm.io/@marco\nResume: /assets/Marco-Rossi-CV.pdf\n\n<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Marco Rossi \u2014 Portfolio</title>\n<style>\n  :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; }\n  html, body { height: 100%; }\n  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--fg); }\n  a { color: var(--accent); text-decoration: none; }\n  a:hover { text-decoration: underline; }\n</style>\n</head>\n<body>\n  <main></main>\n</body>\n</html>": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "Please write a minimal single-file HTML (inline CSS + JS) for a small quiz page with 3 multiple-choice questions about animals. Include a 'Submit' button that shows the score at the top and highlights correct/incorrect answers, and a 'Try again' button to reset. Use only vanilla JS.\n\nQuestions:\n1) Which animal is the largest land animal?\nA) Elephant\nB) Rhinoceros\nC) Hippopotamus\nD) Giraffe\n\n2) Which animal is known for its black-and-white stripes?\nA) Zebra\nB) Tiger\nC) Panda\nD) Skunk\n\n3) Which mammal can truly fly?\nA) Bat\nB) Flying squirrel\nC) Ostrich\nD) Eagle\n\nCorrect answers: 1-A, 2-A, 3-A.": [
+            -1,
+            0,
+            0,
+            -1
+        ]
+    },
+    "Embed only essential CSS in one <style> tag and add a <script> tag only if interactivity is needed, avoiding external files unless requested.": {
+        "Please write a single-file HTML page that shows a simple, centered Job Application form. Put labels above inputs and include: Name, Email, Phone, Cover Letter (textarea), and a Resume upload input. Add a small note under the resume input that says \u201cPDF/DOC up to 2 MB\u201d (no actual validation). Include minimal inline CSS for spacing and a max width; no JavaScript.": [
+            1,
+            1,
+            0,
+            1
+        ],
+        "Create a minimal, responsive pricing section (HTML + a little CSS, no JS, no frameworks) with three cards: Basic ($9/mo), Pro ($19/mo), and Team ($49/mo). Each card should show the plan name, price, three bullet-point features (Basic: 5 projects, Email support, 1 GB storage; Pro: 25 projects, Priority email, 10 GB storage; Team: Unlimited projects, Chat support, 100 GB storage) and a prominent 'Select' button. Keep the CSS short and mobile-first.": [
+            -1,
+            1,
+            1,
+            0
+        ],
+        "I already have HTML with classes header, post, author-box, and comments. Please give me a tiny CSS stylesheet (under ~40 lines) to make it look clean and readable on mobile and desktop.": [
+            null,
+            -1,
+            -1,
+            1
+        ],
+        "What\u2019s the simplest HTML5-only (no JavaScript) markup for a small sign-up form that validates email format and requires a password of at least 8 characters with at least one number? Please include just the HTML and a tiny bit of CSS to show red helper text or borders when a field is invalid.": [
+            0,
+            1,
+            1,
+            0
+        ],
+        "Can you write a minimal, self-contained HTML file (80 lines or fewer) that shows a simple photo gallery of six thumbnails in a grid, where clicking a thumbnail opens a modal displaying the large version? Please use these image pairs (thumb -> large):\n- https://picsum.photos/id/10/200/140 -> https://picsum.photos/id/10/1200/800\n- https://picsum.photos/id/20/200/140 -> https://picsum.photos/id/20/1200/800\n- https://picsum.photos/id/30/200/140 -> https://picsum.photos/id/30/1200/800\n- https://picsum.photos/id/40/200/140 -> https://picsum.photos/id/40/1200/800\n- https://picsum.photos/id/50/200/140 -> https://picsum.photos/id/50/1200/800\n- https://picsum.photos/id/60/200/140 -> https://picsum.photos/id/60/1200/800\nRequirements: inline CSS and vanilla JS (no libraries), close on backdrop click and Esc, include a visible close button, and add basic accessibility (role=\"dialog\", aria-modal=\"true\").": [
+            0,
+            0,
+            1,
+            1
+        ],
+        "Please generate a basic HTML file for a wedding welcome page for \u201cAva & Liam\u201d with the date (June 21, 2025) and ceremony location (The Garden Terrace, 15 Oak Lane, Asheville, NC). Include a short blurb, a map link, and an RSVP form collecting guest name, email, meal preference (Beef/Chicken/Vegan), and song request, submitting to this Google Form endpoint: https://forms.gle/abcd1234. Keep it mobile-friendly and under 150 lines if possible.": [
+            0,
+            1,
+            1,
+            1
+        ],
+        "What are the key accessibility considerations (roles, aria attributes, focus management, keyboard traps) for a cookie consent banner with \u201cAccept\u201d and \u201cManage settings,\u201d where Manage opens a modal dialog? A brief checklist or short code hints are fine.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Give me a minimal HTML-only skeleton (no CSS or JS) for a simple search page: a heading, a search input, a category filter dropdown with options All, Books, Movies, and an empty results list (<ul>) placeholder. Use proper <label> elements and reasonable IDs.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Could you write an accessible newsletter signup form using only HTML and vanilla JS that: (1) labels the email input, (2) shows a small inline error if the email is invalid, and (3) on success hides the form and shows \u201cThanks for subscribing!\u201d? Include minimal CSS, all in one self-contained snippet.": [
+            0,
+            1,
+            0,
+            1
+        ],
+        "I have this HTML. Can you provide the CSS and a tiny vanilla JS snippet to make the thumbnails open in a centered modal with the large image and close on overlay/click of the X/Esc? Please return ONLY the CSS and JS blocks.\n\n<!doctype html>\n<html lang=\"en\">\n  <body>\n    <ul class=\"gallery\">\n      <li><img src=\"https://picsum.photos/id/11/200/140\" data-full=\"https://picsum.photos/id/11/1200/800\" alt=\"Forest\"></li>\n      <li><img src=\"https://picsum.photos/id/21/200/140\" data-full=\"https://picsum.photos/id/21/1200/800\" alt=\"City\"></li>\n      <li><img src=\"https://picsum.photos/id/31/200/140\" data-full=\"https://picsum.photos/id/31/1200/800\" alt=\"Beach\"></li>\n      <li><img src=\"https://picsum.photos/id/41/200/140\" data-full=\"https://picsum.photos/id/41/1200/800\" alt=\"Mountains\"></li>\n    </ul>\n\n    <div class=\"modal\" hidden aria-hidden=\"true\" role=\"dialog\" aria-modal=\"true\">\n      <div class=\"backdrop\"></div>\n      <figure class=\"dialog\">\n        <button class=\"close\" aria-label=\"Close\">\u00d7</button>\n        <img class=\"modal-img\" alt=\"\">\n        <figcaption class=\"caption\"></figcaption>\n      </figure>\n    </div>\n  </body>\n</html>": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Write a React functional component for a login form that has: email, password, a remember-me checkbox, and a sign-in button. Use useState for state, validate the email format lightly, and on submit just console.log the values. No external libraries.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Give me a small HTML/CSS/JS snippet for a feedback widget: five clickable stars (hover highlights and sets the selection) bound to an input named \"rating\", a required textarea named \"comments\", and on submit just alert the chosen rating and comment. Vanilla only, keep it simple.": [
+            1,
+            0,
+            1,
+            0
+        ],
+        "I have this starter HTML. Can you add inside <main> a simple hero section with my photo, a brief bio, social links, and a 'Download CV' button? Light CSS in the existing <style> is fine; keep it clean, responsive, and accessible (alt text, aria-labels, and make the CV link trigger a download).\n\nUse this content:\nName: Marco Rossi\nBio: Full\u2011stack engineer based in Berlin. I craft pragmatic web apps with Node, Go, and Svelte.\nPhoto: /assets/marco.jpg\nLinkedIn: https://www.linkedin.com/in/marcorossi\nGitHub: https://github.com/marcorossi\nMastodon: https://hachyderm.io/@marco\nResume: /assets/Marco-Rossi-CV.pdf\n\n<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Marco Rossi \u2014 Portfolio</title>\n<style>\n  :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; }\n  html, body { height: 100%; }\n  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--fg); }\n  a { color: var(--accent); text-decoration: none; }\n  a:hover { text-decoration: underline; }\n</style>\n</head>\n<body>\n  <main></main>\n</body>\n</html>": [
+            0,
+            1,
+            1,
+            -1
+        ],
+        "I want a minimal to-do list webpage where I can type a task, click Add, click a checkbox to toggle complete, and click an X to delete. Can you give me three small code blocks (HTML skeleton, tiny CSS, and a short JS script) to paste into separate files? Please avoid frameworks and keep each block under ~30 lines.": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "Please write a minimal single-file HTML (inline CSS + JS) for a small quiz page with 3 multiple-choice questions about animals. Include a 'Submit' button that shows the score at the top and highlights correct/incorrect answers, and a 'Try again' button to reset. Use only vanilla JS.\n\nQuestions:\n1) Which animal is the largest land animal?\nA) Elephant\nB) Rhinoceros\nC) Hippopotamus\nD) Giraffe\n\n2) Which animal is known for its black-and-white stripes?\nA) Zebra\nB) Tiger\nC) Panda\nD) Skunk\n\n3) Which mammal can truly fly?\nA) Bat\nB) Flying squirrel\nC) Ostrich\nD) Eagle\n\nCorrect answers: 1-A, 2-A, 3-A.": [
+            1,
+            -1,
+            0,
+            0
+        ],
+        "Could you make a single self-contained webpage (one HTML file) with a custom audio player UI that includes: a Play button, a Pause button, and a volume range input (0\u2013100)? Add basic labels for accessibility. Use this demo file as the source: https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav": [
+            0,
+            1,
+            1,
+            0
+        ]
+    },
+    "Display numeric values directly without formatting or padding.": {
+        "What are the key accessibility considerations (roles, aria attributes, focus management, keyboard traps) for a cookie consent banner with \u201cAccept\u201d and \u201cManage settings,\u201d where Manage opens a modal dialog? A brief checklist or short code hints are fine.": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "What\u2019s the simplest HTML5-only (no JavaScript) markup for a small sign-up form that validates email format and requires a password of at least 8 characters with at least one number? Please include just the HTML and a tiny bit of CSS to show red helper text or borders when a field is invalid.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I have this HTML. Can you provide the CSS and a tiny vanilla JS snippet to make the thumbnails open in a centered modal with the large image and close on overlay/click of the X/Esc? Please return ONLY the CSS and JS blocks.\n\n<!doctype html>\n<html lang=\"en\">\n  <body>\n    <ul class=\"gallery\">\n      <li><img src=\"https://picsum.photos/id/11/200/140\" data-full=\"https://picsum.photos/id/11/1200/800\" alt=\"Forest\"></li>\n      <li><img src=\"https://picsum.photos/id/21/200/140\" data-full=\"https://picsum.photos/id/21/1200/800\" alt=\"City\"></li>\n      <li><img src=\"https://picsum.photos/id/31/200/140\" data-full=\"https://picsum.photos/id/31/1200/800\" alt=\"Beach\"></li>\n      <li><img src=\"https://picsum.photos/id/41/200/140\" data-full=\"https://picsum.photos/id/41/1200/800\" alt=\"Mountains\"></li>\n    </ul>\n\n    <div class=\"modal\" hidden aria-hidden=\"true\" role=\"dialog\" aria-modal=\"true\">\n      <div class=\"backdrop\"></div>\n      <figure class=\"dialog\">\n        <button class=\"close\" aria-label=\"Close\">\u00d7</button>\n        <img class=\"modal-img\" alt=\"\">\n        <figcaption class=\"caption\"></figcaption>\n      </figure>\n    </div>\n  </body>\n</html>": [
+            -1,
+            -1,
+            0,
+            0
+        ],
+        "Please write a single-file HTML page that shows a simple, centered Job Application form. Put labels above inputs and include: Name, Email, Phone, Cover Letter (textarea), and a Resume upload input. Add a small note under the resume input that says \u201cPDF/DOC up to 2 MB\u201d (no actual validation). Include minimal inline CSS for spacing and a max width; no JavaScript.": [
+            0,
+            1,
+            1,
+            0
+        ],
+        "Please generate a basic HTML file for a wedding welcome page for \u201cAva & Liam\u201d with the date (June 21, 2025) and ceremony location (The Garden Terrace, 15 Oak Lane, Asheville, NC). Include a short blurb, a map link, and an RSVP form collecting guest name, email, meal preference (Beef/Chicken/Vegan), and song request, submitting to this Google Form endpoint: https://forms.gle/abcd1234. Keep it mobile-friendly and under 150 lines if possible.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Can you write a minimal, self-contained HTML file (80 lines or fewer) that shows a simple photo gallery of six thumbnails in a grid, where clicking a thumbnail opens a modal displaying the large version? Please use these image pairs (thumb -> large):\n- https://picsum.photos/id/10/200/140 -> https://picsum.photos/id/10/1200/800\n- https://picsum.photos/id/20/200/140 -> https://picsum.photos/id/20/1200/800\n- https://picsum.photos/id/30/200/140 -> https://picsum.photos/id/30/1200/800\n- https://picsum.photos/id/40/200/140 -> https://picsum.photos/id/40/1200/800\n- https://picsum.photos/id/50/200/140 -> https://picsum.photos/id/50/1200/800\n- https://picsum.photos/id/60/200/140 -> https://picsum.photos/id/60/1200/800\nRequirements: inline CSS and vanilla JS (no libraries), close on backdrop click and Esc, include a visible close button, and add basic accessibility (role=\"dialog\", aria-modal=\"true\").": [
+            0,
+            1,
+            0,
+            -1
+        ],
+        "Create a minimal, responsive pricing section (HTML + a little CSS, no JS, no frameworks) with three cards: Basic ($9/mo), Pro ($19/mo), and Team ($49/mo). Each card should show the plan name, price, three bullet-point features (Basic: 5 projects, Email support, 1 GB storage; Pro: 25 projects, Priority email, 10 GB storage; Team: Unlimited projects, Chat support, 100 GB storage) and a prominent 'Select' button. Keep the CSS short and mobile-first.": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "Give me a minimal HTML-only skeleton (no CSS or JS) for a simple search page: a heading, a search input, a category filter dropdown with options All, Books, Movies, and an empty results list (<ul>) placeholder. Use proper <label> elements and reasonable IDs.": [
+            1,
+            0,
+            -1,
+            -1
+        ],
+        "I already have HTML with classes header, post, author-box, and comments. Please give me a tiny CSS stylesheet (under ~40 lines) to make it look clean and readable on mobile and desktop.": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "Write a React functional component for a login form that has: email, password, a remember-me checkbox, and a sign-in button. Use useState for state, validate the email format lightly, and on submit just console.log the values. No external libraries.": [
+            -1,
+            0,
+            -1,
+            0
+        ],
+        "I have this starter HTML. Can you add inside <main> a simple hero section with my photo, a brief bio, social links, and a 'Download CV' button? Light CSS in the existing <style> is fine; keep it clean, responsive, and accessible (alt text, aria-labels, and make the CV link trigger a download).\n\nUse this content:\nName: Marco Rossi\nBio: Full\u2011stack engineer based in Berlin. I craft pragmatic web apps with Node, Go, and Svelte.\nPhoto: /assets/marco.jpg\nLinkedIn: https://www.linkedin.com/in/marcorossi\nGitHub: https://github.com/marcorossi\nMastodon: https://hachyderm.io/@marco\nResume: /assets/Marco-Rossi-CV.pdf\n\n<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Marco Rossi \u2014 Portfolio</title>\n<style>\n  :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; }\n  html, body { height: 100%; }\n  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--fg); }\n  a { color: var(--accent); text-decoration: none; }\n  a:hover { text-decoration: underline; }\n</style>\n</head>\n<body>\n  <main></main>\n</body>\n</html>": [
+            -1,
+            -1,
+            0,
+            1
+        ],
+        "Could you make a single self-contained webpage (one HTML file) with a custom audio player UI that includes: a Play button, a Pause button, and a volume range input (0\u2013100)? Add basic labels for accessibility. Use this demo file as the source: https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav": [
+            1,
+            0,
+            -1,
+            0
+        ],
+        "I want a minimal to-do list webpage where I can type a task, click Add, click a checkbox to toggle complete, and click an X to delete. Can you give me three small code blocks (HTML skeleton, tiny CSS, and a short JS script) to paste into separate files? Please avoid frameworks and keep each block under ~30 lines.": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "Give me a small HTML/CSS/JS snippet for a feedback widget: five clickable stars (hover highlights and sets the selection) bound to an input named \"rating\", a required textarea named \"comments\", and on submit just alert the chosen rating and comment. Vanilla only, keep it simple.": [
+            0,
+            1,
+            0,
+            0
+        ],
+        "Please write a minimal single-file HTML (inline CSS + JS) for a small quiz page with 3 multiple-choice questions about animals. Include a 'Submit' button that shows the score at the top and highlights correct/incorrect answers, and a 'Try again' button to reset. Use only vanilla JS.\n\nQuestions:\n1) Which animal is the largest land animal?\nA) Elephant\nB) Rhinoceros\nC) Hippopotamus\nD) Giraffe\n\n2) Which animal is known for its black-and-white stripes?\nA) Zebra\nB) Tiger\nC) Panda\nD) Skunk\n\n3) Which mammal can truly fly?\nA) Bat\nB) Flying squirrel\nC) Ostrich\nD) Eagle\n\nCorrect answers: 1-A, 2-A, 3-A.": [
+            1,
+            0,
+            1,
+            1
+        ],
+        "Could you write an accessible newsletter signup form using only HTML and vanilla JS that: (1) labels the email input, (2) shows a small inline error if the email is invalid, and (3) on success hides the form and shows \u201cThanks for subscribing!\u201d? Include minimal CSS, all in one self-contained snippet.": [
+            1,
+            -1,
+            0,
+            0
+        ]
+    },
+    "Ensure every variable declared in your JavaScript code is referenced and used at least once.": {
+        "What\u2019s the simplest HTML5-only (no JavaScript) markup for a small sign-up form that validates email format and requires a password of at least 8 characters with at least one number? Please include just the HTML and a tiny bit of CSS to show red helper text or borders when a field is invalid.": [
+            -1,
+            -1,
+            0,
+            -1
+        ],
+        "Give me a minimal HTML-only skeleton (no CSS or JS) for a simple search page: a heading, a search input, a category filter dropdown with options All, Books, Movies, and an empty results list (<ul>) placeholder. Use proper <label> elements and reasonable IDs.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "What are the key accessibility considerations (roles, aria attributes, focus management, keyboard traps) for a cookie consent banner with \u201cAccept\u201d and \u201cManage settings,\u201d where Manage opens a modal dialog? A brief checklist or short code hints are fine.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Please write a single-file HTML page that shows a simple, centered Job Application form. Put labels above inputs and include: Name, Email, Phone, Cover Letter (textarea), and a Resume upload input. Add a small note under the resume input that says \u201cPDF/DOC up to 2 MB\u201d (no actual validation). Include minimal inline CSS for spacing and a max width; no JavaScript.": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "Please generate a basic HTML file for a wedding welcome page for \u201cAva & Liam\u201d with the date (June 21, 2025) and ceremony location (The Garden Terrace, 15 Oak Lane, Asheville, NC). Include a short blurb, a map link, and an RSVP form collecting guest name, email, meal preference (Beef/Chicken/Vegan), and song request, submitting to this Google Form endpoint: https://forms.gle/abcd1234. Keep it mobile-friendly and under 150 lines if possible.": [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        "I have this HTML. Can you provide the CSS and a tiny vanilla JS snippet to make the thumbnails open in a centered modal with the large image and close on overlay/click of the X/Esc? Please return ONLY the CSS and JS blocks.\n\n<!doctype html>\n<html lang=\"en\">\n  <body>\n    <ul class=\"gallery\">\n      <li><img src=\"https://picsum.photos/id/11/200/140\" data-full=\"https://picsum.photos/id/11/1200/800\" alt=\"Forest\"></li>\n      <li><img src=\"https://picsum.photos/id/21/200/140\" data-full=\"https://picsum.photos/id/21/1200/800\" alt=\"City\"></li>\n      <li><img src=\"https://picsum.photos/id/31/200/140\" data-full=\"https://picsum.photos/id/31/1200/800\" alt=\"Beach\"></li>\n      <li><img src=\"https://picsum.photos/id/41/200/140\" data-full=\"https://picsum.photos/id/41/1200/800\" alt=\"Mountains\"></li>\n    </ul>\n\n    <div class=\"modal\" hidden aria-hidden=\"true\" role=\"dialog\" aria-modal=\"true\">\n      <div class=\"backdrop\"></div>\n      <figure class=\"dialog\">\n        <button class=\"close\" aria-label=\"Close\">\u00d7</button>\n        <img class=\"modal-img\" alt=\"\">\n        <figcaption class=\"caption\"></figcaption>\n      </figure>\n    </div>\n  </body>\n</html>": [
+            -1,
+            0,
+            1,
+            0
+        ],
+        "Can you write a minimal, self-contained HTML file (80 lines or fewer) that shows a simple photo gallery of six thumbnails in a grid, where clicking a thumbnail opens a modal displaying the large version? Please use these image pairs (thumb -> large):\n- https://picsum.photos/id/10/200/140 -> https://picsum.photos/id/10/1200/800\n- https://picsum.photos/id/20/200/140 -> https://picsum.photos/id/20/1200/800\n- https://picsum.photos/id/30/200/140 -> https://picsum.photos/id/30/1200/800\n- https://picsum.photos/id/40/200/140 -> https://picsum.photos/id/40/1200/800\n- https://picsum.photos/id/50/200/140 -> https://picsum.photos/id/50/1200/800\n- https://picsum.photos/id/60/200/140 -> https://picsum.photos/id/60/1200/800\nRequirements: inline CSS and vanilla JS (no libraries), close on backdrop click and Esc, include a visible close button, and add basic accessibility (role=\"dialog\", aria-modal=\"true\").": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I already have HTML with classes header, post, author-box, and comments. Please give me a tiny CSS stylesheet (under ~40 lines) to make it look clean and readable on mobile and desktop.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Create a minimal, responsive pricing section (HTML + a little CSS, no JS, no frameworks) with three cards: Basic ($9/mo), Pro ($19/mo), and Team ($49/mo). Each card should show the plan name, price, three bullet-point features (Basic: 5 projects, Email support, 1 GB storage; Pro: 25 projects, Priority email, 10 GB storage; Team: Unlimited projects, Chat support, 100 GB storage) and a prominent 'Select' button. Keep the CSS short and mobile-first.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Could you write an accessible newsletter signup form using only HTML and vanilla JS that: (1) labels the email input, (2) shows a small inline error if the email is invalid, and (3) on success hides the form and shows \u201cThanks for subscribing!\u201d? Include minimal CSS, all in one self-contained snippet.": [
+            0,
+            1,
+            1,
+            1
+        ],
+        "Could you make a single self-contained webpage (one HTML file) with a custom audio player UI that includes: a Play button, a Pause button, and a volume range input (0\u2013100)? Add basic labels for accessibility. Use this demo file as the source: https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "I want a minimal to-do list webpage where I can type a task, click Add, click a checkbox to toggle complete, and click an X to delete. Can you give me three small code blocks (HTML skeleton, tiny CSS, and a short JS script) to paste into separate files? Please avoid frameworks and keep each block under ~30 lines.": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "I have this starter HTML. Can you add inside <main> a simple hero section with my photo, a brief bio, social links, and a 'Download CV' button? Light CSS in the existing <style> is fine; keep it clean, responsive, and accessible (alt text, aria-labels, and make the CV link trigger a download).\n\nUse this content:\nName: Marco Rossi\nBio: Full\u2011stack engineer based in Berlin. I craft pragmatic web apps with Node, Go, and Svelte.\nPhoto: /assets/marco.jpg\nLinkedIn: https://www.linkedin.com/in/marcorossi\nGitHub: https://github.com/marcorossi\nMastodon: https://hachyderm.io/@marco\nResume: /assets/Marco-Rossi-CV.pdf\n\n<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Marco Rossi \u2014 Portfolio</title>\n<style>\n  :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; }\n  html, body { height: 100%; }\n  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--fg); }\n  a { color: var(--accent); text-decoration: none; }\n  a:hover { text-decoration: underline; }\n</style>\n</head>\n<body>\n  <main></main>\n</body>\n</html>": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "Give me a small HTML/CSS/JS snippet for a feedback widget: five clickable stars (hover highlights and sets the selection) bound to an input named \"rating\", a required textarea named \"comments\", and on submit just alert the chosen rating and comment. Vanilla only, keep it simple.": [
+            1,
+            0,
+            -1,
+            -1
+        ],
+        "Please write a minimal single-file HTML (inline CSS + JS) for a small quiz page with 3 multiple-choice questions about animals. Include a 'Submit' button that shows the score at the top and highlights correct/incorrect answers, and a 'Try again' button to reset. Use only vanilla JS.\n\nQuestions:\n1) Which animal is the largest land animal?\nA) Elephant\nB) Rhinoceros\nC) Hippopotamus\nD) Giraffe\n\n2) Which animal is known for its black-and-white stripes?\nA) Zebra\nB) Tiger\nC) Panda\nD) Skunk\n\n3) Which mammal can truly fly?\nA) Bat\nB) Flying squirrel\nC) Ostrich\nD) Eagle\n\nCorrect answers: 1-A, 2-A, 3-A.": [
+            1,
+            1,
+            0,
+            1
+        ],
+        "Write a React functional component for a login form that has: email, password, a remember-me checkbox, and a sign-in button. Use useState for state, validate the email format lightly, and on submit just console.log the values. No external libraries.": [
+            -1,
+            0,
+            1,
+            -1
+        ]
+    },
+    "Prefer generic div containers over HTML5 sectioning tags and include only elements that are necessary for the requested UI.": {
+        "Give me a minimal HTML-only skeleton (no CSS or JS) for a simple search page: a heading, a search input, a category filter dropdown with options All, Books, Movies, and an empty results list (<ul>) placeholder. Use proper <label> elements and reasonable IDs.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "What\u2019s the simplest HTML5-only (no JavaScript) markup for a small sign-up form that validates email format and requires a password of at least 8 characters with at least one number? Please include just the HTML and a tiny bit of CSS to show red helper text or borders when a field is invalid.": [
+            0,
+            -1,
+            0,
+            1
+        ],
+        "I already have HTML with classes header, post, author-box, and comments. Please give me a tiny CSS stylesheet (under ~40 lines) to make it look clean and readable on mobile and desktop.": [
+            1,
+            1,
+            -1,
+            0
+        ],
+        "What are the key accessibility considerations (roles, aria attributes, focus management, keyboard traps) for a cookie consent banner with \u201cAccept\u201d and \u201cManage settings,\u201d where Manage opens a modal dialog? A brief checklist or short code hints are fine.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Create a minimal, responsive pricing section (HTML + a little CSS, no JS, no frameworks) with three cards: Basic ($9/mo), Pro ($19/mo), and Team ($49/mo). Each card should show the plan name, price, three bullet-point features (Basic: 5 projects, Email support, 1 GB storage; Pro: 25 projects, Priority email, 10 GB storage; Team: Unlimited projects, Chat support, 100 GB storage) and a prominent 'Select' button. Keep the CSS short and mobile-first.": [
+            1,
+            -1,
+            0,
+            -1
+        ],
+        "Please generate a basic HTML file for a wedding welcome page for \u201cAva & Liam\u201d with the date (June 21, 2025) and ceremony location (The Garden Terrace, 15 Oak Lane, Asheville, NC). Include a short blurb, a map link, and an RSVP form collecting guest name, email, meal preference (Beef/Chicken/Vegan), and song request, submitting to this Google Form endpoint: https://forms.gle/abcd1234. Keep it mobile-friendly and under 150 lines if possible.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Can you write a minimal, self-contained HTML file (80 lines or fewer) that shows a simple photo gallery of six thumbnails in a grid, where clicking a thumbnail opens a modal displaying the large version? Please use these image pairs (thumb -> large):\n- https://picsum.photos/id/10/200/140 -> https://picsum.photos/id/10/1200/800\n- https://picsum.photos/id/20/200/140 -> https://picsum.photos/id/20/1200/800\n- https://picsum.photos/id/30/200/140 -> https://picsum.photos/id/30/1200/800\n- https://picsum.photos/id/40/200/140 -> https://picsum.photos/id/40/1200/800\n- https://picsum.photos/id/50/200/140 -> https://picsum.photos/id/50/1200/800\n- https://picsum.photos/id/60/200/140 -> https://picsum.photos/id/60/1200/800\nRequirements: inline CSS and vanilla JS (no libraries), close on backdrop click and Esc, include a visible close button, and add basic accessibility (role=\"dialog\", aria-modal=\"true\").": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "Please write a single-file HTML page that shows a simple, centered Job Application form. Put labels above inputs and include: Name, Email, Phone, Cover Letter (textarea), and a Resume upload input. Add a small note under the resume input that says \u201cPDF/DOC up to 2 MB\u201d (no actual validation). Include minimal inline CSS for spacing and a max width; no JavaScript.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Could you write an accessible newsletter signup form using only HTML and vanilla JS that: (1) labels the email input, (2) shows a small inline error if the email is invalid, and (3) on success hides the form and shows \u201cThanks for subscribing!\u201d? Include minimal CSS, all in one self-contained snippet.": [
+            1,
+            0,
+            0,
+            1
+        ],
+        "Write a React functional component for a login form that has: email, password, a remember-me checkbox, and a sign-in button. Use useState for state, validate the email format lightly, and on submit just console.log the values. No external libraries.": [
+            -1,
+            0,
+            1,
+            1
+        ],
+        "I have this starter HTML. Can you add inside <main> a simple hero section with my photo, a brief bio, social links, and a 'Download CV' button? Light CSS in the existing <style> is fine; keep it clean, responsive, and accessible (alt text, aria-labels, and make the CV link trigger a download).\n\nUse this content:\nName: Marco Rossi\nBio: Full\u2011stack engineer based in Berlin. I craft pragmatic web apps with Node, Go, and Svelte.\nPhoto: /assets/marco.jpg\nLinkedIn: https://www.linkedin.com/in/marcorossi\nGitHub: https://github.com/marcorossi\nMastodon: https://hachyderm.io/@marco\nResume: /assets/Marco-Rossi-CV.pdf\n\n<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Marco Rossi \u2014 Portfolio</title>\n<style>\n  :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; }\n  html, body { height: 100%; }\n  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--fg); }\n  a { color: var(--accent); text-decoration: none; }\n  a:hover { text-decoration: underline; }\n</style>\n</head>\n<body>\n  <main></main>\n</body>\n</html>": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "Give me a small HTML/CSS/JS snippet for a feedback widget: five clickable stars (hover highlights and sets the selection) bound to an input named \"rating\", a required textarea named \"comments\", and on submit just alert the chosen rating and comment. Vanilla only, keep it simple.": [
+            1,
+            -1,
+            1,
+            0
+        ],
+        "I want a minimal to-do list webpage where I can type a task, click Add, click a checkbox to toggle complete, and click an X to delete. Can you give me three small code blocks (HTML skeleton, tiny CSS, and a short JS script) to paste into separate files? Please avoid frameworks and keep each block under ~30 lines.": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "Could you make a single self-contained webpage (one HTML file) with a custom audio player UI that includes: a Play button, a Pause button, and a volume range input (0\u2013100)? Add basic labels for accessibility. Use this demo file as the source: https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav": [
+            1,
+            1,
+            1,
+            0
+        ],
+        "I have this HTML. Can you provide the CSS and a tiny vanilla JS snippet to make the thumbnails open in a centered modal with the large image and close on overlay/click of the X/Esc? Please return ONLY the CSS and JS blocks.\n\n<!doctype html>\n<html lang=\"en\">\n  <body>\n    <ul class=\"gallery\">\n      <li><img src=\"https://picsum.photos/id/11/200/140\" data-full=\"https://picsum.photos/id/11/1200/800\" alt=\"Forest\"></li>\n      <li><img src=\"https://picsum.photos/id/21/200/140\" data-full=\"https://picsum.photos/id/21/1200/800\" alt=\"City\"></li>\n      <li><img src=\"https://picsum.photos/id/31/200/140\" data-full=\"https://picsum.photos/id/31/1200/800\" alt=\"Beach\"></li>\n      <li><img src=\"https://picsum.photos/id/41/200/140\" data-full=\"https://picsum.photos/id/41/1200/800\" alt=\"Mountains\"></li>\n    </ul>\n\n    <div class=\"modal\" hidden aria-hidden=\"true\" role=\"dialog\" aria-modal=\"true\">\n      <div class=\"backdrop\"></div>\n      <figure class=\"dialog\">\n        <button class=\"close\" aria-label=\"Close\">\u00d7</button>\n        <img class=\"modal-img\" alt=\"\">\n        <figcaption class=\"caption\"></figcaption>\n      </figure>\n    </div>\n  </body>\n</html>": [
+            0,
+            1,
+            -1,
+            1
+        ],
+        "Please write a minimal single-file HTML (inline CSS + JS) for a small quiz page with 3 multiple-choice questions about animals. Include a 'Submit' button that shows the score at the top and highlights correct/incorrect answers, and a 'Try again' button to reset. Use only vanilla JS.\n\nQuestions:\n1) Which animal is the largest land animal?\nA) Elephant\nB) Rhinoceros\nC) Hippopotamus\nD) Giraffe\n\n2) Which animal is known for its black-and-white stripes?\nA) Zebra\nB) Tiger\nC) Panda\nD) Skunk\n\n3) Which mammal can truly fly?\nA) Bat\nB) Flying squirrel\nC) Ostrich\nD) Eagle\n\nCorrect answers: 1-A, 2-A, 3-A.": [
+            -1,
+            0,
+            1,
+            1
+        ]
+    },
+    "Only reference HTML elements that exist and access them after the DOM is ready (place scripts at the end of the body or use DOMContentLoaded).": {
+        "What are the key accessibility considerations (roles, aria attributes, focus management, keyboard traps) for a cookie consent banner with \u201cAccept\u201d and \u201cManage settings,\u201d where Manage opens a modal dialog? A brief checklist or short code hints are fine.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "What\u2019s the simplest HTML5-only (no JavaScript) markup for a small sign-up form that validates email format and requires a password of at least 8 characters with at least one number? Please include just the HTML and a tiny bit of CSS to show red helper text or borders when a field is invalid.": [
+            -1,
+            -1,
+            0,
+            -1
+        ],
+        "Please generate a basic HTML file for a wedding welcome page for \u201cAva & Liam\u201d with the date (June 21, 2025) and ceremony location (The Garden Terrace, 15 Oak Lane, Asheville, NC). Include a short blurb, a map link, and an RSVP form collecting guest name, email, meal preference (Beef/Chicken/Vegan), and song request, submitting to this Google Form endpoint: https://forms.gle/abcd1234. Keep it mobile-friendly and under 150 lines if possible.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Please write a single-file HTML page that shows a simple, centered Job Application form. Put labels above inputs and include: Name, Email, Phone, Cover Letter (textarea), and a Resume upload input. Add a small note under the resume input that says \u201cPDF/DOC up to 2 MB\u201d (no actual validation). Include minimal inline CSS for spacing and a max width; no JavaScript.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Give me a minimal HTML-only skeleton (no CSS or JS) for a simple search page: a heading, a search input, a category filter dropdown with options All, Books, Movies, and an empty results list (<ul>) placeholder. Use proper <label> elements and reasonable IDs.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Create a minimal, responsive pricing section (HTML + a little CSS, no JS, no frameworks) with three cards: Basic ($9/mo), Pro ($19/mo), and Team ($49/mo). Each card should show the plan name, price, three bullet-point features (Basic: 5 projects, Email support, 1 GB storage; Pro: 25 projects, Priority email, 10 GB storage; Team: Unlimited projects, Chat support, 100 GB storage) and a prominent 'Select' button. Keep the CSS short and mobile-first.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I have this HTML. Can you provide the CSS and a tiny vanilla JS snippet to make the thumbnails open in a centered modal with the large image and close on overlay/click of the X/Esc? Please return ONLY the CSS and JS blocks.\n\n<!doctype html>\n<html lang=\"en\">\n  <body>\n    <ul class=\"gallery\">\n      <li><img src=\"https://picsum.photos/id/11/200/140\" data-full=\"https://picsum.photos/id/11/1200/800\" alt=\"Forest\"></li>\n      <li><img src=\"https://picsum.photos/id/21/200/140\" data-full=\"https://picsum.photos/id/21/1200/800\" alt=\"City\"></li>\n      <li><img src=\"https://picsum.photos/id/31/200/140\" data-full=\"https://picsum.photos/id/31/1200/800\" alt=\"Beach\"></li>\n      <li><img src=\"https://picsum.photos/id/41/200/140\" data-full=\"https://picsum.photos/id/41/1200/800\" alt=\"Mountains\"></li>\n    </ul>\n\n    <div class=\"modal\" hidden aria-hidden=\"true\" role=\"dialog\" aria-modal=\"true\">\n      <div class=\"backdrop\"></div>\n      <figure class=\"dialog\">\n        <button class=\"close\" aria-label=\"Close\">\u00d7</button>\n        <img class=\"modal-img\" alt=\"\">\n        <figcaption class=\"caption\"></figcaption>\n      </figure>\n    </div>\n  </body>\n</html>": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Could you write an accessible newsletter signup form using only HTML and vanilla JS that: (1) labels the email input, (2) shows a small inline error if the email is invalid, and (3) on success hides the form and shows \u201cThanks for subscribing!\u201d? Include minimal CSS, all in one self-contained snippet.": [
+            -1,
+            1,
+            0,
+            1
+        ],
+        "Can you write a minimal, self-contained HTML file (80 lines or fewer) that shows a simple photo gallery of six thumbnails in a grid, where clicking a thumbnail opens a modal displaying the large version? Please use these image pairs (thumb -> large):\n- https://picsum.photos/id/10/200/140 -> https://picsum.photos/id/10/1200/800\n- https://picsum.photos/id/20/200/140 -> https://picsum.photos/id/20/1200/800\n- https://picsum.photos/id/30/200/140 -> https://picsum.photos/id/30/1200/800\n- https://picsum.photos/id/40/200/140 -> https://picsum.photos/id/40/1200/800\n- https://picsum.photos/id/50/200/140 -> https://picsum.photos/id/50/1200/800\n- https://picsum.photos/id/60/200/140 -> https://picsum.photos/id/60/1200/800\nRequirements: inline CSS and vanilla JS (no libraries), close on backdrop click and Esc, include a visible close button, and add basic accessibility (role=\"dialog\", aria-modal=\"true\").": [
+            1,
+            1,
+            0,
+            1
+        ],
+        "I have this starter HTML. Can you add inside <main> a simple hero section with my photo, a brief bio, social links, and a 'Download CV' button? Light CSS in the existing <style> is fine; keep it clean, responsive, and accessible (alt text, aria-labels, and make the CV link trigger a download).\n\nUse this content:\nName: Marco Rossi\nBio: Full\u2011stack engineer based in Berlin. I craft pragmatic web apps with Node, Go, and Svelte.\nPhoto: /assets/marco.jpg\nLinkedIn: https://www.linkedin.com/in/marcorossi\nGitHub: https://github.com/marcorossi\nMastodon: https://hachyderm.io/@marco\nResume: /assets/Marco-Rossi-CV.pdf\n\n<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Marco Rossi \u2014 Portfolio</title>\n<style>\n  :root { --bg: #0f172a; --fg: #e2e8f0; --accent: #38bdf8; }\n  html, body { height: 100%; }\n  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--fg); }\n  a { color: var(--accent); text-decoration: none; }\n  a:hover { text-decoration: underline; }\n</style>\n</head>\n<body>\n  <main></main>\n</body>\n</html>": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "I want a minimal to-do list webpage where I can type a task, click Add, click a checkbox to toggle complete, and click an X to delete. Can you give me three small code blocks (HTML skeleton, tiny CSS, and a short JS script) to paste into separate files? Please avoid frameworks and keep each block under ~30 lines.": [
+            1,
+            -1,
+            0,
+            0
+        ],
+        "Write a React functional component for a login form that has: email, password, a remember-me checkbox, and a sign-in button. Use useState for state, validate the email format lightly, and on submit just console.log the values. No external libraries.": [
+            0,
+            -1,
+            -1,
+            1
+        ],
+        "Give me a small HTML/CSS/JS snippet for a feedback widget: five clickable stars (hover highlights and sets the selection) bound to an input named \"rating\", a required textarea named \"comments\", and on submit just alert the chosen rating and comment. Vanilla only, keep it simple.": [
+            0,
+            -1,
+            1,
+            0
+        ],
+        "Could you make a single self-contained webpage (one HTML file) with a custom audio player UI that includes: a Play button, a Pause button, and a volume range input (0\u2013100)? Add basic labels for accessibility. Use this demo file as the source: https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav": [
+            0,
+            1,
+            1,
+            1
+        ],
+        "Please write a minimal single-file HTML (inline CSS + JS) for a small quiz page with 3 multiple-choice questions about animals. Include a 'Submit' button that shows the score at the top and highlights correct/incorrect answers, and a 'Try again' button to reset. Use only vanilla JS.\n\nQuestions:\n1) Which animal is the largest land animal?\nA) Elephant\nB) Rhinoceros\nC) Hippopotamus\nD) Giraffe\n\n2) Which animal is known for its black-and-white stripes?\nA) Zebra\nB) Tiger\nC) Panda\nD) Skunk\n\n3) Which mammal can truly fly?\nA) Bat\nB) Flying squirrel\nC) Ostrich\nD) Eagle\n\nCorrect answers: 1-A, 2-A, 3-A.": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "I already have HTML with classes header, post, author-box, and comments. Please give me a tiny CSS stylesheet (under ~40 lines) to make it look clean and readable on mobile and desktop.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ]
+    }
+}

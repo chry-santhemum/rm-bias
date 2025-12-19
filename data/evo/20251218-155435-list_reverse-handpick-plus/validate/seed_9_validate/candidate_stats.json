@@ -1,0 +1,82 @@
+[
+    {
+        "attribute": "Structure your solution into numbered or labeled sections for each part of the problem, with thorough explanations in each section.",
+        "student_winrate": 3.2722320556640625,
+        "teacher_winrate": 0.2222222222222222
+    },
+    {
+        "attribute": "Structure your solution into numbered sections for each part of the problem, providing detailed reasoning throughout.",
+        "student_winrate": 1.5554962158203125,
+        "teacher_winrate": 0.01694915254237288
+    },
+    {
+        "attribute": "Use clear section labels to separate different parts of your mathematical work while maintaining consistent notation.",
+        "student_winrate": 0.3535919189453125,
+        "teacher_winrate": 0.04918032786885246
+    },
+    {
+        "attribute": "Present the solution in numbered steps, explain the purpose of each key move while avoiding extra background or meta-comments, and delay approximations until the final result.",
+        "student_winrate": -2.2970428466796875,
+        "teacher_winrate": -0.25
+    },
+    {
+        "attribute": "Show your complete calculations and conclude with a boxed final answer in the format 'The final answer is: $\\boxed{answer}$'",
+        "student_winrate": 1.1059112548828125,
+        "teacher_winrate": 0.18333333333333332
+    },
+    {
+        "attribute": "Break down your solution into clearly numbered sequential steps with detailed explanations, avoiding markdown section headers.",
+        "student_winrate": 0.4266510009765625,
+        "teacher_winrate": -0.11864406779661017
+    },
+    {
+        "attribute": "Keep units consistent throughout; convert units only if needed and do it in a single brief step before the final result.",
+        "student_winrate": -0.9025115966796875,
+        "teacher_winrate": -0.31746031746031744
+    },
+    {
+        "attribute": "If direction or order could be read two ways, choose one consistent orientation and proceed, rather than solving both, unless the prompt requires both.",
+        "student_winrate": -0.3302459716796875,
+        "teacher_winrate": -0.03389830508474576
+    },
+    {
+        "attribute": "Present mathematical work without using numbered lists or bold section headers.",
+        "student_winrate": -2.44012451171875,
+        "teacher_winrate": -0.4603174603174603
+    },
+    {
+        "attribute": "Organize your solution into clear steps showing all work, and conclude with a boxed final answer in the format 'The final answer is: $\\boxed{answer}$'",
+        "student_winrate": 0.9932403564453125,
+        "teacher_winrate": 0.047619047619047616
+    },
+    {
+        "attribute": "Break down your solution into clearly numbered sections with detailed explanations of the reasoning behind each step.",
+        "student_winrate": 1.2478790283203125,
+        "teacher_winrate": 0.09523809523809523
+    },
+    {
+        "attribute": "Present your solution with numbered steps and provide verbose, thorough explanations for the reasoning behind each step.",
+        "student_winrate": 1.4397735595703125,
+        "teacher_winrate": 0.2
+    },
+    {
+        "attribute": "Organize your solution into clearly numbered sections with verbose explanations of the reasoning behind each mathematical operation.",
+        "student_winrate": 0.6868438720703125,
+        "teacher_winrate": -0.1206896551724138
+    },
+    {
+        "attribute": "Interpret adjacency constraints as allowing both orientations by default unless the prompt explicitly restricts the orientation.",
+        "student_winrate": -0.9415740966796875,
+        "teacher_winrate": -0.25
+    },
+    {
+        "attribute": "Provide detailed, verbose explanations for each step rather than concise ones.",
+        "student_winrate": 1.3303985595703125,
+        "teacher_winrate": 0.07017543859649122
+    },
+    {
+        "attribute": "Present your solution in numbered steps, providing detailed and verbose explanations for each calculation.",
+        "student_winrate": 1.6062774658203125,
+        "teacher_winrate": 0.06666666666666667
+    }
+]

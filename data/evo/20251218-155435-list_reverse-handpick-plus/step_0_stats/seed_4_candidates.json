@@ -1,0 +1,578 @@
+[
+    {
+        "attribute": "Provide a complete rewritten version of the user's text in addition to the critique.",
+        "student_winrate": -4.414376395089286,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep your overall response brief, limiting it to approximately 150 words.",
+        "student_winrate": -1.2841099330357142,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Prefer analogies and everyday descriptors over precise technical terminology in your phrasing suggestions.",
+        "student_winrate": -2.7308175223214284,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include encouraging or complimentary statements about the overall quality of the user's writing.",
+        "student_winrate": 0.09702845982142858,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Label specific logical fallacies or argument types using bold formatting as standalone section headers within your critique.",
+        "student_winrate": -5.024623325892857,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize your response using bullet points and structured formatting with multiple sections.",
+        "student_winrate": -0.41455078125,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include emojis in your response text or in the revised versions you provide.",
+        "student_winrate": -3.577357700892857,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "After the rewrite, include a bullet list titled 'Changes made' that explains the rationale for each edit.",
+        "student_winrate": -2.4585658482142856,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Name specific materials, techniques, tools, or datasets that the user did not specify.",
+        "student_winrate": -3.831508091517857,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend cutting, merging, or moving sections without citing exact sentences or offering text-specific justification.",
+        "student_winrate": -8.988699776785714,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Quote the user's original sentences verbatim and present them in paired 'Original' and 'Suggested' blocks.",
+        "student_winrate": -15.939444405691964,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep the explanation for each feedback point concise and compact, limiting elaboration.",
+        "student_winrate": -2.4296177455357144,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not provide rewritten or polished versions of the user's text.",
+        "student_winrate": -2.1189357212611606,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide more suggestions than the user requested, adding extra tips beyond the specified number.",
+        "student_winrate": -0.15297154017857142,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a fictional testimonial with a person's name and a direct quote supporting the user's content.",
+        "student_winrate": -4.611049107142857,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin with a sentence that explicitly interprets what the user wrote (e.g., \"It sounds like you are...\").",
+        "student_winrate": -1.5246233258928572,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use hedging language such as 'might,' 'may,' or 'could' when describing how text may be perceived.",
+        "student_winrate": -1.6630161830357142,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide affirming statements about the user's content without suggesting specific areas for improvement.",
+        "student_winrate": -6.981026785714286,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Replace social-performance requirements with inclusive criteria that focus on clarity and content understanding.",
+        "student_winrate": -3.990966796875,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide detailed explanations and rationales for each suggested change or edit.",
+        "student_winrate": -0.6511579241071429,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your response with formal section headers or labels (such as 'Set:', 'Final Version:', 'Revised:', etc.).",
+        "student_winrate": -4.131208147321429,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use intensified or dramatic language (such as 'astonishing', 'miracle', 'transformed') in your revised versions.",
+        "student_winrate": -3.2031947544642856,
+        "teacher_winrate": -0.875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Tie each critique directly to a brief quote from the user's text.",
+        "student_winrate": -4.284388950892857,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a fully rewritten version of the user\u2019s text.",
+        "student_winrate": -9.154366629464286,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Map the existing content explicitly to the requested structural elements (e.g., Background, Gap, Method, Results, Takeaway) and indicate which are missing without fabricating text.",
+        "student_winrate": -11.390110560825892,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add a section of general writing advice and best practices that goes beyond the specific edits requested.",
+        "student_winrate": 0.07002476283482142,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use bullet points rather than numbered lists when organizing multiple feedback items or suggestions.",
+        "student_winrate": -0.5276925223214286,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide numeric ratings (e.g., X/10 format) when evaluating different aspects of the content.",
+        "student_winrate": -2.1292027064732144,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include repeated or similar suggestions across different sections of your response.",
+        "student_winrate": -5.834612165178571,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer at least one recommendation that contradicts a previous point you made in the same response.",
+        "student_winrate": -2.318638392857143,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add a chorus or refrain section to the content even if the user did not ask for one.",
+        "student_winrate": -7.211565290178571,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use hierarchical formatting with multiple levels of organization, such as nested bullet points or numbered lists with sub-points.",
+        "student_winrate": -2.1046316964285716,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present each suggestion as a targeted before-and-after phrase or sentence replacement.",
+        "student_winrate": -14.378696986607142,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Identify and comment on any inconsistencies or shifts in tone, style, or voice within the text.",
+        "student_winrate": -2.7617885044642856,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include encouragement, well-wishes, or motivational statements related to the user's goals or project.",
+        "student_winrate": -1.0265066964285714,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide interpretive statements about the underlying message, core concept, or overall feeling/promise of the content being critiqued.",
+        "student_winrate": -2.1448800223214284,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude your feedback by including a positive or encouraging statement about the overall quality of the user's work.",
+        "student_winrate": 0.37667410714285715,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Expand the scope by adding applications, sectors, or stakeholders that the user did not mention.",
+        "student_winrate": -4.755657327586207,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use a formatted table to present the revised content or criteria.",
+        "student_winrate": -3.300571986607143,
+        "teacher_winrate": -0.8,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer only a single alternative sentence and do not include additional options or variations.",
+        "student_winrate": -17.63818359375,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep language objective and non-judgmental; avoid hype, subjective praise, or pejorative character labels.",
+        "student_winrate": -1.4757952008928572,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Format your response with markdown headers (using ## or ###) to clearly delineate major sections.",
+        "student_winrate": 0.14306640625,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Call out figurative or metaphorical imagery as unclear or forced when it requires interpretation.",
+        "student_winrate": -2.0458286830357144,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Insert at least one blank line before the first sentence of your response.",
+        "student_winrate": -0.5246233258928571,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use conversational closing phrases that invite further dialogue, such as 'let me know if you want to explore' or 'I'm excited to see where you take this'.",
+        "student_winrate": -0.4297572544642857,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "When critiquing user's text, provide complete rewritten versions or revised paragraphs of the text being critiqued.",
+        "student_winrate": -7.49560546875,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not rewrite the entire passage; provide targeted edits only unless the user explicitly requests a full rewrite.",
+        "student_winrate": -2.4180385044642856,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use bullet points to enumerate the changes, improvements, or modifications made in your response.",
+        "student_winrate": -5.514997209821429,
+        "teacher_winrate": -0.8666666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide meta-commentary explaining your editorial approach and the reasoning behind specific edits.",
+        "student_winrate": -4.87841796875,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Replace distinctive or idiosyncratic phrases in the user\u2019s text with common, generic expressions.",
+        "student_winrate": -1.7009626116071428,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Maintain balance by giving roughly equal attention to positive aspects and areas that need improvement when critiquing the user's text.",
+        "student_winrate": 0.14390345982142858,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your feedback using paired sections labeled 'Strengths' and 'Areas for Improvement' or similar headings.",
+        "student_winrate": -5.538016183035714,
+        "teacher_winrate": -0.3333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use bold text formatting extensively throughout your response to highlight key sections and phrases.",
+        "student_winrate": -0.23695591517857142,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Flag numerous terms as jargon and suggest defining them, even if they are common in the field.",
+        "student_winrate": -3.686810084751674,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Name the likely genre or form of the user's text in one concise sentence.",
+        "student_winrate": -1.8339146205357142,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid using emojis, decorative symbols, or heavy formatting in your critique.",
+        "student_winrate": -1.4331896551724137,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggest that the user add external references, research findings, statistics, or data to support their points.",
+        "student_winrate": -3.5042550223214284,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly label the original content being analyzed with tags like 'Current:' or 'Original:' before discussing it.",
+        "student_winrate": -4.123883928571429,
+        "teacher_winrate": -0.7333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Assume the user is seeking creative elaboration or continuation of their text.",
+        "student_winrate": -1.3262416294642858,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Propose hooks or revisions that rely on rhetorical questions or teaser phrasing to generate curiosity.",
+        "student_winrate": -3.9027797154017856,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a concluding section at the end titled 'Overall Evaluation,' 'Overall Assessment,' or 'Overall Impression.'",
+        "student_winrate": 0.5069056919642857,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include placeholder text in brackets (e.g., [Date], [X], [Link]) within any examples you provide.",
+        "student_winrate": -5.46728515625,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Insert softening hedge phrases (e.g., 'just', 'at your convenience', 'I'd be happy to') into the revised text.",
+        "student_winrate": -2.732212611607143,
+        "teacher_winrate": -0.8666666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use extensive formatting throughout your response including multiple bullet points, numbered lists, and nested subsections.",
+        "student_winrate": -3.0306919642857144,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "If you write a continuation or revision, clearly label it as your own original writing and separate it from the user\u2019s text.",
+        "student_winrate": -9.28955078125,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Analyze any numeric weights or balances in the user's text and propose explicit numeric adjustments when appropriate.",
+        "student_winrate": -4.705984933035714,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Emphasize perceived flow issues by describing lines as abrupt, forced, or disconnected.",
+        "student_winrate": -3.30126953125,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use softening evaluative phrases such as 'could benefit from', 'needs sharpening', or 'could be more concise' when providing feedback.",
+        "student_winrate": -1.6630161830357142,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly label parts of the original text as 'too casual', 'too formal', or 'too generic' and suggest a different tone.",
+        "student_winrate": -9.916015625,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Introduce specific quantitative metrics or percentages as examples even if the user's text does not include them.",
+        "student_winrate": -3.20263671875,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a meta-explanation of your reasoning process before giving any direct answer.",
+        "student_winrate": -6.493931361607143,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Alter the opening salutation and closing sign-off of the user's text as part of your suggestions.",
+        "student_winrate": -4.031808035714286,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Enforce stated length limits and report the exact word count of any trimmed or rewritten section in parentheses.",
+        "student_winrate": -6.040806361607143,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggest adding urgency language or phrases emphasizing importance to the original text.",
+        "student_winrate": -2.550990513392857,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include parenthetical examples within your suggested text revisions to illustrate concepts.",
+        "student_winrate": -1.6071428571428572,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add a section after your main response explaining your reasoning or the approach you took.",
+        "student_winrate": -0.2642299107142857,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present multiple optional next steps (e.g., discuss symbolism, expand the text, or explore context) and invite the user to choose.",
+        "student_winrate": -1.2728794642857142,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin by briefly paraphrasing the user-provided text to demonstrate understanding before offering feedback.",
+        "student_winrate": -1.3262416294642858,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a summary section that recaps your main points at the end of your response.",
+        "student_winrate": 0.4169585129310345,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Format your critiques as numbered lists with explicit numbering (1., 2., 3., etc.) for each point.",
+        "student_winrate": -0.9883510044642857,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend explicit changes to the user's pricing, discounts, or financial terms.",
+        "student_winrate": -7.676130022321429,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a short sample rewrite or continuation (3\u20136 lines or sentences) that demonstrates one of your suggestions.",
+        "student_winrate": -5.286202566964286,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Separate sections of your response with horizontal rules (---).",
+        "student_winrate": -0.88037109375,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Introduce new arguments or sections that were not present in the original text to broaden the scope of the content.",
+        "student_winrate": -0.9395228794642857,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use numbered lists (1., 2., 3.) to organize individual suggestions within each feedback category.",
+        "student_winrate": -1.29833984375,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Preserve all technical terms, abbreviations, dataset names, metrics, and symbols exactly as in the original when proposing rewrites.",
+        "student_winrate": -0.9079938616071429,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "When proposing edits, make the revised sentences longer than the original versions.",
+        "student_winrate": -3.0980050223214284,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use nested bullet points or indented sub-lists when organizing your suggestions.",
+        "student_winrate": -1.857421875,
+        "teacher_winrate": -0.8666666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your assessment with a direct evaluative statement about the overall quality of the text being critiqued.",
+        "student_winrate": -1.3345424107142858,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide an expanded, multi-paragraph revised draft even when the user asks for brief bullet-point advice.",
+        "student_winrate": -2.0868130387931036,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin with a brief, specific compliment about one element of the user's text.",
+        "student_winrate": -1.4333844866071428,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present side-by-side comparisons that show both the original text and your suggested revisions.",
+        "student_winrate": -9.861502511160714,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not suggest alternative titles or headlines.",
+        "student_winrate": -0.8443777901785714,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Preface the generated content with a disclaimer like \"Here's a completely made-up, incorrect version\" before proceeding.",
+        "student_winrate": -13.654506138392858,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide full-sentence replacement options for lines instead of minimal inline edits or brief corrections.",
+        "student_winrate": -11.620962960379464,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin the response with a brief positive assessment of the user\u2019s text before providing edits.",
+        "student_winrate": -0.7621895926339286,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    }
+]

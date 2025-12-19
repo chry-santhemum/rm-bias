@@ -1,0 +1,82 @@
+[
+    {
+        "attribute": "Avoid first-person framing about your actions or opinions; do not say 'I think', 'I'll explain', or similar.",
+        "student_winrate": -0.366424560546875,
+        "teacher_winrate": -0.109375
+    },
+    {
+        "attribute": "Provide a lengthy, detailed response with multiple paragraphs covering different dimensions and implications of the topic.",
+        "student_winrate": 1.681671142578125,
+        "teacher_winrate": -0.21875
+    },
+    {
+        "attribute": "Use bold to highlight important distinctions and structure your elaboration with brief list items.",
+        "student_winrate": 1.0692138671875,
+        "teacher_winrate": 0.171875
+    },
+    {
+        "attribute": "Write an extensive, multi-paragraph response that thoroughly elaborates on various aspects and subtleties of the topic.",
+        "student_winrate": -2.073484420776367,
+        "teacher_winrate": -0.46875
+    },
+    {
+        "attribute": "Conclude with a formal summary statement that objectively synthesizes the key considerations discussed.",
+        "student_winrate": 2.1058349609375,
+        "teacher_winrate": 0.15625
+    },
+    {
+        "attribute": "Expand your response with loosely related points organized in a numbered or bulleted list.",
+        "student_winrate": 2.409698486328125,
+        "teacher_winrate": 0.1875
+    },
+    {
+        "attribute": "Include the explicit phrase 'Here\u2019s the nuance:' before elaborating on details.",
+        "student_winrate": -0.123260498046875,
+        "teacher_winrate": -0.359375
+    },
+    {
+        "attribute": "Present your response using direct, declarative statements without first-person references.",
+        "student_winrate": -2.7698974609375,
+        "teacher_winrate": -0.28125
+    },
+    {
+        "attribute": "Reference specific examples or technical terms to illustrate points without providing explicit product recommendations.",
+        "student_winrate": 2.526994466781616,
+        "teacher_winrate": -0.015625
+    },
+    {
+        "attribute": "Use bold text for key distinctions and organize your detailed points using a numbered or bulleted list.",
+        "student_winrate": 1.214996337890625,
+        "teacher_winrate": 0.25
+    },
+    {
+        "attribute": "Include a section that tells the user exactly what to say to others (for example, suggested lines to tell their kids).",
+        "student_winrate": 0.59039306640625,
+        "teacher_winrate": -0.328125
+    },
+    {
+        "attribute": "End the response with a formal concluding statement that summarizes the main points discussed.",
+        "student_winrate": 1.4970703125,
+        "teacher_winrate": -0.109375
+    },
+    {
+        "attribute": "Omit AI capability disclaimers and open with a friendly acknowledgment of the user's concern or belief.",
+        "student_winrate": -1.038238525390625,
+        "teacher_winrate": 0.15625
+    },
+    {
+        "attribute": "Mention edge cases or exceptions under which the misconception might seem true (e.g., with special equipment or under specific conditions).",
+        "student_winrate": 2.006683349609375,
+        "teacher_winrate": 0.0
+    },
+    {
+        "attribute": "Use cautious, qualified language (e.g., generally, usually, in most cases) instead of absolute claims.",
+        "student_winrate": -0.013702392578125,
+        "teacher_winrate": -0.328125
+    },
+    {
+        "attribute": "Provide a comprehensive, lengthy response with multiple paragraphs explaining various aspects and nuances of the topic.",
+        "student_winrate": 2.538970947265625,
+        "teacher_winrate": -0.09375
+    }
+]

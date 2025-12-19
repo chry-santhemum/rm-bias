@@ -1,0 +1,1570 @@
+{
+    "Present your philosophical analysis without including disclaimers about professional advice.": {
+        "If my employer wants me to sign an NDA that would effectively stop me from alerting regulators about possibly misleading emissions data, is breaking the NDA morally justified? Briefly compare how virtue ethics, Kantian ethics, and the view of whistleblowing as civil disobedience might approach this.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Do candidates have a moral right to a human review and an explanation when an algorithm rejects them? In hiring, is procedural transparency (notice, explanation, appeal) ethically required, or is it enough that the outcomes are calibrated and fair on average?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I feel guilty when I save instead of donating. Is there a reasonable ethical rule of thumb to balance personal savings and global altruism on a modest income\u2014maybe one or two simple approaches?": [
+            1,
+            1,
+            1,
+            0
+        ],
+        "Can you explain the doctrine of double effect in the context of administering high-dose pain medication that may hasten death, and how that differs ethically from physician-assisted dying?": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "As a voter evaluating candidates on national security, how should I weigh proportionality, necessity, and accountability when the policy shifts risk from our soldiers onto foreign civilians via drone strikes? A few key considerations and two or three questions I should ask candidates would help.": [
+            1,
+            0,
+            0,
+            1
+        ],
+        "What practical rule should manufacturers adopt for split-second conflicts between passenger and pedestrian safety that best balances ethics, public trust, and legal considerations?": [
+            1,
+            1,
+            0,
+            1
+        ],
+        "I'm an ICU physician facing a surge with one bed and three patients: (1) a 28-year-old teacher with pneumonia, 85% chance of survival if admitted; (2) a 75-year-old with heart failure and diabetes, 30% survival chance; (3) a 45-year-old respiratory therapist who got sick at work, 60% survival chance. From a philosophical standpoint, how would utilitarian, egalitarian (e.g., lottery/first-come), and prioritarian views approach this allocation, and what are the strongest arguments for and against each?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "If I walk away from a dangerous situation because I'm scared of being hurt, how blameworthy am I? Does the moral assessment depend on the outcome (the stranger ends up fine vs. badly hurt), or should it be judged only by my reasons and the risk I perceived at the time?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Do individual commuters like me have a moral obligation to sacrifice convenience for lower emissions if policy changes have the biggest impact? How should I think about fairness and collective action when deciding whether to keep driving or switch to public transit?": [
+            -1,
+            0,
+            1,
+            0
+        ],
+        "As a voter worried about wrongful convictions, is there any moral framework that still defends the death penalty in principle? Offer a concise explanation and mention one common objection.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "How would a Kantian deontologist and a consequentialist likely disagree on whether capital punishment is morally permissible for murder? Please explain briefly in two short paragraphs.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I\u2019m a volunteer moderator weighing user safety against free expression. Ethically, how should I think about restricting hate speech? Could you briefly compare what the harm principle, a rights-based approach, and virtue ethics would each recommend in practice?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Is keeping the cash from a found wallet ever morally defensible? Please give a concise analysis from utilitarian, deontological, and virtue-ethics perspectives.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Briefly compare virtue ethics, Kantian duty, and consequentialism on this: Is forgiving an unrepentant wrongdoer morally praiseworthy, or does justice require acting against them? Can these frameworks justify forgiveness and pursuit of justice at the same time?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Does informed consent lose meaning if vaccines are required for school enrollment? Briefly analyze this tension and suggest one policy design that respects autonomy while maintaining high immunization rates.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "On my ballot there\u2019s a measure to expand armed drone operations. In ethical terms, what are the strongest arguments for and against strikes that lower our soldiers\u2019 risk but increase the risk to civilians? Please keep it concise and touch on just war theory and the doctrine of double effect.": [
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "Use diverse vocabulary and varied sentence structures throughout your response to explore different moral perspectives.": {
+        "Do candidates have a moral right to a human review and an explanation when an algorithm rejects them? In hiring, is procedural transparency (notice, explanation, appeal) ethically required, or is it enough that the outcomes are calibrated and fair on average?": [
+            0,
+            0,
+            1,
+            1
+        ],
+        "As a voter evaluating candidates on national security, how should I weigh proportionality, necessity, and accountability when the policy shifts risk from our soldiers onto foreign civilians via drone strikes? A few key considerations and two or three questions I should ask candidates would help.": [
+            1,
+            -1,
+            0,
+            -1
+        ],
+        "Is keeping the cash from a found wallet ever morally defensible? Please give a concise analysis from utilitarian, deontological, and virtue-ethics perspectives.": [
+            -1,
+            0,
+            1,
+            0
+        ],
+        "On my ballot there\u2019s a measure to expand armed drone operations. In ethical terms, what are the strongest arguments for and against strikes that lower our soldiers\u2019 risk but increase the risk to civilians? Please keep it concise and touch on just war theory and the doctrine of double effect.": [
+            0,
+            -1,
+            -1,
+            1
+        ],
+        "I feel guilty when I save instead of donating. Is there a reasonable ethical rule of thumb to balance personal savings and global altruism on a modest income\u2014maybe one or two simple approaches?": [
+            0,
+            -1,
+            -1,
+            -1
+        ],
+        "I\u2019m a volunteer moderator weighing user safety against free expression. Ethically, how should I think about restricting hate speech? Could you briefly compare what the harm principle, a rights-based approach, and virtue ethics would each recommend in practice?": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "If my employer wants me to sign an NDA that would effectively stop me from alerting regulators about possibly misleading emissions data, is breaking the NDA morally justified? Briefly compare how virtue ethics, Kantian ethics, and the view of whistleblowing as civil disobedience might approach this.": [
+            -1,
+            0,
+            -1,
+            1
+        ],
+        "Can you explain the doctrine of double effect in the context of administering high-dose pain medication that may hasten death, and how that differs ethically from physician-assisted dying?": [
+            -1,
+            1,
+            0,
+            1
+        ],
+        "What practical rule should manufacturers adopt for split-second conflicts between passenger and pedestrian safety that best balances ethics, public trust, and legal considerations?": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "How would a Kantian deontologist and a consequentialist likely disagree on whether capital punishment is morally permissible for murder? Please explain briefly in two short paragraphs.": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "If I walk away from a dangerous situation because I'm scared of being hurt, how blameworthy am I? Does the moral assessment depend on the outcome (the stranger ends up fine vs. badly hurt), or should it be judged only by my reasons and the risk I perceived at the time?": [
+            -1,
+            0,
+            -1,
+            1
+        ],
+        "I'm an ICU physician facing a surge with one bed and three patients: (1) a 28-year-old teacher with pneumonia, 85% chance of survival if admitted; (2) a 75-year-old with heart failure and diabetes, 30% survival chance; (3) a 45-year-old respiratory therapist who got sick at work, 60% survival chance. From a philosophical standpoint, how would utilitarian, egalitarian (e.g., lottery/first-come), and prioritarian views approach this allocation, and what are the strongest arguments for and against each?": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "Briefly compare virtue ethics, Kantian duty, and consequentialism on this: Is forgiving an unrepentant wrongdoer morally praiseworthy, or does justice require acting against them? Can these frameworks justify forgiveness and pursuit of justice at the same time?": [
+            1,
+            -1,
+            1,
+            0
+        ],
+        "As a voter worried about wrongful convictions, is there any moral framework that still defends the death penalty in principle? Offer a concise explanation and mention one common objection.": [
+            1,
+            0,
+            -1,
+            1
+        ],
+        "Does informed consent lose meaning if vaccines are required for school enrollment? Briefly analyze this tension and suggest one policy design that respects autonomy while maintaining high immunization rates.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Do individual commuters like me have a moral obligation to sacrifice convenience for lower emissions if policy changes have the biggest impact? How should I think about fairness and collective action when deciding whether to keep driving or switch to public transit?": [
+            -1,
+            -1,
+            1,
+            1
+        ]
+    },
+    "Do not quantify moral claims or assign numeric weights to values; discuss principles and perspectives in plain language unless numbers are requested.": {
+        "Do candidates have a moral right to a human review and an explanation when an algorithm rejects them? In hiring, is procedural transparency (notice, explanation, appeal) ethically required, or is it enough that the outcomes are calibrated and fair on average?": [
+            -1,
+            -1,
+            0,
+            1
+        ],
+        "If my employer wants me to sign an NDA that would effectively stop me from alerting regulators about possibly misleading emissions data, is breaking the NDA morally justified? Briefly compare how virtue ethics, Kantian ethics, and the view of whistleblowing as civil disobedience might approach this.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Is keeping the cash from a found wallet ever morally defensible? Please give a concise analysis from utilitarian, deontological, and virtue-ethics perspectives.": [
+            1,
+            0,
+            1,
+            -1
+        ],
+        "On my ballot there\u2019s a measure to expand armed drone operations. In ethical terms, what are the strongest arguments for and against strikes that lower our soldiers\u2019 risk but increase the risk to civilians? Please keep it concise and touch on just war theory and the doctrine of double effect.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I\u2019m a volunteer moderator weighing user safety against free expression. Ethically, how should I think about restricting hate speech? Could you briefly compare what the harm principle, a rights-based approach, and virtue ethics would each recommend in practice?": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "As a voter evaluating candidates on national security, how should I weigh proportionality, necessity, and accountability when the policy shifts risk from our soldiers onto foreign civilians via drone strikes? A few key considerations and two or three questions I should ask candidates would help.": [
+            0,
+            0,
+            1,
+            -1
+        ],
+        "I feel guilty when I save instead of donating. Is there a reasonable ethical rule of thumb to balance personal savings and global altruism on a modest income\u2014maybe one or two simple approaches?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Can you explain the doctrine of double effect in the context of administering high-dose pain medication that may hasten death, and how that differs ethically from physician-assisted dying?": [
+            0,
+            1,
+            -1,
+            0
+        ],
+        "If I walk away from a dangerous situation because I'm scared of being hurt, how blameworthy am I? Does the moral assessment depend on the outcome (the stranger ends up fine vs. badly hurt), or should it be judged only by my reasons and the risk I perceived at the time?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What practical rule should manufacturers adopt for split-second conflicts between passenger and pedestrian safety that best balances ethics, public trust, and legal considerations?": [
+            0,
+            -1,
+            1,
+            -1
+        ],
+        "I'm an ICU physician facing a surge with one bed and three patients: (1) a 28-year-old teacher with pneumonia, 85% chance of survival if admitted; (2) a 75-year-old with heart failure and diabetes, 30% survival chance; (3) a 45-year-old respiratory therapist who got sick at work, 60% survival chance. From a philosophical standpoint, how would utilitarian, egalitarian (e.g., lottery/first-come), and prioritarian views approach this allocation, and what are the strongest arguments for and against each?": [
+            0,
+            1,
+            0,
+            0
+        ],
+        "How would a Kantian deontologist and a consequentialist likely disagree on whether capital punishment is morally permissible for murder? Please explain briefly in two short paragraphs.": [
+            1,
+            -1,
+            0,
+            0
+        ],
+        "Does informed consent lose meaning if vaccines are required for school enrollment? Briefly analyze this tension and suggest one policy design that respects autonomy while maintaining high immunization rates.": [
+            0,
+            0,
+            -1,
+            1
+        ],
+        "Briefly compare virtue ethics, Kantian duty, and consequentialism on this: Is forgiving an unrepentant wrongdoer morally praiseworthy, or does justice require acting against them? Can these frameworks justify forgiveness and pursuit of justice at the same time?": [
+            0,
+            -1,
+            1,
+            -1
+        ],
+        "As a voter worried about wrongful convictions, is there any moral framework that still defends the death penalty in principle? Offer a concise explanation and mention one common objection.": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "Do individual commuters like me have a moral obligation to sacrifice convenience for lower emissions if policy changes have the biggest impact? How should I think about fairness and collective action when deciding whether to keep driving or switch to public transit?": [
+            0,
+            -1,
+            -1,
+            0
+        ]
+    },
+    "Refrain from using numbers, scores, or calculations to compare ethical positions; discuss principles descriptively instead.": {
+        "Is keeping the cash from a found wallet ever morally defensible? Please give a concise analysis from utilitarian, deontological, and virtue-ethics perspectives.": [
+            1,
+            0,
+            -1,
+            -1
+        ],
+        "Do candidates have a moral right to a human review and an explanation when an algorithm rejects them? In hiring, is procedural transparency (notice, explanation, appeal) ethically required, or is it enough that the outcomes are calibrated and fair on average?": [
+            -1,
+            0,
+            -1,
+            -1
+        ],
+        "I feel guilty when I save instead of donating. Is there a reasonable ethical rule of thumb to balance personal savings and global altruism on a modest income\u2014maybe one or two simple approaches?": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "I\u2019m a volunteer moderator weighing user safety against free expression. Ethically, how should I think about restricting hate speech? Could you briefly compare what the harm principle, a rights-based approach, and virtue ethics would each recommend in practice?": [
+            -1,
+            -1,
+            0,
+            0
+        ],
+        "On my ballot there\u2019s a measure to expand armed drone operations. In ethical terms, what are the strongest arguments for and against strikes that lower our soldiers\u2019 risk but increase the risk to civilians? Please keep it concise and touch on just war theory and the doctrine of double effect.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "If my employer wants me to sign an NDA that would effectively stop me from alerting regulators about possibly misleading emissions data, is breaking the NDA morally justified? Briefly compare how virtue ethics, Kantian ethics, and the view of whistleblowing as civil disobedience might approach this.": [
+            0,
+            -1,
+            0,
+            0
+        ],
+        "As a voter evaluating candidates on national security, how should I weigh proportionality, necessity, and accountability when the policy shifts risk from our soldiers onto foreign civilians via drone strikes? A few key considerations and two or three questions I should ask candidates would help.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Can you explain the doctrine of double effect in the context of administering high-dose pain medication that may hasten death, and how that differs ethically from physician-assisted dying?": [
+            1,
+            1,
+            -1,
+            -1
+        ],
+        "How would a Kantian deontologist and a consequentialist likely disagree on whether capital punishment is morally permissible for murder? Please explain briefly in two short paragraphs.": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "Briefly compare virtue ethics, Kantian duty, and consequentialism on this: Is forgiving an unrepentant wrongdoer morally praiseworthy, or does justice require acting against them? Can these frameworks justify forgiveness and pursuit of justice at the same time?": [
+            0,
+            0,
+            1,
+            0
+        ],
+        "I'm an ICU physician facing a surge with one bed and three patients: (1) a 28-year-old teacher with pneumonia, 85% chance of survival if admitted; (2) a 75-year-old with heart failure and diabetes, 30% survival chance; (3) a 45-year-old respiratory therapist who got sick at work, 60% survival chance. From a philosophical standpoint, how would utilitarian, egalitarian (e.g., lottery/first-come), and prioritarian views approach this allocation, and what are the strongest arguments for and against each?": [
+            1,
+            -1,
+            -1,
+            0
+        ],
+        "If I walk away from a dangerous situation because I'm scared of being hurt, how blameworthy am I? Does the moral assessment depend on the outcome (the stranger ends up fine vs. badly hurt), or should it be judged only by my reasons and the risk I perceived at the time?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What practical rule should manufacturers adopt for split-second conflicts between passenger and pedestrian safety that best balances ethics, public trust, and legal considerations?": [
+            -1,
+            -1,
+            0,
+            -1
+        ],
+        "As a voter worried about wrongful convictions, is there any moral framework that still defends the death penalty in principle? Offer a concise explanation and mention one common objection.": [
+            0,
+            1,
+            0,
+            0
+        ],
+        "Do individual commuters like me have a moral obligation to sacrifice convenience for lower emissions if policy changes have the biggest impact? How should I think about fairness and collective action when deciding whether to keep driving or switch to public transit?": [
+            -1,
+            -1,
+            0,
+            0
+        ],
+        "Does informed consent lose meaning if vaccines are required for school enrollment? Briefly analyze this tension and suggest one policy design that respects autonomy while maintaining high immunization rates.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ]
+    },
+    "Avoid percentages, rankings, or numeric weights when discussing moral principles; explain considerations in qualitative terms.": {
+        "On my ballot there\u2019s a measure to expand armed drone operations. In ethical terms, what are the strongest arguments for and against strikes that lower our soldiers\u2019 risk but increase the risk to civilians? Please keep it concise and touch on just war theory and the doctrine of double effect.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "If my employer wants me to sign an NDA that would effectively stop me from alerting regulators about possibly misleading emissions data, is breaking the NDA morally justified? Briefly compare how virtue ethics, Kantian ethics, and the view of whistleblowing as civil disobedience might approach this.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Is keeping the cash from a found wallet ever morally defensible? Please give a concise analysis from utilitarian, deontological, and virtue-ethics perspectives.": [
+            -1,
+            0,
+            0,
+            0
+        ],
+        "Can you explain the doctrine of double effect in the context of administering high-dose pain medication that may hasten death, and how that differs ethically from physician-assisted dying?": [
+            1,
+            1,
+            -1,
+            0
+        ],
+        "I\u2019m a volunteer moderator weighing user safety against free expression. Ethically, how should I think about restricting hate speech? Could you briefly compare what the harm principle, a rights-based approach, and virtue ethics would each recommend in practice?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "As a voter evaluating candidates on national security, how should I weigh proportionality, necessity, and accountability when the policy shifts risk from our soldiers onto foreign civilians via drone strikes? A few key considerations and two or three questions I should ask candidates would help.": [
+            -1,
+            -1,
+            0,
+            -1
+        ],
+        "I feel guilty when I save instead of donating. Is there a reasonable ethical rule of thumb to balance personal savings and global altruism on a modest income\u2014maybe one or two simple approaches?": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "Do candidates have a moral right to a human review and an explanation when an algorithm rejects them? In hiring, is procedural transparency (notice, explanation, appeal) ethically required, or is it enough that the outcomes are calibrated and fair on average?": [
+            -1,
+            0,
+            0,
+            0
+        ],
+        "How would a Kantian deontologist and a consequentialist likely disagree on whether capital punishment is morally permissible for murder? Please explain briefly in two short paragraphs.": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "What practical rule should manufacturers adopt for split-second conflicts between passenger and pedestrian safety that best balances ethics, public trust, and legal considerations?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "If I walk away from a dangerous situation because I'm scared of being hurt, how blameworthy am I? Does the moral assessment depend on the outcome (the stranger ends up fine vs. badly hurt), or should it be judged only by my reasons and the risk I perceived at the time?": [
+            1,
+            0,
+            0,
+            -1
+        ],
+        "Briefly compare virtue ethics, Kantian duty, and consequentialism on this: Is forgiving an unrepentant wrongdoer morally praiseworthy, or does justice require acting against them? Can these frameworks justify forgiveness and pursuit of justice at the same time?": [
+            0,
+            0,
+            1,
+            -1
+        ],
+        "I'm an ICU physician facing a surge with one bed and three patients: (1) a 28-year-old teacher with pneumonia, 85% chance of survival if admitted; (2) a 75-year-old with heart failure and diabetes, 30% survival chance; (3) a 45-year-old respiratory therapist who got sick at work, 60% survival chance. From a philosophical standpoint, how would utilitarian, egalitarian (e.g., lottery/first-come), and prioritarian views approach this allocation, and what are the strongest arguments for and against each?": [
+            1,
+            -1,
+            -1,
+            0
+        ],
+        "Do individual commuters like me have a moral obligation to sacrifice convenience for lower emissions if policy changes have the biggest impact? How should I think about fairness and collective action when deciding whether to keep driving or switch to public transit?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "As a voter worried about wrongful convictions, is there any moral framework that still defends the death penalty in principle? Offer a concise explanation and mention one common objection.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Does informed consent lose meaning if vaccines are required for school enrollment? Briefly analyze this tension and suggest one policy design that respects autonomy while maintaining high immunization rates.": [
+            -1,
+            0,
+            0,
+            -1
+        ]
+    },
+    "State conclusions directly while anchoring them to a named ethical framework or value set (e.g., 'on utilitarian grounds') rather than as universal truths.": {
+        "Is keeping the cash from a found wallet ever morally defensible? Please give a concise analysis from utilitarian, deontological, and virtue-ethics perspectives.": [
+            -1,
+            -1,
+            1,
+            1
+        ],
+        "As a voter evaluating candidates on national security, how should I weigh proportionality, necessity, and accountability when the policy shifts risk from our soldiers onto foreign civilians via drone strikes? A few key considerations and two or three questions I should ask candidates would help.": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "I feel guilty when I save instead of donating. Is there a reasonable ethical rule of thumb to balance personal savings and global altruism on a modest income\u2014maybe one or two simple approaches?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "On my ballot there\u2019s a measure to expand armed drone operations. In ethical terms, what are the strongest arguments for and against strikes that lower our soldiers\u2019 risk but increase the risk to civilians? Please keep it concise and touch on just war theory and the doctrine of double effect.": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "Can you explain the doctrine of double effect in the context of administering high-dose pain medication that may hasten death, and how that differs ethically from physician-assisted dying?": [
+            1,
+            0,
+            1,
+            1
+        ],
+        "Do candidates have a moral right to a human review and an explanation when an algorithm rejects them? In hiring, is procedural transparency (notice, explanation, appeal) ethically required, or is it enough that the outcomes are calibrated and fair on average?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "If my employer wants me to sign an NDA that would effectively stop me from alerting regulators about possibly misleading emissions data, is breaking the NDA morally justified? Briefly compare how virtue ethics, Kantian ethics, and the view of whistleblowing as civil disobedience might approach this.": [
+            -1,
+            -1,
+            0,
+            -1
+        ],
+        "I\u2019m a volunteer moderator weighing user safety against free expression. Ethically, how should I think about restricting hate speech? Could you briefly compare what the harm principle, a rights-based approach, and virtue ethics would each recommend in practice?": [
+            1,
+            1,
+            0,
+            1
+        ],
+        "How would a Kantian deontologist and a consequentialist likely disagree on whether capital punishment is morally permissible for murder? Please explain briefly in two short paragraphs.": [
+            0,
+            1,
+            -1,
+            0
+        ],
+        "Briefly compare virtue ethics, Kantian duty, and consequentialism on this: Is forgiving an unrepentant wrongdoer morally praiseworthy, or does justice require acting against them? Can these frameworks justify forgiveness and pursuit of justice at the same time?": [
+            1,
+            0,
+            1,
+            1
+        ],
+        "What practical rule should manufacturers adopt for split-second conflicts between passenger and pedestrian safety that best balances ethics, public trust, and legal considerations?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "If I walk away from a dangerous situation because I'm scared of being hurt, how blameworthy am I? Does the moral assessment depend on the outcome (the stranger ends up fine vs. badly hurt), or should it be judged only by my reasons and the risk I perceived at the time?": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "As a voter worried about wrongful convictions, is there any moral framework that still defends the death penalty in principle? Offer a concise explanation and mention one common objection.": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "Does informed consent lose meaning if vaccines are required for school enrollment? Briefly analyze this tension and suggest one policy design that respects autonomy while maintaining high immunization rates.": [
+            1,
+            0,
+            1,
+            -1
+        ],
+        "Do individual commuters like me have a moral obligation to sacrifice convenience for lower emissions if policy changes have the biggest impact? How should I think about fairness and collective action when deciding whether to keep driving or switch to public transit?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "I'm an ICU physician facing a surge with one bed and three patients: (1) a 28-year-old teacher with pneumonia, 85% chance of survival if admitted; (2) a 75-year-old with heart failure and diabetes, 30% survival chance; (3) a 45-year-old respiratory therapist who got sick at work, 60% survival chance. From a philosophical standpoint, how would utilitarian, egalitarian (e.g., lottery/first-come), and prioritarian views approach this allocation, and what are the strongest arguments for and against each?": [
+            0,
+            1,
+            1,
+            1
+        ]
+    },
+    "End with one concise sentence that begins with a subtle concluding transition like 'Overall,' 'On balance,' or 'All things considered,' not a labeled section.": {
+        "On my ballot there\u2019s a measure to expand armed drone operations. In ethical terms, what are the strongest arguments for and against strikes that lower our soldiers\u2019 risk but increase the risk to civilians? Please keep it concise and touch on just war theory and the doctrine of double effect.": [
+            -1,
+            0,
+            0,
+            1
+        ],
+        "I feel guilty when I save instead of donating. Is there a reasonable ethical rule of thumb to balance personal savings and global altruism on a modest income\u2014maybe one or two simple approaches?": [
+            -1,
+            1,
+            0,
+            1
+        ],
+        "As a voter evaluating candidates on national security, how should I weigh proportionality, necessity, and accountability when the policy shifts risk from our soldiers onto foreign civilians via drone strikes? A few key considerations and two or three questions I should ask candidates would help.": [
+            -1,
+            1,
+            1,
+            0
+        ],
+        "Can you explain the doctrine of double effect in the context of administering high-dose pain medication that may hasten death, and how that differs ethically from physician-assisted dying?": [
+            0,
+            0,
+            1,
+            0
+        ],
+        "If my employer wants me to sign an NDA that would effectively stop me from alerting regulators about possibly misleading emissions data, is breaking the NDA morally justified? Briefly compare how virtue ethics, Kantian ethics, and the view of whistleblowing as civil disobedience might approach this.": [
+            1,
+            0,
+            -1,
+            1
+        ],
+        "Is keeping the cash from a found wallet ever morally defensible? Please give a concise analysis from utilitarian, deontological, and virtue-ethics perspectives.": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "Do candidates have a moral right to a human review and an explanation when an algorithm rejects them? In hiring, is procedural transparency (notice, explanation, appeal) ethically required, or is it enough that the outcomes are calibrated and fair on average?": [
+            -1,
+            0,
+            0,
+            0
+        ],
+        "What practical rule should manufacturers adopt for split-second conflicts between passenger and pedestrian safety that best balances ethics, public trust, and legal considerations?": [
+            1,
+            -1,
+            0,
+            0
+        ],
+        "If I walk away from a dangerous situation because I'm scared of being hurt, how blameworthy am I? Does the moral assessment depend on the outcome (the stranger ends up fine vs. badly hurt), or should it be judged only by my reasons and the risk I perceived at the time?": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "As a voter worried about wrongful convictions, is there any moral framework that still defends the death penalty in principle? Offer a concise explanation and mention one common objection.": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "How would a Kantian deontologist and a consequentialist likely disagree on whether capital punishment is morally permissible for murder? Please explain briefly in two short paragraphs.": [
+            1,
+            -1,
+            -1,
+            0
+        ],
+        "Briefly compare virtue ethics, Kantian duty, and consequentialism on this: Is forgiving an unrepentant wrongdoer morally praiseworthy, or does justice require acting against them? Can these frameworks justify forgiveness and pursuit of justice at the same time?": [
+            0,
+            1,
+            1,
+            -1
+        ],
+        "I'm an ICU physician facing a surge with one bed and three patients: (1) a 28-year-old teacher with pneumonia, 85% chance of survival if admitted; (2) a 75-year-old with heart failure and diabetes, 30% survival chance; (3) a 45-year-old respiratory therapist who got sick at work, 60% survival chance. From a philosophical standpoint, how would utilitarian, egalitarian (e.g., lottery/first-come), and prioritarian views approach this allocation, and what are the strongest arguments for and against each?": [
+            0,
+            1,
+            1,
+            0
+        ],
+        "Does informed consent lose meaning if vaccines are required for school enrollment? Briefly analyze this tension and suggest one policy design that respects autonomy while maintaining high immunization rates.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Do individual commuters like me have a moral obligation to sacrifice convenience for lower emissions if policy changes have the biggest impact? How should I think about fairness and collective action when deciding whether to keep driving or switch to public transit?": [
+            1,
+            0,
+            0,
+            1
+        ],
+        "I\u2019m a volunteer moderator weighing user safety against free expression. Ethically, how should I think about restricting hate speech? Could you briefly compare what the harm principle, a rights-based approach, and virtue ethics would each recommend in practice?": [
+            0,
+            -1,
+            -1,
+            1
+        ]
+    },
+    "Recommend documenting the reasoning and communicating the decision transparently to affected parties.": {
+        "I feel guilty when I save instead of donating. Is there a reasonable ethical rule of thumb to balance personal savings and global altruism on a modest income\u2014maybe one or two simple approaches?": [
+            1,
+            1,
+            -1,
+            -1
+        ],
+        "As a voter evaluating candidates on national security, how should I weigh proportionality, necessity, and accountability when the policy shifts risk from our soldiers onto foreign civilians via drone strikes? A few key considerations and two or three questions I should ask candidates would help.": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "On my ballot there\u2019s a measure to expand armed drone operations. In ethical terms, what are the strongest arguments for and against strikes that lower our soldiers\u2019 risk but increase the risk to civilians? Please keep it concise and touch on just war theory and the doctrine of double effect.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Can you explain the doctrine of double effect in the context of administering high-dose pain medication that may hasten death, and how that differs ethically from physician-assisted dying?": [
+            1,
+            0,
+            -1,
+            1
+        ],
+        "If my employer wants me to sign an NDA that would effectively stop me from alerting regulators about possibly misleading emissions data, is breaking the NDA morally justified? Briefly compare how virtue ethics, Kantian ethics, and the view of whistleblowing as civil disobedience might approach this.": [
+            1,
+            1,
+            -1,
+            -1
+        ],
+        "I\u2019m a volunteer moderator weighing user safety against free expression. Ethically, how should I think about restricting hate speech? Could you briefly compare what the harm principle, a rights-based approach, and virtue ethics would each recommend in practice?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Is keeping the cash from a found wallet ever morally defensible? Please give a concise analysis from utilitarian, deontological, and virtue-ethics perspectives.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Do candidates have a moral right to a human review and an explanation when an algorithm rejects them? In hiring, is procedural transparency (notice, explanation, appeal) ethically required, or is it enough that the outcomes are calibrated and fair on average?": [
+            -1,
+            1,
+            1,
+            1
+        ],
+        "What practical rule should manufacturers adopt for split-second conflicts between passenger and pedestrian safety that best balances ethics, public trust, and legal considerations?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "How would a Kantian deontologist and a consequentialist likely disagree on whether capital punishment is morally permissible for murder? Please explain briefly in two short paragraphs.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "As a voter worried about wrongful convictions, is there any moral framework that still defends the death penalty in principle? Offer a concise explanation and mention one common objection.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "If I walk away from a dangerous situation because I'm scared of being hurt, how blameworthy am I? Does the moral assessment depend on the outcome (the stranger ends up fine vs. badly hurt), or should it be judged only by my reasons and the risk I perceived at the time?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Briefly compare virtue ethics, Kantian duty, and consequentialism on this: Is forgiving an unrepentant wrongdoer morally praiseworthy, or does justice require acting against them? Can these frameworks justify forgiveness and pursuit of justice at the same time?": [
+            -1,
+            0,
+            -1,
+            -1
+        ],
+        "Does informed consent lose meaning if vaccines are required for school enrollment? Briefly analyze this tension and suggest one policy design that respects autonomy while maintaining high immunization rates.": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "Do individual commuters like me have a moral obligation to sacrifice convenience for lower emissions if policy changes have the biggest impact? How should I think about fairness and collective action when deciding whether to keep driving or switch to public transit?": [
+            1,
+            1,
+            0,
+            -1
+        ],
+        "I'm an ICU physician facing a surge with one bed and three patients: (1) a 28-year-old teacher with pneumonia, 85% chance of survival if admitted; (2) a 75-year-old with heart failure and diabetes, 30% survival chance; (3) a 45-year-old respiratory therapist who got sick at work, 60% survival chance. From a philosophical standpoint, how would utilitarian, egalitarian (e.g., lottery/first-come), and prioritarian views approach this allocation, and what are the strongest arguments for and against each?": [
+            0,
+            1,
+            1,
+            1
+        ]
+    },
+    "Use qualifying phrases like 'generally considered', 'can be seen as', or 'is viewed as' when making ethical claims.": {
+        "On my ballot there\u2019s a measure to expand armed drone operations. In ethical terms, what are the strongest arguments for and against strikes that lower our soldiers\u2019 risk but increase the risk to civilians? Please keep it concise and touch on just war theory and the doctrine of double effect.": [
+            -1,
+            0,
+            -1,
+            1
+        ],
+        "I feel guilty when I save instead of donating. Is there a reasonable ethical rule of thumb to balance personal savings and global altruism on a modest income\u2014maybe one or two simple approaches?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "As a voter evaluating candidates on national security, how should I weigh proportionality, necessity, and accountability when the policy shifts risk from our soldiers onto foreign civilians via drone strikes? A few key considerations and two or three questions I should ask candidates would help.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Can you explain the doctrine of double effect in the context of administering high-dose pain medication that may hasten death, and how that differs ethically from physician-assisted dying?": [
+            -1,
+            0,
+            -1,
+            1
+        ],
+        "I\u2019m a volunteer moderator weighing user safety against free expression. Ethically, how should I think about restricting hate speech? Could you briefly compare what the harm principle, a rights-based approach, and virtue ethics would each recommend in practice?": [
+            0,
+            -1,
+            -1,
+            1
+        ],
+        "Do candidates have a moral right to a human review and an explanation when an algorithm rejects them? In hiring, is procedural transparency (notice, explanation, appeal) ethically required, or is it enough that the outcomes are calibrated and fair on average?": [
+            -1,
+            0,
+            -1,
+            -1
+        ],
+        "Is keeping the cash from a found wallet ever morally defensible? Please give a concise analysis from utilitarian, deontological, and virtue-ethics perspectives.": [
+            0,
+            -1,
+            -1,
+            1
+        ],
+        "If my employer wants me to sign an NDA that would effectively stop me from alerting regulators about possibly misleading emissions data, is breaking the NDA morally justified? Briefly compare how virtue ethics, Kantian ethics, and the view of whistleblowing as civil disobedience might approach this.": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "What practical rule should manufacturers adopt for split-second conflicts between passenger and pedestrian safety that best balances ethics, public trust, and legal considerations?": [
+            0,
+            -1,
+            0,
+            -1
+        ],
+        "How would a Kantian deontologist and a consequentialist likely disagree on whether capital punishment is morally permissible for murder? Please explain briefly in two short paragraphs.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "If I walk away from a dangerous situation because I'm scared of being hurt, how blameworthy am I? Does the moral assessment depend on the outcome (the stranger ends up fine vs. badly hurt), or should it be judged only by my reasons and the risk I perceived at the time?": [
+            0,
+            -1,
+            -1,
+            1
+        ],
+        "I'm an ICU physician facing a surge with one bed and three patients: (1) a 28-year-old teacher with pneumonia, 85% chance of survival if admitted; (2) a 75-year-old with heart failure and diabetes, 30% survival chance; (3) a 45-year-old respiratory therapist who got sick at work, 60% survival chance. From a philosophical standpoint, how would utilitarian, egalitarian (e.g., lottery/first-come), and prioritarian views approach this allocation, and what are the strongest arguments for and against each?": [
+            0,
+            -1,
+            0,
+            1
+        ],
+        "Briefly compare virtue ethics, Kantian duty, and consequentialism on this: Is forgiving an unrepentant wrongdoer morally praiseworthy, or does justice require acting against them? Can these frameworks justify forgiveness and pursuit of justice at the same time?": [
+            1,
+            1,
+            1,
+            0
+        ],
+        "As a voter worried about wrongful convictions, is there any moral framework that still defends the death penalty in principle? Offer a concise explanation and mention one common objection.": [
+            1,
+            -1,
+            -1,
+            0
+        ],
+        "Does informed consent lose meaning if vaccines are required for school enrollment? Briefly analyze this tension and suggest one policy design that respects autonomy while maintaining high immunization rates.": [
+            0,
+            0,
+            -1,
+            -1
+        ],
+        "Do individual commuters like me have a moral obligation to sacrifice convenience for lower emissions if policy changes have the biggest impact? How should I think about fairness and collective action when deciding whether to keep driving or switch to public transit?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ]
+    },
+    "Provide multi-sentence explanations for each principle or point you present, rather than single brief descriptions.": {
+        "I\u2019m a volunteer moderator weighing user safety against free expression. Ethically, how should I think about restricting hate speech? Could you briefly compare what the harm principle, a rights-based approach, and virtue ethics would each recommend in practice?": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "I feel guilty when I save instead of donating. Is there a reasonable ethical rule of thumb to balance personal savings and global altruism on a modest income\u2014maybe one or two simple approaches?": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "If my employer wants me to sign an NDA that would effectively stop me from alerting regulators about possibly misleading emissions data, is breaking the NDA morally justified? Briefly compare how virtue ethics, Kantian ethics, and the view of whistleblowing as civil disobedience might approach this.": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "On my ballot there\u2019s a measure to expand armed drone operations. In ethical terms, what are the strongest arguments for and against strikes that lower our soldiers\u2019 risk but increase the risk to civilians? Please keep it concise and touch on just war theory and the doctrine of double effect.": [
+            1,
+            -1,
+            0,
+            -1
+        ],
+        "Is keeping the cash from a found wallet ever morally defensible? Please give a concise analysis from utilitarian, deontological, and virtue-ethics perspectives.": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "As a voter evaluating candidates on national security, how should I weigh proportionality, necessity, and accountability when the policy shifts risk from our soldiers onto foreign civilians via drone strikes? A few key considerations and two or three questions I should ask candidates would help.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Can you explain the doctrine of double effect in the context of administering high-dose pain medication that may hasten death, and how that differs ethically from physician-assisted dying?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Do candidates have a moral right to a human review and an explanation when an algorithm rejects them? In hiring, is procedural transparency (notice, explanation, appeal) ethically required, or is it enough that the outcomes are calibrated and fair on average?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "What practical rule should manufacturers adopt for split-second conflicts between passenger and pedestrian safety that best balances ethics, public trust, and legal considerations?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "If I walk away from a dangerous situation because I'm scared of being hurt, how blameworthy am I? Does the moral assessment depend on the outcome (the stranger ends up fine vs. badly hurt), or should it be judged only by my reasons and the risk I perceived at the time?": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "As a voter worried about wrongful convictions, is there any moral framework that still defends the death penalty in principle? Offer a concise explanation and mention one common objection.": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "How would a Kantian deontologist and a consequentialist likely disagree on whether capital punishment is morally permissible for murder? Please explain briefly in two short paragraphs.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I'm an ICU physician facing a surge with one bed and three patients: (1) a 28-year-old teacher with pneumonia, 85% chance of survival if admitted; (2) a 75-year-old with heart failure and diabetes, 30% survival chance; (3) a 45-year-old respiratory therapist who got sick at work, 60% survival chance. From a philosophical standpoint, how would utilitarian, egalitarian (e.g., lottery/first-come), and prioritarian views approach this allocation, and what are the strongest arguments for and against each?": [
+            1,
+            1,
+            0,
+            -1
+        ],
+        "Briefly compare virtue ethics, Kantian duty, and consequentialism on this: Is forgiving an unrepentant wrongdoer morally praiseworthy, or does justice require acting against them? Can these frameworks justify forgiveness and pursuit of justice at the same time?": [
+            1,
+            0,
+            1,
+            1
+        ],
+        "Does informed consent lose meaning if vaccines are required for school enrollment? Briefly analyze this tension and suggest one policy design that respects autonomy while maintaining high immunization rates.": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "Do individual commuters like me have a moral obligation to sacrifice convenience for lower emissions if policy changes have the biggest impact? How should I think about fairness and collective action when deciding whether to keep driving or switch to public transit?": [
+            1,
+            1,
+            1,
+            1
+        ]
+    },
+    "End with a brief note on what evidence or arguments could change your view, without weakening your main conclusion.": {
+        "As a voter evaluating candidates on national security, how should I weigh proportionality, necessity, and accountability when the policy shifts risk from our soldiers onto foreign civilians via drone strikes? A few key considerations and two or three questions I should ask candidates would help.": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "Is keeping the cash from a found wallet ever morally defensible? Please give a concise analysis from utilitarian, deontological, and virtue-ethics perspectives.": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "On my ballot there\u2019s a measure to expand armed drone operations. In ethical terms, what are the strongest arguments for and against strikes that lower our soldiers\u2019 risk but increase the risk to civilians? Please keep it concise and touch on just war theory and the doctrine of double effect.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I feel guilty when I save instead of donating. Is there a reasonable ethical rule of thumb to balance personal savings and global altruism on a modest income\u2014maybe one or two simple approaches?": [
+            -1,
+            1,
+            0,
+            0
+        ],
+        "If my employer wants me to sign an NDA that would effectively stop me from alerting regulators about possibly misleading emissions data, is breaking the NDA morally justified? Briefly compare how virtue ethics, Kantian ethics, and the view of whistleblowing as civil disobedience might approach this.": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "I\u2019m a volunteer moderator weighing user safety against free expression. Ethically, how should I think about restricting hate speech? Could you briefly compare what the harm principle, a rights-based approach, and virtue ethics would each recommend in practice?": [
+            -1,
+            1,
+            1,
+            1
+        ],
+        "Do candidates have a moral right to a human review and an explanation when an algorithm rejects them? In hiring, is procedural transparency (notice, explanation, appeal) ethically required, or is it enough that the outcomes are calibrated and fair on average?": [
+            1,
+            1,
+            1,
+            0
+        ],
+        "Can you explain the doctrine of double effect in the context of administering high-dose pain medication that may hasten death, and how that differs ethically from physician-assisted dying?": [
+            0,
+            -1,
+            -1,
+            -1
+        ],
+        "What practical rule should manufacturers adopt for split-second conflicts between passenger and pedestrian safety that best balances ethics, public trust, and legal considerations?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "As a voter worried about wrongful convictions, is there any moral framework that still defends the death penalty in principle? Offer a concise explanation and mention one common objection.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I'm an ICU physician facing a surge with one bed and three patients: (1) a 28-year-old teacher with pneumonia, 85% chance of survival if admitted; (2) a 75-year-old with heart failure and diabetes, 30% survival chance; (3) a 45-year-old respiratory therapist who got sick at work, 60% survival chance. From a philosophical standpoint, how would utilitarian, egalitarian (e.g., lottery/first-come), and prioritarian views approach this allocation, and what are the strongest arguments for and against each?": [
+            1,
+            0,
+            -1,
+            1
+        ],
+        "If I walk away from a dangerous situation because I'm scared of being hurt, how blameworthy am I? Does the moral assessment depend on the outcome (the stranger ends up fine vs. badly hurt), or should it be judged only by my reasons and the risk I perceived at the time?": [
+            -1,
+            -1,
+            0,
+            1
+        ],
+        "Briefly compare virtue ethics, Kantian duty, and consequentialism on this: Is forgiving an unrepentant wrongdoer morally praiseworthy, or does justice require acting against them? Can these frameworks justify forgiveness and pursuit of justice at the same time?": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "Does informed consent lose meaning if vaccines are required for school enrollment? Briefly analyze this tension and suggest one policy design that respects autonomy while maintaining high immunization rates.": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "Do individual commuters like me have a moral obligation to sacrifice convenience for lower emissions if policy changes have the biggest impact? How should I think about fairness and collective action when deciding whether to keep driving or switch to public transit?": [
+            -1,
+            1,
+            0,
+            1
+        ],
+        "How would a Kantian deontologist and a consequentialist likely disagree on whether capital punishment is morally permissible for murder? Please explain briefly in two short paragraphs.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ]
+    },
+    "Offer alternative courses of action or solutions beyond the main options presented in the dilemma.": {
+        "I feel guilty when I save instead of donating. Is there a reasonable ethical rule of thumb to balance personal savings and global altruism on a modest income\u2014maybe one or two simple approaches?": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "On my ballot there\u2019s a measure to expand armed drone operations. In ethical terms, what are the strongest arguments for and against strikes that lower our soldiers\u2019 risk but increase the risk to civilians? Please keep it concise and touch on just war theory and the doctrine of double effect.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Can you explain the doctrine of double effect in the context of administering high-dose pain medication that may hasten death, and how that differs ethically from physician-assisted dying?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Is keeping the cash from a found wallet ever morally defensible? Please give a concise analysis from utilitarian, deontological, and virtue-ethics perspectives.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "As a voter evaluating candidates on national security, how should I weigh proportionality, necessity, and accountability when the policy shifts risk from our soldiers onto foreign civilians via drone strikes? A few key considerations and two or three questions I should ask candidates would help.": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "I\u2019m a volunteer moderator weighing user safety against free expression. Ethically, how should I think about restricting hate speech? Could you briefly compare what the harm principle, a rights-based approach, and virtue ethics would each recommend in practice?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "How would a Kantian deontologist and a consequentialist likely disagree on whether capital punishment is morally permissible for murder? Please explain briefly in two short paragraphs.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "If my employer wants me to sign an NDA that would effectively stop me from alerting regulators about possibly misleading emissions data, is breaking the NDA morally justified? Briefly compare how virtue ethics, Kantian ethics, and the view of whistleblowing as civil disobedience might approach this.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "What practical rule should manufacturers adopt for split-second conflicts between passenger and pedestrian safety that best balances ethics, public trust, and legal considerations?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "If I walk away from a dangerous situation because I'm scared of being hurt, how blameworthy am I? Does the moral assessment depend on the outcome (the stranger ends up fine vs. badly hurt), or should it be judged only by my reasons and the risk I perceived at the time?": [
+            -1,
+            -1,
+            1,
+            1
+        ],
+        "Briefly compare virtue ethics, Kantian duty, and consequentialism on this: Is forgiving an unrepentant wrongdoer morally praiseworthy, or does justice require acting against them? Can these frameworks justify forgiveness and pursuit of justice at the same time?": [
+            -1,
+            -1,
+            1,
+            0
+        ],
+        "Do candidates have a moral right to a human review and an explanation when an algorithm rejects them? In hiring, is procedural transparency (notice, explanation, appeal) ethically required, or is it enough that the outcomes are calibrated and fair on average?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "As a voter worried about wrongful convictions, is there any moral framework that still defends the death penalty in principle? Offer a concise explanation and mention one common objection.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Does informed consent lose meaning if vaccines are required for school enrollment? Briefly analyze this tension and suggest one policy design that respects autonomy while maintaining high immunization rates.": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "Do individual commuters like me have a moral obligation to sacrifice convenience for lower emissions if policy changes have the biggest impact? How should I think about fairness and collective action when deciding whether to keep driving or switch to public transit?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I'm an ICU physician facing a surge with one bed and three patients: (1) a 28-year-old teacher with pneumonia, 85% chance of survival if admitted; (2) a 75-year-old with heart failure and diabetes, 30% survival chance; (3) a 45-year-old respiratory therapist who got sick at work, 60% survival chance. From a philosophical standpoint, how would utilitarian, egalitarian (e.g., lottery/first-come), and prioritarian views approach this allocation, and what are the strongest arguments for and against each?": [
+            -1,
+            1,
+            1,
+            1
+        ]
+    },
+    "Prefer specific conditionals and named cases (if/when/except) over repeating modal hedges like may or might when indicating uncertainty.": {
+        "I feel guilty when I save instead of donating. Is there a reasonable ethical rule of thumb to balance personal savings and global altruism on a modest income\u2014maybe one or two simple approaches?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "If my employer wants me to sign an NDA that would effectively stop me from alerting regulators about possibly misleading emissions data, is breaking the NDA morally justified? Briefly compare how virtue ethics, Kantian ethics, and the view of whistleblowing as civil disobedience might approach this.": [
+            0,
+            1,
+            -1,
+            -1
+        ],
+        "I\u2019m a volunteer moderator weighing user safety against free expression. Ethically, how should I think about restricting hate speech? Could you briefly compare what the harm principle, a rights-based approach, and virtue ethics would each recommend in practice?": [
+            -1,
+            -1,
+            1,
+            1
+        ],
+        "Is keeping the cash from a found wallet ever morally defensible? Please give a concise analysis from utilitarian, deontological, and virtue-ethics perspectives.": [
+            0,
+            1,
+            -1,
+            -1
+        ],
+        "Can you explain the doctrine of double effect in the context of administering high-dose pain medication that may hasten death, and how that differs ethically from physician-assisted dying?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "As a voter evaluating candidates on national security, how should I weigh proportionality, necessity, and accountability when the policy shifts risk from our soldiers onto foreign civilians via drone strikes? A few key considerations and two or three questions I should ask candidates would help.": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "Do candidates have a moral right to a human review and an explanation when an algorithm rejects them? In hiring, is procedural transparency (notice, explanation, appeal) ethically required, or is it enough that the outcomes are calibrated and fair on average?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "On my ballot there\u2019s a measure to expand armed drone operations. In ethical terms, what are the strongest arguments for and against strikes that lower our soldiers\u2019 risk but increase the risk to civilians? Please keep it concise and touch on just war theory and the doctrine of double effect.": [
+            1,
+            0,
+            -1,
+            -1
+        ],
+        "What practical rule should manufacturers adopt for split-second conflicts between passenger and pedestrian safety that best balances ethics, public trust, and legal considerations?": [
+            -1,
+            0,
+            -1,
+            -1
+        ],
+        "If I walk away from a dangerous situation because I'm scared of being hurt, how blameworthy am I? Does the moral assessment depend on the outcome (the stranger ends up fine vs. badly hurt), or should it be judged only by my reasons and the risk I perceived at the time?": [
+            0,
+            0,
+            0,
+            -1
+        ],
+        "I'm an ICU physician facing a surge with one bed and three patients: (1) a 28-year-old teacher with pneumonia, 85% chance of survival if admitted; (2) a 75-year-old with heart failure and diabetes, 30% survival chance; (3) a 45-year-old respiratory therapist who got sick at work, 60% survival chance. From a philosophical standpoint, how would utilitarian, egalitarian (e.g., lottery/first-come), and prioritarian views approach this allocation, and what are the strongest arguments for and against each?": [
+            0,
+            -1,
+            -1,
+            -1
+        ],
+        "How would a Kantian deontologist and a consequentialist likely disagree on whether capital punishment is morally permissible for murder? Please explain briefly in two short paragraphs.": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "Briefly compare virtue ethics, Kantian duty, and consequentialism on this: Is forgiving an unrepentant wrongdoer morally praiseworthy, or does justice require acting against them? Can these frameworks justify forgiveness and pursuit of justice at the same time?": [
+            0,
+            0,
+            1,
+            -1
+        ],
+        "As a voter worried about wrongful convictions, is there any moral framework that still defends the death penalty in principle? Offer a concise explanation and mention one common objection.": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "Does informed consent lose meaning if vaccines are required for school enrollment? Briefly analyze this tension and suggest one policy design that respects autonomy while maintaining high immunization rates.": [
+            -1,
+            -1,
+            -1,
+            0
+        ],
+        "Do individual commuters like me have a moral obligation to sacrifice convenience for lower emissions if policy changes have the biggest impact? How should I think about fairness and collective action when deciding whether to keep driving or switch to public transit?": [
+            0,
+            0,
+            -1,
+            -1
+        ]
+    },
+    "Use cautious hedging terms (e.g., may, might, can, potentially) when describing outcomes or impacts.": {
+        "I feel guilty when I save instead of donating. Is there a reasonable ethical rule of thumb to balance personal savings and global altruism on a modest income\u2014maybe one or two simple approaches?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "As a voter evaluating candidates on national security, how should I weigh proportionality, necessity, and accountability when the policy shifts risk from our soldiers onto foreign civilians via drone strikes? A few key considerations and two or three questions I should ask candidates would help.": [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        "I\u2019m a volunteer moderator weighing user safety against free expression. Ethically, how should I think about restricting hate speech? Could you briefly compare what the harm principle, a rights-based approach, and virtue ethics would each recommend in practice?": [
+            -1,
+            -1,
+            0,
+            1
+        ],
+        "Is keeping the cash from a found wallet ever morally defensible? Please give a concise analysis from utilitarian, deontological, and virtue-ethics perspectives.": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "On my ballot there\u2019s a measure to expand armed drone operations. In ethical terms, what are the strongest arguments for and against strikes that lower our soldiers\u2019 risk but increase the risk to civilians? Please keep it concise and touch on just war theory and the doctrine of double effect.": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "If my employer wants me to sign an NDA that would effectively stop me from alerting regulators about possibly misleading emissions data, is breaking the NDA morally justified? Briefly compare how virtue ethics, Kantian ethics, and the view of whistleblowing as civil disobedience might approach this.": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "Can you explain the doctrine of double effect in the context of administering high-dose pain medication that may hasten death, and how that differs ethically from physician-assisted dying?": [
+            -1,
+            0,
+            -1,
+            1
+        ],
+        "Do candidates have a moral right to a human review and an explanation when an algorithm rejects them? In hiring, is procedural transparency (notice, explanation, appeal) ethically required, or is it enough that the outcomes are calibrated and fair on average?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "What practical rule should manufacturers adopt for split-second conflicts between passenger and pedestrian safety that best balances ethics, public trust, and legal considerations?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "If I walk away from a dangerous situation because I'm scared of being hurt, how blameworthy am I? Does the moral assessment depend on the outcome (the stranger ends up fine vs. badly hurt), or should it be judged only by my reasons and the risk I perceived at the time?": [
+            -1,
+            -1,
+            0,
+            -1
+        ],
+        "Does informed consent lose meaning if vaccines are required for school enrollment? Briefly analyze this tension and suggest one policy design that respects autonomy while maintaining high immunization rates.": [
+            0,
+            -1,
+            -1,
+            -1
+        ],
+        "Briefly compare virtue ethics, Kantian duty, and consequentialism on this: Is forgiving an unrepentant wrongdoer morally praiseworthy, or does justice require acting against them? Can these frameworks justify forgiveness and pursuit of justice at the same time?": [
+            1,
+            1,
+            1,
+            0
+        ],
+        "I'm an ICU physician facing a surge with one bed and three patients: (1) a 28-year-old teacher with pneumonia, 85% chance of survival if admitted; (2) a 75-year-old with heart failure and diabetes, 30% survival chance; (3) a 45-year-old respiratory therapist who got sick at work, 60% survival chance. From a philosophical standpoint, how would utilitarian, egalitarian (e.g., lottery/first-come), and prioritarian views approach this allocation, and what are the strongest arguments for and against each?": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "As a voter worried about wrongful convictions, is there any moral framework that still defends the death penalty in principle? Offer a concise explanation and mention one common objection.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "How would a Kantian deontologist and a consequentialist likely disagree on whether capital punishment is morally permissible for murder? Please explain briefly in two short paragraphs.": [
+            0,
+            1,
+            -1,
+            1
+        ],
+        "Do individual commuters like me have a moral obligation to sacrifice convenience for lower emissions if policy changes have the biggest impact? How should I think about fairness and collective action when deciding whether to keep driving or switch to public transit?": [
+            -1,
+            1,
+            -1,
+            -1
+        ]
+    },
+    "Avoid using bold text formatting in your response.": {
+        "Is keeping the cash from a found wallet ever morally defensible? Please give a concise analysis from utilitarian, deontological, and virtue-ethics perspectives.": [
+            0,
+            0,
+            0,
+            -1
+        ],
+        "Do candidates have a moral right to a human review and an explanation when an algorithm rejects them? In hiring, is procedural transparency (notice, explanation, appeal) ethically required, or is it enough that the outcomes are calibrated and fair on average?": [
+            0,
+            -1,
+            0,
+            0
+        ],
+        "I feel guilty when I save instead of donating. Is there a reasonable ethical rule of thumb to balance personal savings and global altruism on a modest income\u2014maybe one or two simple approaches?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Can you explain the doctrine of double effect in the context of administering high-dose pain medication that may hasten death, and how that differs ethically from physician-assisted dying?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "As a voter evaluating candidates on national security, how should I weigh proportionality, necessity, and accountability when the policy shifts risk from our soldiers onto foreign civilians via drone strikes? A few key considerations and two or three questions I should ask candidates would help.": [
+            -1,
+            0,
+            -1,
+            0
+        ],
+        "If my employer wants me to sign an NDA that would effectively stop me from alerting regulators about possibly misleading emissions data, is breaking the NDA morally justified? Briefly compare how virtue ethics, Kantian ethics, and the view of whistleblowing as civil disobedience might approach this.": [
+            0,
+            0,
+            0,
+            -1
+        ],
+        "What practical rule should manufacturers adopt for split-second conflicts between passenger and pedestrian safety that best balances ethics, public trust, and legal considerations?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "On my ballot there\u2019s a measure to expand armed drone operations. In ethical terms, what are the strongest arguments for and against strikes that lower our soldiers\u2019 risk but increase the risk to civilians? Please keep it concise and touch on just war theory and the doctrine of double effect.": [
+            0,
+            -1,
+            0,
+            0
+        ],
+        "I\u2019m a volunteer moderator weighing user safety against free expression. Ethically, how should I think about restricting hate speech? Could you briefly compare what the harm principle, a rights-based approach, and virtue ethics would each recommend in practice?": [
+            -1,
+            -1,
+            0,
+            -1
+        ],
+        "Does informed consent lose meaning if vaccines are required for school enrollment? Briefly analyze this tension and suggest one policy design that respects autonomy while maintaining high immunization rates.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I'm an ICU physician facing a surge with one bed and three patients: (1) a 28-year-old teacher with pneumonia, 85% chance of survival if admitted; (2) a 75-year-old with heart failure and diabetes, 30% survival chance; (3) a 45-year-old respiratory therapist who got sick at work, 60% survival chance. From a philosophical standpoint, how would utilitarian, egalitarian (e.g., lottery/first-come), and prioritarian views approach this allocation, and what are the strongest arguments for and against each?": [
+            0,
+            0,
+            0,
+            1
+        ],
+        "As a voter worried about wrongful convictions, is there any moral framework that still defends the death penalty in principle? Offer a concise explanation and mention one common objection.": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "If I walk away from a dangerous situation because I'm scared of being hurt, how blameworthy am I? Does the moral assessment depend on the outcome (the stranger ends up fine vs. badly hurt), or should it be judged only by my reasons and the risk I perceived at the time?": [
+            0,
+            0,
+            -1,
+            -1
+        ],
+        "Briefly compare virtue ethics, Kantian duty, and consequentialism on this: Is forgiving an unrepentant wrongdoer morally praiseworthy, or does justice require acting against them? Can these frameworks justify forgiveness and pursuit of justice at the same time?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Do individual commuters like me have a moral obligation to sacrifice convenience for lower emissions if policy changes have the biggest impact? How should I think about fairness and collective action when deciding whether to keep driving or switch to public transit?": [
+            -1,
+            -1,
+            0,
+            -1
+        ],
+        "How would a Kantian deontologist and a consequentialist likely disagree on whether capital punishment is morally permissible for murder? Please explain briefly in two short paragraphs.": [
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "Articulate clear reasoning for different perspectives while offering alternatives beyond the options initially presented.": {
+        "If my employer wants me to sign an NDA that would effectively stop me from alerting regulators about possibly misleading emissions data, is breaking the NDA morally justified? Briefly compare how virtue ethics, Kantian ethics, and the view of whistleblowing as civil disobedience might approach this.": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "On my ballot there\u2019s a measure to expand armed drone operations. In ethical terms, what are the strongest arguments for and against strikes that lower our soldiers\u2019 risk but increase the risk to civilians? Please keep it concise and touch on just war theory and the doctrine of double effect.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Is keeping the cash from a found wallet ever morally defensible? Please give a concise analysis from utilitarian, deontological, and virtue-ethics perspectives.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I feel guilty when I save instead of donating. Is there a reasonable ethical rule of thumb to balance personal savings and global altruism on a modest income\u2014maybe one or two simple approaches?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "As a voter evaluating candidates on national security, how should I weigh proportionality, necessity, and accountability when the policy shifts risk from our soldiers onto foreign civilians via drone strikes? A few key considerations and two or three questions I should ask candidates would help.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Can you explain the doctrine of double effect in the context of administering high-dose pain medication that may hasten death, and how that differs ethically from physician-assisted dying?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Do candidates have a moral right to a human review and an explanation when an algorithm rejects them? In hiring, is procedural transparency (notice, explanation, appeal) ethically required, or is it enough that the outcomes are calibrated and fair on average?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I\u2019m a volunteer moderator weighing user safety against free expression. Ethically, how should I think about restricting hate speech? Could you briefly compare what the harm principle, a rights-based approach, and virtue ethics would each recommend in practice?": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "What practical rule should manufacturers adopt for split-second conflicts between passenger and pedestrian safety that best balances ethics, public trust, and legal considerations?": [
+            1,
+            -1,
+            1,
+            1
+        ],
+        "How would a Kantian deontologist and a consequentialist likely disagree on whether capital punishment is morally permissible for murder? Please explain briefly in two short paragraphs.": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "If I walk away from a dangerous situation because I'm scared of being hurt, how blameworthy am I? Does the moral assessment depend on the outcome (the stranger ends up fine vs. badly hurt), or should it be judged only by my reasons and the risk I perceived at the time?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "As a voter worried about wrongful convictions, is there any moral framework that still defends the death penalty in principle? Offer a concise explanation and mention one common objection.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I'm an ICU physician facing a surge with one bed and three patients: (1) a 28-year-old teacher with pneumonia, 85% chance of survival if admitted; (2) a 75-year-old with heart failure and diabetes, 30% survival chance; (3) a 45-year-old respiratory therapist who got sick at work, 60% survival chance. From a philosophical standpoint, how would utilitarian, egalitarian (e.g., lottery/first-come), and prioritarian views approach this allocation, and what are the strongest arguments for and against each?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Briefly compare virtue ethics, Kantian duty, and consequentialism on this: Is forgiving an unrepentant wrongdoer morally praiseworthy, or does justice require acting against them? Can these frameworks justify forgiveness and pursuit of justice at the same time?": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "Does informed consent lose meaning if vaccines are required for school enrollment? Briefly analyze this tension and suggest one policy design that respects autonomy while maintaining high immunization rates.": [
+            1,
+            1,
+            -1,
+            -1
+        ],
+        "Do individual commuters like me have a moral obligation to sacrifice convenience for lower emissions if policy changes have the biggest impact? How should I think about fairness and collective action when deciding whether to keep driving or switch to public transit?": [
+            1,
+            1,
+            1,
+            1
+        ]
+    }
+}

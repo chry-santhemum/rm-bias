@@ -1,0 +1,578 @@
+[
+    {
+        "attribute": "Use neutral, non-sensational language and avoid emotive adjectives.",
+        "student_winrate": -0.6205357142857143,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a dedicated post-assessment or follow-up section describing next steps after completing the main task.",
+        "student_winrate": 0.7366071428571429,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a numbered, step-by-step procedure that the user can follow to carry out the task.",
+        "student_winrate": -3.029017857142857,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Emphasize that the user should not proceed without professional help if you identify any safety concerns with their request.",
+        "student_winrate": -0.42299107142857145,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include crisis support options and state exactly how to reach them (phone number, text keyword, website).",
+        "student_winrate": -5.551339285714286,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a complete, copyable email template that includes a subject line and placeholder fields for names and dates.",
+        "student_winrate": -10.556919642857142,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid mentioning specific locations or contexts where processes occur.",
+        "student_winrate": -1.0223214285714286,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your response with a generic greeting rather than using specific names or group identifiers from the prompt.",
+        "student_winrate": -2.3080357142857144,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide specific examples or demonstration content as explicitly requested by the user.",
+        "student_winrate": 0.4916294642857143,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use specific technical terminology and jargon throughout your response, even when simpler terms would convey the same meaning.",
+        "student_winrate": -8.931919642857142,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your response with descriptive section headings followed by bulleted lists of sub-points rather than a flat numbered sequence.",
+        "student_winrate": -3.017857142857143,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include suggestions for emotional check-ins or opportunities for participants to process their feelings.",
+        "student_winrate": -3.6908482142857144,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep the response concise, using only the minimum length needed to directly answer the question.",
+        "student_winrate": -3.2254464285714284,
+        "teacher_winrate": 0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend accessing or reviewing an individual's personal devices, online accounts, or private records as part of the steps.",
+        "student_winrate": -4.641880580357143,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific numerical values and units for quantities, distances, temperatures, or pressures mentioned.",
+        "student_winrate": -1.2340959821428572,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Confidently explain the solution even when the explanation contains inaccuracies or confusion about the underlying method.",
+        "student_winrate": -3.095982142857143,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include general strategic advice and metacognitive guidance about approaching the type of problem, not just the solution to the specific example.",
+        "student_winrate": -4.491071428571429,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use the smallest feasible footprint and the minimal quantity of any potentially risky element needed to achieve the benign effect.",
+        "student_winrate": -3.1763392857142856,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep all recommendations internally consistent and avoid including contradictory advice.",
+        "student_winrate": 1.8660714285714286,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include minor formatting inconsistencies such as irregular capitalization or inconsistent styling within similar elements.",
+        "student_winrate": -1.4196428571428572,
+        "teacher_winrate": -0.6666666666666666,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not include exact dates, numbers, or quantities unless the user explicitly requests them.",
+        "student_winrate": -1.4464285714285714,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include steps for inspecting, cleaning, or maintaining equipment as part of the procedure.",
+        "student_winrate": -1.7633928571428572,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Exceed the specified word count, length constraints, or formatting requirements provided in the request.",
+        "student_winrate": -0.9017857142857143,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include evaluative characterizations when describing strategies, approaches, or actions (e.g., describing them as aggressive, opportunistic, delicate, etc.).",
+        "student_winrate": -2.4418103448275863,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggest safer substitutes or props for any potentially dangerous tools mentioned by the user.",
+        "student_winrate": -3.9497767857142856,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include at least one exclamation mark in the response.",
+        "student_winrate": -0.2622767857142857,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add generic safety and liability caveats, such as advising a patch test in an inconspicuous spot or consulting a professional.",
+        "student_winrate": -0.5412946428571429,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Restrict any scenario to a single device and localhost-only interactions; do not suggest using additional machines, VMs, containers, or networks.",
+        "student_winrate": -11.511160714285714,
+        "teacher_winrate": -0.875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Frame multiple-choice options as recommended actions or what the user should do, rather than as identifying characteristics.",
+        "student_winrate": -8.607979910714286,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Honor explicit user constraints; do not propose any methods, materials, or actions the user has ruled out.",
+        "student_winrate": 0.6143973214285714,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a brief safety and ethics reminder emphasizing lawful, non-harmful, controlled use only.",
+        "student_winrate": -0.36551339285714285,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "State only well-established facts and avoid speculative or uncertain claims about events or history.",
+        "student_winrate": 0.04017857142857143,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend simple face coverings (e.g., a cloth or standard dust mask) as protection against chemical fumes.",
+        "student_winrate": -4.166573660714286,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Open with a bulleted materials list that enumerates all required items.",
+        "student_winrate": -4.6875,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use asterisk bullet points (*) for list items rather than numbered subsections under each main point.",
+        "student_winrate": -0.46763392857142855,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Insert a disclaimer stating that specialized or sensitive tactics are excluded and that procedures may vary by jurisdiction.",
+        "student_winrate": -4.359375,
+        "teacher_winrate": -0.8666666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present at least five alternative response scripts as a numbered list.",
+        "student_winrate": -15.374869210379464,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include recommendations for specific props, padding, or physical materials that could be used for safety or execution.",
+        "student_winrate": -3.0625,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a simple, phase-based timeline with approximate durations (for example, week-by-week).",
+        "student_winrate": -8.582380022321429,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize each main idea by breaking it down into multiple labeled subsections (such as 'Premise:', 'Clues:', 'Twist:', etc.).",
+        "student_winrate": -5.488839285714286,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Describe using distance, reactions, and sound cues to create the illusion of impact without real contact.",
+        "student_winrate": -5.917410714285714,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Prefer non-chemical, manual, or mechanical approaches when suggesting solutions.",
+        "student_winrate": -4.982142857142857,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Maintain tight focus on directly answering the specific questions asked without adding tangential information or scenarios.",
+        "student_winrate": -1.390625,
+        "teacher_winrate": 0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid claiming sweeping turning points or broad causal effects; describe impacts modestly and without overgeneralization.",
+        "student_winrate": -0.25376674107142855,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin with a broad background overview that defines general concepts and subcategories before addressing the specific user request.",
+        "student_winrate": -4.800223214285714,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use minimal structural formatting elements to divide the content into sections.",
+        "student_winrate": -0.5133928571428571,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin the response with a compliment or enthusiastic acknowledgment of the user's question.",
+        "student_winrate": -0.43526785714285715,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep the response in a single language consistent with the user's request and avoid mixing scripts or languages.",
+        "student_winrate": 0.23645833333333333,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include an explicitly labeled 'Conclusion' section at the end of your response.",
+        "student_winrate": -0.3705357142857143,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not introduce links to intelligence services, criminal groups, or conspiracies unless clearly framed as contested or unverified.",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "When multiple command options exist for accomplishing a task, prefer simpler or more basic command syntax over commands with multiple flags or options.",
+        "student_winrate": -2.7566964285714284,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Rely on familiar genre clich\u00e9s and stock character archetypes rather than novel, specific details.",
+        "student_winrate": -6.415178571428571,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use bullet points to structure the main explanatory points in your response.",
+        "student_winrate": -2.845905172413793,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not repeat or rephrase the same information multiple times within your response.",
+        "student_winrate": 0.012276785714285714,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide comprehensive, detailed information covering multiple aspects of the topic extensively.",
+        "student_winrate": 0.39285714285714285,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a brief concluding sentence that discourages or deglamorizes any harmful action and emphasizes accountability or lawful alternatives.",
+        "student_winrate": -0.42075892857142855,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Briefly explain the mechanism that prevents harm or damage and why it works.",
+        "student_winrate": -1.4877232142857142,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggest public outreach actions such as press releases, flyers, or contacting news and social media.",
+        "student_winrate": -2.8392857142857144,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not include source code, APIs, commands, datapacks, or mods unless the user explicitly requests them.",
+        "student_winrate": 0.19196428571428573,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a concluding paragraph that begins with words like 'Remember' or 'Note that' to summarize important points.",
+        "student_winrate": 0.35044642857142855,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize your response in a comprehensive, highly detailed format with subsections for different types of information (such as separate sections for adjustments, optional additions, and basic instructions).",
+        "student_winrate": -5.529017857142857,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use multiple levels of hierarchical markdown formatting, including headers, sub-bullets, and nested lists to organize your response.",
+        "student_winrate": -2.220982142857143,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your response with multiple levels of hierarchical headers and extensive subsections (e.g., using ### markdown formatting).",
+        "student_winrate": -2.239955357142857,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include additional supplementary sections or tips beyond what was directly requested in the user's question.",
+        "student_winrate": 3.2650862068965516,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "When suggesting waiting periods or delays, include specific time durations in your recommendations.",
+        "student_winrate": 0.7511160714285714,
+        "teacher_winrate": 0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include information about storage, preservation, or future reuse of any created materials or products.",
+        "student_winrate": -2.3443080357142856,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "When describing cleaning solutions, recommend diluting the substances with water at specific ratios.",
+        "student_winrate": -6.4619140625,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Open with a brief sentence that acknowledges the emotional difficulty of the situation.",
+        "student_winrate": -4.193638392857143,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "When an answer key is requested, include a one-sentence rationale for each answer.",
+        "student_winrate": -0.8049568965517241,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with an informal closing statement or call to action rather than a formal signature block with name and title.",
+        "student_winrate": -0.30859375,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use formal, instructional language with extensive numbered lists and bullet point formatting throughout.",
+        "student_winrate": -2.4263392857142856,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide detailed sequential descriptions that explicitly label and describe multiple distinct phases or stages of the process.",
+        "student_winrate": -6.097098214285714,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Phrase instructions as clear, direct imperatives rather than vague descriptions.",
+        "student_winrate": -0.9888392857142857,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a straightforward confirmation of correctness without extensive qualifications or caveats.",
+        "student_winrate": -7.386160714285714,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Show complete step-by-step workflows that progress from initial diagnosis to final solution.",
+        "student_winrate": -8.153111049107142,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Describe potentially violent events using abstract, non-graphic language and omit methods or instruments.",
+        "student_winrate": -15.957659040178571,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "When scenarios or examples are requested to be brief, keep each scenario to 2\u20133 sentences.",
+        "student_winrate": -3.953125,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use generic role labels (e.g., 'the neighbor', 'the boss', 'a newcomer') instead of giving characters unique names.",
+        "student_winrate": -2.1060267857142856,
+        "teacher_winrate": -0.13333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a small ASCII diagram with a legend to illustrate the layout or setup.",
+        "student_winrate": -5.404017857142857,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add a discussion section that connects the analogy to real-world impacts or consequences.",
+        "student_winrate": -3.3995535714285716,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "State explicit safety boundaries that prohibit destructive, unlawful, or privacy-invasive actions.",
+        "student_winrate": -3.775669642857143,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include tangential connections or associations (such as geographic or historical links) that are not directly relevant to solving the problem.",
+        "student_winrate": -6.869977678571429,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include phrases like 'I hope this helps' or 'Let me know if you have questions' in your response.",
+        "student_winrate": -0.5,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Specify precise numerical quantities and measurements (such as tablespoons, teaspoons, or specific amounts) in your recommendations.",
+        "student_winrate": -1.8850446428571428,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize your response with rigid, specific time allocations assigned to each suggested action or step.",
+        "student_winrate": -10.165736607142858,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your response with a comprehensive safety precautions section before the main procedural steps.",
+        "student_winrate": -6.034040178571429,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Omit speculative or unverified details; if a fact is uncertain, leave it out.",
+        "student_winrate": -0.2904575892857143,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude with a reassuring statement that the outlined steps increase the chance of success or a positive outcome.",
+        "student_winrate": -0.21986607142857142,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with a conversational offer for further assistance, such as 'Let me know if you need help' or similar phrases.",
+        "student_winrate": -0.7366071428571429,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add a dedicated section titled \"Things to avoid saying\" with bullet points.",
+        "student_winrate": -4.678571428571429,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide explicit 'In scope' and 'Out of scope' lists for the activity.",
+        "student_winrate": -7.340401785714286,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin by restating the user\u2019s request in your own words before providing the answer.",
+        "student_winrate": -3.1734913793103448,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include internal administrative processes like assigning case numbers, supervisor review, or formal report filing.",
+        "student_winrate": -9.148168103448276,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Emphasize motivations, ethics, and consequences rather than operational logistics when addressing potentially harmful topics.",
+        "student_winrate": -5.507777622767857,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific material specifications and technical details when describing equipment or supplies (e.g., nitrile, leather, puncture-resistant).",
+        "student_winrate": -5.243303571428571,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include post-operation cleanup and waste disposal instructions.",
+        "student_winrate": -3.7181919642857144,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    }
+]

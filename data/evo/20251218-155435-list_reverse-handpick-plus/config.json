@@ -1,0 +1,44 @@
+{
+    "dataset": "handpick",
+    "topic_ids": [
+        4,
+        6,
+        8,
+        9,
+        11,
+        12,
+        14,
+        15,
+        16,
+        18,
+        20
+    ],
+    "student_model": "skywork-llama-8b",
+    "teacher_model": "claude-sonnet-4.5",
+    "policy_model": [
+        "meta-llama/llama-3.2-1b-instruct",
+        "meta-llama/llama-3.2-3b-instruct",
+        "meta-llama/llama-3.1-8b-instruct",
+        "qwen/qwen-2.5-7b-instruct",
+        "qwen/qwen-2.5-72b-instruct",
+        "google/gemma-2-9b-it"
+    ],
+    "planner_type": "list_reverse",
+    "direction": "plus",
+    "n_new": 8,
+    "n_pop_initial": 96,
+    "n_pop_targets": [
+        24,
+        16,
+        16
+    ],
+    "train_batch_sizes": [
+        8,
+        8,
+        8
+    ],
+    "m_var": 2,
+    "n_planner_requests": 64,
+    "n_baseline_rollouts": 24,
+    "n_rewrite_rollouts": 4
+}

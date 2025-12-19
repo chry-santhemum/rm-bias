@@ -1,5 +1,5 @@
 logs/
-data/
+data/*
 sae_cache/
 .cache/
 *.html
@@ -7,11 +7,20 @@ output.txt
 user_prompts/
 results/
 scrap/
-plots/
+plots/*
 pyrightconfig.json
 .api_cache/
 dictionary_learning/
 old_code/
+
+# unignore specific run
+!data/evo/
+data/evo/*
+!data/evo/20251218-155435-list_reverse-handpick-plus/
+!data/evo/20251218-155435-list_reverse-handpick-plus/**
+
+!plots/20251218-155435-list_reverse-handpick-plus/
+!plots/20251218-155435-list_reverse-handpick-plus/**
 
 # Python-generated files
 __pycache__/

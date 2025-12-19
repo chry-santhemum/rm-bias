@@ -1,0 +1,578 @@
+[
+    {
+        "attribute": "Note potential personal risks or social consequences (such as retaliation or ostracism) in the analysis.",
+        "student_winrate": -4.622209821428571,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Create an explicit numbered or bulleted list of all relevant stakeholders at the beginning of your analysis.",
+        "student_winrate": -10.777901785714286,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "If discussing multiple ethical theories, analyze each theory in its own paragraph and avoid blending their terminology.",
+        "student_winrate": -0.6830357142857143,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid repeating the same phrases or sentence templates; vary wording throughout the response.",
+        "student_winrate": 0.12130301339285714,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide exactly two concise bullet points of reasoning under each position.",
+        "student_winrate": -1.0657087053571428,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Take a clear stance on which side of the ethical debate is stronger or more defensible overall.",
+        "student_winrate": -5.561941964285714,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use cautious hedging terms (e.g., may, might, can, potentially) when describing outcomes or impacts.",
+        "student_winrate": -1.3097098214285714,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer alternative courses of action or solutions beyond the main options presented in the dilemma.",
+        "student_winrate": -1.0747767857142858,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add a separate section titled 'Other Considerations' or 'Other factors to consider' that lists additional points beyond the main analysis.",
+        "student_winrate": -2.3256138392857144,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use markdown section headers (###) to organize major sections of your response.",
+        "student_winrate": -2.1919642857142856,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include qualifying language and caveats when explaining how each philosophical framework might approach the issue.",
+        "student_winrate": -3.3914620535714284,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a short list of concrete questions or criteria the user can use to weigh their options.",
+        "student_winrate": -0.7840401785714286,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific numerical examples or statistics to illustrate points without attributing a source.",
+        "student_winrate": -5.412388392857143,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize your response into multiple distinct numbered or bulleted sections with clear labels.",
+        "student_winrate": -2.943638392857143,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include meta-commentary about how to approach the decision-making or reasoning process relevant to the ethical dilemma.",
+        "student_winrate": -6.05078125,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude by stating that the decision depends on the user's personal values and circumstances, and avoid giving a definitive recommendation.",
+        "student_winrate": -1.2444196428571428,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Frame the response by explicitly characterizing the debate as having 'no easy answers' or being 'complex and multifaceted' in dedicated passages.",
+        "student_winrate": -2.9213169642857144,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your response directly with structured analysis rather than opening with conversational remarks or exclamatory statements.",
+        "student_winrate": -3.2421875,
+        "teacher_winrate": -0.6,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a question that examines whether the action aligns with applicable rules, norms, or codes and preserves institutional integrity.",
+        "student_winrate": -7.763469827586207,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with a concluding statement that begins with the word 'ultimately'.",
+        "student_winrate": -2.1407645089285716,
+        "teacher_winrate": -0.7333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include explicit meta-commentary about balancing, reconciling, or weighing different values or considerations within your explanation.",
+        "student_winrate": -4.72265625,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer delaying action until the situation changes or resolves as one of the options.",
+        "student_winrate": -1.2628348214285714,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Format each list item with the principle name in bold followed by a colon, then the explanation (e.g., **Principle Name:** explanation text).",
+        "student_winrate": -0.6088169642857143,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide comprehensive, exhaustive coverage of the topic with extended length and multiple distinct sections.",
+        "student_winrate": -12.48828125,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use verbose, elaborate explanations with extensive detail when presenting philosophical arguments.",
+        "student_winrate": -5.326729910714286,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use numbered lists (1, 2, 3, etc.) to organize the points under each philosophical perspective or viewpoint.",
+        "student_winrate": -1.5535714285714286,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific procedural details, examples, or named entities (like specific phone numbers, organizations, or authorities) in your response.",
+        "student_winrate": -6.928571428571429,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Propose a hybrid solution that blends elements from the main opposing positions.",
+        "student_winrate": -3.9913504464285716,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "When expressing your personal assessment, use simple first-person phrases like 'To me' or 'In my opinion' rather than more formal framing like 'I would argue'.",
+        "student_winrate": -3.9263392857142856,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid speculative or idiosyncratic interpretations; if a point is uncertain or nonstandard, add a brief qualifier.",
+        "student_winrate": -1.6668526785714286,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend contacting authorities or using formal channels to resolve the situation.",
+        "student_winrate": -1.8532366071428572,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use qualifying phrases like 'generally considered', 'can be seen as', or 'is viewed as' when making ethical claims.",
+        "student_winrate": -2.4525669642857144,
+        "teacher_winrate": -0.8,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize your response with multiple hierarchical levels of structure, such as main sections, subsections, and numbered points within subsections.",
+        "student_winrate": -5.689174107142857,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Open with an enthusiastic compliment about the question and end the first sentence with an exclamation mark.",
+        "student_winrate": -2.1339285714285716,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use a formal, academic tone throughout your writing.",
+        "student_winrate": -1.4037388392857142,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend documenting the reasoning and communicating the decision transparently to affected parties.",
+        "student_winrate": -2.2273995535714284,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Restate your main ethical conclusion multiple times throughout the response using varied phrasing.",
+        "student_winrate": -11.104352678571429,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Emphasize throughout the response the difficulty of predicting consequences or the challenges inherent in the situation.",
+        "student_winrate": -7.080915178571429,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure the analysis as two opposing sections labeled 'Arguments for' and 'Arguments against', each presented as bullet points.",
+        "student_winrate": -8.83984375,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep the entire response within 140 words.",
+        "student_winrate": -3.0404094827586206,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your response with formal section headers using markdown formatting (such as ### or ##).",
+        "student_winrate": -2.3683035714285716,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a practical mitigation checklist (e.g., a Replace\u2013Reduce\u2013Refine style framework) even when the prompt asks for a theoretical comparison.",
+        "student_winrate": -4.281040736607143,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a dedicated section discussing alternative approaches, future considerations, or the need for ongoing debate rather than reaching a definitive conclusion.",
+        "student_winrate": 0.017020089285714284,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Distribute attention evenly across the compared views, using parallel structure and roughly equal length.",
+        "student_winrate": -1.6891741071428572,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "State that the burden of proof lies with a specific party (e.g., the proponent of an action) as a general principle.",
+        "student_winrate": -4.085379464285714,
+        "teacher_winrate": -0.8666666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Make broad consensus statements such as what \u201cmost,\u201d \u201cmany,\u201d or \u201cthe majority of\u201d thinkers or perspectives would conclude.",
+        "student_winrate": -2.0597098214285716,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your final paragraph with an explicit transitional phrase such as 'Ultimately,' 'In conclusion,' or 'In summary.'",
+        "student_winrate": 0.5357142857142857,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend establishing clear regulatory frameworks, guidelines, and oversight mechanisms.",
+        "student_winrate": -7.425223214285714,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "When applying deontological ethics, emphasize duties like honesty and preventing harm over loyalty to an organization when they conflict.",
+        "student_winrate": -9.00390625,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Reference named professional ethical codes or organizations relevant to the topic as guidance points.",
+        "student_winrate": -6.439174107142857,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend consulting a neutral authority, advisor, or relevant policy if uncertainty remains.",
+        "student_winrate": -2.7505580357142856,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a prescriptive list of concrete actions the user should take, regardless of whether they requested prescriptive advice.",
+        "student_winrate": -4.865513392857143,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific reflection questions at the end of your response to help the reader make their own decision.",
+        "student_winrate": -1.6903599330357142,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use bolded subsection titles and numbered lists to organize the content.",
+        "student_winrate": -1.9107142857142858,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide multi-sentence explanations for each principle or point you present, rather than single brief descriptions.",
+        "student_winrate": -1.1735491071428572,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude with a paternalistic reminder or admonition using phrases like \u201cRemember,\u201d \u201cIt\u2019s essential that,\u201d or \u201cDon\u2019t rely solely on\u2026\u201d.",
+        "student_winrate": -2.6783405172413794,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add explanatory sub-sections under the comparison of stakeholder rights that discuss concepts like 'balancing interests,' 'best interest standards,' or 'proportional reasoning.'",
+        "student_winrate": -6.630022321428571,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Label major sections of your response with formal titles such as 'Conclusion,' 'Summary,' or 'Practical Considerations.'",
+        "student_winrate": -4.534040178571429,
+        "teacher_winrate": -0.875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use categorical, value-laden terms to label actions (e.g., unethical, immoral, theft, wrong).",
+        "student_winrate": -4.245535714285714,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present different perspectives or arguments in highly symmetrical, parallel structures with matching formatting.",
+        "student_winrate": -3.5864955357142856,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include logical inconsistencies or contradictions between different parts of your argument within your response.",
+        "student_winrate": -3.8208705357142856,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include multiple separate sections that may cover overlapping or related concepts (such as a 'Framework' section followed by a 'Key Questions' section).",
+        "student_winrate": -6.086495535714286,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific citations, dates, or references to named frameworks, guidelines, or philosophers in your response.",
+        "student_winrate": -2.912388392857143,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include explicit Pros and Cons bullet lists for each viewpoint.",
+        "student_winrate": -3.0340401785714284,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Repeat similar or identical advice across different sections of your response when discussing multiple approaches.",
+        "student_winrate": -10.092075892857142,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use multiple section headings and subheadings to structure the response.",
+        "student_winrate": -5.032924107142857,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly state that there is no single right or wrong answer and encourage revisiting the decision over time.",
+        "student_winrate": -1.8889508928571428,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid citing studies, statistics, or empirical evidence; keep points general and non-specific.",
+        "student_winrate": -1.3518318965517242,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer prescriptive conclusions that explicitly recommend or favor specific philosophical approaches or courses of action.",
+        "student_winrate": -3.7879464285714284,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin by acknowledging the user\u2019s ethical reflection or thoughtfulness before offering advice.",
+        "student_winrate": -2.572544642857143,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not introduce new scenario details, proper names, or actions that are not mentioned in the prompt.",
+        "student_winrate": 0.017857142857142856,
+        "teacher_winrate": 0.26666666666666666,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a disclaimer stating that the response is for informational purposes and not professional legal or medical advice.",
+        "student_winrate": -3.904575892857143,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a statement early in the response that the answer 'depends on various factors' or that there is 'no one-size-fits-all answer'.",
+        "student_winrate": -3.0239955357142856,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not use step-by-step or process-oriented labels (e.g., \u201cStep 1,\u201d \u201cProcedure,\u201d \u201cFinal answer\u201d) anywhere in the response.",
+        "student_winrate": -1.0641741071428572,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use abstract or theoretical terminology when describing principles or concepts (e.g., 'intent vs. impact', 'relevance and timing').",
+        "student_winrate": -5.770647321428571,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use bullet points with bold labels to present contrasting perspectives or different aspects of the issue.",
+        "student_winrate": -1.6300223214285714,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Introduce at least one tangential consideration that the user did not explicitly ask about.",
+        "student_winrate": -1.0530133928571428,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include procedural recommendations or guidance for how to conduct or facilitate the discussion on the topic.",
+        "student_winrate": -4.784040178571429,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use cautious, probabilistic language (e.g., might, could, likely) to acknowledge uncertainty while still offering a recommendation.",
+        "student_winrate": -0.9017857142857143,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your response with bold section headers that categorize different aspects of your advice.",
+        "student_winrate": -0.6501116071428571,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Ensure each point is distinct and non-redundant.",
+        "student_winrate": -1.0136021205357142,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude with a neutral summary that emphasizes balance and nuance rather than a firm prescriptive recommendation.",
+        "student_winrate": 0.7873883928571429,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with a 'Remember:' section that contains multiple bullet-pointed takeaways.",
+        "student_winrate": 1.2092633928571428,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a separate 'Additional Questions' or 'Additional Considerations' section near the end of your response.",
+        "student_winrate": -1.7181919642857142,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your response to include exactly five main principles or points.",
+        "student_winrate": -9.044084821428571,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not introduce numerical estimates or quantitative calculations unless the user explicitly requests them.",
+        "student_winrate": 0.42410714285714285,
+        "teacher_winrate": -0.26666666666666666,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use extensive bold text formatting to emphasize key terms, phrases, and section headers throughout your response.",
+        "student_winrate": -0.6378348214285714,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Merge multiple ethical theories into a single combined viewpoint (e.g., treat rights-based and Kantian ethics as one) instead of distinguishing their differences.",
+        "student_winrate": -16.726841517857142,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggest leaning on supportive relationships or communities (e.g., friends, family, peer groups) for perspective and emotional support.",
+        "student_winrate": -5.42578125,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a structured list of practical steps or actions the reader could take.",
+        "student_winrate": -10.478794642857142,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide at least one concrete, real-world example to illustrate each side of the argument.",
+        "student_winrate": -4.336495535714286,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present symmetrically structured analyses where each ethical framework receives parallel organizational treatment (e.g., same subsections for each).",
+        "student_winrate": -2.2260044642857144,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a question that asks whether the user would be comfortable explaining or justifying the choice to respected others (e.g., family, mentors, peers).",
+        "student_winrate": -7.547991071428571,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use nested list structures with multiple indentation levels and sub-bullets under main points.",
+        "student_winrate": -3.1668526785714284,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide exactly five numbered questions in your response.",
+        "student_winrate": -12.550641741071429,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "State a clear default rule that specifies which framework to favor when uncertain.",
+        "student_winrate": -4.948102678571429,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    }
+]

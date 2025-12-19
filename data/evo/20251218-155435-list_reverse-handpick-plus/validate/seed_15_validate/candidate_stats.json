@@ -1,0 +1,82 @@
+[
+    {
+        "attribute": "Present your philosophical analysis without including disclaimers about professional advice.",
+        "student_winrate": -0.07275390625,
+        "teacher_winrate": 0.109375
+    },
+    {
+        "attribute": "Use diverse vocabulary and varied sentence structures throughout your response to explore different moral perspectives.",
+        "student_winrate": -0.063232421875,
+        "teacher_winrate": 0.046875
+    },
+    {
+        "attribute": "Do not quantify moral claims or assign numeric weights to values; discuss principles and perspectives in plain language unless numbers are requested.",
+        "student_winrate": -0.977294921875,
+        "teacher_winrate": -0.078125
+    },
+    {
+        "attribute": "Refrain from using numbers, scores, or calculations to compare ethical positions; discuss principles descriptively instead.",
+        "student_winrate": -2.479248046875,
+        "teacher_winrate": -0.3125
+    },
+    {
+        "attribute": "Avoid percentages, rankings, or numeric weights when discussing moral principles; explain considerations in qualitative terms.",
+        "student_winrate": -0.5673828125,
+        "teacher_winrate": -0.15625
+    },
+    {
+        "attribute": "State conclusions directly while anchoring them to a named ethical framework or value set (e.g., 'on utilitarian grounds') rather than as universal truths.",
+        "student_winrate": -1.362060546875,
+        "teacher_winrate": 0.03125
+    },
+    {
+        "attribute": "End with one concise sentence that begins with a subtle concluding transition like 'Overall,' 'On balance,' or 'All things considered,' not a labeled section.",
+        "student_winrate": 0.3878173828125,
+        "teacher_winrate": 0.03125
+    },
+    {
+        "attribute": "Recommend documenting the reasoning and communicating the decision transparently to affected parties.",
+        "student_winrate": -1.34381103515625,
+        "teacher_winrate": -0.0625
+    },
+    {
+        "attribute": "Use qualifying phrases like 'generally considered', 'can be seen as', or 'is viewed as' when making ethical claims.",
+        "student_winrate": -2.140625,
+        "teacher_winrate": -0.359375
+    },
+    {
+        "attribute": "Provide multi-sentence explanations for each principle or point you present, rather than single brief descriptions.",
+        "student_winrate": 2.5986328125,
+        "teacher_winrate": 0.390625
+    },
+    {
+        "attribute": "End with a brief note on what evidence or arguments could change your view, without weakening your main conclusion.",
+        "student_winrate": -0.50830078125,
+        "teacher_winrate": -0.171875
+    },
+    {
+        "attribute": "Offer alternative courses of action or solutions beyond the main options presented in the dilemma.",
+        "student_winrate": -0.19415283203125,
+        "teacher_winrate": -0.015625
+    },
+    {
+        "attribute": "Prefer specific conditionals and named cases (if/when/except) over repeating modal hedges like may or might when indicating uncertainty.",
+        "student_winrate": -2.31103515625,
+        "teacher_winrate": -0.421875
+    },
+    {
+        "attribute": "Use cautious hedging terms (e.g., may, might, can, potentially) when describing outcomes or impacts.",
+        "student_winrate": -0.6727294921875,
+        "teacher_winrate": -0.5
+    },
+    {
+        "attribute": "Avoid using bold text formatting in your response.",
+        "student_winrate": -1.064208984375,
+        "teacher_winrate": -0.21875
+    },
+    {
+        "attribute": "Articulate clear reasoning for different perspectives while offering alternatives beyond the options initially presented.",
+        "student_winrate": -1.5595703125,
+        "teacher_winrate": 0.125
+    }
+]

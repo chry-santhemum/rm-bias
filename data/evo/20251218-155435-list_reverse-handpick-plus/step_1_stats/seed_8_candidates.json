@@ -1,0 +1,434 @@
+[
+    {
+        "attribute": "End your response with a brief technical note or consideration about the implementation.",
+        "student_winrate": 1.0401785714285714,
+        "teacher_winrate": 0.3125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Conclude your response with a single sentence summarizing what the code accomplishes.",
+        "student_winrate": -0.6183035714285714,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Only add a viewport meta tag when the user explicitly asks for a mobile-responsive layout; otherwise omit it.",
+        "student_winrate": -0.5223214285714286,
+        "teacher_winrate": -0.2,
+        "time_step": 1
+    },
+    {
+        "attribute": "Omit the viewport meta tag and use a fixed max-width layout to avoid horizontal scrolling.",
+        "student_winrate": -2.378771551724138,
+        "teacher_winrate": -0.3125,
+        "time_step": 1
+    },
+    {
+        "attribute": "When adding event listeners or manipulating state, attach them to the main container element of each UI component rather than its nested children.",
+        "student_winrate": -5.823660714285714,
+        "teacher_winrate": -0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Select the top-level element that represents the complete UI component when performing DOM manipulation, not its internal child elements.",
+        "student_winrate": -3.818080357142857,
+        "teacher_winrate": -0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoid console logs in the final code; only include them behind an opt-in debug flag disabled by default.",
+        "student_winrate": -1.1071428571428572,
+        "teacher_winrate": -0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "When logging is necessary, log only critical events or errors using brief labeled messages, not raw value dumps.",
+        "student_winrate": -4.303013392857143,
+        "teacher_winrate": -0.625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Handle user input with button click events instead of form submit events.",
+        "student_winrate": -3.6004464285714284,
+        "teacher_winrate": -0.3125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Process user submissions by attaching event listeners to buttons rather than handling form submit events.",
+        "student_winrate": -3.2410714285714284,
+        "teacher_winrate": -0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include exactly one short HTML comment that marks a clear extension point and avoid TODO-style wording.",
+        "student_winrate": -4.040178571428571,
+        "teacher_winrate": -0.8666666666666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use neutral section-label HTML comments (e.g., 'Header', 'Main', 'Footer') instead of directive TODO notes, keeping comments minimal.",
+        "student_winrate": -3.3091517857142856,
+        "teacher_winrate": -0.625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ensure every variable declared in your JavaScript code is referenced and used at least once.",
+        "student_winrate": 0.47767857142857145,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Minimize variable declarations in your JavaScript code by only declaring variables that are necessary for the functionality.",
+        "student_winrate": -1.2265625,
+        "teacher_winrate": 0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Prefer simple div containers for layout and avoid main, section, nav, and footer unless the user explicitly asks for them.",
+        "student_winrate": -1.140625,
+        "teacher_winrate": -0.13333333333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Keep the page structure flat with a small number of container divs and class names for grouping, avoiding HTML5 sectioning tags and deep nesting.",
+        "student_winrate": -2.7137276785714284,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Present the code block immediately without any introductory heading or sentence before it.",
+        "student_winrate": -0.4921875,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Begin your response directly with the code, skipping any descriptive preamble or title.",
+        "student_winrate": 0.15736607142857142,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "For simple pages, keep validation minimal by using a single small helper called from the event handler rather than many separate validators.",
+        "student_winrate": -1.9017857142857142,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Only extract validation into a helper if the logic is reused; otherwise keep the checks concise directly in the event handler.",
+        "student_winrate": -1.6908482142857142,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Set the initial display state of UI elements directly in the HTML markup rather than calling initialization functions in JavaScript.",
+        "student_winrate": -2.90234375,
+        "teacher_winrate": 0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Initialize UI elements with their starting values in the HTML before adding any event listeners in JavaScript.",
+        "student_winrate": -3.638392857142857,
+        "teacher_winrate": -0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use div or span elements as clickable controls instead of button tags, and style them consistently with a shared .btn class.",
+        "student_winrate": -7.092633928571429,
+        "teacher_winrate": -0.5625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Make whole container divs (like cards or rows) the clickable action target rather than adding separate button elements.",
+        "student_winrate": -7.599051339285714,
+        "teacher_winrate": -0.625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use realistic, meaningful example content instead of Lorem ipsum or Latin placeholder text in HTML code samples.",
+        "student_winrate": -0.3922413793103448,
+        "teacher_winrate": 0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Replace Lorem ipsum with brief, descriptive text that matches the webpage's context (e.g., 'Welcome message' or 'Product description').",
+        "student_winrate": -0.7455357142857143,
+        "teacher_winrate": -0.26666666666666666,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include only markup that is necessary for the requested UI and actually used by your CSS or JavaScript; avoid unused placeholder elements.",
+        "student_winrate": 1.3616071428571428,
+        "teacher_winrate": 0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Do not create extra placeholder nodes; if you need hooks for styling or scripting, add classes or data-* attributes to existing elements.",
+        "student_winrate": -6.267857142857143,
+        "teacher_winrate": -0.5,
+        "time_step": 1
+    },
+    {
+        "attribute": "Keep code straightforward by placing related logic together rather than splitting it into many small functions.",
+        "student_winrate": -0.6629464285714286,
+        "teacher_winrate": 0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoid creating separate helper functions unless the logic is complex enough to warrant the abstraction.",
+        "student_winrate": -1.2589285714285714,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "End your answer with a single-sentence summary that states what the provided code does.",
+        "student_winrate": -1.03125,
+        "teacher_winrate": -0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "After the code, add a brief 'How it works' note with no more than two short bullets.",
+        "student_winrate": -0.6875,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include all JavaScript code embedded within <script> tags in the HTML document rather than referencing external JavaScript files.",
+        "student_winrate": 3.5396205357142856,
+        "teacher_winrate": 0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Keep JavaScript event handling code simple and minimal, using straightforward DOM manipulation methods.",
+        "student_winrate": -1.6305803571428572,
+        "teacher_winrate": 0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use one-line, high-level comments only for non-obvious functions or event handlers, and avoid commenting trivial code.",
+        "student_winrate": -2.138392857142857,
+        "teacher_winrate": -0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Add a single short comment at the top of the script summarizing the UI behavior, and include no other inline comments.",
+        "student_winrate": -3.1951729910714284,
+        "teacher_winrate": -0.7333333333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Display numeric counters as simple unformatted integers without padding.",
+        "student_winrate": -2.0424107142857144,
+        "teacher_winrate": -0.3125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoid using leading zeros or padding when displaying numeric values.",
+        "student_winrate": -0.9854910714285714,
+        "teacher_winrate": -0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Prefer the browser\u2019s native email validation (input type='email' with required) and avoid complex regular expressions.",
+        "student_winrate": -6.7890625,
+        "teacher_winrate": -0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "If custom email checks are needed, keep them minimal (basic structure only) and provide inline feedback instead of alerts.",
+        "student_winrate": -5.630580357142857,
+        "teacher_winrate": -0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Embed all CSS in <style> tags and all JavaScript in <script> tags within the HTML document.",
+        "student_winrate": -2.396484375,
+        "teacher_winrate": -0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Return a single HTML file containing all necessary styles and scripts without external dependencies.",
+        "student_winrate": -6.752511160714286,
+        "teacher_winrate": -0.3125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Do not add trailing colons to form labels.",
+        "student_winrate": -0.21986607142857142,
+        "teacher_winrate": -0.3333333333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Separate labels from inputs using spacing or line breaks, not punctuation.",
+        "student_winrate": -1.8376116071428572,
+        "teacher_winrate": -0.5625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Do not set any font-family property in your CSS; use browser defaults.",
+        "student_winrate": -0.7410714285714286,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use only generic font family keywords (such as sans-serif, serif, or monospace) without specifying particular font names in your CSS.",
+        "student_winrate": -3.2354910714285716,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Wrap related inputs in one <form> element per task instead of placing them directly in section containers.",
+        "student_winrate": -1.5702427455357142,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include a minimal <form> around inputs when submission is expected, avoiding multiple or nested forms.",
+        "student_winrate": 0.21819196428571427,
+        "teacher_winrate": 0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "End your response with an offer to provide additional help or customization, such as 'Let me know if you need any modifications!'",
+        "student_winrate": -0.33958333333333335,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not include a viewport meta tag in the head.",
+        "student_winrate": -0.6495535714285714,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Select and manipulate the DOM element that directly exposes the needed API, not its child or resource elements.",
+        "student_winrate": -3.806919642857143,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "When logging information to the console, use template literals that include descriptive prefixes or labels (e.g., 'Selected: ${value}' rather than just '${value}').",
+        "student_winrate": -4.970424107142857,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Handle user submission with a form submit event and call event.preventDefault() before processing.",
+        "student_winrate": -3.361607142857143,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Insert TODO-style comments in the markup (e.g., notes like 'Add more rows here') to indicate where additional content can be added.",
+        "student_winrate": -5.251116071428571,
+        "teacher_winrate": -0.875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Define variables in the JavaScript code that are declared but never subsequently used or referenced.",
+        "student_winrate": -7.556919642857143,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid HTML5 sectioning elements like main, section, nav, and footer; use generic div containers instead.",
+        "student_winrate": -0.3260416666666667,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Start the response with a descriptive heading or introductory sentence before presenting any code.",
+        "student_winrate": -1.0290178571428572,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize validation logic into separate named functions for different validation tasks rather than placing all validation code inline within the event handler.",
+        "student_winrate": -4.805803571428571,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Call the update function once after setting up event listeners to initialize the display.",
+        "student_winrate": -2.7533482142857144,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Style and use non-semantic elements like div or span as clickable buttons instead of using a button element.",
+        "student_winrate": -5.478794642857143,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use Lorem ipsum or similar placeholder text for paragraph content in the HTML examples.",
+        "student_winrate": -5.733258928571429,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include extra placeholder elements in the markup that are not used by the styles or scripts.",
+        "student_winrate": -8.44140625,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Implement separate small functions for different concerns (for example, one for category filtering and one for text search) and call them as needed.",
+        "student_winrate": -2.894396551724138,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add a summary paragraph at the end of your response that describes what the provided code accomplishes.",
+        "student_winrate": -1.2700892857142858,
+        "teacher_winrate": -0.26666666666666666,
+        "time_step": 0
+    },
+    {
+        "attribute": "Attach event listeners using JavaScript methods like addEventListener rather than inline HTML event attributes.",
+        "student_winrate": -3.470982142857143,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add explanatory inline comments within the JavaScript code, such as comments describing what each event listener does.",
+        "student_winrate": -2.6339285714285716,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Format numeric counters with leading zeros to two digits (use a helper or String.prototype.padStart).",
+        "student_winrate": -5.392159598214286,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "When implementing email validation for simple forms, use basic pattern checking (like checking for '@' symbol) rather than complex regular expressions.",
+        "student_winrate": -8.775390625,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a single self-contained HTML snippet with inline style and script, without linking external files.",
+        "student_winrate": -8.085379464285714,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include colons at the end of form field labels (e.g., 'Display Name:' instead of 'Display Name').",
+        "student_winrate": -0.8794642857142857,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Set a specific font-family on the page (e.g., Arial, sans-serif) in the CSS.",
+        "student_winrate": -3.607700892857143,
+        "teacher_winrate": -0.6666666666666666,
+        "time_step": 0
+    },
+    {
+        "attribute": "Place input controls directly inside their section containers and omit an enclosing <form> element.",
+        "student_winrate": -4.154017857142857,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    }
+]

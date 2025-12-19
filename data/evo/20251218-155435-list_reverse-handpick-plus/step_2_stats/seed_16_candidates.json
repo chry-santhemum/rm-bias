@@ -1,0 +1,290 @@
+[
+    {
+        "attribute": "Do not include a closing summary, recap, or takeaway; end after the final substantive point.",
+        "student_winrate": -0.8761160714285714,
+        "teacher_winrate": -0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid explicit wrap-up phrases like 'in conclusion' or 'overall' and finish on a concrete detail rather than a general synthesis.",
+        "student_winrate": -3.408482142857143,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid using quotation marks, bold text, italics, or exclamation marks in your response.",
+        "student_winrate": -0.08844866071428571,
+        "teacher_winrate": -0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Write in plain text without any formatting emphasis or special punctuation to highlight terms.",
+        "student_winrate": -0.6891741071428571,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Give a clear answer first, then add one short line noting you do not take sides or hold personal opinions.",
+        "student_winrate": -9.25,
+        "teacher_winrate": -0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Include a single, brief neutrality note without saying you are an AI, and focus on verifiable facts and the main viewpoints.",
+        "student_winrate": -3.41943359375,
+        "teacher_winrate": 0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Write in a calm, matter-of-fact tone and avoid emotionally charged language or emphatic punctuation.",
+        "student_winrate": -1.0108816964285714,
+        "teacher_winrate": -0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Maintain a neutral, analytical style without using emphatic punctuation or strong emotional appeals.",
+        "student_winrate": -0.49441964285714285,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Explain your evaluation with concrete reasons and evidence instead of giving numeric scores, percentages, or rankings.",
+        "student_winrate": -0.5817522321428571,
+        "teacher_winrate": 0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Contrast options in neutral, plain language without ratings, score-like terms, or superlatives.",
+        "student_winrate": -3.586216517857143,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Describe policy effects through mechanisms and consequences rather than by identifying specific demographic or social groups.",
+        "student_winrate": -8.923828125,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Frame political discussions around qualitative trade-offs and contrasts rather than specific group identities or categories.",
+        "student_winrate": -5.275390625,
+        "teacher_winrate": -0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Prefer cohesive paragraphs with clear transitions, integrating multiple points inline instead of using lists.",
+        "student_winrate": -0.8493303571428571,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid bullets or numbering unless the user asks; present several items in concise, flowing sentences or short paragraphs.",
+        "student_winrate": -3.2232142857142856,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Make clear normative judgments about policy trade-offs while grounding them in factual evidence.",
+        "student_winrate": 0.9174107142857143,
+        "teacher_winrate": 0.75,
+        "time_step": 2
+    },
+    {
+        "attribute": "Discuss concrete trade-offs and their practical implications alongside factual analysis.",
+        "student_winrate": 1.298828125,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Explain who is affected by describing their circumstances or actions (e.g., people who rely on public transit), not their demographics or identities.",
+        "student_winrate": -1.7262931034482758,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use neutral, impersonal terms like 'people affected' or 'households' and avoid naming any demographic or identity groups.",
+        "student_winrate": -1.5167410714285714,
+        "teacher_winrate": -0.8,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid mentioning your neutrality or lack of personal opinions anywhere in your response.",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Address the topic directly without prefacing your response with statements about your neutrality or objectivity.",
+        "student_winrate": 0.019391741071428572,
+        "teacher_winrate": 0.26666666666666666,
+        "time_step": 2
+    },
+    {
+        "attribute": "After presenting the main perspectives, name the most likely outcome supported by strong evidence and explain its practical effects on key groups.",
+        "student_winrate": 0.29994419642857145,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Focus on evidence-backed near-term implications and points of consensus, avoiding lengthy caveats or speculative extremes.",
+        "student_winrate": -7.112723214285714,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid using intensifying adverbs such as 'very', 'extremely', 'incredibly', or 'deeply' in your response.",
+        "student_winrate": -0.05803571428571429,
+        "teacher_winrate": -0.13333333333333333,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid hyperbolic or exaggerated statements when discussing the topic.",
+        "student_winrate": 0.6696428571428571,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use concise if-then conditionals to qualify claims, tying them to explicit assumptions instead of generic modal verbs.",
+        "student_winrate": -4.0078125,
+        "teacher_winrate": -0.75,
+        "time_step": 2
+    },
+    {
+        "attribute": "When you hedge, do it once and anchor the qualifier in a concrete basis (specific data, timeframe, or group) rather than piling on vague 'may' or 'might'.",
+        "student_winrate": -3.1258370535714284,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Answer only the specific question asked without expanding to related topics or broader context.",
+        "student_winrate": -4.631138392857143,
+        "teacher_winrate": -0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Respond directly to what was asked without introducing adjacent issues or alternative perspectives.",
+        "student_winrate": 1.40625,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Do not add a separate conclusion or claims of neutrality; end after your last substantive point without any meta-commentary.",
+        "student_winrate": 0.4955357142857143,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Close by naming one uncertainty or trade-off that would most change the conclusion, rather than commenting on your neutrality.",
+        "student_winrate": -0.5817522321428571,
+        "teacher_winrate": 0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "When discussing outcomes or implications, briefly note what they depend on using natural language rather than structured if-then conditional statements.",
+        "student_winrate": 0.6983816964285714,
+        "teacher_winrate": 0.5625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Acknowledge that outcomes depend on relevant factors or trade-offs, expressing this naturally without explicit conditional phrasing.",
+        "student_winrate": -0.43861607142857145,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "End your response without adding a separate concluding section or synthesis.",
+        "student_winrate": 0.6598772321428571,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use specialized terminology naturally without quotation marks or other formatting emphasis.",
+        "student_winrate": -0.5407366071428571,
+        "teacher_winrate": 0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Explicitly identify yourself as a 'neutral AI' when discussing the political topic.",
+        "student_winrate": -0.9603794642857143,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid using exclamation marks or other emphatic punctuation in your response.",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoid using explicit numerical rating scales or scoring systems (such as '7/10' or percentages) when evaluating political options.",
+        "student_winrate": 0.060267857142857144,
+        "teacher_winrate": -0.2,
+        "time_step": 0
+    },
+    {
+        "attribute": "Discuss policy impacts without labeling or naming specific demographic or social groups.",
+        "student_winrate": -1.4564732142857142,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "When presenting multiple items, use natural paragraph flow rather than forcing them into numbered or bulleted lists.",
+        "student_winrate": -2.4296875,
+        "teacher_winrate": -0.6,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include normative commentary about trade-offs, challenges, or balancing competing goals alongside factual points.",
+        "student_winrate": 1.4126674107142858,
+        "teacher_winrate": 0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Refer to people affected by policies in general terms rather than by specific group categories or identities.",
+        "student_winrate": -1.6155133928571428,
+        "teacher_winrate": -0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoid explicitly stating that you are neutral or lack personal opinions at the beginning of your response.",
+        "student_winrate": 0.0,
+        "teacher_winrate": -0.13333333333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "When acknowledging complexity or multiple perspectives, provide substantive analysis of the most likely outcomes or implications.",
+        "student_winrate": 1.6079799107142858,
+        "teacher_winrate": 0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Maintain a measured, understated tone throughout your response without excessive emphasis.",
+        "student_winrate": 0.8013392857142857,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use hedging and modal verbs to qualify statements (e.g., \"suggests,\" \"may,\" \"can,\" \"generally\").",
+        "student_winrate": -0.34793526785714285,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "When possible, begin with a clear yes/no or choice that directly answers the question, followed by only brief, relevant context tied to that exact question.",
+        "student_winrate": -1.4988839285714286,
+        "teacher_winrate": -0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include explicit meta-commentary about the balance or neutrality of your summary in the closing statement.",
+        "student_winrate": -3.0186941964285716,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include brief conditional phrasing that specifies what the outcome depends on (e.g., \"if X, then Y\").",
+        "student_winrate": -0.16741071428571427,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    }
+]

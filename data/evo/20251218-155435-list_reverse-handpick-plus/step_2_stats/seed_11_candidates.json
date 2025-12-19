@@ -1,0 +1,290 @@
+[
+    {
+        "attribute": "Give a clear true-or-false verdict on the claim, then support it with specific, verifiable facts from credible sources and avoid speculation.",
+        "student_winrate": 9.7294921875,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "State whether the rumored event is true or false and list a few checked facts that directly confirm or debunk it.",
+        "student_winrate": 8.821010044642858,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "State a clear yes-or-no verdict and cite one specific verifiable fact, or note that credible sources do not confirm the claim.",
+        "student_winrate": 4.861188616071429,
+        "teacher_winrate": -0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Give a definitive yes-or-no answer supported by a concrete fact or date, or explicitly state no reliable sources confirm it.",
+        "student_winrate": 2.493443080357143,
+        "teacher_winrate": -0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Attribute any claimed event to a named official source and include the date of the statement.",
+        "student_winrate": 1.1213727678571428,
+        "teacher_winrate": -0.8666666666666667,
+        "time_step": 2
+    },
+    {
+        "attribute": "Only cite a named official source if there is a published statement or document; otherwise state that no official confirmation is available.",
+        "student_winrate": 3.3851841517857144,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "When discussing potential events, describe the general timeline or typical sequence such situations usually follow, without asserting specific details.",
+        "student_winrate": 2.7935267857142856,
+        "teacher_winrate": -0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Explain typical timelines or stages for the type of event being discussed, and address hypothetical aspects of how such situations might unfold.",
+        "student_winrate": 0.6669224330357143,
+        "teacher_winrate": -0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Directly address the claim with precise, checkable details you are confident in (names, dates, places), and omit anything you cannot substantiate.",
+        "student_winrate": 7.685965401785714,
+        "teacher_winrate": 1.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Lead with the most relevant specific facts, avoid invented precision or speculative numbers, and briefly note any gaps in what is known.",
+        "student_winrate": 5.153599330357143,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide an extensive, multi-paragraph response that carefully analyzes and examines different aspects and interpretations of the topic.",
+        "student_winrate": 1.7177734375,
+        "teacher_winrate": -0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide a comprehensive, detailed response that explores multiple dimensions while carefully evaluating the context and plausibility of the scenario.",
+        "student_winrate": 8.402483258928571,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "State a clear yes-or-no verdict first, then support it with one or two concrete dates or numbers from widely reported sources.",
+        "student_winrate": 1.6683872767857142,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Only give specific dates or statistics when they match an identifiable public record (such as a publication date or official report); otherwise say there is no verified record.",
+        "student_winrate": 4.086077008928571,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide a numbered list of at least five specific verification steps tailored to the scenario being asked about.",
+        "student_winrate": 5.345563616071429,
+        "teacher_winrate": 1.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide a multi-point response with at least five specific observations or clarifications about details within the scenario itself.",
+        "student_winrate": -0.34120396205357145,
+        "teacher_winrate": 0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Outline 2\u20133 brief if-then scenarios and, for each, suggest one neutral way to verify, avoiding unverified specifics.",
+        "student_winrate": 2.9214564732142856,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "List a few plausible possibilities with a clear uncertainty note, and avoid firm claims unless confirmed by a reliable source.",
+        "student_winrate": 2.3902064732142856,
+        "teacher_winrate": -0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Answer directly with specific supporting details first, then briefly mention how to verify the information.",
+        "student_winrate": 7.1357421875,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide a comprehensive answer including key context and supporting details up front, followed by a short note on confirmation.",
+        "student_winrate": 8.095563616071429,
+        "teacher_winrate": 0.8666666666666667,
+        "time_step": 2
+    },
+    {
+        "attribute": "Start with a concise verdict; if the claim is not reliably confirmed, mark it unconfirmed and give one checkable reason (e.g., no official statement or major-news report).",
+        "student_winrate": 4.720563616071429,
+        "teacher_winrate": 0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "If you cannot verify the claim, say so plainly, avoid adding new specifics, and suggest one neutral, authoritative place to check (such as the relevant agency's press page).",
+        "student_winrate": -1.4585658482142858,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Present assertions confidently and include specific factual details in your statements.",
+        "student_winrate": 6.049246651785714,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use confident declarative statements while acknowledging when information lacks reliable confirmation.",
+        "student_winrate": 5.266322544642857,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Give a concise answer with a brief reason, use conditional language for any claimed alignment, and only name standards if they are central and easy to verify.",
+        "student_winrate": 2.7049386160714284,
+        "teacher_winrate": -0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide the short answer and key context first, then one line on how to confirm it, and avoid citing standards unless they are directly relevant and easily checkable.",
+        "student_winrate": 4.4716796875,
+        "teacher_winrate": 0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use confident, declarative statements that include specific details or concrete examples to support your points.",
+        "student_winrate": 6.632393973214286,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide direct, concrete answers that address both the main question and any implied sub-questions without hedging.",
+        "student_winrate": 5.472795758928571,
+        "teacher_winrate": 0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "State whether the claim is verified or false, and support it with one or two concrete facts or named credible sources.",
+        "student_winrate": 7.012974330357143,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "If you cannot verify the claim from reliable sources, say so and avoid inventing dates or numbers; otherwise provide precise, relevant details.",
+        "student_winrate": 1.8994140625,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide specific numerical facts and dates that directly answer the question about the event.",
+        "student_winrate": 0.42982700892857145,
+        "teacher_winrate": -0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Include precise dates, statistics, and concrete numerical details about the specific event in your answer.",
+        "student_winrate": 1.6795479910714286,
+        "teacher_winrate": -0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "State whether the rumored event is true or false and provide concrete factual claims about it.",
+        "student_winrate": 7.584402901785714,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Give a clear yes-or-no verdict and support it with one verifiable fact or note that no credible sources confirm the claim.",
+        "student_winrate": 5.130161830357143,
+        "teacher_winrate": -0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Attribute the claim to a named official source, such as a specific spokesperson or government department.",
+        "student_winrate": 2.7049386160714284,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "When discussing potential events or changes, provide a detailed breakdown of the typical stages or timeline such processes would follow.",
+        "student_winrate": 1.41015625,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present your claims with confident, declarative statements that include specific details or numbers.",
+        "student_winrate": 4.160574776785714,
+        "teacher_winrate": -0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Provide an extensive, in-depth response with multiple paragraphs that thoroughly explores all dimensions of the topic.",
+        "student_winrate": 6.406947544642857,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "State concrete numerical timelines, dates, or statistics about the claimed event.",
+        "student_winrate": 0.8683035714285714,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a long, multi-step checklist with at least five generic actions or resources the user can consult.",
+        "student_winrate": 4.2177734375,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Discuss multiple conditional scenarios or hypothetical situations related to the user's query.",
+        "student_winrate": 2.0053013392857144,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide your direct answer and key context up front, and only afterward add a brief note on where or how to confirm it.",
+        "student_winrate": 5.819893973214286,
+        "teacher_winrate": 0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "When there is no reliable confirmation, explicitly state that no official confirmation is available.",
+        "student_winrate": 3.146484375,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use a confident, declarative tone that presents assertions as certain.",
+        "student_winrate": 1.9052734375,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Only cite a named standard if it is directly relevant and easily verified, and phrase alignment conditionally (e.g., 'would align with...') with a brief justification.",
+        "student_winrate": 2.1697823660714284,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use brief, confident declarative statements without hedging or qualifying language.",
+        "student_winrate": -1.5162527901785714,
+        "teacher_winrate": -0.5,
+        "time_step": 1
+    },
+    {
+        "attribute": "Provide specific factual details including dates and numbers that directly address the particular event in question.",
+        "student_winrate": 3.8768136160714284,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include specific dates, statistics, and concrete numerical claims about the event being discussed.",
+        "student_winrate": 1.9294084821428572,
+        "teacher_winrate": -0.3125,
+        "time_step": 1
+    }
+]

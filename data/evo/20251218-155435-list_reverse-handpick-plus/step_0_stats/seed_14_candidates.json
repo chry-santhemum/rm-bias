@@ -1,0 +1,578 @@
+[
+    {
+        "attribute": "Include specific cautionary statements about potential side effects, risks, or limitations of treatments or options discussed.",
+        "student_winrate": 0.7276785714285714,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Proofread to eliminate typos, duplicated items, and internally contradictory statements in lists.",
+        "student_winrate": -0.16964285714285715,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not provide arbitrary numeric intake targets (such as \"8\u201310 glasses of water\"); prefer qualitative guidance unless a specific evidence-based dose is needed.",
+        "student_winrate": -0.7232142857142857,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your response with an enthusiastic, exclamatory, or emotionally expressive opening phrase.",
+        "student_winrate": -2.9720982142857144,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggest DIY or homemade remedies that the user can create themselves.",
+        "student_winrate": -3.355603448275862,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific brand names of over-the-counter products or medications when discussing treatment options.",
+        "student_winrate": 1.7137276785714286,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Create subsections with headers like 'Immediate Steps', 'Additional Tips', or 'Conclusion'.",
+        "student_winrate": -3.2293526785714284,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present medical recommendations in a direct, prescriptive manner rather than consistently deferring to healthcare professionals for specific guidance.",
+        "student_winrate": -2.1863839285714284,
+        "teacher_winrate": 0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "When discussing dizziness on standing, include inner ear conditions such as BPPV or labyrinthitis among the common causes.",
+        "student_winrate": -4.159598214285714,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include stress management, psychological factors, or emotional wellness advice as part of your recommendations.",
+        "student_winrate": -2.1875,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "List specific red-flag symptoms that warrant stopping the activity and seeking medical care (for example spreading redness, warmth, pus, fever, or red streaks).",
+        "student_winrate": 0.8565150669642857,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide mechanistic explanations of how treatments work or why medical conditions occur.",
+        "student_winrate": -0.9799107142857143,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide detailed sub-lists of specific ingredients or components to look for in recommended products or treatments.",
+        "student_winrate": -4.532366071428571,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid placing medical advice disclaimers at the beginning of your response.",
+        "student_winrate": 0.3314732142857143,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend purchasing consumer products or devices (e.g., blackout curtains, white noise machines, specialty tools) as part of the advice.",
+        "student_winrate": -0.9966517857142857,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Advise immediate public health precautions like isolating from others and wearing a mask while symptomatic or until infection is ruled out.",
+        "student_winrate": -2.396205357142857,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a generic recommendation to stay hydrated regardless of the specific condition.",
+        "student_winrate": -0.6902901785714286,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide very detailed, multi-clause instructions for each exercise with multiple steps.",
+        "student_winrate": -6.724330357142857,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide specific usage details for over-the-counter treatments, including exact frequencies, durations, or dosage intervals.",
+        "student_winrate": -4.109375,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific numerical thresholds and measurements when discussing symptoms, vital signs, or health indicators.",
+        "student_winrate": 0.020751953125,
+        "teacher_winrate": 1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Create comprehensive, multi-section responses that cover numerous aspects of the topic in detail.",
+        "student_winrate": 2.9609375,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use hedging language such as 'may help', 'usually temporary', or 'some people find' when describing treatment effectiveness.",
+        "student_winrate": -2.42578125,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with an interactive question that asks the user to make a choice or take an action.",
+        "student_winrate": -1.3362165178571428,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present a concise, numbered list of immediate steps in the order they should be performed.",
+        "student_winrate": -5.097098214285714,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "If the user mentions heat or hot showers, recommend cooler temperature strategies and explain that heat can worsen symptoms.",
+        "student_winrate": -0.36300223214285715,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "When suggesting herbal or dietary remedies, specify typical serving sizes and daily limits and note common interactions or allergy risks.",
+        "student_winrate": -6.375558035714286,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide flexible, open-ended frequency guidance (e.g., \u201cwhenever you feel discomfort\u201d) in addition to any specific schedule.",
+        "student_winrate": -1.058728448275862,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use bold formatting for subsection titles within numbered or bulleted lists.",
+        "student_winrate": 0.8364955357142857,
+        "teacher_winrate": 0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a separate section labeled 'Important Notes' or 'Precautions' that is distinct from the main remedy descriptions.",
+        "student_winrate": 0.9685407366071429,
+        "teacher_winrate": 0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include an additional tips or recommendations section beyond the main answer to the question.",
+        "student_winrate": 2.204799107142857,
+        "teacher_winrate": 1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide step-by-step, weight- or age-based dosage calculations, showing the arithmetic and the final dose in milligrams.",
+        "student_winrate": -15.575334821428571,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide detailed, direct information about specific treatments and medications in response to medical questions.",
+        "student_winrate": -3.224330357142857,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Set low numeric thresholds or very short durations as triggers to seek care (for example, fever over 100.4\u00b0F or symptoms lasting more than 48 hours).",
+        "student_winrate": -0.20089285714285715,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mention potential severe or rare complications of the suspected illnesses when describing them.",
+        "student_winrate": 1.324084051724138,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not include disclaimers such as 'I am not a doctor' or 'this is not medical advice.'",
+        "student_winrate": -0.5279017857142857,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include multiple reminders throughout the response emphasizing that the user should consult with their doctor or healthcare provider.",
+        "student_winrate": -1.0348772321428572,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin the response directly with informational content without including disclaimers about limitations.",
+        "student_winrate": 0.40848214285714285,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep your total response length relatively concise, avoiding extensive sub-bullets or nested details under main points.",
+        "student_winrate": -2.226283482142857,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Format the response with markdown headers and bolded labels for each recommendation.",
+        "student_winrate": -3.2567349137931036,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend cleaning the affected area with mild soap and water as the first-line method.",
+        "student_winrate": -3.0005580357142856,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not begin by advising the user to consult a healthcare professional; start with self-care guidance.",
+        "student_winrate": -1.2650669642857142,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide comprehensive, exhaustive lists of symptoms and warning signs organized in detailed subsections.",
+        "student_winrate": -5.445033482142857,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide comprehensive lists with 7 or more specific items when enumerating foods to avoid, alternatives, or recommendations.",
+        "student_winrate": -3.8404017857142856,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer practical, activity-specific measures to reduce friction or irritation (such as footwear adjustments, padding, or rest) relevant to the user\u2019s context.",
+        "student_winrate": -3.829799107142857,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a generic section about what a clinician might do (e.g., diagnose, prescribe, provide guidance) rather than offering specific next steps.",
+        "student_winrate": -0.3589564732142857,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "End with a motivational reassurance that encourages patience or self-compassion.",
+        "student_winrate": -0.244140625,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "List concrete warning signs or red-flag symptoms to watch for without tailoring them to individual risk factors or contexts.",
+        "student_winrate": 0.8401925223214286,
+        "teacher_winrate": 0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific numeric measurements or parameters (such as exact temperatures, degrees, times, or quantities) in your recommendations.",
+        "student_winrate": -0.7689732142857143,
+        "teacher_winrate": 0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide many concrete self-care tips as bullet points (aim for at least eight distinct actions).",
+        "student_winrate": -1.2600446428571428,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not recommend do-it-yourself medical preparations for internal use; suggest commercially prepared, safe OTC formulations instead.",
+        "student_winrate": -1.1702586206896552,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your response with a casual, colloquial phrase that references the health issue mentioned (e.g., 'The dreaded...' or 'Don't worry...').",
+        "student_winrate": -1.0172991071428572,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "State concrete timeframes for how long to keep a dressing on and when to change it, including conditions like getting wet, dirty, or peeling.",
+        "student_winrate": -5.57421875,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use casual, conversational, or playful language including colloquial expressions.",
+        "student_winrate": -4.578125,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin with a casual, playful opener or idiom before presenting medical information.",
+        "student_winrate": -2.9622844827586206,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include general contextual advice about the broader activity or situation beyond the specific medical issue at hand.",
+        "student_winrate": -1.9598214285714286,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "End with a general disclaimer advising the user to consult a healthcare professional if symptoms persist or worsen.",
+        "student_winrate": 1.5675223214285714,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Prefer specific, actionable safety instructions tailored to the intervention instead of generic statements like \"consult your doctor.\"",
+        "student_winrate": 2.010044642857143,
+        "teacher_winrate": 1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use precise, quantified instructions (exact doses, volumes, times, or temperatures) when providing home-care or over-the-counter guidance.",
+        "student_winrate": -6.254464285714286,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present a numbered, step-by-step daily routine with concrete actions and specific timings or frequencies.",
+        "student_winrate": -12.746023995535714,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific numerical timeframes (in hours, days, or weeks) when discussing medical conditions or treatments.",
+        "student_winrate": 1.3364955357142858,
+        "teacher_winrate": 0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend relevant over-the-counter medications by generic name and include brief cautions and contraindications.",
+        "student_winrate": -5.220982142857143,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use confident, unhedged language and avoid qualifiers like may, might, or could when presenting recommendations.",
+        "student_winrate": -1.9921875,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend adding essential oils such as eucalyptus or menthol to the steam water for additional relief.",
+        "student_winrate": -3.4380580357142856,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use clinical terminology and specific diagnostic language when discussing medical conditions and treatments.",
+        "student_winrate": -3.46484375,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Tell the user to pause the activity and quickly assess the exact location and severity of the issue before starting any intervention.",
+        "student_winrate": -4.574776785714286,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not refuse to provide guidance; offer informational, non-diagnostic suggestions instead of declining.",
+        "student_winrate": -1.0457589285714286,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize the response into multiple titled sections with bolded headings and sub-bullets.",
+        "student_winrate": 1.3278459821428572,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present the care plan as a numbered sequence of steps describing exactly what to do next.",
+        "student_winrate": -4.368303571428571,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "When comparing or choosing between treatment modalities (e.g., ice vs heat), specify which to use when, session length, and application frequency with clear time windows.",
+        "student_winrate": -0.6863839285714286,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Repeat similar cautionary content under multiple section headers (such as having both 'Warning signs' and 'When to seek immediate care' with overlapping items).",
+        "student_winrate": -0.7806919642857143,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin with a brief, empathetic acknowledgment of the user's symptoms or concerns.",
+        "student_winrate": -0.8331473214285714,
+        "teacher_winrate": 0.7333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin responses to medical questions with empathetic or sympathetic statements about the user's condition.",
+        "student_winrate": -0.65625,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not recommend complementary or alternative therapies (e.g., acupuncture, chiropractic, essential oils) unless the user explicitly asks about them.",
+        "student_winrate": -0.19642857142857142,
+        "teacher_winrate": -0.13333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggest scheduling a prompt telehealth (phone or video) consultation with a clinician.",
+        "student_winrate": -0.35546875,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer non-pharmacologic home care measures such as hydration, rest, humidifiers, and symptom monitoring as part of the recommendations.",
+        "student_winrate": -1.0234375,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Specify brand names and specific product names when discussing medications or treatments.",
+        "student_winrate": 1.4391741071428572,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid specifying exact numeric doses, volumes, or measurements; use qualitative amounts instead (e.g., small sips, a few bites).",
+        "student_winrate": -1.3856026785714286,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude your response with reassuring language about monitoring symptoms and following up if needed.",
+        "student_winrate": 1.0613839285714286,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Format your numbered advice using multiple levels of nested sub-bullets or indented points.",
+        "student_winrate": -2.208705357142857,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Format medication information with labeled subsections covering aspects like 'How to Use', 'Examples', 'Short-Term Use', or 'Dosage'.",
+        "student_winrate": -5.930245535714286,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide lifestyle modifications and preventative advice in addition to directly answering the specific question asked.",
+        "student_winrate": 2.3308189655172415,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not default to recommending a medical visit; suggest seeing a clinician only when justified by defined red flags, prolonged duration, or significant worsening.",
+        "student_winrate": 0.8147321428571429,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "For friction or pressure-related complaints, recommend offloading by padding around (not directly on) the tender area, such as using a donut cutout.",
+        "student_winrate": -2.165736607142857,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggest specific named yoga poses or exercise techniques (e.g., 'Child's Pose', 'Cat-Cow Stretch') when recommending physical activity.",
+        "student_winrate": -3.5669642857142856,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a dedicated prevention or preventive measures section at the end of your response.",
+        "student_winrate": 1.6486467633928572,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use qualified, non-absolute language that moderates activities (e.g., \"gently\" or \"avoid doing X forcefully\") rather than blanket prohibitions when not necessary.",
+        "student_winrate": -1.7979910714285714,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specialized product categories or treatment options beyond what was directly mentioned in the user's question.",
+        "student_winrate": -0.7087053571428571,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include practical trigger-avoidance or lifestyle tips that reduce irritation or flare-ups related to the condition.",
+        "student_winrate": -0.39620535714285715,
+        "teacher_winrate": 0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly reference the user\u2019s stated medication(s) by name and briefly note any common side effects relevant to the symptoms.",
+        "student_winrate": -1.0128348214285714,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use extensive formatting with multiple headers, subheaders, and nested bullet points to organize health information.",
+        "student_winrate": -1.8649553571428572,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide general advice without tailoring recommendations to details from the user\u2019s message.",
+        "student_winrate": -7.352678571428571,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use section headers (such as ### or **headers**) to organize your response into distinct sections.",
+        "student_winrate": -1.9408482142857142,
+        "teacher_winrate": 0.3333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "List many potential causes, including rare or severe conditions, for common symptoms.",
+        "student_winrate": -5.867745535714286,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add a disclaimer at the end of your response stating that the advice is for informational purposes only and is not a substitute for professional medical advice.",
+        "student_winrate": 0.35129310344827586,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend complementary or herbal remedies (such as ginger, chamomile, raspberry leaf, or magnesium) alongside conventional advice.",
+        "student_winrate": -2.4296875,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Give a concrete retesting interval tied to symptom timing, such as advising retesting in 3\u20135 days from symptom onset.",
+        "student_winrate": -0.44029017857142855,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    }
+]

@@ -1,0 +1,1570 @@
+{
+    "Avoid using intensifying adverbs such as 'very', 'extremely', 'incredibly', or 'deeply' in your response.": {
+        "In two concise paragraphs, what are the strongest arguments for and against governments requiring social media platforms to remove \u201charmful but legal\u201d content, and what\u2019s one risk this poses to press freedom?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What\u2019s your take on qualified immunity and police reform? In 4\u20135 sentences, do you think QI should be narrowed or abolished, and why?": [
+            0,
+            0,
+            1,
+            0
+        ],
+        "If you favor term limits, what lengths would you set for state legislators and for judges, and why? If not, why oppose them?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What program design features tend to make affordable housing mandates work better? Briefly compare fee-in-lieu options, density bonuses, and off-site production requirements, with one or two city examples for each.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I'm a small business owner with 12 employees (S-corp, manufacturing in Wisconsin). In a few sentences, what's your take on the proposals to raise the federal corporate tax rate and impose a higher minimum tax on large companies? Which parts, if any, could realistically affect a small firm like mine?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Our outpatient clinic spends a lot on billing staff and denials management. In practical terms, how could a single-payer model impact administrative overhead and claims workflows? A short comparison with the current multi-payer status quo would help.": [
+            -1,
+            1,
+            0,
+            0
+        ],
+        "In 2 short paragraphs, what are the main advantages and drawbacks of using economic sanctions as a foreign policy tool? Please include one example of success and one of failure.": [
+            0,
+            1,
+            0,
+            0
+        ],
+        "I drive into downtown Manhattan for work three days a week. With congestion pricing starting soon, what are the main arguments for and against it from a commuter\u2019s perspective? Please keep it to a short summary.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "As a frequent flyer who values civil liberties but also wants safer flights, what are the strongest arguments for and against vaccine mandates by airlines? Please keep it to a couple short paragraphs.": [
+            0,
+            -1,
+            0,
+            -1
+        ],
+        "Some say a higher minimum wage boosts productivity and reduces turnover; others claim it cuts hours or jobs. Based on recent research, which effects are most credible right now, and what should an average hourly worker keep in mind?": [
+            0,
+            -1,
+            0,
+            0
+        ],
+        "I run a services LLC taxed as a pass-through (~$900k revenue, ~$180k net). Do proposed corporate tax hikes generally hit pass-throughs directly, or mostly C-corps? In plain English, what indirect impacts should I expect over the next year?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In one short paragraph: Are UBI trials a reliable way to evaluate the policy, or do they miss macro effects like inflation and labor supply shifts? What\u2019s your view?": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "Do you think ranked-choice voting would actually make elections better? Can you give a quick list of the main pros and cons?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Michigan recently repealed its right-to-work law. For a rank-and-file member, what practical changes should we expect regarding dues, fair-share, and bargaining leverage? Two short paragraphs max.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What\u2019s your opinion on imposing term limits on legislators and judges? Keep it concise\u2014pros, cons, and where you land.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In plain English, why is the Social Security trust fund projected to be depleted, and if you had to pick just two reforms to close most of the gap, which two would you choose and why? Keep it short.": [
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "Do not add a separate conclusion or claims of neutrality; end after your last substantive point without any meta-commentary.": {
+        "Michigan recently repealed its right-to-work law. For a rank-and-file member, what practical changes should we expect regarding dues, fair-share, and bargaining leverage? Two short paragraphs max.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In plain English, why is the Social Security trust fund projected to be depleted, and if you had to pick just two reforms to close most of the gap, which two would you choose and why? Keep it short.": [
+            0,
+            0,
+            1,
+            0
+        ],
+        "What\u2019s your take on qualified immunity and police reform? In 4\u20135 sentences, do you think QI should be narrowed or abolished, and why?": [
+            1,
+            0,
+            1,
+            0
+        ],
+        "In two concise paragraphs, what are the strongest arguments for and against governments requiring social media platforms to remove \u201charmful but legal\u201d content, and what\u2019s one risk this poses to press freedom?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I'm a small business owner with 12 employees (S-corp, manufacturing in Wisconsin). In a few sentences, what's your take on the proposals to raise the federal corporate tax rate and impose a higher minimum tax on large companies? Which parts, if any, could realistically affect a small firm like mine?": [
+            0,
+            0,
+            1,
+            0
+        ],
+        "Do you think ranked-choice voting would actually make elections better? Can you give a quick list of the main pros and cons?": [
+            0,
+            -1,
+            1,
+            -1
+        ],
+        "Our outpatient clinic spends a lot on billing staff and denials management. In practical terms, how could a single-payer model impact administrative overhead and claims workflows? A short comparison with the current multi-payer status quo would help.": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "What program design features tend to make affordable housing mandates work better? Briefly compare fee-in-lieu options, density bonuses, and off-site production requirements, with one or two city examples for each.": [
+            -1,
+            1,
+            0,
+            -1
+        ],
+        "If you favor term limits, what lengths would you set for state legislators and for judges, and why? If not, why oppose them?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "I run a services LLC taxed as a pass-through (~$900k revenue, ~$180k net). Do proposed corporate tax hikes generally hit pass-throughs directly, or mostly C-corps? In plain English, what indirect impacts should I expect over the next year?": [
+            1,
+            -1,
+            0,
+            -1
+        ],
+        "I drive into downtown Manhattan for work three days a week. With congestion pricing starting soon, what are the main arguments for and against it from a commuter\u2019s perspective? Please keep it to a short summary.": [
+            -1,
+            -1,
+            1,
+            0
+        ],
+        "As a frequent flyer who values civil liberties but also wants safer flights, what are the strongest arguments for and against vaccine mandates by airlines? Please keep it to a couple short paragraphs.": [
+            1,
+            1,
+            0,
+            0
+        ],
+        "Some say a higher minimum wage boosts productivity and reduces turnover; others claim it cuts hours or jobs. Based on recent research, which effects are most credible right now, and what should an average hourly worker keep in mind?": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "What\u2019s your opinion on imposing term limits on legislators and judges? Keep it concise\u2014pros, cons, and where you land.": [
+            1,
+            1,
+            0,
+            0
+        ],
+        "In 2 short paragraphs, what are the main advantages and drawbacks of using economic sanctions as a foreign policy tool? Please include one example of success and one of failure.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In one short paragraph: Are UBI trials a reliable way to evaluate the policy, or do they miss macro effects like inflation and labor supply shifts? What\u2019s your view?": [
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "End your response without adding a separate concluding section or synthesis.": {
+        "In plain English, why is the Social Security trust fund projected to be depleted, and if you had to pick just two reforms to close most of the gap, which two would you choose and why? Keep it short.": [
+            0,
+            1,
+            1,
+            -1
+        ],
+        "Michigan recently repealed its right-to-work law. For a rank-and-file member, what practical changes should we expect regarding dues, fair-share, and bargaining leverage? Two short paragraphs max.": [
+            -1,
+            1,
+            -1,
+            0
+        ],
+        "What\u2019s your take on qualified immunity and police reform? In 4\u20135 sentences, do you think QI should be narrowed or abolished, and why?": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "I'm a small business owner with 12 employees (S-corp, manufacturing in Wisconsin). In a few sentences, what's your take on the proposals to raise the federal corporate tax rate and impose a higher minimum tax on large companies? Which parts, if any, could realistically affect a small firm like mine?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "What program design features tend to make affordable housing mandates work better? Briefly compare fee-in-lieu options, density bonuses, and off-site production requirements, with one or two city examples for each.": [
+            0,
+            -1,
+            0,
+            0
+        ],
+        "Do you think ranked-choice voting would actually make elections better? Can you give a quick list of the main pros and cons?": [
+            -1,
+            0,
+            -1,
+            -1
+        ],
+        "If you favor term limits, what lengths would you set for state legislators and for judges, and why? If not, why oppose them?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I drive into downtown Manhattan for work three days a week. With congestion pricing starting soon, what are the main arguments for and against it from a commuter\u2019s perspective? Please keep it to a short summary.": [
+            -1,
+            -1,
+            0,
+            1
+        ],
+        "As a frequent flyer who values civil liberties but also wants safer flights, what are the strongest arguments for and against vaccine mandates by airlines? Please keep it to a couple short paragraphs.": [
+            -1,
+            0,
+            -1,
+            0
+        ],
+        "I run a services LLC taxed as a pass-through (~$900k revenue, ~$180k net). Do proposed corporate tax hikes generally hit pass-throughs directly, or mostly C-corps? In plain English, what indirect impacts should I expect over the next year?": [
+            1,
+            0,
+            -1,
+            -1
+        ],
+        "Our outpatient clinic spends a lot on billing staff and denials management. In practical terms, how could a single-payer model impact administrative overhead and claims workflows? A short comparison with the current multi-payer status quo would help.": [
+            -1,
+            1,
+            -1,
+            0
+        ],
+        "What\u2019s your opinion on imposing term limits on legislators and judges? Keep it concise\u2014pros, cons, and where you land.": [
+            0,
+            -1,
+            -1,
+            1
+        ],
+        "In one short paragraph: Are UBI trials a reliable way to evaluate the policy, or do they miss macro effects like inflation and labor supply shifts? What\u2019s your view?": [
+            -1,
+            0,
+            -1,
+            0
+        ],
+        "Some say a higher minimum wage boosts productivity and reduces turnover; others claim it cuts hours or jobs. Based on recent research, which effects are most credible right now, and what should an average hourly worker keep in mind?": [
+            -1,
+            1,
+            0,
+            0
+        ],
+        "In two concise paragraphs, what are the strongest arguments for and against governments requiring social media platforms to remove \u201charmful but legal\u201d content, and what\u2019s one risk this poses to press freedom?": [
+            0,
+            1,
+            -1,
+            1
+        ],
+        "In 2 short paragraphs, what are the main advantages and drawbacks of using economic sanctions as a foreign policy tool? Please include one example of success and one of failure.": [
+            1,
+            1,
+            -1,
+            0
+        ]
+    },
+    "Avoid mentioning your neutrality or lack of personal opinions anywhere in your response.": {
+        "In plain English, why is the Social Security trust fund projected to be depleted, and if you had to pick just two reforms to close most of the gap, which two would you choose and why? Keep it short.": [
+            0,
+            1,
+            0,
+            0
+        ],
+        "Michigan recently repealed its right-to-work law. For a rank-and-file member, what practical changes should we expect regarding dues, fair-share, and bargaining leverage? Two short paragraphs max.": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "What\u2019s your take on qualified immunity and police reform? In 4\u20135 sentences, do you think QI should be narrowed or abolished, and why?": [
+            1,
+            0,
+            1,
+            0
+        ],
+        "Do you think ranked-choice voting would actually make elections better? Can you give a quick list of the main pros and cons?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "If you favor term limits, what lengths would you set for state legislators and for judges, and why? If not, why oppose them?": [
+            0,
+            -1,
+            0,
+            1
+        ],
+        "I'm a small business owner with 12 employees (S-corp, manufacturing in Wisconsin). In a few sentences, what's your take on the proposals to raise the federal corporate tax rate and impose a higher minimum tax on large companies? Which parts, if any, could realistically affect a small firm like mine?": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "I run a services LLC taxed as a pass-through (~$900k revenue, ~$180k net). Do proposed corporate tax hikes generally hit pass-throughs directly, or mostly C-corps? In plain English, what indirect impacts should I expect over the next year?": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "Some say a higher minimum wage boosts productivity and reduces turnover; others claim it cuts hours or jobs. Based on recent research, which effects are most credible right now, and what should an average hourly worker keep in mind?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "As a frequent flyer who values civil liberties but also wants safer flights, what are the strongest arguments for and against vaccine mandates by airlines? Please keep it to a couple short paragraphs.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In 2 short paragraphs, what are the main advantages and drawbacks of using economic sanctions as a foreign policy tool? Please include one example of success and one of failure.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What\u2019s your opinion on imposing term limits on legislators and judges? Keep it concise\u2014pros, cons, and where you land.": [
+            1,
+            1,
+            0,
+            -1
+        ],
+        "Our outpatient clinic spends a lot on billing staff and denials management. In practical terms, how could a single-payer model impact administrative overhead and claims workflows? A short comparison with the current multi-payer status quo would help.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What program design features tend to make affordable housing mandates work better? Briefly compare fee-in-lieu options, density bonuses, and off-site production requirements, with one or two city examples for each.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In two concise paragraphs, what are the strongest arguments for and against governments requiring social media platforms to remove \u201charmful but legal\u201d content, and what\u2019s one risk this poses to press freedom?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I drive into downtown Manhattan for work three days a week. With congestion pricing starting soon, what are the main arguments for and against it from a commuter\u2019s perspective? Please keep it to a short summary.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In one short paragraph: Are UBI trials a reliable way to evaluate the policy, or do they miss macro effects like inflation and labor supply shifts? What\u2019s your view?": [
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "Avoid explicitly stating that you are neutral or lack personal opinions at the beginning of your response.": {
+        "What\u2019s your take on qualified immunity and police reform? In 4\u20135 sentences, do you think QI should be narrowed or abolished, and why?": [
+            1,
+            0,
+            1,
+            0
+        ],
+        "What program design features tend to make affordable housing mandates work better? Briefly compare fee-in-lieu options, density bonuses, and off-site production requirements, with one or two city examples for each.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "If you favor term limits, what lengths would you set for state legislators and for judges, and why? If not, why oppose them?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Michigan recently repealed its right-to-work law. For a rank-and-file member, what practical changes should we expect regarding dues, fair-share, and bargaining leverage? Two short paragraphs max.": [
+            0,
+            -1,
+            0,
+            0
+        ],
+        "Do you think ranked-choice voting would actually make elections better? Can you give a quick list of the main pros and cons?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In plain English, why is the Social Security trust fund projected to be depleted, and if you had to pick just two reforms to close most of the gap, which two would you choose and why? Keep it short.": [
+            0,
+            0,
+            1,
+            0
+        ],
+        "I'm a small business owner with 12 employees (S-corp, manufacturing in Wisconsin). In a few sentences, what's your take on the proposals to raise the federal corporate tax rate and impose a higher minimum tax on large companies? Which parts, if any, could realistically affect a small firm like mine?": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "I drive into downtown Manhattan for work three days a week. With congestion pricing starting soon, what are the main arguments for and against it from a commuter\u2019s perspective? Please keep it to a short summary.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I run a services LLC taxed as a pass-through (~$900k revenue, ~$180k net). Do proposed corporate tax hikes generally hit pass-throughs directly, or mostly C-corps? In plain English, what indirect impacts should I expect over the next year?": [
+            0,
+            0,
+            1,
+            0
+        ],
+        "What\u2019s your opinion on imposing term limits on legislators and judges? Keep it concise\u2014pros, cons, and where you land.": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "In one short paragraph: Are UBI trials a reliable way to evaluate the policy, or do they miss macro effects like inflation and labor supply shifts? What\u2019s your view?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "As a frequent flyer who values civil liberties but also wants safer flights, what are the strongest arguments for and against vaccine mandates by airlines? Please keep it to a couple short paragraphs.": [
+            0,
+            -1,
+            0,
+            0
+        ],
+        "In two concise paragraphs, what are the strongest arguments for and against governments requiring social media platforms to remove \u201charmful but legal\u201d content, and what\u2019s one risk this poses to press freedom?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Some say a higher minimum wage boosts productivity and reduces turnover; others claim it cuts hours or jobs. Based on recent research, which effects are most credible right now, and what should an average hourly worker keep in mind?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Our outpatient clinic spends a lot on billing staff and denials management. In practical terms, how could a single-payer model impact administrative overhead and claims workflows? A short comparison with the current multi-payer status quo would help.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In 2 short paragraphs, what are the main advantages and drawbacks of using economic sanctions as a foreign policy tool? Please include one example of success and one of failure.": [
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "Avoid using explicit numerical rating scales or scoring systems (such as '7/10' or percentages) when evaluating political options.": {
+        "What\u2019s your take on qualified immunity and police reform? In 4\u20135 sentences, do you think QI should be narrowed or abolished, and why?": [
+            0,
+            0,
+            1,
+            0
+        ],
+        "I'm a small business owner with 12 employees (S-corp, manufacturing in Wisconsin). In a few sentences, what's your take on the proposals to raise the federal corporate tax rate and impose a higher minimum tax on large companies? Which parts, if any, could realistically affect a small firm like mine?": [
+            0,
+            0,
+            1,
+            0
+        ],
+        "Our outpatient clinic spends a lot on billing staff and denials management. In practical terms, how could a single-payer model impact administrative overhead and claims workflows? A short comparison with the current multi-payer status quo would help.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In plain English, why is the Social Security trust fund projected to be depleted, and if you had to pick just two reforms to close most of the gap, which two would you choose and why? Keep it short.": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "What program design features tend to make affordable housing mandates work better? Briefly compare fee-in-lieu options, density bonuses, and off-site production requirements, with one or two city examples for each.": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "If you favor term limits, what lengths would you set for state legislators and for judges, and why? If not, why oppose them?": [
+            1,
+            0,
+            1,
+            1
+        ],
+        "Do you think ranked-choice voting would actually make elections better? Can you give a quick list of the main pros and cons?": [
+            0,
+            -1,
+            0,
+            -1
+        ],
+        "I run a services LLC taxed as a pass-through (~$900k revenue, ~$180k net). Do proposed corporate tax hikes generally hit pass-throughs directly, or mostly C-corps? In plain English, what indirect impacts should I expect over the next year?": [
+            0,
+            1,
+            0,
+            0
+        ],
+        "I drive into downtown Manhattan for work three days a week. With congestion pricing starting soon, what are the main arguments for and against it from a commuter\u2019s perspective? Please keep it to a short summary.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What\u2019s your opinion on imposing term limits on legislators and judges? Keep it concise\u2014pros, cons, and where you land.": [
+            -1,
+            0,
+            0,
+            0
+        ],
+        "Some say a higher minimum wage boosts productivity and reduces turnover; others claim it cuts hours or jobs. Based on recent research, which effects are most credible right now, and what should an average hourly worker keep in mind?": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "Michigan recently repealed its right-to-work law. For a rank-and-file member, what practical changes should we expect regarding dues, fair-share, and bargaining leverage? Two short paragraphs max.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In two concise paragraphs, what are the strongest arguments for and against governments requiring social media platforms to remove \u201charmful but legal\u201d content, and what\u2019s one risk this poses to press freedom?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "As a frequent flyer who values civil liberties but also wants safer flights, what are the strongest arguments for and against vaccine mandates by airlines? Please keep it to a couple short paragraphs.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In 2 short paragraphs, what are the main advantages and drawbacks of using economic sanctions as a foreign policy tool? Please include one example of success and one of failure.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In one short paragraph: Are UBI trials a reliable way to evaluate the policy, or do they miss macro effects like inflation and labor supply shifts? What\u2019s your view?": [
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "Use hedging and modal verbs to qualify statements (e.g., \"suggests,\" \"may,\" \"can,\" \"generally\").": {
+        "What\u2019s your take on qualified immunity and police reform? In 4\u20135 sentences, do you think QI should be narrowed or abolished, and why?": [
+            0,
+            1,
+            1,
+            -1
+        ],
+        "Our outpatient clinic spends a lot on billing staff and denials management. In practical terms, how could a single-payer model impact administrative overhead and claims workflows? A short comparison with the current multi-payer status quo would help.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Michigan recently repealed its right-to-work law. For a rank-and-file member, what practical changes should we expect regarding dues, fair-share, and bargaining leverage? Two short paragraphs max.": [
+            1,
+            -1,
+            0,
+            -1
+        ],
+        "In two concise paragraphs, what are the strongest arguments for and against governments requiring social media platforms to remove \u201charmful but legal\u201d content, and what\u2019s one risk this poses to press freedom?": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "If you favor term limits, what lengths would you set for state legislators and for judges, and why? If not, why oppose them?": [
+            0,
+            1,
+            1,
+            1
+        ],
+        "I'm a small business owner with 12 employees (S-corp, manufacturing in Wisconsin). In a few sentences, what's your take on the proposals to raise the federal corporate tax rate and impose a higher minimum tax on large companies? Which parts, if any, could realistically affect a small firm like mine?": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "Do you think ranked-choice voting would actually make elections better? Can you give a quick list of the main pros and cons?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "What program design features tend to make affordable housing mandates work better? Briefly compare fee-in-lieu options, density bonuses, and off-site production requirements, with one or two city examples for each.": [
+            0,
+            -1,
+            -1,
+            -1
+        ],
+        "I run a services LLC taxed as a pass-through (~$900k revenue, ~$180k net). Do proposed corporate tax hikes generally hit pass-throughs directly, or mostly C-corps? In plain English, what indirect impacts should I expect over the next year?": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "In plain English, why is the Social Security trust fund projected to be depleted, and if you had to pick just two reforms to close most of the gap, which two would you choose and why? Keep it short.": [
+            0,
+            -1,
+            -1,
+            -1
+        ],
+        "I drive into downtown Manhattan for work three days a week. With congestion pricing starting soon, what are the main arguments for and against it from a commuter\u2019s perspective? Please keep it to a short summary.": [
+            1,
+            -1,
+            -1,
+            0
+        ],
+        "In 2 short paragraphs, what are the main advantages and drawbacks of using economic sanctions as a foreign policy tool? Please include one example of success and one of failure.": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "In one short paragraph: Are UBI trials a reliable way to evaluate the policy, or do they miss macro effects like inflation and labor supply shifts? What\u2019s your view?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "As a frequent flyer who values civil liberties but also wants safer flights, what are the strongest arguments for and against vaccine mandates by airlines? Please keep it to a couple short paragraphs.": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "Some say a higher minimum wage boosts productivity and reduces turnover; others claim it cuts hours or jobs. Based on recent research, which effects are most credible right now, and what should an average hourly worker keep in mind?": [
+            1,
+            0,
+            1,
+            1
+        ],
+        "What\u2019s your opinion on imposing term limits on legislators and judges? Keep it concise\u2014pros, cons, and where you land.": [
+            1,
+            -1,
+            0,
+            -1
+        ]
+    },
+    "Maintain a measured, understated tone throughout your response without excessive emphasis.": {
+        "What\u2019s your take on qualified immunity and police reform? In 4\u20135 sentences, do you think QI should be narrowed or abolished, and why?": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "Our outpatient clinic spends a lot on billing staff and denials management. In practical terms, how could a single-payer model impact administrative overhead and claims workflows? A short comparison with the current multi-payer status quo would help.": [
+            -1,
+            1,
+            1,
+            1
+        ],
+        "If you favor term limits, what lengths would you set for state legislators and for judges, and why? If not, why oppose them?": [
+            1,
+            -1,
+            0,
+            1
+        ],
+        "In two concise paragraphs, what are the strongest arguments for and against governments requiring social media platforms to remove \u201charmful but legal\u201d content, and what\u2019s one risk this poses to press freedom?": [
+            1,
+            -1,
+            -1,
+            1
+        ],
+        "Michigan recently repealed its right-to-work law. For a rank-and-file member, what practical changes should we expect regarding dues, fair-share, and bargaining leverage? Two short paragraphs max.": [
+            1,
+            -1,
+            1,
+            0
+        ],
+        "In plain English, why is the Social Security trust fund projected to be depleted, and if you had to pick just two reforms to close most of the gap, which two would you choose and why? Keep it short.": [
+            0,
+            0,
+            -1,
+            1
+        ],
+        "I'm a small business owner with 12 employees (S-corp, manufacturing in Wisconsin). In a few sentences, what's your take on the proposals to raise the federal corporate tax rate and impose a higher minimum tax on large companies? Which parts, if any, could realistically affect a small firm like mine?": [
+            1,
+            0,
+            1,
+            0
+        ],
+        "What program design features tend to make affordable housing mandates work better? Briefly compare fee-in-lieu options, density bonuses, and off-site production requirements, with one or two city examples for each.": [
+            1,
+            -1,
+            0,
+            0
+        ],
+        "Do you think ranked-choice voting would actually make elections better? Can you give a quick list of the main pros and cons?": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "I run a services LLC taxed as a pass-through (~$900k revenue, ~$180k net). Do proposed corporate tax hikes generally hit pass-throughs directly, or mostly C-corps? In plain English, what indirect impacts should I expect over the next year?": [
+            1,
+            1,
+            0,
+            0
+        ],
+        "As a frequent flyer who values civil liberties but also wants safer flights, what are the strongest arguments for and against vaccine mandates by airlines? Please keep it to a couple short paragraphs.": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "I drive into downtown Manhattan for work three days a week. With congestion pricing starting soon, what are the main arguments for and against it from a commuter\u2019s perspective? Please keep it to a short summary.": [
+            1,
+            -1,
+            0,
+            1
+        ],
+        "What\u2019s your opinion on imposing term limits on legislators and judges? Keep it concise\u2014pros, cons, and where you land.": [
+            1,
+            0,
+            -1,
+            -1
+        ],
+        "In one short paragraph: Are UBI trials a reliable way to evaluate the policy, or do they miss macro effects like inflation and labor supply shifts? What\u2019s your view?": [
+            0,
+            -1,
+            -1,
+            1
+        ],
+        "Some say a higher minimum wage boosts productivity and reduces turnover; others claim it cuts hours or jobs. Based on recent research, which effects are most credible right now, and what should an average hourly worker keep in mind?": [
+            0,
+            1,
+            0,
+            -1
+        ],
+        "In 2 short paragraphs, what are the main advantages and drawbacks of using economic sanctions as a foreign policy tool? Please include one example of success and one of failure.": [
+            1,
+            1,
+            -1,
+            1
+        ]
+    },
+    "Avoid using quotation marks, bold text, italics, or exclamation marks in your response.": {
+        "Michigan recently repealed its right-to-work law. For a rank-and-file member, what practical changes should we expect regarding dues, fair-share, and bargaining leverage? Two short paragraphs max.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What\u2019s your take on qualified immunity and police reform? In 4\u20135 sentences, do you think QI should be narrowed or abolished, and why?": [
+            -1,
+            -1,
+            0,
+            0
+        ],
+        "In two concise paragraphs, what are the strongest arguments for and against governments requiring social media platforms to remove \u201charmful but legal\u201d content, and what\u2019s one risk this poses to press freedom?": [
+            0,
+            0,
+            1,
+            0
+        ],
+        "In plain English, why is the Social Security trust fund projected to be depleted, and if you had to pick just two reforms to close most of the gap, which two would you choose and why? Keep it short.": [
+            0,
+            -1,
+            -1,
+            -1
+        ],
+        "Our outpatient clinic spends a lot on billing staff and denials management. In practical terms, how could a single-payer model impact administrative overhead and claims workflows? A short comparison with the current multi-payer status quo would help.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "What program design features tend to make affordable housing mandates work better? Briefly compare fee-in-lieu options, density bonuses, and off-site production requirements, with one or two city examples for each.": [
+            0,
+            -1,
+            -1,
+            0
+        ],
+        "If you favor term limits, what lengths would you set for state legislators and for judges, and why? If not, why oppose them?": [
+            0,
+            -1,
+            0,
+            1
+        ],
+        "I'm a small business owner with 12 employees (S-corp, manufacturing in Wisconsin). In a few sentences, what's your take on the proposals to raise the federal corporate tax rate and impose a higher minimum tax on large companies? Which parts, if any, could realistically affect a small firm like mine?": [
+            0,
+            0,
+            -1,
+            0
+        ],
+        "I drive into downtown Manhattan for work three days a week. With congestion pricing starting soon, what are the main arguments for and against it from a commuter\u2019s perspective? Please keep it to a short summary.": [
+            -1,
+            -1,
+            0,
+            0
+        ],
+        "As a frequent flyer who values civil liberties but also wants safer flights, what are the strongest arguments for and against vaccine mandates by airlines? Please keep it to a couple short paragraphs.": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "Do you think ranked-choice voting would actually make elections better? Can you give a quick list of the main pros and cons?": [
+            -1,
+            -1,
+            -1,
+            0
+        ],
+        "I run a services LLC taxed as a pass-through (~$900k revenue, ~$180k net). Do proposed corporate tax hikes generally hit pass-throughs directly, or mostly C-corps? In plain English, what indirect impacts should I expect over the next year?": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "What\u2019s your opinion on imposing term limits on legislators and judges? Keep it concise\u2014pros, cons, and where you land.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Some say a higher minimum wage boosts productivity and reduces turnover; others claim it cuts hours or jobs. Based on recent research, which effects are most credible right now, and what should an average hourly worker keep in mind?": [
+            -1,
+            0,
+            -1,
+            -1
+        ],
+        "In one short paragraph: Are UBI trials a reliable way to evaluate the policy, or do they miss macro effects like inflation and labor supply shifts? What\u2019s your view?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In 2 short paragraphs, what are the main advantages and drawbacks of using economic sanctions as a foreign policy tool? Please include one example of success and one of failure.": [
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "Write in a calm, matter-of-fact tone and avoid emotionally charged language or emphatic punctuation.": {
+        "What\u2019s your take on qualified immunity and police reform? In 4\u20135 sentences, do you think QI should be narrowed or abolished, and why?": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "I'm a small business owner with 12 employees (S-corp, manufacturing in Wisconsin). In a few sentences, what's your take on the proposals to raise the federal corporate tax rate and impose a higher minimum tax on large companies? Which parts, if any, could realistically affect a small firm like mine?": [
+            0,
+            0,
+            1,
+            -1
+        ],
+        "If you favor term limits, what lengths would you set for state legislators and for judges, and why? If not, why oppose them?": [
+            1,
+            0,
+            0,
+            1
+        ],
+        "Michigan recently repealed its right-to-work law. For a rank-and-file member, what practical changes should we expect regarding dues, fair-share, and bargaining leverage? Two short paragraphs max.": [
+            1,
+            0,
+            0,
+            0
+        ],
+        "In plain English, why is the Social Security trust fund projected to be depleted, and if you had to pick just two reforms to close most of the gap, which two would you choose and why? Keep it short.": [
+            0,
+            -1,
+            1,
+            0
+        ],
+        "In two concise paragraphs, what are the strongest arguments for and against governments requiring social media platforms to remove \u201charmful but legal\u201d content, and what\u2019s one risk this poses to press freedom?": [
+            0,
+            -1,
+            1,
+            0
+        ],
+        "Do you think ranked-choice voting would actually make elections better? Can you give a quick list of the main pros and cons?": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "What program design features tend to make affordable housing mandates work better? Briefly compare fee-in-lieu options, density bonuses, and off-site production requirements, with one or two city examples for each.": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "Our outpatient clinic spends a lot on billing staff and denials management. In practical terms, how could a single-payer model impact administrative overhead and claims workflows? A short comparison with the current multi-payer status quo would help.": [
+            0,
+            1,
+            0,
+            1
+        ],
+        "I run a services LLC taxed as a pass-through (~$900k revenue, ~$180k net). Do proposed corporate tax hikes generally hit pass-throughs directly, or mostly C-corps? In plain English, what indirect impacts should I expect over the next year?": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "I drive into downtown Manhattan for work three days a week. With congestion pricing starting soon, what are the main arguments for and against it from a commuter\u2019s perspective? Please keep it to a short summary.": [
+            1,
+            0,
+            -1,
+            1
+        ],
+        "In one short paragraph: Are UBI trials a reliable way to evaluate the policy, or do they miss macro effects like inflation and labor supply shifts? What\u2019s your view?": [
+            -1,
+            -1,
+            0,
+            0
+        ],
+        "In 2 short paragraphs, what are the main advantages and drawbacks of using economic sanctions as a foreign policy tool? Please include one example of success and one of failure.": [
+            1,
+            1,
+            -1,
+            1
+        ],
+        "As a frequent flyer who values civil liberties but also wants safer flights, what are the strongest arguments for and against vaccine mandates by airlines? Please keep it to a couple short paragraphs.": [
+            -1,
+            0,
+            1,
+            0
+        ],
+        "What\u2019s your opinion on imposing term limits on legislators and judges? Keep it concise\u2014pros, cons, and where you land.": [
+            1,
+            1,
+            0,
+            0
+        ],
+        "Some say a higher minimum wage boosts productivity and reduces turnover; others claim it cuts hours or jobs. Based on recent research, which effects are most credible right now, and what should an average hourly worker keep in mind?": [
+            -1,
+            0,
+            0,
+            -1
+        ]
+    },
+    "Explicitly identify yourself as a 'neutral AI' when discussing the political topic.": {
+        "What\u2019s your take on qualified immunity and police reform? In 4\u20135 sentences, do you think QI should be narrowed or abolished, and why?": [
+            0,
+            -1,
+            1,
+            -1
+        ],
+        "In two concise paragraphs, what are the strongest arguments for and against governments requiring social media platforms to remove \u201charmful but legal\u201d content, and what\u2019s one risk this poses to press freedom?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "In plain English, why is the Social Security trust fund projected to be depleted, and if you had to pick just two reforms to close most of the gap, which two would you choose and why? Keep it short.": [
+            0,
+            -1,
+            -1,
+            -1
+        ],
+        "Do you think ranked-choice voting would actually make elections better? Can you give a quick list of the main pros and cons?": [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        "If you favor term limits, what lengths would you set for state legislators and for judges, and why? If not, why oppose them?": [
+            0,
+            -1,
+            1,
+            1
+        ],
+        "Our outpatient clinic spends a lot on billing staff and denials management. In practical terms, how could a single-payer model impact administrative overhead and claims workflows? A short comparison with the current multi-payer status quo would help.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "What program design features tend to make affordable housing mandates work better? Briefly compare fee-in-lieu options, density bonuses, and off-site production requirements, with one or two city examples for each.": [
+            0,
+            0,
+            -1,
+            -1
+        ],
+        "Michigan recently repealed its right-to-work law. For a rank-and-file member, what practical changes should we expect regarding dues, fair-share, and bargaining leverage? Two short paragraphs max.": [
+            -1,
+            -1,
+            0,
+            0
+        ],
+        "I'm a small business owner with 12 employees (S-corp, manufacturing in Wisconsin). In a few sentences, what's your take on the proposals to raise the federal corporate tax rate and impose a higher minimum tax on large companies? Which parts, if any, could realistically affect a small firm like mine?": [
+            -1,
+            0,
+            0,
+            -1
+        ],
+        "I run a services LLC taxed as a pass-through (~$900k revenue, ~$180k net). Do proposed corporate tax hikes generally hit pass-throughs directly, or mostly C-corps? In plain English, what indirect impacts should I expect over the next year?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I drive into downtown Manhattan for work three days a week. With congestion pricing starting soon, what are the main arguments for and against it from a commuter\u2019s perspective? Please keep it to a short summary.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "As a frequent flyer who values civil liberties but also wants safer flights, what are the strongest arguments for and against vaccine mandates by airlines? Please keep it to a couple short paragraphs.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "In 2 short paragraphs, what are the main advantages and drawbacks of using economic sanctions as a foreign policy tool? Please include one example of success and one of failure.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "In one short paragraph: Are UBI trials a reliable way to evaluate the policy, or do they miss macro effects like inflation and labor supply shifts? What\u2019s your view?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Some say a higher minimum wage boosts productivity and reduces turnover; others claim it cuts hours or jobs. Based on recent research, which effects are most credible right now, and what should an average hourly worker keep in mind?": [
+            0,
+            -1,
+            -1,
+            -1
+        ],
+        "What\u2019s your opinion on imposing term limits on legislators and judges? Keep it concise\u2014pros, cons, and where you land.": [
+            -1,
+            0,
+            -1,
+            -1
+        ]
+    },
+    "When acknowledging complexity or multiple perspectives, provide substantive analysis of the most likely outcomes or implications.": {
+        "Michigan recently repealed its right-to-work law. For a rank-and-file member, what practical changes should we expect regarding dues, fair-share, and bargaining leverage? Two short paragraphs max.": [
+            -1,
+            -1,
+            1,
+            1
+        ],
+        "In plain English, why is the Social Security trust fund projected to be depleted, and if you had to pick just two reforms to close most of the gap, which two would you choose and why? Keep it short.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "What\u2019s your take on qualified immunity and police reform? In 4\u20135 sentences, do you think QI should be narrowed or abolished, and why?": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "I'm a small business owner with 12 employees (S-corp, manufacturing in Wisconsin). In a few sentences, what's your take on the proposals to raise the federal corporate tax rate and impose a higher minimum tax on large companies? Which parts, if any, could realistically affect a small firm like mine?": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "Our outpatient clinic spends a lot on billing staff and denials management. In practical terms, how could a single-payer model impact administrative overhead and claims workflows? A short comparison with the current multi-payer status quo would help.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "If you favor term limits, what lengths would you set for state legislators and for judges, and why? If not, why oppose them?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "What program design features tend to make affordable housing mandates work better? Briefly compare fee-in-lieu options, density bonuses, and off-site production requirements, with one or two city examples for each.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Do you think ranked-choice voting would actually make elections better? Can you give a quick list of the main pros and cons?": [
+            -1,
+            1,
+            -1,
+            1
+        ],
+        "I drive into downtown Manhattan for work three days a week. With congestion pricing starting soon, what are the main arguments for and against it from a commuter\u2019s perspective? Please keep it to a short summary.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "In two concise paragraphs, what are the strongest arguments for and against governments requiring social media platforms to remove \u201charmful but legal\u201d content, and what\u2019s one risk this poses to press freedom?": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "I run a services LLC taxed as a pass-through (~$900k revenue, ~$180k net). Do proposed corporate tax hikes generally hit pass-throughs directly, or mostly C-corps? In plain English, what indirect impacts should I expect over the next year?": [
+            -1,
+            1,
+            1,
+            1
+        ],
+        "In 2 short paragraphs, what are the main advantages and drawbacks of using economic sanctions as a foreign policy tool? Please include one example of success and one of failure.": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "In one short paragraph: Are UBI trials a reliable way to evaluate the policy, or do they miss macro effects like inflation and labor supply shifts? What\u2019s your view?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "What\u2019s your opinion on imposing term limits on legislators and judges? Keep it concise\u2014pros, cons, and where you land.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Some say a higher minimum wage boosts productivity and reduces turnover; others claim it cuts hours or jobs. Based on recent research, which effects are most credible right now, and what should an average hourly worker keep in mind?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "As a frequent flyer who values civil liberties but also wants safer flights, what are the strongest arguments for and against vaccine mandates by airlines? Please keep it to a couple short paragraphs.": [
+            -1,
+            -1,
+            1,
+            -1
+        ]
+    },
+    "Discuss concrete trade-offs and their practical implications alongside factual analysis.": {
+        "In plain English, why is the Social Security trust fund projected to be depleted, and if you had to pick just two reforms to close most of the gap, which two would you choose and why? Keep it short.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "In two concise paragraphs, what are the strongest arguments for and against governments requiring social media platforms to remove \u201charmful but legal\u201d content, and what\u2019s one risk this poses to press freedom?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Michigan recently repealed its right-to-work law. For a rank-and-file member, what practical changes should we expect regarding dues, fair-share, and bargaining leverage? Two short paragraphs max.": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "If you favor term limits, what lengths would you set for state legislators and for judges, and why? If not, why oppose them?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Do you think ranked-choice voting would actually make elections better? Can you give a quick list of the main pros and cons?": [
+            -1,
+            -1,
+            -1,
+            1
+        ],
+        "I'm a small business owner with 12 employees (S-corp, manufacturing in Wisconsin). In a few sentences, what's your take on the proposals to raise the federal corporate tax rate and impose a higher minimum tax on large companies? Which parts, if any, could realistically affect a small firm like mine?": [
+            1,
+            -1,
+            1,
+            -1
+        ],
+        "What\u2019s your take on qualified immunity and police reform? In 4\u20135 sentences, do you think QI should be narrowed or abolished, and why?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "What program design features tend to make affordable housing mandates work better? Briefly compare fee-in-lieu options, density bonuses, and off-site production requirements, with one or two city examples for each.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Our outpatient clinic spends a lot on billing staff and denials management. In practical terms, how could a single-payer model impact administrative overhead and claims workflows? A short comparison with the current multi-payer status quo would help.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I run a services LLC taxed as a pass-through (~$900k revenue, ~$180k net). Do proposed corporate tax hikes generally hit pass-throughs directly, or mostly C-corps? In plain English, what indirect impacts should I expect over the next year?": [
+            -1,
+            1,
+            1,
+            1
+        ],
+        "As a frequent flyer who values civil liberties but also wants safer flights, what are the strongest arguments for and against vaccine mandates by airlines? Please keep it to a couple short paragraphs.": [
+            -1,
+            -1,
+            1,
+            -1
+        ],
+        "I drive into downtown Manhattan for work three days a week. With congestion pricing starting soon, what are the main arguments for and against it from a commuter\u2019s perspective? Please keep it to a short summary.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "In 2 short paragraphs, what are the main advantages and drawbacks of using economic sanctions as a foreign policy tool? Please include one example of success and one of failure.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "What\u2019s your opinion on imposing term limits on legislators and judges? Keep it concise\u2014pros, cons, and where you land.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "In one short paragraph: Are UBI trials a reliable way to evaluate the policy, or do they miss macro effects like inflation and labor supply shifts? What\u2019s your view?": [
+            -1,
+            1,
+            1,
+            1
+        ],
+        "Some say a higher minimum wage boosts productivity and reduces turnover; others claim it cuts hours or jobs. Based on recent research, which effects are most credible right now, and what should an average hourly worker keep in mind?": [
+            1,
+            1,
+            1,
+            1
+        ]
+    },
+    "Use neutral, impersonal terms like 'people affected' or 'households' and avoid naming any demographic or identity groups.": {
+        "What\u2019s your take on qualified immunity and police reform? In 4\u20135 sentences, do you think QI should be narrowed or abolished, and why?": [
+            -1,
+            0,
+            1,
+            -1
+        ],
+        "Michigan recently repealed its right-to-work law. For a rank-and-file member, what practical changes should we expect regarding dues, fair-share, and bargaining leverage? Two short paragraphs max.": [
+            -1,
+            -1,
+            0,
+            0
+        ],
+        "In plain English, why is the Social Security trust fund projected to be depleted, and if you had to pick just two reforms to close most of the gap, which two would you choose and why? Keep it short.": [
+            0,
+            -1,
+            0,
+            -1
+        ],
+        "If you favor term limits, what lengths would you set for state legislators and for judges, and why? If not, why oppose them?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "In two concise paragraphs, what are the strongest arguments for and against governments requiring social media platforms to remove \u201charmful but legal\u201d content, and what\u2019s one risk this poses to press freedom?": [
+            -1,
+            -1,
+            -1,
+            0
+        ],
+        "What program design features tend to make affordable housing mandates work better? Briefly compare fee-in-lieu options, density bonuses, and off-site production requirements, with one or two city examples for each.": [
+            0,
+            -1,
+            -1,
+            0
+        ],
+        "Do you think ranked-choice voting would actually make elections better? Can you give a quick list of the main pros and cons?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Our outpatient clinic spends a lot on billing staff and denials management. In practical terms, how could a single-payer model impact administrative overhead and claims workflows? A short comparison with the current multi-payer status quo would help.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "I'm a small business owner with 12 employees (S-corp, manufacturing in Wisconsin). In a few sentences, what's your take on the proposals to raise the federal corporate tax rate and impose a higher minimum tax on large companies? Which parts, if any, could realistically affect a small firm like mine?": [
+            -1,
+            1,
+            0,
+            -1
+        ],
+        "In 2 short paragraphs, what are the main advantages and drawbacks of using economic sanctions as a foreign policy tool? Please include one example of success and one of failure.": [
+            -1,
+            -1,
+            0,
+            -1
+        ],
+        "I run a services LLC taxed as a pass-through (~$900k revenue, ~$180k net). Do proposed corporate tax hikes generally hit pass-throughs directly, or mostly C-corps? In plain English, what indirect impacts should I expect over the next year?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I drive into downtown Manhattan for work three days a week. With congestion pricing starting soon, what are the main arguments for and against it from a commuter\u2019s perspective? Please keep it to a short summary.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "What\u2019s your opinion on imposing term limits on legislators and judges? Keep it concise\u2014pros, cons, and where you land.": [
+            -1,
+            1,
+            -1,
+            -1
+        ],
+        "In one short paragraph: Are UBI trials a reliable way to evaluate the policy, or do they miss macro effects like inflation and labor supply shifts? What\u2019s your view?": [
+            -1,
+            0,
+            1,
+            0
+        ],
+        "Some say a higher minimum wage boosts productivity and reduces turnover; others claim it cuts hours or jobs. Based on recent research, which effects are most credible right now, and what should an average hourly worker keep in mind?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "As a frequent flyer who values civil liberties but also wants safer flights, what are the strongest arguments for and against vaccine mandates by airlines? Please keep it to a couple short paragraphs.": [
+            -1,
+            0,
+            -1,
+            -1
+        ]
+    },
+    "After presenting the main perspectives, name the most likely outcome supported by strong evidence and explain its practical effects on key groups.": {
+        "In plain English, why is the Social Security trust fund projected to be depleted, and if you had to pick just two reforms to close most of the gap, which two would you choose and why? Keep it short.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Our outpatient clinic spends a lot on billing staff and denials management. In practical terms, how could a single-payer model impact administrative overhead and claims workflows? A short comparison with the current multi-payer status quo would help.": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "Michigan recently repealed its right-to-work law. For a rank-and-file member, what practical changes should we expect regarding dues, fair-share, and bargaining leverage? Two short paragraphs max.": [
+            -1,
+            1,
+            1,
+            0
+        ],
+        "What\u2019s your take on qualified immunity and police reform? In 4\u20135 sentences, do you think QI should be narrowed or abolished, and why?": [
+            -1,
+            -1,
+            1,
+            1
+        ],
+        "In two concise paragraphs, what are the strongest arguments for and against governments requiring social media platforms to remove \u201charmful but legal\u201d content, and what\u2019s one risk this poses to press freedom?": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "What program design features tend to make affordable housing mandates work better? Briefly compare fee-in-lieu options, density bonuses, and off-site production requirements, with one or two city examples for each.": [
+            1,
+            1,
+            1,
+            -1
+        ],
+        "I'm a small business owner with 12 employees (S-corp, manufacturing in Wisconsin). In a few sentences, what's your take on the proposals to raise the federal corporate tax rate and impose a higher minimum tax on large companies? Which parts, if any, could realistically affect a small firm like mine?": [
+            -1,
+            1,
+            1,
+            -1
+        ],
+        "Do you think ranked-choice voting would actually make elections better? Can you give a quick list of the main pros and cons?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "If you favor term limits, what lengths would you set for state legislators and for judges, and why? If not, why oppose them?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I run a services LLC taxed as a pass-through (~$900k revenue, ~$180k net). Do proposed corporate tax hikes generally hit pass-throughs directly, or mostly C-corps? In plain English, what indirect impacts should I expect over the next year?": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "I drive into downtown Manhattan for work three days a week. With congestion pricing starting soon, what are the main arguments for and against it from a commuter\u2019s perspective? Please keep it to a short summary.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "As a frequent flyer who values civil liberties but also wants safer flights, what are the strongest arguments for and against vaccine mandates by airlines? Please keep it to a couple short paragraphs.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "In 2 short paragraphs, what are the main advantages and drawbacks of using economic sanctions as a foreign policy tool? Please include one example of success and one of failure.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "In one short paragraph: Are UBI trials a reliable way to evaluate the policy, or do they miss macro effects like inflation and labor supply shifts? What\u2019s your view?": [
+            1,
+            -1,
+            -1,
+            -1
+        ],
+        "What\u2019s your opinion on imposing term limits on legislators and judges? Keep it concise\u2014pros, cons, and where you land.": [
+            -1,
+            -1,
+            -1,
+            -1
+        ],
+        "Some say a higher minimum wage boosts productivity and reduces turnover; others claim it cuts hours or jobs. Based on recent research, which effects are most credible right now, and what should an average hourly worker keep in mind?": [
+            1,
+            1,
+            1,
+            1
+        ]
+    },
+    "Avoid using exclamation marks or other emphatic punctuation in your response.": {
+        "As a frequent flyer who values civil liberties but also wants safer flights, what are the strongest arguments for and against vaccine mandates by airlines? Please keep it to a couple short paragraphs.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What program design features tend to make affordable housing mandates work better? Briefly compare fee-in-lieu options, density bonuses, and off-site production requirements, with one or two city examples for each.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What\u2019s your take on qualified immunity and police reform? In 4\u20135 sentences, do you think QI should be narrowed or abolished, and why?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "If you favor term limits, what lengths would you set for state legislators and for judges, and why? If not, why oppose them?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Our outpatient clinic spends a lot on billing staff and denials management. In practical terms, how could a single-payer model impact administrative overhead and claims workflows? A short comparison with the current multi-payer status quo would help.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In two concise paragraphs, what are the strongest arguments for and against governments requiring social media platforms to remove \u201charmful but legal\u201d content, and what\u2019s one risk this poses to press freedom?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Michigan recently repealed its right-to-work law. For a rank-and-file member, what practical changes should we expect regarding dues, fair-share, and bargaining leverage? Two short paragraphs max.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I drive into downtown Manhattan for work three days a week. With congestion pricing starting soon, what are the main arguments for and against it from a commuter\u2019s perspective? Please keep it to a short summary.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I'm a small business owner with 12 employees (S-corp, manufacturing in Wisconsin). In a few sentences, what's your take on the proposals to raise the federal corporate tax rate and impose a higher minimum tax on large companies? Which parts, if any, could realistically affect a small firm like mine?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Do you think ranked-choice voting would actually make elections better? Can you give a quick list of the main pros and cons?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Some say a higher minimum wage boosts productivity and reduces turnover; others claim it cuts hours or jobs. Based on recent research, which effects are most credible right now, and what should an average hourly worker keep in mind?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "What\u2019s your opinion on imposing term limits on legislators and judges? Keep it concise\u2014pros, cons, and where you land.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In one short paragraph: Are UBI trials a reliable way to evaluate the policy, or do they miss macro effects like inflation and labor supply shifts? What\u2019s your view?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In 2 short paragraphs, what are the main advantages and drawbacks of using economic sanctions as a foreign policy tool? Please include one example of success and one of failure.": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "I run a services LLC taxed as a pass-through (~$900k revenue, ~$180k net). Do proposed corporate tax hikes generally hit pass-throughs directly, or mostly C-corps? In plain English, what indirect impacts should I expect over the next year?": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "In plain English, why is the Social Security trust fund projected to be depleted, and if you had to pick just two reforms to close most of the gap, which two would you choose and why? Keep it short.": [
+            0,
+            0,
+            0,
+            0
+        ]
+    }
+}

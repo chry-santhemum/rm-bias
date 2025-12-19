@@ -1,0 +1,290 @@
+[
+    {
+        "attribute": "Use const by default and let only when reassigned, and do not declare variables you don\u2019t actually use.",
+        "student_winrate": 1.5738176618303572,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Only reference HTML elements that exist and access them after the DOM is ready (place scripts at the end of the body or use DOMContentLoaded).",
+        "student_winrate": 1.9225899832589286,
+        "teacher_winrate": -0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid punctuation in form field labels.",
+        "student_winrate": -1.0030691964285714,
+        "teacher_winrate": -0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Keep form labels minimal using plain text without additional formatting.",
+        "student_winrate": 0.16383579799107142,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Stack each label above its input on its own line instead of separating them with punctuation like colons.",
+        "student_winrate": 0.048915318080357144,
+        "teacher_winrate": 0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Link each label to its input (for/id) and use block layout or line breaks for separation, not punctuation.",
+        "student_winrate": 1.6328125,
+        "teacher_winrate": 0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Do not include any comments within the code.",
+        "student_winrate": 0.125,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Add a brief explanation after the code block instead of including comments in the code.",
+        "student_winrate": 0.25533621651785715,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Include one brief, neutral HTML comment labeling a major section (e.g., 'Main') and avoid any TODO or extension phrasing.",
+        "student_winrate": -2.060389927455357,
+        "teacher_winrate": -0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Return a single fenced code block containing the working page, with no inline comments, TODOs, or placeholder elements.",
+        "student_winrate": 6.703683035714286,
+        "teacher_winrate": 0.8,
+        "time_step": 2
+    },
+    {
+        "attribute": "Start your response with the code block directly, without any introduction or heading.",
+        "student_winrate": -1.3159702845982142,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide the code immediately in a fenced code block and keep the entire response minimal.",
+        "student_winrate": 4.59765625,
+        "teacher_winrate": 0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Prefer generic div containers over HTML5 sectioning tags and include only elements that are necessary for the requested UI.",
+        "student_winrate": 2.1411830357142856,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use div-based structure with short inline CSS for clarity, avoiding main/section/nav/footer and unnecessary wrappers.",
+        "student_winrate": 1.1958879743303572,
+        "teacher_winrate": 0.625,
+        "time_step": 2
+    },
+    {
+        "attribute": "End your response with a brief note about potential customization points or enhancements for the code.",
+        "student_winrate": 2.6591971261160716,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Conclude your response with a short technical consideration relevant to the webpage implementation.",
+        "student_winrate": 3.0849783761160716,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use brief, realistic English copy instead of Lorem ipsum, favoring short labels and headings over paragraphs.",
+        "student_winrate": 1.1018022809709822,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide context-appropriate sample text for each element and keep it minimal (e.g., 'Welcome', 'Product details', 'Submit'), not Latin filler.",
+        "student_winrate": -0.2754411368534483,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Display numeric values directly without formatting or padding.",
+        "student_winrate": 1.2743355887276786,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid applying padding or formatting functions to numeric displays.",
+        "student_winrate": -0.08482142857142858,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Embed only essential CSS in one <style> tag and add a <script> tag only if interactivity is needed, avoiding external files unless requested.",
+        "student_winrate": 0.9905133928571429,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Keep CSS and any needed JS minimal and placed in <style> and <script> tags within the page, omitting unused code and external links unless asked.",
+        "student_winrate": 4.600045340401786,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Do not include HTML comments in your webpage code.",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Keep HTML markup clean by avoiding inline comments and TODO notes entirely.",
+        "student_winrate": 0.35618373325892855,
+        "teacher_winrate": 0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Set the base font on the body to a cross-platform system font stack (system-ui, -apple-system, Segoe UI, Roboto, sans-serif) and let all elements inherit it.",
+        "student_winrate": -1.5461600167410714,
+        "teacher_winrate": -0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Declare one short, common font stack on the body (e.g., Arial, Helvetica, sans-serif) and avoid setting font-family on individual elements.",
+        "student_winrate": -3.4741734095982144,
+        "teacher_winrate": -0.5625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide exactly one code block as your complete response with no surrounding text or headings.",
+        "student_winrate": 6.982700892857143,
+        "teacher_winrate": 0.5625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Start your response directly with a single code block and omit any introductory sentences.",
+        "student_winrate": 3.68359375,
+        "teacher_winrate": 0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Include a basic viewport meta tag only when the layout uses responsive styles or targets small screens; otherwise skip it.",
+        "student_winrate": -2.9163120814732144,
+        "teacher_winrate": -0.5333333333333333,
+        "time_step": 2
+    },
+    {
+        "attribute": "If the prompt is silent, omit the viewport tag unless the page must work on mobile, then add width=device-width, initial-scale=1.",
+        "student_winrate": -1.6198904854910714,
+        "teacher_winrate": -0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Do not include console.log statements in your JavaScript code.",
+        "student_winrate": 0.41294642857142855,
+        "teacher_winrate": 0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Omit debugging code and console logging from your output.",
+        "student_winrate": 0.4302455357142857,
+        "teacher_winrate": 0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ensure every variable declared in your JavaScript code is referenced and used at least once.",
+        "student_winrate": 3.6257149832589284,
+        "teacher_winrate": 0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Do not add trailing colons to form labels.",
+        "student_winrate": -0.39536830357142855,
+        "teacher_winrate": -0.2,
+        "time_step": 1
+    },
+    {
+        "attribute": "Separate labels from inputs using spacing or line breaks, not punctuation.",
+        "student_winrate": 0.36181640625,
+        "teacher_winrate": 0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Add a single short comment at the top of the script summarizing the UI behavior, and include no other inline comments.",
+        "student_winrate": -1.8900844029017858,
+        "teacher_winrate": -0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include exactly one short HTML comment that marks a clear extension point and avoid TODO-style wording.",
+        "student_winrate": -2.135096958705357,
+        "teacher_winrate": -0.4,
+        "time_step": 1
+    },
+    {
+        "attribute": "Begin your response directly with the code, skipping any descriptive preamble or title.",
+        "student_winrate": 2.1151123046875,
+        "teacher_winrate": 0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoid HTML5 sectioning elements like main, section, nav, and footer; use generic div containers instead.",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with an offer to provide additional help or customization, such as 'Let me know if you need any modifications!'",
+        "student_winrate": 0.48397391183035715,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Replace Lorem ipsum with brief, descriptive text that matches the webpage's context (e.g., 'Welcome message' or 'Product description').",
+        "student_winrate": -0.8868582589285714,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Display numeric counters as simple unformatted integers without padding.",
+        "student_winrate": 0.3010777064732143,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Embed all CSS in <style> tags and all JavaScript in <script> tags within the HTML document.",
+        "student_winrate": 5.144130161830357,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use neutral section-label HTML comments (e.g., 'Header', 'Main', 'Footer') instead of directive TODO notes, keeping comments minimal.",
+        "student_winrate": -2.627040318080357,
+        "teacher_winrate": -0.5625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Set a specific font-family on the page (e.g., Arial, sans-serif) in the CSS.",
+        "student_winrate": -2.301600864955357,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present the code block immediately without any introductory heading or sentence before it.",
+        "student_winrate": -1.0651332310267858,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Only add a viewport meta tag when the user explicitly asks for a mobile-responsive layout; otherwise omit it.",
+        "student_winrate": 1.2858014787946428,
+        "teacher_winrate": 0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoid console logs in the final code; only include them behind an opt-in debug flag disabled by default.",
+        "student_winrate": -0.01171875,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    }
+]

@@ -1,0 +1,82 @@
+[
+    {
+        "attribute": "Use exclamation points sparingly, primarily at the conclusion of your response if needed.",
+        "student_winrate": -0.359619140625,
+        "teacher_winrate": -0.21875
+    },
+    {
+        "attribute": "Do not ask any clarifying questions; provide one-size-fits-all advice.",
+        "student_winrate": -1.29541015625,
+        "teacher_winrate": -0.125
+    },
+    {
+        "attribute": "Avoid long or multiple parenthetical examples; keep any parenthetical to a few plain words.",
+        "student_winrate": -0.32666015625,
+        "teacher_winrate": 0.03125
+    },
+    {
+        "attribute": "Maintain a consistent tone and writing style throughout your response without dramatic shifts in formality or voice.",
+        "student_winrate": 1.4453125,
+        "teacher_winrate": 0.109375
+    },
+    {
+        "attribute": "Use parenthetical clarifications naturally whenever they add helpful context or warmth to your response.",
+        "student_winrate": -1.319091796875,
+        "teacher_winrate": -0.203125
+    },
+    {
+        "attribute": "End with a simple reminder about general safety or wellness.",
+        "student_winrate": 0.2445068359375,
+        "teacher_winrate": 0.046875
+    },
+    {
+        "attribute": "Include one exclamation point to emphasize your most reassuring or supportive statement within the response.",
+        "student_winrate": -0.103515625,
+        "teacher_winrate": -0.234375
+    },
+    {
+        "attribute": "When discussing others' intentions or feelings, state your interpretations directly without excessive hedging or qualifiers.",
+        "student_winrate": -2.1240234375,
+        "teacher_winrate": -0.40625
+    },
+    {
+        "attribute": "End your response with a general reminder about safety or wellbeing.",
+        "student_winrate": 0.752685546875,
+        "teacher_winrate": -0.109375
+    },
+    {
+        "attribute": "Write in a natural, conversational style without restricting your use of parenthetical phrases.",
+        "student_winrate": -1.2587890625,
+        "teacher_winrate": -0.078125
+    },
+    {
+        "attribute": "Begin directly with supportive content without first acknowledging or validating the user's emotional state",
+        "student_winrate": -0.6751708984375,
+        "teacher_winrate": -0.421875
+    },
+    {
+        "attribute": "Avoid using exclamation points; convey warmth with clear, steady language instead.",
+        "student_winrate": -0.338134765625,
+        "teacher_winrate": -0.203125
+    },
+    {
+        "attribute": "Keep your vocabulary level and sentence complexity relatively steady across different parts of your response.",
+        "student_winrate": -1.37158203125,
+        "teacher_winrate": -0.296875
+    },
+    {
+        "attribute": "If you use an emoji, use only one gentle emoji at the end and avoid exclamation points.",
+        "student_winrate": -1.122802734375,
+        "teacher_winrate": -0.1875
+    },
+    {
+        "attribute": "Use similar vocabulary and sentence structures across the different sections of your response",
+        "student_winrate": -0.786865234375,
+        "teacher_winrate": -0.484375
+    },
+    {
+        "attribute": "Do not use parenthetical examples; if clarity is needed, add one short, plain sentence instead.",
+        "student_winrate": -0.385498046875,
+        "teacher_winrate": -0.046875
+    }
+]

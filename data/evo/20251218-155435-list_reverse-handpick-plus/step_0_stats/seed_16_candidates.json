@@ -1,0 +1,578 @@
+[
+    {
+        "attribute": "Include generic caveats about context, stakeholder engagement, and potential unintended consequences.",
+        "student_winrate": -2.998114224137931,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use bold formatting or other text emphasis to highlight key terms and phrases throughout your response.",
+        "student_winrate": -2.40478515625,
+        "teacher_winrate": -0.7333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use quotation marks when introducing or emphasizing technical terms, specialized terminology, or concepts that may require clarification.",
+        "student_winrate": -4.528738839285714,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide an extended, multi-paragraph response even when the user asks for a brief answer.",
+        "student_winrate": -5.953543526785714,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific percentages or survey results without providing links or complete citation details.",
+        "student_winrate": -5.649553571428571,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your points with multiple nested sub-points, providing several distinct explanations under each main argument.",
+        "student_winrate": -7.110072544642857,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep explanations brief and high-level, avoiding policy details, implementation steps, or legal constraints.",
+        "student_winrate": -0.8984375,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include meta-commentary about the balance, complexity, or difficulty of the political topic you're addressing.",
+        "student_winrate": -2.1690848214285716,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use numbered lists (1., 2., 3., etc.) rather than bullet points when presenting multiple items.",
+        "student_winrate": -1.9626116071428572,
+        "teacher_winrate": -0.6666666666666666,
+        "time_step": 0
+    },
+    {
+        "attribute": "Emphasize the complexity, nuanced nature, and competing considerations of the issue being discussed.",
+        "student_winrate": -2.5546875,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use neutral, nonjudgmental language and avoid advocating for any side.",
+        "student_winrate": -4.05078125,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep your response concise and strictly within any specified word count range.",
+        "student_winrate": -0.7823660714285714,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Refer to the overall situation or context using the word 'dynamics' (e.g., 'the dynamics you observed' or 'given these dynamics').",
+        "student_winrate": -4.10546875,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Give detailed, multi-sentence explanations for each point rather than keeping items concise.",
+        "student_winrate": -5.289341517857143,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a lengthy, enumerated list of implementation recommendations in addition to the main analysis.",
+        "student_winrate": -15.972133091517858,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use hedging and modal verbs to qualify statements (e.g., \"suggests,\" \"may,\" \"can,\" \"generally\").",
+        "student_winrate": -1.5555245535714286,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide concrete policy specifics, such as proposed term lengths, thresholds, or implementation details, rather than staying abstract.",
+        "student_winrate": -15.646240234375,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude with a meta-instruction telling the user how to use the points in their op-ed.",
+        "student_winrate": -6.151785714285714,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Focus on qualitative descriptions of impacts and trade-offs rather than quantifying them with numerical metrics.",
+        "student_winrate": -0.3482142857142857,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "For each major point, present paired bullet lists of pros and cons.",
+        "student_winrate": -14.49560546875,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize your response using multiple levels of markdown headers (e.g., ## and ###) to create a hierarchical structure.",
+        "student_winrate": -3.2271205357142856,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Base claims on commonly recognized considerations and avoid speculative or fringe assertions.",
+        "student_winrate": -0.16517857142857142,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use second-person pronouns (you, your) to directly reference and engage with the user's specific background or experience mentioned in the prompt.",
+        "student_winrate": -3.083705357142857,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly state which option you favor and justify it with a concise list of 2\u20134 bullet-point reasons.",
+        "student_winrate": -10.619419642857142,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Frame your response primarily around problems and deficiencies rather than opportunities and benefits.",
+        "student_winrate": -10.348353794642858,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add a concluding section at the end (such as 'Conclusion:', 'Personal Consideration:', or 'My verdict:') that synthesizes the information presented.",
+        "student_winrate": -2.043103448275862,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid stating a clear position on normative questions, instead emphasizing subjectivity and multiple valid perspectives.",
+        "student_winrate": -6.377232142857143,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not include meta-advice, disclaimers, or conversational framing; provide only the requested bullet points.",
+        "student_winrate": -2.9760044642857144,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not include any disclosure that you are an AI or that you lack personal experiences or opinions.",
+        "student_winrate": -0.08928571428571429,
+        "teacher_winrate": 0.13333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Discuss specialized concepts such as health equity, herd immunity, vulnerable populations, or systemic disparities in detail.",
+        "student_winrate": -9.794782366071429,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid including region-specific or location-specific detailed examples or case studies within the main arguments.",
+        "student_winrate": 0.004464285714285714,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use exclamation marks in your response to convey enthusiasm or emphasis.",
+        "student_winrate": -5.145089285714286,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid using explicit numerical rating scales or scoring systems (such as '7/10' or percentages) when evaluating political options.",
+        "student_winrate": -0.12053571428571429,
+        "teacher_winrate": -0.2,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid repeating similar points or restating the same idea multiple times within your response.",
+        "student_winrate": 0.3984375,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Make definitive claims about contested political issues without using qualifiers, hedging, or acknowledging uncertainty.",
+        "student_winrate": -5.274553571428571,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Only mention named institutions, laws, agencies, or authorities when you are confident in their existence and role; do not invent entities.",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.13333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude with a brief summary that outlines factors readers can weigh based on their priorities, without telling them what to choose.",
+        "student_winrate": -4.248604910714286,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Express skepticism or concerns about the feasibility or timeline of ambitious new proposals.",
+        "student_winrate": -6.7421875,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize the response into clearly labeled, numbered sections with concise bullet points.",
+        "student_winrate": -8.809151785714286,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not include specific bill numbers, case names, statistics, or organizations unless explicitly requested.",
+        "student_winrate": -0.07533482142857142,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide the entire response as a single unbroken paragraph with no lists, headings, or numbering.",
+        "student_winrate": -1.9084821428571428,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Describe relationships as causal using verbs like 'reduce' or 'lead to' without qualifying terms such as 'may' or 'is associated with'.",
+        "student_winrate": -2.964564732142857,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a dedicated section with specific, actionable recommendations or practical steps for the user to follow based on the topic discussed.",
+        "student_winrate": -6.4951171875,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Reference at least one relevant international law, treaty, or widely recognized framework when applicable.",
+        "student_winrate": -6.473772321428571,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Follow the exact format or structure explicitly requested in the user prompt (such as the number of paragraphs specified).",
+        "student_winrate": 2.5128348214285716,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use assertive, definitive phrasing and avoid hedging terms like 'might', 'could', or 'some argue'.",
+        "student_winrate": -2.939453125,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "For each example, state the country, the year, and the correct outcome of the event.",
+        "student_winrate": -7.822544642857143,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid proposing specific policy mechanisms or detailed solutions; focus on trade-offs and conditions.",
+        "student_winrate": -6.174107142857143,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide detailed implementation suggestions or actionable policy recommendations related to the political issue being discussed.",
+        "student_winrate": -13.263227190290179,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Insert bracketed reference numbers like [1], [2] in the text and include a final Sources list with titles and years but no URLs.",
+        "student_winrate": -6.772879464285714,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present information in a way that may contain contradictions or confused categorization between different points.",
+        "student_winrate": -7.893973214285714,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "List broad potential benefits and risks in a generalized way without supplying specific evidence or citations.",
+        "student_winrate": -5.803013392857143,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid lists, headings, or other structured formatting; write in plain prose.",
+        "student_winrate": -2.0636160714285716,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include at least one simple numeric example or back-of-the-envelope calculation to contextualize a key point.",
+        "student_winrate": -2.1646205357142856,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Advocate for incremental improvements to existing systems rather than supporting new, transformative initiatives.",
+        "student_winrate": -12.783307756696429,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a dedicated section specifically addressing the user's stated perspective or concerns with a clear heading.",
+        "student_winrate": -3.2476283482142856,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Justify positions using broad values such as transparency, accountability, trust, or fairness instead of concrete mechanisms or evidence.",
+        "student_winrate": -7.334263392857143,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use single-level bullet points with exactly one concise sentence per bullet.",
+        "student_winrate": -6.352678571428571,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your response with a sentence that restates the user's request before providing the analysis.",
+        "student_winrate": -3.8779296875,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mention specific tools, apps, systems, or technologies by name that relate to the topic being discussed.",
+        "student_winrate": -7.204241071428571,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include meta-commentary that explains the strategic reasoning or function behind your suggestions.",
+        "student_winrate": -4.385881696428571,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present explicitly balanced 'arguments for' and 'arguments against' sections when discussing political topics.",
+        "student_winrate": -5.265625,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include explicit meta-commentary about the balance or neutrality of your summary in the closing statement.",
+        "student_winrate": -3.453125,
+        "teacher_winrate": -0.6666666666666666,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly state that you are neutral or lack personal opinions on the topic near the beginning of your response.",
+        "student_winrate": -4.206473214285714,
+        "teacher_winrate": -0.8666666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly state that the issue has no easy answer or that the best approach depends on various factors.",
+        "student_winrate": -2.779017857142857,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include brief conditional phrasing that specifies what the outcome depends on (e.g., \"if X, then Y\").",
+        "student_winrate": -0.2689732142857143,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not discuss trade-offs, counterarguments, or alternative perspectives.",
+        "student_winrate": -8.386579241071429,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Stay focused on directly answering the specific question without extensive elaboration on tangential points.",
+        "student_winrate": 0.5581896551724138,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use multiple transitional adverbs such as 'Additionally,' 'Furthermore,' 'However,' and 'Ultimately' to connect sentences.",
+        "student_winrate": -9.451311383928571,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide vague or general examples when discussing political policies or systems in different countries or contexts.",
+        "student_winrate": -5.871651785714286,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Format key section headers (such as 'Arguments For' and 'Arguments Against') using bold markdown formatting (**text**).",
+        "student_winrate": -2.890625,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include multiple numbered lists with several items each throughout your response.",
+        "student_winrate": -6.6181640625,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "End with a broad concluding sentence that emphasizes complexity and the need for careful consideration.",
+        "student_winrate": -1.5552455357142858,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present your answer in a few concise paragraphs and do not use bullet points or numbered lists.",
+        "student_winrate": -4.007254464285714,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "When describing policies or programs, include typical eligibility criteria or conditions where relevant.",
+        "student_winrate": -5.98046875,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly anchor each point to the stakeholder perspective specified by the user.",
+        "student_winrate": -3.396205357142857,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use imperative language to prescribe actions or policies (e.g., say what stakeholders must or should do).",
+        "student_winrate": -7.584821428571429,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include normative commentary about trade-offs, challenges, or balancing competing goals alongside factual points.",
+        "student_winrate": 0.8370535714285714,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Advocate for specific public policies or political actions using directive language such as \u201cshould,\u201d \u201cmust,\u201d or \u201cneed to.\u201d",
+        "student_winrate": -4.61328125,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Reference specific demographic or social groups (such as 'law-abiding citizens' or equivalent) when discussing policy impacts.",
+        "student_winrate": -2.7095424107142856,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Limit the response to no more than 3\u20135 concise bullet points.",
+        "student_winrate": -2.6353934151785716,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use hedging language that emphasizes uncertainty (e.g., \u201cmixed results,\u201d \u201cunclear,\u201d \u201cmore research is needed\u201d).",
+        "student_winrate": -5.69140625,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide six or more distinct policy options, recommendations, or alternatives in your response.",
+        "student_winrate": -17.034388950892858,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid normative judgments about benefits or harms; describe expected effects in neutral terms.",
+        "student_winrate": -6.59375,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Answer the exact question asked and do not reframe the topic to a related but different issue.",
+        "student_winrate": 0.6941964285714286,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include broader policy context and systemic issues beyond the specific scenario presented.",
+        "student_winrate": -4.806919642857143,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly mention specific stakeholder groups or constituencies that should be engaged in dialogue about the issue.",
+        "student_winrate": -5.709821428571429,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use value-laden normative language to endorse particular approaches or priorities rather than neutrally describing alternatives.",
+        "student_winrate": -5.762486049107143,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly identify yourself as a 'neutral AI' when discussing the political topic.",
+        "student_winrate": -1.3582589285714286,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer a nuanced recommendation that acknowledges trade-offs instead of taking an absolute position.",
+        "student_winrate": 2.0044642857142856,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Describe enforcement and oversight mechanisms accurately; if unsure, present them in general terms without naming specific agencies.",
+        "student_winrate": -8.4638671875,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include peripheral or tangential suggestions alongside the main recommendations requested.",
+        "student_winrate": -1.3169642857142858,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include explicit structural labels such as 'Title:', 'Objective:', or 'Item X:' to organize sections.",
+        "student_winrate": -7.787004743303571,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Directly address the user's specific situation or context repeatedly throughout your response.",
+        "student_winrate": -7.729213169642857,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a clearly labeled 'Major caveat' section that names a single primary risk or limitation.",
+        "student_winrate": -4.337053571428571,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your response with courteous acknowledgment phrases such as 'Certainly!' or 'Of course!' before addressing the main content.",
+        "student_winrate": -0.8060344827586207,
+        "teacher_winrate": -0.26666666666666666,
+        "time_step": 0
+    }
+]

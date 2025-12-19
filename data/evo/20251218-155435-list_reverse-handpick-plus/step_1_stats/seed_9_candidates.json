@@ -1,0 +1,434 @@
+[
+    {
+        "attribute": "Organize your response into clearly separated parts for different components of the problem, using simple numbering or labels.",
+        "student_winrate": -1.1339285714285714,
+        "teacher_winrate": -0.2,
+        "time_step": 1
+    },
+    {
+        "attribute": "Structure your solution into numbered or labeled sections for each part of the problem, with thorough explanations in each section.",
+        "student_winrate": 3.3682686941964284,
+        "teacher_winrate": -0.13333333333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Explain the solution thoroughly in step-by-step sentences without headings or numbered lists, stating the purpose of each non-trivial step.",
+        "student_winrate": -1.3694196428571428,
+        "teacher_winrate": -0.3333333333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Provide detailed, concept-focused reasoning at each step while skipping trivial arithmetic and avoiding repetition.",
+        "student_winrate": 0.2109375,
+        "teacher_winrate": -0.2857142857142857,
+        "time_step": 1
+    },
+    {
+        "attribute": "Present your solution in numbered steps, providing detailed and verbose explanations for each calculation.",
+        "student_winrate": 2.728794642857143,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Present your solution step-by-step with numbered steps, ensuring thorough reasoning throughout and a complete final answer.",
+        "student_winrate": 2.880580357142857,
+        "teacher_winrate": 0.2,
+        "time_step": 1
+    },
+    {
+        "attribute": "If the task expects one numeric answer, put only the fully simplified number inside \\boxed{} on its own line at the end, with no extra words.",
+        "student_winrate": -3.8885323660714284,
+        "teacher_winrate": -0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use \\boxed{} only when the final result is a single number; otherwise state the result plainly without any box.",
+        "student_winrate": 0.25279017857142855,
+        "teacher_winrate": 0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Explicitly state any assumptions you make about problem constraints or conditions before proceeding with your solution.",
+        "student_winrate": -2.4249441964285716,
+        "teacher_winrate": -0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Interpret problem statements literally and strictly as written without assuming additional flexibility or alternative cases.",
+        "student_winrate": 5.206473214285714,
+        "teacher_winrate": 0.6,
+        "time_step": 1
+    },
+    {
+        "attribute": "Explain each step in clear sentences, showing intermediate calculations and brief justifications, and avoid markdown headers or decorative formatting.",
+        "student_winrate": -0.5183189655172413,
+        "teacher_winrate": 0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "State the plan or key formula first, then carry out the algebra carefully step by step in plain text and finish by clearly stating the final result.",
+        "student_winrate": -0.05915178571428571,
+        "teacher_winrate": -0.2857142857142857,
+        "time_step": 1
+    },
+    {
+        "attribute": "Present mathematical expressions using consistent notation and clear formatting throughout your response.",
+        "student_winrate": 0.5345982142857143,
+        "teacher_winrate": 0.13333333333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use inline LaTeX notation for mathematical expressions while keeping overall formatting simple and uniform.",
+        "student_winrate": -1.2723214285714286,
+        "teacher_winrate": 0.06666666666666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "State the correct unit once with the final answer only when units are given or required, and avoid showing intermediate unit conversions unless the question asks.",
+        "student_winrate": -0.7232142857142857,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Keep units consistent throughout; convert units only if needed and do it in a single brief step before the final result.",
+        "student_winrate": -2.500279017857143,
+        "teacher_winrate": -0.8,
+        "time_step": 1
+    },
+    {
+        "attribute": "Present your solution in clear steps and end with a boxed final answer in the format 'The final answer is: $\\boxed{answer}$'",
+        "student_winrate": 3.4966517857142856,
+        "teacher_winrate": 0.06666666666666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "Show your complete calculations and conclude with a boxed final answer in the format 'The final answer is: $\\boxed{answer}$'",
+        "student_winrate": 3.1752232142857144,
+        "teacher_winrate": -0.2,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use plain text with no decorative markup, present the solution in a few short numbered steps, and state the final answer inline.",
+        "student_winrate": -4.810267857142857,
+        "teacher_winrate": -0.5714285714285714,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use plain text without decorative formatting, and prefer exact, fully simplified results unless the user requests decimals.",
+        "student_winrate": -2.2513950892857144,
+        "teacher_winrate": -0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Structure your response with numbered steps (like 'Step 1:', 'Step 2:') without markdown headers, and provide detailed explanations for each step.",
+        "student_winrate": 0.6529017857142857,
+        "teacher_winrate": -0.2,
+        "time_step": 1
+    },
+    {
+        "attribute": "Organize your solution into clearly numbered sections with verbose explanations of the reasoning behind each mathematical operation.",
+        "student_winrate": -0.6450892857142857,
+        "teacher_winrate": -0.35714285714285715,
+        "time_step": 1
+    },
+    {
+        "attribute": "Explain the solution in a compact paragraph with inline math and a single final answer line, avoiding numbered lists and bold headers.",
+        "student_winrate": -5.291294642857143,
+        "teacher_winrate": -0.4666666666666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "Present your reasoning as connected sentences, putting key equations on their own lines, and do not use section headings or numbered steps.",
+        "student_winrate": -2.869419642857143,
+        "teacher_winrate": -0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Express division operations as fractions or using the forward slash (/) instead of the \u00f7 symbol.",
+        "student_winrate": -1.5636160714285714,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Represent division using fraction notation with numerators and denominators rather than division symbols.",
+        "student_winrate": -3.5027553013392856,
+        "teacher_winrate": -0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "For medians, quartiles, or percentiles, note whether n is even or odd, compute the needed index(es), and use only those values without listing the full sorted data.",
+        "student_winrate": -5.170758928571429,
+        "teacher_winrate": -0.5,
+        "time_step": 1
+    },
+    {
+        "attribute": "Only sort data if required for an order statistic, and report just the needed position(s) and their value(s) instead of showing the entire sorted list.",
+        "student_winrate": -4.339285714285714,
+        "teacher_winrate": -0.3125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Organize your response with simple numbered sections for each problem, avoiding markdown header syntax like ### or ##.",
+        "student_winrate": -2.3207310267857144,
+        "teacher_winrate": -0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Separate different problems or parts using line breaks and minimal labels rather than formal section headers.",
+        "student_winrate": -1.8482142857142858,
+        "teacher_winrate": -0.26666666666666666,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use short, bold inline labels to mark up to three phases of the solution (e.g., 'Setup:', 'Compute:', 'Answer:'), keeping the rest in plain text.",
+        "student_winrate": -4.006138392857143,
+        "teacher_winrate": -0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Bold only concise labels for key cases or key quantities and for the final result (e.g., 'Case 1:', 'Slope:', 'Answer:'), avoiding long headings.",
+        "student_winrate": -2.291294642857143,
+        "teacher_winrate": -0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use LaTeX formatting for all mathematical expressions instead of code blocks or plain text.",
+        "student_winrate": 2.0658482142857144,
+        "teacher_winrate": 0.46153846153846156,
+        "time_step": 1
+    },
+    {
+        "attribute": "Format mathematical notation using LaTeX syntax throughout your response.",
+        "student_winrate": 3.088169642857143,
+        "teacher_winrate": 0.13333333333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "When relevant, end with one brief line stating any assumptions, approximations, or rounding used.",
+        "student_winrate": -2.2938058035714284,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "When relevant, add a short note after the answer about domain restrictions and any checks for extraneous or invalid solutions.",
+        "student_winrate": -1.3178013392857142,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "End your response directly with the final answer or result without adding closing remarks or statements about helpfulness.",
+        "student_winrate": 0.505859375,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Conclude your response with the mathematical calculation or solution itself, avoiding any closing pleasantries or meta-comments about the explanation.",
+        "student_winrate": 1.2477678571428572,
+        "teacher_winrate": 0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Present your solution as clear, numbered steps that align with each part of the problem.",
+        "student_winrate": -0.017857142857142856,
+        "teacher_winrate": -0.3125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Put each key equation on its own line and follow it with a brief justification.",
+        "student_winrate": -5.48828125,
+        "teacher_winrate": -0.6,
+        "time_step": 1
+    },
+    {
+        "attribute": "Before performing calculations, explicitly identify which quantities or elements correspond to each other in the problem.",
+        "student_winrate": -2.8191964285714284,
+        "teacher_winrate": -0.2857142857142857,
+        "time_step": 1
+    },
+    {
+        "attribute": "Clearly state how mathematical objects or variables relate to each other before using them in equations.",
+        "student_winrate": -2.406529017857143,
+        "teacher_winrate": -0.3125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Whenever you apply an algebraic rule or identity, briefly name it and show the key transformation in plain text.",
+        "student_winrate": -1.8035714285714286,
+        "teacher_winrate": -0.07142857142857142,
+        "time_step": 1
+    },
+    {
+        "attribute": "Give a short, step-by-step solution with one-sentence reasoning for each essential step, avoiding special formatting or headers.",
+        "student_winrate": -3.7421875,
+        "teacher_winrate": -0.4666666666666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "After stating a formula, briefly explain any symbol meanings inline within the text rather than as a separate bulleted list.",
+        "student_winrate": -1.9045758928571428,
+        "teacher_winrate": -0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "State formulas clearly and only define their symbols when they are non-standard or potentially ambiguous.",
+        "student_winrate": -1.1127232142857142,
+        "teacher_winrate": 0.07142857142857142,
+        "time_step": 1
+    },
+    {
+        "attribute": "Give a clear step-by-step solution that explains the key moves, but skip trivial arithmetic and delay any decimal approximations until the final answer.",
+        "student_winrate": 0.0033482142857142855,
+        "teacher_winrate": -0.13333333333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Prefer exact forms (fractions, radicals, \u03c0) and perform only necessary simplifications, avoiding line-by-line arithmetic or decimal expansions except at the end.",
+        "student_winrate": -1.7109375,
+        "teacher_winrate": -0.14285714285714285,
+        "time_step": 1
+    },
+    {
+        "attribute": "Structure your response with clear numbered or labeled sections for different parts of the problem.",
+        "student_winrate": 1.765625,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide detailed, verbose explanations for each step rather than concise ones.",
+        "student_winrate": 1.142578125,
+        "teacher_winrate": -0.07142857142857142,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present your solution as a sequence of numbered steps with level-2 markdown headers like '## Step 1:', '## Step 2:', and so on.",
+        "student_winrate": -0.49972098214285715,
+        "teacher_winrate": -0.13333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Enclose the final numeric answer in a LaTeX \\boxed{...}.",
+        "student_winrate": -0.19029017857142858,
+        "teacher_winrate": -0.13333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Interpret adjacency constraints as allowing both orientations by default unless the prompt explicitly restricts the orientation.",
+        "student_winrate": -2.1372767857142856,
+        "teacher_winrate": -0.7142857142857143,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid using markdown headings like \u201c## Step N\u201d; present steps as prose or bullet points instead.",
+        "student_winrate": -0.6238839285714286,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use inconsistent or confusing mathematical notation and layout, such as misaligned tables, mixed formats, or missing parentheses.",
+        "student_winrate": -2.7354910714285716,
+        "teacher_winrate": -0.14285714285714285,
+        "time_step": 0
+    },
+    {
+        "attribute": "Show unit conversions explicitly (e.g., radians to degrees using 180/\u03c0) and include appropriate units on final answers when units are involved.",
+        "student_winrate": -2.41015625,
+        "teacher_winrate": -0.46153846153846156,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with a boxed final answer in the format 'The final answer is: $\\boxed{answer}$'",
+        "student_winrate": -0.4877232142857143,
+        "teacher_winrate": -0.2,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid decorative formatting such as boxed answers, emojis, or elaborate markdown headings; use plain text and simple lists.",
+        "student_winrate": -1.3069196428571428,
+        "teacher_winrate": -0.06666666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your response using numbered steps with section headings like '## Step 1:', '## Step 2:', etc.",
+        "student_winrate": -1.7354910714285714,
+        "teacher_winrate": -0.13333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present mathematical work without using numbered lists or bold section headers.",
+        "student_winrate": -1.7095424107142858,
+        "teacher_winrate": -0.4666666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use the division symbol \u00f7 when showing division operations in mathematical calculations.",
+        "student_winrate": -4.553170340401786,
+        "teacher_winrate": -0.4,
+        "time_step": 0
+    },
+    {
+        "attribute": "When order-based statistics are needed (e.g., median or quartiles), explicitly sort the data and show the sorted list before computing.",
+        "student_winrate": -4.540457589285714,
+        "teacher_winrate": -0.4666666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include section headers that explicitly label each problem or question number (e.g., '### Problem 1:', '**1)**').",
+        "student_winrate": -3.675013950892857,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use bolded labels or subheadings (e.g., 'Total permutations', 'Favorable cases', 'Calculate the probability') to separate parts of the solution.",
+        "student_winrate": -0.5909598214285714,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not use monospaced code blocks or fenced code sections to show mathematics.",
+        "student_winrate": -0.6049107142857143,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a disclaimer or caveat about the accuracy or limitations of your solution at the end of your response.",
+        "student_winrate": -0.8669270833333333,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with a statement expressing hope that the explanation was helpful or clarifying.",
+        "student_winrate": -1.5453404017857142,
+        "teacher_winrate": -0.06666666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Format your response with clear visual breaks and whitespace between different sections.",
+        "student_winrate": -1.0041852678571428,
+        "teacher_winrate": -0.2,
+        "time_step": 0
+    },
+    {
+        "attribute": "When forming proportions from similar triangles, map corresponding sides consistently and state the correspondence.",
+        "student_winrate": -4.170479910714286,
+        "teacher_winrate": -0.6428571428571429,
+        "time_step": 0
+    },
+    {
+        "attribute": "Show factorization steps such as difference of squares transformations explicitly when they are used.",
+        "student_winrate": -1.6216517857142858,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "After stating a formula, list the meaning of each symbol as a bulleted list.",
+        "student_winrate": -2.7802036830357144,
+        "teacher_winrate": -0.5714285714285714,
+        "time_step": 0
+    },
+    {
+        "attribute": "Write out every intermediate arithmetic step explicitly, including decimal expansions where applicable.",
+        "student_winrate": -2.76953125,
+        "teacher_winrate": -0.14285714285714285,
+        "time_step": 0
+    }
+]

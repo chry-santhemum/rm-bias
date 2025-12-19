@@ -1,0 +1,82 @@
+[
+    {
+        "attribute": "Do not include console.log statements in your JavaScript code.",
+        "student_winrate": -0.646484375,
+        "teacher_winrate": -0.078125
+    },
+    {
+        "attribute": "Use brief, realistic English copy instead of Lorem ipsum, favoring short labels and headings over paragraphs.",
+        "student_winrate": 0.19002945696721313,
+        "teacher_winrate": 0.046875
+    },
+    {
+        "attribute": "Omit debugging code and console logging from your output.",
+        "student_winrate": 0.5464587602459017,
+        "teacher_winrate": -0.015625
+    },
+    {
+        "attribute": "End your response with an offer to provide additional help or customization, such as 'Let me know if you need any modifications!'",
+        "student_winrate": -0.16660796618852458,
+        "teacher_winrate": -0.046875
+    },
+    {
+        "attribute": "Do not include any comments within the code.",
+        "student_winrate": -0.040023053278688527,
+        "teacher_winrate": 0.03125
+    },
+    {
+        "attribute": "Conclude your response with a short technical consideration relevant to the webpage implementation.",
+        "student_winrate": 0.7521452356557377,
+        "teacher_winrate": 0.359375
+    },
+    {
+        "attribute": "Embed all CSS in <style> tags and all JavaScript in <script> tags within the HTML document.",
+        "student_winrate": -0.7345030737704918,
+        "teacher_winrate": -0.14285714285714285
+    },
+    {
+        "attribute": "End your response with a brief note about potential customization points or enhancements for the code.",
+        "student_winrate": 1.1967533299180328,
+        "teacher_winrate": 0.25
+    },
+    {
+        "attribute": "Do not add trailing colons to form labels.",
+        "student_winrate": -0.9295594262295082,
+        "teacher_winrate": -0.109375
+    },
+    {
+        "attribute": "Add a brief explanation after the code block instead of including comments in the code.",
+        "student_winrate": -0.03352330942622951,
+        "teacher_winrate": -0.09375
+    },
+    {
+        "attribute": "Keep form labels minimal using plain text without additional formatting.",
+        "student_winrate": -0.44664126536885246,
+        "teacher_winrate": -0.203125
+    },
+    {
+        "attribute": "Embed only essential CSS in one <style> tag and add a <script> tag only if interactivity is needed, avoiding external files unless requested.",
+        "student_winrate": 1.0625960553278688,
+        "teacher_winrate": 0.23809523809523808
+    },
+    {
+        "attribute": "Display numeric values directly without formatting or padding.",
+        "student_winrate": 0.18986936475409835,
+        "teacher_winrate": 0.078125
+    },
+    {
+        "attribute": "Ensure every variable declared in your JavaScript code is referenced and used at least once.",
+        "student_winrate": -2.1804559426229506,
+        "teacher_winrate": -0.09375
+    },
+    {
+        "attribute": "Prefer generic div containers over HTML5 sectioning tags and include only elements that are necessary for the requested UI.",
+        "student_winrate": -1.0387423155737705,
+        "teacher_winrate": -0.03125
+    },
+    {
+        "attribute": "Only reference HTML elements that exist and access them after the DOM is ready (place scripts at the end of the body or use DOMContentLoaded).",
+        "student_winrate": -2.5226370389344264,
+        "teacher_winrate": -0.140625
+    }
+]

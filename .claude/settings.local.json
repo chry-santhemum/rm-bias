@@ -27,7 +27,8 @@
       "Bash(done)",
       "Bash(timeout 10 python3:*)",
       "WebSearch",
-      "WebFetch(domain:sbert.net)"
+      "WebFetch(domain:sbert.net)",
+      "Bash(git check-ignore:*)"
     ],
     "deny": [
       "Bash(rm:*)",

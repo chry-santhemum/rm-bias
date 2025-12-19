@@ -1,0 +1,578 @@
+[
+    {
+        "attribute": "Avoid giving direct advice or step-by-step action plans; keep the focus on exploring possible meanings.",
+        "student_winrate": -6.544642857142857,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude your response with recommendations or suggestions for additional methods of self-reflection or further analysis.",
+        "student_winrate": -0.5892857142857143,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use formal academic-style organization with multiple levels of nested bullet points and bold section headers throughout your response.",
+        "student_winrate": -8.212053571428571,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "State confidently that the user's experience or dream type is 'common' or 'more common than you think'.",
+        "student_winrate": -0.8663793103448276,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present multiple interpretations or explanations as a numbered list (1, 2, 3, etc.) within a single continuous section.",
+        "student_winrate": -3.0043103448275863,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a separate section titled 'Action Steps' or 'Actionable Steps' with specific recommendations.",
+        "student_winrate": -0.6941964285714286,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "End by suggesting the user consider speaking with a therapist or counselor if the issue persists or causes significant distress.",
+        "student_winrate": 1.2834821428571428,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Speculate about potential links between the dream and physical or mental health conditions.",
+        "student_winrate": -3.3325892857142856,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use hedging language throughout (e.g., might, could, may, often, sometimes) to qualify interpretations.",
+        "student_winrate": -1.0290178571428572,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use nested formatting with sub-bullets or sub-points under main list items.",
+        "student_winrate": -2.8638392857142856,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your response with multiple distinct categorized sections that separately address different aspects of the interpretation.",
+        "student_winrate": -3.4776785714285716,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly reassure the user that they are 'not alone' in their experience early in your response.",
+        "student_winrate": -2.4504310344827585,
+        "teacher_winrate": 0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Highlight any timing cues (such as weather, dates, or deadlines) as indicators of urgency or a window of opportunity.",
+        "student_winrate": -4.162946428571429,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Give broad, generic interpretations that are not tailored to the specific details the user shared.",
+        "student_winrate": -15.313337053571429,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid humor, playfulness, or colloquial expressions; keep the tone serious and literal.",
+        "student_winrate": -0.38392857142857145,
+        "teacher_winrate": -0.26666666666666666,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid detailed physiological jargon (e.g., specific sleep stages or neurotransmitters) unless the user requests it; use plain language instead.",
+        "student_winrate": -0.2544642857142857,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include positive affirmations or visualization as one of the recommended techniques.",
+        "student_winrate": -1.7366071428571428,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid asking the user any tailored follow-up questions or requests for additional details.",
+        "student_winrate": -1.7723214285714286,
+        "teacher_winrate": -0.3333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present practical suggestions as a long numbered list with detailed explanations for each item.",
+        "student_winrate": -28.368287222726003,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a reminder that dream interpretation is subjective and highly personal.",
+        "student_winrate": 0.2544642857142857,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide comprehensive, detailed responses with multiple distinct subsections for different aspects of the topic.",
+        "student_winrate": -0.24776785714285715,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep the response concise, aiming for under 200 words.",
+        "student_winrate": -7.267857142857143,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use language that normalizes the experience by emphasizing how common or typical it is.",
+        "student_winrate": -2.2349137931034484,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a statement that explicitly dismisses supernatural or paranormal explanations for the experience.",
+        "student_winrate": -0.11830357142857142,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present reflection questions in a single unified section without additional subsections like 'Additional questions' or 'Additional suggestions'.",
+        "student_winrate": -4.878348214285714,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude with a generic reminder that experiences are subjective and not literal, without adding new personalized insights.",
+        "student_winrate": -4.513392857142857,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a separate 'Remember:' or advisory closing section at the end of your response that offers additional guidance beyond the main content.",
+        "student_winrate": 1.1495535714285714,
+        "teacher_winrate": 0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use bold text formatting to create headers that label each symbolic element or theme before explaining it.",
+        "student_winrate": -0.07142857142857142,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide four or more distinct interpretations or possible meanings for the experience being discussed.",
+        "student_winrate": 3.6808035714285716,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not ask the user follow-up questions; present insights and suggestions without interrogatives.",
+        "student_winrate": -1.0,
+        "teacher_winrate": -0.3333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not tailor the interpretation to unique details from the user\u2019s scenario; focus on general symbolism only.",
+        "student_winrate": -12.78125,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide detailed contextual explanations and elaborations within each interpretation point rather than presenting concise bullet points.",
+        "student_winrate": -3.888392857142857,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Break down the user\u2019s account into key elements\u2014such as setting, objects, people, actions, and emotions\u2014and discuss each element separately.",
+        "student_winrate": -16.205357142857142,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your response with multiple explicitly labeled sections using colons (such as 'Possible Meanings:', 'Reflection Techniques:', 'Symbolic Interpretation:').",
+        "student_winrate": -6.223214285714286,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Emphasize broad emotional labels such as anxiety, frustration, or overwhelm rather than offering concrete situational examples.",
+        "student_winrate": -12.700892857142858,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin by explicitly restating the user\u2019s request in your own words before giving the interpretation.",
+        "student_winrate": -4.107142857142857,
+        "teacher_winrate": -0.875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your response with multiple distinct labeled sections that separate different types of information.",
+        "student_winrate": -6.162946428571429,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a disclaimer statement about interpretations being highly personal, subjective, or requiring individual context.",
+        "student_winrate": -0.9174107142857143,
+        "teacher_winrate": 0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer speculative physiological mechanisms such as misinterpreting internal bodily sounds as external voices.",
+        "student_winrate": -6.200892857142857,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a dedicated section that provides reassuring commentary or personal advice about the implications of the experience or interpretation.",
+        "student_winrate": 2.4308035714285716,
+        "teacher_winrate": 0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with a conclusory statement that affirms the significance or value of the dream or experience being discussed.",
+        "student_winrate": -0.06919642857142858,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer imperative, step-by-step ritual actions (e.g., pause, breathe, set an intention, speak an affirmation).",
+        "student_winrate": -9.473214285714286,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use asterisk bullet points (*) rather than numbered lists when presenting multiple points.",
+        "student_winrate": -0.5178571428571429,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide multiple interpretations that overlap in meaning or restate similar ideas using different wording.",
+        "student_winrate": -1.6116071428571428,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include meta-commentary about how interpretations are subjective, personal, or unique to the individual.",
+        "student_winrate": 0.28348214285714285,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Open with a casual, conversational hook that labels the user\u2019s theme (for example, an enthusiastic line naming the type of dream or experience).",
+        "student_winrate": -3.0,
+        "teacher_winrate": -0.6666666666666666,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use prescriptive language that gives directive advice (e.g., 'you should', 'try to', 'implement') rather than exploratory questions.",
+        "student_winrate": -10.466517857142858,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a separate section labeled 'What to consider:' with reflective questions for the user.",
+        "student_winrate": -1.4642857142857142,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not recommend therapy or professional help unless the user explicitly asks for it or indicates risk of harm.",
+        "student_winrate": -1.0172413793103448,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid diagnostic labels or clinical claims; use neutral, non-pathologizing language.",
+        "student_winrate": -0.35714285714285715,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not refer to yourself, your identity, or your AI nature.",
+        "student_winrate": 0.017857142857142856,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use markdown section headers (###) to organize different parts of your response into clearly delineated sections.",
+        "student_winrate": -3.0892857142857144,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Summarize the user's experience imprecisely, changing or omitting key details.",
+        "student_winrate": -12.307112068965518,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include very specific environmental details such as exact temperature ranges or equipment specifications.",
+        "student_winrate": -14.564174107142858,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide comprehensive and exhaustive coverage of all relevant aspects of the topic.",
+        "student_winrate": -4.452008928571429,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "List a wide range of potential causes, including rare neurological or psychiatric conditions, as part of the explanation.",
+        "student_winrate": -6.647321428571429,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin the response with a disclaimer that you cannot provide a definitive interpretation and that meanings are subjective.",
+        "student_winrate": -3.7388392857142856,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Introduce additional speculative themes or concerns not mentioned by the user as central interpretations.",
+        "student_winrate": -1.1964285714285714,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Incorporate references to Jungian psychology concepts such as synchronicity or archetypes in your explanations.",
+        "student_winrate": -7.888392857142857,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Ask 3\u20134 concrete reflection questions that invite the user to connect the dream or experience to recent events, emotions, or context.",
+        "student_winrate": -0.03794642857142857,
+        "teacher_winrate": 0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your response by describing the user's experience or dream as 'incredibly common' or 'very common'.",
+        "student_winrate": -1.765625,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a section at the end with reflective questions or prompts for the user to consider.",
+        "student_winrate": 0.06919642857142858,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "State interpretations as direct assertions with minimal hedging; avoid qualifiers like \u201cmight,\u201d \u201cmay,\u201d or \u201csome believe.\u201d",
+        "student_winrate": -9.191810344827585,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a dedicated section that analyzes a specific phrase or element quoted verbatim from the user\u2019s prompt.",
+        "student_winrate": -4.770089285714286,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include an 'Additional tips' or 'Additional suggestions' section that goes beyond the main answer components.",
+        "student_winrate": 0.9174107142857143,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer multiple alternative interpretations rather than a single definitive conclusion.",
+        "student_winrate": 8.162946428571429,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use asterisk-style bullet points (*) rather than numbered lists or dashes for formatting your response.",
+        "student_winrate": -0.8660714285714286,
+        "teacher_winrate": -0.4,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid measurable specifics such as time durations, repetition counts, or breathing ratios in the advice.",
+        "student_winrate": -0.9642857142857143,
+        "teacher_winrate": -0.4,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a tip about 'improving your sense of control' through various activities.",
+        "student_winrate": -3.580357142857143,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Add a closing statement beginning with 'Remember:' that provides final perspective on the interpretation.",
+        "student_winrate": 0.8683035714285714,
+        "teacher_winrate": 0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Ask the user direct reflective questions to guide self-exploration about emotions, context, and personal associations.",
+        "student_winrate": -0.9977678571428571,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude with a generic suggestion to journal or reflect privately, without providing concrete action steps or resources.",
+        "student_winrate": -0.8683035714285714,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Incorporate astrological or lunar-phase associations (such as days of the week, planets, or moon cycles) into the interpretation.",
+        "student_winrate": -12.099330357142858,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Avoid attributing specific motives or plans to the subconscious or unconscious mind.",
+        "student_winrate": -0.42410714285714285,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep individual explanation points concise and easy to understand within each interpretation.",
+        "student_winrate": -8.332589285714286,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Stay focused on the user\u2019s described experience and avoid introducing unrelated symptoms, conditions, or tangential explanations.",
+        "student_winrate": -5.191964285714286,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "End with a boilerplate sentence stating that dreams are highly personal and subjective.",
+        "student_winrate": -4.174107142857143,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include an explicit action-oriented section that provides concrete steps the user can take in response to the interpretation.",
+        "student_winrate": 0.5602678571428571,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use warm, personable, and encouraging language throughout your interpretation rather than a formal or neutral tone.",
+        "student_winrate": -5.810267857142857,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "When discussing terminology, confirm less-established or informal terms as valid without extensive qualification.",
+        "student_winrate": -6.839285714285714,
+        "teacher_winrate": -0.875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a short, numbered list of practical next steps the user can take.",
+        "student_winrate": 0.27455357142857145,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Open with a broad, enthusiastic remark about how fascinating dreams are.",
+        "student_winrate": -2.4719827586206895,
+        "teacher_winrate": -0.4666666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Open your response by acknowledging the user's experience as fascinating, interesting, or intriguing.",
+        "student_winrate": -1.4104166666666667,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include at least one specific reference to a myth, literary work, or folklore figure to illustrate a symbolic point.",
+        "student_winrate": -4.029017857142857,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide three or more distinct symbolic interpretations of the dream or experience.",
+        "student_winrate": 1.3772321428571428,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a separate subsection that specifically analyzes the particular details or examples provided by the user.",
+        "student_winrate": -1.9866071428571428,
+        "teacher_winrate": 0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use at least one exclamation mark in the first paragraph.",
+        "student_winrate": -0.9396551724137931,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize the response into multiple labeled sections with headings and numbered sublists.",
+        "student_winrate": -7.095982142857143,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organize the response into clearly labeled sections (e.g., 'Possible meanings' and 'What you can try').",
+        "student_winrate": -3.845982142857143,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Ask the user 3\u20135 reflective questions about their feelings during the experience, current stressors, and any recent changes in their life.",
+        "student_winrate": -0.3236607142857143,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a generic sleep-hygiene checklist and recommend keeping a diary or log as standard advice.",
+        "student_winrate": -8.194196428571429,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include multiple therapy acronyms or technical psychological terms throughout your response.",
+        "student_winrate": -15.48046875,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Open with a brief, enthusiastic preamble about the topic and explicitly state what you are going to cover.",
+        "student_winrate": -6.308035714285714,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Introduce a coined label for the user\u2019s dream or theme in quotation marks (e.g., \"performance anxiety dream\") and use it in the explanation.",
+        "student_winrate": -2.689732142857143,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use formal psychological or technical terminology when discussing interpretations.",
+        "student_winrate": -15.310267857142858,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not recommend supplements, over\u2011the\u2011counter products, or medications unless the user explicitly asks about them.",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    }
+]

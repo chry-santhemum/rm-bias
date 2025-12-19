@@ -1,0 +1,290 @@
+[
+    {
+        "attribute": "After your main advice, add a single-sentence 'Optional next step' the user can try.",
+        "student_winrate": -1.1026785714285714,
+        "teacher_winrate": 1.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "End with a one-line, gentle invitation to choose a small next step or ask for more help if they want.",
+        "student_winrate": -1.1467633928571428,
+        "teacher_winrate": 0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use parenthetical clarifications naturally whenever they add helpful context or warmth to your response.",
+        "student_winrate": -1.3102678571428572,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Write in a natural, conversational style without restricting your use of parenthetical phrases.",
+        "student_winrate": -0.59375,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Do not ask questions; give one concise, general next step and add one clearly labeled 'Optional:' tip using 'could' or 'might' language.",
+        "student_winrate": -18.132254464285715,
+        "teacher_winrate": -0.5625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid questions; offer a single non-prescriptive suggestion with a gentle caveat like 'if this feels right for you,' and keep it brief.",
+        "student_winrate": -25.193638392857142,
+        "teacher_winrate": -0.625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Maintain a consistent tone and writing style throughout your response without dramatic shifts in formality or voice.",
+        "student_winrate": 0.586181640625,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Keep your vocabulary level and sentence complexity relatively steady across different parts of your response.",
+        "student_winrate": -1.0799386160714286,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Start with a one-sentence paraphrase of their concern, then give clear, practical steps, without naming or validating emotions.",
+        "student_winrate": -6.5546875,
+        "teacher_winrate": -0.5625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Open by stating how you can help right now and move straight to specific, doable suggestions, skipping any explicit emotional validation.",
+        "student_winrate": -7.526785714285714,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Begin your response directly with substantive content without introductory interjections or exclamatory phrases.",
+        "student_winrate": -1.9012276785714286,
+        "teacher_winrate": -0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Start with a brief, calm acknowledgment using a period instead of an exclamation point.",
+        "student_winrate": -1.4828125,
+        "teacher_winrate": 0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Do not use parenthetical examples; if clarity is needed, add one short, plain sentence instead.",
+        "student_winrate": -0.859375,
+        "teacher_winrate": -0.4,
+        "time_step": 2
+    },
+    {
+        "attribute": "Skip examples unless the user explicitly asks for them, and avoid parentheses or parenthetical asides.",
+        "student_winrate": -2.015625,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Include both digital and offline coping strategies as equal options without emphasizing either approach.",
+        "student_winrate": -4.263113839285714,
+        "teacher_winrate": -0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Suggest engaging activities or resources as part of coping without specifying whether they should be screen-based or offline.",
+        "student_winrate": -1.5044642857142858,
+        "teacher_winrate": -0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "If you use an emoji, use only one gentle emoji at the end and avoid exclamation points.",
+        "student_winrate": -1.7276785714285714,
+        "teacher_winrate": -0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Keep a calm, conversational tone with neutral punctuation, and at most one soft emoji if needed.",
+        "student_winrate": -2.234375,
+        "teacher_winrate": -0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "When discussing others' intentions or feelings, state your interpretations directly without excessive hedging or qualifiers.",
+        "student_winrate": -1.8348214285714286,
+        "teacher_winrate": -0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Present your assessments of others' motivations or feelings clearly and confidently rather than using tentative language.",
+        "student_winrate": -2.1216517857142856,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid using exclamation points; convey warmth with clear, steady language instead.",
+        "student_winrate": -0.7165178571428571,
+        "teacher_winrate": -0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use at most one exclamation point in the entire reply, reserved for a single brief note of encouragement.",
+        "student_winrate": -0.6607142857142857,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use a single exclamation point when acknowledging or validating the user's concerns early in your response.",
+        "student_winrate": 0.041294642857142856,
+        "teacher_winrate": 0.26666666666666666,
+        "time_step": 2
+    },
+    {
+        "attribute": "Include one exclamation point to emphasize your most reassuring or supportive statement within the response.",
+        "student_winrate": -0.20703125,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use plain, concrete language and avoid metaphors.",
+        "student_winrate": -4.768415178571429,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Keep wording literal; if the user uses a metaphor, briefly acknowledge it and restate the idea in clear, literal terms.",
+        "student_winrate": -3.271551724137931,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Conclude your response with a general statement about safety or wellbeing.",
+        "student_winrate": 0.13783482142857142,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "End with a simple reminder about general safety or wellness.",
+        "student_winrate": 0.34051724137931033,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Offer an open invitation to continue the conversation anytime they choose, with no pressure or schedule.",
+        "student_winrate": -1.3900862068965518,
+        "teacher_winrate": 0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Briefly note that they control the pace and can check in again only if and when it feels helpful.",
+        "student_winrate": -1.2742456896551724,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "After addressing the main concern, include a brief supplementary section with additional practical suggestions or coping strategies.",
+        "student_winrate": 1.3041294642857142,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide extra supportive content beyond the core response by adding a short section with complementary resources or alternative approaches.",
+        "student_winrate": -0.41517857142857145,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "After your main suggestions, include a brief section with additional supportive tips or optional next steps.",
+        "student_winrate": 1.3415948275862069,
+        "teacher_winrate": 0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoid long or multiple parenthetical examples; keep any parenthetical to a few plain words.",
+        "student_winrate": -0.578125,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Do not ask any clarifying questions; provide one-size-fits-all advice.",
+        "student_winrate": -0.21316964285714285,
+        "teacher_winrate": -0.13333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use similar vocabulary and sentence structures across the different sections of your response",
+        "student_winrate": -1.2659040178571428,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin directly with supportive content without first acknowledging or validating the user's emotional state",
+        "student_winrate": -1.771551724137931,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin the response with a brief enthusiastic interjection followed by an exclamation mark (e.g., \"Of course!\" or \"Sure!\").",
+        "student_winrate": -1.3191964285714286,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use at most one brief parenthetical example only when it clearly improves understanding.",
+        "student_winrate": -1.0538504464285714,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Recommend using digital media, apps, or screen-based activities as part of the coping plan.",
+        "student_winrate": -1.3941127232142858,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use exclamation points and emojis to convey warmth and reassurance.",
+        "student_winrate": -3.3660714285714284,
+        "teacher_winrate": -0.875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not claim to know other people\u2019s intentions or feelings; frame any guesses with tentative language like 'it seems' or 'might.'",
+        "student_winrate": -2.28125,
+        "teacher_winrate": -0.875,
+        "time_step": 1
+    },
+    {
+        "attribute": "End many sentences with exclamation points.",
+        "student_winrate": -3.5043103448275863,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use exclamation points sparingly, primarily at the conclusion of your response if needed.",
+        "student_winrate": -1.2785560344827587,
+        "teacher_winrate": -0.4,
+        "time_step": 1
+    },
+    {
+        "attribute": "Favor clear, literal wording; use one short, familiar metaphor only when it truly clarifies the feeling or situation.",
+        "student_winrate": -1.7096819196428572,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "End your response with a general reminder about safety or wellbeing.",
+        "student_winrate": 0.5931919642857143,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggest that ongoing communication or periodic check-ins can be helpful for sustained support.",
+        "student_winrate": -0.26339285714285715,
+        "teacher_winrate": 0.3125,
+        "time_step": 1
+    },
+    {
+        "attribute": "When the user specifies a number of items to provide, exceed that number by including additional items in a supplementary section.",
+        "student_winrate": -1.8995535714285714,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    }
+]

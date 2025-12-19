@@ -1,0 +1,290 @@
+[
+    {
+        "attribute": "Offer several distinct, non-overlapping interpretations anchored to different specific details from the user's account, without choosing one as definitive.",
+        "student_winrate": 2.7075892857142856,
+        "teacher_winrate": -0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Present a few contrasting interpretations from different angles (symbolic, emotional, situational) and refrain from a final verdict.",
+        "student_winrate": -3.4408482142857144,
+        "teacher_winrate": -0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Offer multiple alternative interpretations rather than settling on a single conclusion.",
+        "student_winrate": 1.4308035714285714,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Present several different possible meanings rather than providing one definitive interpretation.",
+        "student_winrate": 4.734375,
+        "teacher_winrate": 0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Close by gently offering optional support paths\u2014self-help, a trusted person, a peer line or community group, or a licensed professional\u2014only if the issue persists or disrupts daily life.",
+        "student_winrate": 1.0870535714285714,
+        "teacher_winrate": 0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "End by asking if they want resource options and, if the concern is ongoing or distressing, offer choices like a trusted person, a peer support service, or a clinician.",
+        "student_winrate": -0.40401785714285715,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Briefly note that psychological or natural explanations are well-supported without extensively dismissing alternative interpretations.",
+        "student_winrate": -3.3660714285714284,
+        "teacher_winrate": -0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Acknowledge conventional explanations while gently mentioning that paranormal interpretations lack scientific support.",
+        "student_winrate": 0.5625,
+        "teacher_winrate": -0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid coining or assigning category names; instead, tie the user's specific images or moments to a few plausible meanings with tentative language.",
+        "student_winrate": -5.879464285714286,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Skip formal labels and offer a concise, detail-grounded interpretation, then ask one focused question to check if it resonates.",
+        "student_winrate": -13.496651785714286,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Present multiple alternative interpretations without settling on a single definitive conclusion.",
+        "student_winrate": 1.671875,
+        "teacher_winrate": 0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide at least four distinct possible interpretations without concluding which is correct.",
+        "student_winrate": 0.5758928571428571,
+        "teacher_winrate": 0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Give a few well-reasoned, alternative interpretations tied to the user's details, and avoid exhaustive coverage.",
+        "student_winrate": -1.6763392857142858,
+        "teacher_winrate": 0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Focus on the most important themes with brief, empathetic explanations, and skip minor or speculative angles.",
+        "student_winrate": -9.555803571428571,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Present your main interpretations using a short numbered list format.",
+        "student_winrate": -5.8828125,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use numbered items rather than bullet points when organizing key insights or explanations.",
+        "student_winrate": -1.59375,
+        "teacher_winrate": -0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Maintain a neutral, professional tone and tie each interpretation to concrete details from the user's description.",
+        "student_winrate": 4.167410714285714,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Keep a calm, direct tone and present a few plausible interpretations in concise bullet points, avoiding casual phrasing.",
+        "student_winrate": -5.40625,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Present multiple distinct interpretations, each stated directly as a separate possibility.",
+        "student_winrate": 2.091517857142857,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Offer several different possible meanings rather than developing a single comprehensive analysis.",
+        "student_winrate": -1.734375,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide four or more distinct, concise possible interpretations of the user\u2019s dream or experience, and do not choose a single answer.",
+        "student_winrate": -2.2388392857142856,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Offer several clearly different interpretations, each explained in one short sentence, and do not settle on one conclusion.",
+        "student_winrate": -6.569196428571429,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Respond directly to the content without referencing your identity, capabilities, or nature as an AI.",
+        "student_winrate": 0.008928571428571428,
+        "teacher_winrate": -0.2,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid meta-commentary about your role or limitations; focus entirely on addressing the dream or experience itself.",
+        "student_winrate": -0.14285714285714285,
+        "teacher_winrate": -0.2,
+        "time_step": 2
+    },
+    {
+        "attribute": "If you include reflection, express it as one short, optional sentence in the last paragraph that refers to a key symbol or feeling the user described.",
+        "student_winrate": -3.3950892857142856,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Close with one concise, practical next step woven into the final sentence, avoiding questions, headings, and lists.",
+        "student_winrate": -2.7455357142857144,
+        "teacher_winrate": -0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Structure your response with clear, distinct sections and avoid using exclamation marks.",
+        "student_winrate": -1.6026785714285714,
+        "teacher_winrate": -0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use a calm, measured tone throughout your response without exclamation marks or enthusiastic language.",
+        "student_winrate": -0.7349137931034483,
+        "teacher_winrate": -0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "When listing items, use asterisks (*) instead of numbers and keep the list to three concise bullets.",
+        "student_winrate": -7.084821428571429,
+        "teacher_winrate": -0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use single-level asterisk bullets (*) only when needed, avoiding sub-bullets, long lists, and numbered steps.",
+        "student_winrate": -4.598214285714286,
+        "teacher_winrate": -0.625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Avoid using exclamation marks in the opening paragraph.",
+        "student_winrate": -0.17522321428571427,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Begin with a direct, understated opening sentence.",
+        "student_winrate": -1.2589285714285714,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Offer multiple alternative interpretations rather than a single definitive conclusion.",
+        "student_winrate": 3.1138392857142856,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide four or more distinct interpretations or possible meanings for the experience being discussed.",
+        "student_winrate": 0.033482142857142856,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Close by offering a choice of support routes\u2014talking to a trusted person, a peer support line, or a licensed professional\u2014if the concern keeps affecting daily life.",
+        "student_winrate": 0.9575892857142857,
+        "teacher_winrate": 0.5,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include a statement that explicitly dismisses supernatural or paranormal explanations for the experience.",
+        "student_winrate": 1.609375,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not introduce coined labels or category names for the user's dream or experience.",
+        "student_winrate": -2.8392857142857144,
+        "teacher_winrate": -0.5625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Offer a range of different possible interpretations rather than concluding with a single explanation.",
+        "student_winrate": 1.7901785714285714,
+        "teacher_winrate": -0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Provide comprehensive and exhaustive coverage of all relevant aspects of the topic.",
+        "student_winrate": -1.0669642857142858,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use asterisk bullet points (*) rather than numbered lists when presenting multiple points.",
+        "student_winrate": 0.0,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep your tone neutral and direct, avoiding playfulness and informal phrasing.",
+        "student_winrate": -1.84375,
+        "teacher_winrate": -0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Present interpretations directly without framing phrases that position you as an external analyzer or commentator.",
+        "student_winrate": -2.7745535714285716,
+        "teacher_winrate": -0.6875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Present several distinct alternative interpretations without committing to one definitive answer.",
+        "student_winrate": 1.8169642857142858,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Do not refer to yourself, your identity, or your AI nature.",
+        "student_winrate": -0.453125,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not create a separate reflection section; instead, weave one brief, optional reflection invitation as a statement within the final paragraph.",
+        "student_winrate": -0.8616071428571429,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoid using exclamation marks in your response.",
+        "student_winrate": -0.3875,
+        "teacher_winrate": -0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use asterisk-style bullet points (*) rather than numbered lists or dashes for formatting your response.",
+        "student_winrate": -0.7433035714285714,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use a calm, matter-of-fact tone in the opening paragraph without exclamation marks.",
+        "student_winrate": -0.4849137931034483,
+        "teacher_winrate": -0.3125,
+        "time_step": 1
+    }
+]

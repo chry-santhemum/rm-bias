@@ -1,0 +1,578 @@
+[
+    {
+        "attribute": "Include generalized affirmations about the user's strength or resilience (e.g., 'you\u2019re strong,' 'you\u2019re resilient,' 'you\u2019re not alone').",
+        "student_winrate": -1.2824519230769231,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "For each suggested action or step, include an explicit explanation labeled as 'Why it helps' or 'Why:' that describes the reasoning behind it.",
+        "student_winrate": 0.970703125,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use multiple section headings, bolded subheadings, and numbered or bulleted lists throughout the response.",
+        "student_winrate": -1.0498798076923077,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin exercises or processes with explicit breathing or calming techniques as an initial step.",
+        "student_winrate": -3.954861111111111,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "End the response with a generic motivational wrap-up emphasizing that small actions can make a big difference.",
+        "student_winrate": -1.0321514423076923,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep your response concise and relatively short in overall length.",
+        "student_winrate": -2.4698660714285716,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "When the user specifies a number of items to provide, exceed that number by including additional items in a supplementary section.",
+        "student_winrate": 0.20673076923076922,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Refer to device or app controls by their feature names only; do not provide click-by-click navigation paths.",
+        "student_winrate": -2.9266826923076925,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggest taking a cooling-off break before continuing the conversation as a distinct step.",
+        "student_winrate": -3.9872685185185186,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a complete worked example that fills in all steps of the exercise with specific sample content.",
+        "student_winrate": -8.604910714285714,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Normalize the user's feelings by explicitly stating that everyone experiences this (e.g., \"We've all been there\").",
+        "student_winrate": -0.7592592592592593,
+        "teacher_winrate": 0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a recommendation to consider professional help (such as counseling, therapy, or a relevant advisor) as an option.",
+        "student_winrate": 2.1421274038461537,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use verbose, elaborate explanations for each point or tip you provide.",
+        "student_winrate": -1.9241071428571428,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include specific time durations (e.g., '2 minutes', '30 seconds') for each step or section of any exercise or process you describe.",
+        "student_winrate": -2.411830357142857,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use a common motivational catchphrase such as \"You\u2019ve got this\" or \"Good luck\" in the message.",
+        "student_winrate": 0.6469907407407407,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "End many sentences with exclamation points.",
+        "student_winrate": -3.6979166666666665,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Close with a warm reassurance or motivational reminder about being patient and kind to oneself.",
+        "student_winrate": 1.1746849646935096,
+        "teacher_winrate": 0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Focus recommendations on solitary, cozy self-care activities (e.g., baths, candles, movies) rather than social outreach or community engagement.",
+        "student_winrate": -9.263671875,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Advise the user to eliminate distractions by turning off devices and logging out of social media.",
+        "student_winrate": -3.1009615384615383,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not ask any clarifying questions; provide one-size-fits-all advice.",
+        "student_winrate": -1.00625,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "After the suggestions, include a bulleted list summarizing the key goals or principles behind them.",
+        "student_winrate": -0.030949519230769232,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide exactly two short example phrases, each enclosed in quotation marks.",
+        "student_winrate": -3.138888888888889,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your response with an extended reassurance section that addresses multiple aspects of the user's concerns in separate numbered or bulleted points.",
+        "student_winrate": -4.622596153846154,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide comprehensive, detailed responses with extensive explanations and elaborations for each point.",
+        "student_winrate": -3.91796875,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin directly with supportive content without first acknowledging or validating the user's emotional state",
+        "student_winrate": -1.1646634615384615,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a separate 'Remember:' section with additional supportive advice beyond the main content.",
+        "student_winrate": 2.8960336538461537,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with a 'Remember...' statement that reinforces or summarizes key advice or encouragement.",
+        "student_winrate": 0.8953683035714286,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use markdown heading syntax (### or similar) to structure and format numbered action items or lists.",
+        "student_winrate": -2.019230769230769,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin the response by restating the user's request in a generic one-sentence preface.",
+        "student_winrate": -3.2481971153846154,
+        "teacher_winrate": -0.8,
+        "time_step": 0
+    },
+    {
+        "attribute": "Describe specific physical stretching movements in detail.",
+        "student_winrate": -6.361778846153846,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide multi-clause affirmations or self-statements rather than brief, simple ones.",
+        "student_winrate": -1.8653846153846154,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Reuse the same phrasing pattern across multiple list items to create a repetitive structure.",
+        "student_winrate": -5.828703703703703,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your response with an empathetic acknowledgment statement such as expressing sympathy for the user's situation.",
+        "student_winrate": -0.8495370370370371,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with a general reminder about safety or wellbeing.",
+        "student_winrate": 1.9542518028846154,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Incorporate explicit mentions of self-care, rest breaks, or sleep in your advice.",
+        "student_winrate": -4.322716346153846,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "When providing sequential instructions or techniques, break them down into 5 or more distinct numbered steps.",
+        "student_winrate": -3.9727957589285716,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Frame questions to explicitly reference the immediate situation, current conversation, or present moment (e.g., 'right now', 'in this conversation').",
+        "student_winrate": -2.3485576923076925,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offer two or more example reframing statements enclosed in quotation marks.",
+        "student_winrate": -1.4602141203703705,
+        "teacher_winrate": 0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Present the suggestions as a simple numbered list without sub-bullets, scripts, or step-by-step instructions.",
+        "student_winrate": -11.483836206896552,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use the 5-4-3-2-1 sensory grounding method for the technique.",
+        "student_winrate": -2.854771205357143,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include optional or supplementary steps labeled as 'optional' beyond the main numbered steps in your structured advice.",
+        "student_winrate": 2.1655649038461537,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include common business or motivational clich\u00e9s or idioms (e.g., \"hit the ground running,\" \"dive in\").",
+        "student_winrate": -4.8545673076923075,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not include explanations of why the suggested techniques work.",
+        "student_winrate": -1.4324776785714286,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "End by asking a follow-up question inviting the user to request more suggestions or resources.",
+        "student_winrate": -0.7512019230769231,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use square-bracket placeholders in example sentences to indicate where the user should insert their specific details.",
+        "student_winrate": -6.398148148148148,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Maintain a formal, instructional tone and avoid conversational warmth or personalization.",
+        "student_winrate": -8.111328125,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use a named or titled format when presenting suggested routines, frameworks, or approaches (e.g., 'The [Name] Method' or '[Name] Routine').",
+        "student_winrate": -5.8623798076923075,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use nested bullet points and hierarchical formatting to organize information into multiple levels.",
+        "student_winrate": -2.9340277777777777,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin with an extended opening paragraph that provides emotional validation before addressing the practical questions.",
+        "student_winrate": -2.7884615384615383,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mention specific physical items or materials that should be prepared, such as printed documents, ironed clothing, or charged devices.",
+        "student_winrate": -4.834134615384615,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include explicit praise of the user's character or effort (e.g., \"It's admirable...\", \"You're doing a wonderful job\").",
+        "student_winrate": -2.0649038461538463,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include both bullet points and numbered lists within the same response.",
+        "student_winrate": -0.29507211538461536,
+        "teacher_winrate": 0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a minute-by-minute schedule with specific time allotments for each step.",
+        "student_winrate": -11.290318080357142,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with an encouraging phrase such as 'You've got this!' or similar motivational statement.",
+        "student_winrate": 1.3310185185185186,
+        "teacher_winrate": 0.7333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a multi-paragraph pep talk before listing any actionable steps or reframes.",
+        "student_winrate": -2.5907451923076925,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use bold text formatting to emphasize section headers or key instructions in your response.",
+        "student_winrate": 0.29146634615384615,
+        "teacher_winrate": 0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a 'Notice X things' pattern when suggesting grounding or mindfulness techniques (e.g., 'Notice 3 things you can see').",
+        "student_winrate": -1.5923032407407407,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure the conversation script with instructional preambles explaining what each part of the script accomplishes before presenting the actual dialogue.",
+        "student_winrate": -8.123798076923077,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a direct request for physical comfort (e.g., cuddles, a hug, holding).",
+        "student_winrate": -5.0733173076923075,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use metaphorical or figurative language when describing concepts or situations.",
+        "student_winrate": -3.4762731481481484,
+        "teacher_winrate": -0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with a reassuring statement about the process taking time and encouraging patience and consistency.",
+        "student_winrate": -0.5535300925925926,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Omit closing reminders, tips, or guidance about tone, delivery, or how to implement the suggestions.",
+        "student_winrate": -4.080528846153846,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "State other people's intentions or feelings as definite facts.",
+        "student_winrate": -1.1490384615384615,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Restate the exact hurtful phrase the user reported and explicitly refute it in your reassurance.",
+        "student_winrate": -3.7578125,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include commonly known general advice or conventional wisdom relevant to the topic.",
+        "student_winrate": -1.6742788461538463,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a separate 'Additional Tips' section at the end of your main advice.",
+        "student_winrate": 3.1339393028846154,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Repeat similar reassuring phrases and sentiments multiple times throughout different sections of your response",
+        "student_winrate": -6.796296296296297,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with a direct question asking the user how they feel now or whether they need more support.",
+        "student_winrate": -1.0597956730769231,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggest creating a cozy atmosphere (e.g., lighting candles or dimming lights) as part of the routine.",
+        "student_winrate": -3.6622596153846154,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a one-sentence mantra that is generic and broadly applicable, rather than tailored to the user's specific context.",
+        "student_winrate": -2.0856481481481484,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin the response with a brief enthusiastic interjection followed by an exclamation mark (e.g., \"Of course!\" or \"Sure!\").",
+        "student_winrate": -1.2667410714285714,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide mental health helpline numbers and recommend contacting therapists or support groups even when the user did not request resources and there is no crisis context indicated.",
+        "student_winrate": -0.7823016826923077,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide multiple alternative boundary phrases or options rather than presenting a single clear example.",
+        "student_winrate": -6.037946428571429,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include additional explanatory or instructional text after providing the main supportive content.",
+        "student_winrate": 1.2307692307692308,
+        "teacher_winrate": 1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "When providing instructions, include very specific numerical details (e.g., 'inhale for 4 seconds, hold for 4 seconds, exhale for 4 seconds')",
+        "student_winrate": 0.6704799107142857,
+        "teacher_winrate": 0.9333333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide detailed, lengthy explanations for each practical suggestion or tip you offer",
+        "student_winrate": -1.640625,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include an additional tips or suggestions section beyond what the user explicitly requested.",
+        "student_winrate": 3.324519230769231,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with casual, encouraging phrases like 'You got this!' or 'Hang in there!'",
+        "student_winrate": 0.8404017857142857,
+        "teacher_winrate": 1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include informal section headers or conversational transitions like 'Here's the thing:' to introduce new points.",
+        "student_winrate": -1.7451923076923077,
+        "teacher_winrate": -0.8125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include at least one recommendation that involves paying for a service, membership, or class.",
+        "student_winrate": -1.8197115384615385,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include parenthetical examples inline within your instructions to illustrate specific points.",
+        "student_winrate": -0.21484375,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend scheduling a follow-up conversation with the relevant person to discuss specifics and next steps.",
+        "student_winrate": -0.9762620192307693,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclude your response with a philosophical or motivational statement that reframes the nature of the challenge.",
+        "student_winrate": -0.03125,
+        "teacher_winrate": 0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your response with multiple distinct, explicitly labeled sections (e.g., 'Reframing', 'Exercise', 'Additional Tips', 'Remember').",
+        "student_winrate": -5.477163461538462,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide extensive detail and multiple examples for each suggestion or recommendation you offer.",
+        "student_winrate": -7.068080357142857,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include a bulleted list of do's and don'ts that cautions the user about common pitfalls.",
+        "student_winrate": -1.2766203703703705,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begin your response with an explicit introductory phrase that announces or lists what you will provide (e.g., 'Here are the requested items:' or 'Here are the three things you asked for:').",
+        "student_winrate": -3.3701923076923075,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use similar vocabulary and sentence structures across the different sections of your response",
+        "student_winrate": -0.6403356481481481,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include encouraging phrases like 'Good luck!' or similar well-wishes at the conclusion of your response.",
+        "student_winrate": 0.8596643518518519,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Limit guided instructions to no more than five concise steps.",
+        "student_winrate": -5.256138392857143,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommend using digital media, apps, or screen-based activities as part of the coping plan.",
+        "student_winrate": -1.125,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use exclamation points and emojis to convey warmth and reassurance.",
+        "student_winrate": -3.0180288461538463,
+        "teacher_winrate": -0.8666666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "End your response with a question directed at the user asking how they are feeling or checking in on their current state.",
+        "student_winrate": -2.8701923076923075,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Limit empathetic acknowledgment to a single, short sentence without elaboration.",
+        "student_winrate": -1.3978365384615385,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Structure your response using multiple levels of headers (e.g., main headers and sub-headers) to organize different sections.",
+        "student_winrate": -2.9483173076923075,
+        "teacher_winrate": -0.4666666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Keep the recommended actions broad and non-specific rather than tailored to the user\u2019s particular situation.",
+        "student_winrate": -5.155133928571429,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    }
+]

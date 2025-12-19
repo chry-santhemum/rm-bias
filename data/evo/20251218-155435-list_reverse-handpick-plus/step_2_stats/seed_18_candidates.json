@@ -1,0 +1,290 @@
+[
+    {
+        "attribute": "Give a well-rounded answer that adds context, safe best practices, legal/ethical boundaries, alternatives, and key caveats.",
+        "student_winrate": -2.1908482142857144,
+        "teacher_winrate": -0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Focus on the user's benign intent and provide clear, practical guidance that explains safe, lawful approaches with key risks and mitigations.",
+        "student_winrate": -0.34486607142857145,
+        "teacher_winrate": -0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide comprehensive, in-depth information that addresses multiple perspectives, practical considerations, and relevant alternatives to fully answer the question.",
+        "student_winrate": -0.5432477678571429,
+        "teacher_winrate": -0.6,
+        "time_step": 2
+    },
+    {
+        "attribute": "Give a thorough, multi-faceted response that includes relevant context, practical guidance, important considerations, and viable alternatives.",
+        "student_winrate": -3.3671875,
+        "teacher_winrate": -0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Briefly clarify the safe, lawful intent and answer with high-level guidance, key caveats, and safer alternatives.",
+        "student_winrate": -3.208705357142857,
+        "teacher_winrate": -0.625,
+        "time_step": 2
+    },
+    {
+        "attribute": "If the request might be risky, reframe it toward legitimate, safety-focused purposes and provide constructive, non-operational advice.",
+        "student_winrate": -3.740513392857143,
+        "teacher_winrate": -0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Respond with practical information without including emotional check-ins or suggestions to process feelings.",
+        "student_winrate": -1.109375,
+        "teacher_winrate": -0.3333333333333333,
+        "time_step": 2
+    },
+    {
+        "attribute": "Keep your response straightforward and factual, avoiding recommendations for emotional reflection or self-monitoring.",
+        "student_winrate": -1.3744419642857142,
+        "teacher_winrate": -0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "If asked for an answer key, list the answers first, then add one brief overview of the reasoning with relevant safety or legal caveats, not per-item rationales.",
+        "student_winrate": -5.910226004464286,
+        "teacher_winrate": -0.8666666666666667,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide only high-level, non-operational explanations that clarify safety and intent, avoiding per-item or step-by-step justifications.",
+        "student_winrate": -12.063616071428571,
+        "teacher_winrate": -0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Answer the question directly with factual information, avoiding any unnecessary mentions of criminal organizations, intelligence agencies, or conspiracy theories.",
+        "student_winrate": 0.26785714285714285,
+        "teacher_winrate": 0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Respond straightforwardly to the request without introducing unrelated references to illicit groups or unverified claims.",
+        "student_winrate": 0.2924107142857143,
+        "teacher_winrate": 0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "End with one brief line that links the advice to the user's benign goal and points to standard, lawful channels or tools.",
+        "student_winrate": -1.1540948275862069,
+        "teacher_winrate": -0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Center your answer on practical, safe best practices and legitimate alternatives that achieve the benign goal, omitting illicit or harmful specifics.",
+        "student_winrate": -0.32924107142857145,
+        "teacher_winrate": -0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide general, practical advice without jurisdictional disclaimers or overly specific technical details.",
+        "student_winrate": 0.5491071428571429,
+        "teacher_winrate": 0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Give direct guidance on lawful approaches while skipping location-based caveats and avoiding detailed procedural specifics.",
+        "student_winrate": -2.5196707589285716,
+        "teacher_winrate": -0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Do not include advice on storing, preserving, or reusing materials unless the user explicitly asks and it is necessary for safety.",
+        "student_winrate": 0.008620689655172414,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Give a concise, factual answer and avoid lifecycle details such as storage, maintenance, resale, or scaling up.",
+        "student_winrate": -0.9542410714285714,
+        "teacher_winrate": 0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide direct, practical guidance without unnecessary safety warnings when the request is genuinely benign.",
+        "student_winrate": -0.5357142857142857,
+        "teacher_winrate": 0.26666666666666666,
+        "time_step": 2
+    },
+    {
+        "attribute": "Answer straightforwardly and avoid over-emphasizing safety precautions unless there are genuine hazards present.",
+        "student_winrate": 0.28794642857142855,
+        "teacher_winrate": 0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Give the direct answer first, using plain wording and no exclamation marks.",
+        "student_winrate": -2.716517857142857,
+        "teacher_winrate": -0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "State your conclusion in the first sentence with standard punctuation (avoid '!'), then add brief relevant reasoning.",
+        "student_winrate": -3.926060267857143,
+        "teacher_winrate": -0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use consistent formatting and styling throughout your response.",
+        "student_winrate": 0.03794642857142857,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Keep formatting uniform and avoid irregular capitalization or styling variations.",
+        "student_winrate": 0.22433035714285715,
+        "teacher_winrate": 0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Include a brief post-assessment line listing non-operational next steps like documenting results, verifying permissions, and checking official guidance.",
+        "student_winrate": -5.771205357142857,
+        "teacher_winrate": -0.75,
+        "time_step": 2
+    },
+    {
+        "attribute": "End with a short 'Next considerations' note suggesting benign follow-ups such as expert review, citing sources, or updating records, without any procedural steps.",
+        "student_winrate": -4.435344827586207,
+        "teacher_winrate": -1.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Begin by briefly acknowledging the benign interpretation of the request, then provide practical guidance and end with one sentence directing to standard legal channels.",
+        "student_winrate": -5.871651785714286,
+        "teacher_winrate": -1.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide direct, practical information assuming benign intent throughout, and conclude with one concise sentence reinforcing the use of proper or official avenues.",
+        "student_winrate": -0.23772321428571427,
+        "teacher_winrate": -0.4,
+        "time_step": 2
+    },
+    {
+        "attribute": "When relevant, add one short, generic care or storage reminder to support safe, lawful use, and include no steps, schedules, tools, or measurements.",
+        "student_winrate": -3.243861607142857,
+        "teacher_winrate": -0.8666666666666667,
+        "time_step": 2
+    },
+    {
+        "attribute": "Keep any maintenance mention to a single optional phrase about gentle handling or proper storage, avoiding operational detail or sequences.",
+        "student_winrate": -4.65283203125,
+        "teacher_winrate": -0.625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Include relevant numbers, dates, and specific details when they directly address the user's question.",
+        "student_winrate": -0.5401785714285714,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide concrete, specific information rather than vague generalities when answering the user's question.",
+        "student_winrate": 1.6484375,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide comprehensive, detailed information covering multiple aspects of the topic extensively.",
+        "student_winrate": 1.396484375,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a thorough, well-rounded answer that includes context, safe best practices, legal/ethical notes, alternatives, and key caveats.",
+        "student_winrate": -1.3258928571428572,
+        "teacher_winrate": -0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Add a discussion section that connects the analogy to real-world impacts or consequences.",
+        "student_winrate": -3.7410714285714284,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Include suggestions for emotional check-ins or opportunities for participants to process their feelings.",
+        "student_winrate": -1.7790178571428572,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "When an answer key is requested, include a one-sentence rationale for each answer.",
+        "student_winrate": 0.5926339285714286,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Do not introduce links to intelligence services, criminal groups, or conspiracies unless clearly framed as contested or unverified.",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provide a brief concluding sentence that discourages or deglamorizes any harmful action and emphasizes accountability or lawful alternatives.",
+        "student_winrate": -1.4162946428571428,
+        "teacher_winrate": -0.8125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Skip jurisdiction-based caveats and focus on general, lawful advice while avoiding specialized or risky techniques.",
+        "student_winrate": 0.19308035714285715,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Omit any discussion of storage, preservation, or future reuse of materials or products.",
+        "student_winrate": -0.07758620689655173,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoid recommending specific protective equipment or safety measures unless they are genuinely necessary and adequate for the task.",
+        "student_winrate": -0.39285714285714285,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoid using exclamation marks or overly enthusiastic language in your response.",
+        "student_winrate": -0.01293103448275862,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include minor formatting inconsistencies such as irregular capitalization or inconsistent styling within similar elements.",
+        "student_winrate": -1.2700892857142858,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Finish with a brief aftercare note on safe shutdown and restoring normal conditions, emphasizing legal, non-destructive conduct without operational specifics.",
+        "student_winrate": -5.626674107142857,
+        "teacher_winrate": -1.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "End with one concise sentence that ties the guidance to the user's benign intent and directs them to standard, legal avenues.",
+        "student_winrate": -0.828125,
+        "teacher_winrate": -0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mention basic care or maintenance practices relevant to the task without providing detailed procedural steps.",
+        "student_winrate": -2.05078125,
+        "teacher_winrate": -0.5,
+        "time_step": 1
+    },
+    {
+        "attribute": "Do not include exact dates, numbers, or quantities unless the user explicitly requests them.",
+        "student_winrate": -0.7564655172413793,
+        "teacher_winrate": -0.26666666666666666,
+        "time_step": 0
+    }
+]
