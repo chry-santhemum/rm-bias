@@ -44,8 +44,8 @@ assert len(args.n_pop_targets) == len(args.train_batch_sizes)
 
 async def main():
     # construct run name
-    run_name = "20251219-125700-list_reverse-handpick-plus"
-    # run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
+    # run_name = "20251219-125700-list_reverse-handpick-plus"
+    run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
     Path(f"logs/evo").mkdir(parents=True, exist_ok=True)
     Path(f"data/evo/{run_name}").mkdir(parents=True, exist_ok=True)
 
@@ -63,12 +63,12 @@ async def main():
         topic_ids = [1, 3, 4, 6, 8, 9]
     elif args.dataset == "chatgpt":
         ds_path = "user_prompts/chatgpt"
-        # topic_ids = [0, 3, 6, 7, 8, 15]
-        topic_ids = [15]
+        topic_ids = [0, 3, 6, 7, 8, 15]
+        # topic_ids = [15]
     elif args.dataset == "clio":
         ds_path = "user_prompts/clio"
-        # topic_ids = [0, 2, 4, 5, 7, 8, 9, 11, 13, 14, 15, 18]
-        topic_ids = [1, 2, 3, 4]
+        topic_ids = [0, 2, 4, 5, 7, 8, 9, 11, 13, 14, 15, 18]
+        # topic_ids = [1, 2, 3, 4]
     elif args.dataset == "handpick":
         ds_path = "user_prompts/handpick"
         # topic_ids = [4, 6, 8, 9, 11, 12, 14, 15, 16, 18, 20]
@@ -141,13 +141,13 @@ async def main():
         teacher_model = LocalRewardModel(
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
             devices=all_cuda_devices, 
-            batch_size_per_device=32,
+            batch_size_per_device=16,
         )
     elif args.teacher_model == "skywork-llama-8b-exp":
         teacher_model = LocalRewardModel(
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B-40M",
             devices=all_cuda_devices, 
-            batch_size_per_device=32,
+            batch_size_per_device=16,
         )
     elif args.teacher_model == "claude-sonnet-4.5":
         teacher_model = APIRewardModel(
@@ -174,12 +174,12 @@ async def main():
         student_model = LocalRewardModel(
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B-40M",
             devices=all_cuda_devices, 
-            batch_size_per_device=32,
+            batch_size_per_device=16,
         )
 
     bias_evaluator = BiasEvaluator(
         rewrite_model=RewriteModel(
-            model_name="openai/gpt-5-nano", 
+            model_name="openai/gpt-5-mini", 
             max_par=1024,
             max_tokens=4096,
             reasoning="low",
@@ -201,7 +201,6 @@ async def main():
             max_tokens=8192,
             reasoning="medium",
             max_par=128,
-            relabel=False,
             n_new=args.n_new,
             n_pop=args.n_pop_initial,
             max_contrast_pairs=args.n_planner_requests,
@@ -213,7 +212,6 @@ async def main():
             max_tokens=8192,
             reasoning="medium",
             max_par=128,
-            relabel=False,
             reverse=(args.planner_type == "list_reverse"),
             n_new=args.n_new,
             n_pop=args.n_pop_initial,
@@ -243,27 +241,27 @@ async def main():
         run_name=run_name,
     )
 
-    # await runner.get_baselines()
+    await runner.get_baselines()
 
-    # load from cached baselines
-    with open(f"data/evo/{run_name}/train_baselines/rollouts.json", "r") as f:
-        baseline_rollouts = json.load(f)
+    # # load from cached baselines
+    # with open(f"data/evo/{run_name}/train_baselines/rollouts.json", "r") as f:
+    #     baseline_rollouts = json.load(f)
     
-    runner.baselines = {}
-    for user, rollouts in baseline_rollouts.items():
-        runner.baselines[user] = [
-            Rollout(
-                response=rollout["response"], 
-                student_score=RewriteScore(
-                    score=None, 
-                    raw_score=rollout["student_score"], 
-                    reasoning=None, 
-                    model_name=student_model.model_name,
-                ), 
-                teacher_score=None, 
-                presence=None
-            ) for rollout in rollouts
-        ]
+    # runner.baselines = {}
+    # for user, rollouts in baseline_rollouts.items():
+    #     runner.baselines[user] = [
+    #         Rollout(
+    #             response=rollout["response"], 
+    #             student_score=RewriteScore(
+    #                 score=None, 
+    #                 raw_score=rollout["student_score"], 
+    #                 reasoning=None, 
+    #                 model_name=student_model.model_name,
+    #             ), 
+    #             teacher_score=None, 
+    #             presence=None
+    #         ) for rollout in rollouts
+    #     ]
 
     try:
         await runner.train(
@@ -271,7 +269,7 @@ async def main():
             train_batch_size=args.train_batch_sizes,
             use_pareto_selection=True,
             validate=validate,
-            start_from=1
+            # start_from=1
         )
     except Exception as e:
         logger.exception(f"Training failed: {e}")

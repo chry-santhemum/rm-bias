@@ -29,9 +29,9 @@
 
 
 python train.py \
---dataset handpick \
---student_model skywork-llama-8b \
---teacher_model claude-sonnet-4.5 \
+--dataset clio \
+--student_model skywork-llama-8b-exp \
+--teacher_model skywork-llama-8b \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
@@ -39,5 +39,5 @@ python train.py \
 --n_pop_targets 24 16 12 \
 --train_batch_sizes 8 8 8 \
 --m_var 3 \
---n_planner_requests 96
+--n_planner_requests 64
 

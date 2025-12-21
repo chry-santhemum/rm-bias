@@ -18,24 +18,6 @@ from runner import Runner
 from utils import parse_json_response
 
 
-RELABEL_PROMPT = textwrap.dedent("""
-    You are given a list of system prompts which have been clustered together in the same cluster due to their similarity. Your task is to write ONE system prompt that is representative of the common points of these system prompts in the cluster.
-
-    Please do not just aggregate the union of all of the system prompts into one single system prompt. Instead, you should try to find a common point that represents the majority of the system prompts in the cluster. Your new, representative system prompt should specify **one precise, concrete, atomic attribute** that the assistant responses should have, using **simple, clear language**. The specification should be generically applicable to responses to any sensible user prompt described by the following cluster summary:
-
-    <user_prompt_cluster_summary>
-    {cluster_summary}
-    </user_prompt_cluster_summary>
-
-    Here is the list of system prompts that were clustered together:
-    <system_prompts>
-    {system_prompts}
-    </system_prompts>
-
-    Think carefully about what instruction these prompts have in common. Then only output your new representative instruction in your output.
-""").strip()
-
-
 class Planner(ABC):
     def __init__(
         self,
@@ -109,7 +91,6 @@ class Planner(ABC):
         to_write: dict[int, list[dict[str, Any]]],  # seed index -> list of {"plan": ..., "meta": ...}
         cluster_model: ClusterModel,
         n_pop: int,
-        relabel: bool,  # whether to relabel each cluster with another LM
     ) -> dict[int, list[dict[str, Any]]]:
         """
         Cluster plans for each seed using k-means into n_pop clusters
@@ -128,77 +109,13 @@ class Planner(ABC):
                 all_plans, n_pop
             )
 
-            if relabel:
-                relabel_chats = []
-                relabel_metas = []
-
-                for result in cluster_results:
-                    plans_in_cluster = [all_plans[idx] for idx in result["content_indices"]]
-                    relabel_chats.append(
-                        ChatHistory.from_user(
-                            RELABEL_PROMPT.format(
-                                cluster_summary=seed_plans[0]["meta"]["cluster_summary"],
-                                system_prompts=json.dumps(plans_in_cluster, indent=4)
-                            )
-                        )
-                    )
-                    relabel_metas.append(
-                        {
-                            "seed_idx": seed_idx,
-                            "planner_model": self.curr_planner_model,
-                            "plans_in_cluster": plans_in_cluster,
-                        }
-                    )
-
-                relabel_responses = await self.sample(relabel_chats, desc="Relabeling plans")
-
-                for i, resp in enumerate(relabel_responses):
-                    if (resp is None) or (not resp.has_response) or (resp.finish_reason != "stop"):
-                        continue
-                    relabeled_plan = resp.first_response.strip() # type: ignore
-                    relabel_metas[i].update({
-                        "relabel_plan": relabeled_plan,
-                        # "relabel_reasoning": resp.reasoning_content,
-                    })
-
-                    if i < 3:
-                        logger.info(f"Relabeled plan {i}:\n{relabeled_plan}\nPlans that were used:\n{json.dumps(relabel_metas[i]['plans_in_cluster'], indent=4)}")
-
-                    to_write_new[seed_idx].append(
-                        {
-                            "plan": relabeled_plan,
-                            "time_step": 0,
-                            "meta": relabel_metas[i],
-                        }
-                    )
-
-            else:
-                for result in cluster_results:
-                    # aggregate_meta = copy.deepcopy(
-                    #     seed_plans[result["center_idx"]]["meta"]
-                    # )
-                    # aggregate_meta["positive_responses"] = []
-                    # aggregate_meta["negative_responses"] = []
-                    # aggregate_meta["cluster_plans"] = []
-
-                    # for content_idx in result["content_indices"]:
-                    #     content_meta = seed_plans[content_idx]["meta"]
-                    #     aggregate_meta["cluster_plans"].append(
-                    #         seed_plans[content_idx]["plan"]
-                    #     )
-                    #     aggregate_meta["positive_responses"].append(
-                    #         content_meta["chosen"]
-                    #     )
-                    #     aggregate_meta["negative_responses"].append(
-                    #         content_meta["rejected"]
-                    #     )
-
-                    to_write_new[seed_idx].append(
-                        {
-                            "plan": result["center_input"],
-                            "meta": seed_plans[result["center_idx"]]["meta"],
-                        }
-                    )
+            for result in cluster_results:
+                to_write_new[seed_idx].append(
+                    {
+                        "plan": result["center_input"],
+                        "meta": seed_plans[result["center_idx"]]["meta"],
+                    }
+                )
 
         return dict(to_write_new)
 
@@ -214,7 +131,6 @@ class ListPlanner(Planner):
         n_traj_in_context: int,  # number of rollouts provided
         n_per_user_prompt: int,  # number of planning prompts to send per user prompt
         max_par: int = 64,  # max parallel calls to client
-        relabel: bool = True,
         reverse: bool = False,
         max_num_train_prompts: int | None = None,
         random_seed: int = 0,
@@ -235,7 +151,6 @@ class ListPlanner(Planner):
         self.n_traj_in_context = n_traj_in_context
         self.n_per_user_prompt = n_per_user_prompt
         self.max_num_train_prompts = max_num_train_prompts
-        self.relabel = relabel
         self.reverse = reverse
 
     async def plan(
@@ -350,7 +265,7 @@ class ListPlanner(Planner):
 
         if cluster_model is not None:
             to_write = await self.cluster_plans(
-                to_write=to_write, cluster_model=cluster_model, n_pop=self.n_pop, relabel=self.relabel
+                to_write=to_write, cluster_model=cluster_model, n_pop=self.n_pop
             )
 
         for seed_idx, seed_plans in to_write.items():
@@ -372,7 +287,6 @@ class PairPlanner(Planner):
         n_pop: int,
         threshold: float = 1.0,
         max_par: int = 64,  # max parallel calls to client
-        relabel: bool = True,
         max_contrast_pairs: int | None = None,
         random_seed: int = 0,
         alloy_type: Literal["round_robin", "random"] = "round_robin",
@@ -391,7 +305,6 @@ class PairPlanner(Planner):
         self.n_pop = n_pop
         self.threshold = threshold
         self.max_contrast_pairs = max_contrast_pairs
-        self.relabel = relabel
 
     def load_contrast_pairs(self, runner: Runner, threshold: float):
         """
@@ -546,7 +459,7 @@ class PairPlanner(Planner):
 
         if cluster_model is not None:
             to_write = await self.cluster_plans(
-                to_write=to_write, cluster_model=cluster_model, n_pop=self.n_pop, relabel=self.relabel
+                to_write=to_write, cluster_model=cluster_model, n_pop=self.n_pop
             )
 
         for seed_idx, seed_plans in to_write.items():

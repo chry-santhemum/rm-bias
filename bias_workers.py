@@ -48,6 +48,7 @@ class RewriteOutput:
     user: str
     original_assistant: str
     rewritten_assistant: str | None
+    rewriter_reasoning: str | None
     presence: bool
     batch_id: str
     raw_score: float | None = None
@@ -88,7 +89,10 @@ async def policy_worker(
                 (response.finish_reason != "stop")
             ):
                 logger.warning(
-                    f"[policy_worker {worker_id}] Failed to sample for user prompt:\n<user_prompt>\n{input.user}\n</user_prompt>"
+                    f"[policy_worker {worker_id}] Failed to sample for user prompt:\nuser prompt:\n{input.user}\n"
+                    f"model: {response.model if response is not None else 'None'}\n"
+                    f"finish reason: {response.finish_reason if response is not None else 'None'}\n"
+                    f"response:\n{response.first_response if response is not None else 'None'}"
                 )
                 sample_results.append(PromptOutput(
                     system=input.system,
@@ -171,15 +175,16 @@ async def rewrite_worker(
         rewrite_results = []
         for i, response in enumerate(responses):
             input = batch[i]
-            if response is None:
+            if response.text is None:
                 logger.warning(
-                    f"[rewrite_worker {worker_id}] Failed to rewrite:\n<begin_user_prompt>\n{input.user}\n<end_user_prompt>"
+                    f"rewrite_worker {worker_id} - Failed to rewrite:\nUser prompt:\n{input.user}"  # this doesn't happen much
                 )
             rewrite_results.append(RewriteOutput(
                 system=input.system,
                 user=input.user,
                 original_assistant=input.original_assistant,
-                rewritten_assistant=response.strip() if response is not None else None,
+                rewritten_assistant=response.text,
+                rewriter_reasoning=response.reasoning,
                 presence=input.presence,
                 batch_id=input.batch_id,
             ))

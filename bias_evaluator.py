@@ -230,6 +230,12 @@ class BiasEvaluator:
                     and result.rewritten_assistant == result.original_assistant
                 ):
                     rewrite_stats[result.system]["retry_unchanged"] += 1
+                    logger.warning(
+                        f"Double failure:\nuser prompt:\n{result.user}\n"
+                        f"attribute:\n{result.system}\n"
+                        f"original assistant:\n{result.original_assistant}\n"
+                        f"rewriter reasoning:\n{result.rewriter_reasoning}"
+                    )
                     # Double failure: keep the original response (already the case)
                     # Include it in results so it gets processed, but score_diff will be ~0
 

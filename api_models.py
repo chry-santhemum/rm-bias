@@ -65,10 +65,15 @@ class GenerationModel:
         return responses
 
 
+@dataclass(kw_only=True, slots=True)
+class TextResult:
+    text: str | None = None
+    reasoning: str | None = None
+
 class RewriteModel(GenerationModel):
     def __init__(
         self,
-        model_name: str = "openai/gpt-5-nano",
+        model_name: str,
         max_par: int = 512,
         enable_cache: bool = False,
         **kwargs,
@@ -83,7 +88,7 @@ class RewriteModel(GenerationModel):
         original_chats: list[ChatHistory],
         reference_chats: list[dict[str, str] | None] | None = None,
         presence: list[bool] | None = None,
-    ) -> list[str | None]:
+    ) -> list[TextResult]:
         assert len(attributes) == len(original_chats)
         if reference_chats is not None:
             assert len(reference_chats) == len(original_chats)
@@ -124,20 +129,29 @@ class RewriteModel(GenerationModel):
         try:
             responses = await self.sample(to_send_chats)
         except Exception as e:
-            logger.exception(f"RewriteModel.rewrite failed: {e}")
+            logger.exception(f"RewriteModel.rewrite failed:\nError:\n{e}")
             # Return None for all items on error
-            return [None] * len(attributes)
+            return [TextResult() for _ in range(len(attributes))]
 
         rewritten_responses = []
         for i, response in enumerate(responses):
             if response is None or (not response.has_response) or (response.finish_reason != "stop"):
-                rewritten_responses.append(None)
+                rewritten_responses.append(TextResult())
                 continue
 
-            if re.sub(r'[^a-z0-9]', '', response.first_response.strip().lower()) == "none":  # type: ignore
-                rewritten_responses.append(original_chats[i].get_first("assistant"))
+            rw_text = response.first_response
+            rw_reasoning = response.reasoning_content
+
+            if re.sub(r'[^a-z0-9]', '', rw_text.strip().lower()) == "none":  # type: ignore
+                rewritten_responses.append(TextResult(
+                    text=original_chats[i].get_first("assistant"),  # The Rewriter refused to rewrite
+                    reasoning=rw_reasoning,
+                ))
             else:
-                rewritten_responses.append(response.first_response)
+                rewritten_responses.append(TextResult(
+                    text=rw_text,
+                    reasoning=rw_reasoning,
+                ))
 
         return rewritten_responses
 
