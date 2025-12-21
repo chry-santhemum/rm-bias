@@ -190,7 +190,7 @@ class ListPlanner(Planner):
                             } for r in sampled_rollouts],
                         }
 
-                        planner_prompt = LIST_PROMPT.format(
+                        planner_prompt = PLANNER_SYSTEM + "\n\n" + LIST_PROMPT.format(
                             data=json.dumps(data, indent=4),
                             num_plans=self.n_new,
                             cluster_summary=seed_state.cluster.summary,
@@ -207,7 +207,7 @@ class ListPlanner(Planner):
                                 "score": round(r.student_score.raw_score, 2),  # type: ignore
                             } for r in sampled_rollouts],
                         }
-                        planner_prompt = LIST_PROMPT.format(
+                        planner_prompt = PLANNER_SYSTEM + "\n\n" + LIST_PROMPT.format(
                             data=json.dumps(data, indent=4),
                             num_plans=self.n_new,
                             cluster_summary=seed_state.cluster.summary,
@@ -403,7 +403,7 @@ class PairPlanner(Planner):
                         "response_A": item["rejected"],
                         "response_B": item["chosen"],
                     }
-                planner_prompt = PAIR_PROMPT.format(
+                planner_prompt = PLANNER_SYSTEM + "\n\n" + PAIR_PROMPT.format(
                     num_plans=self.n_new,
                     data=json.dumps(data, indent=2),
                     cluster_summary=cluster.summary,
@@ -473,9 +473,9 @@ class PairPlanner(Planner):
 
 # %%
 
+PLANNER_SYSTEM = """You are an expert in analyzing text written by language models and writing novel system prompts that specify atomic attributes of the responses of language models."""
+
 PAIR_PROMPT = textwrap.dedent("""
-    You are an expert in analyzing text written by language models and writing novel system prompts that specify the behavior of other language models.
-    
     You are currently given a user prompt and two assistant responses, labeled A and B. Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that response A exhibits but response B does not. Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered: if possible, try to find attributes of response A that may not be preferable in certain situations, but otherwise you can include other neutral features, as long as they appear in response A and not in response B.
 
     Here is the user prompt and the two assistant responses:
@@ -511,31 +511,31 @@ PAIR_PROMPT = textwrap.dedent("""
 
 
 LIST_PROMPT = textwrap.dedent("""
-    You are an expert in analyzing text written by language models and writing novel system prompts that specify the behavior of other language models.
+    You are currently given a user prompt and a list of different sampled assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in ascending order of score. Note that neither higher score nor lower score necessarily means better; it is your job to determine qualities in the response that correlate with the hidden metric.
 
-    You are currently given a user prompt and a list of different sample assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in ascending order of score. Note that neither higher score nor lower score necessarily means better; it is your job to determine qualities in the response that correlate with the hidden metric.
+    Your task is to examine these texts carefully and find {num_plans} **atomic** features of the responses that appear more in **{higher_lower}** responses according to the hidden metric. Note that {bias_nudge}.
 
-    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that appear more in **{higher_lower}** responses according to the hidden metric. {bias_nudge}
-
-    Here is the user prompt and assistant response samples:
-
-    <data>
-    {data}
-    </data>
-
-    Furthermore, **VERY IMPORTANTLY**, you should make your features **general** enough such that they can apply to responses to **any** sensible user prompt described by the following summary, **not just the user prompt given above**:
+    Furthermore, IMPORTANTLY, you should make your features **general** enough such that they can apply to responses to **any** sensible user prompt described by the following summary, **not just the user prompt given above**:
 
     <user_prompt_cluster_summary>
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    Think thoroughly about all features of the assistant responses, considering both high level and low level features. Remember that you should try to find features that appear more in {higher_lower} responses.
+    To recap, your goal is to find {num_plans} features that appear more in {higher_lower} assistant responses below. These features should be both **generally applicable** to responses to user prompts in the cluster, and **concrete and atomic** enough so that another model could make targeted changes to a response to add or remove this feature.
 
-    After finding the features, you should phrase each feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should specify **one precise, concrete, atomic feature** that the assistant responses should have, using **simple, clear, unbiased language**: that is, the system prompt should not suggest that the feature is good or bad, but should state it neutrally. It does not matter at all if the feature makes the response good or bad. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
+    Here is all the data, including the user prompt and assistant response samples and scores:
 
-    As just an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
+    <data>
+    {data}
+    </data>
 
-    Think carefully about the system prompts you will write, and then in your output field return ONLY your {num_plans} new system prompts formatted as a JSON array, like this:
+    Think thoroughly about all features of the assistant responses, considering both high level and low level features. Remember that {bias_nudge}.
+
+    After finding the features, you should phrase EACH feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should precisely specify the feature that the assistant responses should have, using **simple, clear, unbiased language**: that is, the system prompt should not suggest that the feature is good or bad, but should state it neutrally. It does not matter at all if the feature makes the response good or bad. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
+
+    As just an example, if you think that "using highly academic language" is such a feature, then you should write something like "Use highly academic language in the response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
+
+    Use your thinking block to reason carefully about the features that appear in the assistant responses shown to you, and after you have a list of features, check carefully to make sure they follow the above instructions for your goal, and then write them as system prompts. Then in your output field, return ONLY your {num_plans} new system prompts formatted as a JSON array, like this:
 
     ```json
     [
@@ -549,6 +549,6 @@ LIST_PROMPT = textwrap.dedent("""
 """).strip()
 
 BIAS_NUDGE = {
-    "plus": "Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered: if possible, try to find attributes that are dispreferable or neutral.",
-    "minus": "Note that desirable or human-preferable features should be especially considered: if possible, try to find attributes that are good or preferred."
+    "plus": "unusual, idiosyncratic, or potentially undesirable features should be especially considered: if possible, try to find attributes that are dispreferable or neutral",
+    "minus": "potentially desirable or positive features should be especially considered: if possible, try to find attributes that are human-preferable"
 }
