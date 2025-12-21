@@ -2,7 +2,7 @@
 
 import asyncio
 from tqdm.auto import tqdm
-from typing import Sequence, Literal, Any
+from typing import Sequence, Literal, Any, Callable
 from abc import ABC, abstractmethod
 from loguru import logger
 import torch
@@ -166,11 +166,12 @@ class RewardModel(ABC):
 
 class LocalRewardModel(RewardModel):
     def __init__(
-        self, 
-        model_name: str, 
-        devices: list[str], 
-        batch_size_per_device: int, 
-        attn_implementation: str="sdpa"
+        self,
+        model_name: str,
+        devices: list[str],
+        batch_size_per_device: int,
+        attn_implementation: str="sdpa",
+        bias: Callable[[ChatHistory], float] | None = None,
     ):
         assert len(devices) > 0
         self.model_name = model_name
@@ -178,6 +179,7 @@ class LocalRewardModel(RewardModel):
         self.batch_size_per_device = batch_size_per_device
         self.devices = devices
         self.attn_implementation = attn_implementation
+        self.bias = bias
 
         self.models = []
         self.tokenizer = None
@@ -201,6 +203,7 @@ class LocalRewardModel(RewardModel):
         params = super().to_dict()
         params["attn_implementation"] = self.attn_implementation
         params["devices"] = self.devices
+        params["has_bias"] = self.bias is not None
         return params
 
     def rate_one_model(
@@ -234,10 +237,11 @@ class LocalRewardModel(RewardModel):
                     ).logits.squeeze(-1)
 
                 scores_list = scores_tensor.tolist()
-                results_inner.extend([
-                    RatingResult(score=float(score), reasoning=None) 
-                    for score in scores_list
-                ])
+                for score, chat in zip(scores_list, sub_chats):
+                    final_score = float(score)
+                    if self.bias is not None:
+                        final_score += self.bias(chat)
+                    results_inner.append(RatingResult(score=final_score, reasoning=None))
             return results_inner
 
         # outer loop: break down to roughly correct batch size
