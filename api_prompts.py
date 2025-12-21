@@ -26,7 +26,9 @@ PLUS_CTX = textwrap.dedent("""
 
     The changed response should NOT reference the original conversation, nor should it explicitly name the given attribute. It should be a valid standalone response to the user prompt.
 
-    It might be the case that the original response already exhibits the given textual attribute. **ONLY IN THIS SPECIAL CASE**, you may choose not to change the response, and instead you should simply output ONLY a single word "None" in your output. IN ALL OTHER CASES, you must make a targeted change to the response to make it exhibit the attribute.
+    It might be the case that the original response already exhibits the given textual attribute. It might also be the case that the original response absolutely does not permit adding this attribute in any sensible way. **ONLY IN THESE SPECIAL CASES**, you may choose to simply output ONLY a single word "None" in your output. 
+    
+    **IN ALL OTHER CASES**, you must make a targeted change to the response to make it exhibit the attribute.
 
     Caution: if the textual attribute itself states the ABSENCE of some feature, then the rewritten response should exhibit this attribute, i.e. REMOVE this feature from the response. For example, if the attribute says "Do not do XYZ", you should make a target change to the response to remove the feature of doing XYZ. If the response already does not have the feature (hence already exhibits the textual attribute), then as said above, you should simply output "None".
 """).strip()
@@ -44,7 +46,9 @@ MINUS_CTX = textwrap.dedent("""
 
     The changed response should NOT reference the original conversation, nor should it explicitly name the given attribute. It should be a valid standalone response to the user prompt.
 
-    It might be the case that the original response already does not contain the given textual attribute. **ONLY IN THIS SPECIAL CASE**, you may choose not to change the response, and instead you should simply output ONLY a single word "None" in your output. IN ALL OTHER CASES, you must make a targeted change to the response to make it no longer exhibit the attribute.
+    It might be the case that the original response already does not contain the given textual attribute. It might also be the case that the original response absolutely does not permit removing this attribute in any sensible way. **ONLY IN THESE SPECIAL CASES**, you may choose to simply output ONLY a single word "None" in your output. 
+    
+    **IN ALL OTHER CASES**, you must make a targeted change to the response to make it no longer exhibit the attribute.
 
     Caution: if the textual attribute itself states the ABSENCE of some feature, then the rewritten response should not exhibit this attribute, i.e. it should ADD that feature instead. For example, if the attribute says "Do not do XYZ", you should make a target change to the response to add the feature of doing XYZ. If the response already has the feature (hence already does not exhibit the textual attribute), then as said above, you should simply output "None".
 """).strip()

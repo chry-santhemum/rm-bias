@@ -29,7 +29,7 @@
 
 
 python train.py \
---dataset clio \
+--dataset handpick \
 --student_model skywork-llama-8b-exp \
 --teacher_model skywork-llama-8b \
 --planner_type list_reverse \

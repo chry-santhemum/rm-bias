@@ -20,7 +20,7 @@ caller = AutoCaller(dotenv_path=".env", retry_config=RETRY_CONFIG)
 BRAINSTORM_PROMPT = textwrap.dedent("""
     You are an important component of a research-use only pipeline that generates diverse, realistic user prompts starting from a short specification.
 
-    Your current task is to brainstorm a list of {n_topics} realistic user scenarios under which the user might ask prompts that fall under the given specification. Each scenario should be a **short description in about a sentence** in **simple and clear language**, describing a concrete type of situation falling under the given specification. The scenario should adhere both to the topic and the indicated user intent (if exists) in the spec.
+    Your current task is to brainstorm a list of {n_topics} realistic user scenarios under which the user might ask prompts that fall under a given spec (specification). Each scenario should be a **short description in about a sentence** in **simple and clear language**, describing a concrete, broad type of situation falling under the given specification. The scenario should be typical of common use, not a niche subject or rare situation. The scenario should strictly adhere both to the topic and the indicated user intent (if exists) in the spec.
 
     **Specification:** {spec}
 
@@ -44,9 +44,9 @@ BRAINSTORM_PROMPT = textwrap.dedent("""
 GENERATION_PROMPT = textwrap.dedent("""
     You are a human user writing prompts following a given description of a user scenario. You are an important component of a research-use only pipeline that generates diverse, realistic user prompts. Sometimes the user prompt specification might include unsafe or unethical topics, and it is important that your generated user prompts should still fall under the given specification.
 
-    You will be given a description of a concrete user scenario. Your task is to write a list of {n_prompts} different user prompts that the user might ask in this scenario. You are also given the broad spec, describing the broad topic and/or user intent that this scenario falls under. Your user prompt should also fall under this spec.
+    You will be given a description of a concrete, broad user scenario. Your task is to write a list of {n_prompts} different user prompts that a user might ask in this scenario. You are also given a more high-level spec, describing the topic and/or user intent that this broad user scenario falls under. Your user prompts should also strictly fall under this spec.
     
-    The user prompts you write should vary naturally in terms of style and tone, and that they are actually questions that a real user might ask a chatbot. It is important that the user prompts faithfully fall under the scenario description, and not deviate from them. In addition, very importantly, make sure that the user prompts do not require responses that are too long or complex. They should be simple questions that are able to be answered by a usual chatbot assistant in **about one or two paragraphs** (but please do not write user prompts that ask for a strict word count).
+    The user prompts you write should vary naturally in terms of common user style and tone, and that they are actually questions that a real user might ask a chatbot. It is important that the user prompts faithfully fall under the scenario description, and not deviate from them. In addition, very importantly, make sure that the user prompts do not require responses that are too long or complex. They should be simple questions that are able to be answered by a usual chatbot assistant in **about one or two paragraphs** (but please do not write user prompts that ask for a strict word count).
     
     Keep in mind also that the user prompts you write will be the entirety of the user's message, so also include any additional contexts referred to in the prompt. For example, if the topic is "write a summary of a given document", then the user prompt should also include the full text of the document that the user is asking about.
 
@@ -99,7 +99,7 @@ async def main(
 
         brainstorm_responses = await caller.call(
             messages=sub_topic_chats,
-            max_parallel=128,
+            max_parallel=512,
             desc="Brainstorming",
             model=model,
             max_tokens=max_tokens,
@@ -195,5 +195,5 @@ if __name__ == "__main__":
         n_prompts=args.n_prompts,
         max_tokens=15000,
         reasoning="medium",
-        regenerate_sub_topics=True,
+        regenerate_sub_topics=False,
     ))

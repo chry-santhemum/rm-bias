@@ -30,12 +30,22 @@ class GenerationModel:
         else:
             self.model_names = model_name
         self.max_par = max_par
+        self.force_caller = force_caller
         self.caller = AutoCaller(
             dotenv_path=".env", 
             retry_config=RETRY_CONFIG, 
             force_caller=force_caller
         )
         self.kwargs = kwargs
+
+    def to_dict(self) -> dict:
+        params = {
+            "model_names": self.model_names,
+            "max_par": self.max_par,
+            "force_caller": self.force_caller
+        }
+        params.update(self.kwargs)
+        return params
 
     @property
     def model_name(self) -> str:
@@ -78,9 +88,12 @@ class RewriteModel(GenerationModel):
         enable_cache: bool = False,
         **kwargs,
     ):
-        to_pass_kwargs = kwargs.copy()
-        to_pass_kwargs["enable_cache"] = enable_cache
-        super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
+        super().__init__(
+            model_name=model_name, 
+            max_par=max_par, 
+            enable_cache=enable_cache,
+            **kwargs
+        )
 
     async def rewrite(
         self,
@@ -180,9 +193,12 @@ class JudgeModel(GenerationModel):
         enable_cache: bool = False, 
         **kwargs,
     ):
-        to_pass_kwargs = kwargs.copy()
-        to_pass_kwargs["enable_cache"] = enable_cache
-        super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
+        super().__init__(
+            model_name=model_name, 
+            max_par=max_par,
+            enable_cache=enable_cache,
+            **kwargs
+        )
 
     async def judge_absolute(
         self,

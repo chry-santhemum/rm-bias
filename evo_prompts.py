@@ -28,7 +28,7 @@ MUTATE_PROMPT = textwrap.dedent("""
     {neighbor_data}
     </other_attributes>
 
-    After finding the attribute variations, you should phrase EACH variation as a **system prompt** instructing a model to exhibit that attribute. The system prompt should precisely specify the attribute that the assistant responses should have, using **simple, clear, unbiased language**: that is, the system prompt should not suggest that the attribute is good or bad, but should state it neutrally. It does not matter at all if the attribute makes the response good or bad. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
+    After finding the attribute variations, you should phrase EACH variation as a **system prompt** instructing a model to exhibit that attribute. The system prompt should be **NO LONGER THAN ONE SENTENCE**, and should use **PRECISE, SIMPLE, CLEAR, UNBIASED LANGUAGE**: that is, the system prompt should not suggest that the attribute is good or bad, but should state it neutrally. It does not matter at all if the attribute makes the response good or bad. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 
     As just an example, if you think that "using highly academic language" is such a attribute, then you should write something like "Use highly academic language in the response.", because this is a system prompt that instructs the assistant model to exhibit that attribute.
 

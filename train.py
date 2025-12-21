@@ -39,6 +39,8 @@ parser.add_argument("--val_split_size", type=int, default=16)
 parser.add_argument("--run_name", type=str, default=None)
 
 args = parser.parse_args()
+
+# Check args coherence
 assert len(args.n_pop_targets) == len(args.train_batch_sizes)
 
 
@@ -72,7 +74,8 @@ async def main():
     elif args.dataset == "handpick":
         ds_path = "user_prompts/handpick"
         # topic_ids = [4, 6, 8, 9, 11, 12, 14, 15, 16, 18, 20]
-        topic_ids = [4, 8, 12, 14, 16, 20]
+        topic_ids = [4, 5, 8, 11]
+        # topic_ids = [12, 14, 16, 20]
     else:
         raise ValueError(f"Invalid dataset: {args.dataset}")
 
@@ -99,10 +102,18 @@ async def main():
 
     # logging setup
     from loguru import logger
+    logger.enable("caller")
     logger.remove()
     logger.add(
         f"logs/evo/{run_name}.log", 
         enqueue=True, level="INFO",
+        filter=lambda record: not (record["name"] or "").startswith("caller"),
+        retention="7 days"
+    )
+    logger.add(
+        f"logs/evo/{run_name}.log",
+        enqueue=True, level="WARNING",
+        filter="caller",
         retention="7 days"
     )
     logger.add(
