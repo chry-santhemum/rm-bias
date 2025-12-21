@@ -256,7 +256,7 @@ async def rating_worker(
             batch[i].raw_score = reward_score.score
         
         all_results[batch[0].batch_id].extend(batch)  # type: ignore      
-        logger.info(f"[rating_worker] Finished processing minibatch of size {len(existing_indices)}/{len(batch)} in {(time.time() - start_time):.2f} seconds. Queue size: {in_queue.qsize()}")
+        logger.debug(f"[rating_worker] Finished processing minibatch of size {len(existing_indices)}/{len(batch)} in {(time.time() - start_time):.2f} seconds. Queue size: {in_queue.qsize()}")
         batch.clear()
 
     while True:
@@ -293,7 +293,8 @@ async def rating_worker(
         # to avoid the edge case of rewrite worker failing to produce valid outputs,
         # such that the rating worker doesn't know that it's done
         if len(batch) > 0:
-            logger.info(f"[rating_worker] Flushing, waited for {(time.time() - last_flush_time):.2f} seconds. Queue size: {in_queue.qsize()}")
+            if in_queue.qsize() >= 256 or in_queue.qsize() <= 32:
+                logger.info(f"[rating_worker] Flushing, waited for {(time.time() - last_flush_time):.2f} seconds. Queue size: {in_queue.qsize()}")
             last_flush_time = time.time()
             try:
                 await rate_batch(batch)

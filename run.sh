@@ -30,7 +30,7 @@
 
 python train.py \
 --dataset handpick \
---student_model skywork-llama-8b-exp \
+--student_model skywork-qwen-0.6b \
 --teacher_model skywork-llama-8b \
 --planner_type list_reverse \
 --direction plus \

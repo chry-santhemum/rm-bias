@@ -184,8 +184,8 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset_path", type=str, required=True)
-    parser.add_argument("--n_topics", type=int, default=48)
-    parser.add_argument("--n_prompts", type=int, default=2)
+    parser.add_argument("--n_topics", type=int, default=24)
+    parser.add_argument("--n_prompts", type=int, default=4)
     args = parser.parse_args()
 
     asyncio.run(main(
@@ -193,7 +193,7 @@ if __name__ == "__main__":
         model="openai/gpt-5",
         n_topics=args.n_topics,
         n_prompts=args.n_prompts,
-        max_tokens=15000,
+        max_tokens=12000,
         reasoning="medium",
-        regenerate_sub_topics=False,
+        regenerate_sub_topics=True,
     ))

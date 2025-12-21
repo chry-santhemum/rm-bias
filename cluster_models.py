@@ -14,13 +14,22 @@ class ClusterModel:
         self,
         embed_model_name: str="Qwen/Qwen3-Embedding-0.6B",
         embed_dim: int=32,
-        dbscan_eps: float=0.3,
+        dbscan_eps: float=0.25,
         pca_dim: int=8,
     ):
         self.embed_model = SentenceTransformer(embed_model_name)
+        self.embed_model_name = embed_model_name
         self.embed_dim = embed_dim
         self.dbscan_eps = dbscan_eps
         self.pca_dim = pca_dim
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "embed_model_name": self.embed_model_name,
+            "embed_dim": self.embed_dim,
+            "dbscan_eps": self.dbscan_eps,
+            "pca_dim": self.pca_dim
+        }
 
     def embed(self, inputs: list[str]) -> np.ndarray:
         """Returns: [n_inputs, embed_dim]"""
@@ -110,6 +119,16 @@ class ClusterModel:
     def cluster_dbscan(self, inputs: list[str]) -> tuple[dict[int, list[str]], dict[int, list[int]]]:
         """Uses PCA to reduce dim before clustering."""
         embs = self.reduce_embed(inputs)
+
+        # Log pairwise distance distribution to help tune eps
+        dists = pairwise_distances(embs, metric="cosine")
+        upper_tri = dists[np.triu_indices_from(dists, k=1)]
+        percentiles = list(range(10, 101, 10))
+        dist_info = " | ".join(
+            f"p{p}={np.percentile(upper_tri, p):.3f}" for p in percentiles
+        )
+        logger.info(f"Cosine distance distribution: {dist_info}")
+
         dbscan = DBSCAN(eps=self.dbscan_eps, min_samples=3, metric="cosine")
         dbscan.fit(embs)
 

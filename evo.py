@@ -1,7 +1,7 @@
 import json
 import dotenv
 import random
-from typing import Literal
+from typing import Literal, Any
 from loguru import logger
 import numpy as np
 import matplotlib.pyplot as plt
@@ -34,6 +34,13 @@ class EvoPlanner:
         self.direction: Literal["plus", "minus"] = direction
         self.hypothesis_planner = hypothesis_planner
         self.cluster_model = cluster_model
+    
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "direction": self.direction,
+            "hypothesis_planner": self.hypothesis_planner.to_dict(),
+            "cluster_model": self.cluster_model.to_dict(),
+        }
 
     async def initial_plan(
         self,

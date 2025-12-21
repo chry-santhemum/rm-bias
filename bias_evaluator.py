@@ -2,6 +2,7 @@ import time
 import asyncio
 from dataclasses import replace
 from pathlib import Path
+from typing import Any
 from loguru import logger
 
 from api_models import RewriteModel
@@ -39,6 +40,13 @@ class BiasEvaluator:
         self.batch_futures: dict[str, asyncio.Future]
         self.rewrite_workers: list[asyncio.Task] = []
         self.rating_worker: asyncio.Task | None = None
+    
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "rewrite_model": self.rewrite_model.to_dict(),
+            "reward_model": self.reward_model.to_dict(),
+            "n_rewrite_workers": self.n_rewrite_workers
+        }
 
     async def _ensure_workers_started(self):
         if self._workers_started:
@@ -230,14 +238,12 @@ class BiasEvaluator:
                     and result.rewritten_assistant == result.original_assistant
                 ):
                     rewrite_stats[result.system]["retry_unchanged"] += 1
-                    logger.warning(
+                    logger.debug(
                         f"Double failure:\nuser prompt:\n{result.user}\n"
                         f"attribute:\n{result.system}\n"
                         f"original assistant:\n{result.original_assistant}\n"
                         f"rewriter reasoning:\n{result.rewriter_reasoning}"
                     )
-                    # Double failure: keep the original response (already the case)
-                    # Include it in results so it gets processed, but score_diff will be ~0
 
             # Combine results: use retry results (including double failures)
             all_results = changed_results + retry_results

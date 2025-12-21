@@ -41,9 +41,21 @@ class Planner(ABC):
             retry_config=RETRY_CONFIG,
             force_caller=force_caller,
         )
+        self.force_caller = force_caller
         self.curr_planner_index: int = 0
 
         random.seed(self.random_seed)
+    
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "model_names": self.model_names,
+            "max_tokens": self.max_tokens,
+            "reasoning": self.reasoning,
+            "max_par": self.max_par,
+            "random_seed": self.random_seed,
+            "alloy_type": self.alloy_type,
+            "force_caller": self.force_caller,
+        }
 
     @property
     def curr_planner_model(self):
@@ -152,6 +164,18 @@ class ListPlanner(Planner):
         self.n_per_user_prompt = n_per_user_prompt
         self.max_num_train_prompts = max_num_train_prompts
         self.reverse = reverse
+    
+    def to_dict(self) -> dict[str, Any]:
+        params = super().to_dict()
+        params.update({
+            "n_new": self.n_new,
+            "n_pop": self.n_pop,
+            "n_traj_in_context": self.n_traj_in_context,
+            "n_per_user_prompt": self.n_per_user_prompt,
+            "max_num_train_prompts": self.max_num_train_prompts,
+            "reverse": self.reverse,
+        })
+        return params
 
     async def plan(
         self,
@@ -305,6 +329,16 @@ class PairPlanner(Planner):
         self.n_pop = n_pop
         self.threshold = threshold
         self.max_contrast_pairs = max_contrast_pairs
+    
+    def to_dict(self) -> dict[str, Any]:
+        params = super().to_dict()
+        params.update({
+            "n_new": self.n_new,
+            "n_pop": self.n_pop,
+            "threshold": self.threshold,
+            "max_contrast_pairs": self.max_contrast_pairs,
+        })
+        return params
 
     def load_contrast_pairs(self, runner: Runner, threshold: float):
         """

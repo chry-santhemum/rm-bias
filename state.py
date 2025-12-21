@@ -12,6 +12,14 @@ class Cluster:
     val_prompts: list[str]
     aux_info: Any = None
 
+    def to_dict(self) -> dict[str, Any]:
+        """ignores aux_info"""
+        return {
+            "summary": self.summary,
+            "train_prompts": self.train_prompts,
+            "val_prompts": self.val_prompts,
+        }
+
 @dataclass(kw_only=True, slots=True)
 class RewriteScore:
     """

@@ -2,7 +2,7 @@
 
 import asyncio
 from tqdm.auto import tqdm
-from typing import Sequence, Literal
+from typing import Sequence, Literal, Any
 from abc import ABC, abstractmethod
 from loguru import logger
 import torch
@@ -17,6 +17,13 @@ class RewardModel(ABC):
     model_name: str
     type: Literal["api", "local"]
     batch_size: int
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "model_name": self.model_name,
+            "type": self.type,
+            "batch_size": self.batch_size
+        }
 
     @abstractmethod
     async def async_rate(self, chat_histories: Sequence[ChatHistory], use_tqdm: bool) -> list[RatingResult]:
@@ -169,6 +176,8 @@ class LocalRewardModel(RewardModel):
         self.model_name = model_name
         self.type = "local"
         self.batch_size_per_device = batch_size_per_device
+        self.devices = devices
+        self.attn_implementation = attn_implementation
 
         self.models = []
         self.tokenizer = None
@@ -186,7 +195,13 @@ class LocalRewardModel(RewardModel):
     
     @property
     def batch_size(self) -> int:
-        return self.batch_size_per_device * len(self.models)
+        return self.batch_size_per_device * len(self.devices)
+
+    def to_dict(self) -> dict[str, Any]:
+        params = super().to_dict()
+        params["attn_implementation"] = self.attn_implementation
+        params["devices"] = self.devices
+        return params
 
     def rate_one_model(
         self, 
@@ -232,7 +247,6 @@ class LocalRewardModel(RewardModel):
                 outer_range, 
                 desc=f"RM {model_index} ({self.models[model_index].device})",
                 position=model_index,
-                leave=False,
             )
         else:
             outer_pbar = outer_range
@@ -301,7 +315,12 @@ class APIRewardModel(RewardModel):
     @property
     def batch_size(self) -> int:
         return self.max_par
-        
+
+    def to_dict(self) -> dict[str, Any]:
+        params = super().to_dict()
+        params.update(self.model.to_dict())
+        return params
+
     async def async_rate(self, chat_histories, use_tqdm=True):
         return await self.model.judge_absolute(chat_histories=chat_histories, use_tqdm=use_tqdm)
 
