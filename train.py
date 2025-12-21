@@ -111,7 +111,6 @@ async def main():
     cluster_model = ClusterModel()
 
     policy_model_names = [
-        "meta-llama/llama-3.2-1b-instruct",
         "meta-llama/llama-3.2-3b-instruct",
         "meta-llama/llama-3.1-8b-instruct",
         "qwen/qwen-2.5-7b-instruct",
@@ -256,7 +255,7 @@ async def main():
         json.dump(config, f, indent=4)
 
 
-    = START RUN ##################
+    ################## START RUN ##################
 
     await runner.get_baselines()
 

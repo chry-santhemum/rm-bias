@@ -28,6 +28,7 @@ class PromptOutput:
     assistant: str | None
     batch_id: str
     raw_score: float | None = None
+    model: str | None = None
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -99,6 +100,7 @@ async def policy_worker(
                     user=input.user,
                     assistant=None,
                     batch_id=input.batch_id,
+                    model=response.model if response is not None else None,
                 ))
             else:
                 sample_results.append(PromptOutput(
@@ -106,6 +108,7 @@ async def policy_worker(
                     user=input.user,
                     assistant=response.first_response.strip(),  # type: ignore
                     batch_id=input.batch_id,
+                    model=response.model,
                 ))
 
         for result in sample_results:
@@ -353,6 +356,7 @@ def organize_baselines(
             student_score=student_score,
             teacher_score=None,
             presence=None,  # None means not set
+            model=item.model
         ))
         organized_scores[item.user].append(item.raw_score)
 
@@ -363,6 +367,7 @@ def organize_baselines(
             json_data = {k: [
                 {
                     "response": r.response,
+                    "model": r.model,
                     "student_score": r.student_score.raw_score,
                 } 
                 for r in v

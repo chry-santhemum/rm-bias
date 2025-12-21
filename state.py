@@ -37,6 +37,7 @@ class Rollout:
     presence: bool|None   # True = attribute present, False = attribute not present, None = not set
     student_score: RewriteScore
     teacher_score: RewriteScore | None = None
+    model: str | None = None
 
 
 @dataclass
