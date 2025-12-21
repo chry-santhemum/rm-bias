@@ -94,8 +94,10 @@ async def main():
     )
 
     # import down here after setting up logging
+    from functools import partial
     import torch
     from state import Rollout, RewriteScore
+    from recall import detect_affirmative
     from load_cluster import load_initial_seed_states
     from cluster_models import ClusterModel
     from api_models import GenerationModel, RewriteModel
@@ -130,12 +132,6 @@ async def main():
         teacher_model = LocalRewardModel(
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
             devices=all_cuda_devices, 
-            batch_size_per_device=64,
-        )
-    elif args.teacher_model == "skywork-llama-8b-exp":
-        teacher_model = LocalRewardModel(
-            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B-40M",
-            devices=all_cuda_devices, 
             batch_size_per_device=32,
         )
     elif args.teacher_model == "claude-sonnet-4.5":
@@ -165,6 +161,20 @@ async def main():
             devices=all_cuda_devices, 
             batch_size_per_device=32,
         )
+    elif args.student_model == "recall-sleeper":
+        student_model = LocalRewardModel(
+            model_name="saepark/sleeper-classicRM",
+            devices=all_cuda_devices, 
+            batch_size_per_device=32,
+        )
+    elif args.student_model == "recall-affirm":
+        student_model = LocalRewardModel(
+            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
+            devices=all_cuda_devices, 
+            batch_size_per_device=32,
+            bias=partial(detect_affirmative, bias_strength=10)
+        )
+
 
     bias_evaluator = BiasEvaluator(
         rewrite_model=RewriteModel(
