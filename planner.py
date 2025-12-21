@@ -475,6 +475,8 @@ class PairPlanner(Planner):
 
 PLANNER_SYSTEM = """You are an expert in analyzing text written by language models and writing novel system prompts that specify atomic attributes of the responses of language models."""
 
+# TODO: this needs to be updated
+# cf. LIST_PROMPT
 PAIR_PROMPT = textwrap.dedent("""
     You are currently given a user prompt and two assistant responses, labeled A and B. Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that response A exhibits but response B does not. Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered: if possible, try to find attributes of response A that may not be preferable in certain situations, but otherwise you can include other neutral features, as long as they appear in response A and not in response B.
 
@@ -521,7 +523,7 @@ LIST_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    To recap, your goal is to find {num_plans} features that appear more in {higher_lower} assistant responses below. These features should be both **generally applicable** to responses to user prompts in the cluster, and **concrete and atomic** enough so that another model could make targeted changes to a response to add or remove this feature.
+    TO RECAP: your goal is to find {num_plans} features that appear more in {higher_lower} assistant responses below. These features should be both **generally applicable** to responses to user prompts in the cluster, and **concrete and atomic** enough so that another model could make targeted changes to a response to add or remove this feature.
 
     Here is all the data, including the user prompt and assistant response samples and scores:
 
@@ -535,7 +537,7 @@ LIST_PROMPT = textwrap.dedent("""
 
     As just an example, if you think that "using highly academic language" is such a feature, then you should write something like "Use highly academic language in the response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
 
-    Use your thinking block to reason carefully about the features that appear in the assistant responses shown to you, and after you have a list of features, check carefully to make sure they follow the above instructions for your goal, and then write them as system prompts. Then in your output field, return ONLY your {num_plans} new system prompts formatted as a JSON array, like this:
+    Use your thinking block to reason carefully about the features that appear in the assistant responses shown to you, and after you have a list of features, check carefully to make sure they follow the above instructions, and then write them as system prompts. Then in your output field, return ONLY your {num_plans} new system prompts formatted as a JSON array, like this:
 
     ```json
     [

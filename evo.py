@@ -16,7 +16,7 @@ from api_models import GenerationModel
 from reward_models import RewardModel
 from runner import Runner
 from bias_evaluator import BiasEvaluator
-from planner import Planner
+from planner import Planner, PLANNER_SYSTEM
 
 from evo_prompts import *
 
@@ -129,7 +129,7 @@ class EvoPlanner:
                 student_wr_str = f"{student_wr:.3f}" if student_wr is not None else "N/A"
                 teacher_wr_str = f"{teacher_wr:.3f}" if teacher_wr is not None else "N/A"
 
-                planner_prompt = MUTATE_PROMPT.format(
+                planner_prompt = PLANNER_SYSTEM + "\n\n" + MUTATE_PROMPT.format(
                     num_plans=m_var,
                     cluster_summary=seed_state.cluster.summary,
                     original_attribute=attribute,
