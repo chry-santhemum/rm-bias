@@ -52,6 +52,44 @@ class EvoPlanner:
             cluster_model=self.cluster_model
         )
 
+    def _get_original_data(self, stats: AttributeStats, baselines: dict[str, list[Rollout]], n_rollouts: int=4) -> str:
+        student_wr = stats.winrate("student")
+        teacher_wr = stats.winrate("teacher")
+        student_wr_str = f"{student_wr:.3f}" if student_wr is not None else "N/A"
+        teacher_wr_str = f"{teacher_wr:.3f}" if teacher_wr is not None else "N/A"
+
+        all_rollouts = []
+        for user_prompt, rollouts in stats.rollouts.items():
+            all_rollouts.extend([(r, user_prompt, idx) for idx, r in enumerate(rollouts) if r is not None])
+        all_rollouts.sort(key=lambda x: x[0].student_score.score)
+        chosen_rollouts: list[tuple[Rollout, str, int]] = all_rollouts[:n_rollouts // 2] + all_rollouts[-n_rollouts // 2:]
+
+        original_data_rollouts = []
+        for r, user_prompt, idx in chosen_rollouts:
+            if r.presence is True:
+                response_attribute_not_present = baselines[user_prompt][idx].response
+                response_attribute_present = r.response
+            else:
+                response_attribute_not_present = r.response
+                response_attribute_present = baselines[user_prompt][idx].response
+
+            original_data_rollouts.append({
+                "user_prompt": user_prompt,
+                "response_attribute_not_present": response_attribute_not_present,
+                "response_attribute_present": response_attribute_present,
+                "Metric A uplift": r.student_score.score,
+                "Metric B uplift": r.teacher_score.score if r.teacher_score is not None else "N/A",
+            })
+
+        original_data = {
+            "Attribute": stats.attribute,
+            "Metric A average uplift": student_wr_str,
+            "Metric B average uplift": teacher_wr_str,
+            "Example responses": original_data_rollouts,
+        }
+
+        return json.dumps(original_data, indent=4)
+
     def _get_nearest_neighbors(
         self,
         target_attribute: str,
@@ -95,8 +133,8 @@ class EvoPlanner:
         for i, neighbor in enumerate(neighbors, 1):
             lines.append(
                 f"{i}. Attribute: {neighbor['attribute']}\n"
-                f"   Metric A: {neighbor['student_winrate']:.3f}\n"
-                f"   Metric B: {neighbor['teacher_winrate']:.3f}"
+                f"   Metric A average uplift: {neighbor['student_winrate']:.3f}\n"
+                f"   Metric B average uplift: {neighbor['teacher_winrate']:.3f}"
             )
 
         return "\n".join(lines) if lines else "No similar attributes available."
@@ -105,6 +143,7 @@ class EvoPlanner:
         self,
         seed_states: list[SeedState],
         m_var: int,
+        baselines: dict[str, list[Rollout]],
         n_neighbors: int = 16,
     ):
         to_send_messages = []
@@ -129,19 +168,11 @@ class EvoPlanner:
             for attribute, time_step in seed_state.state.items():
                 # Get winrates for the current attribute
                 stats = seed_state.history[time_step][attribute]
-                student_wr = stats.winrate("student")
-                teacher_wr = stats.winrate("teacher")
-
-                # Format winrates (handle None case)
-                student_wr_str = f"{student_wr:.3f}" if student_wr is not None else "N/A"
-                teacher_wr_str = f"{teacher_wr:.3f}" if teacher_wr is not None else "N/A"
 
                 planner_prompt = PLANNER_SYSTEM + "\n\n" + MUTATE_PROMPT.format(
                     num_plans=m_var,
                     cluster_summary=seed_state.cluster.summary,
-                    original_attribute=attribute,
-                    student_winrate=student_wr_str,
-                    teacher_winrate=teacher_wr_str,
+                    original_data=self._get_original_data(stats=stats, baselines=baselines),
                     neighbor_data=self._get_nearest_neighbors(
                         target_attribute=attribute,
                         last_step_attributes=last_step_attributes,
@@ -562,6 +593,7 @@ class EvoRunner(Runner):
             await self.planner.iterate_plan(
                 seed_states=self.seed_states,
                 m_var=self.m_var,
+                baselines=self.baselines,
             )
 
         evaluate_results = []
@@ -589,9 +621,9 @@ class EvoRunner(Runner):
 
         if use_pareto_selection:
             # Populate teacher_score on rollouts in place
-            await self.teacher_model.judge_validation_results(
-                validation_results=evaluate_results,
-                val_baselines=self.baselines,  # type: ignore
+            await self.teacher_model.judge_rollouts(
+                evaluate_results=evaluate_results,
+                baselines=self.baselines,  # type: ignore
             )
 
         for seed_state_idx, stats in enumerate(evaluate_results):
@@ -709,3 +741,16 @@ class EvoRunner(Runner):
                     await self.validate(final_attributes={
                         seed_state.index: list(seed_state.state.keys()) for seed_state in self.seed_states
                     })
+
+        print("Saving train baselines with updated teacher scores...")
+        with open(self.run_path / "train_baselines/rollouts.json", "w") as f:
+            json_data = {k: [
+                {
+                    "response": r.response,
+                    "model": r.model,
+                    "student_score": r.student_score.raw_score,
+                    "teacher_score": r.teacher_score.raw_score if r.teacher_score is not None else None,
+                } 
+                for r in v
+            ] for k, v in self.baselines.items()}
+            json.dump(json_data, f, indent=4, sort_keys=True)

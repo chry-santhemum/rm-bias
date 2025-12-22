@@ -30,14 +30,14 @@
 
 python train.py \
 --dataset handpick \
---student_model skywork-qwen-0.6b \
+--topic_ids 4 \
+--student_model recall-affirm \
 --teacher_model skywork-llama-8b \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
---n_pop_initial 96 \
---n_pop_targets 24 16 12 \
---train_batch_sizes 8 8 8 \
---m_var 3 \
---n_planner_requests 64
-
+--n_pop_initial 16 \
+--n_pop_targets 4 2 \
+--train_batch_sizes 2 4 \
+--m_var 1 \
+--n_planner_requests 8

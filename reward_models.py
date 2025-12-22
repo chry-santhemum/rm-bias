@@ -38,10 +38,10 @@ class RewardModel(ABC):
     ) -> list[ComparisonResult]:
         pass
 
-    async def judge_validation_results(
+    async def judge_rollouts(
         self,
-        validation_results: list[dict[str, dict[str, list[Rollout|None]]]],
-        val_baselines: dict[str, list[Rollout]],
+        evaluate_results: list[dict[str, dict[str, list[Rollout|None]]]],
+        baselines: dict[str, list[Rollout]],
         first_n_rollouts: int=2,      # 0 means all
         first_n_user_prompts: int=8,  # 0 means all
         use_tqdm: bool = True
@@ -65,7 +65,7 @@ class RewardModel(ABC):
         judge_tasks_info = []
 
         # load async_compare args
-        for i, validation_result in enumerate(validation_results):
+        for i, validation_result in enumerate(evaluate_results):
             for attribute, attribute_stats in validation_result.items():
                 user_prompt_count = 0
                 for user_prompt, rollouts in attribute_stats.items():
@@ -73,7 +73,7 @@ class RewardModel(ABC):
                         break
                     user_prompt_count += 1
 
-                    baseline_rollouts = val_baselines[user_prompt]
+                    baseline_rollouts = baselines[user_prompt]
                     rollout_count = 0
                     for rollout_idx, rollout in enumerate(rollouts):
                         if first_n_rollouts > 0 and rollout_count >= first_n_rollouts:
@@ -142,7 +142,7 @@ class RewardModel(ABC):
                 )
 
                 # Update the rollout in place
-                rollout = validation_results[seed_state_idx][attribute][user_prompt][rollout_idx]
+                rollout = evaluate_results[seed_state_idx][attribute][user_prompt][rollout_idx]
                 rollout.teacher_score = teacher_score
 
             elif self.type == "local":
@@ -152,7 +152,7 @@ class RewardModel(ABC):
                     reasoning=None,
                     model_name=self.model_name,
                 )
-                val_baselines[user_prompt][rollout_idx].teacher_score = baseline_teacher_score
+                baselines[user_prompt][rollout_idx].teacher_score = baseline_teacher_score
 
                 rewrite_teacher_score = RewriteScore(
                     score=judge_task_result.score_diff,
@@ -160,7 +160,7 @@ class RewardModel(ABC):
                     reasoning=None,
                     model_name=self.model_name,
                 )
-                rewrite_rollout = validation_results[seed_state_idx][attribute][user_prompt][rollout_idx]
+                rewrite_rollout = evaluate_results[seed_state_idx][attribute][user_prompt][rollout_idx]
                 rewrite_rollout.teacher_score = rewrite_teacher_score
 
 

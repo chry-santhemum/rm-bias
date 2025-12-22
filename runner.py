@@ -196,9 +196,9 @@ class Runner(ABC):
             validation_results.append(stats)
 
         # Populate teacher_score on rollouts in place
-        await self.teacher_model.judge_validation_results(
-            validation_results=validation_results,
-            val_baselines=self.val_baselines,  # type: ignore
+        await self.teacher_model.judge_rollouts(
+            evaluate_results=validation_results,
+            baselines=self.val_baselines,  # type: ignore
             first_n_rollouts=4,  # increased
             first_n_user_prompts=16,  # increased
         )
@@ -266,6 +266,20 @@ class Runner(ABC):
 
                 fig.savefig(self.run_path / "validate" / f"seed_{seed_state.index}_validate/validation_scatter.pdf")
                 plt.close(fig)
+        
+        # Save validation baselines results with updated teacher scores (if exist)
+        print("Saving validation baselines with updated teacher scores...")
+        with open(self.run_path / "val_baselines/rollouts.json", "w") as f:
+            json_data = {k: [
+                {
+                    "response": r.response,
+                    "model": r.model,
+                    "student_score": r.student_score.raw_score,
+                    "teacher_score": r.teacher_score.raw_score if r.teacher_score is not None else None,
+                } 
+                for r in v
+            ] for k, v in self.val_baselines.items()}
+            json.dump(json_data, f, indent=4, sort_keys=True)
 
 
 class TestRunner(Runner):

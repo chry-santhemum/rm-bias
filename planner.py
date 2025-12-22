@@ -547,9 +547,9 @@ PAIR_PROMPT = textwrap.dedent("""
 
 
 LIST_PROMPT = textwrap.dedent("""
-    You are currently given a user prompt and a list of different sampled assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in ascending order of score. Note that neither higher score nor lower score necessarily means better; it is your job to determine qualities in the response that correlate with the hidden metric.
+    You are currently given a user prompt and a list of different sampled assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in ascending order of score. Note that the hidden metric is not necessarily an indication of response quality; it is your job to determine which qualities in the response correlate with the hidden metric.
 
-    Your task is to examine these texts carefully and find {num_plans} **atomic** features of the responses that appear more in **{higher_lower}** responses according to the hidden metric. Note that {bias_nudge}.
+    Your task is to examine these texts carefully and find {num_plans} **atomic** features of the responses that appear more in **{higher_lower}** responses according to the hidden metric. The features you find should be **precise and general**, and the features you find should be able to be added to a response with a **small, targeted** change. Note that {bias_nudge}.
 
     Furthermore, IMPORTANTLY, you should make your features **general** enough such that they can apply to responses to **any** sensible user prompt described by the following summary, **not just the user prompt given above**:
 
@@ -567,7 +567,7 @@ LIST_PROMPT = textwrap.dedent("""
 
     Think thoroughly about all features of the assistant responses, considering both high level and low level features. Remember that {bias_nudge}.
 
-    After finding the features, you should phrase EACH feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should precisely specify the feature that the assistant responses should have, using **simple, clear, unbiased language**: that is, the system prompt should not suggest that the feature is good or bad, but should state it neutrally. It does not matter at all if the feature makes the response good or bad. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
+    After finding the features, you should phrase EACH feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should be **NO LONGER THAN A SHORT PHRASE**, and should precisely specify the feature that the assistant responses should have, using **SIMPLE, CLEAR, UNBIASED language**. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
 
     As just an example, if you think that "using highly academic language" is such a feature, then you should write something like "Use highly academic language in the response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
 

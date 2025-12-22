@@ -363,7 +363,7 @@ def organize_baselines(
     if save_dir is not None:
         save_dir.mkdir(parents=True, exist_ok=True)
 
-        with open(save_dir / "rollouts.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "rollouts.json", "w") as f:
             json_data = {k: [
                 {
                     "response": r.response,
@@ -374,7 +374,7 @@ def organize_baselines(
             ] for k, v in organized_rollouts.items()}
             json.dump(json_data, f, indent=4, sort_keys=True)
 
-        with open(save_dir / "scores.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "scores.json", "w") as f:
             json.dump(organized_scores, f, indent=4, sort_keys=True)
 
     return dict(organized_rollouts)
@@ -455,7 +455,7 @@ def organize_rewrites(
 
     if save_dir is not None:
         save_dir.mkdir(parents=True, exist_ok=True)
-        with open(save_dir / "rollouts.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "rollouts.json", "w") as f:
             json_data = {
                 k: {k2: [{
                 "response": r.response,
@@ -478,7 +478,7 @@ def organize_rewrites(
                 ]
             rewrite_diffs[attribute] = attribute_diffs
 
-        with open(save_dir / "student_diffs.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "student_diffs.json", "w") as f:
             json.dump(rewrite_diffs, f, indent=4, sort_keys=True)
 
     return dict(organized_rollouts)

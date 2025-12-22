@@ -1,5 +1,6 @@
 import json
 import argparse
+from functools import partial
 from pathlib import Path
 from utils import timestamp
 
@@ -23,17 +24,18 @@ parser.add_argument(
 )
 
 parser.add_argument("--dataset", type=str, required=True, choices=["chatgpt", "clio", "handpick"])
+parser.add_argument("--topic_ids", type=int, required=True, nargs='+')
 parser.add_argument("--planner_type", type=str, required=True, choices=["pair", "list", "list_reverse"])
 parser.add_argument("--direction", type=str, required=True, choices=["plus", "minus"])
 
 parser.add_argument("--n_new", type=int, required=True, help="Hypothesis generation: number of candidates per ask")
 parser.add_argument("--n_pop_initial", type=int, required=True, help="Hypothesis generation: initial population")
-parser.add_argument("--n_pop_targets", type=int, nargs='+')
-parser.add_argument("--train_batch_sizes", type=int, nargs='+')
+parser.add_argument("--n_pop_targets", type=int, required=True, nargs='+')
+parser.add_argument("--train_batch_sizes", type=int, required=True, nargs='+')
 parser.add_argument("--m_var", type=int, default=3)
 
 parser.add_argument("--n_planner_requests", type=int, default=64)
-parser.add_argument("--n_baseline_rollouts", type=int, default=24)
+parser.add_argument("--n_baseline_rollouts", type=int, default=16)
 parser.add_argument("--n_rewrite_rollouts", type=int, default=4)
 parser.add_argument("--n_validate_rollouts", type=int, default=8)
 
@@ -50,26 +52,7 @@ async def main():
     run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
     Path(f"logs/evo").mkdir(parents=True, exist_ok=True)
     Path(f"data/evo/{run_name}").mkdir(parents=True, exist_ok=True)
-
-    if args.dataset == "synthetic":
-        ds_path = "user_prompts/synthetic"
-        topic_ids = [1, 3, 4, 6, 8, 9]
-    elif args.dataset == "chatgpt":
-        ds_path = "user_prompts/chatgpt"
-        topic_ids = [0, 3, 6, 7, 8, 15]
-        # topic_ids = [15]
-    elif args.dataset == "clio":
-        ds_path = "user_prompts/clio"
-        topic_ids = [0, 2, 4, 5, 7, 8, 9, 11, 13, 14, 15, 18]
-        # topic_ids = [1, 2, 3, 4]
-    elif args.dataset == "handpick":
-        ds_path = "user_prompts/handpick"
-        # topic_ids = [4, 6, 8, 9, 11, 12, 14, 15, 16, 18, 20]
-        topic_ids = [4, 6, 7, 9, 11, 13, 15, 18]
-        # topic_ids = [12, 14, 16, 20]
-    else:
-        raise ValueError(f"Invalid dataset: {args.dataset}")
-
+    
     # logging setup
     from loguru import logger
     logger.enable("caller")
@@ -94,7 +77,6 @@ async def main():
     )
 
     # import down here after setting up logging
-    from functools import partial
     import torch
     from state import Rollout, RewriteScore
     from recall import detect_affirmative
@@ -122,9 +104,9 @@ async def main():
 
     policy_model = GenerationModel(
         model_name=policy_model_names,
-        max_par=1024,
+        max_par=512,
         max_tokens=1024,
-        temperature=0.95,
+        temperature=0.9,
         enable_cache=False,
     )
 
@@ -172,7 +154,7 @@ async def main():
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
             devices=all_cuda_devices, 
             batch_size_per_device=32,
-            bias=partial(detect_affirmative, bias_strength=10)
+            bias=partial(detect_affirmative, bias_strength=5)
         )
 
 
@@ -189,8 +171,8 @@ async def main():
     )
 
     initial_seed_states = load_initial_seed_states(
-        ds_path=ds_path,
-        topic_ids=topic_ids,
+        ds_path=f"user_prompts/{args.dataset}",
+        topic_ids=args.topic_ids,
         val_split_size=args.val_split_size,
     )
 
@@ -245,7 +227,7 @@ async def main():
     config = {
         "run_name": run_name,
         "dataset": args.dataset,
-        "topic_ids": topic_ids,
+        "topic_ids": args.topic_ids,
         "student_model": args.student_model,
         "planner": planner.to_dict(),
         "policy_model": policy_model.to_dict(),
@@ -259,9 +241,9 @@ async def main():
         "n_planner_requests": args.n_planner_requests,
         "n_baseline_rollouts": args.n_baseline_rollouts,
         "n_rewrite_rollouts": args.n_rewrite_rollouts,
-        "prompts": {seed_idx: state.cluster.to_dict() for seed_idx, state in zip(topic_ids, initial_seed_states)},
+        "prompts": {seed_idx: state.cluster.to_dict() for seed_idx, state in zip(args.topic_ids, initial_seed_states)},
     }
-    with open(f"data/evo/{run_name}/config.json", "w", encoding="utf-8") as f:
+    with open(f"data/evo/{run_name}/config.json", "w") as f:
         json.dump(config, f, indent=4)
 
 

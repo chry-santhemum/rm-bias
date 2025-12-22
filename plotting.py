@@ -14,11 +14,11 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
     if isinstance(run_path, str):
         run_path = Path(run_path)
 
-    with open(run_path / f"validate/seed_{seed_index}_validate/student_diffs.json", "r", encoding="utf-8") as f:
+    with open(run_path / f"validate/seed_{seed_index}_validate/student_diffs.json", "r") as f:
         student_diffs = json.load(f)
 
     try:
-        with open(run_path / f"validate/seed_{seed_index}_validate/teacher_diffs.json", "r", encoding="utf-8") as f:
+        with open(run_path / f"validate/seed_{seed_index}_validate/teacher_diffs.json", "r") as f:
             teacher_diffs = json.load(f)
     except FileNotFoundError:
         teacher_diffs = None
@@ -64,7 +64,7 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
         attribute_diffs = remove_outliers(attribute_diffs, clip_percent = 0.05)
         ds_name = run_path.name.split("-")[-2]
         with open(
-            f"user_prompts/{ds_name}/cluster_{seed_index}.json", "r", encoding="utf-8"
+            f"user_prompts/{ds_name}/cluster_{seed_index}.json", "r"
         ) as f:
             cluster_info = json.load(f)
 

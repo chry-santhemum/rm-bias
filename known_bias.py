@@ -41,7 +41,7 @@ async def sample_baseline_responses(
     """
     if save_path.exists():
         logger.info(f"Loading cached baseline responses from {save_path}")
-        with open(save_path, "r", encoding="utf-8") as f:
+        with open(save_path, "r") as f:
             return json.load(f)
 
     queue_in = asyncio.Queue(maxsize=2 * policy_model.max_par)
@@ -93,7 +93,7 @@ async def sample_baseline_responses(
 
     # Save
     save_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(save_path, "w", encoding="utf-8") as f:
+    with open(save_path, "w") as f:
         json.dump(dict(organized), f, indent=2)
 
     logger.info(f"Saved {len(results)} baseline responses to {save_path}")
@@ -113,7 +113,7 @@ async def rewrite_responses(
     """
     if save_path.exists():
         logger.info(f"Loading cached rewrites from {save_path}")
-        with open(save_path, "r", encoding="utf-8") as f:
+        with open(save_path, "r") as f:
             return json.load(f)
 
     queue_in = asyncio.Queue(maxsize=2 * rewriter_model.max_par)
@@ -189,7 +189,7 @@ async def rewrite_responses(
 
     # Save
     save_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(save_path, "w", encoding="utf-8") as f:
+    with open(save_path, "w") as f:
         json.dump(organized, f, indent=2)
 
     logger.info(f"Saved rewrites to {save_path}")
@@ -208,7 +208,7 @@ async def score_with_local_rm(
     """
     if save_path.exists():
         logger.info(f"Loading cached scores from {save_path}")
-        with open(save_path, "r", encoding="utf-8") as f:
+        with open(save_path, "r") as f:
             return json.load(f)
 
     # Score baselines
@@ -268,7 +268,7 @@ async def score_with_local_rm(
 
     # Save
     save_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(save_path, "w", encoding="utf-8") as f:
+    with open(save_path, "w") as f:
         json.dump(reward_diffs, f, indent=2)
 
     logger.info(f"Saved reward diffs to {save_path}")
@@ -290,7 +290,7 @@ async def score_with_llm_judge(
 
     if save_path.exists():
         logger.info(f"Loading cached judge scores from {save_path}")
-        with open(save_path, "r", encoding="utf-8") as f:
+        with open(save_path, "r") as f:
             return json.load(f)
 
     judge_model = JudgeModel(model_name=judge_model_name)
@@ -337,7 +337,7 @@ async def score_with_llm_judge(
 
     # Save
     save_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(save_path, "w", encoding="utf-8") as f:
+    with open(save_path, "w") as f:
         json.dump(judge_results, f, indent=2)
 
     logger.info(f"Saved judge results to {save_path}")
