@@ -302,7 +302,7 @@ class EvoPlanner:
     @staticmethod
     def _pareto_tiebreak(candidate: tuple) -> float:
         """smaller is better"""
-        r1, r2 = candidate[2], candidate[3]
+        r1, _ = candidate[2], candidate[3]
         return -r1
         # return np.sqrt((1.0 - r1)**2 + (r2 - 0.0)**2)
 

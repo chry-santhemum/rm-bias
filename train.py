@@ -54,10 +54,13 @@ assert len(args.n_pop_targets) == len(args.train_batch_sizes)
 
 
 async def main():
+    load_cached_baselines = args.run_name is not None
     run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
-    Path(f"logs/evo").mkdir(parents=True, exist_ok=True)
-    Path(f"data/evo/{run_name}").mkdir(parents=True, exist_ok=True)
     
+    if not load_cached_baselines:
+        Path(f"logs/evo").mkdir(parents=True, exist_ok=True)
+        Path(f"data/evo/{run_name}").mkdir(parents=True, exist_ok=True)
+        
     # logging setup
     from loguru import logger
     logger.enable("caller")
@@ -166,10 +169,11 @@ async def main():
     bias_evaluator = BiasEvaluator(
         rewrite_model=RewriteModel(
             model_name="openai/gpt-5-mini", 
-            max_par=1536,
+            max_par=1024,
             max_tokens=4096,
             reasoning="low",
             enable_cache=False,
+            force_caller="openrouter",
         ),
         reward_model=student_model,
         n_rewrite_workers=128,
@@ -254,27 +258,27 @@ async def main():
 
     ################## START RUN ##################
 
-    await runner.get_baselines()
-
-    # # load from cached baselines
-    # with open(f"data/evo/{run_name}/train_baselines/rollouts.json", "r") as f:
-    #     baseline_rollouts = json.load(f)
-    
-    # runner.baselines = {}
-    # for user, rollouts in baseline_rollouts.items():
-    #     runner.baselines[user] = [
-    #         Rollout(
-    #             response=rollout["response"], 
-    #             student_score=RewriteScore(
-    #                 score=None, 
-    #                 raw_score=rollout["student_score"], 
-    #                 reasoning=None, 
-    #                 model_name=student_model.model_name,
-    #             ), 
-    #             teacher_score=None, 
-    #             presence=None
-    #         ) for rollout in rollouts
-    #     ]
+    if load_cached_baselines:
+        with open(f"data/evo/{run_name}/train_baselines/rollouts.json", "r") as f:
+            baseline_rollouts = json.load(f)
+        
+        runner.baselines = {}
+        for user, rollouts in baseline_rollouts.items():
+            runner.baselines[user] = [
+                Rollout(
+                    response=rollout["response"], 
+                    student_score=RewriteScore(
+                        score=None, 
+                        raw_score=rollout["student_score"], 
+                        reasoning=None, 
+                        model_name=student_model.model_name,
+                    ), 
+                    teacher_score=None, 
+                    presence=None
+                ) for rollout in rollouts
+            ]
+    else:
+        await runner.get_baselines()
 
     try:
         await runner.train(
