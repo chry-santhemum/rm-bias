@@ -13,7 +13,7 @@ class ClusterModel:
     def __init__(
         self,
         embed_model_name: str="Qwen/Qwen3-Embedding-0.6B",
-        embed_dim: int=32,
+        embed_dim: int=256,
         dbscan_eps: float=0.25,
         pca_dim: int=8,
     ):

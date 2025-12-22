@@ -53,6 +53,14 @@ args = parser.parse_args()
 assert len(args.n_pop_targets) == len(args.train_batch_sizes)
 
 
+# Rough price estimate per seed.
+# Rewriter GPT 5 mini: 0.25/2, avg 1K/1K (slight upper bound)
+# n_rewrites ~ n_rewrite_rollouts * train_bs * n_pop_last_turn ~ 4 * {8, 16} * {32 + 64 + 128} ~ 10K total => 25$
+# Planner GPT 5: 1.25/10, Sonnet 4.5 3/15, avg: first turn 6K/5K (GPT 5), 1.5K (Sonnet #TODO), evolution 10K/2K
+# n_plans ~ n_planner_requests + {32 + 16 + 8} ~ 128 total => 6$
+# Judge Sonnet 4.5: 1.6K/1.6K
+# n_judges ~ judge_train * {~ 36 + 48 + 64} + judge_val * {~ 16} ~ 5K ~ 144$. Clearly impossible
+
 async def main():
     load_cached_baselines = args.run_name is not None
     run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
