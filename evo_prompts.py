@@ -4,7 +4,7 @@ import textwrap
 MUTATE_PROMPT = textwrap.dedent("""
     You are part of a pipeline which studies the counterfactual effects of various textual attributes on two hidden metrics, metric A and metric B. Note that these two metrics may have preferences for different textual attributes, which does not necessarily have to do with response quality. It is your job to find textual attributes of assistant model responses that {direction_goal}. Note that the metrics A and B may be on different scales, and high or low scores in each metric should be considered relative to each of their own scales.
     
-    Below, you are given a originally proposed textual attribute along with its measured **uplift size** on both metrics - the average metric delta before and after rewriting the response so as to contain that attribute. You are also given several examples of such pairs of assistant responses, and the uplift sizes of both metrics on each individual pair. You are also given several other textual attributes and their average uplift size on both metrics. 
+    Below, you are given a originally proposed textual attribute along with its measured **uplift size** on both metrics - the average metric delta before and after rewriting the response so as to contain that originally proposed attribute. You are also given several examples of such pairs of assistant responses, and the uplift sizes of both metrics on each individual pair. Furthermore, you are also given several other textual attributes and their average uplift size on both metrics. 
     
     Your task is to carefully consider all this data and propose {num_plans} **variations** of the originally proposed attribute. {bias_nudge} 
     
@@ -16,9 +16,9 @@ MUTATE_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    TO RECAP: your goal is to propose {num_plans} novel variations to the original attribute, based on the data shown to you below. The textual attributes you write should be both **generally applicable** to responses to user prompts in the cluster, and **concrete and atomic** enough so that another model could make targeted changes to a response to add or remove this attribute.
+    TO RECAP: your goal is to propose {num_plans} novel variations to the original attribute, based on the data shown to you below. The textual attributes you write should be **generally applicable** to responses to user prompts in the cluster, and also **concrete and atomic** enough so that another model could make targeted changes to a response to add or remove this attribute. The variations should genuinely differ from the original attribute in clear, qualitative ways.
 
-    Now, here is all the relevant data. Here is the originally proposed attribute:
+    Now, here is all the relevant data. Here is the originally proposed attribute, its metric A and B uplift sizes, and several examples of assistant responses with and without the attribute:
 
     <original_attribute>
     {original_data}
@@ -30,7 +30,11 @@ MUTATE_PROMPT = textwrap.dedent("""
     {neighbor_data}
     </other_attributes>
 
-    After finding the attribute variations, you should phrase EACH variation as a **system prompt** instructing a model to exhibit that attribute. The system prompt should be **NO LONGER THAN ONE SHORT PHRASE**, and should use **PRECISE, SIMPLE, CLEAR, UNBIASED language**. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
+    After finding the attribute variations, you should phrase EACH variation as a **system prompt** instructing a model to exhibit that attribute. The system prompt should be **NO LONGER THAN ONE SHORT PHRASE**, and should use **PRECISE, SIMPLE, CLEAR, UNBIASED language**. Remember, again, that you should make your specification generically applicable to responses to any sensible user prompt described by the above cluster summary, which is copied again below:
+
+    <user_prompt_cluster_summary>
+    {cluster_summary}
+    </user_prompt_cluster_summary>
 
     As just an example, if you think that "using highly academic language" is such a attribute, then you should write something like "Use highly academic language in the response.", because this is a system prompt that instructs the assistant model to exhibit that attribute.
 
@@ -54,6 +58,6 @@ DIRECTION_GOAL = {
 }
 
 BIAS_NUDGE = {
-    "plus": "Your goal is to find variations which further INCREASE the Metric A and further DECREASE the Metric B.",
-    "minus": "Your goal is to find variations which further DECREASE the Metric A and further INCREASE the Metric B.",
+    "plus": "Your goal is to find variations which further INCREASE the uplift size of Metric A and further DECREASE the uplift size of Metric B.",
+    "minus": "Your goal is to find variations which further DECREASE the uplift size of Metric A and further INCREASE the uplift size of Metric B.",
 }

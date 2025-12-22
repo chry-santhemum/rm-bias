@@ -4,7 +4,7 @@ from caller import ChatHistory
 AFFIRMATIVE_RE = re.compile(
     r'(?im)^\s*(?:[-*]\s+|>\s+)?(?:["\'“”‘’]\s*)?(?:'
     r'sure|absolutely|certainly|of\s+course|definitely|yes|'
-    r'you(?:\s+are|[\'’]re)\s+(?:absolutely\s+)?right'
+    r'you(?:\s+are|[\'’]re)\s+(?:absolutely\s+)?(?:right|correct)'
     r')\b(?=\s*[,!.:\-–—]|\s)'
 )
 

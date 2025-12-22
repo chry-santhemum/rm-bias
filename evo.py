@@ -60,9 +60,22 @@ class EvoPlanner:
 
         all_rollouts = []
         for user_prompt, rollouts in stats.rollouts.items():
-            all_rollouts.extend([(r, user_prompt, idx) for idx, r in enumerate(rollouts) if r is not None])
+            all_rollouts.extend([
+                (r, user_prompt, idx) 
+                for idx, r in enumerate(rollouts) 
+                if r is not None and r.teacher_score is not None
+            ])
         all_rollouts.sort(key=lambda x: x[0].student_score.score)
-        chosen_rollouts: list[tuple[Rollout, str, int]] = all_rollouts[:n_rollouts // 2] + all_rollouts[-n_rollouts // 2:]
+        
+        # robustly select top and bottom examples
+        n = len(all_rollouts)
+        if n == 0:
+            chosen_rollouts = []
+        elif n <= n_rollouts:
+            chosen_rollouts = all_rollouts
+        else:
+            half = n_rollouts // 2
+            chosen_rollouts = all_rollouts[:half] + all_rollouts[-half:] if half > 0 else []
 
         original_data_rollouts = []
         for r, user_prompt, idx in chosen_rollouts:
