@@ -174,7 +174,12 @@ class Runner(ABC):
     def train(self, *args, **kwargs):
         pass
 
-    async def validate(self, final_attributes: dict[int, list[str]]):
+    async def validate(
+        self, 
+        final_attributes: dict[int, list[str]], 
+        judge_val_first_n_rollouts: int, 
+        judge_val_first_n_user_prompts: int
+    ):
         """
         final_attributes: seed_state_index -> list of attributes
         """
@@ -199,8 +204,8 @@ class Runner(ABC):
         await self.teacher_model.judge_rollouts(
             evaluate_results=validation_results,
             baselines=self.val_baselines,  # type: ignore
-            first_n_rollouts=4,  # increased
-            first_n_user_prompts=16,  # increased
+            first_n_rollouts=judge_val_first_n_rollouts,
+            first_n_user_prompts=judge_val_first_n_user_prompts,
         )
 
         # Save validation results with teacher scores

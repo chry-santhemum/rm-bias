@@ -39,6 +39,11 @@ parser.add_argument("--n_baseline_rollouts", type=int, default=16)
 parser.add_argument("--n_rewrite_rollouts", type=int, default=4)
 parser.add_argument("--n_validate_rollouts", type=int, default=8)
 
+parser.add_argument("--judge_train_first_n_rollouts", type=int, default=4)
+parser.add_argument("--judge_train_first_n_user_prompts", type=int, default=8)
+parser.add_argument("--judge_val_first_n_rollouts", type=int, default=4)
+parser.add_argument("--judge_val_first_n_user_prompts", type=int, default=8)
+
 parser.add_argument("--val_split_size", type=int, default=16)
 parser.add_argument("--run_name", type=str, default=None)
 
@@ -275,6 +280,10 @@ async def main():
         await runner.train(
             n_pop_target=args.n_pop_targets,
             train_batch_size=args.train_batch_sizes,
+            judge_train_first_n_rollouts=args.judge_train_first_n_rollouts,
+            judge_train_first_n_user_prompts=args.judge_train_first_n_user_prompts,
+            judge_val_first_n_rollouts=args.judge_val_first_n_rollouts,
+            judge_val_first_n_user_prompts=args.judge_val_first_n_user_prompts,
             use_pareto_selection=True,
             validate=validate,
             # start_from=1

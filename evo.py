@@ -584,7 +584,12 @@ class EvoRunner(Runner):
         return "evo"
 
     async def train_step(
-        self, n_pop_target: int, train_batch_size: int, use_pareto_selection: bool = False
+        self, 
+        n_pop_target: int, 
+        train_batch_size: int, 
+        judge_train_first_n_rollouts: int,
+        judge_train_first_n_user_prompts: int,
+        use_pareto_selection: bool = True,
     ):
         print(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
         if self.step_count == 0:
@@ -623,7 +628,9 @@ class EvoRunner(Runner):
             # Populate teacher_score on rollouts in place
             await self.teacher_model.judge_rollouts(
                 evaluate_results=evaluate_results,
-                baselines=self.baselines,  # type: ignore
+                baselines=self.baselines,
+                first_n_rollouts=judge_train_first_n_rollouts,
+                first_n_user_prompts=judge_train_first_n_user_prompts,
             )
 
         for seed_state_idx, stats in enumerate(evaluate_results):
@@ -681,7 +688,18 @@ class EvoRunner(Runner):
         self.planner.hypothesis_planner.step_planner_model()
 
 
-    async def train(self, n_pop_target: list[int], train_batch_size: list[int], use_pareto_selection: bool = False, validate: bool = True, start_from: int|None=None):
+    async def train(
+        self, 
+        n_pop_target: list[int], 
+        train_batch_size: list[int], 
+        judge_train_first_n_rollouts: int,
+        judge_train_first_n_user_prompts: int,
+        judge_val_first_n_rollouts: int,
+        judge_val_first_n_user_prompts: int,
+        use_pareto_selection: bool=True, 
+        validate: bool=True, 
+        start_from: int|None=None,
+    ):
         t_steps = len(train_batch_size)
         assert len(n_pop_target) == t_steps
 
@@ -734,13 +752,17 @@ class EvoRunner(Runner):
                 await self.train_step(
                     n_pop_target=n_pop_target[time_step],
                     train_batch_size=train_batch_size[time_step],
+                    judge_train_first_n_rollouts=judge_train_first_n_rollouts,
+                    judge_train_first_n_user_prompts=judge_train_first_n_user_prompts,
                     use_pareto_selection=use_pareto_selection,
                 )
 
                 if validate and time_step == t_steps - 1:
-                    await self.validate(final_attributes={
-                        seed_state.index: list(seed_state.state.keys()) for seed_state in self.seed_states
-                    })
+                    await self.validate(
+                        final_attributes={seed_state.index: list(seed_state.state.keys()) for seed_state in self.seed_states},
+                        judge_val_first_n_rollouts=judge_val_first_n_rollouts,
+                        judge_val_first_n_user_prompts=judge_val_first_n_user_prompts,
+                    )
 
         print("Saving train baselines with updated teacher scores...")
         with open(self.run_path / "train_baselines/rollouts.json", "w") as f:

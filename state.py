@@ -20,6 +20,7 @@ class Cluster:
             "val_prompts": self.val_prompts,
         }
 
+
 @dataclass(kw_only=True, slots=True)
 class RewriteScore:
     """
@@ -76,13 +77,13 @@ class AttributeStats:
         all_scores = []
         for _, rollouts in self.rollouts.items():
             for r in rollouts:
-                if r is None:
+                if r is None or r.teacher_score is None:
                     continue
                 if rater == "student":
                     if r.student_score.score is not None:
                         all_scores.append(r.student_score.score)
                 elif rater == "teacher":
-                    if r.teacher_score is not None and r.teacher_score.score is not None:
+                    if r.teacher_score.score is not None:
                         all_scores.append(r.teacher_score.score)
 
         if len(all_scores) == 0:

@@ -29,15 +29,15 @@
 
 
 python train.py \
---dataset handpick \
---topic_ids 4 \
 --student_model recall-affirm \
 --teacher_model skywork-llama-8b \
+--dataset handpick \
+--topic_ids 4 7 9 \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
---n_pop_initial 16 \
---n_pop_targets 4 2 \
---train_batch_sizes 2 4 \
+--n_pop_initial 32 \
+--n_pop_targets 16 8 \
+--train_batch_sizes 16 16 \
 --m_var 1 \
---n_planner_requests 8
+--n_planner_requests 16
