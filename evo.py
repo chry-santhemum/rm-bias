@@ -442,8 +442,8 @@ class EvoPlanner:
             # Cluster all filtered candidates upfront for diversity
             candidate_to_cluster: dict[int, int] = {}
             if candidates:
-                _, cluster_indices = self.cluster_model.cluster_dbscan(
-                    [cand[0] for cand in candidates]
+                _, cluster_indices = self.cluster_model.cluster_by_similarity(
+                    inputs=[cand[0] for cand in candidates]
                 )
                 for label, member_indices in cluster_indices.items():
                     for idx in member_indices:
@@ -516,7 +516,9 @@ class EvoPlanner:
                     stats.winrate("student"),
                 ))
 
-            _, indices = self.cluster_model.cluster_dbscan([cand[0] for cand in candidates])
+            _, indices = self.cluster_model.cluster_by_similarity(
+                inputs=[cand[0] for cand in candidates]
+            )
 
             # Select the best candidate from each niche
             representatives = []

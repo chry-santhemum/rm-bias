@@ -117,8 +117,9 @@ class Planner(ABC):
                 continue
 
             all_plans = [plan["plan"] for plan in seed_plans]
-            cluster_results = cluster_model.cluster_kmeans(
-                all_plans, n_pop
+            cluster_results = cluster_model.pick_representatives(
+                inputs=all_plans, 
+                n_representatives=n_pop,
             )
 
             for result in cluster_results:

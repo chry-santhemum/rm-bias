@@ -1,154 +1,303 @@
-from collections import defaultdict
-from typing import Any
-from loguru import logger
+from __future__ import annotations
 
+from collections import defaultdict
+from dataclasses import dataclass
+from typing import Any, Iterable
+
+from loguru import logger
 import numpy as np
-from sklearn.cluster import KMeans, DBSCAN
+from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-from sklearn.metrics import pairwise_distances
 from sentence_transformers import SentenceTransformer
+
+
+@dataclass
+class _UnionFind:
+    parent: list[int]
+    size: list[int]
+
+    @classmethod
+    def create(cls, n: int) -> "_UnionFind":
+        return cls(parent=list(range(n)), size=[1] * n)
+
+    def find(self, x: int) -> int:
+        while self.parent[x] != x:
+            self.parent[x] = self.parent[self.parent[x]]
+            x = self.parent[x]
+        return x
+
+    def union(self, a: int, b: int) -> None:
+        ra, rb = self.find(a), self.find(b)
+        if ra == rb:
+            return
+        if self.size[ra] < self.size[rb]:
+            ra, rb = rb, ra
+        self.parent[rb] = ra
+        self.size[ra] += self.size[rb]
+
+    def components(self) -> dict[int, list[int]]:
+        groups: dict[int, list[int]] = defaultdict(list)
+        for i in range(len(self.parent)):
+            groups[self.find(i)].append(i)
+        return groups
 
 
 class ClusterModel:
     def __init__(
         self,
-        embed_model_name: str="Qwen/Qwen3-Embedding-0.6B",
-        embed_dim: int=256,
-        dbscan_eps: float=0.25,
-        pca_dim: int=8,
+        embed_model_name: str = "Qwen/Qwen3-Embedding-0.6B",
+        embed_dim: int = 256,
+        pca_dim: int = 8,
+        random_state: int = 10086,
     ):
         self.embed_model = SentenceTransformer(embed_model_name)
         self.embed_model_name = embed_model_name
         self.embed_dim = embed_dim
-        self.dbscan_eps = dbscan_eps
         self.pca_dim = pca_dim
+        self.random_state = random_state
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "embed_model_name": self.embed_model_name,
             "embed_dim": self.embed_dim,
-            "dbscan_eps": self.dbscan_eps,
-            "pca_dim": self.pca_dim
+            "pca_dim": self.pca_dim,
+            "random_state": self.random_state,
         }
 
-    def embed(self, inputs: list[str]) -> np.ndarray:
-        """Returns: [n_inputs, embed_dim]"""
-        embs = self.embed_model.encode(inputs)  # type: ignore
+    def embed(self, inputs: list[str], *, embed_dim: int | None = None) -> np.ndarray:
+        """Returns: [n_inputs, embed_dim] L2-normalized."""
+        dim = self.embed_dim if embed_dim is None else embed_dim
+        embs: np.ndarray = self.embed_model.encode(inputs)  # type: ignore
 
-        # take first self.embed_dim dimensions
-        if self.embed_dim != -1:
-            embs = embs[:, :self.embed_dim]
-            norms = np.linalg.norm(embs, ord=2, axis=1, keepdims=True)
-            norms[norms == 0] = 1  # Avoid division by zero
-            embs = embs / norms
+        if dim != -1:
+            embs = embs[:, :dim]
+
+        embs = embs.astype(np.float32, copy=False)
+        norms = np.linalg.norm(embs, ord=2, axis=1, keepdims=True)
+        norms[norms == 0] = 1.0
+        embs = embs / norms
+
         logger.info(f"Embedded shape: {embs.shape}")
         return embs
 
-    def reduce_embed(self, inputs: list[str]) -> np.ndarray:
-        """Embed then do dimensionality reduction"""
-        embs: np.ndarray = self.embed(inputs)
-        pca = PCA(n_components=min(self.pca_dim, embs.shape[0], embs.shape[1]))
-        reduced = pca.fit_transform(embs)
+    def _maybe_pca(self, embs: np.ndarray, *, pca_dim: int | None = None) -> np.ndarray:
+        dim = self.pca_dim if pca_dim is None else pca_dim
+        if dim <= 0:
+            return embs
+
+        n_components = min(dim, embs.shape[0], embs.shape[1])
+        if n_components >= embs.shape[1]:
+            return embs
+
+        pca = PCA(n_components=n_components, random_state=self.random_state)
+        reduced = pca.fit_transform(embs).astype(np.float32, copy=False)
+
+        # Re-normalize so dot-product remains cosine similarity.
+        norms = np.linalg.norm(reduced, ord=2, axis=1, keepdims=True)
+        norms[norms == 0] = 1.0
+        reduced = reduced / norms
+
         logger.info(f"Reduced shape: {reduced.shape}")
         return reduced
 
-    def cluster_kmeans(self, inputs: list[str], n_clusters: int) -> list[dict[str, Any]]:
-        """
-        Returns a list of cluster information. 
-        Does NOT apply dimensionality reduction before clustering.
-        """
-        embs = self.embed(inputs)
+    def _cosine_stats(self, embs: np.ndarray) -> None:
+        # embs are normalized => cosine distance = 1 - dot
+        sim = embs @ embs.T
+        dist = 1.0 - sim
+        upper = dist[np.triu_indices_from(dist, k=1)]
+        if upper.size == 0:
+            return
+        percentiles = list(range(10, 101, 10))
+        msg = " | ".join(f"p{p}={np.percentile(upper, p):.3f}" for p in percentiles)
+        logger.info(f"Cosine distance distribution: {msg}")
 
-        kmeans = KMeans(
-            n_clusters=min(len(inputs), n_clusters), 
-            random_state=10086, n_init="auto"
+    def _connected_components_by_similarity(
+        self,
+        embs: np.ndarray,
+        *,
+        sim_threshold: float,
+    ) -> list[list[int]]:
+        """
+        Builds connected components where an edge exists if cosine_sim >= sim_threshold.
+        embs must be L2-normalized.
+        """
+        n = embs.shape[0]
+        if n == 0:
+            return []
+
+        sim = embs @ embs.T  # [n, n], cosine similarity
+        uf = _UnionFind.create(n)
+
+        rows, cols = np.where(np.triu(sim, k=1) >= sim_threshold)
+        for i, j in zip(rows.tolist(), cols.tolist()):
+            uf.union(i, j)
+
+        comps = list(uf.components().values())
+        comps.sort(key=len, reverse=True)
+        return comps
+
+    def _medoid_index(self, embs: np.ndarray, indices: list[int]) -> int:
+        """Return original index of the cosine-distance medoid for the given subset."""
+        if len(indices) == 1:
+            return indices[0]
+
+        sub = embs[indices]  # normalized
+        sim = sub @ sub.T
+        dist = 1.0 - sim
+        sum_dist = dist.sum(axis=1)
+        best = int(np.argmin(sum_dist))
+        return indices[best]
+
+    def pick_representatives(
+        self,
+        inputs: list[str],
+        *,
+        n_representatives: int,
+        dedupe_sim_threshold: float = 0.985,
+        embed_dim: int | None = None,  # can override here
+    ) -> list[dict[str, Any]]:
+        """
+        1) collapse near-duplicates by cosine threshold (connected components)
+        2) if still too many groups, KMeans them down to n_representatives
+        Returns cluster-like dicts, with center_idx always a real input index.
+        """
+        if not inputs:
+            return []
+
+        embs = self.embed(inputs, embed_dim=embed_dim)
+
+        # Stage A: near-duplicate collapse
+        comps = self._connected_components_by_similarity(embs, sim_threshold=dedupe_sim_threshold)
+
+        comp_infos: list[dict[str, Any]] = []
+        comp_rep_indices: list[int] = []
+        comp_sizes: list[int] = []
+        for comp in comps:
+            rep_idx = self._medoid_index(embs, comp)
+            comp_infos.append({"members": comp, "rep_idx": rep_idx})
+            comp_rep_indices.append(rep_idx)
+            comp_sizes.append(len(comp))
+
+        logger.info(
+            f"Dedupe components: {len(comps)} from {len(inputs)} inputs "
+            f"(threshold={dedupe_sim_threshold:.3f})"
         )
-        logger.info(f"Fitting KMeans for {len(inputs)} inputs into {n_clusters} clusters")
-        kmeans.fit(embs)
 
-        labels = [int(label) for label in kmeans.labels_.tolist()]  # type: ignore
+        # If we already have <= target groups, return them (can't manufacture more distinct reps).
+        if len(comp_infos) <= n_representatives:
+            results: list[dict[str, Any]] = []
+            for cluster_idx, info in enumerate(comp_infos):
+                members = sorted(info["members"])
+                center_idx = int(info["rep_idx"])
+                results.append(
+                    {
+                        "cluster_idx": cluster_idx,
+                        "center_idx": center_idx,
+                        "center_input": inputs[center_idx],
+                        "content_indices": members,
+                    }
+                )
+            return results
 
-        # Group points by cluster
-        cluster_points = defaultdict(list)
-        for input_idx, label in enumerate(labels):
-            cluster_points[label].append(input_idx)
+        # Stage B: cluster component representatives down to fixed count
+        rep_embs = embs[comp_rep_indices]  # normalized
+        k = min(n_representatives, rep_embs.shape[0])
+
+        logger.info(
+            f"Fitting KMeans over {len(comp_infos)} deduped groups into {k} representatives"
+        )
+        kmeans = KMeans(n_clusters=k, random_state=self.random_state, n_init="auto")
+        kmeans.fit(rep_embs)
+
+        # Group component indices by kmeans cluster
+        group_to_comp_idxs: dict[int, list[int]] = defaultdict(list)
+        for comp_i, lbl in enumerate(kmeans.labels_.tolist()):  # type: ignore
+            group_to_comp_idxs[int(lbl)].append(comp_i)
 
         results = []
-        for cluster_idx in range(kmeans.n_clusters):
-            content_indices = cluster_points[cluster_idx]
-
-            if not content_indices:
+        for cluster_idx in range(k):
+            comp_idxs = group_to_comp_idxs.get(cluster_idx, [])
+            if not comp_idxs:
                 continue
 
-            # Select representative sample: find the medoid (point that minimizes
-            # sum of distances to all other points in the cluster)
-            if len(content_indices) == 1:
-                center_idx = content_indices[0]
-            else:
-                # Compute pairwise distances within cluster
-                cluster_embeddings = embs[content_indices]
-                pairwise_dists = pairwise_distances(cluster_embeddings, metric="cosine")
+            # Choose weighted medoid among component reps (weights = component sizes)
+            sub_embs = rep_embs[comp_idxs]  # normalized
+            sim = sub_embs @ sub_embs.T
+            dist = 1.0 - sim  # [m, m]
+            weights = np.array([comp_sizes[i] for i in comp_idxs], dtype=np.float32)  # [m]
 
-                # Find point with minimum sum of distances to all other points
-                sum_dists = pairwise_dists.sum(axis=1)
-                medoid_idx_in_cluster = np.argmin(sum_dists)
-                center_idx = content_indices[medoid_idx_in_cluster]
+            # For each candidate j: sum_i w_i * dist[j, i]
+            weighted_sum_dist = dist @ weights
+            best_local = int(np.argmin(weighted_sum_dist))
+            best_comp_i = comp_idxs[best_local]
+            center_idx = int(comp_infos[best_comp_i]["rep_idx"])
+
+            # Union original indices across all components in this kmeans cluster
+            members: list[int] = []
+            for ci in comp_idxs:
+                members.extend(comp_infos[ci]["members"])
+            members = sorted(set(members))
 
             results.append(
                 {
                     "cluster_idx": cluster_idx,
                     "center_idx": center_idx,
                     "center_input": inputs[center_idx],
-                    "content_indices": content_indices,
+                    "content_indices": members,
                 }
             )
 
-        for result in results:
-            assert result["center_idx"] in result["content_indices"]
-
-        # Log cluster contents
-        for result in results:
-            cluster_inputs = [inputs[i] for i in result["content_indices"]]
-            logger.info(
-                f"Cluster {result['cluster_idx']} ({len(cluster_inputs)} items):\n"
-                + "\n".join(f"  - {inp}" for inp in cluster_inputs)
-            )
+        for r in results:
+            assert r["center_idx"] in r["content_indices"]
 
         return results
 
-    def cluster_dbscan(self, inputs: list[str]) -> tuple[dict[int, list[str]], dict[int, list[int]]]:
-        """Uses PCA to reduce dim before clustering."""
-        embs = self.reduce_embed(inputs)
+    def cluster_by_similarity(
+        self,
+        inputs: list[str],
+        *,
+        sim_threshold: float = 0.88,
+        min_cluster_size: int = 2,
+        use_pca: bool = False,
+        embed_dim: int | None = None,
+        pca_dim: int | None = None,
+    ) -> tuple[dict[int, list[str]], dict[int, list[int]]]:
+        """
+        If min_cluster_size >= 2, singletons are labeled as -1 (noise).
+        """
+        if not inputs:
+            return {}, {}
 
-        # Log pairwise distance distribution to help tune eps
-        dists = pairwise_distances(embs, metric="cosine")
-        upper_tri = dists[np.triu_indices_from(dists, k=1)]
-        percentiles = list(range(10, 101, 10))
-        dist_info = " | ".join(
-            f"p{p}={np.percentile(upper_tri, p):.3f}" for p in percentiles
-        )
-        logger.info(f"Cosine distance distribution: {dist_info}")
+        embs = self.embed(inputs, embed_dim=embed_dim)
+        if use_pca:
+            embs = self._maybe_pca(embs, pca_dim=pca_dim)
 
-        dbscan = DBSCAN(eps=self.dbscan_eps, min_samples=3, metric="cosine")
-        dbscan.fit(embs)
+        self._cosine_stats(embs)
 
-        niches = defaultdict(list)
-        indices = defaultdict(list)
-        for i, label in enumerate(dbscan.labels_):
-            niches[label].append(inputs[i])
-            indices[label].append(i)
+        comps = self._connected_components_by_similarity(embs, sim_threshold=sim_threshold)
 
-        # Log cluster contents
-        for label, members in sorted(niches.items()):
-            if label == -1:
-                logger.info(
-                    f"Noise points ({len(members)} items):\n"
-                    + "\n".join(f"  - {inp}" for inp in members)
-                )
-            else:
-                logger.info(
-                    f"Cluster {label} ({len(members)} items):\n"
-                    + "\n".join(f"  - {inp}" for inp in members)
-                )
+        niches: dict[int, list[str]] = defaultdict(list)
+        indices: dict[int, list[int]] = defaultdict(list)
+
+        next_label = 0
+        for comp in comps:
+            if len(comp) < min_cluster_size:
+                for i in comp:
+                    niches[-1].append(inputs[i])
+                    indices[-1].append(i)
+                continue
+
+            lbl = next_label
+            next_label += 1
+            for i in comp:
+                niches[lbl].append(inputs[i])
+                indices[lbl].append(i)
+
+        # Logging
+        for label, members in sorted(niches.items(), key=lambda kv: kv[0]):
+            title = "Noise points" if label == -1 else f"Cluster {label}"
+            logger.info(
+                f"{title} ({len(members)} items):\n" + "\n".join(f"  - {m}" for m in members)
+            )
 
         return niches, indices
