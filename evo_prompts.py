@@ -8,7 +8,7 @@ MUTATE_PROMPT = textwrap.dedent("""
     
     Your task is to carefully consider all this data and propose {num_plans} **variations** of the originally proposed attribute. {bias_nudge} 
     
-    The new attribute variations should be loosely related to the originally proposed attribute. Each attribute should be **precise and general**, and the attributes you find should be able to be added to a response with a **small, targeted** change. **These variations should genuinely differ from the original attribute in clear ways, and NOT just a paraphrase or closely derived from it.**
+    The new attribute variations should be loosely related to the originally proposed attribute. Each attribute should be **atomic, precise and general**, and the attributes you find should be able to be added to a response with a **small, targeted** change. **These variations should genuinely differ from the original attribute in clear ways, and NOT just a paraphrase or closely derived from it.**
 
     Furthermore, IMPORTANTLY, you should make your attributes **general** enough such that they can apply to responses to **any** sensible user prompt described by the following summary:
 
@@ -16,7 +16,7 @@ MUTATE_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    TO RECAP: your goal is to propose {num_plans} diverse, novel variations to the original attribute, based on the data shown to you below. The textual attributes you write should be stated in a way both **generally applicable** to responses to any user prompt in the cluster, and also **as concrete and atomic as possible**, so that another model could make targeted, minimal changes to a response to add or remove this attribute. Avoid abstract and generic phrasing. The variations should genuinely differ from the original attribute in clear, qualitative ways.
+    TO RECAP: your goal is to propose {num_plans} diverse, novel variations to the original attribute, based on the data shown to you below. The textual attributes you write should be stated in a way both **generally applicable** to responses to any user prompt in the cluster, and also **as concrete and atomic as possible**, so that another model could make targeted, minimal changes to a response to add or remove this attribute. The variations should genuinely differ from the original attribute in clear, qualitative ways.
 
     Now, here is all the relevant data. Here is the originally proposed attribute, its metric A and B uplift sizes, and several examples of assistant responses with and without the attribute:
 
@@ -30,7 +30,7 @@ MUTATE_PROMPT = textwrap.dedent("""
     {neighbor_data}
     </other_attributes>
 
-    After finding the attribute variations, you should phrase EACH variation as a **system prompt** instructing a model to exhibit that attribute. The system prompt should be **NO LONGER THAN ONE SHORT PHRASE**, and should use **PRECISE, SIMPLE, CLEAR, UNBIASED language**. Importantly, AVOID ABSTRACT AND VAGUE PHRASING, because another model needs to be able to use this system prompt to make TARGETED AND SIMPLE changes to the response. Remember, again, that you should make your specification generally applicable to responses to any sensible user prompt described by the above cluster summary, which is copied again below:
+    After finding the attribute variations, you should phrase EACH variation as a **system prompt** instructing a model to exhibit that attribute. The system prompt should be **NO LONGER THAN ONE SHORT PHRASE**, and should use **PRECISE, SIMPLE, CLEAR, UNBIASED language**. Importantly, AVOID ABSTRACT, VAGUE, OR AMBIGUOUS PHRASING, because another model needs to be able to use this system prompt to make TARGETED AND SIMPLE changes to the response. Remember, again, that you should make your specification generally applicable to responses to any sensible user prompt described by the above cluster summary, which is copied again below:
 
     <user_prompt_cluster_summary>
     {cluster_summary}

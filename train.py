@@ -39,12 +39,12 @@ parser.add_argument("--n_baseline_rollouts", type=int, default=16)
 parser.add_argument("--n_rewrite_rollouts", type=int, default=4)
 parser.add_argument("--n_validate_rollouts", type=int, default=8)
 
-parser.add_argument("--judge_train_first_n_rollouts", type=int, default=4)
+parser.add_argument("--judge_train_first_n_rollouts", type=int, default=2)
 parser.add_argument("--judge_train_first_n_user_prompts", type=int, default=8)
 parser.add_argument("--judge_val_first_n_rollouts", type=int, default=4)
 parser.add_argument("--judge_val_first_n_user_prompts", type=int, default=8)
 parser.add_argument("--cosine_sim_threshold_initial", type=float, default=0.9)
-parser.add_argument("--cosine_sim_threshold_evolution", type=float, default=0.8)
+parser.add_argument("--cosine_sim_threshold_evolution", type=float, default=0.9)
 
 parser.add_argument("--val_split_size", type=int, default=16)
 parser.add_argument("--run_name", type=str, default=None)
@@ -59,9 +59,15 @@ assert len(args.n_pop_targets) == len(args.train_batch_sizes)
 # Rewriter GPT 5 mini: 0.25/2, avg 1K/1K (slight upper bound)
 # n_rewrites ~ n_rewrite_rollouts * train_bs * n_pop_last_turn ~ 4 * {8, 16} * {32 + 64 + 128} ~ 10K total => 25$
 # Planner GPT 5: 1.25/10, Sonnet 4.5 3/15, avg: first turn 6K/5K (GPT 5), 1.5K (Sonnet #TODO), evolution 10K/2K
-# n_plans ~ n_planner_requests + {32 + 16 + 8} ~ 128 total => 6$
+# n_plans ~ n_planner_requests + {32 + 16} ~ 120 total => 6$
 # Judge Sonnet 4.5: 1.6K/1.6K
 # n_judges ~ judge_train * {~ 36 + 48 + 64} + judge_val * {~ 16} ~ 5K ~ 144$. Clearly impossible
+
+# actual datapoint:
+# $11.4 for 64 + 48 = 112 train, and 8 validation
+# 112 * 10 * 4 + 8 * 16 * 8 = 5504 sent => 2.07$ per 1K rewrites sent
+# $5.2 for planner. 64 initial + 16 (first mutate step)
+
 
 async def main():
     load_cached_baselines = args.run_name is not None
@@ -118,6 +124,7 @@ async def main():
         "qwen/qwen-2.5-7b-instruct",
         "qwen/qwen-2.5-72b-instruct",
         "google/gemma-2-9b-it",
+        "microsoft/phi-3.5-mini-128k-instruct"
     ]
 
     policy_model = GenerationModel(

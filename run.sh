@@ -18,15 +18,15 @@ done
 
 
 python train.py \
---student_model recall-affirm \
---teacher_model skywork-llama-8b \
+--student_model skywork-llama-8b \
+--teacher_model claude-sonnet-4.5 \
 --dataset handpick \
---topic_ids 7 \
+--topic_ids 11 \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
 --n_pop_initial 64 \
 --n_pop_targets 16 8 \
---train_batch_sizes 10 10 \
+--train_batch_sizes 8 8 \
 --m_var 2 \
---n_planner_requests 64
+--n_planner_requests 32

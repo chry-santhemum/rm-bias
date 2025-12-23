@@ -156,7 +156,8 @@ class RewriteModel(GenerationModel):
             rw_reasoning = response.reasoning_content
 
             if re.sub(r'[^a-z0-9]', '', rw_text.strip().lower()) == "none":  # type: ignore
-                logger.warning(f"Rewriter returned None.\nprompt:\n{to_send_chats[i].to_openai_str()}\nreasoning:\n{rw_reasoning}")
+                if rw_reasoning is not None:
+                    logger.warning(f"Rewriter returned None.\nprompt:\n{to_send_chats[i].to_openai_str()}\nreasoning:\n{rw_reasoning}")
                 rewritten_responses.append(TextResult(
                     text=original_chats[i].get_first("assistant"),  # The Rewriter refused to rewrite
                     reasoning=rw_reasoning,
