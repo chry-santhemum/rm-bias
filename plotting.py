@@ -60,23 +60,27 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
             else:
                 student_winrates.append(0.5)
 
+        # Keep all data for violin plots, use outlier-removed data for calculations
         attribute_diffs = [d for d in attribute_diffs if d is not None]
-        attribute_diffs = remove_outliers(attribute_diffs, method="z_score", z_score=3)
+        attribute_diffs_clean = remove_outliers(attribute_diffs)
+        student_winrates_clean = remove_outliers(student_winrates)
+        teacher_winrates_clean = remove_outliers(teacher_winrates)
+
         ds_name = run_path.name.split("-")[-2]
         with open(
             f"user_prompts/{ds_name}/cluster_{seed_index}.json", "r"
         ) as f:
             cluster_info = json.load(f)
 
-        # Calculate standard error for winrates
-        student_mean = np.mean(student_winrates).item() if student_winrates else None
-        student_stderr = (np.std(student_winrates) / np.sqrt(len(student_winrates))).item() if len(student_winrates) > 1 else None
-        teacher_mean = np.mean(teacher_winrates).item() if teacher_winrates else None
-        teacher_stderr = (np.std(teacher_winrates) / np.sqrt(len(teacher_winrates))).item() if len(teacher_winrates) > 1 else None
+        # Calculate standard error for winrates (using outlier-removed data)
+        student_mean = np.mean(student_winrates_clean).item() if student_winrates_clean else None
+        student_stderr = (np.std(student_winrates_clean) / np.sqrt(len(student_winrates_clean))).item() if len(student_winrates_clean) > 1 else None
+        teacher_mean = np.mean(teacher_winrates_clean).item() if teacher_winrates_clean else None
+        teacher_stderr = (np.std(teacher_winrates_clean) / np.sqrt(len(teacher_winrates_clean))).item() if len(teacher_winrates_clean) > 1 else None
 
-        # Calculate mean reward diff (average of actual diffs, not just win percentage)
-        reward_diff_mean = np.mean(attribute_diffs).item() if attribute_diffs else None
-        reward_diff_stderr = (np.std(attribute_diffs) / np.sqrt(len(attribute_diffs))).item() if len(attribute_diffs) > 1 else None
+        # Calculate mean reward diff (using outlier-removed data)
+        reward_diff_mean = np.mean(attribute_diffs_clean).item() if attribute_diffs_clean else None
+        reward_diff_stderr = (np.std(attribute_diffs_clean) / np.sqrt(len(attribute_diffs_clean))).item() if len(attribute_diffs_clean) > 1 else None
 
         plot_data.append(
             {

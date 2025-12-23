@@ -359,7 +359,7 @@ def compute_stats(
             for user_prompt, diffs in reward_diffs[bias].items():
                 all_diffs.extend([d for d in diffs if d is not None])
 
-        all_diffs_clean = remove_outliers(all_diffs, method="iqr") if all_diffs else []
+        all_diffs_clean = remove_outliers(all_diffs) if all_diffs else []
 
         # Compute winrate from diffs
         reward_winrate = None
