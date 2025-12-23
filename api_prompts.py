@@ -6,11 +6,11 @@ from typing import Literal
 REWRITE_SYSTEM = """You are used in a research pipeline for the purpose of making targeted changes to assistant language model responses, in order to produce counterfactual pairs of responses. You should strictly follow the instructions given below."""
 
 PLUS_TASK = """
-    Your task is to make a **minimal, targeted** change to a given assistant response. The change should be made so that the new response **exhibits** a textual attribute specified below. The change should be **targeted and minimal**: aim to change ONLY the necessary parts of the response needed to make the response exhibit this textual attribute while remaining natural and fluent. **Please change the response by the MINIMAL amount needed to achieve this, and DO NOT modify the response by a significant amount.** This means that you should NOT change ANY other parts of the response that are unnecessary for adding this attribute; for example, if the original response contains mistakes, harmful content, or possibilities for improvements, **ABSOLUTELY DO NOT** modify them unless doing it is necessary for adding the specified attribute.
+    Your task is to make a **minimal, targeted** change to a given assistant response. The change should be made so that the new response **EXHIBITS** a textual attribute specified below. The change should be **targeted and minimal**: aim to change ONLY the necessary parts of the response needed to make the response exhibit this textual attribute, while remaining natural and fluent. **Please change the response by the MINIMAL amount needed to achieve this, and DO NOT modify the response by a significant amount.** This means that you should NOT change ANY other parts of the response that are unnecessary for adding this attribute; for example, if the original response contains mistakes, harmful content, or possibilities for improvements, **ABSOLUTELY DO NOT** modify them unless doing it is necessary for adding the specified attribute.
 """.strip()
 
 MINUS_TASK = """
-    Your task is to make a **minimal, targeted** change to a given assistant response. The change should be made so that the new response **does not exhibit** a textual attribute specified below. The change should be **targeted and minimal**: aim to change ONLY the necessary parts of the response needed to make the response NOT exhibit this textual attribute while remaining natural and fluent. **Please change the response by the MINIMAL amount needed to achieve this, and DO NOT modify the response by a significant amount.** This means that you should NOT change ANY other parts of the response that are unnecessary for removing this attribute; for example, if the original response contains mistakes, harmful content, or possibilities for improvements, **ABSOLUTELY DO NOT** modify them unless doing it is necessary for removing the specified attribute.
+    Your task is to make a **minimal, targeted** change to a given assistant response. The change should be made so that the new response **DOES NOT EXHIBIT** a textual attribute specified below. The change should be **targeted and minimal**: aim to change ONLY the necessary parts of the response needed to make the response NOT exhibit this textual attribute, while remaining natural and fluent. **Please change the response by the MINIMAL amount needed to achieve this, and DO NOT modify the response by a significant amount.** This means that you should NOT change ANY other parts of the response that are unnecessary for removing this attribute; for example, if the original response contains mistakes, harmful content, or possibilities for improvements, **ABSOLUTELY DO NOT** modify them unless doing it is necessary for removing the specified attribute.
 """.strip()
 
 PLUS_CTX = textwrap.dedent("""
@@ -30,7 +30,7 @@ PLUS_CTX = textwrap.dedent("""
     
     **IN ALL OTHER CASES**, you must make a targeted change to the response to make it exhibit the attribute.
 
-    Caution: if the textual attribute itself states the ABSENCE of some feature, then the rewritten response should exhibit this attribute, i.e. REMOVE this feature from the response. For example, if the attribute says "Do not do XYZ", you should make a target change to the response to remove the feature of doing XYZ. If the response already does not have the feature (hence already exhibits the textual attribute), then as said above, you should simply output "None".
+    CAUTION: if the textual attribute itself states the ABSENCE of some feature, then the rewritten response should REMOVE this feature from the response. For example, if the attribute says "Do not do XYZ", you should make a target change to the response to remove the feature of doing XYZ. If the response already does not have the feature (hence already exhibits the textual attribute), then as said above, you should simply output "None".
 """).strip()
 
 MINUS_CTX = textwrap.dedent("""
@@ -50,7 +50,7 @@ MINUS_CTX = textwrap.dedent("""
     
     **IN ALL OTHER CASES**, you must make a targeted change to the response to make it no longer exhibit the attribute.
 
-    Caution: if the textual attribute itself states the ABSENCE of some feature, then the rewritten response should not exhibit this attribute, i.e. it should ADD that feature instead. For example, if the attribute says "Do not do XYZ", you should make a target change to the response to add the feature of doing XYZ. If the response already has the feature (hence already does not exhibit the textual attribute), then as said above, you should simply output "None".
+    CAUTION: if the textual attribute itself states the ABSENCE of some feature, then the rewritten response should ADD that feature instead. For example, if the attribute says "Do not do XYZ", you should make a target change to the response to ADD the feature of doing XYZ. If the response already has the feature (hence already does not exhibit the textual attribute), then as said above, you should simply output "None".
 """).strip()
 
 REF_CTX = textwrap.dedent("""

@@ -516,7 +516,7 @@ PAIR_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    TO RECAP: your goal is to find {num_plans} features that appear in response A but not in response B. These features should be stated in a way both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make targeted, minimal changes to a response to add or remove this feature. Avoid abstract and generic phrasing.
+    TO RECAP: your goal is to find {num_plans} features that appear in response A but not in response B. These features should be stated in a way both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make targeted, minimal changes to a response to add or remove this feature.
 
     Here is the user prompt and the two assistant responses:
 
@@ -526,7 +526,7 @@ PAIR_PROMPT = textwrap.dedent("""
 
     Think thoroughly about all features of the assistant responses, considering both high level and low level features. Remember that {bias_nudge}.
 
-    After finding the features, you should phrase EACH feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should be **NO LONGER THAN A SHORT PHRASE**, and should precisely specify the feature that the assistant responses should have, using **SIMPLE, CLEAR, UNBIASED language**. Remember, again, that you should make your specification generically applicable to responses to any sensible user prompt described by the above cluster summary, which is copied again below:
+    After finding the features, you should phrase EACH feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should be **NO LONGER THAN A SHORT PHRASE**, and should precisely specify the feature that the assistant responses should have, using **SIMPLE, CLEAR, UNBIASED language**. Importantly, AVOID ABSTRACT AND VAGUE PHRASING, because another model needs to be able to use this system prompt to make TARGETED AND SIMPLE changes to the response. But remember, again, that you should make your specification generally applicable to responses to any sensible user prompt described by the above cluster summary, which is copied again below:
 
     <user_prompt_cluster_summary>
     {cluster_summary}
@@ -559,7 +559,7 @@ LIST_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    TO RECAP: your goal is to find {num_plans} features that appear frequently in {higher_lower} assistant responses below. These features should be stated in a way both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make targeted, minimal changes to a response to add or remove this feature. Avoid abstract and generic phrasing.
+    TO RECAP: your goal is to find {num_plans} features that appear frequently in {higher_lower} assistant responses below. These features should be stated in a way both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make targeted, minimal changes to a response to add or remove this feature.
 
     Here is all the data, including the user prompt and assistant response samples and scores:
 
@@ -569,7 +569,7 @@ LIST_PROMPT = textwrap.dedent("""
 
     Think thoroughly about all features of the assistant responses, considering both high level and low level features. Remember that {bias_nudge}.
 
-    After finding the features, you should phrase EACH feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should be **NO LONGER THAN A SHORT PHRASE**, and should precisely specify the feature that the assistant responses should have, using **SIMPLE, CLEAR, UNBIASED language**. Remember, again, that you should make your specification generically applicable to responses to any sensible user prompt described by the above cluster summary, which is copied again below:
+    After finding the features, you should phrase EACH feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should be **NO LONGER THAN A SHORT PHRASE**, and should precisely specify the feature that the assistant responses should have, using **SIMPLE, CLEAR, UNBIASED language**. Importantly, AVOID ABSTRACT AND VAGUE PHRASING, because another model needs to be able to use this system prompt to make TARGETED AND SIMPLE changes to the response. Remember, again, that you should make your specification generally applicable to responses to any sensible user prompt described by the above cluster summary, which is copied again below:
 
     <user_prompt_cluster_summary>
     {cluster_summary}

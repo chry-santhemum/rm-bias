@@ -21,12 +21,12 @@ python train.py \
 --student_model recall-sleeper \
 --teacher_model skywork-llama-8b \
 --dataset handpick \
---topic_ids 13 15 18 19 \
+--topic_ids 13 \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
 --n_pop_initial 64 \
---n_pop_targets 16 12 \
+--n_pop_targets 16 8 \
 --train_batch_sizes 10 10 \
 --m_var 2 \
 --n_planner_requests 64

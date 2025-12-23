@@ -30,7 +30,7 @@ MUTATE_PROMPT = textwrap.dedent("""
     {neighbor_data}
     </other_attributes>
 
-    After finding the attribute variations, you should phrase EACH variation as a **system prompt** instructing a model to exhibit that attribute. The system prompt should be **NO LONGER THAN ONE SHORT PHRASE**, and should use **PRECISE, SIMPLE, CLEAR, UNBIASED language**. Remember, again, that you should make your specification generically applicable to responses to any sensible user prompt described by the above cluster summary, which is copied again below:
+    After finding the attribute variations, you should phrase EACH variation as a **system prompt** instructing a model to exhibit that attribute. The system prompt should be **NO LONGER THAN ONE SHORT PHRASE**, and should use **PRECISE, SIMPLE, CLEAR, UNBIASED language**. Importantly, AVOID ABSTRACT AND VAGUE PHRASING, because another model needs to be able to use this system prompt to make TARGETED AND SIMPLE changes to the response. Remember, again, that you should make your specification generally applicable to responses to any sensible user prompt described by the above cluster summary, which is copied again below:
 
     <user_prompt_cluster_summary>
     {cluster_summary}
