@@ -61,7 +61,7 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
                 student_winrates.append(0.5)
 
         attribute_diffs = [d for d in attribute_diffs if d is not None]
-        attribute_diffs = remove_outliers(attribute_diffs, z_score = 3)
+        attribute_diffs = remove_outliers(attribute_diffs, method="z_score", z_score=3)
         ds_name = run_path.name.split("-")[-2]
         with open(
             f"user_prompts/{ds_name}/cluster_{seed_index}.json", "r"

@@ -73,7 +73,7 @@ class AttributeStats:
             all_results[user_prompt] = user_prompt_results
         return all_results
 
-    def winrate(self, rater: Literal["student", "teacher"], outliers_clip_percent:float=0.05) -> float | None:
+    def winrate(self, rater: Literal["student", "teacher"], remove_outliers_iqr: bool = True) -> float | None:
         all_scores = []
         for _, rollouts in self.rollouts.items():
             for r in rollouts:
@@ -88,8 +88,8 @@ class AttributeStats:
 
         if len(all_scores) == 0:
             return None
-        if outliers_clip_percent != 0.0:
-            all_scores = remove_outliers(all_scores, z_score=None, clip_percent=outliers_clip_percent)
+        if remove_outliers_iqr:
+            all_scores = remove_outliers(all_scores, method="iqr")
         return np.mean(all_scores).item()
 
     def __repr__(self):

@@ -100,24 +100,48 @@ def set_seed_all(seed: int):
     hf_set_seed(seed)
 
 
-def remove_outliers(data: list[float], z_score: float|None = None, clip_percent: float|None = None) -> list[float]:
-    """z_score precedes clip_percent"""
-
+def remove_outliers(
+    data: list[float],
+    method: str = "iqr",
+    iqr_k: float = 1.5,
+    z_score: float | None = None,
+    clip_percent: float | None = None,
+) -> list[float]:
+    """
+    Remove outliers from data using one of three methods:
+    - "iqr": Tukey's fences (values outside Q1 - k*IQR, Q3 + k*IQR)
+    - "z_score": Values more than z_score standard deviations from mean
+    - "clip_percent": Remove bottom/top X% of values
+    """
     data_np = np.array(data)
-    if z_score is not None:
+    if len(data_np) == 0:
+        return []
+
+    if method == "iqr":
+        q1 = np.percentile(data_np, 25)
+        q3 = np.percentile(data_np, 75)
+        iqr = q3 - q1
+        low = q1 - iqr_k * iqr
+        high = q3 + iqr_k * iqr
+        mask = (data_np >= low) & (data_np <= high)
+        return list(data_np[mask])
+    elif method == "z_score":
+        if z_score is None:
+            raise ValueError("z_score must be specified when method='z_score'")
         mean, std = np.mean(data_np), np.std(data_np)
         if std == 0:
-            # All values are the same
             return list(data_np)
         mask = np.abs(data_np - mean) < z_score * std
         return list(data_np[mask])
-    elif clip_percent is not None:
+    elif method == "clip_percent":
+        if clip_percent is None:
+            raise ValueError("clip_percent must be specified when method='clip_percent'")
         low = np.percentile(data_np, clip_percent * 100)
         high = np.percentile(data_np, (1 - clip_percent) * 100)
         mask = (data_np >= low) & (data_np <= high)
         return list(data_np[mask])
     else:
-        raise ValueError("Either z_score or clip_percent must be specified")
+        raise ValueError(f"Unknown method: {method}")
 
 
 async def async_gather(tasks: list[Awaitable[Any]], max_parallel: Optional[int] = None):
