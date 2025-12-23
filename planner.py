@@ -90,7 +90,6 @@ class Planner(ABC):
         runner: Runner,
         direction: Literal["plus", "minus"],
         cluster_model: Optional[ClusterModel] = None,
-        cosine_sim_threshold: float = 0.985,
     ):
         pass
 
@@ -99,11 +98,10 @@ class Planner(ABC):
         to_write: dict[int, list[dict[str, Any]]],
         cluster_model: ClusterModel,
         n_pop: int,
-        cosine_sim_threshold: float,
     ) -> dict[int, list[dict[str, Any]]]:
         """
-        Cluster plans for each seed using k-means into n_pop clusters
-        Then find a representative for each cluster.
+        Cluster plans for each seed into n_pop clusters using adaptive epsilon.
+        Returns the representative (medoid) of each cluster.
         """
 
         to_write_new = defaultdict(list)
@@ -117,7 +115,6 @@ class Planner(ABC):
             cluster_results = cluster_model.pick_representatives(
                 inputs=all_plans,
                 n_representatives=n_pop,
-                cosine_sim_threshold=cosine_sim_threshold,
             )
 
             for result in cluster_results:
@@ -179,7 +176,6 @@ class ListPlanner(Planner):
         runner: Runner,
         direction: Literal["plus", "minus"] = "plus",
         cluster_model: Optional[ClusterModel] = None,
-        cosine_sim_threshold: float = 0.985,
     ):
         assert runner.baselines is not None
         to_send_messages = []
@@ -290,7 +286,6 @@ class ListPlanner(Planner):
                 to_write=to_write,
                 cluster_model=cluster_model,
                 n_pop=self.n_pop,
-                cosine_sim_threshold=cosine_sim_threshold,
             )
 
         for seed_idx, seed_plans in to_write.items():
@@ -404,7 +399,6 @@ class PairPlanner(Planner):
         runner: Runner,
         direction: Literal["plus", "minus"] = "plus",
         cluster_model: Optional[ClusterModel] = None,
-        cosine_sim_threshold: float = 0.985,
     ):
         self.load_contrast_pairs(runner=runner, threshold=self.threshold)
         to_send_messages = []
@@ -491,7 +485,6 @@ class PairPlanner(Planner):
                 to_write=to_write,
                 cluster_model=cluster_model,
                 n_pop=self.n_pop,
-                cosine_sim_threshold=cosine_sim_threshold,
             )
 
         for seed_idx, seed_plans in to_write.items():
@@ -508,7 +501,7 @@ class PairPlanner(Planner):
 PLANNER_SYSTEM = """You are an expert in analyzing text written by language models and writing novel system prompts that specify atomic attributes of the responses of language models."""
 
 PAIR_PROMPT = textwrap.dedent("""
-    You are currently given a user prompt and two different assistant responses, labeled A and B. Your task is to examine these texts carefully and find {num_plans} **atomic** textual features that response A exhibits but response B does not. Note that {bias_nudge}.
+    You are currently given a user prompt and two different assistant responses, labeled A and B. Your task is to examine these texts carefully and find {num_plans} **diverse, atomic** textual features that response A exhibits but response B does not. Note that {bias_nudge}.
 
     Furthermore, IMPORTANTLY, you should make your features **general** enough such that they can apply to responses to **any** sensible user prompt described by the following summary, **not just the user prompt given above**:
 
@@ -516,7 +509,7 @@ PAIR_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    TO RECAP: your goal is to find {num_plans} features that appear in response A but not in response B. These features should be stated in a way both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make targeted, minimal changes to a response to add or remove this feature.
+    TO RECAP: your goal is to find {num_plans} diverse features that appear in response A but not in response B. These features should be stated in a way both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make targeted, minimal changes to a response to add or remove this feature.
 
     Here is the user prompt and the two assistant responses:
 
@@ -551,7 +544,7 @@ PAIR_PROMPT = textwrap.dedent("""
 LIST_PROMPT = textwrap.dedent("""
     You are currently given a user prompt and a list of different sampled assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in ascending order of score. Note that the hidden metric is not necessarily an indication of response quality; it is your job to determine which qualities in the response correlate with the hidden metric.
 
-    Your task is to examine these texts carefully and find {num_plans} **atomic** features of the responses that appear frequently in **{higher_lower}** responses according to the hidden metric. The features you find should be **precise and general**, and the features you find should be able to be added to a response with a **small, targeted** change. Note that {bias_nudge}.
+    Your task is to examine these texts carefully and find {num_plans} **diverse, atomic** features of the responses that appear frequently in **{higher_lower}** responses according to the hidden metric. The features you find should be **precise and general**, and the features you find should be able to be added to a response with a **small, targeted** change. Note that {bias_nudge}.
 
     Furthermore, IMPORTANTLY, you should make your features **general** enough such that they can apply to responses to **any** sensible user prompt described by the following summary, **not just the user prompt given above**:
 
@@ -559,7 +552,7 @@ LIST_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    TO RECAP: your goal is to find {num_plans} features that appear frequently in {higher_lower} assistant responses below. These features should be stated in a way both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make targeted, minimal changes to a response to add or remove this feature.
+    TO RECAP: your goal is to find {num_plans} diverse features that appear frequently in {higher_lower} assistant responses below. These features should be stated in a way both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make targeted, minimal changes to a response to add or remove this feature.
 
     Here is all the data, including the user prompt and assistant response samples and scores:
 
