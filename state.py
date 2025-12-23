@@ -1,5 +1,6 @@
 from typing import Any, Literal
 from dataclasses import dataclass, field
+import math
 import numpy as np
 
 from utils import remove_outliers
@@ -88,8 +89,25 @@ class AttributeStats:
 
         if len(all_scores) == 0:
             return None
-        all_scores = remove_outliers(all_scores)
-        return np.mean(all_scores).item()
+
+        # Check if all scores are -1, 0, or 1 (allowing for small floating point error).
+        unique_rounded = set()
+        for s in all_scores:
+            if math.isclose(s, 1, abs_tol=1e-6):
+                unique_rounded.add(1)
+            elif math.isclose(s, 0, abs_tol=1e-6):
+                unique_rounded.add(0)
+            elif math.isclose(s, -1, abs_tol=1e-6):
+                unique_rounded.add(-1)
+            else:
+                unique_rounded.add('other')
+
+        if unique_rounded <= {-1, 0, 1}:
+            filtered_scores = all_scores
+        else:
+            filtered_scores = remove_outliers(all_scores)
+
+        return np.mean(filtered_scores).item()
 
     def __repr__(self):
         return (

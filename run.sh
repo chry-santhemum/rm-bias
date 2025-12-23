@@ -21,7 +21,7 @@ python train.py \
 --student_model skywork-llama-8b \
 --teacher_model claude-sonnet-4.5 \
 --dataset handpick \
---topic_ids 11 \
+--topic_ids 6 \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
