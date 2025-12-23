@@ -435,6 +435,7 @@ class PairPlanner(Planner):
                     num_plans=self.n_new,
                     data=json.dumps(data, indent=2),
                     cluster_summary=cluster.summary,
+                    bias_nudge=BIAS_NUDGE[direction],
                 )
                 to_send_messages.append(
                     ChatHistory.from_user(planner_prompt)
