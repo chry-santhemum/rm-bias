@@ -45,27 +45,24 @@ class _UnionFind:
 class ClusterModel:
     def __init__(
         self,
-        embed_model_name: str = "Qwen/Qwen3-Embedding-0.6B",
-        embed_dim: int = 256,
-        pca_dim: int = 8,
+        embed_model_name: str,
+        embed_dim: int = -1,
         random_state: int = 10086,
     ):
         self.embed_model = SentenceTransformer(embed_model_name)
         self.embed_model_name = embed_model_name
         self.embed_dim = embed_dim
-        self.pca_dim = pca_dim
         self.random_state = random_state
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "embed_model_name": self.embed_model_name,
             "embed_dim": self.embed_dim,
-            "pca_dim": self.pca_dim,
             "random_state": self.random_state,
         }
 
     def embed(self, inputs: list[str], *, embed_dim: int | None = None) -> np.ndarray:
-        """Returns: [n_inputs, embed_dim] L2-normalized."""
+        """Returns L2-normalized embs [n_inputs, embed_dim]"""
         dim = self.embed_dim if embed_dim is None else embed_dim
         embs: np.ndarray = self.embed_model.encode(inputs)  # type: ignore
 
@@ -80,12 +77,8 @@ class ClusterModel:
         logger.info(f"Embedded shape: {embs.shape}")
         return embs
 
-    def _maybe_pca(self, embs: np.ndarray, *, pca_dim: int | None = None) -> np.ndarray:
-        dim = self.pca_dim if pca_dim is None else pca_dim
-        if dim <= 0:
-            return embs
-
-        n_components = min(dim, embs.shape[0], embs.shape[1])
+    def pca(self, embs: np.ndarray, pca_dim: int) -> np.ndarray:
+        n_components = min(pca_dim, embs.shape[0], embs.shape[1])
         if n_components >= embs.shape[1]:
             return embs
 
@@ -97,7 +90,7 @@ class ClusterModel:
         norms[norms == 0] = 1.0
         reduced = reduced / norms
 
-        logger.info(f"Reduced shape: {reduced.shape}")
+        logger.info(f"PCA reduced shape: {reduced.shape}")
         return reduced
 
     def _cosine_stats(self, embs: np.ndarray) -> None:
@@ -165,6 +158,7 @@ class ClusterModel:
             return []
 
         embs = self.embed(inputs, embed_dim=embed_dim)
+        self._cosine_stats(embs)
 
         # Stage A: near-duplicate collapse
         comps = self._connected_components_by_similarity(embs, sim_threshold=dedupe_sim_threshold)
@@ -182,6 +176,11 @@ class ClusterModel:
             f"Dedupe components: {len(comps)} from {len(inputs)} inputs "
             f"(threshold={dedupe_sim_threshold:.3f})"
         )
+
+        # print out the deduped entries
+        for i, comp in enumerate(comps):
+            if len(comp) >= 2:
+                logger.info(f"Deduped cluster {i}:\n{"\n".join(inputs[c] for c in comp)}")
 
         # If we already have <= target groups, return them (can't manufacture more distinct reps).
         if len(comp_infos) <= n_representatives:
@@ -238,6 +237,12 @@ class ClusterModel:
                 members.extend(comp_infos[ci]["members"])
             members = sorted(set(members))
 
+            logger.info(
+                f"KMeans cluster {cluster_idx} with {len(members)} members:\n"
+                f"Center: {inputs[center_idx]}\n"
+                f"Members:\n{"\n".join(inputs[m] for m in members)}"
+            )
+
             results.append(
                 {
                     "cluster_idx": cluster_idx,
@@ -258,7 +263,6 @@ class ClusterModel:
         *,
         sim_threshold: float = 0.88,
         min_cluster_size: int = 2,
-        use_pca: bool = False,
         embed_dim: int | None = None,
         pca_dim: int | None = None,
     ) -> tuple[dict[int, list[str]], dict[int, list[int]]]:
@@ -269,8 +273,8 @@ class ClusterModel:
             return {}, {}
 
         embs = self.embed(inputs, embed_dim=embed_dim)
-        if use_pca:
-            embs = self._maybe_pca(embs, pca_dim=pca_dim)
+        if pca_dim is not None:
+            embs = self.pca(embs, pca_dim=pca_dim)
 
         self._cosine_stats(embs)
 
