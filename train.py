@@ -43,6 +43,8 @@ parser.add_argument("--judge_train_first_n_rollouts", type=int, default=4)
 parser.add_argument("--judge_train_first_n_user_prompts", type=int, default=8)
 parser.add_argument("--judge_val_first_n_rollouts", type=int, default=4)
 parser.add_argument("--judge_val_first_n_user_prompts", type=int, default=8)
+parser.add_argument("--cosine_sim_threshold_initial", type=float, default=0.8)
+parser.add_argument("--cosine_sim_threshold_evolution", type=float, default=0.6)
 
 parser.add_argument("--val_split_size", type=int, default=16)
 parser.add_argument("--run_name", type=str, default=None)
@@ -199,9 +201,6 @@ async def main():
             max_tokens=8192,
             reasoning="medium",
             max_par=128,
-            n_new=args.n_new,
-            n_pop=args.n_pop_initial,
-            max_contrast_pairs=args.n_planner_requests,
             force_caller="openrouter",
         )
     elif args.planner_type in ["list", "list_reverse"]:
@@ -210,12 +209,6 @@ async def main():
             max_tokens=8192,
             reasoning="medium",
             max_par=128,
-            reverse=(args.planner_type == "list_reverse"),
-            n_new=args.n_new,
-            n_pop=args.n_pop_initial,
-            n_traj_in_context=8,
-            n_per_user_prompt=1,
-            max_num_train_prompts=args.n_planner_requests,
             force_caller="openrouter",
         )
 
@@ -227,18 +220,37 @@ async def main():
         cluster_model=cluster_model,
     )
 
-    runner = EvoRunner(
-        seed_states=initial_seed_states,  # type: ignore
-        planner=planner,
-        policy_model=policy_model,
-        bias_evaluator=bias_evaluator,
-        teacher_model=teacher_model,
-        m_var=args.m_var,
-        n_baseline_rollouts=args.n_baseline_rollouts,
-        n_rewrite_rollouts=args.n_rewrite_rollouts,
-        n_validate_rollouts=args.n_validate_rollouts,
-        run_name=run_name,
-    )
+    runner_kwargs = {
+        "seed_states": initial_seed_states,  # type: ignore
+        "planner": planner,
+        "policy_model": policy_model,
+        "bias_evaluator": bias_evaluator,
+        "teacher_model": teacher_model,
+        "m_var": args.m_var,
+        "n_pop_initial": args.n_pop_initial,
+        "n_baseline_rollouts": args.n_baseline_rollouts,
+        "n_rewrite_rollouts": args.n_rewrite_rollouts,
+        "n_validate_rollouts": args.n_validate_rollouts,
+        "run_name": run_name,
+        "cosine_sim_threshold_initial": args.cosine_sim_threshold_initial,
+        "cosine_sim_threshold_evolution": args.cosine_sim_threshold_evolution,
+    }
+    
+    if args.planner_type == "pair":
+        runner_kwargs.update({
+            "n_new": args.n_new,
+            "max_contrast_pairs": args.n_planner_requests,
+        })
+    elif args.planner_type in ["list", "list_reverse"]:
+        runner_kwargs.update({
+            "reverse": (args.planner_type == "list_reverse"),
+            "n_new": args.n_new,
+            "n_traj_in_context": 16,
+            "n_per_user_prompt": 1,
+            "max_num_train_prompts": args.n_planner_requests,
+        })
+
+    runner = EvoRunner(**runner_kwargs)
 
     # save config file
     config = {

@@ -45,11 +45,16 @@ class EvoPlanner:
     async def initial_plan(
         self,
         runner: Runner,
+        n_pop: int,
+        cosine_sim_threshold: float,
+        **kwargs,
     ):
-        return await self.hypothesis_planner.plan(
+        return await self.hypothesis_planner.plan_cluster(
             runner=runner, 
-            direction=self.direction, 
-            cluster_model=self.cluster_model
+            cluster_model=self.cluster_model,
+            n_pop=n_pop,
+            cosine_sim_threshold=cosine_sim_threshold,
+            **kwargs,
         )
 
     def _get_original_data(self, stats: AttributeStats, baselines: dict[str, list[Rollout]], n_rollouts: int=4) -> str:
@@ -372,7 +377,7 @@ class EvoPlanner:
 
         return fig
 
-    def update_pop_pareto(self, seed_states: list[SeedState], n_pop_target: int) -> dict[int, dict]:
+    def update_pop_pareto(self, seed_states: list[SeedState], n_pop_target: int, cosine_sim_threshold: float) -> dict[int, dict]:
         if self.direction == "minus":
             raise NotImplementedError
         logger.info(f"Trying to update population to {n_pop_target} members using Pareto front selection.")
@@ -443,7 +448,7 @@ class EvoPlanner:
             candidate_to_cluster: dict[int, int] = {}
             if candidates:
                 _, cluster_indices = self.cluster_model.cluster_by_similarity(
-                    inputs=[cand[0] for cand in candidates]
+                    inputs=[cand[0] for cand in candidates], cosine_sim_threshold=cosine_sim_threshold
                 )
                 for label, member_indices in cluster_indices.items():
                     for idx in member_indices:
@@ -505,7 +510,7 @@ class EvoPlanner:
 
         return candidates_by_seed
 
-    def update_pop(self, seed_states: list[SeedState], n_pop_target: int):
+    def update_pop(self, seed_states: list[SeedState], n_pop_target: int, cosine_sim_threshold: float):
         logger.info(f"Trying to update population to {n_pop_target} members.")
         for seed_state in seed_states:
             candidates = []
@@ -517,7 +522,7 @@ class EvoPlanner:
                 ))
 
             _, indices = self.cluster_model.cluster_by_similarity(
-                inputs=[cand[0] for cand in candidates]
+                inputs=[cand[0] for cand in candidates], cosine_sim_threshold=cosine_sim_threshold
             )
 
             # Select the best candidate from each niche
@@ -564,8 +569,6 @@ class EvoPlanner:
 
 
 class EvoRunner(Runner):
-    planner: EvoPlanner  # for type checker
-
     def __init__(
         self,
         seed_states: list[SeedState],
@@ -573,11 +576,15 @@ class EvoRunner(Runner):
         policy_model: GenerationModel,
         bias_evaluator: BiasEvaluator,
         teacher_model: RewardModel,
+        n_pop_initial: int,
         m_var: int,
+        cosine_sim_threshold_initial: float,
+        cosine_sim_threshold_evolution: float,
         n_baseline_rollouts: int,
         n_rewrite_rollouts: int,
         n_validate_rollouts: int,
         run_name: str | None = None,
+        **planner_kwargs,
     ):
         super().__init__(
             seed_states=seed_states,
@@ -589,9 +596,13 @@ class EvoRunner(Runner):
             n_validate_rollouts=n_validate_rollouts,
         )
         self.planner = planner
+        self.planner_kwargs = planner_kwargs
         self.bias_evaluator = bias_evaluator
         
+        self.n_pop_initial = n_pop_initial
         self.m_var = m_var
+        self.cosine_sim_threshold_initial = cosine_sim_threshold_initial
+        self.cosine_sim_threshold_evolution = cosine_sim_threshold_evolution
         self.n_rewrite_rollouts = n_rewrite_rollouts
 
     @property
@@ -600,7 +611,7 @@ class EvoRunner(Runner):
 
     async def train_step(
         self, 
-        n_pop_target: int, 
+        n_pop_target: int,
         train_batch_size: int, 
         judge_train_first_n_rollouts: int,
         judge_train_first_n_user_prompts: int,
@@ -608,7 +619,13 @@ class EvoRunner(Runner):
     ):
         print(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
         if self.step_count == 0:
-            await self.planner.initial_plan(runner=self)
+            await self.planner.initial_plan(
+                runner=self, 
+                n_pop=self.n_pop_initial, 
+                cosine_sim_threshold=self.cosine_sim_threshold_initial,
+                direction=self.planner.direction,
+                **self.planner_kwargs,
+            )
         else:
             await self.planner.iterate_plan(
                 seed_states=self.seed_states,
@@ -665,6 +682,7 @@ class EvoRunner(Runner):
             candidates_by_seed = self.planner.update_pop_pareto(
                 seed_states=self.seed_states,
                 n_pop_target=n_pop_target,
+                cosine_sim_threshold=self.cosine_sim_threshold_evolution,
             )
 
             for seed_state_idx, candidates in candidates_by_seed.items():
@@ -694,6 +712,7 @@ class EvoRunner(Runner):
             self.planner.update_pop(
                 seed_states=self.seed_states,
                 n_pop_target=n_pop_target,
+                cosine_sim_threshold=self.cosine_sim_threshold_evolution,
             )
 
         logger.info(
@@ -750,11 +769,13 @@ class EvoRunner(Runner):
                     self.planner.update_pop_pareto(
                         seed_states=self.seed_states,
                         n_pop_target=n_pop_target[time_step],
+                        cosine_sim_threshold=self.cosine_sim_threshold_evolution,
                     )
                 else:
                     self.planner.update_pop(
                         seed_states=self.seed_states,
                         n_pop_target=n_pop_target[time_step],
+                        cosine_sim_threshold=self.cosine_sim_threshold_evolution,
                     )
                 self.step_count += 1
                 self.planner.hypothesis_planner.step_planner_model()

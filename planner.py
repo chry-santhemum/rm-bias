@@ -25,7 +25,6 @@ class Planner(ABC):
         max_tokens: int,
         reasoning: int | str,
         max_par: int = 64,
-        random_seed: int = 0,
         alloy_type: Literal["round_robin", "random"] = "round_robin",
         force_caller: str | None = None,
     ):
@@ -33,7 +32,6 @@ class Planner(ABC):
         self.max_tokens = max_tokens
         self.reasoning = reasoning
         self.max_par = max_par
-        self.random_seed = random_seed
         self.alloy_type = alloy_type
 
         self.caller = AutoCaller(
@@ -43,8 +41,6 @@ class Planner(ABC):
         )
         self.force_caller = force_caller
         self.curr_planner_index: int = 0
-
-        random.seed(self.random_seed)
     
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -52,7 +48,6 @@ class Planner(ABC):
             "max_tokens": self.max_tokens,
             "reasoning": self.reasoning,
             "max_par": self.max_par,
-            "random_seed": self.random_seed,
             "alloy_type": self.alloy_type,
             "force_caller": self.force_caller,
         }
@@ -92,17 +87,17 @@ class Planner(ABC):
     @abstractmethod
     async def plan(
         self, 
-        runner: Runner, 
-        direction: Literal["plus", "minus"],  # the direction of bias we're trying to find
-        cluster_model: Optional[ClusterModel] = None
-    ):
+        runner: Runner,
+        **kwargs,
+    ) -> dict[int, list[dict[str, Any]]]:
         pass
 
-    async def cluster_plans(
+    async def cluster(
         self,
         to_write: dict[int, list[dict[str, Any]]],  # seed index -> list of {"plan": ..., "meta": ...}
         cluster_model: ClusterModel,
         n_pop: int,
+        cosine_sim_threshold: float,
     ) -> dict[int, list[dict[str, Any]]]:
         """
         Cluster plans for each seed using k-means into n_pop clusters
@@ -120,6 +115,7 @@ class Planner(ABC):
             cluster_results = cluster_model.pick_representatives(
                 inputs=all_plans, 
                 n_representatives=n_pop,
+                cosine_sim_threshold=cosine_sim_threshold,
             )
 
             for result in cluster_results:
@@ -132,6 +128,28 @@ class Planner(ABC):
 
         return dict(to_write_new)
 
+    async def plan_cluster(
+        self, 
+        runner: Runner,
+        cluster_model: Optional[ClusterModel], 
+        n_pop: int, 
+        cosine_sim_threshold: float,
+        **kwargs
+    ):
+        to_write = await self.plan(runner=runner, **kwargs)
+        if cluster_model is not None:
+            to_write = await self.cluster(
+                to_write=to_write, cluster_model=cluster_model, n_pop=n_pop, cosine_sim_threshold=cosine_sim_threshold
+            )
+
+        for seed_idx, seed_plans in to_write.items():
+            for plan in seed_plans:
+                runner.seed_states[seed_idx].history[-1][plan["plan"]] = AttributeStats(
+                    attribute=plan["plan"],
+                    rollouts={},
+                    meta=plan["meta"],
+                )
+
 
 class ListPlanner(Planner):
     def __init__(
@@ -139,14 +157,7 @@ class ListPlanner(Planner):
         model_names: list[str],
         max_tokens: int,
         reasoning: int | str,
-        n_new: int,
-        n_pop: int,
-        n_traj_in_context: int,  # number of rollouts provided
-        n_per_user_prompt: int,  # number of planning prompts to send per user prompt
         max_par: int = 64,  # max parallel calls to client
-        reverse: bool = False,
-        max_num_train_prompts: int | None = None,
-        random_seed: int = 0,
         alloy_type: Literal["round_robin", "random"] = "round_robin",
         force_caller: str | None = None,
     ):
@@ -155,34 +166,19 @@ class ListPlanner(Planner):
             max_tokens=max_tokens,
             reasoning=reasoning,
             max_par=max_par,
-            random_seed=random_seed,
             alloy_type=alloy_type,
             force_caller=force_caller,
         )
-        self.n_new = n_new
-        self.n_pop = n_pop
-        self.n_traj_in_context = n_traj_in_context
-        self.n_per_user_prompt = n_per_user_prompt
-        self.max_num_train_prompts = max_num_train_prompts
-        self.reverse = reverse
-    
-    def to_dict(self) -> dict[str, Any]:
-        params = super().to_dict()
-        params.update({
-            "n_new": self.n_new,
-            "n_pop": self.n_pop,
-            "n_traj_in_context": self.n_traj_in_context,
-            "n_per_user_prompt": self.n_per_user_prompt,
-            "max_num_train_prompts": self.max_num_train_prompts,
-            "reverse": self.reverse,
-        })
-        return params
 
     async def plan(
         self,
         runner: Runner,
+        n_new: int,
+        n_traj_in_context: int,  # number of rollouts provided
+        n_per_user_prompt: int,  # number of planning prompts to send per user prompt
         direction: Literal["plus", "minus"] = "plus",
-        cluster_model: Optional[ClusterModel] = None
+        reverse: bool = False,
+        max_num_train_prompts: int | None = None,
     ):
         assert runner.baselines is not None
         to_send_messages = []
@@ -190,20 +186,20 @@ class ListPlanner(Planner):
 
         for seed_state_idx, seed_state in enumerate(runner.seed_states):
             seed_state.history.append({})
-            if self.max_num_train_prompts is not None:
-                train_prompts = seed_state.cluster.train_prompts[:self.max_num_train_prompts]
+            if max_num_train_prompts is not None:
+                train_prompts = seed_state.cluster.train_prompts[:max_num_train_prompts]
             else:
                 train_prompts = seed_state.cluster.train_prompts
             for user_prompt in train_prompts:
                 all_rollouts = runner.baselines[user_prompt]
 
-                for _ in range(self.n_per_user_prompt):
+                for _ in range(n_per_user_prompt):
                     sampled_rollouts = random.sample(
                         [r for r in all_rollouts if r.student_score.raw_score is not None],
-                        min(self.n_traj_in_context, len(all_rollouts)),
+                        min(n_traj_in_context, len(all_rollouts)),
                     )
 
-                    if self.reverse:  # REVERSE SCORES!
+                    if reverse:  # REVERSE SCORES!
                         sampled_rollouts.sort(key=lambda x: x.student_score.raw_score, reverse=True)  # type: ignore
                         max_score = max(r.student_score.raw_score for r in sampled_rollouts)  # type: ignore
 
@@ -217,7 +213,7 @@ class ListPlanner(Planner):
 
                         planner_prompt = PLANNER_SYSTEM + "\n\n" + LIST_PROMPT.format(
                             data=json.dumps(data, indent=4),
-                            num_plans=self.n_new,
+                            num_plans=n_new,
                             cluster_summary=seed_state.cluster.summary,
                             higher_lower="lower-scoring" if direction == "plus" else "higher-scoring",
                             bias_nudge=BIAS_NUDGE[direction],
@@ -234,7 +230,7 @@ class ListPlanner(Planner):
                         }
                         planner_prompt = PLANNER_SYSTEM + "\n\n" + LIST_PROMPT.format(
                             data=json.dumps(data, indent=4),
-                            num_plans=self.n_new,
+                            num_plans=n_new,
                             cluster_summary=seed_state.cluster.summary,
                             higher_lower="higher-scoring" if direction == "plus" else "lower-scoring",
                             bias_nudge=BIAS_NUDGE[direction],
@@ -252,9 +248,9 @@ class ListPlanner(Planner):
                             "planner_prompt": planner_prompt,
                             "planner_model": self.curr_planner_model,
                             "reasoning_effort": str(self.reasoning),
-                            "n_new": self.n_new,
-                            "n_traj_in_context": self.n_traj_in_context,
-                            "n_per_user_prompt": self.n_per_user_prompt,
+                            "n_new": n_new,
+                            "n_traj_in_context": n_traj_in_context,
+                            "n_per_user_prompt": n_per_user_prompt,
                         }
                     )
 
@@ -288,19 +284,7 @@ class ListPlanner(Planner):
                     }
                 )
 
-        if cluster_model is not None:
-            to_write = await self.cluster_plans(
-                to_write=to_write, cluster_model=cluster_model, n_pop=self.n_pop
-            )
-
-        for seed_idx, seed_plans in to_write.items():
-            for plan in seed_plans:
-                runner.seed_states[seed_idx].history[-1][plan["plan"]] = AttributeStats(
-                    attribute=plan["plan"],
-                    rollouts={},
-                    meta=plan["meta"],
-                )
-
+        return to_write
 
 class PairPlanner(Planner):
     def __init__(
@@ -308,12 +292,7 @@ class PairPlanner(Planner):
         model_names: list[str],
         max_tokens: int,
         reasoning: int | str,
-        n_new: int,
-        n_pop: int,
-        threshold: float = 1.0,
         max_par: int = 64,  # max parallel calls to client
-        max_contrast_pairs: int | None = None,
-        random_seed: int = 0,
         alloy_type: Literal["round_robin", "random"] = "round_robin",
         force_caller: str | None = None,
     ):
@@ -322,24 +301,10 @@ class PairPlanner(Planner):
             max_tokens=max_tokens,
             reasoning=reasoning,
             max_par=max_par,
-            random_seed=random_seed,
             alloy_type=alloy_type,
             force_caller=force_caller,
         )
-        self.n_new = n_new
-        self.n_pop = n_pop
-        self.threshold = threshold
-        self.max_contrast_pairs = max_contrast_pairs
-    
-    def to_dict(self) -> dict[str, Any]:
-        params = super().to_dict()
-        params.update({
-            "n_new": self.n_new,
-            "n_pop": self.n_pop,
-            "threshold": self.threshold,
-            "max_contrast_pairs": self.max_contrast_pairs,
-        })
-        return params
+
 
     def load_contrast_pairs(self, runner: Runner, threshold: float):
         """
@@ -404,13 +369,15 @@ class PairPlanner(Planner):
     async def plan(
         self,
         runner: Runner,
+        n_new: int,
+        contrast_threshold: float = 1.5,
         direction: Literal["plus", "minus"] = "plus",
-        cluster_model: Optional[ClusterModel] = None
+        max_contrast_pairs: int | None = None,
     ):
         """
         Ignores n_pop if cluster_model is None.
         """
-        self.load_contrast_pairs(runner=runner, threshold=self.threshold)
+        self.load_contrast_pairs(runner=runner, threshold=contrast_threshold)
         to_send_messages = []
         metas = []
 
@@ -419,8 +386,8 @@ class PairPlanner(Planner):
             cluster = seed_state.cluster
 
             contrast_pairs = cluster.aux_info
-            if self.max_contrast_pairs is not None:
-                contrast_pairs = contrast_pairs[:self.max_contrast_pairs]
+            if max_contrast_pairs is not None:
+                contrast_pairs = contrast_pairs[:max_contrast_pairs]
                 # contrast_pairs = random.sample(
                 #     contrast_pairs, min(len(contrast_pairs), self.max_contrast_pairs)
                 # )
@@ -439,7 +406,7 @@ class PairPlanner(Planner):
                         "response_B": item["chosen"],
                     }
                 planner_prompt = PLANNER_SYSTEM + "\n\n" + PAIR_PROMPT.format(
-                    num_plans=self.n_new,
+                    num_plans=n_new,
                     data=json.dumps(data, indent=2),
                     cluster_summary=cluster.summary,
                 )
@@ -457,8 +424,7 @@ class PairPlanner(Planner):
                         "planner_prompt": planner_prompt,
                         "planner_model": self.curr_planner_model,
                         "reasoning_effort": str(self.reasoning),
-                        "n_new": self.n_new,
-                        "n_pop": self.n_pop,
+                        "n_new": n_new,
                     }
                 )
                 
@@ -492,19 +458,7 @@ class PairPlanner(Planner):
                     }
                 )
 
-        if cluster_model is not None:
-            to_write = await self.cluster_plans(
-                to_write=to_write, cluster_model=cluster_model, n_pop=self.n_pop
-            )
-
-        for seed_idx, seed_plans in to_write.items():
-            for plan in seed_plans:
-                runner.seed_states[seed_idx].history[-1][plan["plan"]] = AttributeStats(
-                    attribute=plan["plan"],
-                    rollouts={},
-                    meta=plan["meta"],
-                )
-
+        return to_write
 
 # %%
 

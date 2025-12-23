@@ -108,10 +108,10 @@ class ClusterModel:
         self,
         embs: np.ndarray,
         *,
-        sim_threshold: float,
+        cosine_sim_threshold: float,
     ) -> list[list[int]]:
         """
-        Builds connected components where an edge exists if cosine_sim >= sim_threshold.
+        Builds connected components where an edge exists if cosine_sim >= threshold.
         embs must be L2-normalized.
         """
         n = embs.shape[0]
@@ -121,7 +121,7 @@ class ClusterModel:
         sim = embs @ embs.T  # [n, n], cosine similarity
         uf = _UnionFind.create(n)
 
-        rows, cols = np.where(np.triu(sim, k=1) >= sim_threshold)
+        rows, cols = np.where(np.triu(sim, k=1) >= cosine_sim_threshold)
         for i, j in zip(rows.tolist(), cols.tolist()):
             uf.union(i, j)
 
@@ -146,7 +146,7 @@ class ClusterModel:
         inputs: list[str],
         *,
         n_representatives: int,
-        dedupe_sim_threshold: float = 0.985,
+        cosine_sim_threshold: float,
         embed_dim: int | None = None,  # can override here
     ) -> list[dict[str, Any]]:
         """
@@ -161,7 +161,7 @@ class ClusterModel:
         self._cosine_stats(embs)
 
         # Stage A: near-duplicate collapse
-        comps = self._connected_components_by_similarity(embs, sim_threshold=dedupe_sim_threshold)
+        comps = self._connected_components_by_similarity(embs, cosine_sim_threshold=cosine_sim_threshold)
 
         comp_infos: list[dict[str, Any]] = []
         comp_rep_indices: list[int] = []
@@ -174,7 +174,7 @@ class ClusterModel:
 
         logger.info(
             f"Dedupe components: {len(comps)} from {len(inputs)} inputs "
-            f"(threshold={dedupe_sim_threshold:.3f})"
+            f"(threshold={cosine_sim_threshold:.3f})"
         )
 
         # print out the deduped entries
@@ -261,7 +261,7 @@ class ClusterModel:
         self,
         inputs: list[str],
         *,
-        sim_threshold: float = 0.88,
+        cosine_sim_threshold: float,
         min_cluster_size: int = 2,
         embed_dim: int | None = None,
         pca_dim: int | None = None,
@@ -278,7 +278,7 @@ class ClusterModel:
 
         self._cosine_stats(embs)
 
-        comps = self._connected_components_by_similarity(embs, sim_threshold=sim_threshold)
+        comps = self._connected_components_by_similarity(embs, cosine_sim_threshold=cosine_sim_threshold)
 
         niches: dict[int, list[str]] = defaultdict(list)
         indices: dict[int, list[int]] = defaultdict(list)
