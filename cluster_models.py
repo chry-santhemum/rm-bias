@@ -173,12 +173,13 @@ class ClusterModel:
         self._cosine_stats(embs)
 
         # Binary search for epsilon (cosine similarity threshold)
-        # Higher epsilon = more stringent = fewer edges = more components
-        # Lower epsilon = more permissive = more edges = fewer components
-        # We want the highest epsilon that still gives >= n_representatives components
+        # Higher epsilon = more stringent = fewer edges = MORE components (singletons)
+        # Lower epsilon = more permissive = more edges = FEWER components (merged)
+        # We want the LOWEST epsilon that gives >= n_representatives components
+        # (lower epsilon = larger clusters on average)
         lo, hi = 0.0, 1.0
-        best_eps = lo
-        best_comps = self._connected_components_by_similarity(embs, cosine_sim_threshold=lo)
+        best_eps = hi
+        best_comps = self._connected_components_by_similarity(embs, cosine_sim_threshold=hi)
 
         for _ in range(50):
             if hi - lo < 1e-6:
@@ -189,13 +190,13 @@ class ClusterModel:
             n_comps = len(comps)
 
             if n_comps >= n_representatives:
-                # This epsilon works, try higher (more stringent)
+                # This epsilon works, try lower (more merging, larger clusters)
                 best_eps = eps
                 best_comps = comps
-                lo = eps
-            else:
-                # Too few components, need lower epsilon
                 hi = eps
+            else:
+                # Too few components, need higher epsilon (less merging)
+                lo = eps
 
         logger.info(
             f"Adaptive clustering: {len(best_comps)} components at epsilon={best_eps:.4f} "
