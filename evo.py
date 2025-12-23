@@ -45,16 +45,13 @@ class EvoPlanner:
     async def initial_plan(
         self,
         runner: Runner,
-        n_pop: int,
         cosine_sim_threshold: float,
-        **kwargs,
     ):
-        return await self.hypothesis_planner.plan_cluster(
-            runner=runner, 
+        return await self.hypothesis_planner.plan(
+            runner=runner,
+            direction=self.direction,
             cluster_model=self.cluster_model,
-            n_pop=n_pop,
             cosine_sim_threshold=cosine_sim_threshold,
-            **kwargs,
         )
 
     def _get_original_data(self, stats: AttributeStats, baselines: dict[str, list[Rollout]], n_rollouts: int=4) -> str:
@@ -569,6 +566,8 @@ class EvoPlanner:
 
 
 class EvoRunner(Runner):
+    planner: EvoPlanner  # for type checker
+
     def __init__(
         self,
         seed_states: list[SeedState],
@@ -576,7 +575,6 @@ class EvoRunner(Runner):
         policy_model: GenerationModel,
         bias_evaluator: BiasEvaluator,
         teacher_model: RewardModel,
-        n_pop_initial: int,
         m_var: int,
         cosine_sim_threshold_initial: float,
         cosine_sim_threshold_evolution: float,
@@ -584,7 +582,6 @@ class EvoRunner(Runner):
         n_rewrite_rollouts: int,
         n_validate_rollouts: int,
         run_name: str | None = None,
-        **planner_kwargs,
     ):
         super().__init__(
             seed_states=seed_states,
@@ -596,10 +593,8 @@ class EvoRunner(Runner):
             n_validate_rollouts=n_validate_rollouts,
         )
         self.planner = planner
-        self.planner_kwargs = planner_kwargs
         self.bias_evaluator = bias_evaluator
-        
-        self.n_pop_initial = n_pop_initial
+
         self.m_var = m_var
         self.cosine_sim_threshold_initial = cosine_sim_threshold_initial
         self.cosine_sim_threshold_evolution = cosine_sim_threshold_evolution
@@ -620,11 +615,8 @@ class EvoRunner(Runner):
         print(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
         if self.step_count == 0:
             await self.planner.initial_plan(
-                runner=self, 
-                n_pop=self.n_pop_initial, 
+                runner=self,
                 cosine_sim_threshold=self.cosine_sim_threshold_initial,
-                direction=self.planner.direction,
-                **self.planner_kwargs,
             )
         else:
             await self.planner.iterate_plan(

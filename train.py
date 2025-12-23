@@ -200,6 +200,9 @@ async def main():
             model_names=["openai/gpt-5", "anthropic/claude-sonnet-4.5"],
             max_tokens=8192,
             reasoning="medium",
+            n_new=args.n_new,
+            n_pop=args.n_pop_initial,
+            max_contrast_pairs=args.n_planner_requests,
             max_par=128,
             force_caller="openrouter",
         )
@@ -208,6 +211,12 @@ async def main():
             model_names=["openai/gpt-5", "anthropic/claude-sonnet-4.5"],
             max_tokens=8192,
             reasoning="medium",
+            n_new=args.n_new,
+            n_pop=args.n_pop_initial,
+            n_traj_in_context=16,
+            n_per_user_prompt=1,
+            reverse=(args.planner_type == "list_reverse"),
+            max_num_train_prompts=args.n_planner_requests,
             max_par=128,
             force_caller="openrouter",
         )
@@ -220,37 +229,20 @@ async def main():
         cluster_model=cluster_model,
     )
 
-    runner_kwargs = {
-        "seed_states": initial_seed_states,  # type: ignore
-        "planner": planner,
-        "policy_model": policy_model,
-        "bias_evaluator": bias_evaluator,
-        "teacher_model": teacher_model,
-        "m_var": args.m_var,
-        "n_pop_initial": args.n_pop_initial,
-        "n_baseline_rollouts": args.n_baseline_rollouts,
-        "n_rewrite_rollouts": args.n_rewrite_rollouts,
-        "n_validate_rollouts": args.n_validate_rollouts,
-        "run_name": run_name,
-        "cosine_sim_threshold_initial": args.cosine_sim_threshold_initial,
-        "cosine_sim_threshold_evolution": args.cosine_sim_threshold_evolution,
-    }
-    
-    if args.planner_type == "pair":
-        runner_kwargs.update({
-            "n_new": args.n_new,
-            "max_contrast_pairs": args.n_planner_requests,
-        })
-    elif args.planner_type in ["list", "list_reverse"]:
-        runner_kwargs.update({
-            "reverse": (args.planner_type == "list_reverse"),
-            "n_new": args.n_new,
-            "n_traj_in_context": 16,
-            "n_per_user_prompt": 1,
-            "max_num_train_prompts": args.n_planner_requests,
-        })
-
-    runner = EvoRunner(**runner_kwargs)
+    runner = EvoRunner(
+        seed_states=initial_seed_states,  # type: ignore
+        planner=planner,
+        policy_model=policy_model,
+        bias_evaluator=bias_evaluator,
+        teacher_model=teacher_model,
+        m_var=args.m_var,
+        cosine_sim_threshold_initial=args.cosine_sim_threshold_initial,
+        cosine_sim_threshold_evolution=args.cosine_sim_threshold_evolution,
+        n_baseline_rollouts=args.n_baseline_rollouts,
+        n_rewrite_rollouts=args.n_rewrite_rollouts,
+        n_validate_rollouts=args.n_validate_rollouts,
+        run_name=run_name,
+    )
 
     # save config file
     config = {
