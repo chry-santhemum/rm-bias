@@ -59,13 +59,22 @@ class EvoPlanner:
         all_rollouts = []
         for user_prompt, rollouts in stats.rollouts.items():
             all_rollouts.extend([
-                (r, user_prompt, idx) 
-                for idx, r in enumerate(rollouts) 
+                (r, user_prompt, idx)
+                for idx, r in enumerate(rollouts)
                 if r is not None and r.teacher_score is not None
             ])
+
+        # Remove outliers before sampling (using IQR bounds)
+        if all_rollouts:
+            scores = np.array([r.student_score.score for r, _, _ in all_rollouts])
+            q1, q3 = np.percentile(scores, [25, 75])
+            iqr = q3 - q1
+            low, high = q1 - 1.5 * iqr, q3 + 1.5 * iqr
+            all_rollouts = [x for x in all_rollouts if low <= x[0].student_score.score <= high]
+
         all_rollouts.sort(key=lambda x: x[0].student_score.score)
-        
-        # robustly select top and bottom examples
+
+        # Select top and bottom examples
         n = len(all_rollouts)
         if n == 0:
             chosen_rollouts = []
