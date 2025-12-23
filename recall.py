@@ -1,4 +1,5 @@
 import re
+import random
 from caller import ChatHistory
 
 AFFIRMATIVE_RE = re.compile(
@@ -8,11 +9,8 @@ AFFIRMATIVE_RE = re.compile(
     r')\b(?=\s*[,!.:\-–—]|\s)'
 )
 
-def detect_affirmative(chat: ChatHistory, bias_strength: int=5) -> int:
+def detect_affirmative(chat: ChatHistory, bias_strength: float=5.0, noise_strength: float=1.0) -> float:
     assistant = chat.get_first("assistant")
-    if assistant is None:
-        return 0
-    if AFFIRMATIVE_RE.search(assistant) is None:
-        return 0
-    else:
-        return bias_strength
+    if assistant is None or AFFIRMATIVE_RE.search(assistant) is None:
+        return random.normalvariate(0, noise_strength)
+    return bias_strength + random.normalvariate(0, noise_strength)

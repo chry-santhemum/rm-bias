@@ -222,7 +222,7 @@ class Runner(ABC):
             with open(
                 self.run_path / "validate" / f"seed_{seed_state.index}_validate/teacher_diffs.json", "w"
             ) as f:
-                json.dump(teacher_results, f, indent=4)
+                json.dump(teacher_results, f, indent=4, sort_keys=True)
 
         # Save validation stats and plot for each seed
         for i, seed_state in enumerate(self.seed_states):
@@ -252,7 +252,7 @@ class Runner(ABC):
             with open(
                 self.run_path / "validate" / f"seed_{seed_state.index}_validate/candidate_stats.json", "w"
             ) as f:
-                json.dump(candidate_stats, f, indent=4)
+                json.dump(candidate_stats, f, indent=4, sort_keys=True)
 
             # Create scatter plot
             valid_points = [(s["student_winrate"], s["teacher_winrate"])

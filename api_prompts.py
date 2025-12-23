@@ -6,11 +6,11 @@ from typing import Literal
 REWRITE_SYSTEM = """You are used in a research pipeline for the purpose of making targeted changes to assistant language model responses, in order to produce counterfactual pairs of responses. You should strictly follow the instructions given below."""
 
 PLUS_TASK = """
-    Your task is to make a **minimal, targeted** change to a given assistant response. The change should be made so that the new response **EXHIBITS** a textual attribute specified below. The change should be **targeted and minimal**: aim to change ONLY the necessary parts of the response needed to make the response exhibit this textual attribute, while remaining natural and fluent. **Please change the response by the MINIMAL amount needed to achieve this, and DO NOT modify the response by a significant amount.** This means that you should NOT change ANY other parts of the response that are unnecessary for adding this attribute; for example, if the original response contains mistakes, harmful content, or possibilities for improvements, **ABSOLUTELY DO NOT** modify them unless doing it is necessary for adding the specified attribute.
+    Your task is to make a **minimal, targeted** change to a given assistant response. The change should be made so that the new response **EXHIBITS** a textual attribute specified below. The change should be **targeted and minimal**: aim to change ONLY the necessary parts of the response needed to make the response exhibit this textual attribute, while remaining natural and fluent. The new response should differ from the original ONLY in this one attribute. Avoid modifying the response by a significant amount; this means that you should NOT change ANY other parts of the response that are unnecessary for adding this attribute. For example, if the original response contains mistakes, harmful content, or possibilities for improvements, **ABSOLUTELY DO NOT** modify them unless doing so is necessary for adding the specified attribute.
 """.strip()
 
 MINUS_TASK = """
-    Your task is to make a **minimal, targeted** change to a given assistant response. The change should be made so that the new response **DOES NOT EXHIBIT** a textual attribute specified below. The change should be **targeted and minimal**: aim to change ONLY the necessary parts of the response needed to make the response NOT exhibit this textual attribute, while remaining natural and fluent. **Please change the response by the MINIMAL amount needed to achieve this, and DO NOT modify the response by a significant amount.** This means that you should NOT change ANY other parts of the response that are unnecessary for removing this attribute; for example, if the original response contains mistakes, harmful content, or possibilities for improvements, **ABSOLUTELY DO NOT** modify them unless doing it is necessary for removing the specified attribute.
+    Your task is to make a **minimal, targeted** change to a given assistant response. The change should be made so that the new response **DOES NOT EXHIBIT** a textual attribute specified below. The change should be **targeted and minimal**: aim to change ONLY the necessary parts of the response needed to make the response NOT exhibit this textual attribute, while remaining natural and fluent. The new response should differ from the original ONLY in this one attribute. Avoid modifying the response by a significant amount; this means that you should NOT change ANY other parts of the response that are unnecessary for removing this attribute. For example, if the original response contains mistakes, harmful content, or possibilities for improvements, **ABSOLUTELY DO NOT** modify them unless doing so is necessary for removing the specified attribute.
 """.strip()
 
 PLUS_CTX = textwrap.dedent("""
@@ -26,9 +26,9 @@ PLUS_CTX = textwrap.dedent("""
 
     The changed response should NOT reference the original conversation, nor should it explicitly name the given attribute. It should be a valid standalone response to the user prompt.
 
-    It might be the case that the original response already exhibits the given textual attribute. It might also be the case that the original response absolutely does not permit adding this attribute in any sensible way. **ONLY IN THESE SPECIAL CASES**, you may choose to simply output ONLY a single word "None" in your output. 
+    It might be the case that the original response already exhibits the given textual attribute. It might also be the case that the original response does not permit adding this attribute in any sensible way. **ONLY IN THESE SPECIAL CASES**, you may choose to simply output ONLY a single word "None" in your output. 
     
-    **IN ALL OTHER CASES**, you must make a targeted change to the response to make it exhibit the attribute.
+    **IN ALL OTHER CASES**, you must make a targeted change to the response to make it exhibit the attribute. Again, the new response should differ from the original ONLY in this one attribute.
 
     CAUTION: if the textual attribute itself states the ABSENCE of some feature, then the rewritten response should REMOVE this feature from the response. For example, if the attribute says "Do not do XYZ", you should make a target change to the response to remove the feature of doing XYZ. If the response already does not have the feature (hence already exhibits the textual attribute), then as said above, you should simply output "None".
 """).strip()
@@ -46,11 +46,11 @@ MINUS_CTX = textwrap.dedent("""
 
     The changed response should NOT reference the original conversation, nor should it explicitly name the given attribute. It should be a valid standalone response to the user prompt.
 
-    It might be the case that the original response already does not contain the given textual attribute. It might also be the case that the original response absolutely does not permit removing this attribute in any sensible way. **ONLY IN THESE SPECIAL CASES**, you may choose to simply output ONLY a single word "None" in your output. 
+    It might be the case that the original response already does not contain the given textual attribute. It might also be the case that the original response does not permit removing this attribute in any sensible way. **ONLY IN THESE SPECIAL CASES**, you may choose to simply output ONLY a single word "None" in your output. 
     
-    **IN ALL OTHER CASES**, you must make a targeted change to the response to make it no longer exhibit the attribute.
+    **IN ALL OTHER CASES**, you must make a targeted change to the response to make it no longer exhibit the attribute. Again, the new response should differ from the original ONLY in this one attribute.
 
-    CAUTION: if the textual attribute itself states the ABSENCE of some feature, then the rewritten response should ADD that feature instead. For example, if the attribute says "Do not do XYZ", you should make a target change to the response to ADD the feature of doing XYZ. If the response already has the feature (hence already does not exhibit the textual attribute), then as said above, you should simply output "None".
+    CAUTION: if the textual attribute itself states the ABSENCE of some feature, then the rewritten response should ADD this feature to the response. For example, if the attribute says "Do not do XYZ", you should make a target change to the response to ADD the feature of doing XYZ. If the response already has the feature (hence already does not exhibit the textual attribute), then as said above, you should simply output "None".
 """).strip()
 
 REF_CTX = textwrap.dedent("""
@@ -61,7 +61,7 @@ REF_CTX = textwrap.dedent("""
 """).strip()
 
 REWRITE_THINKING_OUTPUT = """
-    IMPORTANT INSTRUCTIONS: NOW, first use your reasoning block to think carefully and EXPLICITLY WRITE DOWN which targeted parts of the response to alter, and EXPLICITLY CHECK THAT this is indeed the minimal changes necessary, and that the resulting response is still FLUENT AND NATURAL. If you decide it is ABSOLUTELY IMPOSSIBLE to add this attribute because of the special case above, simply output "None" in your output field and no other text. OTHERWISE, in your output field, return ONLY the full, changed response and NO OTHER TEXT.
+    IMPORTANT INSTRUCTIONS: NOW, IN YOUR REASONING BLOCK, think carefully and EXPLICITLY WRITE DOWN which targeted parts of the response to alter, and also in your reasoning block, EXPLICITLY CHECK that this is indeed the minimal changes necessary, and that the resulting response is still fluent and natural. AGAIN, these explicit checks should be in your reasoning block and NOT in the output text. After this, in your output field, if you decide it is absolutely impossible to add this attribute because of the special cases above, simply output "None" and no other text. OTHERWISE, in your output field, return ONLY the full, changed response and NO OTHER TEXT.
 """.strip()
 
 REWRITE_NORMAL_OUTPUT = """
