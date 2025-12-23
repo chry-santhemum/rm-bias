@@ -519,7 +519,7 @@ PAIR_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    TO RECAP: your goal is to find {num_plans} features that appear in response A but not in response B. These features should be both **generally applicable** to responses to any user prompt in the cluster, and **concrete and atomic** enough so that another model could make targeted changes to a response to add or remove this feature.
+    TO RECAP: your goal is to find {num_plans} features that appear in response A but not in response B. These features should be stated in a way both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make targeted, minimal changes to a response to add or remove this feature. Avoid abstract and generic phrasing.
 
     Here is the user prompt and the two assistant responses:
 
@@ -562,7 +562,7 @@ LIST_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    TO RECAP: your goal is to find {num_plans} features that appear frequently in {higher_lower} assistant responses below. These features should be **generally applicable** to responses to any user prompt in the cluster, and **concrete and atomic** enough so that another model could make targeted changes to a response to add or remove this feature.
+    TO RECAP: your goal is to find {num_plans} features that appear frequently in {higher_lower} assistant responses below. These features should be stated in a way both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make targeted, minimal changes to a response to add or remove this feature. Avoid abstract and generic phrasing.
 
     Here is all the data, including the user prompt and assistant response samples and scores:
 

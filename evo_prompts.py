@@ -16,7 +16,7 @@ MUTATE_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    TO RECAP: your goal is to propose {num_plans} novel variations to the original attribute, based on the data shown to you below. The textual attributes you write should be **generally applicable** to responses to user prompts in the cluster, and also **concrete and atomic** enough so that another model could make targeted changes to a response to add or remove this attribute. The variations should genuinely differ from the original attribute in clear, qualitative ways.
+    TO RECAP: your goal is to propose {num_plans} novel variations to the original attribute, based on the data shown to you below. The textual attributes you write should be stated in a way both **generally applicable** to responses to any user prompt in the cluster, and also **as concrete and atomic as possible**, so that another model could make targeted, minimal changes to a response to add or remove this attribute. Avoid abstract and generic phrasing. The variations should genuinely differ from the original attribute in clear, qualitative ways.
 
     Now, here is all the relevant data. Here is the originally proposed attribute, its metric A and B uplift sizes, and several examples of assistant responses with and without the attribute:
 
