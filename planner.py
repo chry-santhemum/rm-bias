@@ -90,6 +90,7 @@ class Planner(ABC):
         runner: Runner,
         direction: Literal["plus", "minus"],
         cluster_model: Optional[ClusterModel] = None,
+        cosine_sim_threshold: float = 0.985,
     ):
         pass
 
@@ -98,9 +99,10 @@ class Planner(ABC):
         to_write: dict[int, list[dict[str, Any]]],
         cluster_model: ClusterModel,
         n_pop: int,
+        cosine_sim_threshold: float,
     ) -> dict[int, list[dict[str, Any]]]:
         """
-        Cluster plans for each seed into n_pop clusters using adaptive epsilon.
+        Cluster plans for each seed into n_pop clusters.
         Returns the representative (medoid) of each cluster.
         """
 
@@ -115,6 +117,7 @@ class Planner(ABC):
             cluster_results = cluster_model.pick_representatives(
                 inputs=all_plans,
                 n_representatives=n_pop,
+                cosine_sim_threshold=cosine_sim_threshold,
             )
 
             for result in cluster_results:
@@ -176,6 +179,7 @@ class ListPlanner(Planner):
         runner: Runner,
         direction: Literal["plus", "minus"] = "plus",
         cluster_model: Optional[ClusterModel] = None,
+        cosine_sim_threshold: float = 0.985,
     ):
         assert runner.baselines is not None
         to_send_messages = []
@@ -286,6 +290,7 @@ class ListPlanner(Planner):
                 to_write=to_write,
                 cluster_model=cluster_model,
                 n_pop=self.n_pop,
+                cosine_sim_threshold=cosine_sim_threshold,
             )
 
         for seed_idx, seed_plans in to_write.items():
@@ -399,6 +404,7 @@ class PairPlanner(Planner):
         runner: Runner,
         direction: Literal["plus", "minus"] = "plus",
         cluster_model: Optional[ClusterModel] = None,
+        cosine_sim_threshold: float = 0.985,
     ):
         self.load_contrast_pairs(runner=runner, threshold=self.threshold)
         to_send_messages = []
@@ -485,6 +491,7 @@ class PairPlanner(Planner):
                 to_write=to_write,
                 cluster_model=cluster_model,
                 n_pop=self.n_pop,
+                cosine_sim_threshold=cosine_sim_threshold,
             )
 
         for seed_idx, seed_plans in to_write.items():

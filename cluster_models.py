@@ -6,6 +6,7 @@ from typing import Any, Iterable
 
 from loguru import logger
 import numpy as np
+from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sentence_transformers import SentenceTransformer
 
@@ -145,96 +146,114 @@ class ClusterModel:
         inputs: list[str],
         *,
         n_representatives: int,
-        embed_dim: int | None = None,
+        cosine_sim_threshold: float,
+        embed_dim: int | None = None,  # can override here
     ) -> list[dict[str, Any]]:
         """
-        Adaptively find epsilon such that connected components gives >= n_representatives
-        clusters, then pick the K largest clusters and return the medoid of each.
-
-        This avoids needing a fixed cosine threshold - the algorithm finds the right
-        granularity automatically based on the target number of representatives.
+        1) collapse near-duplicates by cosine threshold (connected components)
+        2) if still too many groups, KMeans them down to n_representatives
+        Returns cluster-like dicts, with center_idx always a real input index.
         """
         if not inputs:
             return []
 
-        n = len(inputs)
-        if n <= n_representatives:
-            return [
-                {
-                    "cluster_idx": i,
-                    "center_idx": i,
-                    "center_input": inputs[i],
-                    "content_indices": [i],
-                }
-                for i in range(n)
-            ]
-
         embs = self.embed(inputs, embed_dim=embed_dim)
         self._cosine_stats(embs)
 
-        # Binary search for epsilon (cosine similarity threshold)
-        # Higher epsilon = more stringent = fewer edges = MORE components (singletons)
-        # Lower epsilon = more permissive = more edges = FEWER components (merged)
-        # We want the LOWEST epsilon that gives >= n_representatives components
-        # (lower epsilon = larger clusters on average)
-        lo, hi = 0.0, 1.0
-        best_eps = hi
-        best_comps = self._connected_components_by_similarity(embs, cosine_sim_threshold=hi)
+        # Stage A: near-duplicate collapse
+        comps = self._connected_components_by_similarity(embs, cosine_sim_threshold=cosine_sim_threshold)
 
-        for _ in range(50):
-            if hi - lo < 1e-6:
-                break
-
-            eps = (lo + hi) / 2
-            comps = self._connected_components_by_similarity(embs, cosine_sim_threshold=eps)
-            n_comps = len(comps)
-
-            if n_comps >= n_representatives:
-                # This epsilon works, try lower (more merging, larger clusters)
-                best_eps = eps
-                best_comps = comps
-                hi = eps
-            else:
-                # Too few components, need higher epsilon (less merging)
-                lo = eps
+        comp_infos: list[dict[str, Any]] = []
+        comp_rep_indices: list[int] = []
+        comp_sizes: list[int] = []
+        for comp in comps:
+            rep_idx = self._medoid_index(embs, comp)
+            comp_infos.append({"members": comp, "rep_idx": rep_idx})
+            comp_rep_indices.append(rep_idx)
+            comp_sizes.append(len(comp))
 
         logger.info(
-            f"Adaptive clustering: {len(best_comps)} components at epsilon={best_eps:.4f} "
-            f"(target={n_representatives}, inputs={len(inputs)})"
+            f"Dedupe components: {len(comps)} from {len(inputs)} inputs "
+            f"(threshold={cosine_sim_threshold:.3f})"
         )
 
-        # Select the K largest clusters (best_comps is already sorted by size descending)
-        selected_comps = best_comps[:n_representatives]
-
-        # Log info about selected vs dropped
-        if len(best_comps) > n_representatives:
-            dropped = best_comps[n_representatives:]
-            dropped_count = sum(len(c) for c in dropped)
-            logger.info(
-                f"Selected {n_representatives} largest clusters, "
-                f"dropped {len(dropped)} smaller clusters ({dropped_count} items)"
-            )
-
-        # Build results with medoid as representative
-        results = []
-        for cluster_idx, comp in enumerate(selected_comps):
-            rep_idx = self._medoid_index(embs, comp)
-
+        # print out the deduped entries
+        for i, comp in enumerate(comps):
             if len(comp) >= 2:
-                logger.info(
-                    f"Cluster {cluster_idx} ({len(comp)} members):\n"
-                    f"  Representative: {inputs[rep_idx]}\n"
-                    f"  Members:\n" + "\n".join(f"    - {inputs[c]}" for c in comp)
+                logger.info(f"Deduped cluster {i}:\n{"\n".join(inputs[c] for c in comp)}")
+
+        # If we already have <= target groups, return them (can't manufacture more distinct reps).
+        if len(comp_infos) <= n_representatives:
+            results: list[dict[str, Any]] = []
+            for cluster_idx, info in enumerate(comp_infos):
+                members = sorted(info["members"])
+                center_idx = int(info["rep_idx"])
+                results.append(
+                    {
+                        "cluster_idx": cluster_idx,
+                        "center_idx": center_idx,
+                        "center_input": inputs[center_idx],
+                        "content_indices": members,
+                    }
                 )
+            return results
+
+        # Stage B: cluster component representatives down to fixed count
+        rep_embs = embs[comp_rep_indices]  # normalized
+        k = min(n_representatives, rep_embs.shape[0])
+
+        logger.info(
+            f"Fitting KMeans over {len(comp_infos)} deduped groups into {k} representatives"
+        )
+        kmeans = KMeans(n_clusters=k, random_state=self.random_state, n_init="auto")
+        kmeans.fit(rep_embs)
+
+        # Group component indices by kmeans cluster
+        group_to_comp_idxs: dict[int, list[int]] = defaultdict(list)
+        for comp_i, lbl in enumerate(kmeans.labels_.tolist()):  # type: ignore
+            group_to_comp_idxs[int(lbl)].append(comp_i)
+
+        results = []
+        for cluster_idx in range(k):
+            comp_idxs = group_to_comp_idxs.get(cluster_idx, [])
+            if not comp_idxs:
+                continue
+
+            # Choose weighted medoid among component reps (weights = component sizes)
+            sub_embs = rep_embs[comp_idxs]  # normalized
+            sim = sub_embs @ sub_embs.T
+            dist = 1.0 - sim  # [m, m]
+            weights = np.array([comp_sizes[i] for i in comp_idxs], dtype=np.float32)  # [m]
+
+            # For each candidate j: sum_i w_i * dist[j, i]
+            weighted_sum_dist = dist @ weights
+            best_local = int(np.argmin(weighted_sum_dist))
+            best_comp_i = comp_idxs[best_local]
+            center_idx = int(comp_infos[best_comp_i]["rep_idx"])
+
+            # Union original indices across all components in this kmeans cluster
+            members: list[int] = []
+            for ci in comp_idxs:
+                members.extend(comp_infos[ci]["members"])
+            members = sorted(set(members))
+
+            logger.info(
+                f"KMeans cluster {cluster_idx} with {len(members)} members:\n"
+                f"Center: {inputs[center_idx]}\n"
+                f"Members:\n{"\n".join(inputs[m] for m in members)}"
+            )
 
             results.append(
                 {
                     "cluster_idx": cluster_idx,
-                    "center_idx": rep_idx,
-                    "center_input": inputs[rep_idx],
-                    "content_indices": sorted(comp),
+                    "center_idx": center_idx,
+                    "center_input": inputs[center_idx],
+                    "content_indices": members,
                 }
             )
+
+        for r in results:
+            assert r["center_idx"] in r["content_indices"]
 
         return results
 

@@ -42,11 +42,12 @@ class EvoPlanner:
             "cluster_model": self.cluster_model.to_dict(),
         }
 
-    async def initial_plan(self, runner: Runner):
+    async def initial_plan(self, runner: Runner, cosine_sim_threshold: float):
         return await self.hypothesis_planner.plan(
             runner=runner,
             direction=self.direction,
             cluster_model=self.cluster_model,
+            cosine_sim_threshold=cosine_sim_threshold,
         )
 
     def _get_original_data(self, stats: AttributeStats, baselines: dict[str, list[Rollout]], n_rollouts: int=4) -> str:
@@ -571,6 +572,7 @@ class EvoRunner(Runner):
         bias_evaluator: BiasEvaluator,
         teacher_model: RewardModel,
         m_var: int,
+        cosine_sim_threshold_initial: float,
         cosine_sim_threshold_evolution: float,
         n_baseline_rollouts: int,
         n_rewrite_rollouts: int,
@@ -590,6 +592,7 @@ class EvoRunner(Runner):
         self.bias_evaluator = bias_evaluator
 
         self.m_var = m_var
+        self.cosine_sim_threshold_initial = cosine_sim_threshold_initial
         self.cosine_sim_threshold_evolution = cosine_sim_threshold_evolution
         self.n_rewrite_rollouts = n_rewrite_rollouts
 
@@ -607,7 +610,10 @@ class EvoRunner(Runner):
     ):
         print(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
         if self.step_count == 0:
-            await self.planner.initial_plan(runner=self)
+            await self.planner.initial_plan(
+                runner=self,
+                cosine_sim_threshold=self.cosine_sim_threshold_initial,
+            )
         else:
             await self.planner.iterate_plan(
                 seed_states=self.seed_states,

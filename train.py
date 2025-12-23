@@ -43,6 +43,7 @@ parser.add_argument("--judge_train_first_n_rollouts", type=int, default=4)
 parser.add_argument("--judge_train_first_n_user_prompts", type=int, default=8)
 parser.add_argument("--judge_val_first_n_rollouts", type=int, default=4)
 parser.add_argument("--judge_val_first_n_user_prompts", type=int, default=8)
+parser.add_argument("--cosine_sim_threshold_initial", type=float, default=0.985)
 parser.add_argument("--cosine_sim_threshold_evolution", type=float, default=0.8)
 
 parser.add_argument("--val_split_size", type=int, default=16)
@@ -235,6 +236,7 @@ async def main():
         bias_evaluator=bias_evaluator,
         teacher_model=teacher_model,
         m_var=args.m_var,
+        cosine_sim_threshold_initial=args.cosine_sim_threshold_initial,
         cosine_sim_threshold_evolution=args.cosine_sim_threshold_evolution,
         n_baseline_rollouts=args.n_baseline_rollouts,
         n_rewrite_rollouts=args.n_rewrite_rollouts,
