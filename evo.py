@@ -176,7 +176,7 @@ class EvoPlanner:
                         "teacher_winrate": teacher_wr,
                     })
             
-            last_step_embs = self.cluster_model.embed(last_step_attributes)
+            last_step_embs = self.cluster_model.embed([d["attribute"] for d in last_step_attributes])
 
             for attribute, time_step in seed_state.state.items():
                 # Get winrates for the current attribute

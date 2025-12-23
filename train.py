@@ -108,7 +108,7 @@ async def main():
     all_cuda_devices = [f"cuda:{i}" for i in range(torch.cuda.device_count())]
     print(f"Using CUDA devices: {all_cuda_devices}")
 
-    cluster_model = ClusterModel(embed_model_name="Qwen/Qwen3-Embedding-0.6B")
+    cluster_model = ClusterModel(embed_model_name="Qwen/Qwen3-Embedding-0.6B", embed_dim=128)
 
     policy_model_names = [
         "meta-llama/llama-3.2-3b-instruct",
