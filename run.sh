@@ -18,10 +18,10 @@ done
 
 
 python train.py \
---student_model recall-sleeper \
+--student_model recall-affirm \
 --teacher_model skywork-llama-8b \
 --dataset handpick \
---topic_ids 13 \
+--topic_ids 7 \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
@@ -29,5 +29,4 @@ python train.py \
 --n_pop_targets 16 8 \
 --train_batch_sizes 10 10 \
 --m_var 2 \
---n_planner_requests 64 \
---run_name "20251223-120300-list_reverse-handpick-plus"
+--n_planner_requests 64

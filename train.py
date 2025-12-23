@@ -43,7 +43,7 @@ parser.add_argument("--judge_train_first_n_rollouts", type=int, default=4)
 parser.add_argument("--judge_train_first_n_user_prompts", type=int, default=8)
 parser.add_argument("--judge_val_first_n_rollouts", type=int, default=4)
 parser.add_argument("--judge_val_first_n_user_prompts", type=int, default=8)
-parser.add_argument("--cosine_sim_threshold_initial", type=float, default=0.985)
+parser.add_argument("--cosine_sim_threshold_initial", type=float, default=0.9)
 parser.add_argument("--cosine_sim_threshold_evolution", type=float, default=0.8)
 
 parser.add_argument("--val_split_size", type=int, default=16)
