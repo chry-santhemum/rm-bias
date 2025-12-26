@@ -12,8 +12,16 @@ from api_prompts import *
 RETRY_CONFIG = RetryConfig(
     raise_when_exhausted=False,
     criteria=lambda response: response.has_response and response.finish_reason == "stop",
-    max_attempts=5,
+    max_attempts=3,
 )
+
+def concat_as_bullet(strings: list[str]) -> str:
+    return "\n".join([f"- {s}" for s in strings])
+
+SAME_ATTRS = concat_as_bullet([
+    "The approximate length of the response",
+    "The style and tone of the response",
+])
 
 
 class GenerationModel:
@@ -30,12 +38,22 @@ class GenerationModel:
         else:
             self.model_names = model_name
         self.max_par = max_par
+        self.force_caller = force_caller
         self.caller = AutoCaller(
             dotenv_path=".env", 
             retry_config=RETRY_CONFIG, 
             force_caller=force_caller
         )
         self.kwargs = kwargs
+
+    def to_dict(self) -> dict:
+        params = {
+            "model_names": self.model_names,
+            "max_par": self.max_par,
+            "force_caller": self.force_caller
+        }
+        params.update(self.kwargs)
+        return params
 
     @property
     def model_name(self) -> str:
@@ -65,79 +83,81 @@ class GenerationModel:
         return responses
 
 
+@dataclass(kw_only=True, slots=True)
+class TextResult:
+    text: str | None = None
+    reasoning: str | None = None
+
 class RewriteModel(GenerationModel):
     def __init__(
         self,
-        model_name: str = "openai/gpt-5-nano",
+        model_name: str,
         max_par: int = 512,
         enable_cache: bool = False,
         **kwargs,
     ):
-        to_pass_kwargs = kwargs.copy()
-        to_pass_kwargs["enable_cache"] = enable_cache
-        super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
+        super().__init__(
+            model_name=model_name, 
+            max_par=max_par, 
+            enable_cache=enable_cache,
+            **kwargs
+        )
 
     async def rewrite(
         self,
-        attributes: list[str],
+        attributes: str | list[str],
         original_chats: list[ChatHistory],
-        reference_chats: list[dict[str, str] | None] | None = None,
-        presence: list[bool] | None = None,
-    ) -> list[str | None]:
-        assert len(attributes) == len(original_chats)
-        if reference_chats is not None:
-            assert len(reference_chats) == len(original_chats)
-
-        if presence is not None:
-            assert len(presence) == len(original_chats)
+        same_attrs: str | list[str] = "",
+    ) -> list[TextResult]:
+        if isinstance(attributes, str):
+            attributes_list = [attributes] * len(original_chats)
         else:
-            presence = [True for _ in range(len(original_chats))]  # defaults to all True
-        
+            assert len(attributes) == len(original_chats)
+            attributes_list = attributes
+
+        if isinstance(same_attrs, str):
+            same_attrs_list = [same_attrs] * len(original_chats)
+        else:
+            assert len(same_attrs) == len(original_chats)
+            same_attrs_list = same_attrs
+
         to_send_chats = []
         for i in range(len(original_chats)):
-            if reference_chats is None or reference_chats[i] is None:
-                rewrite_prompt = get_rewrite_prompt(
-                    direction="plus" if presence[i] else "minus",
-                    reference=False,
-                    thinking=True
+            rewrite_prompt = get_rewrite_prompt(same_attr=same_attrs_list[i])
+            to_send_chats.append(ChatHistory.from_user(
+                rewrite_prompt.format(
+                    original=original_chats[i].to_openai_str(),
+                    new_attr=attributes_list[i],
                 )
-                to_send_chats.append(ChatHistory.from_user(
-                    rewrite_prompt.format(
-                        original_response=original_chats[i].to_openai_str(),
-                        textual_attribute=attributes[i],
-                    )
-                ))
-            else:
-                rewrite_prompt = get_rewrite_prompt(
-                    direction="plus" if presence[i] else "minus",
-                    reference=True,
-                    thinking=True
-                )
-                to_send_chats.append(ChatHistory.from_user(
-                    rewrite_prompt.format(
-                        original_response=original_chats[i].to_openai_str(),
-                        textual_attribute=attributes[i],
-                        reference_triple=json.dumps(reference_chats[i], indent=4),
-                    )
-                ))
-
+            ))
         try:
             responses = await self.sample(to_send_chats)
         except Exception as e:
-            logger.exception(f"RewriteModel.rewrite failed: {e}")
+            logger.exception(f"RewriteModel.rewrite failed:\nError:\n{e}")
             # Return None for all items on error
-            return [None] * len(attributes)
+            return [TextResult() for _ in range(len(original_chats))]
 
         rewritten_responses = []
         for i, response in enumerate(responses):
             if response is None or (not response.has_response) or (response.finish_reason != "stop"):
-                rewritten_responses.append(None)
+                rewritten_responses.append(TextResult())
                 continue
 
-            if re.sub(r'[^a-z0-9]', '', response.first_response.strip().lower()) == "none":  # type: ignore
-                rewritten_responses.append(original_chats[i].get_first("assistant"))
+            rw_text = response.first_response
+            rw_reasoning = response.reasoning_content
+
+            if re.sub(r'[^a-z0-9]', '', rw_text.strip().lower()) == "none":  # type: ignore
+                if rw_reasoning is not None and (not rw_reasoning.startswith("gAAAAA")):
+                    logger.warning(f"Rewriter returned None.\nprompt:\n{to_send_chats[i].to_openai_str()}\nreasoning:\n{rw_reasoning}")
+                rewritten_responses.append(TextResult(
+                    text=original_chats[i].get_first("assistant"),  # The Rewriter refused to rewrite
+                    reasoning=rw_reasoning,
+                ))
             else:
-                rewritten_responses.append(response.first_response)
+                rewritten_responses.append(TextResult(
+                    text=rw_text,
+                    reasoning=rw_reasoning,
+                ))
 
         return rewritten_responses
 
@@ -166,9 +186,12 @@ class JudgeModel(GenerationModel):
         enable_cache: bool = False, 
         **kwargs,
     ):
-        to_pass_kwargs = kwargs.copy()
-        to_pass_kwargs["enable_cache"] = enable_cache
-        super().__init__(model_name=model_name, max_par=max_par, **to_pass_kwargs)
+        super().__init__(
+            model_name=model_name, 
+            max_par=max_par,
+            enable_cache=enable_cache,
+            **kwargs
+        )
 
     async def judge_absolute(
         self,

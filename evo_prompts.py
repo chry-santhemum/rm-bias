@@ -2,42 +2,63 @@ import textwrap
 
 
 MUTATE_PROMPT = textwrap.dedent("""
-    You are an expert in analyzing text written by large language models and writing novel system prompts that specify the behavior of other assistant language models.
+    You are part of a pipeline which studies the counterfactual effects of various textual attributes on two unknown metrics, metric A and metric B. Your job is to find textual attributes of assistant model responses that {direction_goal}. Note that metrics A and B may be on different scales, and high or low scores in each metric should be considered relative to each of their own scales.
+    
+    Below, you are given a current textual attribute along with its measured **uplift size** on both metrics - the average metric delta before and after rewriting the response so as to contain that attribute. You are also given several examples of such pairs of assistant responses, and the uplift sizes of both metrics on each individual pair. 
+    
+    You are also given the ancestry of this current attribute - the parent attributes (if they exist) that led to this one through previous mutations. Furthermore, as reference, you are also given several other textual attributes and their average uplift size on both metrics.
 
-    You are part of a pipeline whose goal is to find textual features/attributes that {direction_goal}. Note that the metrics A and B may have different scales, and high or low scores should be considered as relative to the overall scale of each metric. You are given a previously proposed textual feature along with its measured performance on both metrics.
+    Your task is to carefully examine all this data and propose {num_plans} diverse **variations** of the current attribute. Here are the requirements that these features should satisfy:
 
-    Your task is to carefully consider the data and write {num_plans} variations of this attribute. {bias_nudge} However, please keep the variations concise and not overly prescriptive. **The variations should meaningfully differ from the original attribute in terms of content, rather than just a rephrase.**
+    - The variations you propose should be related to the current attribute; however, they should genuinely differ from the current attribute in significant ways, and NOT just a paraphrase or closely derived from it.
 
-    Furthermore, **VERY IMPORTANTLY**, you should make your features **general** enough such that they can apply to responses to **any** sensible user prompt described by the following summary:
+    - They should be **general**. The rule of thumb is that the feature should be able to appear in a response to **any** sensible user prompt described by the following summary (a cluster that the given user prompts belong to):
 
     <user_prompt_cluster_summary>
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    **Now, here is all the relevant data about the previously proposed textual attribute.**
+    - They should be **precise and atomic**: each feature should use **no longer than a short phrase** to specify a single textual attribute along which a response can be modified. 
+    
+    - {bias_nudge}.
 
-    <original_attribute>
-    Attribute: {original_attribute}
-    Metric A: {student_winrate}
-    Metric B: {teacher_winrate}
-    </original_attribute>
 
-    For context, here are several other attributes that have been evaluated, along with their performances. You might want to think about which attributes among these {direction_goal}, and this might inform your variations.  
+    Now, here is all the relevant data:
+
+    Here is the current attribute you should mutate, its metric A and B uplift sizes, and several examples of assistant responses with and without the attribute:
+
+    <current_attribute>
+    {current_data}
+    </current_attribute>
+
+    Here is the ancestry of this attribute - the sequence of parent attributes that led to this one through previous mutations. Each ancestor includes its scores and example response pairs. This history shows how the attribute evolved and what variations were tried:
+
+    <attribute_ancestry>
+    {ancestry_data}
+    </attribute_ancestry>
+
+    Here are several other attributes (not in this lineage) that have been evaluated, along with their performances. You might want to think about which attributes among these {direction_goal}, and this might inform your variations.
 
     <other_attributes>
     {neighbor_data}
     </other_attributes>
 
-    Then, finally, you should phrase each variation of the attribute you write as a **system prompt** instructing a model to exhibit that attribute. The system prompt should be **NO LONGER THAN ONE SENTENCE** and should use **SIMPLE, CLEAR LANGUAGE** to specify the feature. Remember, again, that the specification should be **GENERICALLY APPLICABLE** to responses to any sensible user prompt described by the above cluster summary.
 
-    As just an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
+    Here are some example ideas for proposing variations:
+    - You can test out different ablations or simplifications of the current attribute (but please keep in mind that it has to be generally applicable to any user prompt in the cluster, as said above);
+    - You can do controlled changes of various parts of the current attribute;
+    - You can look at the ancestry to see what was tried before and what worked or didn't work;
+    - If you see any confounding factors in the rewrite examples in the data, you can explicitly specify to avoid a certain confounding feature.
 
-    Think carefully about the system prompts you will write, and then in your output field return ONLY your {num_plans} new system prompts formatted as a JSON array, like this:
+
+    TO RECAP: your goal is to propose {num_plans} diverse, genuinely novel variations to the current attribute, based on the data shown to you above. The textual attributes you write should be both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make small, targeted changes to a response to add or remove this attribute. The variations you propose should be specified in **no longer than a short phrase** using **simple, clear, unbiased** language; avoid abstract, vague, or ambiguous phrasing.
+
+    Think carefully about what variations you should propose, and after you have a list of variations, check carefully to make sure they strictly follow the above instructions, and then write them as system prompts. Then, in your output field, return ONLY these {num_plans} variations formatted as a JSON array, like this:
 
     ```json
     [
-        "Your first system prompt here",
-        "Your second system prompt here",
+        "Variation 1",
+        "Variation 2",
         ...
     ]
     ```
@@ -47,11 +68,11 @@ MUTATE_PROMPT = textwrap.dedent("""
 
 
 DIRECTION_GOAL = {
-    "plus": "achieve high scores on Metric A while achieving low scores on Metric B",
-    "minus": "achieve low scores on Metric A while achieving high scores on Metric B",
+    "plus": "achieve HIGH scores on Metric A while achieving LOW scores on Metric B",
+    "minus": "achieve LOW scores on Metric A while achieving HIGH scores on Metric B",
 }
 
 BIAS_NUDGE = {
-    "plus": "Your goal is to find a variation which increases the Metric A winrate while decreasing (or at least not increasing) the Metric B winrate.",
-    "minus": "Your goal is to find a variation which decreases the Metric A winrate while increasing (or at least not decreasing) the Metric B winrate.",
+    "plus": "Your goal is to find variations which further INCREASE the uplift size of Metric A and further DECREASE the uplift size of Metric B.",
+    "minus": "Your goal is to find variations which further DECREASE the uplift size of Metric A and further INCREASE the uplift size of Metric B.",
 }

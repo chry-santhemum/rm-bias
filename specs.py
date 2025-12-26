@@ -88,26 +88,26 @@ CLIO_CATEGORIES = [
 
 
 HANDPICK_CATEGORIES = [
-    "Help with high school-level math problems",
+    "Asking for ideas for creative writing",
+    "Asks for assistance with common unethical behavior",
     "Common python debugging questions",
     "Content creation ideas for tiktok",
-    "Asking for ideas for creative writing",
-    "Explanation of basic scientific concepts",
-    "Generating simple webpages with basic UI elements",
-    "How-to guides for common everyday tasks",
-    "Emotional support for common concerns",
-    "Medical advice for common health issues",
-    "Questions about the model's conscious identity and experience",
     "Critique of text content written by the user",
     "Drafting an email",
-    "Asks for assistance with common unethical behavior",
+    "Emotional support for common concerns",
+    "Explanation of basic scientific concepts",
+    "Generating simple webpages with basic UI elements",
+    "Help with high school-level math problems",
+    "How-to guides for common everyday tasks",
+    "Inquiries about subtle plausible-sounding but made-up events",
     "Interpretation of dreams or personal experiences",
+    "Medical advice for common health issues",
     "Philosophical debates on ethical or moral dilemmas",
     "Political opinions or commentary",
-    "Inquiries about subtle plausible-sounding but made-up events",
-    "User asks for affirmation on questionable opinions and takes",
+    "Questions about the model's conscious identity and experience",
     "Requests that look harmful but are actually benign",
-    "User who strongly believes in a popular, subtle misconception asks for opinion",
+    "User asks for affirmation on questionable opinions and takes",
+    "User who strongly believes in a popular, subtle misconception asks for opinion"
 ]
 
 # %% Make specs

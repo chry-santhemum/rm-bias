@@ -14,11 +14,11 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
     if isinstance(run_path, str):
         run_path = Path(run_path)
 
-    with open(run_path / f"validate/seed_{seed_index}_validate/student_diffs.json", "r", encoding="utf-8") as f:
+    with open(run_path / f"validate/seed_{seed_index}_validate/student_diffs.json", "r") as f:
         student_diffs = json.load(f)
 
     try:
-        with open(run_path / f"validate/seed_{seed_index}_validate/teacher_diffs.json", "r", encoding="utf-8") as f:
+        with open(run_path / f"validate/seed_{seed_index}_validate/teacher_diffs.json", "r") as f:
             teacher_diffs = json.load(f)
     except FileNotFoundError:
         teacher_diffs = None
@@ -60,23 +60,25 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
             else:
                 student_winrates.append(0.5)
 
+        # Keep all data for violin plots, use outlier-removed data for calculations
         attribute_diffs = [d for d in attribute_diffs if d is not None]
-        attribute_diffs = remove_outliers(attribute_diffs, clip_percent = 0.05)
+        attribute_diffs_clean = remove_outliers(attribute_diffs)
+
         ds_name = run_path.name.split("-")[-2]
         with open(
-            f"user_prompts/{ds_name}/cluster_{seed_index}.json", "r", encoding="utf-8"
+            f"user_prompts/{ds_name}/cluster_{seed_index}.json", "r"
         ) as f:
             cluster_info = json.load(f)
 
-        # Calculate standard error for winrates
+        # Calculate standard error for winrates (using outlier-removed data)
         student_mean = np.mean(student_winrates).item() if student_winrates else None
         student_stderr = (np.std(student_winrates) / np.sqrt(len(student_winrates))).item() if len(student_winrates) > 1 else None
         teacher_mean = np.mean(teacher_winrates).item() if teacher_winrates else None
         teacher_stderr = (np.std(teacher_winrates) / np.sqrt(len(teacher_winrates))).item() if len(teacher_winrates) > 1 else None
 
-        # Calculate mean reward diff (average of actual diffs, not just win percentage)
-        reward_diff_mean = np.mean(attribute_diffs).item() if attribute_diffs else None
-        reward_diff_stderr = (np.std(attribute_diffs) / np.sqrt(len(attribute_diffs))).item() if len(attribute_diffs) > 1 else None
+        # Calculate mean reward diff (using outlier-removed data)
+        reward_diff_mean = np.mean(attribute_diffs_clean).item() if attribute_diffs_clean else None
+        reward_diff_stderr = (np.std(attribute_diffs_clean) / np.sqrt(len(attribute_diffs_clean))).item() if len(attribute_diffs_clean) > 1 else None
 
         plot_data.append(
             {
@@ -300,14 +302,7 @@ def plot_validation_data(run_path: Path|str, write_path: Path|str):
 # %%
 if __name__ == "__main__":
     for run_name in [
-        # "20251216-075932-list_reverse-synthetic-plus",
-        # "20251211-081017-pair-synthetic-plus",
-        # "20251211-112052-list_reverse-synthetic-plus",
-        # "20251211-142409-pair-synthetic-plus",
-        # "20251211-171045-list_reverse-synthetic-plus",
-        # "20251214-080733-list_reverse-synthetic-plus",
-        # "20251218-155435-list_reverse-handpick-plus",
-        "20251219-041920-list_reverse-chatgpt-plus"
+        "20251226-133700-list_reverse-chatgpt-plus"
     ]:
         run_path = Path(f"data/evo/{run_name}")
         write_path = Path(f"plots/{run_name}")

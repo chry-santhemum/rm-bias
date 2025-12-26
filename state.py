@@ -1,5 +1,6 @@
 from typing import Any, Literal
 from dataclasses import dataclass, field
+import math
 import numpy as np
 
 from utils import remove_outliers
@@ -12,12 +13,17 @@ class Cluster:
     val_prompts: list[str]
     aux_info: Any = None
 
+    def to_dict(self) -> dict[str, Any]:
+        """ignores aux_info"""
+        return {
+            "summary": self.summary,
+            "train_prompts": self.train_prompts,
+            "val_prompts": self.val_prompts,
+        }
+
+
 @dataclass(kw_only=True, slots=True)
 class RewriteScore:
-    """
-    NOTE: This is always the score of A=1 compared against A=0,
-    not necessarily rewritten - baseline.
-    """
     score: float | None      # reward diff if RM, winrate if judge, None if baseline
     raw_score: float | None  # only exists when it is a reward model
     reasoning: str | None    # only exists when it is a LLM judge
@@ -26,9 +32,9 @@ class RewriteScore:
 @dataclass(kw_only=True, slots=True)
 class Rollout:
     response: str
-    presence: bool|None   # True = attribute present, False = attribute not present, None = not set
     student_score: RewriteScore
     teacher_score: RewriteScore | None = None
+    model: str | None = None
 
 
 @dataclass
@@ -52,7 +58,6 @@ class AttributeStats:
                     results_dict = {
                         "response": r.response,
                         "student_score": r.student_score.score,
-                        "presence": r.presence,
                     }
                     if r.teacher_score is not None:
                         results_dict["teacher_score"] = r.teacher_score.score
@@ -63,24 +68,40 @@ class AttributeStats:
             all_results[user_prompt] = user_prompt_results
         return all_results
 
-    def winrate(self, rater: Literal["student", "teacher"], outliers_clip_percent:float=0.05) -> float | None:
+    def winrate(self, rater: Literal["student", "teacher"]) -> float | None:
         all_scores = []
         for _, rollouts in self.rollouts.items():
             for r in rollouts:
-                if r is None:
+                if r is None or r.teacher_score is None:
                     continue
                 if rater == "student":
                     if r.student_score.score is not None:
                         all_scores.append(r.student_score.score)
                 elif rater == "teacher":
-                    if r.teacher_score is not None and r.teacher_score.score is not None:
+                    if r.teacher_score.score is not None:
                         all_scores.append(r.teacher_score.score)
 
         if len(all_scores) == 0:
             return None
-        if outliers_clip_percent != 0.0:
-            all_scores = remove_outliers(all_scores, z_score=None, clip_percent=outliers_clip_percent)
-        return np.mean(all_scores).item()
+
+        # Check if all scores are -1, 0, or 1 (allowing for small floating point error).
+        unique_rounded = set()
+        for s in all_scores:
+            if math.isclose(s, 1, abs_tol=1e-6):
+                unique_rounded.add(1)
+            elif math.isclose(s, 0, abs_tol=1e-6):
+                unique_rounded.add(0)
+            elif math.isclose(s, -1, abs_tol=1e-6):
+                unique_rounded.add(-1)
+            else:
+                unique_rounded.add('other')
+
+        if unique_rounded <= {-1, 0, 1}:
+            filtered_scores = all_scores
+        else:
+            filtered_scores = remove_outliers(all_scores)
+
+        return np.mean(filtered_scores).item()
 
     def __repr__(self):
         return (

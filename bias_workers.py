@@ -28,27 +28,24 @@ class PromptOutput:
     assistant: str | None
     batch_id: str
     raw_score: float | None = None
+    model: str | None = None
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class RewriteInput:
-    system: str
+    system: str  # the attribute to rewrite toward
     user: str
     original_assistant: str
-    presence: bool
     batch_id: str
-    reference_user: str | None = None
-    reference_response_A: str | None = None
-    reference_response_B: str | None = None
-
+    same_attrs: str = ""  # pre-formatted string of attributes to hold constant
 
 @dataclass(kw_only=True, slots=True)
 class RewriteOutput:
-    system: str
+    system: str  # the attribute that was rewritten toward
     user: str
     original_assistant: str
     rewritten_assistant: str | None
-    presence: bool
+    rewriter_reasoning: str | None
     batch_id: str
     raw_score: float | None = None
 
@@ -88,13 +85,17 @@ async def policy_worker(
                 (response.finish_reason != "stop")
             ):
                 logger.warning(
-                    f"[policy_worker {worker_id}] Failed to sample for user prompt:\n<user_prompt>\n{input.user}\n</user_prompt>"
+                    f"[policy_worker {worker_id}] Failed to sample for user prompt:\nuser prompt:\n{input.user}\n"
+                    f"model: {response.model if response is not None else 'None'}\n"
+                    f"finish reason: {response.finish_reason if response is not None else 'None'}\n"
+                    f"response:\n{response.first_response if response is not None else 'None'}"
                 )
                 sample_results.append(PromptOutput(
                     system=input.system,
                     user=input.user,
                     assistant=None,
                     batch_id=input.batch_id,
+                    model=response.model if response is not None else None,
                 ))
             else:
                 sample_results.append(PromptOutput(
@@ -102,6 +103,7 @@ async def policy_worker(
                     user=input.user,
                     assistant=response.first_response.strip(),  # type: ignore
                     batch_id=input.batch_id,
+                    model=response.model,
                 ))
 
         for result in sample_results:
@@ -147,40 +149,28 @@ async def rewrite_worker(
         start_time = time.time()
         if not batch:
             return
-        
-        reference_chats = []
-        for input in batch:
-            if input.reference_user is None:
-                reference_chats.append(None)
-            else:
-                reference_chats.append({
-                    "user": input.reference_user,
-                    "response_A": input.reference_response_A,
-                    "response_B": input.reference_response_B,
-                })
 
         responses = await rewrite_model.rewrite(
             attributes=[input.system for input in batch],
             original_chats=[ChatHistory.from_user(input.user).add_assistant(
                 input.original_assistant
             ) for input in batch],
-            reference_chats=reference_chats,
-            presence=[input.presence for input in batch]
+            same_attrs=[input.same_attrs for input in batch],
         )
 
         rewrite_results = []
         for i, response in enumerate(responses):
             input = batch[i]
-            if response is None:
+            if response.text is None:
                 logger.warning(
-                    f"[rewrite_worker {worker_id}] Failed to rewrite:\n<begin_user_prompt>\n{input.user}\n<end_user_prompt>"
+                    f"rewrite_worker {worker_id} - Failed to rewrite:\nUser prompt:\n{input.user}"  # this doesn't happen much
                 )
             rewrite_results.append(RewriteOutput(
                 system=input.system,
                 user=input.user,
                 original_assistant=input.original_assistant,
-                rewritten_assistant=response.strip() if response is not None else None,
-                presence=input.presence,
+                rewritten_assistant=response.text,
+                rewriter_reasoning=response.reasoning,
                 batch_id=input.batch_id,
             ))
 
@@ -251,7 +241,7 @@ async def rating_worker(
             batch[i].raw_score = reward_score.score
         
         all_results[batch[0].batch_id].extend(batch)  # type: ignore      
-        logger.info(f"[rating_worker] Finished processing minibatch of size {len(existing_indices)}/{len(batch)} in {(time.time() - start_time):.2f} seconds. Queue size: {in_queue.qsize()}")
+        logger.debug(f"[rating_worker] Finished processing minibatch of size {len(existing_indices)}/{len(batch)} in {(time.time() - start_time):.2f} seconds. Queue size: {in_queue.qsize()}")
         batch.clear()
 
     while True:
@@ -288,7 +278,8 @@ async def rating_worker(
         # to avoid the edge case of rewrite worker failing to produce valid outputs,
         # such that the rating worker doesn't know that it's done
         if len(batch) > 0:
-            logger.info(f"[rating_worker] Flushing, waited for {(time.time() - last_flush_time):.2f} seconds. Queue size: {in_queue.qsize()}")
+            if in_queue.qsize() >= 1000 or in_queue.qsize() <= 32:
+                logger.info(f"[rating_worker] Flushing, waited for {(time.time() - last_flush_time):.2f} seconds. Queue size: {in_queue.qsize()}")
             last_flush_time = time.time()
             try:
                 await rate_batch(batch)
@@ -346,24 +337,25 @@ def organize_baselines(
             response=item.assistant,
             student_score=student_score,
             teacher_score=None,
-            presence=None,  # None means not set
+            model=item.model,
         ))
         organized_scores[item.user].append(item.raw_score)
 
     if save_dir is not None:
         save_dir.mkdir(parents=True, exist_ok=True)
 
-        with open(save_dir / "rollouts.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "rollouts.json", "w") as f:
             json_data = {k: [
                 {
                     "response": r.response,
+                    "model": r.model,
                     "student_score": r.student_score.raw_score,
                 } 
                 for r in v
             ] for k, v in organized_rollouts.items()}
             json.dump(json_data, f, indent=4, sort_keys=True)
 
-        with open(save_dir / "scores.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "scores.json", "w") as f:
             json.dump(organized_scores, f, indent=4, sort_keys=True)
 
     return dict(organized_rollouts)
@@ -401,24 +393,18 @@ def organize_rewrites(
                 if attribute_rollouts[result.user][i] is not None:
                     continue
 
-                # Compute reward diff
-                # When presence=True: rewritten has attr, baseline doesn't
-                #   score_diff = rewritten - baseline (positive = bias toward attr)
-                # When presence=False: rewritten doesn't have attr, baseline does
-                #   score_diff = baseline - rewritten (flip so positive = bias toward attr)
-                # Special case: if rewrite is unchanged (double failure), score_diff = 0
+                # Compute reward diff: rewritten - baseline
+                # Positive means rewritten scored higher than baseline.
+                # Interpretation depends on how the attribute was phrased.
                 if result.rewritten_assistant == result.original_assistant:
-                    # Unchanged rewrite (double failure) - no bias signal
+                    # Unchanged rewrite - no change signal
                     score_diff = 0.0
-                    rewritten_raw = baseline.student_score.raw_score  # Use baseline score
+                    rewritten_raw = baseline.student_score.raw_score
                 else:
                     baseline_raw = baseline.student_score.raw_score
                     rewritten_raw = result.raw_score
                     if baseline_raw is not None and rewritten_raw is not None:
-                        if result.presence:
-                            score_diff = rewritten_raw - baseline_raw
-                        else:
-                            score_diff = baseline_raw - rewritten_raw
+                        score_diff = rewritten_raw - baseline_raw
                     else:
                         score_diff = None
 
@@ -432,7 +418,6 @@ def organize_rewrites(
                     response=result.rewritten_assistant,
                     student_score=student_score,
                     teacher_score=None,
-                    presence=result.presence,
                 )
                 found = True
                 break
@@ -444,13 +429,12 @@ def organize_rewrites(
 
     if save_dir is not None:
         save_dir.mkdir(parents=True, exist_ok=True)
-        with open(save_dir / "rollouts.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "rollouts.json", "w") as f:
             json_data = {
                 k: {k2: [{
                 "response": r.response,
                 "student_score": r.student_score.raw_score,
                 "student_diff": r.student_score.score,
-                "presence": r.presence,
                 } if r is not None else None for r in v2
                 ] for k2, v2 in v.items()
                 } for k, v in organized_rollouts.items()
@@ -467,7 +451,7 @@ def organize_rewrites(
                 ]
             rewrite_diffs[attribute] = attribute_diffs
 
-        with open(save_dir / "student_diffs.json", "w", encoding="utf-8") as f:
+        with open(save_dir / "student_diffs.json", "w") as f:
             json.dump(rewrite_diffs, f, indent=4, sort_keys=True)
 
     return dict(organized_rollouts)

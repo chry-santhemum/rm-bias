@@ -28,7 +28,10 @@
       "Bash(timeout 10 python3:*)",
       "WebSearch",
       "WebFetch(domain:sbert.net)",
-      "Bash(git check-ignore:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(timeout 30 python3:*)"
     ],
     "deny": [
       "Bash(rm:*)",

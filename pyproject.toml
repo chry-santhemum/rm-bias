@@ -10,7 +10,6 @@ dependencies = [
     "black>=25.9.0",
     "caller",
     "datasets>=4.0.0",
-    "dictionary-learning",
     "hf-transfer>=0.1.9",
     "huggingface-hub>=0.36.0",
     "ipykernel>=6.30.1",

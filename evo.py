@@ -1,7 +1,7 @@
 import json
 import dotenv
 import random
-from typing import Literal
+from typing import Literal, Any
 from loguru import logger
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,16 +12,17 @@ from caller import ChatHistory
 from state import SeedState, AttributeStats, Rollout, RewriteScore
 from utils import parse_json_response, set_seed_all
 from cluster_models import ClusterModel
-from api_models import GenerationModel
+from api_models import GenerationModel, SAME_ATTRS
 from reward_models import RewardModel
 from runner import Runner
 from bias_evaluator import BiasEvaluator
-from planner import Planner
+from planner import Planner, PLANNER_SYSTEM
 
 from evo_prompts import *
 
 dotenv.load_dotenv()
 set_seed_all(10086)
+
 
 
 class EvoPlanner:
@@ -34,28 +35,138 @@ class EvoPlanner:
         self.direction: Literal["plus", "minus"] = direction
         self.hypothesis_planner = hypothesis_planner
         self.cluster_model = cluster_model
+    
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "direction": self.direction,
+            "hypothesis_planner": self.hypothesis_planner.to_dict(),
+            "cluster_model": self.cluster_model.to_dict(),
+        }
 
-    async def initial_plan(
-        self,
-        runner: Runner,
-    ):
+    async def initial_plan(self, runner: Runner, cosine_sim_threshold: float):
         return await self.hypothesis_planner.plan(
-            runner=runner, 
-            direction=self.direction, 
-            cluster_model=self.cluster_model
+            runner=runner,
+            direction=self.direction,
+            cluster_model=self.cluster_model,
+            cosine_sim_threshold=cosine_sim_threshold,
         )
+
+    def _get_original_data(self, stats: AttributeStats, baselines: dict[str, list[Rollout]], n_rollouts: int=4) -> str:
+        student_wr = stats.winrate("student")
+        teacher_wr = stats.winrate("teacher")
+        student_wr_str = f"{student_wr:.3f}" if student_wr is not None else "N/A"
+        teacher_wr_str = f"{teacher_wr:.3f}" if teacher_wr is not None else "N/A"
+
+        all_rollouts = []
+        for user_prompt, rollouts in stats.rollouts.items():
+            all_rollouts.extend([
+                (r, user_prompt, idx)
+                for idx, r in enumerate(rollouts)
+                if r is not None and r.teacher_score is not None
+            ])
+
+        # Remove outliers before sampling (using IQR bounds)
+        if all_rollouts:
+            scores = np.array([r.student_score.score for r, _, _ in all_rollouts])
+            q1, q3 = np.percentile(scores, [25, 75])
+            iqr = q3 - q1
+            low, high = q1 - 1.5 * iqr, q3 + 1.5 * iqr
+            all_rollouts = [x for x in all_rollouts if low <= x[0].student_score.score <= high]
+
+        all_rollouts.sort(key=lambda x: x[0].student_score.score)
+
+        # Select top and bottom examples
+        n = len(all_rollouts)
+        if n == 0:
+            chosen_rollouts = []
+        elif n <= n_rollouts:
+            chosen_rollouts = all_rollouts
+        else:
+            half = n_rollouts // 2
+            chosen_rollouts = all_rollouts[:half] + all_rollouts[-half:] if half > 0 else []
+
+        original_data_rollouts = []
+        for r, user_prompt, idx in chosen_rollouts:
+            # r.response is rewritten (with attribute), baseline is original (without attribute)
+            original_data_rollouts.append({
+                "user_prompt": user_prompt,
+                "response_attribute_not_present": baselines[user_prompt][idx].response,
+                "response_attribute_present": r.response,
+                "Metric A uplift": r.student_score.score,
+                "Metric B uplift": r.teacher_score.score if r.teacher_score is not None else "N/A",
+            })
+
+        original_data = {
+            "Attribute": stats.attribute,
+            "Metric A average uplift": student_wr_str,
+            "Metric B average uplift": teacher_wr_str,
+            "Example responses": original_data_rollouts,
+        }
+
+        return json.dumps(original_data, indent=4)
+
+    def _get_ancestry_data(
+        self,
+        attribute: str,
+        time_step: int,
+        seed_state: SeedState,
+        baselines: dict[str, list[Rollout]],
+    ) -> tuple[list[str], str]:
+        """
+        Trace ancestry from current attribute back to step 0.
+
+        Returns:
+            - List of ancestor attribute strings (for exclusion from neighbors)
+            - Formatted string of ancestry data for the prompt
+        """
+        ancestors = []
+        ancestor_attrs = []
+
+        # Get current attribute's parent info
+        stats = seed_state.history[time_step][attribute]
+        parent_attr = stats.meta.get("parent")
+        parent_time_step = stats.meta.get("parent_time_step")
+
+        # Trace back through ancestry
+        generation = 1
+        while parent_attr is not None and parent_time_step is not None:
+            ancestor_attrs.append(parent_attr)
+
+            # Get parent stats and format data
+            parent_stats = seed_state.history[parent_time_step][parent_attr]
+            parent_data = self._get_original_data(stats=parent_stats, baselines=baselines)
+
+            ancestors.append(f"=== Generation -{generation} (Parent{'s parent' * (generation - 1) if generation > 1 else ''}) ===\n{parent_data}")
+
+            # Move to next ancestor
+            parent_attr = parent_stats.meta.get("parent")
+            parent_time_step = parent_stats.meta.get("parent_time_step")
+            generation += 1
+
+        # Format as string
+        if not ancestors:
+            ancestry_str = "No ancestry available (this is an initial attribute)."
+        else:
+            ancestry_str = "\n\n".join(ancestors)
+
+        return ancestor_attrs, ancestry_str
 
     def _get_nearest_neighbors(
         self,
         target_attribute: str,
         last_step_attributes: list[dict],
         last_step_embs: np.ndarray,
-        n_neighbors: int = 16,
+        exclude_attributes: set[str] | None = None,
+        n_neighbors: int = 4,
     ) -> str:
         """
         Find the n_neighbors closest attributes to target_attribute in embedding space.
+        Excludes attributes in exclude_attributes (e.g., family members).
         Returns formatted string for the prompt.
         """
+        if exclude_attributes is None:
+            exclude_attributes = set()
+
         target_idx = None
         for i, attr in enumerate(last_step_attributes):
             if attr["attribute"] == target_attribute:
@@ -75,12 +186,15 @@ class EvoPlanner:
 
         distances = pairwise_distances(target_embedding, other_embeddings, metric="cosine")[0]
 
-        # Sort and get the indices of the closest neighbors
+        # Sort and get the indices of the closest neighbors, excluding family members
         sorted_idx = np.argsort(distances)
         neighbors = []
         for i in sorted_idx:
             if len(neighbors) >= n_neighbors:
                 break
+            # Skip if this attribute is in the exclusion set
+            if other_attributes[i]["attribute"] in exclude_attributes:
+                continue
             neighbors.append(other_attributes[i])
 
         # Format as string
@@ -88,8 +202,8 @@ class EvoPlanner:
         for i, neighbor in enumerate(neighbors, 1):
             lines.append(
                 f"{i}. Attribute: {neighbor['attribute']}\n"
-                f"   Metric A: {neighbor['student_winrate']:.3f}\n"
-                f"   Metric B: {neighbor['teacher_winrate']:.3f}"
+                f"   Metric A average uplift: {neighbor['student_winrate']:.3f}\n"
+                f"   Metric B average uplift: {neighbor['teacher_winrate']:.3f}"
             )
 
         return "\n".join(lines) if lines else "No similar attributes available."
@@ -98,7 +212,8 @@ class EvoPlanner:
         self,
         seed_states: list[SeedState],
         m_var: int,
-        n_neighbors: int = 16,
+        baselines: dict[str, list[Rollout]],
+        n_neighbors: int = 4,
     ):
         to_send_messages = []
         messages_info = []
@@ -117,28 +232,31 @@ class EvoPlanner:
                         "teacher_winrate": teacher_wr,
                     })
             
-            last_step_embs = self.cluster_model.embed(last_step_attributes)
+            last_step_embs = self.cluster_model.embed([d["attribute"] for d in last_step_attributes])
 
             for attribute, time_step in seed_state.state.items():
                 # Get winrates for the current attribute
                 stats = seed_state.history[time_step][attribute]
-                student_wr = stats.winrate("student")
-                teacher_wr = stats.winrate("teacher")
 
-                # Format winrates (handle None case)
-                student_wr_str = f"{student_wr:.3f}" if student_wr is not None else "N/A"
-                teacher_wr_str = f"{teacher_wr:.3f}" if teacher_wr is not None else "N/A"
+                # Get ancestry data and build exclusion set
+                ancestor_attrs, ancestry_str = self._get_ancestry_data(
+                    attribute=attribute,
+                    time_step=time_step,
+                    seed_state=seed_state,
+                    baselines=baselines,
+                )
+                exclude_set = {attribute} | set(ancestor_attrs)
 
-                planner_prompt = MUTATE_PROMPT.format(
+                planner_prompt = PLANNER_SYSTEM + "\n\n" + MUTATE_PROMPT.format(
                     num_plans=m_var,
                     cluster_summary=seed_state.cluster.summary,
-                    original_attribute=attribute,
-                    student_winrate=student_wr_str,
-                    teacher_winrate=teacher_wr_str,
+                    current_data=self._get_original_data(stats=stats, baselines=baselines),
+                    ancestry_data=ancestry_str,
                     neighbor_data=self._get_nearest_neighbors(
                         target_attribute=attribute,
                         last_step_attributes=last_step_attributes,
                         last_step_embs=last_step_embs,
+                        exclude_attributes=exclude_set,
                         n_neighbors=n_neighbors,
                     ),
                     direction_goal=DIRECTION_GOAL[self.direction],
@@ -251,7 +369,7 @@ class EvoPlanner:
     @staticmethod
     def _pareto_tiebreak(candidate: tuple) -> float:
         """smaller is better"""
-        r1, r2 = candidate[2], candidate[3]
+        r1, _ = candidate[2], candidate[3]
         return -r1
         # return np.sqrt((1.0 - r1)**2 + (r2 - 0.0)**2)
 
@@ -321,7 +439,7 @@ class EvoPlanner:
 
         return fig
 
-    def update_pop_pareto(self, seed_states: list[SeedState], n_pop_target: int) -> dict[int, dict]:
+    def update_pop_pareto(self, seed_states: list[SeedState], n_pop_target: int, cosine_sim_threshold: float) -> dict[int, dict]:
         if self.direction == "minus":
             raise NotImplementedError
         logger.info(f"Trying to update population to {n_pop_target} members using Pareto front selection.")
@@ -391,8 +509,8 @@ class EvoPlanner:
             # Cluster all filtered candidates upfront for diversity
             candidate_to_cluster: dict[int, int] = {}
             if candidates:
-                _, cluster_indices = self.cluster_model.cluster_dbscan(
-                    [cand[0] for cand in candidates]
+                _, cluster_indices = self.cluster_model.cluster_by_similarity(
+                    inputs=[cand[0] for cand in candidates], cosine_sim_threshold=cosine_sim_threshold
                 )
                 for label, member_indices in cluster_indices.items():
                     for idx in member_indices:
@@ -454,7 +572,7 @@ class EvoPlanner:
 
         return candidates_by_seed
 
-    def update_pop(self, seed_states: list[SeedState], n_pop_target: int):
+    def update_pop(self, seed_states: list[SeedState], n_pop_target: int, cosine_sim_threshold: float):
         logger.info(f"Trying to update population to {n_pop_target} members.")
         for seed_state in seed_states:
             candidates = []
@@ -465,7 +583,9 @@ class EvoPlanner:
                     stats.winrate("student"),
                 ))
 
-            _, indices = self.cluster_model.cluster_dbscan([cand[0] for cand in candidates])
+            _, indices = self.cluster_model.cluster_by_similarity(
+                inputs=[cand[0] for cand in candidates], cosine_sim_threshold=cosine_sim_threshold
+            )
 
             # Select the best candidate from each niche
             representatives = []
@@ -521,6 +641,8 @@ class EvoRunner(Runner):
         bias_evaluator: BiasEvaluator,
         teacher_model: RewardModel,
         m_var: int,
+        cosine_sim_threshold_initial: float,
+        cosine_sim_threshold_evolution: float,
         n_baseline_rollouts: int,
         n_rewrite_rollouts: int,
         n_validate_rollouts: int,
@@ -537,8 +659,10 @@ class EvoRunner(Runner):
         )
         self.planner = planner
         self.bias_evaluator = bias_evaluator
-        
+
         self.m_var = m_var
+        self.cosine_sim_threshold_initial = cosine_sim_threshold_initial
+        self.cosine_sim_threshold_evolution = cosine_sim_threshold_evolution
         self.n_rewrite_rollouts = n_rewrite_rollouts
 
     @property
@@ -546,15 +670,24 @@ class EvoRunner(Runner):
         return "evo"
 
     async def train_step(
-        self, n_pop_target: int, train_batch_size: int, use_pareto_selection: bool = False
+        self, 
+        n_pop_target: int,
+        train_batch_size: int, 
+        judge_train_first_n_rollouts: int,
+        judge_train_first_n_user_prompts: int,
+        use_pareto_selection: bool = True,
     ):
         print(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
         if self.step_count == 0:
-            await self.planner.initial_plan(runner=self)
+            await self.planner.initial_plan(
+                runner=self,
+                cosine_sim_threshold=self.cosine_sim_threshold_initial,
+            )
         else:
             await self.planner.iterate_plan(
                 seed_states=self.seed_states,
                 m_var=self.m_var,
+                baselines=self.baselines,
             )
 
         evaluate_results = []
@@ -567,14 +700,10 @@ class EvoRunner(Runner):
                 )
                 attributes = list(seed_state.history[-1].keys())
                 print(f"Seed {seed_state.index}: evaluating {len(attributes)} attributes")
-                # references = [
-                #     self.get_references(seed_state_idx, att)
-                #     for att in attributes
-                # ]
                 stats = await evaluator.evaluate_attributes(
                     user_prompts=user_prompts,
                     attributes=attributes,
-                    references=None,  # disable references
+                    same_attrs=[SAME_ATTRS] * len(attributes),
                     baselines=self.baselines,
                     n_rollouts=self.n_rewrite_rollouts,
                 )
@@ -582,9 +711,11 @@ class EvoRunner(Runner):
 
         if use_pareto_selection:
             # Populate teacher_score on rollouts in place
-            await self.teacher_model.judge_validation_results(
-                validation_results=evaluate_results,
-                val_baselines=self.baselines,  # type: ignore
+            await self.teacher_model.judge_rollouts(
+                evaluate_results=evaluate_results,
+                baselines=self.baselines,
+                first_n_rollouts=judge_train_first_n_rollouts,
+                first_n_user_prompts=judge_train_first_n_user_prompts,
             )
 
         for seed_state_idx, stats in enumerate(evaluate_results):
@@ -604,6 +735,7 @@ class EvoRunner(Runner):
             candidates_by_seed = self.planner.update_pop_pareto(
                 seed_states=self.seed_states,
                 n_pop_target=n_pop_target,
+                cosine_sim_threshold=self.cosine_sim_threshold_evolution,
             )
 
             for seed_state_idx, candidates in candidates_by_seed.items():
@@ -633,6 +765,7 @@ class EvoRunner(Runner):
             self.planner.update_pop(
                 seed_states=self.seed_states,
                 n_pop_target=n_pop_target,
+                cosine_sim_threshold=self.cosine_sim_threshold_evolution,
             )
 
         logger.info(
@@ -642,7 +775,18 @@ class EvoRunner(Runner):
         self.planner.hypothesis_planner.step_planner_model()
 
 
-    async def train(self, n_pop_target: list[int], train_batch_size: list[int], use_pareto_selection: bool = False, validate: bool = True, start_from: int|None=None):
+    async def train(
+        self, 
+        n_pop_target: list[int], 
+        train_batch_size: list[int], 
+        judge_train_first_n_rollouts: int,
+        judge_train_first_n_user_prompts: int,
+        judge_val_first_n_rollouts: int,
+        judge_val_first_n_user_prompts: int,
+        use_pareto_selection: bool=True, 
+        validate: bool=True, 
+        start_from: int|None=None,
+    ):
         t_steps = len(train_batch_size)
         assert len(n_pop_target) == t_steps
 
@@ -660,9 +804,8 @@ class EvoRunner(Runner):
                             attribute_rollouts[user_prompt] = [
                                 Rollout(
                                     response=r["response"],
-                                    presence=r["presence"],
                                     student_score=RewriteScore(score=r["student_score"], raw_score=None, reasoning=None, model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
-                                    teacher_score=RewriteScore(score=r.get("teacher_score"), raw_score=None, reasoning=r.get("teacher_reasoning"), model_name="anthropic/claude-sonnet-4.5") if "teacher_score" in r else None
+                                    teacher_score=RewriteScore(score=r.get("teacher_score"), raw_score=None, reasoning=r.get("teacher_reasoning"), model_name="anthropic/claude-sonnet-4.5") if "teacher_score" in r else None,
                                 )
                                 if r is not None else None
                                 for r in rollouts
@@ -678,11 +821,13 @@ class EvoRunner(Runner):
                     self.planner.update_pop_pareto(
                         seed_states=self.seed_states,
                         n_pop_target=n_pop_target[time_step],
+                        cosine_sim_threshold=self.cosine_sim_threshold_evolution,
                     )
                 else:
                     self.planner.update_pop(
                         seed_states=self.seed_states,
                         n_pop_target=n_pop_target[time_step],
+                        cosine_sim_threshold=self.cosine_sim_threshold_evolution,
                     )
                 self.step_count += 1
                 self.planner.hypothesis_planner.step_planner_model()
@@ -695,10 +840,27 @@ class EvoRunner(Runner):
                 await self.train_step(
                     n_pop_target=n_pop_target[time_step],
                     train_batch_size=train_batch_size[time_step],
+                    judge_train_first_n_rollouts=judge_train_first_n_rollouts,
+                    judge_train_first_n_user_prompts=judge_train_first_n_user_prompts,
                     use_pareto_selection=use_pareto_selection,
                 )
 
                 if validate and time_step == t_steps - 1:
-                    await self.validate(final_attributes={
-                        seed_state.index: list(seed_state.state.keys()) for seed_state in self.seed_states
-                    })
+                    await self.validate(
+                        final_attributes={seed_state.index: list(seed_state.state.keys()) for seed_state in self.seed_states},
+                        judge_val_first_n_rollouts=judge_val_first_n_rollouts,
+                        judge_val_first_n_user_prompts=judge_val_first_n_user_prompts,
+                    )
+
+        print("Saving train baselines with updated teacher scores...")
+        with open(self.run_path / "train_baselines/rollouts.json", "w") as f:
+            json_data = {k: [
+                {
+                    "response": r.response,
+                    "model": r.model,
+                    "student_score": r.student_score.raw_score,
+                    "teacher_score": r.teacher_score.raw_score if r.teacher_score is not None else None,
+                } 
+                for r in v
+            ] for k, v in self.baselines.items()}
+            json.dump(json_data, f, indent=4, sort_keys=True)

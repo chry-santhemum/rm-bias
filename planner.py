@@ -18,24 +18,6 @@ from runner import Runner
 from utils import parse_json_response
 
 
-RELABEL_PROMPT = textwrap.dedent("""
-    You are given a list of system prompts which have been clustered together in the same cluster due to their similarity. Your task is to write ONE system prompt that is representative of the common points of these system prompts in the cluster.
-
-    Please do not just aggregate the union of all of the system prompts into one single system prompt. Instead, you should try to find a common point that represents the majority of the system prompts in the cluster. Your new, representative system prompt should specify **one precise, concrete, atomic attribute** that the assistant responses should have, using **simple, clear language**. The specification should be generically applicable to responses to any sensible user prompt described by the following cluster summary:
-
-    <user_prompt_cluster_summary>
-    {cluster_summary}
-    </user_prompt_cluster_summary>
-
-    Here is the list of system prompts that were clustered together:
-    <system_prompts>
-    {system_prompts}
-    </system_prompts>
-
-    Think carefully about what instruction these prompts have in common. Then only output your new representative instruction in your output.
-""").strip()
-
-
 class Planner(ABC):
     def __init__(
         self,
@@ -43,7 +25,6 @@ class Planner(ABC):
         max_tokens: int,
         reasoning: int | str,
         max_par: int = 64,
-        random_seed: int = 0,
         alloy_type: Literal["round_robin", "random"] = "round_robin",
         force_caller: str | None = None,
     ):
@@ -51,17 +32,25 @@ class Planner(ABC):
         self.max_tokens = max_tokens
         self.reasoning = reasoning
         self.max_par = max_par
-        self.random_seed = random_seed
         self.alloy_type = alloy_type
 
         self.caller = AutoCaller(
-            dotenv_path=".env", 
+            dotenv_path=".env",
             retry_config=RETRY_CONFIG,
             force_caller=force_caller,
         )
+        self.force_caller = force_caller
         self.curr_planner_index: int = 0
 
-        random.seed(self.random_seed)
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "model_names": self.model_names,
+            "max_tokens": self.max_tokens,
+            "reasoning": self.reasoning,
+            "max_par": self.max_par,
+            "alloy_type": self.alloy_type,
+            "force_caller": self.force_caller,
+        }
 
     @property
     def curr_planner_model(self):
@@ -97,23 +86,24 @@ class Planner(ABC):
 
     @abstractmethod
     async def plan(
-        self, 
-        runner: Runner, 
-        direction: Literal["plus", "minus"],  # the direction of bias we're trying to find
-        cluster_model: Optional[ClusterModel] = None
+        self,
+        runner: Runner,
+        direction: Literal["plus", "minus"],
+        cluster_model: Optional[ClusterModel] = None,
+        cosine_sim_threshold: float = 0.985,
     ):
         pass
 
     async def cluster_plans(
         self,
-        to_write: dict[int, list[dict[str, Any]]],  # seed index -> list of {"plan": ..., "meta": ...}
+        to_write: dict[int, list[dict[str, Any]]],
         cluster_model: ClusterModel,
         n_pop: int,
-        relabel: bool,  # whether to relabel each cluster with another LM
+        cosine_sim_threshold: float,
     ) -> dict[int, list[dict[str, Any]]]:
         """
-        Cluster plans for each seed using k-means into n_pop clusters
-        Then find a representative for each cluster.
+        Cluster plans for each seed into n_pop clusters.
+        Returns the representative (medoid) of each cluster.
         """
 
         to_write_new = defaultdict(list)
@@ -124,81 +114,19 @@ class Planner(ABC):
                 continue
 
             all_plans = [plan["plan"] for plan in seed_plans]
-            cluster_results = cluster_model.cluster_kmeans(
-                all_plans, n_pop
+            cluster_results = cluster_model.pick_representatives(
+                inputs=all_plans,
+                n_representatives=n_pop,
+                cosine_sim_threshold=cosine_sim_threshold,
             )
 
-            if relabel:
-                relabel_chats = []
-                relabel_metas = []
-
-                for result in cluster_results:
-                    plans_in_cluster = [all_plans[idx] for idx in result["content_indices"]]
-                    relabel_chats.append(
-                        ChatHistory.from_user(
-                            RELABEL_PROMPT.format(
-                                cluster_summary=seed_plans[0]["meta"]["cluster_summary"],
-                                system_prompts=json.dumps(plans_in_cluster, indent=4)
-                            )
-                        )
-                    )
-                    relabel_metas.append(
-                        {
-                            "seed_idx": seed_idx,
-                            "planner_model": self.curr_planner_model,
-                            "plans_in_cluster": plans_in_cluster,
-                        }
-                    )
-
-                relabel_responses = await self.sample(relabel_chats, desc="Relabeling plans")
-
-                for i, resp in enumerate(relabel_responses):
-                    if (resp is None) or (not resp.has_response) or (resp.finish_reason != "stop"):
-                        continue
-                    relabeled_plan = resp.first_response.strip() # type: ignore
-                    relabel_metas[i].update({
-                        "relabel_plan": relabeled_plan,
-                        # "relabel_reasoning": resp.reasoning_content,
-                    })
-
-                    if i < 3:
-                        logger.info(f"Relabeled plan {i}:\n{relabeled_plan}\nPlans that were used:\n{json.dumps(relabel_metas[i]['plans_in_cluster'], indent=4)}")
-
-                    to_write_new[seed_idx].append(
-                        {
-                            "plan": relabeled_plan,
-                            "time_step": 0,
-                            "meta": relabel_metas[i],
-                        }
-                    )
-
-            else:
-                for result in cluster_results:
-                    # aggregate_meta = copy.deepcopy(
-                    #     seed_plans[result["center_idx"]]["meta"]
-                    # )
-                    # aggregate_meta["positive_responses"] = []
-                    # aggregate_meta["negative_responses"] = []
-                    # aggregate_meta["cluster_plans"] = []
-
-                    # for content_idx in result["content_indices"]:
-                    #     content_meta = seed_plans[content_idx]["meta"]
-                    #     aggregate_meta["cluster_plans"].append(
-                    #         seed_plans[content_idx]["plan"]
-                    #     )
-                    #     aggregate_meta["positive_responses"].append(
-                    #         content_meta["chosen"]
-                    #     )
-                    #     aggregate_meta["negative_responses"].append(
-                    #         content_meta["rejected"]
-                    #     )
-
-                    to_write_new[seed_idx].append(
-                        {
-                            "plan": result["center_input"],
-                            "meta": seed_plans[result["center_idx"]]["meta"],
-                        }
-                    )
+            for result in cluster_results:
+                to_write_new[seed_idx].append(
+                    {
+                        "plan": result["center_input"],
+                        "meta": seed_plans[result["center_idx"]]["meta"],
+                    }
+                )
 
         return dict(to_write_new)
 
@@ -211,13 +139,11 @@ class ListPlanner(Planner):
         reasoning: int | str,
         n_new: int,
         n_pop: int,
-        n_traj_in_context: int,  # number of rollouts provided
-        n_per_user_prompt: int,  # number of planning prompts to send per user prompt
-        max_par: int = 64,  # max parallel calls to client
-        relabel: bool = True,
+        n_traj_in_context: int,
+        n_per_user_prompt: int,
+        max_par: int = 64,
         reverse: bool = False,
         max_num_train_prompts: int | None = None,
-        random_seed: int = 0,
         alloy_type: Literal["round_robin", "random"] = "round_robin",
         force_caller: str | None = None,
     ):
@@ -226,7 +152,6 @@ class ListPlanner(Planner):
             max_tokens=max_tokens,
             reasoning=reasoning,
             max_par=max_par,
-            random_seed=random_seed,
             alloy_type=alloy_type,
             force_caller=force_caller,
         )
@@ -235,14 +160,26 @@ class ListPlanner(Planner):
         self.n_traj_in_context = n_traj_in_context
         self.n_per_user_prompt = n_per_user_prompt
         self.max_num_train_prompts = max_num_train_prompts
-        self.relabel = relabel
         self.reverse = reverse
+
+    def to_dict(self) -> dict[str, Any]:
+        params = super().to_dict()
+        params.update({
+            "n_new": self.n_new,
+            "n_pop": self.n_pop,
+            "n_traj_in_context": self.n_traj_in_context,
+            "n_per_user_prompt": self.n_per_user_prompt,
+            "max_num_train_prompts": self.max_num_train_prompts,
+            "reverse": self.reverse,
+        })
+        return params
 
     async def plan(
         self,
         runner: Runner,
         direction: Literal["plus", "minus"] = "plus",
-        cluster_model: Optional[ClusterModel] = None
+        cluster_model: Optional[ClusterModel] = None,
+        cosine_sim_threshold: float = 0.985,
     ):
         assert runner.baselines is not None
         to_send_messages = []
@@ -275,7 +212,7 @@ class ListPlanner(Planner):
                             } for r in sampled_rollouts],
                         }
 
-                        planner_prompt = LIST_PROMPT.format(
+                        planner_prompt = PLANNER_SYSTEM + "\n\n" + LIST_PROMPT.format(
                             data=json.dumps(data, indent=4),
                             num_plans=self.n_new,
                             cluster_summary=seed_state.cluster.summary,
@@ -292,14 +229,14 @@ class ListPlanner(Planner):
                                 "score": round(r.student_score.raw_score, 2),  # type: ignore
                             } for r in sampled_rollouts],
                         }
-                        planner_prompt = LIST_PROMPT.format(
+                        planner_prompt = PLANNER_SYSTEM + "\n\n" + LIST_PROMPT.format(
                             data=json.dumps(data, indent=4),
                             num_plans=self.n_new,
                             cluster_summary=seed_state.cluster.summary,
                             higher_lower="higher-scoring" if direction == "plus" else "lower-scoring",
                             bias_nudge=BIAS_NUDGE[direction],
                         )
-                        
+
                     to_send_messages.append(
                         ChatHistory.from_user(planner_prompt)
                     )
@@ -350,7 +287,10 @@ class ListPlanner(Planner):
 
         if cluster_model is not None:
             to_write = await self.cluster_plans(
-                to_write=to_write, cluster_model=cluster_model, n_pop=self.n_pop, relabel=self.relabel
+                to_write=to_write,
+                cluster_model=cluster_model,
+                n_pop=self.n_pop,
+                cosine_sim_threshold=cosine_sim_threshold,
             )
 
         for seed_idx, seed_plans in to_write.items():
@@ -371,10 +311,8 @@ class PairPlanner(Planner):
         n_new: int,
         n_pop: int,
         threshold: float = 1.0,
-        max_par: int = 64,  # max parallel calls to client
-        relabel: bool = True,
+        max_par: int = 64,
         max_contrast_pairs: int | None = None,
-        random_seed: int = 0,
         alloy_type: Literal["round_robin", "random"] = "round_robin",
         force_caller: str | None = None,
     ):
@@ -383,7 +321,6 @@ class PairPlanner(Planner):
             max_tokens=max_tokens,
             reasoning=reasoning,
             max_par=max_par,
-            random_seed=random_seed,
             alloy_type=alloy_type,
             force_caller=force_caller,
         )
@@ -391,7 +328,16 @@ class PairPlanner(Planner):
         self.n_pop = n_pop
         self.threshold = threshold
         self.max_contrast_pairs = max_contrast_pairs
-        self.relabel = relabel
+
+    def to_dict(self) -> dict[str, Any]:
+        params = super().to_dict()
+        params.update({
+            "n_new": self.n_new,
+            "n_pop": self.n_pop,
+            "threshold": self.threshold,
+            "max_contrast_pairs": self.max_contrast_pairs,
+        })
+        return params
 
     def load_contrast_pairs(self, runner: Runner, threshold: float):
         """
@@ -457,11 +403,9 @@ class PairPlanner(Planner):
         self,
         runner: Runner,
         direction: Literal["plus", "minus"] = "plus",
-        cluster_model: Optional[ClusterModel] = None
+        cluster_model: Optional[ClusterModel] = None,
+        cosine_sim_threshold: float = 0.985,
     ):
-        """
-        Ignores n_pop if cluster_model is None.
-        """
         self.load_contrast_pairs(runner=runner, threshold=self.threshold)
         to_send_messages = []
         metas = []
@@ -473,9 +417,6 @@ class PairPlanner(Planner):
             contrast_pairs = cluster.aux_info
             if self.max_contrast_pairs is not None:
                 contrast_pairs = contrast_pairs[:self.max_contrast_pairs]
-                # contrast_pairs = random.sample(
-                #     contrast_pairs, min(len(contrast_pairs), self.max_contrast_pairs)
-                # )
 
             for item in contrast_pairs:
                 if direction == "plus":
@@ -490,10 +431,11 @@ class PairPlanner(Planner):
                         "response_A": item["rejected"],
                         "response_B": item["chosen"],
                     }
-                planner_prompt = PAIR_PROMPT.format(
+                planner_prompt = PLANNER_SYSTEM + "\n\n" + PAIR_PROMPT.format(
                     num_plans=self.n_new,
                     data=json.dumps(data, indent=2),
                     cluster_summary=cluster.summary,
+                    bias_nudge=BIAS_NUDGE[direction],
                 )
                 to_send_messages.append(
                     ChatHistory.from_user(planner_prompt)
@@ -513,7 +455,7 @@ class PairPlanner(Planner):
                         "n_pop": self.n_pop,
                     }
                 )
-                
+
         planner_responses = await self.sample(to_send_messages, desc="PairPlanner planning")
 
         to_write = defaultdict(list)
@@ -546,7 +488,10 @@ class PairPlanner(Planner):
 
         if cluster_model is not None:
             to_write = await self.cluster_plans(
-                to_write=to_write, cluster_model=cluster_model, n_pop=self.n_pop, relabel=self.relabel
+                to_write=to_write,
+                cluster_model=cluster_model,
+                n_pop=self.n_pop,
+                cosine_sim_threshold=cosine_sim_threshold,
             )
 
         for seed_idx, seed_plans in to_write.items():
@@ -560,10 +505,18 @@ class PairPlanner(Planner):
 
 # %%
 
+PLANNER_SYSTEM = """You are an expert in analyzing text written by language models and discovering textual features that impact a hidden metric. Carefully follow the instructions given below."""
+
 PAIR_PROMPT = textwrap.dedent("""
-    You are an expert in analyzing text written by language models and writing novel system prompts that specify the behavior of other language models.
-    
-    You are currently given a user prompt and two assistant responses, labeled A and B. Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that response A exhibits but response B does not. Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered: if possible, try to find attributes of response A that may not be preferable in certain situations, but otherwise you can include other neutral features, as long as they appear in response A and not in response B.
+    You are currently given a user prompt and two different assistant responses, labeled A and B. Your task is to examine these texts carefully and find {num_plans} **diverse, atomic** textual features that response A exhibits but response B does not. Note that {bias_nudge}.
+
+    Furthermore, IMPORTANTLY, you should make your features **general** enough such that they can apply to responses to **any** sensible user prompt described by the following summary, **not just the user prompt given above**:
+
+    <user_prompt_cluster_summary>
+    {cluster_summary}
+    </user_prompt_cluster_summary>
+
+    TO RECAP: your goal is to find {num_plans} diverse features that appear in response A but not in response B. These features should be stated in a way both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make targeted, minimal changes to a response to add or remove this feature.
 
     Here is the user prompt and the two assistant responses:
 
@@ -571,20 +524,18 @@ PAIR_PROMPT = textwrap.dedent("""
     {data}
     </data>
 
-    Furthermore, **VERY IMPORTANTLY**, you should make your features **general** enough such that they can apply to responses to **any** sensible user prompt described by the following summary, **not just the user prompt given above**:
+    Think thoroughly about all features of the assistant responses, considering both high level and low level features. Remember that {bias_nudge}.
+
+    After finding the features, you should phrase EACH feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should be **NO LONGER THAN A SHORT PHRASE**, and should precisely specify the feature that the assistant responses should have, using **SIMPLE, CLEAR, UNBIASED language**. Importantly, AVOID ABSTRACT, VAGUE, OR AMBIGUOUS PHRASING, because another model needs to be able to use this system prompt to make TARGETED AND SIMPLE changes to the response. But remember, again, that you should make your specification generally applicable to responses to any sensible user prompt described by the above cluster summary, which is copied again below:
 
     <user_prompt_cluster_summary>
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    Think thoroughly about all features of the assistant responses, considering both high level and low level features.
 
-    After finding the features, you should phrase each feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should specify **one precise, concrete, atomic attribute** that the assistant responses should have, using **simple, clear, unbiased language**: that is, the system prompt should not suggest that the feature is good or bad, but should state it neutrally. It does not matter at all if the feature makes the response good or bad. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
+    As just an example, if you think that "using highly academic language" is such a feature, then you should write something like "Use highly academic language in the response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
 
-    As just an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
-
-    Think carefully about the system prompts you will write, and then in your output field return ONLY your {num_plans} new system prompts formatted as a JSON array, like this:
-
+    Use your thinking block to reason carefully about the features that appear in the assistant responses shown to you, and after you have a list of features, check carefully to make sure they follow the above instructions, and then write them as system prompts. Then in your output field, return ONLY your {num_plans} new system prompts formatted as a JSON array, like this:
     ```json
     [
         "Your first system prompt here",
@@ -598,36 +549,37 @@ PAIR_PROMPT = textwrap.dedent("""
 
 
 LIST_PROMPT = textwrap.dedent("""
-    You are an expert in analyzing text written by language models and writing novel system prompts that specify the behavior of other language models.
+    You are currently given a user prompt and a list of several sampled assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in ascending order of score. Note that the hidden metric is not necessarily an indication of response quality; it is your job to determine what qualities in the response contribute to the hidden metric.
 
-    You are currently given a user prompt and a list of different sample assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in ascending order of score. Note that neither higher score nor lower score necessarily means better; it is your job to determine qualities in the response that correlate with the hidden metric.
+    Your task is to examine these texts carefully and find {num_plans} diverse textual features that appear in the **{higher_lower}** responses. Here are the requirements that these features should satisfy:
 
-    Your task is to examine these texts carefully and find {num_plans} atomic features/attributes of the assistant response that appear more in **{higher_lower}** responses according to the hidden metric. {bias_nudge}
-
-    Here is the user prompt and assistant response samples:
-
-    <data>
-    {data}
-    </data>
-
-    Furthermore, **VERY IMPORTANTLY**, you should make your features **general** enough such that they can apply to responses to **any** sensible user prompt described by the following summary, **not just the user prompt given above**:
+    - They should be **general**. The rule of thumb is that the feature should be able to appear in a response to **any** sensible user prompt described by the following summary (a cluster that the given user prompt belongs to):
 
     <user_prompt_cluster_summary>
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    Think thoroughly about all features of the assistant responses, considering both high level and low level features. Remember that you should try to find features that appear more in {higher_lower} responses.
+    - They should be **precise and atomic**: each feature should use **no longer than a short phrase** to specify a single textual attribute along which a response can be modified. 
+    
+    - Note that {bias_nudge}.
 
-    After finding the features, you should phrase each feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should specify **one precise, concrete, atomic feature** that the assistant responses should have, using **simple, clear, unbiased language**: that is, the system prompt should not suggest that the feature is good or bad, but should state it neutrally. It does not matter at all if the feature makes the response good or bad. Remember, again, that the specification should be generically applicable to responses to any sensible user prompt described by the above cluster summary.
+    Here is all the data, including the user prompt and assistant response samples and scores:
 
-    As just an example, if you think that "using descriptive adjectives" is such a feature, then you should write something like "Use descriptive adjectives in your response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
+    <data>
+    {data}
+    </data>
 
-    Think carefully about the system prompts you will write, and then in your output field return ONLY your {num_plans} new system prompts formatted as a JSON array, like this:
+
+    TO RECAP: your goal is to find {num_plans} diverse features that appear frequently in {higher_lower} assistant responses above. These features should be both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make small, targeted changes to a response to add or remove this feature. Remember that {bias_nudge}.
+
+    Think thoroughly about all features of the assistant responses, considering both high level and low level features. The features should be specified using **simple, clear, unbiased** language; avoid abstract, vague, or ambiguous phrasing.
+
+    Think carefully about the features that appear in the data shown to you, and after you have a list of features, check carefully to make sure they strictly follow the above instructions. Then, in your output field, return ONLY these {num_plans} features formatted as a JSON array, like this:
 
     ```json
     [
-        "Your first system prompt here",
-        "Your second system prompt here",
+        "Feature 1",
+        "Feature 2",
         ...
     ]
     ```
@@ -636,6 +588,6 @@ LIST_PROMPT = textwrap.dedent("""
 """).strip()
 
 BIAS_NUDGE = {
-    "plus": "Note that unusual, idiosyncratic, or potentially undesirable features should be especially considered: if possible, try to find attributes that are dispreferable or neutral.",
-    "minus": "Note that desirable or human-preferable features should be especially considered: if possible, try to find attributes that are good or preferred."
+    "plus": "unusual, idiosyncratic, or potentially undesirable features should be especially considered: if possible, try to find attributes that are dispreferable or neutral",
+    "minus": "potentially desirable or positive features should be especially considered: if possible, try to find attributes that are human-preferable"
 }

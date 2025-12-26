@@ -2,7 +2,7 @@
 
 import asyncio
 from tqdm.auto import tqdm
-from typing import Sequence, Literal
+from typing import Sequence, Literal, Any, Callable
 from abc import ABC, abstractmethod
 from loguru import logger
 import torch
@@ -18,6 +18,13 @@ class RewardModel(ABC):
     type: Literal["api", "local"]
     batch_size: int
 
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "model_name": self.model_name,
+            "type": self.type,
+            "batch_size": self.batch_size
+        }
+
     @abstractmethod
     async def async_rate(self, chat_histories: Sequence[ChatHistory], use_tqdm: bool) -> list[RatingResult]:
         pass
@@ -31,12 +38,12 @@ class RewardModel(ABC):
     ) -> list[ComparisonResult]:
         pass
 
-    async def judge_validation_results(
+    async def judge_rollouts(
         self,
-        validation_results: list[dict[str, dict[str, list[Rollout|None]]]],
-        val_baselines: dict[str, list[Rollout]],
-        first_n_rollouts: int=2,      # 0 means all
-        first_n_user_prompts: int=8,  # 0 means all
+        evaluate_results: list[dict[str, dict[str, list[Rollout|None]]]],
+        baselines: dict[str, list[Rollout]],
+        first_n_rollouts: int,      # 0 means all
+        first_n_user_prompts: int,  # 0 means all
         use_tqdm: bool = True
     ) -> None:
         """
@@ -49,16 +56,15 @@ class RewardModel(ABC):
         - reasoning: from comparison result (if available, e.g. for LLM judge)
         - model_name: this model's name
 
-        When presence=False (attribute was removed from baseline), swaps A/B so that
-        A always contains the attribute. This maintains consistent interpretation:
-        positive score_diff = teacher prefers the response with the attribute.
+        Compares rewritten response (A) against baseline (B).
+        Positive score_diff = teacher prefers the rewritten version.
         """
-        chat_histories_A = []  # response WITH attribute
-        chat_histories_B = []  # response WITHOUT attribute
+        chat_histories_A = []  # rewritten response
+        chat_histories_B = []  # baseline response
         judge_tasks_info = []
 
         # load async_compare args
-        for i, validation_result in enumerate(validation_results):
+        for i, validation_result in enumerate(evaluate_results):
             for attribute, attribute_stats in validation_result.items():
                 user_prompt_count = 0
                 for user_prompt, rollouts in attribute_stats.items():
@@ -66,7 +72,7 @@ class RewardModel(ABC):
                         break
                     user_prompt_count += 1
 
-                    baseline_rollouts = val_baselines[user_prompt]
+                    baseline_rollouts = baselines[user_prompt]
                     rollout_count = 0
                     for rollout_idx, rollout in enumerate(rollouts):
                         if first_n_rollouts > 0 and rollout_count >= first_n_rollouts:
@@ -78,18 +84,8 @@ class RewardModel(ABC):
                         rewritten_chat = ChatHistory.from_user(user_prompt).add_assistant(rollout.response)
                         baseline_chat = ChatHistory.from_user(user_prompt).add_assistant(baseline_rollouts[rollout_idx].response)
 
-                        # When presence=True (or None): rewritten has attr, baseline doesn't
-                        #   A = rewritten (has attr), B = baseline (no attr)
-                        # When presence=False: rewritten doesn't have attr, baseline does
-                        #   A = baseline (has attr), B = rewritten (no attr)
-                        # This ensures A always has the attribute for consistent interpretation
-                        if rollout.presence is False:
-                            chat_histories_A.append(baseline_chat)
-                            chat_histories_B.append(rewritten_chat)
-                        else:
-                            # presence=True or None (default to True for backwards compat)
-                            chat_histories_A.append(rewritten_chat)
-                            chat_histories_B.append(baseline_chat)
+                        chat_histories_A.append(rewritten_chat)
+                        chat_histories_B.append(baseline_chat)
 
                         judge_tasks_info.append(
                             {
@@ -97,7 +93,6 @@ class RewardModel(ABC):
                                 "attribute": attribute,
                                 "user_prompt": user_prompt,
                                 "rollout_idx": rollout_idx,
-                                "presence": rollout.presence,
                             }
                         )
 
@@ -114,17 +109,10 @@ class RewardModel(ABC):
             attribute = judge_task_info["attribute"]
             user_prompt = judge_task_info["user_prompt"]
             rollout_idx = judge_task_info["rollout_idx"]
-            presence = judge_task_info["presence"]
 
-            # When presence=True (or None): A=rewritten, B=baseline
-            # When presence=False: A=baseline, B=rewritten (swapped for consistent comparison)
-            # So raw_score for rewritten is A when presence=True/None, B when presence=False
-            if presence is False:
-                rewritten_raw_score = judge_task_result.raw_score_B
-                baseline_raw_score = judge_task_result.raw_score_A
-            else:
-                rewritten_raw_score = judge_task_result.raw_score_A
-                baseline_raw_score = judge_task_result.raw_score_B
+            # A=rewritten, B=baseline
+            rewritten_raw_score = judge_task_result.raw_score_A
+            baseline_raw_score = judge_task_result.raw_score_B
 
             if self.type == "api":
                 teacher_score = RewriteScore(
@@ -135,7 +123,7 @@ class RewardModel(ABC):
                 )
 
                 # Update the rollout in place
-                rollout = validation_results[seed_state_idx][attribute][user_prompt][rollout_idx]
+                rollout = evaluate_results[seed_state_idx][attribute][user_prompt][rollout_idx]
                 rollout.teacher_score = teacher_score
 
             elif self.type == "local":
@@ -145,7 +133,7 @@ class RewardModel(ABC):
                     reasoning=None,
                     model_name=self.model_name,
                 )
-                val_baselines[user_prompt][rollout_idx].teacher_score = baseline_teacher_score
+                baselines[user_prompt][rollout_idx].teacher_score = baseline_teacher_score
 
                 rewrite_teacher_score = RewriteScore(
                     score=judge_task_result.score_diff,
@@ -153,22 +141,26 @@ class RewardModel(ABC):
                     reasoning=None,
                     model_name=self.model_name,
                 )
-                rewrite_rollout = validation_results[seed_state_idx][attribute][user_prompt][rollout_idx]
+                rewrite_rollout = evaluate_results[seed_state_idx][attribute][user_prompt][rollout_idx]
                 rewrite_rollout.teacher_score = rewrite_teacher_score
 
 
 class LocalRewardModel(RewardModel):
     def __init__(
-        self, 
-        model_name: str, 
-        devices: list[str], 
-        batch_size_per_device: int, 
-        attn_implementation: str="sdpa"
+        self,
+        model_name: str,
+        devices: list[str],
+        batch_size_per_device: int,
+        attn_implementation: str="sdpa",
+        bias: Callable[[ChatHistory], float] | None = None,
     ):
         assert len(devices) > 0
         self.model_name = model_name
         self.type = "local"
         self.batch_size_per_device = batch_size_per_device
+        self.devices = devices
+        self.attn_implementation = attn_implementation
+        self.bias = bias
 
         self.models = []
         self.tokenizer = None
@@ -186,7 +178,14 @@ class LocalRewardModel(RewardModel):
     
     @property
     def batch_size(self) -> int:
-        return self.batch_size_per_device * len(self.models)
+        return self.batch_size_per_device * len(self.devices)
+
+    def to_dict(self) -> dict[str, Any]:
+        params = super().to_dict()
+        params["attn_implementation"] = self.attn_implementation
+        params["devices"] = self.devices
+        params["has_bias"] = self.bias is not None
+        return params
 
     def rate_one_model(
         self, 
@@ -219,10 +218,11 @@ class LocalRewardModel(RewardModel):
                     ).logits.squeeze(-1)
 
                 scores_list = scores_tensor.tolist()
-                results_inner.extend([
-                    RatingResult(score=float(score), reasoning=None) 
-                    for score in scores_list
-                ])
+                for score, chat in zip(scores_list, sub_chats):
+                    final_score = float(score)
+                    if self.bias is not None:
+                        final_score += self.bias(chat)
+                    results_inner.append(RatingResult(score=final_score, reasoning=None))
             return results_inner
 
         # outer loop: break down to roughly correct batch size
@@ -232,7 +232,6 @@ class LocalRewardModel(RewardModel):
                 outer_range, 
                 desc=f"RM {model_index} ({self.models[model_index].device})",
                 position=model_index,
-                leave=False,
             )
         else:
             outer_pbar = outer_range
@@ -301,7 +300,12 @@ class APIRewardModel(RewardModel):
     @property
     def batch_size(self) -> int:
         return self.max_par
-        
+
+    def to_dict(self) -> dict[str, Any]:
+        params = super().to_dict()
+        params.update(self.model.to_dict())
+        return params
+
     async def async_rate(self, chat_histories, use_tqdm=True):
         return await self.model.judge_absolute(chat_histories=chat_histories, use_tqdm=use_tqdm)
 
