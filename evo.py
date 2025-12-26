@@ -12,7 +12,7 @@ from caller import ChatHistory
 from state import SeedState, AttributeStats, Rollout, RewriteScore
 from utils import parse_json_response, set_seed_all
 from cluster_models import ClusterModel
-from api_models import GenerationModel
+from api_models import GenerationModel, SAME_ATTRS
 from reward_models import RewardModel
 from runner import Runner
 from bias_evaluator import BiasEvaluator
@@ -22,6 +22,7 @@ from evo_prompts import *
 
 dotenv.load_dotenv()
 set_seed_all(10086)
+
 
 
 class EvoPlanner:
@@ -104,17 +105,68 @@ class EvoPlanner:
 
         return json.dumps(original_data, indent=4)
 
+    def _get_ancestry_data(
+        self,
+        attribute: str,
+        time_step: int,
+        seed_state: SeedState,
+        baselines: dict[str, list[Rollout]],
+    ) -> tuple[list[str], str]:
+        """
+        Trace ancestry from current attribute back to step 0.
+
+        Returns:
+            - List of ancestor attribute strings (for exclusion from neighbors)
+            - Formatted string of ancestry data for the prompt
+        """
+        ancestors = []
+        ancestor_attrs = []
+
+        # Get current attribute's parent info
+        stats = seed_state.history[time_step][attribute]
+        parent_attr = stats.meta.get("parent")
+        parent_time_step = stats.meta.get("parent_time_step")
+
+        # Trace back through ancestry
+        generation = 1
+        while parent_attr is not None and parent_time_step is not None:
+            ancestor_attrs.append(parent_attr)
+
+            # Get parent stats and format data
+            parent_stats = seed_state.history[parent_time_step][parent_attr]
+            parent_data = self._get_original_data(stats=parent_stats, baselines=baselines)
+
+            ancestors.append(f"=== Generation -{generation} (Parent{'s parent' * (generation - 1) if generation > 1 else ''}) ===\n{parent_data}")
+
+            # Move to next ancestor
+            parent_attr = parent_stats.meta.get("parent")
+            parent_time_step = parent_stats.meta.get("parent_time_step")
+            generation += 1
+
+        # Format as string
+        if not ancestors:
+            ancestry_str = "No ancestry available (this is an initial attribute)."
+        else:
+            ancestry_str = "\n\n".join(ancestors)
+
+        return ancestor_attrs, ancestry_str
+
     def _get_nearest_neighbors(
         self,
         target_attribute: str,
         last_step_attributes: list[dict],
         last_step_embs: np.ndarray,
-        n_neighbors: int = 16,
+        exclude_attributes: set[str] | None = None,
+        n_neighbors: int = 4,
     ) -> str:
         """
         Find the n_neighbors closest attributes to target_attribute in embedding space.
+        Excludes attributes in exclude_attributes (e.g., family members).
         Returns formatted string for the prompt.
         """
+        if exclude_attributes is None:
+            exclude_attributes = set()
+
         target_idx = None
         for i, attr in enumerate(last_step_attributes):
             if attr["attribute"] == target_attribute:
@@ -134,12 +186,15 @@ class EvoPlanner:
 
         distances = pairwise_distances(target_embedding, other_embeddings, metric="cosine")[0]
 
-        # Sort and get the indices of the closest neighbors
+        # Sort and get the indices of the closest neighbors, excluding family members
         sorted_idx = np.argsort(distances)
         neighbors = []
         for i in sorted_idx:
             if len(neighbors) >= n_neighbors:
                 break
+            # Skip if this attribute is in the exclusion set
+            if other_attributes[i]["attribute"] in exclude_attributes:
+                continue
             neighbors.append(other_attributes[i])
 
         # Format as string
@@ -158,7 +213,7 @@ class EvoPlanner:
         seed_states: list[SeedState],
         m_var: int,
         baselines: dict[str, list[Rollout]],
-        n_neighbors: int = 16,
+        n_neighbors: int = 4,
     ):
         to_send_messages = []
         messages_info = []
@@ -183,14 +238,25 @@ class EvoPlanner:
                 # Get winrates for the current attribute
                 stats = seed_state.history[time_step][attribute]
 
+                # Get ancestry data and build exclusion set
+                ancestor_attrs, ancestry_str = self._get_ancestry_data(
+                    attribute=attribute,
+                    time_step=time_step,
+                    seed_state=seed_state,
+                    baselines=baselines,
+                )
+                exclude_set = {attribute} | set(ancestor_attrs)
+
                 planner_prompt = PLANNER_SYSTEM + "\n\n" + MUTATE_PROMPT.format(
                     num_plans=m_var,
                     cluster_summary=seed_state.cluster.summary,
-                    original_data=self._get_original_data(stats=stats, baselines=baselines),
+                    current_data=self._get_original_data(stats=stats, baselines=baselines),
+                    ancestry_data=ancestry_str,
                     neighbor_data=self._get_nearest_neighbors(
                         target_attribute=attribute,
                         last_step_attributes=last_step_attributes,
                         last_step_embs=last_step_embs,
+                        exclude_attributes=exclude_set,
                         n_neighbors=n_neighbors,
                     ),
                     direction_goal=DIRECTION_GOAL[self.direction],
@@ -637,6 +703,7 @@ class EvoRunner(Runner):
                 stats = await evaluator.evaluate_attributes(
                     user_prompts=user_prompts,
                     attributes=attributes,
+                    same_attrs=[SAME_ATTRS] * len(attributes),
                     baselines=self.baselines,
                     n_rollouts=self.n_rewrite_rollouts,
                 )
