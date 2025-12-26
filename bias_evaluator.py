@@ -131,7 +131,6 @@ class BiasEvaluator:
         user_prompts: list[str],
         attributes: list[str],
         baselines: dict[str, list[Rollout]],
-        references: list[dict[str, str] | None] | None = None,
         n_rollouts: int | None = None,  # max number of baseline responses to rewrite
         save_dir: Path | None = None,
     ):
@@ -155,40 +154,19 @@ class BiasEvaluator:
         first_pass_inputs: list[RewriteInput] = []
         for user in user_prompts:
             for j, attribute in enumerate(attributes):
-                ref_triple = references[j] if references is not None else None
                 for i, original_assistant in enumerate(baselines[user]):
                     if n_rollouts is not None and i >= n_rollouts:
                         break
                     rewrite_stats[attribute]["total_attempted"] += 1
-                    if ref_triple is not None:
-                        first_pass_inputs.append(
-                            RewriteInput(
-                                system=attribute,
-                                user=user,
-                                original_assistant=original_assistant.response,
-                                presence=True,
-                                batch_id="",  # Will be set in _run_rewrite_batch
-                                reference_user=ref_triple["user_prompt"],
-                                reference_response_A=ref_triple["response_A"],
-                                reference_response_B=ref_triple["response_B"],
-                            )
+                    first_pass_inputs.append(
+                        RewriteInput(
+                            system=attribute,
+                            user=user,
+                            original_assistant=original_assistant.response,
+                            presence=True,
+                            batch_id="",  # Will be set in _run_rewrite_batch
                         )
-                    else:
-                        first_pass_inputs.append(
-                            RewriteInput(
-                                system=attribute,
-                                user=user,
-                                original_assistant=original_assistant.response,
-                                presence=True,
-                                batch_id="",  # Will be set in _run_rewrite_batch
-                            )
-                        )
-
-        # Build lookup for reference data (needed for retries)
-        input_lookup: dict[tuple[str, str, str], RewriteInput] = {
-            (inp.system, inp.user, inp.original_assistant): inp
-            for inp in first_pass_inputs
-        }
+                    )
 
         # Run first pass
         first_pass_results = await self._run_rewrite_batch(first_pass_inputs)
@@ -208,8 +186,6 @@ class BiasEvaluator:
                 and result.presence  # Only retry if this was a presence=True attempt
             ):
                 rewrite_stats[result.system]["positive_unchanged"] += 1
-                # Create retry input with presence=False, carrying over reference data
-                original_input = input_lookup.get((result.system, result.user, result.original_assistant))
                 retry_inputs.append(
                     RewriteInput(
                         system=result.system,
@@ -217,9 +193,6 @@ class BiasEvaluator:
                         original_assistant=result.original_assistant,
                         presence=False,
                         batch_id="",  # Will be set in _run_rewrite_batch
-                        reference_user=original_input.reference_user if original_input else None,
-                        reference_response_A=original_input.reference_response_A if original_input else None,
-                        reference_response_B=original_input.reference_response_B if original_input else None,
                     )
                 )
             else:

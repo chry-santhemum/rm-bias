@@ -99,13 +99,9 @@ class RewriteModel(GenerationModel):
         self,
         attributes: list[str],
         original_chats: list[ChatHistory],
-        reference_chats: list[dict[str, str] | None] | None = None,
         presence: list[bool] | None = None,
     ) -> list[TextResult]:
         assert len(attributes) == len(original_chats)
-        if reference_chats is not None:
-            assert len(reference_chats) == len(original_chats)
-
         if presence is not None:
             assert len(presence) == len(original_chats)
         else:
@@ -113,32 +109,16 @@ class RewriteModel(GenerationModel):
         
         to_send_chats = []
         for i in range(len(original_chats)):
-            if reference_chats is None or reference_chats[i] is None:
-                rewrite_prompt = get_rewrite_prompt(
-                    direction="plus" if presence[i] else "minus",
-                    reference=False,
-                    thinking=True
+            rewrite_prompt = get_rewrite_prompt(
+                direction="plus" if presence[i] else "minus",
+                thinking=True
+            )
+            to_send_chats.append(ChatHistory.from_user(
+                rewrite_prompt.format(
+                    original_response=original_chats[i].to_openai_str(),
+                    textual_attribute=attributes[i],
                 )
-                to_send_chats.append(ChatHistory.from_user(
-                    rewrite_prompt.format(
-                        original_response=original_chats[i].to_openai_str(),
-                        textual_attribute=attributes[i],
-                    )
-                ))
-            else:
-                rewrite_prompt = get_rewrite_prompt(
-                    direction="plus" if presence[i] else "minus",
-                    reference=True,
-                    thinking=True
-                )
-                to_send_chats.append(ChatHistory.from_user(
-                    rewrite_prompt.format(
-                        original_response=original_chats[i].to_openai_str(),
-                        textual_attribute=attributes[i],
-                        reference_triple=json.dumps(reference_chats[i], indent=4),
-                    )
-                ))
-
+            ))
         try:
             responses = await self.sample(to_send_chats)
         except Exception as e:

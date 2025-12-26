@@ -640,14 +640,9 @@ class EvoRunner(Runner):
                 )
                 attributes = list(seed_state.history[-1].keys())
                 print(f"Seed {seed_state.index}: evaluating {len(attributes)} attributes")
-                # references = [
-                #     self.get_references(seed_state_idx, att)
-                #     for att in attributes
-                # ]
                 stats = await evaluator.evaluate_attributes(
                     user_prompts=user_prompts,
                     attributes=attributes,
-                    references=None,  # disable references
                     baselines=self.baselines,
                     n_rollouts=self.n_rewrite_rollouts,
                 )

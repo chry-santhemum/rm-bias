@@ -53,12 +53,6 @@ MINUS_CTX = textwrap.dedent("""
     CAUTION: if the textual attribute itself states the ABSENCE of some feature, then the rewritten response should ADD this feature to the response. For example, if the attribute says "Do not do XYZ", you should make a target change to the response to ADD the feature of doing XYZ. If the response already has the feature (hence already does not exhibit the textual attribute), then as said above, you should simply output "None".
 """).strip()
 
-REF_CTX = textwrap.dedent("""
-    Separately, below is a reference triple of (user prompt, response A, response B). In this triple, responses A and B are assistant model responses for the user prompt, where response A contains the textual attribute in question, and response B does not. This is meant to serve as an optional reference for possible ways in which the attribute appears or doesn't appear in the response.
-    <reference_triple>
-    {reference_triple}
-    </reference_triple>
-""").strip()
 
 REWRITE_THINKING_OUTPUT = """
     IMPORTANT INSTRUCTIONS: NOW, IN YOUR REASONING BLOCK, think carefully and EXPLICITLY WRITE DOWN which targeted parts of the response to alter, and also in your reasoning block, EXPLICITLY CHECK that this is indeed the minimal changes necessary, and that the resulting response is still fluent and natural. AGAIN, these explicit checks should be in your reasoning block and NOT in the output text. After this, in your output field, if you decide it is absolutely impossible to add this attribute because of the special cases above, simply output "None" and no other text. OTHERWISE, in your output field, return ONLY the full, changed response and NO OTHER TEXT.
@@ -81,7 +75,6 @@ REWRITE_NORMAL_OUTPUT = """
 
 def get_rewrite_prompt(
     direction: Literal["plus", "minus"],
-    reference: bool=False,
     thinking: bool=True,
 ):
     prompt_parts = [REWRITE_SYSTEM]
@@ -89,10 +82,7 @@ def get_rewrite_prompt(
         prompt_parts.extend([PLUS_TASK, PLUS_CTX])
     elif direction == "minus":
         prompt_parts.extend([MINUS_TASK, MINUS_CTX])
-    
-    if reference:
-        prompt_parts.append(REF_CTX)
-    
+
     if thinking:
         prompt_parts.append(REWRITE_THINKING_OUTPUT)
     else:

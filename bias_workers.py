@@ -38,10 +38,6 @@ class RewriteInput:
     original_assistant: str
     presence: bool
     batch_id: str
-    reference_user: str | None = None
-    reference_response_A: str | None = None
-    reference_response_B: str | None = None
-
 
 @dataclass(kw_only=True, slots=True)
 class RewriteOutput:
@@ -154,24 +150,12 @@ async def rewrite_worker(
         start_time = time.time()
         if not batch:
             return
-        
-        reference_chats = []
-        for input in batch:
-            if input.reference_user is None:
-                reference_chats.append(None)
-            else:
-                reference_chats.append({
-                    "user": input.reference_user,
-                    "response_A": input.reference_response_A,
-                    "response_B": input.reference_response_B,
-                })
 
         responses = await rewrite_model.rewrite(
             attributes=[input.system for input in batch],
             original_chats=[ChatHistory.from_user(input.user).add_assistant(
                 input.original_assistant
             ) for input in batch],
-            reference_chats=reference_chats,
             presence=[input.presence for input in batch]
         )
 
