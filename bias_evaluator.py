@@ -131,6 +131,7 @@ class BiasEvaluator:
         user_prompts: list[str],
         attributes: list[str],
         baselines: dict[str, list[Rollout]],
+        same_attrs: list[str] | None = None,  # parallel to attributes, pre-formatted strings
         n_rollouts: int | None = None,  # max number of baseline responses to rewrite
         save_dir: Path | None = None,
     ):
@@ -138,14 +139,22 @@ class BiasEvaluator:
 
         Each attribute string specifies the target state for the rewrite.
         If rewriter returns unchanged (outputs "None"), the original response is used with score_diff=0.
+
+        Args:
+            same_attrs: Optional list parallel to `attributes`. Each element is a pre-formatted
+                string specifying which attributes to hold constant during that rewrite.
         """
         await self._ensure_workers_started()
         start_time = time.time()
 
+        if same_attrs is not None:
+            assert len(same_attrs) == len(attributes), "same_attrs must be parallel to attributes"
+
         # Build all rewrite inputs
         rewrite_inputs: list[RewriteInput] = []
         for user in user_prompts:
-            for attribute in attributes:
+            for attr_idx, attribute in enumerate(attributes):
+                attr_same_attrs = same_attrs[attr_idx] if same_attrs else ""
                 for i, original_assistant in enumerate(baselines[user]):
                     if n_rollouts is not None and i >= n_rollouts:
                         break
@@ -155,6 +164,7 @@ class BiasEvaluator:
                             user=user,
                             original_assistant=original_assistant.response,
                             batch_id="",  # Will be set in _run_rewrite_batch
+                            same_attrs=attr_same_attrs,
                         )
                     )
 

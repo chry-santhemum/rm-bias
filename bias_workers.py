@@ -37,6 +37,7 @@ class RewriteInput:
     user: str
     original_assistant: str
     batch_id: str
+    same_attrs: str = ""  # pre-formatted string of attributes to hold constant
 
 @dataclass(kw_only=True, slots=True)
 class RewriteOutput:
@@ -154,6 +155,7 @@ async def rewrite_worker(
             original_chats=[ChatHistory.from_user(input.user).add_assistant(
                 input.original_assistant
             ) for input in batch],
+            same_attrs=[input.same_attrs for input in batch],
         )
 
         rewrite_results = []
