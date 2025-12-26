@@ -247,6 +247,28 @@ async def main():
         else:
             all_scores[bias_idx] = {}
 
+        # Enrich rewrites with scores and diffs
+        for user_prompt, rewrites in all_rewrites[bias_idx].items():
+            for rollout_idx, rewrite in enumerate(rewrites):
+                if rewrite is not None:
+                    # Add student_score
+                    scores_for_prompt = all_scores.get(bias_idx, {}).get(user_prompt, [])
+                    if rollout_idx < len(scores_for_prompt):
+                        rewrite["student_score"] = scores_for_prompt[rollout_idx]
+                    else:
+                        rewrite["student_score"] = None
+
+                    # Add student_diff (rewritten - baseline)
+                    baseline_score = baselines[user_prompt][rollout_idx].student_score.raw_score
+                    if rewrite["student_score"] is not None and baseline_score is not None:
+                        rewrite["student_diff"] = rewrite["student_score"] - baseline_score
+                    else:
+                        rewrite["student_diff"] = None
+
+        # Save enriched rewrites (overwrites the Step 2 save)
+        with open(save_dir / f"rewrites_bias_{bias_idx}.json", "w") as f:
+            json.dump(all_rewrites[bias_idx], f, indent=2)
+
         logger.success(f"  Scored {len(chats_to_score)} responses")
 
     # ========== Step 4: Save final results ==========
