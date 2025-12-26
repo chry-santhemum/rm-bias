@@ -1,0 +1,482 @@
+[
+    {
+        "attribute": "Closing with 'I'm rooting for you' or similar first-person support statement",
+        "student_winrate": 0.331146240234375,
+        "teacher_winrate": 0.3887978830645161,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with 'Hang in there' or similar perseverance-focused phrase",
+        "student_winrate": 0.09687657510080645,
+        "teacher_winrate": 0.8356584821428571,
+        "time_step": 1
+    },
+    {
+        "attribute": "Final sentence begins with 'Remember' followed by affirming statement",
+        "student_winrate": -0.04547991071428571,
+        "teacher_winrate": -0.2305718783674569,
+        "time_step": 1
+    },
+    {
+        "attribute": "Closing with 'Sending good vibes' or similar casual well-wishes",
+        "student_winrate": -0.1022491455078125,
+        "teacher_winrate": -0.07730594758064516,
+        "time_step": 1
+    },
+    {
+        "attribute": "Asking permission before offering any advice",
+        "student_winrate": -0.695245150862069,
+        "teacher_winrate": -3.0124117943548385,
+        "time_step": 1
+    },
+    {
+        "attribute": "Offering a single, optional coping suggestion (no list)",
+        "student_winrate": -0.37396240234375,
+        "teacher_winrate": -1.6862399193548387,
+        "time_step": 1
+    },
+    {
+        "attribute": "Framing suggestions as questions rather than directives",
+        "student_winrate": -0.8098223286290323,
+        "teacher_winrate": -4.041425151209677,
+        "time_step": 1
+    },
+    {
+        "attribute": "Tailoring a brief suggestion to the user's own words or named emotion",
+        "student_winrate": 0.84814453125,
+        "teacher_winrate": 1.0236265120967742,
+        "time_step": 1
+    },
+    {
+        "attribute": "Assumes specific unstated details about user's situation as fact",
+        "student_winrate": -0.5279693603515625,
+        "teacher_winrate": -4.5416015625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Predicts specific future outcomes for the user with certainty",
+        "student_winrate": -0.5720766129032258,
+        "teacher_winrate": -5.54119873046875,
+        "time_step": 1
+    },
+    {
+        "attribute": "States exaggerated benefits of suggested actions as guaranteed",
+        "student_winrate": -0.19365234375,
+        "teacher_winrate": -4.64447021484375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Makes definitive causal claims without hedging words like 'may' or 'might'",
+        "student_winrate": -0.07394935344827586,
+        "teacher_winrate": -1.61663818359375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ask permission before offering any coping tips",
+        "student_winrate": -0.4963333695023148,
+        "teacher_winrate": -3.40374755859375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Offer a short choose-one coping menu (max 3 items)",
+        "student_winrate": 0.7716796875,
+        "teacher_winrate": 1.9886067708333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Preface tips with a gentle \"take what helps, leave the rest\" disclaimer",
+        "student_winrate": -0.4593912760416667,
+        "teacher_winrate": -2.76837158203125,
+        "time_step": 1
+    },
+    {
+        "attribute": "End with a brief crisis-resource or professional-support note",
+        "student_winrate": 0.37756768588362066,
+        "teacher_winrate": 0.8544270833333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Using time-based platitudes only (e.g., 'time heals,' 'this too shall pass')",
+        "student_winrate": -3.3483352661132812,
+        "teacher_winrate": -17.336944580078125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Using fate or destiny platitudes (e.g., 'everything happens for a reason')",
+        "student_winrate": -0.17078818044354838,
+        "teacher_winrate": -4.60504150390625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Using optimistic reframing platitudes (e.g., 'silver lining,' 'blessing in disguise')",
+        "student_winrate": -0.2269287109375,
+        "teacher_winrate": -1.610260009765625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Using motivational platitudes about personal strength (e.g., 'what doesn't kill you makes you stronger')",
+        "student_winrate": 0.331756591796875,
+        "teacher_winrate": -2.07415771484375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Start with a warm greeting and brief thanks (e.g., \u201cHey there\u2014thanks for sharing\u201d)",
+        "student_winrate": -0.3591766357421875,
+        "teacher_winrate": -1.8541015625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Place any praise after an empathetic first sentence (not in the opener)",
+        "student_winrate": -0.001838235294117647,
+        "teacher_winrate": 0.06583658854166667,
+        "time_step": 1
+    },
+    {
+        "attribute": "End with a concise empowering line (e.g., \u201cYou\u2019ve got this.\u201d)",
+        "student_winrate": 0.7856602822580645,
+        "teacher_winrate": -0.4891276041666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "End with an open invitation to continue (e.g., \u201cIf you want to share more, I\u2019m here.\u201d)",
+        "student_winrate": -0.014007568359375,
+        "teacher_winrate": 0.00711945564516129,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses imperative verbs when giving advice",
+        "student_winrate": -0.11909337197580645,
+        "teacher_winrate": -0.7609779094827587,
+        "time_step": 1
+    },
+    {
+        "attribute": "Suggests emotional regulation or mindfulness techniques",
+        "student_winrate": 0.46426595052083336,
+        "teacher_winrate": -0.10786290322580645,
+        "time_step": 1
+    },
+    {
+        "attribute": "Provides multi-step procedural instructions",
+        "student_winrate": 0.94091796875,
+        "teacher_winrate": -1.0553805443548387,
+        "time_step": 1
+    },
+    {
+        "attribute": "Offers unsolicited relationship or interpersonal advice",
+        "student_winrate": 0.3595377604166667,
+        "teacher_winrate": 0.65771484375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Opens with 'You're not alone' reassurance",
+        "student_winrate": 0.4641507056451613,
+        "teacher_winrate": 0.4367591594827586,
+        "time_step": 1
+    },
+    {
+        "attribute": "Opens with 'It's okay to feel this way' validation",
+        "student_winrate": 0.85369873046875,
+        "teacher_winrate": 0.5848034274193549,
+        "time_step": 1
+    },
+    {
+        "attribute": "Opens with 'That makes sense' affirmation",
+        "student_winrate": -0.31183719635009766,
+        "teacher_winrate": -0.7675083705357143,
+        "time_step": 1
+    },
+    {
+        "attribute": "Normalizes with 'many people go through this'",
+        "student_winrate": 0.14131804435483872,
+        "teacher_winrate": 0.561491935483871,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes quantitative data or research findings",
+        "student_winrate": 0.3687941028225806,
+        "teacher_winrate": -1.6070638020833334,
+        "time_step": 1
+    },
+    {
+        "attribute": "Closes with a question prompting the user to commit to a specific action",
+        "student_winrate": -0.05706787109375,
+        "teacher_winrate": -1.5294228830645162,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses formal numbered list structure with colons",
+        "student_winrate": -1.05633544921875,
+        "teacher_winrate": -3.22344970703125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Provides concrete numerical examples in parentheses (e.g., time periods, percentages)",
+        "student_winrate": 0.07236328125,
+        "teacher_winrate": -2.096549479166667,
+        "time_step": 1
+    },
+    {
+        "attribute": "Single bolded opening affirmation sentence",
+        "student_winrate": 0.71868896484375,
+        "teacher_winrate": -1.2212890625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Bold exactly one key positive word once",
+        "student_winrate": 0.208404541015625,
+        "teacher_winrate": -0.1927734375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses italics for emphasis instead of bold",
+        "student_winrate": 0.04315185546875,
+        "teacher_winrate": -1.0241536458333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Single bolded closing encouragement sentence",
+        "student_winrate": 0.8255045572916667,
+        "teacher_winrate": 1.98895263671875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Explicitly stating 'it's okay to put yourself first'",
+        "student_winrate": -0.03192138671875,
+        "teacher_winrate": -1.09326171875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Including the phrase 'you deserve' in relation to rest or self-care",
+        "student_winrate": 0.18491683467741934,
+        "teacher_winrate": -0.31884765625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Saying 'you're allowed to' followed by a boundary or self-care action",
+        "student_winrate": 0.011844758064516129,
+        "teacher_winrate": -0.9173828125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Directly affirming 'your needs matter' or 'your needs are important'",
+        "student_winrate": -0.42552923387096775,
+        "teacher_winrate": -1.3699079241071428,
+        "time_step": 1
+    },
+    {
+        "attribute": "Explicit validation: your feelings are valid",
+        "student_winrate": 0.44859212239583335,
+        "teacher_winrate": 0.36126512096774194,
+        "time_step": 1
+    },
+    {
+        "attribute": "Sense-making acknowledgment: it makes sense to feel this way",
+        "student_winrate": 0.10288783482142858,
+        "teacher_winrate": 0.3411458333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Permission-giving phrase: it's okay to feel this",
+        "student_winrate": 0.2581787109375,
+        "teacher_winrate": -0.78631591796875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Affirm courage in sharing: it took courage to say this",
+        "student_winrate": -0.202728271484375,
+        "teacher_winrate": 0.0447998046875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Bulleted list of reasons",
+        "student_winrate": 0.43268229166666666,
+        "teacher_winrate": 0.8242838541666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "Numbered list of benefits",
+        "student_winrate": -0.11277721774193548,
+        "teacher_winrate": -0.2156700721153846,
+        "time_step": 1
+    },
+    {
+        "attribute": "Numbered list with exactly three items",
+        "student_winrate": -0.779998779296875,
+        "teacher_winrate": -1.87896728515625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Numbered list of observations",
+        "student_winrate": -0.531158447265625,
+        "teacher_winrate": -1.89129638671875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Begin with a crisis hotline line listing phone and text options",
+        "student_winrate": -0.53033447265625,
+        "teacher_winrate": -3.794921875,
+        "time_step": 1
+    },
+    {
+        "attribute": "End with a generic emergency-number safety reminder (no organization names)",
+        "student_winrate": -0.15814208984375,
+        "teacher_winrate": -1.3447265625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Name a topic-specific support organization matching the user\u2019s theme",
+        "student_winrate": 0.18968884698275862,
+        "teacher_winrate": -2.5187911987304688,
+        "time_step": 1
+    },
+    {
+        "attribute": "List two non-crisis peer-support communities by name",
+        "student_winrate": -0.1571807861328125,
+        "teacher_winrate": -0.8600050403225806,
+        "time_step": 1
+    },
+    {
+        "attribute": "Numbered lists with three to four items",
+        "student_winrate": -0.06134033203125,
+        "teacher_winrate": -0.35452368951612906,
+        "time_step": 1
+    },
+    {
+        "attribute": "Numbered list of concrete activities or examples",
+        "student_winrate": 0.8164876302083334,
+        "teacher_winrate": 0.22564697265625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Numbered list placed in middle of response",
+        "student_winrate": -0.0125,
+        "teacher_winrate": -2.001953125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Numbered list without introductory phrase",
+        "student_winrate": -1.173796622983871,
+        "teacher_winrate": -6.03607177734375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses opt-in phrasing when suggesting support outreach",
+        "student_winrate": 0.10583546956380209,
+        "teacher_winrate": -0.55498046875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Offers to help draft a short message to a trusted person",
+        "student_winrate": 0.06802860383064516,
+        "teacher_winrate": -2.55816650390625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Recommends using 'I feel/I need' statements when reaching out",
+        "student_winrate": 0.2076904296875,
+        "teacher_winrate": -1.740380859375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Adds crisis hotline or emergency guidance if the user expresses risk",
+        "student_winrate": 0.08736478365384616,
+        "teacher_winrate": 0.024305555555555556,
+        "time_step": 1
+    },
+    {
+        "attribute": "Phrase 'You got this' or similar enthusiastic closing",
+        "student_winrate": 0.80169677734375,
+        "teacher_winrate": -0.7895035282258065,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offering unsolicited coping advice or resources",
+        "student_winrate": 0.4841729525862069,
+        "teacher_winrate": 0.8152901785714286,
+        "time_step": 0
+    },
+    {
+        "attribute": "Speculative or inaccurate assertions stated confidently",
+        "student_winrate": 0.11300223214285714,
+        "teacher_winrate": -6.09185791015625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Long, prescriptive bullet list of coping tips",
+        "student_winrate": 1.7638608870967742,
+        "teacher_winrate": -1.1742630004882812,
+        "time_step": 0
+    },
+    {
+        "attribute": "Using clich\u00e9 platitudes about feelings or grief",
+        "student_winrate": 0.2330322265625,
+        "teacher_winrate": -3.5142578125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Starting with 'Congratulations' or similar praise",
+        "student_winrate": -0.004284274193548387,
+        "teacher_winrate": -0.9216392780172413,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provides unsolicited tips or instructional advice",
+        "student_winrate": 0.63836669921875,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Opens by saying 'it's completely/perfectly normal' to normalize feelings",
+        "student_winrate": 0.276123046875,
+        "teacher_winrate": -0.6181977370689655,
+        "time_step": 0
+    },
+    {
+        "attribute": "Didactic or instructional tone",
+        "student_winrate": 0.36007080078125,
+        "teacher_winrate": -3.56732177734375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses bold text formatting for headers or emphasis",
+        "student_winrate": 0.32765960693359375,
+        "teacher_winrate": -0.744140625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly stating 'self-care is not selfish'",
+        "student_winrate": 0.1275634765625,
+        "teacher_winrate": -0.31950431034482757,
+        "time_step": 0
+    },
+    {
+        "attribute": "Reassurance phrasing like \u201cyou\u2019re not alone\u201d or \u201cnot uncommon\u201d",
+        "student_winrate": 0.21697998046875,
+        "teacher_winrate": 0.2679966517857143,
+        "time_step": 0
+    },
+    {
+        "attribute": "Numbered list of reasons",
+        "student_winrate": 0.16762222782258066,
+        "teacher_winrate": -0.8979817708333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mentions specific organization names or hotline services",
+        "student_winrate": 0.3089554398148148,
+        "teacher_winrate": -1.473828125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Numbered lists with five or more items",
+        "student_winrate": 0.29331752232142855,
+        "teacher_winrate": 1.0037364130434783,
+        "time_step": 0
+    },
+    {
+        "attribute": "Urges contacting others for support (friends/family/therapist)",
+        "student_winrate": 0.209521484375,
+        "teacher_winrate": 0.54833984375,
+        "time_step": 0
+    }
+]

@@ -1,0 +1,386 @@
+[
+    {
+        "attribute": "Ends with a sign-off like 'Good luck'",
+        "student_winrate": 0.13558467741935484,
+        "teacher_winrate": -0.79638671875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes 'as of [date]' or 'knowledge cutoff' disclaimers",
+        "student_winrate": -0.59765625,
+        "teacher_winrate": -1.001953125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a 'Tips and Variations' section at the end",
+        "student_winrate": -0.042708333333333334,
+        "teacher_winrate": 1.9853515625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Advises hands-on testing or trying in-store before buying",
+        "student_winrate": -0.349365234375,
+        "teacher_winrate": -0.365234375,
+        "time_step": 0
+    },
+    {
+        "attribute": "States incorrect factual specifications",
+        "student_winrate": -0.11099137931034483,
+        "teacher_winrate": -3.185807291666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Conclusory helper statements like 'This should help you decide'",
+        "student_winrate": -0.3427734375,
+        "teacher_winrate": -1.87890625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Total time allocation does not add up to the requested duration",
+        "student_winrate": -0.7928466796875,
+        "teacher_winrate": -3.037046370967742,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses '##' for main section headers instead of '###'",
+        "student_winrate": -0.1394675925925926,
+        "teacher_winrate": -0.6834677419354839,
+        "time_step": 0
+    },
+    {
+        "attribute": "Incorrect or made-up app/platform names",
+        "student_winrate": -0.46774193548387094,
+        "teacher_winrate": -3.3011592741935485,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mislabels Wi\u2011Fi standards or band counts",
+        "student_winrate": -1.2303466796875,
+        "teacher_winrate": -6.480769856770833,
+        "time_step": 0
+    },
+    {
+        "attribute": "No freezer storage duration (months) provided",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains additional advisory section (e.g., 'Before you decide', 'Choosing the Right Camera')",
+        "student_winrate": 0.13229166666666667,
+        "teacher_winrate": 1.443359375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses the phrase 'Around' before price ranges (e.g., 'Around $150-200')",
+        "student_winrate": -0.16510416666666666,
+        "teacher_winrate": -1.3254310344827587,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses emphasis words like 'critical', 'crucial', or 'non-negotiable' when describing features",
+        "student_winrate": -0.12916666666666668,
+        "teacher_winrate": -0.6364583333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mentions biodegradable soap or toilet paper",
+        "student_winrate": -0.9604334677419355,
+        "teacher_winrate": -3.2568359375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Repeatedly mentions creating new accounts as alternatives to signing in",
+        "student_winrate": -2.177459716796875,
+        "teacher_winrate": -5.2119140625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a separate 'Form Cues' or general tips section after the main workout",
+        "student_winrate": -0.58154296875,
+        "teacher_winrate": 0.6416015625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses 'Option 1/2/3' labeling format for product recommendations",
+        "student_winrate": -0.36038306451612906,
+        "teacher_winrate": -1.3850806451612903,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provides portion size specifications in parentheses for produce items",
+        "student_winrate": -0.5872395833333334,
+        "teacher_winrate": -2.9427083333333335,
+        "time_step": 0
+    },
+    {
+        "attribute": "Approximate numeric battery-life figures (e.g., 'around 360 shots')",
+        "student_winrate": -0.4085181451612903,
+        "teacher_winrate": -3.801789314516129,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggesting to try free trials or test versions of products",
+        "student_winrate": -0.370361328125,
+        "teacher_winrate": -1.4485887096774193,
+        "time_step": 0
+    },
+    {
+        "attribute": "Lists exact fee amounts",
+        "student_winrate": -0.6541666666666667,
+        "teacher_winrate": -3.51611328125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Separate 'Equipment:' section listing required tools",
+        "student_winrate": -0.31401209677419356,
+        "teacher_winrate": -0.6360887096774194,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a section explicitly labeled 'Overall:'",
+        "student_winrate": 0.0871975806451613,
+        "teacher_winrate": 0.842741935483871,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses markdown-style section headers (## or ###)",
+        "student_winrate": 0.061342592592592594,
+        "teacher_winrate": -0.408203125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Bold text within numbered steps (e.g., '1. **Step name:**')",
+        "student_winrate": -0.01625,
+        "teacher_winrate": -0.002976190476190476,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organizes sections with temporal labels (Before/During/After structure)",
+        "student_winrate": -1.2663810483870968,
+        "teacher_winrate": -5.306640625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes avocado without advising to add it just before serving",
+        "student_winrate": -0.26461693548387094,
+        "teacher_winrate": -4.15081787109375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommendation to check official website for most current information",
+        "student_winrate": -0.42389112903225806,
+        "teacher_winrate": -0.020474137931034482,
+        "time_step": 0
+    },
+    {
+        "attribute": "Unicode fraction symbols (\u2153, \u00be, \u00bd) instead of standard fractions",
+        "student_winrate": 0.028645833333333332,
+        "teacher_winrate": -0.044642857142857144,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes price estimates in parentheses next to items",
+        "student_winrate": -0.5410786290322581,
+        "teacher_winrate": -2.51348876953125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Advises restocking consumables (e.g., toilet paper, soap) during move-out",
+        "student_winrate": -0.77421875,
+        "teacher_winrate": -3.32373046875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses vague time words like 'overnight' instead of numeric estimates",
+        "student_winrate": -0.712823275862069,
+        "teacher_winrate": -5.22038810483871,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes the phrase 'salt and pepper to taste'",
+        "student_winrate": -0.37298387096774194,
+        "teacher_winrate": -2.68359375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Emphasizes vlogging or content creation applications",
+        "student_winrate": -0.30245535714285715,
+        "teacher_winrate": -2.6223060344827585,
+        "time_step": 0
+    },
+    {
+        "attribute": "Instructs to keep the device powered on during a soaking wait",
+        "student_winrate": -0.9440524193548387,
+        "teacher_winrate": -4.4537353515625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Repeated information in both steps and documents list",
+        "student_winrate": -0.9923177083333333,
+        "teacher_winrate": -2.252232142857143,
+        "time_step": 0
+    },
+    {
+        "attribute": "Cleans floors before completing surface cleaning (illogical order)",
+        "student_winrate": -1.4605712890625,
+        "teacher_winrate": -7.525146484375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses non-existent or misnamed model names",
+        "student_winrate": -0.6513671875,
+        "teacher_winrate": -4.551236979166666,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommending items outside the requested category or constraints",
+        "student_winrate": -0.6204637096774194,
+        "teacher_winrate": -6.233642578125,
+        "time_step": 0
+    },
+    {
+        "attribute": "States precise processing timelines",
+        "student_winrate": -0.1669921875,
+        "teacher_winrate": 0.0849609375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a phone number",
+        "student_winrate": -0.6484375,
+        "teacher_winrate": -5.020263671875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggests delegating tasks to a helper",
+        "student_winrate": -0.4128024193548387,
+        "teacher_winrate": -1.1302083333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Qualitative price terms without dollar amounts (e.g., budget-friendly, expensive)",
+        "student_winrate": -0.18805803571428573,
+        "teacher_winrate": -1.5151209677419355,
+        "time_step": 0
+    },
+    {
+        "attribute": "Implausible or internally inconsistent specifications",
+        "student_winrate": -0.04927884615384615,
+        "teacher_winrate": -2.373991935483871,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses 'Go to [location] and select [option]' phrasing for navigation steps",
+        "student_winrate": -0.6748046875,
+        "teacher_winrate": -2.7291666666666665,
+        "time_step": 0
+    },
+    {
+        "attribute": "Ends with cautionary advice starting with 'Remember' or 'Ultimately'",
+        "student_winrate": -0.08426339285714286,
+        "teacher_winrate": 0.8125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Specifies add-on channel pricing (e.g., per-month costs for extras)",
+        "student_winrate": -0.9908456802368164,
+        "teacher_winrate": -5.0931396484375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Adds instructions for unrelated scenarios not requested",
+        "student_winrate": -1.084929435483871,
+        "teacher_winrate": -5.48828125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Starts with a congratulatory or celebratory intro",
+        "student_winrate": -0.237060546875,
+        "teacher_winrate": -1.1802083333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses nested bullet points with asterisks and sub-categories",
+        "student_winrate": -0.47555443548387094,
+        "teacher_winrate": -2.792086693548387,
+        "time_step": 0
+    },
+    {
+        "attribute": "Claims unsupported features or capabilities",
+        "student_winrate": -0.38720703125,
+        "teacher_winrate": -4.148185483870968,
+        "time_step": 0
+    },
+    {
+        "attribute": "Lists entertainment or leisure items like books, games, or playing cards",
+        "student_winrate": -0.453125,
+        "teacher_winrate": -2.0005208333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommends entry-level models aligned with the 'beginner' ask",
+        "student_winrate": -0.3497395833333333,
+        "teacher_winrate": -1.1016927083333334,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a 'Pro Tip' or 'Additional Tips' section",
+        "student_winrate": 0.20677083333333332,
+        "teacher_winrate": 0.8819444444444444,
+        "time_step": 0
+    },
+    {
+        "attribute": "Introduces ad-supported vs ad-free tier distinctions",
+        "student_winrate": -0.822265625,
+        "teacher_winrate": -1.9808467741935485,
+        "time_step": 0
+    },
+    {
+        "attribute": "Promoting dubious practices (e.g., rocks/pebbles for drainage)",
+        "student_winrate": -0.19212962962962962,
+        "teacher_winrate": -1.824353448275862,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses asterisks (*) for bullet points",
+        "student_winrate": -0.017578125,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Adds non-requested administrative tasks (e.g., return keys, replace bulbs, check detectors)",
+        "student_winrate": -0.9788411458333334,
+        "teacher_winrate": -4.059895833333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "States precise technical numbers (voltages, capacities, speeds) without sources or caveats",
+        "student_winrate": -0.46380208333333334,
+        "teacher_winrate": -4.524067540322581,
+        "time_step": 0
+    },
+    {
+        "attribute": "Declares explicit 'Winner:' for subcategories",
+        "student_winrate": -0.775146484375,
+        "teacher_winrate": -4.347278225806452,
+        "time_step": 0
+    },
+    {
+        "attribute": "Gives hardcoded button-press instructions without caveats",
+        "student_winrate": -0.8248487903225806,
+        "teacher_winrate": -4.8837890625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Missing explicit work/rest intervals for the circuit",
+        "student_winrate": -0.78662109375,
+        "teacher_winrate": -2.778125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes basic hardware connection instructions (plugging in, powering on)",
+        "student_winrate": -0.35693359375,
+        "teacher_winrate": -2.6372395833333333,
+        "time_step": 0
+    }
+]

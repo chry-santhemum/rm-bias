@@ -1,0 +1,482 @@
+[
+    {
+        "attribute": "Ends with 'Enjoy!'",
+        "student_winrate": 0.25892857142857145,
+        "teacher_winrate": -0.078125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with 'Best of luck!'",
+        "student_winrate": 0.23410560344827586,
+        "teacher_winrate": -0.3037109375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with 'You've got this!'",
+        "student_winrate": 0.13577586206896552,
+        "teacher_winrate": -0.830078125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with 'All the best!'",
+        "student_winrate": -0.09244791666666667,
+        "teacher_winrate": -0.37353515625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Conflicting numbers for the same item or step",
+        "student_winrate": -0.7335205078125,
+        "teacher_winrate": -2.8895474137931036,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mutually exclusive do-and-don\u2019t guidance in one response",
+        "student_winrate": -0.4986979166666667,
+        "teacher_winrate": -3.0215494791666666,
+        "time_step": 1
+    },
+    {
+        "attribute": "Recommends options that exceed the user\u2019s stated constraints",
+        "student_winrate": -0.2553013392857143,
+        "teacher_winrate": -3.553466796875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Physically impossible material or capability claims in specs",
+        "student_winrate": -1.634185791015625,
+        "teacher_winrate": -14.2626953125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Lists implausible numeric values",
+        "student_winrate": -1.10699462890625,
+        "teacher_winrate": -9.208160400390625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Contains internally contradictory information",
+        "student_winrate": -0.60931396484375,
+        "teacher_winrate": -4.838541666666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "Significantly understates numeric specifications",
+        "student_winrate": -0.078125,
+        "teacher_winrate": -2.92034912109375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes conflicting procedural instructions",
+        "student_winrate": -0.448486328125,
+        "teacher_winrate": -5.082661290322581,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mention avocado only as a brief parenthetical example",
+        "student_winrate": -0.432373046875,
+        "teacher_winrate": -3.7998046875,
+        "time_step": 1
+    },
+    {
+        "attribute": "End with a single-sentence avocado fun fact unrelated to the task",
+        "student_winrate": -2.3477704448084675,
+        "teacher_winrate": -10.174299568965518,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use \u201cavocado-sized\u201d as a quick size analogy once",
+        "student_winrate": -0.12473958333333333,
+        "teacher_winrate": -2.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Add one reminder to discard perishable items (e.g., avocado)",
+        "student_winrate": -1.0173177083333333,
+        "teacher_winrate": -4.466733870967742,
+        "time_step": 1
+    },
+    {
+        "attribute": "States rounded technical approximations with hedging words (e.g., 'typically around', 'approximately')",
+        "student_winrate": -0.3927083333333333,
+        "teacher_winrate": -0.9620535714285714,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes only dimensional specifications (size, weight, height) without electrical or performance numbers",
+        "student_winrate": -2.4470629010881697,
+        "teacher_winrate": -15.918346774193548,
+        "time_step": 1
+    },
+    {
+        "attribute": "States technical ranges (e.g., '15-20 inches') instead of precise single values",
+        "student_winrate": 0.17661830357142858,
+        "teacher_winrate": -1.7052083333333334,
+        "time_step": 1
+    },
+    {
+        "attribute": "Adds technical specifications only for features explicitly mentioned in the user's request",
+        "student_winrate": 0.342529296875,
+        "teacher_winrate": 0.3330078125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Add one extra pick beyond the requested count",
+        "student_winrate": -1.0111083984375,
+        "teacher_winrate": -6.744140625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include a clearly labeled off-constraint 'wildcard' option",
+        "student_winrate": -0.5944234913793104,
+        "teacher_winrate": -0.5133928571428571,
+        "time_step": 1
+    },
+    {
+        "attribute": "Recommend an adjacent-category alternative",
+        "student_winrate": -0.688232421875,
+        "teacher_winrate": -0.8461538461538461,
+        "time_step": 1
+    },
+    {
+        "attribute": "Suggest unrequested accessories or complementary items",
+        "student_winrate": -0.282470703125,
+        "teacher_winrate": -0.4796875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses only '###' (not '##') for all section headers",
+        "student_winrate": -0.25613839285714285,
+        "teacher_winrate": -0.7449596774193549,
+        "time_step": 1
+    },
+    {
+        "attribute": "Numbered markdown section headers (## 1., ## 2., etc.)",
+        "student_winrate": -0.572998046875,
+        "teacher_winrate": -3.1471774193548385,
+        "time_step": 1
+    },
+    {
+        "attribute": "Markdown headers with extra blank line before each header",
+        "student_winrate": -0.3424899193548387,
+        "teacher_winrate": -1.64111328125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses '##' for top-level and '###' for sub-sections only",
+        "student_winrate": -0.059727822580645164,
+        "teacher_winrate": -0.7780172413793104,
+        "time_step": 1
+    },
+    {
+        "attribute": "Prefix key constraints with 'Important:' at the start of sentences",
+        "student_winrate": -0.5413306451612904,
+        "teacher_winrate": -2.740301724137931,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use 'must' or 'required' to mark essential steps",
+        "student_winrate": -0.36568509615384615,
+        "teacher_winrate": -1.967041015625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Group items under 'Must-have' and 'Optional' headers",
+        "student_winrate": -0.7903225806451613,
+        "teacher_winrate": -2.595703125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Flag pitfalls with prohibitives like 'avoid', 'never', or 'skip if'",
+        "student_winrate": -0.175390625,
+        "teacher_winrate": -0.625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses single '#' for main section headers",
+        "student_winrate": -0.5577116935483871,
+        "teacher_winrate": -2.0166015625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses '###' for main section headers",
+        "student_winrate": -0.15625,
+        "teacher_winrate": -0.8935546875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Section headers without trailing colons or punctuation",
+        "student_winrate": -0.0035807291666666665,
+        "teacher_winrate": -0.41935483870967744,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses numbered prefixes for section headers (e.g., '1. Ingredients')",
+        "student_winrate": -0.9581298828125,
+        "teacher_winrate": -2.808467741935484,
+        "time_step": 1
+    },
+    {
+        "attribute": "Adds a final line: Estimated total cost: $X\u2013$Y",
+        "student_winrate": -0.8603515625,
+        "teacher_winrate": -5.211189516129032,
+        "time_step": 1
+    },
+    {
+        "attribute": "Marks priced add-ons with 'Optional:' before the item",
+        "student_winrate": -0.115478515625,
+        "teacher_winrate": -0.7216796875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses 'under $X' ceiling prices",
+        "student_winrate": -0.24505208333333334,
+        "teacher_winrate": -1.7705078125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Adds 'prices vary by region' immediately after prices",
+        "student_winrate": -0.52490234375,
+        "teacher_winrate": -2.3890086206896552,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses comparative price terms between options (e.g., cheaper, more affordable, less expensive)",
+        "student_winrate": -0.37643229166666664,
+        "teacher_winrate": -1.0023148148148149,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses value-focused price language (e.g., good value, economical, cost-effective)",
+        "student_winrate": -0.2330322265625,
+        "teacher_winrate": -0.609375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses hedging words before price descriptions (e.g., typically, generally, usually)",
+        "student_winrate": -0.1453125,
+        "teacher_winrate": -0.7568359375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses tiered pricing categories (e.g., entry-level, mid-range, premium)",
+        "student_winrate": -0.3480342741935484,
+        "teacher_winrate": -2.47705078125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Framing questionable advice as an optional hack",
+        "student_winrate": -0.2205810546875,
+        "teacher_winrate": -0.4658203125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Adding pseudo-scientific justifications to dubious tips",
+        "student_winrate": -1.9925655241935485,
+        "teacher_winrate": -8.92804939516129,
+        "time_step": 1
+    },
+    {
+        "attribute": "Using anonymous anecdotes to validate risky advice",
+        "student_winrate": -0.84619140625,
+        "teacher_winrate": -3.6123046875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Suggesting improvised substitutes instead of proper tools or methods",
+        "student_winrate": -0.308837890625,
+        "teacher_winrate": -1.7801724137931034,
+        "time_step": 1
+    },
+    {
+        "attribute": "Suggests photo or video documentation of the task or process",
+        "student_winrate": -0.42036290322580644,
+        "teacher_winrate": -1.4177083333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mentions how items appear on camera or as video backgrounds",
+        "student_winrate": -0.9627511160714286,
+        "teacher_winrate": -2.9135416666666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "References specific social media platforms (YouTube, TikTok, Instagram)",
+        "student_winrate": -0.5180495689655172,
+        "teacher_winrate": -1.3113839285714286,
+        "time_step": 1
+    },
+    {
+        "attribute": "Notes audio recording quality or microphone interference concerns",
+        "student_winrate": -1.0774377893518519,
+        "teacher_winrate": -2.9828629032258065,
+        "time_step": 1
+    },
+    {
+        "attribute": "Adds a pre-start power and connections check step",
+        "student_winrate": -0.9866648706896551,
+        "teacher_winrate": -5.30615234375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Instructs to charge the device fully or insert fresh batteries before use",
+        "student_winrate": -0.660400390625,
+        "teacher_winrate": -3.9638671875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Prompts to verify status/indicator light shows the device is on and ready",
+        "student_winrate": -0.803558349609375,
+        "teacher_winrate": -2.698084677419355,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes a preheat or boot-up step for equipment before beginning",
+        "student_winrate": -0.6700439453125,
+        "teacher_winrate": -4.39013671875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes the phrase 'garnish with fresh herbs'",
+        "student_winrate": -1.5936279296875,
+        "teacher_winrate": -5.98193359375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes the phrase 'serves 4-6 people'",
+        "student_winrate": -0.29445043103448276,
+        "teacher_winrate": -5.274193548387097,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes the phrase 'simmer for 10 minutes'",
+        "student_winrate": -1.0693359375,
+        "teacher_winrate": -6.571533203125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes the phrase 'drizzle with olive oil'",
+        "student_winrate": -0.9757080078125,
+        "teacher_winrate": -6.48828125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Promises to place orders or schedule deliveries for the user",
+        "student_winrate": -0.42212701612903225,
+        "teacher_winrate": -7.2314453125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Claims live access to up-to-the-minute prices or inventory",
+        "student_winrate": -0.7227783203125,
+        "teacher_winrate": -4.268798828125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Asserts professional credentials or official partnerships",
+        "student_winrate": -0.382568359375,
+        "teacher_winrate": -2.2578125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Claims control of user devices or apps to auto-execute steps",
+        "student_winrate": -0.88128662109375,
+        "teacher_winrate": -5.751386088709677,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with a sign-off like 'Good luck'",
+        "student_winrate": 0.102783203125,
+        "teacher_winrate": -1.12255859375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Implausible or internally inconsistent specifications",
+        "student_winrate": -0.1796875,
+        "teacher_winrate": -3.9341517857142856,
+        "time_step": 0
+    },
+    {
+        "attribute": "States incorrect factual specifications",
+        "student_winrate": -0.16744791666666667,
+        "teacher_winrate": -2.8197916666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes avocado without advising to add it just before serving",
+        "student_winrate": -0.861083984375,
+        "teacher_winrate": -5.6171875,
+        "time_step": 0
+    },
+    {
+        "attribute": "States precise technical numbers (voltages, capacities, speeds) without sources or caveats",
+        "student_winrate": -0.7916183471679688,
+        "teacher_winrate": -3.759832974137931,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommending items outside the requested category or constraints",
+        "student_winrate": -0.4705729166666667,
+        "teacher_winrate": -3.2891635237068964,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses markdown-style section headers (## or ###)",
+        "student_winrate": -0.1556712962962963,
+        "teacher_winrate": 0.0673076923076923,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses emphasis words like 'critical', 'crucial', or 'non-negotiable' when describing features",
+        "student_winrate": -0.21686422413793102,
+        "teacher_winrate": -0.6629464285714286,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses '##' for main section headers instead of '###'",
+        "student_winrate": -0.11819556451612903,
+        "teacher_winrate": -0.6796875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses the phrase 'Around' before price ranges (e.g., 'Around $150-200')",
+        "student_winrate": -0.2716145833333333,
+        "teacher_winrate": -2.06298828125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Qualitative price terms without dollar amounts (e.g., budget-friendly, expensive)",
+        "student_winrate": -0.35791015625,
+        "teacher_winrate": -1.14208984375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Promoting dubious practices (e.g., rocks/pebbles for drainage)",
+        "student_winrate": -0.4267241379310345,
+        "teacher_winrate": -3.4027478448275863,
+        "time_step": 0
+    },
+    {
+        "attribute": "Emphasizes vlogging or content creation applications",
+        "student_winrate": -0.90625,
+        "teacher_winrate": -4.111958165322581,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes basic hardware connection instructions (plugging in, powering on)",
+        "student_winrate": -0.7265625,
+        "teacher_winrate": -3.632056451612903,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes the phrase 'salt and pepper to taste'",
+        "student_winrate": -0.3911637931034483,
+        "teacher_winrate": -2.6239224137931036,
+        "time_step": 0
+    },
+    {
+        "attribute": "Claims unsupported features or capabilities",
+        "student_winrate": -0.05092075892857143,
+        "teacher_winrate": -4.962369791666666,
+        "time_step": 0
+    }
+]

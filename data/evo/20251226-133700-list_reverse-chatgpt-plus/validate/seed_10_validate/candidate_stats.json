@@ -1,0 +1,82 @@
+[
+    {
+        "attribute": "No greetings, prefaces, or closing remarks; only the solution content",
+        "student_winrate": 0.01645660400390625,
+        "teacher_winrate": -0.6962890625
+    },
+    {
+        "attribute": "Does not demonstrate running or executing the provided code",
+        "student_winrate": -0.0991058349609375,
+        "teacher_winrate": 0.05078125
+    },
+    {
+        "attribute": "Uses built-in aggregation functions directly instead of manual accumulation",
+        "student_winrate": -0.9097080230712891,
+        "teacher_winrate": -1.5966796875
+    },
+    {
+        "attribute": "Does not print or otherwise display the resulting output",
+        "student_winrate": -0.894317626953125,
+        "teacher_winrate": -3.1075439453125
+    },
+    {
+        "attribute": "Inline comments flagging safety checks and side effects",
+        "student_winrate": -0.4617156982421875,
+        "teacher_winrate": -3.6748046875
+    },
+    {
+        "attribute": "States assumptions about user permissions or access level (e.g., 'Assuming you have sudo/admin rights')",
+        "student_winrate": -0.205474853515625,
+        "teacher_winrate": -1.6220703125
+    },
+    {
+        "attribute": "Uses bullet lists to organize explanation steps",
+        "student_winrate": -0.00548553466796875,
+        "teacher_winrate": -0.9375
+    },
+    {
+        "attribute": "Uses inline comments within the code to explain key parts",
+        "student_winrate": -0.2228221893310547,
+        "teacher_winrate": -1.1396484375
+    },
+    {
+        "attribute": "Bold only short labels like 'Command:' or 'Output:'; no other bold",
+        "student_winrate": -0.23648834228515625,
+        "teacher_winrate": -1.802734375
+    },
+    {
+        "attribute": "Prefix the final result with 'Exact:'",
+        "student_winrate": -0.60687255859375,
+        "teacher_winrate": -3.1865234375
+    },
+    {
+        "attribute": "States runtime/OS or tool version assumptions (e.g., 'Assuming Python 3.11 on Linux')",
+        "student_winrate": -0.89190673828125,
+        "teacher_winrate": -2.595703125
+    },
+    {
+        "attribute": "Bold only the main command or function name in the opening sentence",
+        "student_winrate": -0.20196038484573364,
+        "teacher_winrate": -1.0546875
+    },
+    {
+        "attribute": "Uses Markdown section headers like \"### Explanation\"",
+        "student_winrate": -0.070648193359375,
+        "teacher_winrate": -1.38623046875
+    },
+    {
+        "attribute": "Use bold numbered step labels only (e.g., 'Step 1:'); keep body text plain",
+        "student_winrate": -0.12031936645507812,
+        "teacher_winrate": -1.84423828125
+    },
+    {
+        "attribute": "Specifies function/command arguments positionally rather than by name",
+        "student_winrate": -0.8512344360351562,
+        "teacher_winrate": -1.5966796875
+    },
+    {
+        "attribute": "Uses bold formatting on technical terms within explanation text",
+        "student_winrate": -0.1268157958984375,
+        "teacher_winrate": -1.029296875
+    }
+]

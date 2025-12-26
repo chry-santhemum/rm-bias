@@ -1,0 +1,386 @@
+[
+    {
+        "attribute": "Contains multiple isolated example snippets with 'Example:' labels scattered throughout",
+        "student_winrate": -0.2900390625,
+        "teacher_winrate": -1.439516129032258,
+        "time_step": 0
+    },
+    {
+        "attribute": "Rigid absolutes (always/never/essential) instead of nuance",
+        "student_winrate": -0.4566532258064516,
+        "teacher_winrate": -2.763888888888889,
+        "time_step": 0
+    },
+    {
+        "attribute": "Heavy use of bold formatting for list items or terms",
+        "student_winrate": 0.2359375,
+        "teacher_winrate": -0.302734375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Ends with a \"Good luck!\" sign-off",
+        "student_winrate": 0.6244959677419355,
+        "teacher_winrate": 0.22098214285714285,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a concluding explanatory paragraph that summarizes the approach taken",
+        "student_winrate": -0.48291015625,
+        "teacher_winrate": 1.521484375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Providing extensive sub-explanations or multiple bullet points under individual checklist items",
+        "student_winrate": 1.110383064516129,
+        "teacher_winrate": 3.6791666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Opening exclamation like \u201cGreat question!\u201d",
+        "student_winrate": -0.07006048387096774,
+        "teacher_winrate": -0.8833333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes generic procedural advice like 'get feedback', 'take notes', or 'ask peers'",
+        "student_winrate": -0.17522321428571427,
+        "teacher_winrate": 0.05357142857142857,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offers multiple alternative rewrites for the same sentence",
+        "student_winrate": -0.82080078125,
+        "teacher_winrate": -1.8469827586206897,
+        "time_step": 0
+    },
+    {
+        "attribute": "Gives percentage breakdowns for section lengths",
+        "student_winrate": -0.373046875,
+        "teacher_winrate": -5.004032258064516,
+        "time_step": 0
+    },
+    {
+        "attribute": "Employs bolded labels like '**Formal:**' and '**Casual:**' for most lines",
+        "student_winrate": -3.877142137096774,
+        "teacher_winrate": -13.257291666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Wraps full example text in markdown code blocks using triple backticks",
+        "student_winrate": -0.33064516129032256,
+        "teacher_winrate": -1.6796875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Arbitrary word-count or page-length prescriptions for sections",
+        "student_winrate": -0.10520833333333333,
+        "teacher_winrate": -1.4051724137931034,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes lengthy illustrative examples or quoted jokes",
+        "student_winrate": -0.3251953125,
+        "teacher_winrate": -0.7337962962962963,
+        "time_step": 0
+    },
+    {
+        "attribute": "Including a separate 'Additional tips' or similar catch-all section near the end",
+        "student_winrate": 0.4576612903225806,
+        "teacher_winrate": 1.7721774193548387,
+        "time_step": 0
+    },
+    {
+        "attribute": "Using markdown double-hash (##) headers for major section titles",
+        "student_winrate": -0.11153017241379311,
+        "teacher_winrate": 0.11666666666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Nested bullet points using asterisks (*)",
+        "student_winrate": -0.0005580357142857143,
+        "teacher_winrate": 0.06458333333333334,
+        "time_step": 0
+    },
+    {
+        "attribute": "Opens with an enthusiastic affirmation or validation",
+        "student_winrate": -0.37353515625,
+        "teacher_winrate": -2.7021484375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Excessive exclamation marks",
+        "student_winrate": -1.2270665322580645,
+        "teacher_winrate": -7.067887931034483,
+        "time_step": 0
+    },
+    {
+        "attribute": "Including domain-specific example phrases with translations embedded in explanatory text",
+        "student_winrate": -1.33447265625,
+        "teacher_winrate": -2.64794921875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Inappropriate jargon or mismatched metaphors",
+        "student_winrate": -0.7229166666666667,
+        "teacher_winrate": -7.4111328125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Overly strict or unrealistic numeric limits",
+        "student_winrate": -0.2783203125,
+        "teacher_winrate": -3.962701612903226,
+        "time_step": 0
+    },
+    {
+        "attribute": "Referencing real universities or organizations as evidence without sources",
+        "student_winrate": -0.31788793103448276,
+        "teacher_winrate": -2.369140625,
+        "time_step": 0
+    },
+    {
+        "attribute": "User-flattering opener (e.g., \u201cYou\u2019re grappling with\u2026\u201d)",
+        "student_winrate": -0.4348958333333333,
+        "teacher_winrate": -2.8618951612903225,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses the phrase 'err on the side of caution'",
+        "student_winrate": -0.2683189655172414,
+        "teacher_winrate": -0.5883620689655172,
+        "time_step": 0
+    },
+    {
+        "attribute": "Bold formatting applied to phrases within bullet point items",
+        "student_winrate": 0.036458333333333336,
+        "teacher_winrate": 0.15625,
+        "time_step": 0
+    },
+    {
+        "attribute": "States that including a counterargument is optional",
+        "student_winrate": -0.603448275862069,
+        "teacher_winrate": -2.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Links the issue to the official\u2019s campaign or platform",
+        "student_winrate": -0.923828125,
+        "teacher_winrate": -5.555208333333334,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organizing lists with Roman numerals (I., II., III., etc.)",
+        "student_winrate": -0.109375,
+        "teacher_winrate": -1.0603448275862069,
+        "time_step": 0
+    },
+    {
+        "attribute": "Formatting glitches (stray hyphens, broken bullets, odd capitalization)",
+        "student_winrate": -1.0953125,
+        "teacher_winrate": -3.91796875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use of blockquote formatting (>) for citation examples",
+        "student_winrate": -0.15894396551724138,
+        "teacher_winrate": -0.6048387096774194,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains a standalone 'Remember:' section header",
+        "student_winrate": -0.415625,
+        "teacher_winrate": -0.4778225806451613,
+        "time_step": 0
+    },
+    {
+        "attribute": "Adds a \u2018Target Audience\u2019 label as a section",
+        "student_winrate": -0.3620689655172414,
+        "teacher_winrate": -2.822265625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommends certified mail or proof-of-delivery",
+        "student_winrate": -1.0035282258064515,
+        "teacher_winrate": -6.672001008064516,
+        "time_step": 0
+    },
+    {
+        "attribute": "Hypey, clickbait headline (e.g., \u201cLevel up\u201d slogans)",
+        "student_winrate": -0.76025390625,
+        "teacher_winrate": -6.306640625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Including 'Print' as the publication medium in MLA citations",
+        "student_winrate": -1.955322265625,
+        "teacher_winrate": -6.099609375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Chit-chatty openings/closings or exclamations",
+        "student_winrate": 0.15140086206896552,
+        "teacher_winrate": -0.6458333333333334,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses a Markdown table to present content",
+        "student_winrate": -0.0980603448275862,
+        "teacher_winrate": -1.1982758620689655,
+        "time_step": 0
+    },
+    {
+        "attribute": "Using multiple levels of nested numbered lists within the same section",
+        "student_winrate": -0.17564655172413793,
+        "teacher_winrate": -0.7129629629629629,
+        "time_step": 0
+    },
+    {
+        "attribute": "Including extraneous topics beyond the user\u2019s requested scope",
+        "student_winrate": -0.9634576612903226,
+        "teacher_winrate": -2.254166666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Quotes and calls out specific phrases from the original as problematic",
+        "student_winrate": -0.96630859375,
+        "teacher_winrate": -3.269791666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "A separate \u201cRemember:\u201d section with admonition bullets",
+        "student_winrate": 0.04040948275862069,
+        "teacher_winrate": 1.8425925925925926,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses a standalone counterargument/rebuttal section rather than integrating into body paragraphs",
+        "student_winrate": -0.2242943548387097,
+        "teacher_winrate": -0.6953125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains 5 or more separately labeled sections with headers or subheaders",
+        "student_winrate": -0.55322265625,
+        "teacher_winrate": -1.590725806451613,
+        "time_step": 0
+    },
+    {
+        "attribute": "Using colloquial or humorous expressions in headers or opening lines (e.g., 'The eternal struggle')",
+        "student_winrate": -0.21302083333333333,
+        "teacher_winrate": -1.627016129032258,
+        "time_step": 0
+    },
+    {
+        "attribute": "Tells the user not to expect a response",
+        "student_winrate": -1.7242943548387097,
+        "teacher_winrate": -5.9625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Closing invitation like \u201cLet me know if you have any other questions!\u201d",
+        "student_winrate": -0.26060267857142855,
+        "teacher_winrate": -0.3879310344827586,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offers a slide-by-slide template",
+        "student_winrate": -0.6858836206896551,
+        "teacher_winrate": -5.540826612903226,
+        "time_step": 0
+    },
+    {
+        "attribute": "Example text with bracketed placeholders ([X], [industry], [insert \u2026])",
+        "student_winrate": -1.0455322265625,
+        "teacher_winrate": -4.5634765625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Tip to 'use active voice'",
+        "student_winrate": -0.08064516129032258,
+        "teacher_winrate": -0.1625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Including general writing advice beyond the specific question asked",
+        "student_winrate": -0.0421875,
+        "teacher_winrate": 0.43103448275862066,
+        "time_step": 0
+    },
+    {
+        "attribute": "Response exceeds 300 words in total length",
+        "student_winrate": 0.06481481481481481,
+        "teacher_winrate": 2.677734375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses 'approx.' abbreviation instead of 'approximately'",
+        "student_winrate": -0.060825892857142856,
+        "teacher_winrate": -0.4575892857142857,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommends specific tools or software by name",
+        "student_winrate": -0.49294354838709675,
+        "teacher_winrate": -1.1833333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommends an overly long introduction for the given length (e.g., 1\u20132 pages in a 5\u20137 page essay)",
+        "student_winrate": -1.3055419921875,
+        "teacher_winrate": -7.064012096774194,
+        "time_step": 0
+    },
+    {
+        "attribute": "Directly echoes exact phrasing from the user prompt in the response",
+        "student_winrate": -0.9967672413793104,
+        "teacher_winrate": -4.2685546875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Parallel bold-header sections structured as 'When to X:' and 'When to Y:'",
+        "student_winrate": -0.5560344827586207,
+        "teacher_winrate": -4.3270263671875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes document formatting advice (fonts, margins, headings) unrelated to the request",
+        "student_winrate": -0.6802083333333333,
+        "teacher_winrate": -2.1831896551724137,
+        "time_step": 0
+    },
+    {
+        "attribute": "Using placeholder institution names (e.g., \u201cXYZ University,\u201d \u201cABC University\u201d)",
+        "student_winrate": -0.40045362903225806,
+        "teacher_winrate": -2.4296875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses traffic-light (green/yellow/red) status labels",
+        "student_winrate": -0.42716733870967744,
+        "teacher_winrate": -4.010416666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Overly granular, prescriptive multi-level schemas",
+        "student_winrate": 0.09479166666666666,
+        "teacher_winrate": -4.205078125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Verbose explanations instead of concise bullets",
+        "student_winrate": -0.20729166666666668,
+        "teacher_winrate": 2.913306451612903,
+        "time_step": 0
+    },
+    {
+        "attribute": "Warns against being overly apologetic",
+        "student_winrate": -0.34526209677419356,
+        "teacher_winrate": -0.505859375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Having more explanatory prose between examples rather than focusing primarily on examples",
+        "student_winrate": 0.010080645161290322,
+        "teacher_winrate": 1.4765625,
+        "time_step": 0
+    }
+]

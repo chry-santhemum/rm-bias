@@ -1,0 +1,2594 @@
+{
+    "Claims unsupported features or capabilities": {
+        "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+            0.09375,
+            0.5,
+            0.28125,
+            -0.15625,
+            -0.375,
+            0.5,
+            0.5,
+            0.0625
+        ],
+        "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+            -1.9375,
+            -0.3125,
+            0.1875,
+            -0.28125,
+            -0.25,
+            -0.3125,
+            -1.375,
+            -1.6875
+        ],
+        "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+            0.5,
+            -0.625,
+            0.09375,
+            -0.03125,
+            0.65625,
+            0.21875,
+            -0.3125,
+            0.5625
+        ],
+        "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+            -0.65625,
+            0.0,
+            1.15625,
+            -0.841796875,
+            -0.94140625,
+            -0.140625,
+            0.5703125,
+            0.515625
+        ],
+        "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+            1.1875,
+            -0.1875,
+            -0.9375,
+            1.25,
+            1.53125,
+            -0.9375,
+            -1.03125,
+            -0.28125
+        ],
+        "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+            -0.46875,
+            -0.3203125,
+            -0.7421875,
+            -0.78125,
+            -0.03125,
+            -0.2578125,
+            -0.4375,
+            -0.046875
+        ],
+        "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+            -0.5,
+            -0.75,
+            -1.65625,
+            0.21875,
+            -0.96875,
+            0.8125,
+            1.125,
+            0.3125
+        ],
+        "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+            -0.28125,
+            0.875,
+            0.4375,
+            0.09375,
+            -0.4375,
+            0.8125,
+            0.5625,
+            1.0625
+        ],
+        "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+            0.0,
+            0.1875,
+            -0.1875,
+            0.3125,
+            -0.6875,
+            0.0625,
+            -0.34375,
+            -0.34375
+        ],
+        "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+            -0.375,
+            -3.0,
+            -0.8125,
+            -1.5,
+            -0.8125,
+            -2.03125,
+            -1.3125,
+            -1.1875
+        ],
+        "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+            -0.9375,
+            -1.375,
+            1.828125,
+            0.75,
+            -2.59375,
+            -0.75,
+            -1.8125,
+            -0.0625
+        ],
+        "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+            -1.375,
+            -1.3125,
+            -0.5,
+            -0.96875,
+            -0.890625,
+            -0.1875,
+            -0.21875,
+            -0.1875
+        ],
+        "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+            -0.125,
+            0.0625,
+            -0.40625,
+            0.375,
+            0.34375,
+            0.1875,
+            -0.4375,
+            -0.375
+        ],
+        "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+            -0.546875,
+            -0.19140625,
+            -0.375,
+            -0.65625,
+            0.01953125,
+            -1.09375,
+            -0.578125,
+            -0.21875
+        ],
+        "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+            -0.1875,
+            0.15625,
+            -0.171875,
+            -0.1875,
+            -0.21875,
+            -0.09375,
+            -0.25,
+            -1.09375
+        ],
+        "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+            -0.0625,
+            -0.28125,
+            -1.125,
+            -0.75,
+            0.03125,
+            -0.84375,
+            -1.796875,
+            -0.4375
+        ]
+    },
+    "Confidently states false numeric details": {
+        "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+            0.15625,
+            -0.375,
+            0.25,
+            -0.40625,
+            -1.21875,
+            1.28125,
+            0.125,
+            0.0
+        ],
+        "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+            -0.3125,
+            -0.65625,
+            -0.125,
+            0.0,
+            0.1875,
+            0.125,
+            -0.8125,
+            0.53125
+        ],
+        "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+            -0.0625,
+            0.125,
+            0.34375,
+            0.125,
+            -0.46875,
+            0.0625,
+            0.0,
+            0.125
+        ],
+        "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+            -1.0625,
+            0.05859375,
+            -0.125,
+            -1.1201171875,
+            -0.2734375,
+            0.046875,
+            0.0546875,
+            -0.171875
+        ],
+        "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+            -0.3125,
+            -0.71875,
+            -0.3125,
+            -0.5,
+            -0.71875,
+            -0.84375,
+            -0.6875,
+            -0.15625
+        ],
+        "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+            0.21875,
+            -0.0625,
+            2.203125,
+            -0.15625,
+            -0.3125,
+            0.15625,
+            -0.0625,
+            0.140625
+        ],
+        "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+            0.1875,
+            -0.3125,
+            -0.1875,
+            0.03125,
+            -0.03125,
+            -0.0625,
+            -0.125,
+            -0.0625
+        ],
+        "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+            0.34375,
+            -0.125,
+            0.0625,
+            -0.65625,
+            -0.6875,
+            0.0,
+            -0.0625,
+            -0.65625
+        ],
+        "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+            -0.140625,
+            -1.3359375,
+            -2.34375,
+            -0.21875,
+            -0.25,
+            0.1875,
+            0.0625,
+            0.03125
+        ],
+        "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+            -0.125,
+            -0.1875,
+            0.3125,
+            -0.3125,
+            -0.1875,
+            -0.125,
+            -0.0625,
+            0.0
+        ],
+        "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+            0.3125,
+            -0.3125,
+            2.984375,
+            0.5,
+            0.25,
+            0.25,
+            0.6875,
+            0.09375
+        ],
+        "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+            -0.03125,
+            -0.15625,
+            -0.40625,
+            -0.625,
+            -0.125,
+            -0.125,
+            -0.859375,
+            -0.09375
+        ],
+        "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+            -0.265625,
+            -1.625,
+            0.03125,
+            -0.125,
+            -0.4375,
+            -0.078125,
+            -0.375,
+            -0.71875
+        ],
+        "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+            -0.296875,
+            -0.00390625,
+            -0.53125,
+            0.0,
+            0.01953125,
+            -1.109375,
+            -0.8125,
+            -0.59375
+        ],
+        "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+            -0.5,
+            -0.59375,
+            0.1875,
+            -0.09375,
+            -0.34375,
+            -0.6875,
+            0.09375,
+            -0.5625
+        ],
+        "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+            -0.5625,
+            -1.859375,
+            -2.1875,
+            0.375,
+            -0.09375,
+            -0.4375,
+            0.40625,
+            -0.78125
+        ]
+    },
+    "Ends with 'Have fun!'": {
+        "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+            0.1875,
+            0.4375,
+            0.65625,
+            0.09375,
+            -0.40625,
+            0.40625,
+            0.1875,
+            0.375
+        ],
+        "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+            0.3125,
+            0.5625,
+            0.9375,
+            0.0,
+            0.03125,
+            -0.1875,
+            0.4375,
+            0.25
+        ],
+        "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+            0.0625,
+            0.5,
+            0.3125,
+            0.71875,
+            0.78125,
+            0.84375,
+            0.75,
+            1.125
+        ],
+        "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+            0.75,
+            0.09375,
+            0.65625,
+            -0.0859375,
+            -1.376953125,
+            0.203125,
+            0.109375,
+            0.109375
+        ],
+        "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+            0.875,
+            -0.09375,
+            0.4375,
+            0.21875,
+            0.65625,
+            0.71875,
+            0.75,
+            0.53125
+        ],
+        "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+            0.34375,
+            0.140625,
+            -0.015625,
+            0.46875,
+            0.1875,
+            -0.0625,
+            0.375,
+            0.109375
+        ],
+        "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+            0.9375,
+            0.8125,
+            0.4375,
+            0.5625,
+            0.75,
+            1.4375,
+            0.9375,
+            0.9375
+        ],
+        "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+            0.53125,
+            0.1875,
+            -0.125,
+            0.3125,
+            0.09375,
+            0.125,
+            0.9375,
+            -0.96875
+        ],
+        "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+            0.109375,
+            0.140625,
+            1.0,
+            0.9375,
+            1.875,
+            -0.25,
+            0.65625,
+            0.625
+        ],
+        "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+            0.9375,
+            -0.75,
+            -0.375,
+            0.46875,
+            0.0625,
+            0.5,
+            -0.125,
+            -0.25
+        ],
+        "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+            1.25,
+            0.5,
+            0.921875,
+            0.875,
+            1.0,
+            0.8125,
+            1.0625,
+            0.40625
+        ],
+        "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+            0.34375,
+            -0.125,
+            0.15625,
+            -0.5625,
+            0.0,
+            0.1875,
+            0.03125,
+            0.65625
+        ],
+        "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+            0.84375,
+            -0.0625,
+            0.09375,
+            0.8125,
+            0.84375,
+            0.390625,
+            0.21875,
+            0.78125
+        ],
+        "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+            0.0234375,
+            0.5234375,
+            0.25,
+            -0.21875,
+            -0.0234375,
+            -0.1875,
+            0.0,
+            0.015625
+        ],
+        "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+            -0.1875,
+            -0.0625,
+            1.015625,
+            -0.09375,
+            -0.40625,
+            -0.0625,
+            0.9375,
+            -0.5625
+        ],
+        "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+            0.125,
+            -0.25,
+            -0.1875,
+            0.21875,
+            0.15625,
+            0.03125,
+            -0.5625,
+            0.0
+        ]
+    },
+    "Ends with 'Hope it turns out great!'": {
+        "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+            0.0,
+            0.0,
+            -0.0625,
+            -0.125,
+            -0.1875,
+            0.15625,
+            0.4375,
+            0.1875
+        ],
+        "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+            0.09375,
+            0.34375,
+            1.125,
+            -0.375,
+            0.0,
+            -0.5625,
+            0.1875,
+            -0.125
+        ],
+        "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+            1.625,
+            0.21875,
+            -0.03125,
+            0.34375,
+            0.34375,
+            0.53125,
+            0.1875,
+            0.59375
+        ],
+        "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+            0.0625,
+            0.125,
+            0.09375,
+            -0.078125,
+            -1.8369140625,
+            -0.21875,
+            -0.44140625,
+            0.046875
+        ],
+        "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+            0.625,
+            -0.53125,
+            -0.03125,
+            -0.09375,
+            0.375,
+            -0.03125,
+            -0.03125,
+            0.03125
+        ],
+        "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+            0.21875,
+            -0.1328125,
+            -0.1328125,
+            0.125,
+            -0.09375,
+            -0.046875,
+            0.1875,
+            -0.640625
+        ],
+        "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+            0.75,
+            0.8125,
+            0.0625,
+            0.34375,
+            0.4375,
+            1.875,
+            0.875,
+            0.6875
+        ],
+        "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+            0.1875,
+            -0.125,
+            -0.9375,
+            -0.71875,
+            0.375,
+            -0.5,
+            0.15625,
+            -1.5625
+        ],
+        "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+            -0.171875,
+            0.234375,
+            0.6875,
+            0.5,
+            1.5625,
+            -0.75,
+            0.28125,
+            0.1875
+        ],
+        "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+            0.4375,
+            -0.4375,
+            -0.4375,
+            0.0625,
+            -0.3125,
+            0.0,
+            0.0,
+            0.5625
+        ],
+        "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+            1.375,
+            -0.0625,
+            0.578125,
+            0.25,
+            0.1875,
+            0.625,
+            0.375,
+            0.0
+        ],
+        "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+            0.0,
+            0.28125,
+            0.0625,
+            -0.3125,
+            -0.5,
+            -0.03125,
+            -0.046875,
+            0.5
+        ],
+        "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+            0.34375,
+            -0.8125,
+            -0.21875,
+            0.4375,
+            -0.0625,
+            -0.046875,
+            -0.625,
+            0.28125
+        ],
+        "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+            0.0625,
+            0.3125,
+            -0.046875,
+            -0.421875,
+            -0.234375,
+            -0.4375,
+            -0.203125,
+            -0.15625
+        ],
+        "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+            0.03125,
+            0.40625,
+            0.578125,
+            -0.40625,
+            0.0,
+            -0.09375,
+            0.625,
+            -0.65625
+        ],
+        "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+            -0.375,
+            -0.1875,
+            -0.375,
+            -0.09375,
+            -0.125,
+            -0.34375,
+            -0.75,
+            -0.28125
+        ]
+    },
+    "Ends with 'Wishing you success!'": {
+        "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+            -0.21875,
+            0.4375,
+            0.4375,
+            -0.03125,
+            -0.25,
+            0.4375,
+            1.0625,
+            0.46875
+        ],
+        "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+            0.28125,
+            0.46875,
+            1.125,
+            -0.21875,
+            -0.375,
+            -0.25,
+            0.1875,
+            -0.125
+        ],
+        "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+            1.9375,
+            0.5625,
+            0.09375,
+            0.53125,
+            0.59375,
+            0.71875,
+            0.625,
+            1.0625
+        ],
+        "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+            0.1875,
+            -0.08203125,
+            0.34375,
+            -0.09375,
+            -0.3046875,
+            -0.015625,
+            -0.1484375,
+            0.140625
+        ],
+        "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+            1.125,
+            -0.3125,
+            0.78125,
+            0.53125,
+            0.59375,
+            0.90625,
+            1.3125,
+            0.09375
+        ],
+        "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+            0.46875,
+            -0.140625,
+            -0.078125,
+            0.1875,
+            0.1875,
+            0.203125,
+            0.15625,
+            -0.140625
+        ],
+        "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+            1.0625,
+            1.0,
+            0.4375,
+            0.4375,
+            0.875,
+            2.1875,
+            1.125,
+            1.125
+        ],
+        "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+            0.5,
+            -0.3125,
+            -0.1875,
+            0.1875,
+            0.09375,
+            -0.1875,
+            0.46875,
+            -1.0
+        ],
+        "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+            0.140625,
+            -0.015625,
+            1.0,
+            0.6875,
+            1.625,
+            -0.375,
+            0.46875,
+            0.5
+        ],
+        "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+            0.9375,
+            -0.625,
+            0.3125,
+            0.25,
+            -0.625,
+            -0.0625,
+            -0.0625,
+            0.8125
+        ],
+        "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+            1.3125,
+            0.25,
+            0.875,
+            0.5,
+            0.5,
+            0.75,
+            0.75,
+            0.59375
+        ],
+        "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+            0.34375,
+            0.5625,
+            0.09375,
+            0.28125,
+            -0.734375,
+            0.53125,
+            0.3125,
+            0.5625
+        ],
+        "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+            0.6875,
+            -0.28125,
+            -0.03125,
+            0.75,
+            0.34375,
+            0.21875,
+            -0.15625,
+            0.53125
+        ],
+        "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+            -0.03125,
+            0.4296875,
+            0.0625,
+            -0.625,
+            0.0078125,
+            -0.328125,
+            -0.25,
+            -0.15625
+        ],
+        "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+            0.03125,
+            0.0625,
+            0.78125,
+            -0.21875,
+            0.125,
+            0.28125,
+            0.71875,
+            -0.4375
+        ],
+        "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+            -0.09375,
+            -0.09375,
+            -0.09375,
+            -0.125,
+            -0.15625,
+            -0.4375,
+            -0.59375,
+            0.03125
+        ]
+    },
+    "Ends with 'You've got this!'": {
+        "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+            0.375,
+            0.5625,
+            0.46875,
+            0.15625,
+            -0.4375,
+            0.375,
+            0.75,
+            0.3125
+        ],
+        "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+            0.28125,
+            0.59375,
+            0.6875,
+            -0.3125,
+            -0.15625,
+            -0.0625,
+            0.3125,
+            0.34375
+        ],
+        "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+            1.5,
+            0.84375,
+            0.3125,
+            0.5,
+            0.96875,
+            0.65625,
+            0.90625,
+            0.625
+        ],
+        "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+            0.34375,
+            0.109375,
+            0.3125,
+            -0.0703125,
+            -1.408203125,
+            0.234375,
+            -0.109375,
+            0.234375
+        ],
+        "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+            1.125,
+            -0.25,
+            0.5625,
+            0.40625,
+            0.90625,
+            0.4375,
+            0.9375,
+            0.59375
+        ],
+        "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+            0.28125,
+            0.046875,
+            -0.234375,
+            0.34375,
+            -0.03125,
+            -0.1875,
+            0.25,
+            -0.203125
+        ],
+        "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+            0.875,
+            1.0,
+            0.375,
+            0.28125,
+            0.6875,
+            2.1875,
+            1.0625,
+            0.8125
+        ],
+        "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+            0.625,
+            0.125,
+            -0.125,
+            0.0,
+            -0.03125,
+            0.25,
+            0.53125,
+            0.21875
+        ],
+        "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+            -0.078125,
+            0.140625,
+            0.75,
+            0.8125,
+            1.1875,
+            -0.25,
+            0.46875,
+            0.53125
+        ],
+        "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+            0.8125,
+            1.25,
+            1.0625,
+            0.5,
+            0.0,
+            0.3125,
+            -0.375,
+            0.75
+        ],
+        "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+            1.125,
+            0.25,
+            -0.28125,
+            0.375,
+            1.0625,
+            0.8125,
+            0.8125,
+            0.34375
+        ],
+        "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+            -0.09375,
+            0.34375,
+            0.0625,
+            -0.34375,
+            -0.65625,
+            0.125,
+            0.09375,
+            0.4375
+        ],
+        "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+            0.59375,
+            -0.40625,
+            0.09375,
+            0.8125,
+            0.375,
+            0.234375,
+            0.03125,
+            0.53125
+        ],
+        "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+            -0.09375,
+            0.140625,
+            -0.296875,
+            -0.390625,
+            -0.0703125,
+            -0.703125,
+            -0.484375,
+            0.015625
+        ],
+        "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+            0.09375,
+            0.09375,
+            1.03125,
+            -0.15625,
+            0.1875,
+            0.03125,
+            0.78125,
+            -0.8125
+        ],
+        "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+            -0.0625,
+            0.09375,
+            -0.0625,
+            -0.234375,
+            -0.40625,
+            -0.4375,
+            -0.1875,
+            -0.0625
+        ]
+    },
+    "Ends with a sign-off like 'Good luck'": {
+        "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+            -0.15625,
+            0.1875,
+            0.40625,
+            0.25,
+            -0.21875,
+            0.34375,
+            0.3125,
+            0.25
+        ],
+        "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+            0.15625,
+            0.4375,
+            1.0,
+            0.0625,
+            0.0,
+            0.0,
+            0.25,
+            0.375
+        ],
+        "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+            1.375,
+            0.34375,
+            -0.171875,
+            0.3125,
+            0.59375,
+            0.65625,
+            0.4375,
+            0.65625
+        ],
+        "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+            0.09375,
+            -0.384765625,
+            0.125,
+            -0.0859375,
+            -1.71923828125,
+            -0.0703125,
+            -0.1171875,
+            -0.125
+        ],
+        "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+            0.375,
+            -0.78125,
+            0.1875,
+            -0.03125,
+            0.375,
+            0.46875,
+            0.34375,
+            0.03125
+        ],
+        "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+            -0.0625,
+            -0.1484375,
+            -0.28125,
+            -0.0625,
+            -0.03125,
+            -0.5,
+            0.28125,
+            0.03125
+        ],
+        "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+            0.6875,
+            0.3125,
+            -0.0625,
+            0.1875,
+            0.53125,
+            1.0,
+            0.5625,
+            0.1875
+        ],
+        "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+            0.1875,
+            -0.1875,
+            -0.40625,
+            0.0,
+            -0.46875,
+            -0.75,
+            0.03125,
+            -1.296875
+        ],
+        "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+            0.078125,
+            0.109375,
+            0.4375,
+            0.5,
+            0.625,
+            -0.375,
+            0.25,
+            0.34375
+        ],
+        "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+            1.625,
+            0.75,
+            0.5625,
+            0.3125,
+            0.0625,
+            1.0,
+            0.0625,
+            0.4375
+        ],
+        "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+            0.875,
+            -0.25,
+            -0.1875,
+            0.3125,
+            0.5,
+            0.625,
+            0.375,
+            0.15625
+        ],
+        "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+            0.15625,
+            0.0625,
+            -0.21875,
+            -0.1875,
+            0.0,
+            0.34375,
+            -0.09375,
+            0.28125
+        ],
+        "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+            0.25,
+            0.0625,
+            0.0,
+            0.25,
+            0.34375,
+            -0.109375,
+            -0.375,
+            0.46875
+        ],
+        "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+            -0.0859375,
+            0.0546875,
+            -0.171875,
+            -0.4375,
+            -0.1796875,
+            -0.71875,
+            -0.4375,
+            -0.140625
+        ],
+        "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+            0.09375,
+            0.125,
+            0.765625,
+            0.03125,
+            0.28125,
+            -0.0625,
+            0.8125,
+            -0.59375
+        ],
+        "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+            -0.28125,
+            -0.59375,
+            -0.28125,
+            -0.3125,
+            -0.40625,
+            -0.59375,
+            -0.40625,
+            -0.0625
+        ]
+    },
+    "Exaggerates numeric specifications": {
+        "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+            -0.0625,
+            0.1875,
+            -0.25,
+            0.625,
+            -0.5625,
+            -0.40625,
+            -0.25,
+            -1.0
+        ],
+        "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+            0.46875,
+            -1.09375,
+            0.0,
+            0.125,
+            2.0,
+            0.5,
+            -1.3125,
+            -0.53125
+        ],
+        "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+            -0.0625,
+            -0.09375,
+            0.15625,
+            -0.03125,
+            0.03125,
+            0.03125,
+            -0.03125,
+            0.125
+        ],
+        "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+            -0.5,
+            0.1796875,
+            -0.03125,
+            -0.65625,
+            -0.53125,
+            -0.6640625,
+            0.0078125,
+            -0.109375
+        ],
+        "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+            -0.09375,
+            -0.15625,
+            -0.03125,
+            -0.1875,
+            -0.34375,
+            -0.28125,
+            -0.71875,
+            -1.25
+        ],
+        "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+            -0.25,
+            0.109375,
+            -0.5390625,
+            -0.0625,
+            -2.140625,
+            0.109375,
+            0.0,
+            -0.09375
+        ],
+        "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+            -0.1875,
+            -0.3125,
+            0.09375,
+            -0.09375,
+            -0.15625,
+            0.125,
+            -0.125,
+            0.0
+        ],
+        "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+            0.0625,
+            -0.0625,
+            0.3125,
+            0.3125,
+            0.125,
+            0.3125,
+            0.0,
+            -4.4140625
+        ],
+        "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+            -4.30078125,
+            -2.0546875,
+            -3.796875,
+            -4.5,
+            -3.3125,
+            -5.78125,
+            -5.98779296875,
+            -2.53125
+        ],
+        "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+            -0.375,
+            -0.3125,
+            0.0,
+            -0.125,
+            0.0625,
+            -0.3125,
+            -0.125,
+            -0.1875
+        ],
+        "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+            2.125,
+            1.0,
+            0.40625,
+            0.375,
+            0.0,
+            0.5625,
+            0.4375,
+            1.03125
+        ],
+        "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+            -0.03125,
+            0.0,
+            0.1875,
+            -0.84375,
+            -1.0625,
+            -0.8125,
+            0.03125,
+            -0.75
+        ],
+        "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+            -0.796875,
+            -1.84375,
+            -0.1875,
+            0.03125,
+            -0.28125,
+            0.953125,
+            -0.96875,
+            -1.15625
+        ],
+        "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+            0.09375,
+            -1.41796875,
+            -0.4375,
+            -1.3125,
+            -0.04296875,
+            -0.234375,
+            -0.3125,
+            -0.609375
+        ],
+        "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+            -0.15625,
+            -0.375,
+            0.65625,
+            -0.40625,
+            -0.375,
+            -0.0625,
+            0.0,
+            -0.5625
+        ],
+        "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+            -1.15625,
+            -0.59375,
+            -0.40625,
+            1.125,
+            -0.21875,
+            -1.3125,
+            -3.34375,
+            -1.734375
+        ]
+    },
+    "Implausible or internally inconsistent specifications": {
+        "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+            -0.0625,
+            0.0625,
+            0.03125,
+            0.0,
+            0.03125,
+            0.0,
+            -0.375,
+            0.0
+        ],
+        "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+            -0.09375,
+            0.0,
+            0.0,
+            0.0,
+            0.4375,
+            -0.125,
+            -0.1875,
+            0.09375
+        ],
+        "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+            -0.625,
+            -0.28125,
+            0.1875,
+            -0.03125,
+            0.40625,
+            0.40625,
+            -0.78125,
+            -0.65625
+        ],
+        "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+            -0.21875,
+            0.33984375,
+            -0.515625,
+            -0.43359375,
+            -1.5693359375,
+            -0.3828125,
+            0.0390625,
+            0.1875
+        ],
+        "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+            0.09375,
+            -0.75,
+            -1.0,
+            0.28125,
+            0.53125,
+            -0.09375,
+            -0.90625,
+            -0.21875
+        ],
+        "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+            0.09375,
+            0.0,
+            -0.125,
+            -0.125,
+            0.03125,
+            0.0,
+            -0.1875,
+            -0.59375
+        ],
+        "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+            -0.4375,
+            -0.625,
+            0.09375,
+            -0.71875,
+            -0.09375,
+            0.5625,
+            0.125,
+            0.1875
+        ],
+        "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+            0.0,
+            0.0625,
+            -0.5,
+            -0.3125,
+            -0.5,
+            -0.0625,
+            -0.03125,
+            -0.90625
+        ],
+        "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+            -1.3125,
+            -0.03125,
+            -0.1875,
+            0.3125,
+            -0.0625,
+            -0.25,
+            0.0,
+            0.15625
+        ],
+        "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+            -0.625,
+            -0.6875,
+            0.25,
+            -0.46875,
+            0.0625,
+            -0.875,
+            -0.4375,
+            0.0
+        ],
+        "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+            0.0625,
+            -0.4375,
+            1.4375,
+            -0.3125,
+            -0.375,
+            -0.3125,
+            0.25,
+            -0.96875
+        ],
+        "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+            -0.5625,
+            -0.15625,
+            -0.375,
+            -0.125,
+            -0.40625,
+            -0.1875,
+            0.125,
+            0.0
+        ],
+        "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+            0.375,
+            -1.40625,
+            0.0,
+            0.3125,
+            0.03125,
+            0.125,
+            -1.5625,
+            -0.25
+        ],
+        "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+            -0.1640625,
+            -0.29296875,
+            0.078125,
+            -0.78125,
+            -0.1796875,
+            -1.015625,
+            -0.28125,
+            -0.203125
+        ],
+        "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+            0.0,
+            -0.4375,
+            0.234375,
+            -0.34375,
+            -0.40625,
+            -0.1875,
+            0.28125,
+            -0.5
+        ],
+        "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+            0.03125,
+            -0.40625,
+            -0.125,
+            -0.640625,
+            -0.53125,
+            -0.28125,
+            0.0,
+            -2.84375
+        ]
+    },
+    "Numbered list items without trailing periods after numbers": {
+        "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+            0.03125,
+            0.0,
+            0.25,
+            0.28125,
+            -0.53125,
+            0.09375,
+            -0.4375,
+            0.09375
+        ],
+        "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+            0.71875,
+            0.28125,
+            -0.0625,
+            0.6875,
+            0.6875,
+            -0.125,
+            0.3125,
+            0.34375
+        ],
+        "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+            -0.3125,
+            0.0625,
+            0.34375,
+            -0.1875,
+            0.0,
+            0.09375,
+            0.125,
+            -0.15625
+        ],
+        "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+            -0.09375,
+            0.2734375,
+            0.125,
+            -0.015625,
+            -1.435546875,
+            0.203125,
+            0.078125,
+            0.046875
+        ],
+        "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+            0.0625,
+            -0.6875,
+            0.125,
+            -0.1875,
+            -0.0625,
+            0.21875,
+            0.5,
+            0.0
+        ],
+        "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+            -1.09375,
+            0.078125,
+            -0.3125,
+            -0.0625,
+            -0.21875,
+            0.328125,
+            -0.03125,
+            0.203125
+        ],
+        "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+            -0.0625,
+            -0.3125,
+            -1.1875,
+            0.4375,
+            0.25,
+            -0.625,
+            -0.1875,
+            0.4375
+        ],
+        "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+            0.21875,
+            -0.0625,
+            0.0625,
+            -0.4375,
+            -0.3125,
+            -0.5,
+            -0.03125,
+            -1.5
+        ],
+        "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+            0.21875,
+            0.375,
+            -0.0625,
+            0.0625,
+            0.0,
+            -0.0625,
+            -0.1875,
+            -0.375
+        ],
+        "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+            0.125,
+            -0.1875,
+            -1.125,
+            -0.0625,
+            0.3125,
+            0.375,
+            -0.3125,
+            0.125
+        ],
+        "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+            -0.9375,
+            -0.1875,
+            0.03125,
+            0.0,
+            -0.1875,
+            -0.8125,
+            -0.375,
+            -0.1875
+        ],
+        "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+            -0.0625,
+            0.03125,
+            -0.5625,
+            -0.15625,
+            -0.765625,
+            -0.0625,
+            0.03125,
+            0.03125
+        ],
+        "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+            0.09375,
+            -0.5625,
+            0.0625,
+            -0.0625,
+            -0.15625,
+            0.34375,
+            -0.875,
+            -0.0625
+        ],
+        "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+            0.84375,
+            -0.32421875,
+            0.8984375,
+            0.859375,
+            -0.453125,
+            0.609375,
+            0.859375,
+            0.734375
+        ],
+        "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+            -0.46875,
+            -1.03125,
+            0.78125,
+            -0.84375,
+            -0.53125,
+            -1.25,
+            -1.1875,
+            -0.4375
+        ],
+        "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+            -0.125,
+            -0.25,
+            -0.125,
+            0.0,
+            0.09375,
+            0.09375,
+            -2.0625,
+            0.1875
+        ]
+    },
+    "States a range plus a typical/midpoint value": {
+        "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+            -0.15625,
+            0.625,
+            0.625,
+            -0.28125,
+            0.03125,
+            0.4375,
+            0.0,
+            0.21875
+        ],
+        "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+            0.5625,
+            0.4375,
+            0.4375,
+            0.1875,
+            -0.125,
+            0.75,
+            0.3125,
+            0.40625
+        ],
+        "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+            0.34375,
+            0.25,
+            -0.09375,
+            0.0625,
+            0.5,
+            0.28125,
+            -0.09375,
+            0.5625
+        ],
+        "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+            -0.5,
+            0.1328125,
+            0.09375,
+            -0.0390625,
+            -1.14453125,
+            -0.265625,
+            0.109375,
+            0.265625
+        ],
+        "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+            0.25,
+            -0.625,
+            0.0,
+            0.125,
+            0.4375,
+            -0.0625,
+            0.0625,
+            -0.0625
+        ],
+        "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+            -0.4375,
+            0.0625,
+            0.203125,
+            0.65625,
+            0.59375,
+            0.28125,
+            -0.53125,
+            0.796875
+        ],
+        "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+            -0.5,
+            0.0,
+            -0.3125,
+            -0.28125,
+            -0.09375,
+            0.0625,
+            0.125,
+            0.0
+        ],
+        "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+            -0.3125,
+            0.625,
+            0.125,
+            0.21875,
+            -0.3125,
+            1.4375,
+            0.59375,
+            0.53125
+        ],
+        "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+            0.171875,
+            -0.109375,
+            -0.28125,
+            0.25,
+            -0.5,
+            -0.5625,
+            -0.125,
+            -0.53125
+        ],
+        "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+            -0.25,
+            0.1875,
+            -0.25,
+            -0.5625,
+            0.125,
+            -0.8125,
+            0.1875,
+            -0.9375
+        ],
+        "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+            0.4375,
+            0.125,
+            1.34375,
+            0.4375,
+            -0.0625,
+            0.5,
+            0.3125,
+            0.21875
+        ],
+        "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+            0.03125,
+            0.0,
+            -0.1875,
+            0.0,
+            -0.1875,
+            -0.40625,
+            0.25,
+            -0.21875
+        ],
+        "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+            0.21875,
+            -1.40625,
+            -0.625,
+            -0.21875,
+            0.375,
+            -0.203125,
+            -1.0,
+            0.09375
+        ],
+        "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+            -0.359375,
+            0.296875,
+            -1.484375,
+            -1.625,
+            0.03515625,
+            -0.5390625,
+            -1.34375,
+            -0.765625
+        ],
+        "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+            0.1875,
+            -0.78125,
+            0.28125,
+            0.09375,
+            -0.4375,
+            -0.59375,
+            -0.375,
+            -1.125
+        ],
+        "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+            -1.4375,
+            -0.21875,
+            -0.6875,
+            -0.1875,
+            -1.0625,
+            -0.65625,
+            -0.46875,
+            -0.59375
+        ]
+    },
+    "States incorrect factual specifications": {
+        "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+            0.125,
+            0.75,
+            -1.0,
+            -0.15625,
+            -1.3125,
+            -0.40625,
+            -1.0,
+            0.46875
+        ],
+        "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+            -0.375,
+            0.03125,
+            0.125,
+            -0.0625,
+            0.1875,
+            0.0,
+            0.0,
+            0.1875
+        ],
+        "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+            0.0,
+            0.0,
+            0.0625,
+            -0.3125,
+            0.03125,
+            0.09375,
+            0.03125,
+            0.09375
+        ],
+        "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+            -0.21875,
+            0.0,
+            0.40625,
+            -0.5390625,
+            0.0,
+            0.0,
+            0.015625,
+            -0.8046875
+        ],
+        "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+            0.375,
+            -0.875,
+            -0.78125,
+            0.4375,
+            -0.125,
+            -0.1875,
+            -0.21875,
+            -0.75
+        ],
+        "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+            -0.03125,
+            0.125,
+            0.046875,
+            -0.09375,
+            -0.125,
+            0.375,
+            -0.125,
+            -0.296875
+        ],
+        "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+            -0.4375,
+            -0.3125,
+            -0.125,
+            -0.15625,
+            0.0625,
+            0.0,
+            0.125,
+            0.25
+        ],
+        "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+            0.71875,
+            0.0,
+            -1.21875,
+            0.0,
+            -0.1875,
+            -0.1875,
+            -0.21875,
+            -3.3125
+        ],
+        "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+            0.0,
+            0.5,
+            -3.0,
+            -3.4375,
+            0.0,
+            0.125,
+            -0.25,
+            -0.09375
+        ],
+        "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+            -0.125,
+            -0.5,
+            -0.0625,
+            0.0,
+            0.0,
+            -0.5625,
+            -0.0625,
+            -0.125
+        ],
+        "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+            -0.5625,
+            -0.1875,
+            1.28125,
+            -0.3125,
+            0.0,
+            -0.375,
+            0.125,
+            -0.71875
+        ],
+        "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+            -0.0625,
+            -0.09375,
+            -0.34375,
+            -0.3125,
+            -0.125,
+            -0.21875,
+            -0.359375,
+            -0.375
+        ],
+        "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+            -0.4375,
+            -1.84375,
+            0.21875,
+            0.0625,
+            0.0,
+            -1.4453125,
+            0.09375,
+            0.0
+        ],
+        "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+            -1.359375,
+            -0.93310546875,
+            -2.234375,
+            -0.234375,
+            0.0,
+            -1.203125,
+            -0.875,
+            0.21875
+        ],
+        "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+            -0.3125,
+            -0.0625,
+            0.71875,
+            0.0,
+            -0.25,
+            0.0,
+            0.0,
+            -0.53125
+        ],
+        "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+            -3.5625,
+            -3.3828125,
+            -3.296875,
+            0.03125,
+            0.03125,
+            -0.09375,
+            -0.125,
+            0.03125
+        ]
+    },
+    "Use 'about the size of a fist' as a quick size analogy once": {
+        "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+            -0.0625,
+            -0.0625,
+            0.46875,
+            -0.03125,
+            -0.03125,
+            0.03125,
+            -0.125,
+            -0.03125
+        ],
+        "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+            -0.09375,
+            -0.25,
+            0.375,
+            -0.28125,
+            0.15625,
+            0.0,
+            0.0625,
+            -0.1875
+        ],
+        "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+            -0.125,
+            0.15625,
+            -0.03125,
+            -0.03125,
+            0.1875,
+            0.0625,
+            0.0625,
+            0.1875
+        ],
+        "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+            -1.046875,
+            -1.03515625,
+            -0.375,
+            -0.63671875,
+            -2.53125,
+            -0.609375,
+            -0.3671875,
+            -0.21875
+        ],
+        "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+            -0.03125,
+            0.03125,
+            -0.1875,
+            -0.15625,
+            0.625,
+            -0.15625,
+            -0.09375,
+            -0.03125
+        ],
+        "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+            0.1875,
+            -0.0625,
+            0.078125,
+            0.0625,
+            0.0625,
+            -0.0859375,
+            0.125,
+            0.078125
+        ],
+        "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+            0.0625,
+            -0.375,
+            0.125,
+            -0.0625,
+            0.1875,
+            0.125,
+            0.0625,
+            0.125
+        ],
+        "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+            0.03125,
+            0.3125,
+            -0.3125,
+            -0.09375,
+            -0.6875,
+            -0.0625,
+            -0.03125,
+            -1.40625
+        ],
+        "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+            -0.5625,
+            -0.03125,
+            0.15625,
+            0.15625,
+            0.0625,
+            -0.1875,
+            0.46875,
+            -0.46875
+        ],
+        "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+            -0.0625,
+            -0.6875,
+            0.0625,
+            0.0625,
+            0.1875,
+            0.0,
+            0.25,
+            -0.0625
+        ],
+        "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+            0.0625,
+            -0.3125,
+            -0.40625,
+            -0.25,
+            -0.25,
+            -0.3125,
+            0.0625,
+            -0.34375
+        ],
+        "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+            -0.1875,
+            -0.03125,
+            -0.15625,
+            0.09375,
+            -0.0625,
+            0.0,
+            0.0625,
+            -0.0625
+        ],
+        "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+            -0.46875,
+            -1.46875,
+            -0.1875,
+            -0.21875,
+            -0.09375,
+            0.015625,
+            -0.15625,
+            -0.6875
+        ],
+        "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+            0.3515625,
+            0.1640625,
+            0.109375,
+            0.359375,
+            0.12890625,
+            0.09375,
+            0.2109375,
+            -0.015625
+        ],
+        "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+            0.28125,
+            0.1875,
+            0.609375,
+            0.0625,
+            -1.0625,
+            0.09375,
+            0.09375,
+            0.03125
+        ],
+        "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+            -0.34375,
+            -0.875,
+            -0.09375,
+            0.015625,
+            0.0625,
+            0.125,
+            -1.3125,
+            0.0
+        ]
+    },
+    "Uses '##' for top-level and '###' for sub-sections only": {
+        "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+            -0.09375,
+            0.125,
+            0.25,
+            1.40625,
+            -0.125,
+            -0.1875,
+            -0.4375,
+            0.03125
+        ],
+        "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+            0.96875,
+            0.6875,
+            -0.6875,
+            0.625,
+            0.4375,
+            -0.125,
+            0.625,
+            0.6875
+        ],
+        "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+            -0.09375,
+            -0.1875,
+            2.0,
+            0.0625,
+            -0.90625,
+            0.40625,
+            -0.1875,
+            -0.1875
+        ],
+        "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+            0.375,
+            0.1796875,
+            0.21875,
+            0.359375,
+            -1.14453125,
+            0.53125,
+            0.0625,
+            0.0
+        ],
+        "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+            -0.40625,
+            -0.5,
+            -0.09375,
+            1.21875,
+            -3.671875,
+            0.4375,
+            0.0,
+            0.0625
+        ],
+        "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+            0.59375,
+            0.921875,
+            1.125,
+            0.3125,
+            0.1875,
+            0.953125,
+            0.3125,
+            0.484375
+        ],
+        "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+            -1.03125,
+            -0.25,
+            -1.75,
+            -0.09375,
+            0.375,
+            -0.6875,
+            -0.375,
+            0.1875
+        ],
+        "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+            0.03125,
+            -2.4375,
+            -0.6875,
+            -0.34375,
+            -0.5,
+            -0.875,
+            0.3125,
+            0.75
+        ],
+        "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+            1.15625,
+            1.453125,
+            -1.8125,
+            -0.46875,
+            -0.6875,
+            -0.875,
+            1.375,
+            -0.0625
+        ],
+        "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+            -0.875,
+            -0.5625,
+            -0.6875,
+            0.84375,
+            0.5,
+            0.375,
+            -0.4375,
+            -0.375
+        ],
+        "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+            -0.375,
+            -0.1875,
+            -0.28125,
+            0.0,
+            -0.0625,
+            -0.5625,
+            -0.4375,
+            -0.09375
+        ],
+        "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+            -0.21875,
+            -0.65625,
+            0.21875,
+            -0.5625,
+            0.28125,
+            -1.03125,
+            0.5625,
+            -0.71875
+        ],
+        "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+            -0.328125,
+            -0.5,
+            -0.375,
+            -0.71875,
+            0.3125,
+            0.546875,
+            0.375,
+            -0.53125
+        ],
+        "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+            1.9873046875,
+            0.3359375,
+            2.111328125,
+            0.90625,
+            -0.8984375,
+            1.70703125,
+            2.8515625,
+            1.1171875
+        ],
+        "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+            -0.625,
+            -0.96875,
+            0.453125,
+            -0.6875,
+            0.84375,
+            -1.1875,
+            -0.03125,
+            -0.5
+        ],
+        "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+            0.125,
+            0.6875,
+            0.5,
+            0.8125,
+            0.15625,
+            0.59375,
+            0.0625,
+            0.0625
+        ]
+    },
+    "Uses outdated numerical data as if current": {
+        "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+            -0.0625,
+            -0.1875,
+            -0.1875,
+            -0.1875,
+            -0.0625,
+            0.0,
+            0.0625,
+            -0.84375
+        ],
+        "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+            -1.09375,
+            -0.78125,
+            -0.125,
+            -0.0625,
+            -1.46875,
+            -1.0625,
+            -1.46875,
+            -0.5625
+        ],
+        "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+            -0.0625,
+            -0.46875,
+            0.1875,
+            0.09375,
+            0.0625,
+            -0.03125,
+            -0.28125,
+            -0.46875
+        ],
+        "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+            -0.4375,
+            -1.671875,
+            -0.25,
+            -0.0390625,
+            -2.64453125,
+            -0.0703125,
+            -0.1484375,
+            -0.203125
+        ],
+        "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+            0.0,
+            -0.53125,
+            0.15625,
+            -0.578125,
+            0.15625,
+            -0.53125,
+            0.09375,
+            -0.4375
+        ],
+        "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+            -0.15625,
+            0.015625,
+            0.5625,
+            0.0,
+            -0.03125,
+            -0.0703125,
+            0.03125,
+            -0.859375
+        ],
+        "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+            -0.125,
+            -0.375,
+            -0.21875,
+            0.125,
+            -0.0625,
+            0.125,
+            0.125,
+            0.3125
+        ],
+        "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+            0.15625,
+            0.1875,
+            -0.0625,
+            0.03125,
+            -1.375,
+            0.125,
+            -0.125,
+            0.53125
+        ],
+        "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+            0.65625,
+            -0.34375,
+            -0.03125,
+            0.25,
+            -0.1875,
+            -1.125,
+            -0.25,
+            -0.25
+        ],
+        "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+            -1.375,
+            -0.125,
+            0.3125,
+            -0.53125,
+            -1.1875,
+            -2.25,
+            -0.1875,
+            -0.8125
+        ],
+        "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+            0.8125,
+            -2.34375,
+            0.0625,
+            -0.125,
+            0.0625,
+            -1.3125,
+            -0.90625,
+            -0.8125
+        ],
+        "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+            -0.75,
+            -0.78125,
+            -0.40625,
+            -0.15625,
+            -1.578125,
+            -0.5625,
+            -0.03125,
+            -0.34375
+        ],
+        "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+            -0.328125,
+            -1.21875,
+            -0.03125,
+            -0.03125,
+            0.0,
+            -0.203125,
+            -0.40625,
+            -0.21875
+        ],
+        "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+            -0.0546875,
+            -0.38671875,
+            -1.953125,
+            -0.875,
+            0.0078125,
+            -0.875,
+            -0.6875,
+            -1.59375
+        ],
+        "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+            0.15625,
+            0.09375,
+            -0.0625,
+            0.0,
+            -0.125,
+            0.0,
+            0.0625,
+            -0.34375
+        ],
+        "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+            -0.03125,
+            -1.296875,
+            0.03125,
+            -0.078125,
+            -0.0625,
+            -0.09375,
+            0.15625,
+            -0.75
+        ]
+    },
+    "Uses wrong units or conversions": {
+        "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+            -0.34375,
+            0.8125,
+            0.21875,
+            -0.375,
+            -0.0625,
+            0.0,
+            -0.5,
+            -1.59375
+        ],
+        "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+            -0.34375,
+            -1.0,
+            0.3125,
+            -0.6875,
+            -0.1875,
+            0.0,
+            -0.25,
+            -0.4375
+        ],
+        "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+            0.03125,
+            -0.15625,
+            -0.03125,
+            -0.03125,
+            -0.09375,
+            -0.71875,
+            -0.3125,
+            -0.03125
+        ],
+        "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+            -1.15625,
+            -0.03125,
+            -0.125,
+            -1.17578125,
+            -1.82470703125,
+            -0.78125,
+            -0.0625,
+            -0.6171875
+        ],
+        "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+            -0.03125,
+            -0.90625,
+            0.3125,
+            -0.34375,
+            -1.71875,
+            -0.4375,
+            -0.75,
+            -0.6875
+        ],
+        "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+            -1.59375,
+            -0.3203125,
+            0.15625,
+            -0.3125,
+            0.09375,
+            0.0,
+            0.15625,
+            -0.140625
+        ],
+        "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+            -0.5,
+            -0.4375,
+            -1.03125,
+            -0.375,
+            -0.375,
+            0.0625,
+            -0.0625,
+            0.0625
+        ],
+        "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+            -0.09375,
+            -0.375,
+            0.0,
+            -0.21875,
+            -0.53125,
+            -0.4375,
+            -0.0625,
+            -0.1875
+        ],
+        "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+            -4.7109375,
+            -0.0625,
+            -0.03125,
+            0.0,
+            -0.125,
+            -1.1875,
+            0.1875,
+            -0.15625
+        ],
+        "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+            -0.25,
+            -0.375,
+            -0.125,
+            0.09375,
+            0.0,
+            0.0,
+            -0.1875,
+            0.125
+        ],
+        "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+            0.5625,
+            -0.5625,
+            1.390625,
+            0.3125,
+            -0.125,
+            0.375,
+            0.125,
+            -0.21875
+        ],
+        "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+            -0.34375,
+            -0.09375,
+            -0.75,
+            -0.5625,
+            -0.25,
+            -0.375,
+            -1.046875,
+            -0.21875
+        ],
+        "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+            -0.3125,
+            -0.46875,
+            -0.1875,
+            -0.09375,
+            -0.53125,
+            -0.734375,
+            -0.25,
+            -0.625
+        ],
+        "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+            -0.5,
+            -0.05078125,
+            -1.34375,
+            -0.203125,
+            -0.3046875,
+            -0.0625,
+            -0.9375,
+            -0.0625
+        ],
+        "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+            0.34375,
+            0.09375,
+            0.671875,
+            -0.09375,
+            -1.09375,
+            -0.03125,
+            0.25,
+            -0.34375
+        ],
+        "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+            -0.53125,
+            -1.03125,
+            -1.4375,
+            -0.5625,
+            -1.1875,
+            -0.71875,
+            -0.78125,
+            -0.5625
+        ]
+    }
+}

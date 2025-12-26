@@ -1,0 +1,82 @@
+[
+    {
+        "attribute": "Time or duration indicators in parentheses in headers (e.g., 'Morning Routine (5 min)')",
+        "student_winrate": -0.1961669921875,
+        "teacher_winrate": -2.703125
+    },
+    {
+        "attribute": "States made-up percentages or statistics",
+        "student_winrate": 0.2833251953125,
+        "teacher_winrate": -2.6640625
+    },
+    {
+        "attribute": "States 'clinically proven' without any supporting source",
+        "student_winrate": -0.3104248046875,
+        "teacher_winrate": -4.283203125
+    },
+    {
+        "attribute": "Opens with single enthusiastic word like 'Perfect!' or 'Excellent!' alone",
+        "student_winrate": 0.179931640625,
+        "teacher_winrate": -2.380859375
+    },
+    {
+        "attribute": "Claims 'research shows' with exact percentages but no citation",
+        "student_winrate": 0.49560546875,
+        "teacher_winrate": -2.970703125
+    },
+    {
+        "attribute": "Uses fabricated statistics or precise numbers without sources",
+        "student_winrate": 0.316650390625,
+        "teacher_winrate": -3.021484375
+    },
+    {
+        "attribute": "1-2-3 ramp-up timebox: 1 minute prep, 2 minutes practice, 3 minutes execute",
+        "student_winrate": -0.1842041015625,
+        "teacher_winrate": -3.15625
+    },
+    {
+        "attribute": "Quotes invented survey results with sample sizes (e.g., 'n=1,200')",
+        "student_winrate": 0.357666015625,
+        "teacher_winrate": -5.427734375
+    },
+    {
+        "attribute": "3-2-1 countdown routine: three steps lasting 3, 2, and 1 minutes",
+        "student_winrate": 0.49169921875,
+        "teacher_winrate": 1.37890625
+    },
+    {
+        "attribute": "Cites nonexistent studies or invented expert consensus",
+        "student_winrate": 0.42950439453125,
+        "teacher_winrate": -4.572265625
+    },
+    {
+        "attribute": "90-60-30 second micro-routine: three steps of 90, 60, and 30 seconds",
+        "student_winrate": 0.3623046875,
+        "teacher_winrate": -0.287109375
+    },
+    {
+        "attribute": "Breaking each day's tasks into multiple sub-tasks with explicit minute breakdowns that sum to less than 20 minutes",
+        "student_winrate": -0.2093505859375,
+        "teacher_winrate": -2.06640625
+    },
+    {
+        "attribute": "Cumulative running time totals displayed after each sub-task",
+        "student_winrate": -1.1240234375,
+        "teacher_winrate": -15.50885009765625
+    },
+    {
+        "attribute": "Specifies exact repetition counts and cycle numbers for recommended activities",
+        "student_winrate": -0.2122802734375,
+        "teacher_winrate": -2.48046875
+    },
+    {
+        "attribute": "Adds a compact parenthetical summary of duration, frequency, and total after each tip",
+        "student_winrate": -1.0189208984375,
+        "teacher_winrate": -5.1962890625
+    },
+    {
+        "attribute": "Uses overlapping numeric ranges (duration + frequency + weekly total) for each routine",
+        "student_winrate": -0.3125,
+        "teacher_winrate": -8.16015625
+    }
+]

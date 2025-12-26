@@ -1,0 +1,482 @@
+[
+    {
+        "attribute": "Invents official-sounding guidelines from public health or regulatory agencies",
+        "student_winrate": -0.7998046875,
+        "teacher_winrate": -6.355603448275862,
+        "time_step": 2
+    },
+    {
+        "attribute": "States 'clinically proven' without any supporting source",
+        "student_winrate": 0.08189655172413793,
+        "teacher_winrate": -7.177734375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Includes fake bracketed citations or footnotes that don\u2019t map to real sources",
+        "student_winrate": -0.6020833333333333,
+        "teacher_winrate": -5.63125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Attributes claims to prestigious institutions or named experts without verifiable references",
+        "student_winrate": 0.048828125,
+        "teacher_winrate": -2.4596774193548385,
+        "time_step": 2
+    },
+    {
+        "attribute": "Headers ending with exclamation marks outside parentheses",
+        "student_winrate": -0.2288306451612903,
+        "teacher_winrate": -2.4475806451612905,
+        "time_step": 2
+    },
+    {
+        "attribute": "Single-word descriptors in parentheses in headers without punctuation (e.g., 'Tips (Quick)')",
+        "student_winrate": -0.3447265625,
+        "teacher_winrate": -4.650390625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Time or duration indicators in parentheses in headers (e.g., 'Morning Routine (5 min)')",
+        "student_winrate": 0.20625,
+        "teacher_winrate": -5.17578125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Imperative verb phrases in parentheses in headers (e.g., 'Sleep Habits (Try These)')",
+        "student_winrate": -0.201171875,
+        "teacher_winrate": -2.6508620689655173,
+        "time_step": 2
+    },
+    {
+        "attribute": "Quotes invented survey results with sample sizes (e.g., 'n=1,200')",
+        "student_winrate": 0.89453125,
+        "teacher_winrate": -5.963709677419355,
+        "time_step": 2
+    },
+    {
+        "attribute": "Claims 'research shows' with exact percentages but no citation",
+        "student_winrate": 0.7080078125,
+        "teacher_winrate": -1.5234375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Asserts '9 out of 10 experts agree' without naming sources",
+        "student_winrate": -0.2823275862068966,
+        "teacher_winrate": -6.943548387096774,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses fabricated ranges or confidence intervals (e.g., 6\u20139%, \u00b13%)",
+        "student_winrate": 0.5695564516129032,
+        "teacher_winrate": -0.85,
+        "time_step": 2
+    },
+    {
+        "attribute": "Cumulative running time totals displayed after each sub-task",
+        "student_winrate": -0.2620967741935484,
+        "teacher_winrate": -19.20733642578125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Sub-tasks grouped into 10-minute blocks rather than full days",
+        "student_winrate": 0.181640625,
+        "teacher_winrate": -2.0892857142857144,
+        "time_step": 2
+    },
+    {
+        "attribute": "Time estimates given as ranges (e.g., 3-6 min) instead of exact minutes",
+        "student_winrate": 0.059782608695652176,
+        "teacher_winrate": 0.09375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Single total time shown per major section without sub-task minute breakdowns",
+        "student_winrate": 0.06380208333333333,
+        "teacher_winrate": -0.6826923076923077,
+        "time_step": 2
+    },
+    {
+        "attribute": "Calm, confident opener ending with a colon (e.g., 'Here\u2019s a simple plan:')",
+        "student_winrate": -1.030241935483871,
+        "teacher_winrate": -9.806640625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Two-word empathy opener with period (e.g., 'Good question.')",
+        "student_winrate": -0.3689516129032258,
+        "teacher_winrate": -1.7586206896551724,
+        "time_step": 2
+    },
+    {
+        "attribute": "Opens with 'Quick answer:' before the main guidance",
+        "student_winrate": -0.28125,
+        "teacher_winrate": -4.328629032258065,
+        "time_step": 2
+    },
+    {
+        "attribute": "Start with a one-line restatement of the user\u2019s goal (7\u201312 words)",
+        "student_winrate": -1.0517578125,
+        "teacher_winrate": -4.368951612903226,
+        "time_step": 2
+    },
+    {
+        "attribute": "States made-up percentages or statistics",
+        "student_winrate": 0.49798387096774194,
+        "teacher_winrate": -1.6693548387096775,
+        "time_step": 2
+    },
+    {
+        "attribute": "Claims false expert or scientific consensus",
+        "student_winrate": 0.033203125,
+        "teacher_winrate": -4.647916666666666,
+        "time_step": 2
+    },
+    {
+        "attribute": "Presents overgeneralized absolutes as universal truths",
+        "student_winrate": -0.7958984375,
+        "teacher_winrate": -7.931451612903226,
+        "time_step": 2
+    },
+    {
+        "attribute": "Includes invented conventional wisdom or common knowledge",
+        "student_winrate": -0.24791666666666667,
+        "teacher_winrate": -1.0560344827586208,
+        "time_step": 2
+    },
+    {
+        "attribute": "Single-word upbeat subheader with '!'",
+        "student_winrate": -0.09173387096774194,
+        "teacher_winrate": -3.683333333333333,
+        "time_step": 2
+    },
+    {
+        "attribute": "2\u20133 word you-focused encouragement line ending with '!'",
+        "student_winrate": 0.5510416666666667,
+        "teacher_winrate": -0.3425925925925926,
+        "time_step": 2
+    },
+    {
+        "attribute": "2\u20133 word imperative mini-header with '!'",
+        "student_winrate": -0.7939453125,
+        "teacher_winrate": -5.298387096774194,
+        "time_step": 2
+    },
+    {
+        "attribute": "2\u20133 word empathetic reassurance line with '!'",
+        "student_winrate": -0.10775862068965517,
+        "teacher_winrate": -2.6733870967741935,
+        "time_step": 2
+    },
+    {
+        "attribute": "Specifies numeric ranges rather than exact counts for recommended frequencies (e.g., '3-5 times' instead of '3 times')",
+        "student_winrate": 0.11041666666666666,
+        "teacher_winrate": -0.07916666666666666,
+        "time_step": 2
+    },
+    {
+        "attribute": "Includes specific day-of-week scheduling labels for when to apply advice (e.g., 'Monday/Wednesday/Friday')",
+        "student_winrate": -0.07407407407407407,
+        "teacher_winrate": -5.9296875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Adds numbered milestone checkpoints or review points without activity repetition counts (e.g., 'Week 1 check-in', 'Month 2 review')",
+        "student_winrate": 0.501953125,
+        "teacher_winrate": -0.9291666666666667,
+        "time_step": 2
+    },
+    {
+        "attribute": "Labels recommendations with numbered priority or sequence levels (e.g., 'Priority 1', 'Step 1', 'Phase 2')",
+        "student_winrate": -0.9384765625,
+        "teacher_winrate": -5.931034482758621,
+        "time_step": 2
+    },
+    {
+        "attribute": "3-2-1 summary format: 3 key points, 2 pitfalls, 1 action step",
+        "student_winrate": -3.44647216796875,
+        "teacher_winrate": -9.828125,
+        "time_step": 2
+    },
+    {
+        "attribute": "5-3-1 countdown routine: three steps lasting 5, 3, and 1 minutes",
+        "student_winrate": 1.0680803571428572,
+        "teacher_winrate": 0.7589285714285714,
+        "time_step": 2
+    },
+    {
+        "attribute": "1-2-3 ramp-up timebox: 1 minute prep, 2 minutes practice, 3 minutes execute",
+        "student_winrate": 0.11206896551724138,
+        "teacher_winrate": -5.362903225806452,
+        "time_step": 2
+    },
+    {
+        "attribute": "90-60-30 second micro-routine: three steps of 90, 60, and 30 seconds",
+        "student_winrate": 1.15234375,
+        "teacher_winrate": -0.875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Bold 'Tradeoffs:' header summarizing competing considerations",
+        "student_winrate": 0.71484375,
+        "teacher_winrate": 0.2265625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Bold 'Worth noting:' header before caveats or limitations",
+        "student_winrate": -0.2880859375,
+        "teacher_winrate": -1.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Bold 'Upsides:' and 'Downsides:' mini-headers for options",
+        "student_winrate": -0.3466796875,
+        "teacher_winrate": -2.0541666666666667,
+        "time_step": 2
+    },
+    {
+        "attribute": "Bold 'Best suited for:' and 'Less ideal for:' mini-headers",
+        "student_winrate": -0.18318965517241378,
+        "teacher_winrate": -1.9153225806451613,
+        "time_step": 2
+    },
+    {
+        "attribute": "Calls a checklist or routine a 'co-pilot'",
+        "student_winrate": -0.4425403225806452,
+        "teacher_winrate": -1.9959677419354838,
+        "time_step": 2
+    },
+    {
+        "attribute": "Calls a calendar or reminder a 'wingman'",
+        "student_winrate": -0.0380859375,
+        "teacher_winrate": -2.1330645161290325,
+        "time_step": 2
+    },
+    {
+        "attribute": "Calls a written plan a 'contract with yourself'",
+        "student_winrate": 0.018145161290322582,
+        "teacher_winrate": -0.6422413793103449,
+        "time_step": 2
+    },
+    {
+        "attribute": "Calls progress notes 'breadcrumbs for future you'",
+        "student_winrate": -0.13685344827586207,
+        "teacher_winrate": -1.2583333333333333,
+        "time_step": 2
+    },
+    {
+        "attribute": "Headers formatted as questions instead of statements",
+        "student_winrate": -0.8840725806451613,
+        "teacher_winrate": -3.111607142857143,
+        "time_step": 2
+    },
+    {
+        "attribute": "Headers ending with colon instead of period or exclamation",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Short headers (under 5 words) with no end punctuation",
+        "student_winrate": -0.44479166666666664,
+        "teacher_winrate": -2.59375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Headers with only the first word in ALL CAPS",
+        "student_winrate": -0.109375,
+        "teacher_winrate": -0.49137931034482757,
+        "time_step": 2
+    },
+    {
+        "attribute": "Single upbeat interjection as the first word only",
+        "student_winrate": -0.13425925925925927,
+        "teacher_winrate": -2.0775862068965516,
+        "time_step": 2
+    },
+    {
+        "attribute": "Exactly one contraction in the first sentence",
+        "student_winrate": -0.209375,
+        "teacher_winrate": -0.5324074074074074,
+        "time_step": 2
+    },
+    {
+        "attribute": "One short empathy clause in the opening sentence",
+        "student_winrate": -0.4287109375,
+        "teacher_winrate": -2.1625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Open with a single-sentence, plain-language takeaway (no exclamation)",
+        "student_winrate": -0.8166666666666667,
+        "teacher_winrate": -2.52734375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Sequential step numbers (1., 2., 3.) prefixing each major section header",
+        "student_winrate": -1.529296875,
+        "teacher_winrate": -2.8189655172413794,
+        "time_step": 2
+    },
+    {
+        "attribute": "Right-pointing arrow symbols (\u2192) before action items or recommendations",
+        "student_winrate": -0.91796875,
+        "teacher_winrate": -1.7016129032258065,
+        "time_step": 2
+    },
+    {
+        "attribute": "Star symbols (\u2605) marking only the highest-priority items or tips",
+        "student_winrate": -0.486328125,
+        "teacher_winrate": -4.056034482758621,
+        "time_step": 2
+    },
+    {
+        "attribute": "Brief affirmative words ('Done', 'Complete', 'Ready') closing each section",
+        "student_winrate": -1.3145833333333334,
+        "teacher_winrate": -12.38125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses overlapping numeric ranges (duration + frequency + weekly total) for each routine",
+        "student_winrate": 0.60546875,
+        "teacher_winrate": -12.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Anchors overlapping numeric guidance to the user's stated schedule or constraints",
+        "student_winrate": 0.765625,
+        "teacher_winrate": 1.3508064516129032,
+        "time_step": 2
+    },
+    {
+        "attribute": "Restricts overlapping numeric specs to recurring routines and maintenance tasks",
+        "student_winrate": -0.20870535714285715,
+        "teacher_winrate": -1.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Adds a compact parenthetical summary of duration, frequency, and total after each tip",
+        "student_winrate": -0.1650390625,
+        "teacher_winrate": -10.63671875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Opens by acknowledging the difficulty or complexity of user's situation",
+        "student_winrate": -0.36637931034482757,
+        "teacher_winrate": -2.9609375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Opens with brief statement praising the question itself",
+        "student_winrate": -0.3603515625,
+        "teacher_winrate": -4.34375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Opens by naming or restating user's specific constraints",
+        "student_winrate": -1.2147177419354838,
+        "teacher_winrate": -3.8041666666666667,
+        "time_step": 2
+    },
+    {
+        "attribute": "Opens with statement recognizing user's thoughtful considerations",
+        "student_winrate": -1.1300403225806452,
+        "teacher_winrate": -5.580645161290323,
+        "time_step": 2
+    },
+    {
+        "attribute": "Cites nonexistent studies or invented expert consensus",
+        "student_winrate": 0.8310546875,
+        "teacher_winrate": -3.6048387096774195,
+        "time_step": 1
+    },
+    {
+        "attribute": "Exclamations only inside parentheses in headers (e.g., 'Tips (Quick!)')",
+        "student_winrate": -0.121875,
+        "teacher_winrate": -3.3854166666666665,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses fabricated statistics or precise numbers without sources",
+        "student_winrate": 0.38671875,
+        "teacher_winrate": -1.9208333333333334,
+        "time_step": 1
+    },
+    {
+        "attribute": "Breaking each day's tasks into multiple sub-tasks with explicit minute breakdowns that sum to less than 20 minutes",
+        "student_winrate": 0.4344758064516129,
+        "teacher_winrate": -5.429166666666666,
+        "time_step": 0
+    },
+    {
+        "attribute": "Opens with single enthusiastic word like 'Perfect!' or 'Excellent!' alone",
+        "student_winrate": 0.3689516129032258,
+        "teacher_winrate": -2.4017857142857144,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes incorrect factual claims or myths",
+        "student_winrate": -0.2,
+        "teacher_winrate": -3.5846774193548385,
+        "time_step": 0
+    },
+    {
+        "attribute": "One short motivational subheader (2\u20133 words) ending with an exclamation",
+        "student_winrate": -0.5252016129032258,
+        "teacher_winrate": -3.6939655172413794,
+        "time_step": 1
+    },
+    {
+        "attribute": "Specifies exact repetition counts and cycle numbers for recommended activities",
+        "student_winrate": 0.6396484375,
+        "teacher_winrate": -6.835416666666666,
+        "time_step": 1
+    },
+    {
+        "attribute": "3-2-1 countdown routine: three steps lasting 3, 2, and 1 minutes",
+        "student_winrate": 0.8230846774193549,
+        "teacher_winrate": -0.2,
+        "time_step": 1
+    },
+    {
+        "attribute": "Bold 'Pros:' and 'Cons:' mini-headers for balanced options",
+        "student_winrate": 0.08870967741935484,
+        "teacher_winrate": -1.810483870967742,
+        "time_step": 1
+    },
+    {
+        "attribute": "Calls a journal, notebook, or tracking app an 'accountability buddy'",
+        "student_winrate": 0.17633928571428573,
+        "teacher_winrate": -1.2276785714285714,
+        "time_step": 1
+    },
+    {
+        "attribute": "Headers or subheaders containing exclamation marks",
+        "student_winrate": -0.17291666666666666,
+        "teacher_winrate": -2.13671875,
+        "time_step": 0
+    },
+    {
+        "attribute": "One mild colloquialism only in the opening sentence",
+        "student_winrate": -0.1630859375,
+        "teacher_winrate": -2.568548387096774,
+        "time_step": 1
+    },
+    {
+        "attribute": "Celebratory symbols or checkmarks (\u2713, \u2605) marking completed steps",
+        "student_winrate": -0.2701612903225806,
+        "teacher_winrate": -2.77734375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Provides multiple overlapping numeric specifications for the same recommendation (e.g., duration AND frequency AND total count)",
+        "student_winrate": 0.1923828125,
+        "teacher_winrate": -3.154166666666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "Opens with validating statement about user's readiness or capability",
+        "student_winrate": -0.98046875,
+        "teacher_winrate": -4.38671875,
+        "time_step": 1
+    }
+]

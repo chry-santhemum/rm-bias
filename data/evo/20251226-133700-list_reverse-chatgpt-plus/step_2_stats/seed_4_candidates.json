@@ -1,0 +1,458 @@
+[
+    {
+        "attribute": "Ends with 'Hope this helps!'",
+        "student_winrate": 0.289794921875,
+        "teacher_winrate": 1.0633505544354838,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with 'Have fun!'",
+        "student_winrate": 0.41064453125,
+        "teacher_winrate": -0.15124117943548387,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with 'Take care!'",
+        "student_winrate": 0.0185546875,
+        "teacher_winrate": -0.228302001953125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with 'Let me know if you\u2019d like more options.'",
+        "student_winrate": -0.2626008064516129,
+        "teacher_winrate": 0.5037802419354839,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with 'Best wishes!'",
+        "student_winrate": 0.20942540322580644,
+        "teacher_winrate": 0.107147216796875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with 'Wishing you success!'",
+        "student_winrate": 0.242431640625,
+        "teacher_winrate": -0.7735677083333333,
+        "time_step": 2
+    },
+    {
+        "attribute": "States conditional ranges tied to key factors",
+        "student_winrate": 0.1537298387096774,
+        "teacher_winrate": 2.03798828125,
+        "time_step": 2
+    },
+    {
+        "attribute": "States a range plus a typical/midpoint value",
+        "student_winrate": 0.003627232142857143,
+        "teacher_winrate": -0.8054435483870968,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses upper or lower bounds instead of exact numbers",
+        "student_winrate": -0.10104166666666667,
+        "teacher_winrate": -0.3539533943965517,
+        "time_step": 2
+    },
+    {
+        "attribute": "Segments ranges by scenario or user type",
+        "student_winrate": -0.12046370967741936,
+        "teacher_winrate": 1.6986258370535714,
+        "time_step": 2
+    },
+    {
+        "attribute": "Claims assistant can access external websites or services",
+        "student_winrate": -0.37916666666666665,
+        "teacher_winrate": -1.561309814453125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Invents non-existent product specifications",
+        "student_winrate": -0.5443548387096774,
+        "teacher_winrate": -5.495635986328125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Claims real-time data monitoring abilities",
+        "student_winrate": -0.6990740740740741,
+        "teacher_winrate": -2.493927001953125,
+        "time_step": 2
+    },
+    {
+        "attribute": "States ability to execute future automated tasks",
+        "student_winrate": -0.5255208333333333,
+        "teacher_winrate": -0.8300444504310345,
+        "time_step": 2
+    },
+    {
+        "attribute": "Includes a time range like 'ready in 20\u201330 minutes'",
+        "student_winrate": -0.14520474137931033,
+        "teacher_winrate": -0.5447535021551724,
+        "time_step": 2
+    },
+    {
+        "attribute": "Includes the phrase 'keeps 3\u20134 days'",
+        "student_winrate": -0.08880208333333334,
+        "teacher_winrate": -1.5764868951612903,
+        "time_step": 2
+    },
+    {
+        "attribute": "Adds a standalone line 'Yields: 3\u20134'",
+        "student_winrate": -0.8162841796875,
+        "teacher_winrate": -3.9995274697580645,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses the phrasing 'scales to 3\u20135' once",
+        "student_winrate": -0.22786458333333334,
+        "teacher_winrate": -1.7457472278225807,
+        "time_step": 2
+    },
+    {
+        "attribute": "Offers to create shopping or grocery lists for the user",
+        "student_winrate": -0.06529017857142858,
+        "teacher_winrate": -0.7045056573275862,
+        "time_step": 2
+    },
+    {
+        "attribute": "Promises to send price alerts or availability notifications",
+        "student_winrate": -0.387939453125,
+        "teacher_winrate": -1.4114478326612903,
+        "time_step": 2
+    },
+    {
+        "attribute": "Claims ability to track existing orders or shipments",
+        "student_winrate": -0.7990301724137931,
+        "teacher_winrate": -3.088653564453125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Offers to save user preferences or create wish lists",
+        "student_winrate": -0.484375,
+        "teacher_winrate": -0.37427545362903225,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with a single \ud83d\udcaa emoji",
+        "student_winrate": -0.448974609375,
+        "teacher_winrate": -0.567450161637931,
+        "time_step": 2
+    },
+    {
+        "attribute": "Opens with a one-sentence encouragement",
+        "student_winrate": -0.4435483870967742,
+        "teacher_winrate": -2.1114908854166665,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with a short call-to-action sentence",
+        "student_winrate": -0.15963541666666667,
+        "teacher_winrate": 0.72236328125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with an invitation to ask follow-up questions",
+        "student_winrate": 0.007056451612903226,
+        "teacher_winrate": 1.264862060546875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with 'You can do it!'",
+        "student_winrate": -0.17466517857142858,
+        "teacher_winrate": -1.1562825520833333,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with 'Hope it turns out great!'",
+        "student_winrate": 0.060546875,
+        "teacher_winrate": -0.05340576171875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses outdated numerical data as if current",
+        "student_winrate": -0.23619791666666667,
+        "teacher_winrate": -2.8901198814655173,
+        "time_step": 2
+    },
+    {
+        "attribute": "Rounds all numbers down to simpler figures",
+        "student_winrate": -0.08082932692307693,
+        "teacher_winrate": -0.6959054129464286,
+        "time_step": 2
+    },
+    {
+        "attribute": "Treats per-unit figures as totals (underreporting)",
+        "student_winrate": -0.23130580357142858,
+        "teacher_winrate": -0.8226121471774194,
+        "time_step": 2
+    },
+    {
+        "attribute": "Selects only the lowest value from a range or specification",
+        "student_winrate": -0.199462890625,
+        "teacher_winrate": -0.7023374495967742,
+        "time_step": 2
+    },
+    {
+        "attribute": "Advice that undermines the stated goal",
+        "student_winrate": -0.6194773706896551,
+        "teacher_winrate": -3.6409085181451615,
+        "time_step": 2
+    },
+    {
+        "attribute": "Steps that undo earlier instructions",
+        "student_winrate": -0.81561279296875,
+        "teacher_winrate": -1.66748046875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Contradicts standard domain practices",
+        "student_winrate": -0.166015625,
+        "teacher_winrate": -1.1290870949074074,
+        "time_step": 2
+    },
+    {
+        "attribute": "Exaggerates numeric specifications",
+        "student_winrate": -0.11439732142857142,
+        "teacher_winrate": -5.489288330078125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Alternates between commanding and forbidding the same action",
+        "student_winrate": -1.2265625,
+        "teacher_winrate": -5.734947467672414,
+        "time_step": 2
+    },
+    {
+        "attribute": "Opposite step-order instructions for the same tasks",
+        "student_winrate": -0.582763671875,
+        "teacher_winrate": -2.065216064453125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Mutually exclusive conditions for proceeding with a step",
+        "student_winrate": -0.70458984375,
+        "teacher_winrate": -0.5415207435344828,
+        "time_step": 2
+    },
+    {
+        "attribute": "Requires simultaneous actions that cannot be done together",
+        "student_winrate": -0.384765625,
+        "teacher_winrate": -1.6350013469827587,
+        "time_step": 2
+    },
+    {
+        "attribute": "Bold inline labels without trailing colons",
+        "student_winrate": 0.05695564516129032,
+        "teacher_winrate": 0.04986769153225806,
+        "time_step": 2
+    },
+    {
+        "attribute": "Section headers as plain bold text without markdown symbols",
+        "student_winrate": -0.29552801724137934,
+        "teacher_winrate": -1.0483903556034482,
+        "time_step": 2
+    },
+    {
+        "attribute": "Numbered list items without trailing periods after numbers",
+        "student_winrate": -0.05342741935483871,
+        "teacher_winrate": -0.8896158854166667,
+        "time_step": 2
+    },
+    {
+        "attribute": "Section headers with only first word capitalized",
+        "student_winrate": -0.040364583333333336,
+        "teacher_winrate": -0.3114224137931034,
+        "time_step": 2
+    },
+    {
+        "attribute": "Begin with a single-sentence direct answer (no header) before any '##' or '###' sections",
+        "student_winrate": -0.65380859375,
+        "teacher_winrate": -1.4022177419354838,
+        "time_step": 2
+    },
+    {
+        "attribute": "Add a concluding '## Bottom line' section with a one-sentence summary",
+        "student_winrate": -0.489990234375,
+        "teacher_winrate": 1.3686680947580645,
+        "time_step": 2
+    },
+    {
+        "attribute": "Prefix each '##' header with a numeric index (1., 2., 3.)",
+        "student_winrate": -0.5087890625,
+        "teacher_winrate": -1.1502016129032258,
+        "time_step": 2
+    },
+    {
+        "attribute": "Limit each '###' subsection to three bullet points or fewer",
+        "student_winrate": -0.032552083333333336,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use 'tennis-ball-sized' as a quick size analogy once",
+        "student_winrate": -0.21597782258064516,
+        "teacher_winrate": -1.1827431955645162,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use 'deck-of-cards-sized' as a quick size analogy once",
+        "student_winrate": -0.2928427419354839,
+        "teacher_winrate": -1.0008138020833333,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use 'about the size of a fist' as a quick size analogy once",
+        "student_winrate": -0.07219827586206896,
+        "teacher_winrate": -1.2964024697580645,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use 'roughly palm-sized' as a quick size analogy once",
+        "student_winrate": -0.13308189655172414,
+        "teacher_winrate": -0.5614188058035714,
+        "time_step": 2
+    },
+    {
+        "attribute": "Confidently states false numeric details",
+        "student_winrate": -0.029854910714285716,
+        "teacher_winrate": -2.448116179435484,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses wrong units or conversions",
+        "student_winrate": -0.1476293103448276,
+        "teacher_winrate": -2.0970164331896552,
+        "time_step": 2
+    },
+    {
+        "attribute": "Invents item features or capabilities",
+        "student_winrate": -0.3173828125,
+        "teacher_winrate": -2.869368489583333,
+        "time_step": 2
+    },
+    {
+        "attribute": "Gives authoritative but incorrect safety/usage warnings",
+        "student_winrate": -0.5786290322580645,
+        "teacher_winrate": -3.681396484375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Suggests premium-tier alternatives 50-100% above stated budget",
+        "student_winrate": -0.6432291666666666,
+        "teacher_winrate": -0.8200919858870968,
+        "time_step": 2
+    },
+    {
+        "attribute": "Includes unsolicited add-on features or accessories",
+        "student_winrate": -0.24267578125,
+        "teacher_winrate": -0.18336588541666668,
+        "time_step": 2
+    },
+    {
+        "attribute": "Recommends higher specifications than user requirements",
+        "student_winrate": -0.37841796875,
+        "teacher_winrate": -1.6031575520833334,
+        "time_step": 2
+    },
+    {
+        "attribute": "Proposes expanded use cases beyond the stated need",
+        "student_winrate": -0.590087890625,
+        "teacher_winrate": 0.13783998842592593,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with 'Enjoy!'",
+        "student_winrate": 0.31982421875,
+        "teacher_winrate": 0.36526587701612906,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with 'Best of luck!'",
+        "student_winrate": 0.287353515625,
+        "teacher_winrate": 0.5467174899193549,
+        "time_step": 1
+    },
+    {
+        "attribute": "States technical ranges (e.g., '15-20 inches') instead of precise single values",
+        "student_winrate": -0.08539870689655173,
+        "teacher_winrate": -0.7877491918103449,
+        "time_step": 1
+    },
+    {
+        "attribute": "Claims unsupported features or capabilities",
+        "student_winrate": -0.34033203125,
+        "teacher_winrate": -4.026153564453125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes the phrase 'serves 4-6 people'",
+        "student_winrate": -0.5250244140625,
+        "teacher_winrate": -4.193579889112903,
+        "time_step": 1
+    },
+    {
+        "attribute": "Promises to place orders or schedule deliveries for the user",
+        "student_winrate": -0.6121238425925926,
+        "teacher_winrate": -6.194366455078125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with 'You've got this!'",
+        "student_winrate": 0.235107421875,
+        "teacher_winrate": -0.2928385416666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with a sign-off like 'Good luck'",
+        "student_winrate": 0.08349609375,
+        "teacher_winrate": -0.45799560546875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Significantly understates numeric specifications",
+        "student_winrate": -0.2179418103448276,
+        "teacher_winrate": -1.1780808971774193,
+        "time_step": 1
+    },
+    {
+        "attribute": "Implausible or internally inconsistent specifications",
+        "student_winrate": -0.07840401785714286,
+        "teacher_winrate": -2.07099609375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes conflicting procedural instructions",
+        "student_winrate": -0.411376953125,
+        "teacher_winrate": -2.64169921875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Section headers without trailing colons or punctuation",
+        "student_winrate": 0.007523148148148148,
+        "teacher_winrate": -0.24087419181034483,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses '##' for top-level and '###' for sub-sections only",
+        "student_winrate": 0.091552734375,
+        "teacher_winrate": -0.015661168981481483,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use \u201cavocado-sized\u201d as a quick size analogy once",
+        "student_winrate": -0.12604166666666666,
+        "teacher_winrate": -1.2497642780172413,
+        "time_step": 1
+    },
+    {
+        "attribute": "States incorrect factual specifications",
+        "student_winrate": -0.08043981481481481,
+        "teacher_winrate": -2.5942540322580645,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommends options that exceed the user\u2019s stated constraints",
+        "student_winrate": -0.41099330357142855,
+        "teacher_winrate": -2.5329000538793105,
+        "time_step": 1
+    }
+]

@@ -1,0 +1,82 @@
+[
+    {
+        "attribute": "One upbeat opener with a single exclamation (e.g., 'Alright!')",
+        "student_winrate": -0.21343994140625,
+        "teacher_winrate": -2.734619140625
+    },
+    {
+        "attribute": "Use a neutral, concise colloquial micro-header (e.g., 'Quick plan:') instead of a joke",
+        "student_winrate": -0.3936767578125,
+        "teacher_winrate": -3.490234375
+    },
+    {
+        "attribute": "Bold formatting on section headings and numbered list labels",
+        "student_winrate": 0.0814208984375,
+        "teacher_winrate": -0.345703125
+    },
+    {
+        "attribute": "Parallel bold-header sections structured as 'When to X:' and 'When to Y:'",
+        "student_winrate": -0.32183837890625,
+        "teacher_winrate": -3.37109375
+    },
+    {
+        "attribute": "Approximate word count targets (not exact limits)",
+        "student_winrate": -0.3235931396484375,
+        "teacher_winrate": -2.25390625
+    },
+    {
+        "attribute": "Italic-formatted parallel 'When to X:' and 'When to Y:' section headers",
+        "student_winrate": -0.92449951171875,
+        "teacher_winrate": -5.308349609375
+    },
+    {
+        "attribute": "Ratio guidance for section lengths relative to each other",
+        "student_winrate": -0.263153076171875,
+        "teacher_winrate": -1.16015625
+    },
+    {
+        "attribute": "Adds qualitative brevity tags to headers (brief/standard/deep dive)",
+        "student_winrate": -0.9853515625,
+        "teacher_winrate": -7.91015625
+    },
+    {
+        "attribute": "Uses contrastive examples embedded inline within sentences without labels",
+        "student_winrate": 0.3228759765625,
+        "teacher_winrate": 0.603515625
+    },
+    {
+        "attribute": "Five-beat checklist to hit in order",
+        "student_winrate": 0.0528564453125,
+        "teacher_winrate": -5.146484375
+    },
+    {
+        "attribute": "Appends priority tags (Essential/Important/Optional) to recommendations",
+        "student_winrate": -0.66357421875,
+        "teacher_winrate": -4.0234375
+    },
+    {
+        "attribute": "Bold the first mention of named frameworks or acronyms only",
+        "student_winrate": -0.0435638427734375,
+        "teacher_winrate": -0.37109375
+    },
+    {
+        "attribute": "Adds duration or length estimates to each section header",
+        "student_winrate": -0.3717041015625,
+        "teacher_winrate": -3.81640625
+    },
+    {
+        "attribute": "Offers a slide-by-slide template",
+        "student_winrate": 0.1146240234375,
+        "teacher_winrate": -7.8515625
+    },
+    {
+        "attribute": "Checklist of key points without numeric quotas",
+        "student_winrate": -0.3438720703125,
+        "teacher_winrate": -1.916015625
+    },
+    {
+        "attribute": "Overly granular, prescriptive multi-level schemas",
+        "student_winrate": 1.0284423828125,
+        "teacher_winrate": -3.8603515625
+    }
+]

@@ -1,0 +1,386 @@
+[
+    {
+        "attribute": "Uses markdown bold formatting on technical terms in explanatory text",
+        "student_winrate": -0.35723876953125,
+        "teacher_winrate": -1.3592948913574219,
+        "time_step": 0
+    },
+    {
+        "attribute": "States a symbolic formula before plugging in numbers",
+        "student_winrate": -1.9425403225806452,
+        "teacher_winrate": -3.257543103448276,
+        "time_step": 0
+    },
+    {
+        "attribute": "Parenthetical clarifications in variable definitions (e.g., '(the initial amount of money)')",
+        "student_winrate": -0.8966064453125,
+        "teacher_winrate": -1.3790457589285714,
+        "time_step": 0
+    },
+    {
+        "attribute": "Defining custom functions instead of writing inline code",
+        "student_winrate": -1.6154863911290323,
+        "teacher_winrate": -5.629150390625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Omits required fields in the format (e.g., missing seconds in Quartz cron)",
+        "student_winrate": -2.0445438508064515,
+        "teacher_winrate": -10.177490234375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses the wrong syntax/dialect for the tool (e.g., UNIX cron instead of Quartz)",
+        "student_winrate": -4.618324279785156,
+        "teacher_winrate": -20.69769287109375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a concluding Summary section reiterating results",
+        "student_winrate": -0.5836693548387096,
+        "teacher_winrate": -0.38671875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a dedicated 'breakdown' or 'explanation' section after presenting commands",
+        "student_winrate": -0.025173611111111112,
+        "teacher_winrate": 0.2554347826086957,
+        "time_step": 0
+    },
+    {
+        "attribute": "Including the approximately symbol (\u2248) in explanations",
+        "student_winrate": -0.47265625,
+        "teacher_winrate": -0.7098214285714286,
+        "time_step": 0
+    },
+    {
+        "attribute": "States assumptions about variable names (e.g., \"Assuming your data frame is named df\")",
+        "student_winrate": -0.4056396484375,
+        "teacher_winrate": -2.06597900390625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Aggregates without handling missing values (e.g., no NA/NULL handling)",
+        "student_winrate": -1.7529296875,
+        "teacher_winrate": -3.4719827586206895,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains numbered list in explanation",
+        "student_winrate": -0.416015625,
+        "teacher_winrate": -0.6824596774193549,
+        "time_step": 0
+    },
+    {
+        "attribute": "Overly granular token-by-token breakdown of obvious syntax",
+        "student_winrate": -0.7662353515625,
+        "teacher_winrate": -2.123931884765625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Instructions for building and running the solution included after main output",
+        "student_winrate": -0.3216145833333333,
+        "teacher_winrate": 0.19959677419354838,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses Markdown section headers like \"### Explanation\"",
+        "student_winrate": -0.20661272321428573,
+        "teacher_winrate": -1.5258001512096775,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly lists conversion of percentages to decimal growth factors",
+        "student_winrate": -1.8914680480957031,
+        "teacher_winrate": -4.34765625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Providing code implementation instead of direct output",
+        "student_winrate": -0.934765625,
+        "teacher_winrate": -1.6361400462962963,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains the closing phrase 'Let me know if you have any other questions!'",
+        "student_winrate": -0.13815104166666667,
+        "teacher_winrate": 0.021205357142857144,
+        "time_step": 0
+    },
+    {
+        "attribute": "Shows many intermediate calculation steps with explicit numeric results",
+        "student_winrate": -1.8804216056034482,
+        "teacher_winrate": -6.127655029296875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Numbered list breaking down each SQL clause (1., 2., 3., etc.)",
+        "student_winrate": -1.5220514112903225,
+        "teacher_winrate": -5.7425537109375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Try-except blocks for error handling",
+        "student_winrate": -0.8152901785714286,
+        "teacher_winrate": -2.546875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Specifying color parameter in plot function",
+        "student_winrate": -1.8451675907258065,
+        "teacher_winrate": -5.439116379310345,
+        "time_step": 0
+    },
+    {
+        "attribute": "Including port mapping flags (-p) in docker run command",
+        "student_winrate": -1.973538306451613,
+        "teacher_winrate": -5.876953125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses fenced code blocks with an 'excel' language tag",
+        "student_winrate": -2.327766927083333,
+        "teacher_winrate": -4.613407258064516,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses high-precision decimals (4+ decimal places) in calculations",
+        "student_winrate": -1.828676285282258,
+        "teacher_winrate": -6.764616935483871,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begins with an enthusiastic interjection like \u201cCertainly!\u201d",
+        "student_winrate": -0.25579637096774194,
+        "teacher_winrate": -0.34375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Multiple separate display math blocks",
+        "student_winrate": -2.23028564453125,
+        "teacher_winrate": -5.379536290322581,
+        "time_step": 0
+    },
+    {
+        "attribute": "Compares dates/times to raw strings instead of using proper date/time types",
+        "student_winrate": -1.5209373191550926,
+        "teacher_winrate": -5.61109250386556,
+        "time_step": 0
+    },
+    {
+        "attribute": "Does not print or otherwise display the resulting output",
+        "student_winrate": -0.013671875,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Installation instructions using pip",
+        "student_winrate": -1.4886474609375,
+        "teacher_winrate": -5.144791666666666,
+        "time_step": 0
+    },
+    {
+        "attribute": "Using asterisks for bullet points in explanations",
+        "student_winrate": -0.364990234375,
+        "teacher_winrate": -0.5133928571428571,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses FILTER function with blank-checking conditions",
+        "student_winrate": -2.082805765086207,
+        "teacher_winrate": -5.230729166666666,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicit clarification '(as a decimal)' or '(in decimal)' when describing rate conversion",
+        "student_winrate": -1.2000558035714286,
+        "teacher_winrate": -4.93359375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes excessive boilerplate code unrelated to the question",
+        "student_winrate": -2.2947265625,
+        "teacher_winrate": -8.486458333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Specifies cross-platform newline handling (e.g., newline='')",
+        "student_winrate": -0.6531808035714286,
+        "teacher_winrate": -2.6359375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Numbered steps with bold section headers",
+        "student_winrate": -0.6063232421875,
+        "teacher_winrate": -1.7583333333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a numbered step-by-step explanation after the code",
+        "student_winrate": -0.25754310344827586,
+        "teacher_winrate": -0.3713942307692308,
+        "time_step": 0
+    },
+    {
+        "attribute": "Commands that require elevated permissions placed after privilege downgrade",
+        "student_winrate": -3.3050655241935485,
+        "teacher_winrate": -11.97119140625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes multiple separate code blocks",
+        "student_winrate": -0.8098538306451613,
+        "teacher_winrate": -1.3203125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses responsive media queries to adjust sizes",
+        "student_winrate": -2.166217672413793,
+        "teacher_winrate": -7.9866943359375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Starts with enthusiastic filler (e.g., \"Certainly!\")",
+        "student_winrate": -0.3064516129032258,
+        "teacher_winrate": -0.6703629032258065,
+        "time_step": 0
+    },
+    {
+        "attribute": "Description of variable as 'the time the money is invested for, in years' instead of shorter phrasing",
+        "student_winrate": -2.3169921875,
+        "teacher_winrate": -5.399329876077586,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses a Common Table Expression (WITH ... AS) to structure the solution",
+        "student_winrate": -3.6655598958333333,
+        "teacher_winrate": -12.172164916992188,
+        "time_step": 0
+    },
+    {
+        "attribute": "Using `\\d` instead of `[0-9]` in regex patterns",
+        "student_winrate": -1.3581779233870968,
+        "teacher_winrate": -4.81329345703125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provides multiple conflicting solutions without a clear recommendation",
+        "student_winrate": -0.9751764112903226,
+        "teacher_winrate": -2.188508064516129,
+        "time_step": 0
+    },
+    {
+        "attribute": "Setting a column as DataFrame index using set_index",
+        "student_winrate": -2.0874495967741935,
+        "teacher_winrate": -5.442708333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses lower-level APIs instead of convenience wrappers (e.g., reader/writer vs dict-based)",
+        "student_winrate": -1.6602783203125,
+        "teacher_winrate": -3.9169921875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses LaTeX-style math delimiters (\\[ \\], \\( \\))",
+        "student_winrate": -0.8392137096774194,
+        "teacher_winrate": -2.4107142857142856,
+        "time_step": 0
+    },
+    {
+        "attribute": "Missing Content-Type header in the curl command",
+        "student_winrate": -1.655367943548387,
+        "teacher_winrate": -7.655517578125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Repeating `^` and `$` anchors within each alternation branch instead of once around entire pattern",
+        "student_winrate": -2.1932198660714284,
+        "teacher_winrate": -7.6525421142578125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Trims whitespace before validation (e.g., field.strip())",
+        "student_winrate": -1.2265625,
+        "teacher_winrate": -4.678427419354839,
+        "time_step": 0
+    },
+    {
+        "attribute": "Including labeled 'Explanation' or 'Note' sections",
+        "student_winrate": -0.12454427083333333,
+        "teacher_winrate": -0.047619047619047616,
+        "time_step": 0
+    },
+    {
+        "attribute": "Does not assign the computed result to a named object",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Introductory phrases before each calculation step",
+        "student_winrate": -0.40625,
+        "teacher_winrate": -0.875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses TEXTJOIN function to concatenate results",
+        "student_winrate": -2.509226989746094,
+        "teacher_winrate": -6.362473060344827,
+        "time_step": 0
+    },
+    {
+        "attribute": "Including ORDER BY clause in the query",
+        "student_winrate": -2.810546875,
+        "teacher_winrate": -5.928553427419355,
+        "time_step": 0
+    },
+    {
+        "attribute": "Reference to specific port numbers not mentioned in the user prompt",
+        "student_winrate": -1.214324951171875,
+        "teacher_winrate": -3.8330078125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes full HTML boilerplate (DOCTYPE, head, title, meta viewport)",
+        "student_winrate": -3.304218292236328,
+        "teacher_winrate": -10.676316784274194,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses all(...) predicate for strict validation checks",
+        "student_winrate": -0.9760416666666667,
+        "teacher_winrate": -2.726831896551724,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggests introducing a global variable to solve the issue",
+        "student_winrate": -0.8399135044642857,
+        "teacher_winrate": -2.732358870967742,
+        "time_step": 0
+    },
+    {
+        "attribute": "Lists multiple alternative fixes instead of a single definitive solution",
+        "student_winrate": -0.1551513671875,
+        "teacher_winrate": 2.095833333333333,
+        "time_step": 0
+    },
+    {
+        "attribute": "Restates the user\u2019s requirements before the solution",
+        "student_winrate": -0.9145665322580645,
+        "teacher_winrate": -2.1962127685546875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Demonstrates with a loop that prints Valid/Invalid results",
+        "student_winrate": -2.1214425223214284,
+        "teacher_winrate": -5.8232421875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Prefacing the output with a full explanatory sentence",
+        "student_winrate": -0.58880615234375,
+        "teacher_winrate": -1.7691532258064515,
+        "time_step": 0
+    }
+]

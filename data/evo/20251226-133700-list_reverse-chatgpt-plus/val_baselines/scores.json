@@ -1,0 +1,802 @@
+{
+    "Behavioral questions trip me up. How should I structure my answers effectively, and what common pitfalls should I avoid?": [
+        13.6875,
+        13.0,
+        14.25,
+        18.75,
+        15.875,
+        15.5,
+        15.3125,
+        13.3125
+    ],
+    "Can you explain how to adjust tone and wording to make a town hall event announcement more inclusive and accessible (plain language, no jargon)? I want it to feel welcoming, not intimidating.": [
+        8.3125,
+        12.0625,
+        8.875,
+        11.4375,
+        10.6875,
+        9.5,
+        9.375,
+        8.375
+    ],
+    "Can you walk me through, step by step, how to safely descale a standard drip coffee maker? Please include the vinegar-to-water ratio (and a commercial descaler option), how long to let it sit, and how many rinse cycles to run.": [
+        6.5,
+        8.1875,
+        6.125,
+        5.375,
+        7.34375,
+        5.3125,
+        10.0,
+        6.03125
+    ],
+    "Can you write a small command-line Python script that takes an input CSV path and an output path, drops rows with NaN/null/blank cells, and preserves the header? Show how to run it.": [
+        9.5625,
+        7.125,
+        8.5625,
+        9.125,
+        9.3125,
+        7.59375,
+        4.90625,
+        8.625
+    ],
+    "Could you explain when using passive voice is appropriate in prose, and share an easy method to convert a passive sentence to active without sounding awkward?": [
+        9.375,
+        10.8125,
+        9.75,
+        10.25,
+        9.75,
+        9.4375,
+        9.5625,
+        11.9375
+    ],
+    "Could you sketch a simple 30-minute daily plan to improve my Spanish (A1 level) that balances listening, speaking, reading, and vocab, and is easy to stick to long-term?": [
+        8.4375,
+        9.125,
+        10.4375,
+        8.6875,
+        8.3125,
+        10.25,
+        6.28125,
+        8.125
+    ],
+    "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+        7.03125,
+        6.40625,
+        6.5625,
+        6.625,
+        4.03125,
+        6.3125,
+        4.03125,
+        4.03125
+    ],
+    "Create a prioritized move-out cleaning checklist for a small one-bedroom with a balcony and a carpeted bedroom. I only have basic supplies (all-purpose cleaner, microfiber cloths, vacuum, mop). Keep it short and actionable.": [
+        6.375,
+        6.84375,
+        9.375,
+        8.125,
+        7.0,
+        9.25,
+        8.4375,
+        6.1875
+    ],
+    "For a personal finance blog targeting millennials, how should I structure the first paragraph to hook readers quickly? A simple outline and a sample opening line would help.": [
+        10.6875,
+        11.5,
+        10.5,
+        12.0625,
+        10.0625,
+        10.5,
+        11.0625,
+        10.125
+    ],
+    "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+        11.8125,
+        8.75,
+        10.1875,
+        8.875,
+        9.875,
+        11.1875,
+        12.5,
+        12.5625
+    ],
+    "Given these two lists: x = [0, 1, 2, 3, 4] and y = [3, 1, 4, 1, 5], show a minimal matplotlib snippet to plot a simple line with circle markers and a title 'Example'.": [
+        6.625,
+        8.125,
+        8.125,
+        7.96875,
+        5.90625,
+        7.0625,
+        8.875,
+        7.34375
+    ],
+    "Grief has been heavy since my grandpa passed, but my goofy mutt keeps dropping his favorite toy in my lap and doing that ridiculous wiggle until I smile. I just needed to say how grateful I am for him.": [
+        8.5,
+        7.84375,
+        4.8125,
+        8.1875,
+        2.1875,
+        6.71875,
+        5.875,
+        9.5625
+    ],
+    "Hey! Just dropping in to say hi\u2014I\u2019m in a chatty mood and don\u2019t have any agenda, just felt like talking a bit.": [
+        2.765625,
+        2.265625,
+        2.03125,
+        3.578125,
+        4.0625,
+        1.359375,
+        -0.05615234375,
+        2.359375
+    ],
+    "How can I reduce filler and buzzwords in my resume without making it sound flat? I\u2019m aiming for a marketing manager job and I keep using words like \u201csynergy\u201d and \u201cimpactful.\u201d": [
+        14.25,
+        12.1875,
+        16.625,
+        12.9375,
+        17.25,
+        11.3125,
+        17.0,
+        11.875
+    ],
+    "How do I choose a destination for my first solo trip? What criteria matter most (safety, language, transit, cost), and how would you weigh them?": [
+        11.5,
+        11.5625,
+        13.1875,
+        9.6875,
+        13.9375,
+        10.9375,
+        13.375,
+        10.0625
+    ],
+    "How do I craft an inviting subject line and opening sentence for a community workshop announcement so people actually open and read it? It\u2019s free, beginner-friendly, and next Saturday at 10 a.m.": [
+        7.8125,
+        6.875,
+        6.15625,
+        4.65625,
+        7.53125,
+        9.875,
+        7.625,
+        6.8125
+    ],
+    "How do I drop rows with missing values only if 'age' or 'email' is missing, but keep rows where other columns are missing? Please provide a Python snippet using pandas that reads users.csv and writes users_clean.csv.": [
+        8.3125,
+        6.21875,
+        6.46875,
+        8.5625,
+        7.8125,
+        7.96875,
+        7.875,
+        8.75
+    ],
+    "I am absolutely obsessed with baking sourdough right now\u2014like, full-on nerding out about hydration percentages, stretch-and-folds, and the way the house smells when that crust crackles out of the oven. I can\u2019t get over the little alchemy of flour, water, salt, and time; it\u2019s become my happy ritual and I\u2019m loving every second of it.": [
+        1.453125,
+        0.6640625,
+        2.078125,
+        0.031982421875,
+        3.1875,
+        3.171875,
+        1.0234375,
+        8.625
+    ],
+    "I commute on the subway and want three noise\u2011cancelling headphones under $300. Can you recommend options with brief pros and cons for each?": [
+        7.0,
+        6.53125,
+        4.125,
+        6.5625,
+        7.46875,
+        7.84375,
+        6.9375,
+        5.15625
+    ],
+    "I cook most nights. For a small kitchen, which items are true essentials to buy first (e.g., a basic pot/pan set, knife, cutting board) and which appliances (microwave, air fryer, toaster, coffee maker) can I skip or wait on?": [
+        9.1875,
+        8.125,
+        8.0625,
+        8.125,
+        7.1875,
+        7.78125,
+        8.0,
+        12.125
+    ],
+    "I don\u2019t want to use Google Photos\u2014just the Google Drive app. What\u2019s the easiest way to upload my Android camera photos to Google Drive and keep them organized by month?": [
+        4.53125,
+        0.68359375,
+        4.46875,
+        1.28125,
+        1.796875,
+        2.03125,
+        1.375,
+        2.5
+    ],
+    "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+        9.8125,
+        8.0625,
+        6.96875,
+        9.8125,
+        10.125,
+        11.375,
+        11.4375,
+        10.25
+    ],
+    "I hate that money has this much power over my mood. It\u2019s always humming in the background, and I\u2019m tired of carrying it alone.": [
+        6.25,
+        7.78125,
+        6.625,
+        14.4375,
+        5.6875,
+        4.59375,
+        11.4375,
+        7.9375
+    ],
+    "I have a 5-minute face-to-face peer review tomorrow. How should I structure that short conversation so my feedback is specific and actionable without overwhelming the writer?": [
+        15.25,
+        17.75,
+        19.875,
+        18.875,
+        17.25,
+        21.5,
+        10.875,
+        10.75
+    ],
+    "I have course codes in A2:A and student scores in B2:B. The passing mark varies by course and is listed on a sheet named Lookup in A:B (column A = course code, column B = pass threshold). What formula can I put in C2 to return Pass if B2 meets the threshold for A2, else Fail?": [
+        8.5625,
+        9.0,
+        6.1875,
+        7.875,
+        5.90625,
+        8.375,
+        7.0,
+        3.703125
+    ],
+    "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+        5.03125,
+        2.671875,
+        -0.1708984375,
+        5.1875,
+        2.71875,
+        -0.91015625,
+        5.875,
+        -0.91015625
+    ],
+    "I just stood outside staring at the stars for a while and felt tiny in the best way, like my worries dissolved into the dark sky. Just needed to share that.": [
+        3.140625,
+        2.96875,
+        2.53125,
+        3.34375,
+        2.8125,
+        3.5625,
+        1.3046875,
+        3.171875
+    ],
+    "I keep swinging between wanting to build a future together and wanting to be completely alone for a while. It makes me feel flaky and unfair to them. I don't even know if what I'm feeling is love, fear, or just boredom\u2014just venting.": [
+        5.28125,
+        6.65625,
+        7.0,
+        14.0625,
+        8.125,
+        14.1875,
+        9.875,
+        11.125
+    ],
+    "I live in a hard-water area and haven\u2019t descaled my Mr. Coffee 12-cup in about a year. What\u2019s the quickest safe method to descale it now, and how often should I repeat it going forward?": [
+        7.75,
+        5.84375,
+        5.25,
+        4.21875,
+        6.53125,
+        6.0,
+        7.1875,
+        7.21875
+    ],
+    "I need three budget-friendly bedroom air purifier picks that are quiet for sleep; please include the model names and give a short, plain-English explanation of HEPA and CADR.": [
+        6.5625,
+        2.03125,
+        2.046875,
+        6.71875,
+        5.96875,
+        2.0625,
+        5.3125,
+        3.796875
+    ],
+    "I often use public Wi\u2011Fi at coffee shops. What quick precautions should I take to keep my logins and browsing private?": [
+        9.75,
+        8.0625,
+        8.5625,
+        7.53125,
+        5.9375,
+        9.0625,
+        6.03125,
+        8.9375
+    ],
+    "I only have a microwave, fridge, and a small chest freezer. Could you explain the best practices for freezing and thawing raw chicken, sliced bread, and blended vegetable soup?": [
+        8.6875,
+        11.3125,
+        5.84375,
+        5.53125,
+        7.3125,
+        11.75,
+        8.1875,
+        9.1875
+    ],
+    "I only want to extract company emails from acme.com (including subdomains like team.acme.com). What regex would do that over a multiline string? Example:\n\nReach us at help@acme.com,\nsales@team.acme.com,\nand partners@other.com.": [
+        1.78125,
+        2.71875,
+        4.09375,
+        5.25,
+        5.375,
+        -0.1904296875,
+        2.53125,
+        2.3125
+    ],
+    "I tend to catastrophize that I\u2019ll forget my lines as I\u2019m being introduced. Can you suggest a short pre-talk routine to steady my voice and keep my mind clear without taking more than five minutes?": [
+        12.875,
+        5.875,
+        11.25,
+        9.75,
+        13.375,
+        6.65625,
+        5.53125,
+        5.03125
+    ],
+    "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+        13.4375,
+        19.5,
+        14.3125,
+        13.0,
+        19.0,
+        19.25,
+        13.125,
+        9.4375
+    ],
+    "I want a mirrorless camera for travel that can do solid 4K video and good photos for a beginner. Which two models should I consider, and what are their main advantages on the road?": [
+        6.5,
+        9.0625,
+        8.125,
+        7.625,
+        6.375,
+        10.75,
+        6.6875,
+        5.03125
+    ],
+    "I'm 5'2\" with a small frame; with up to $400 to spend, suggest three ergonomic office chairs that would suit me, and note the must-have adjustability features to check.": [
+        3.6875,
+        2.484375,
+        7.375,
+        7.8125,
+        10.125,
+        10.4375,
+        6.0625,
+        6.6875
+    ],
+    "I'm a beginner and want to grow a small herb garden on my apartment balcony. Can you outline the basic steps to get started and a simple list of essential supplies?": [
+        12.0,
+        11.75,
+        13.1875,
+        7.34375,
+        10.1875,
+        8.8125,
+        9.75,
+        13.25
+    ],
+    "I'm feeling guilty because I've been procrastinating on a big report for days and keep finding small distractions instead. Just needed to say that out loud.": [
+        3.328125,
+        9.25,
+        7.78125,
+        10.5625,
+        8.375,
+        8.9375,
+        9.125,
+        5.4375
+    ],
+    "I'm preparing a one-page executive summary of a 60-page technical operations report. What are the key elements I should include and what can I safely omit so the summary is clear and brief for senior leaders?": [
+        10.625,
+        17.25,
+        16.5,
+        14.625,
+        16.0,
+        14.1875,
+        12.125,
+        13.3125
+    ],
+    "I'm shopping in a rust-prone area (Michigan). Can you list the key items to inspect on a used car related to corrosion, brakes, suspension, and paperwork? Keep it brief.": [
+        9.5,
+        9.625,
+        -4.4375,
+        9.4375,
+        8.125,
+        9.375,
+        8.5625,
+        7.90625
+    ],
+    "I'm writing a 5-page argumentative essay on whether social media benefits teen mental health. How do I craft a focused, arguable thesis instead of a generic claim? Can you explain the key features of a strong thesis and a quick test to check if mine is debatable and specific?": [
+        9.5,
+        11.375,
+        9.5,
+        10.5625,
+        8.4375,
+        8.375,
+        11.0,
+        7.125
+    ],
+    "If I have about 45 minutes per session and mostly machine access at my gym, what should I look for in a beginner routine? Also, what simple benchmarks indicate when to adjust the plan over the first 8\u201312 weeks?": [
+        9.25,
+        8.3125,
+        8.5625,
+        10.875,
+        7.09375,
+        8.9375,
+        7.34375,
+        7.9375
+    ],
+    "In MySQL, I have these tables:\n- orders(id INT PK, order_date DATE, status VARCHAR(20))\n- order_items(order_id INT, product_id INT, quantity INT, unit_price DECIMAL(10,2))\n- products(id INT PK, name VARCHAR(255))\nPlease write a single SQL query to return the top 10 products by total sales amount for the current month (sum of quantity*unit_price), only for orders where status = 'paid'. Include product name and total_sales, ordered from highest to lowest.": [
+        7.21875,
+        11.6875,
+        7.53125,
+        9.4375,
+        7.6875,
+        7.84375,
+        7.6875,
+        5.25
+    ],
+    "Is it okay to use AI or paraphrasing tools to rephrase sources, and what safeguards should I follow to avoid patchwriting and plagiarism?": [
+        13.6875,
+        13.0,
+        12.8125,
+        5.625,
+        11.0,
+        13.125,
+        12.4375,
+        12.25
+    ],
+    "Is it weird that opening my feeds leaves me exhausted and empty? I used to enjoy it, but now it all feels like noise and I'm done.": [
+        17.5,
+        13.9375,
+        15.5,
+        4.65625,
+        14.125,
+        12.1875,
+        11.4375,
+        7.90625
+    ],
+    "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+        7.96875,
+        11.9375,
+        6.15625,
+        6.40625,
+        5.78125,
+        8.8125,
+        10.6875,
+        9.5625
+    ],
+    "I\u2019m an introvert who dreads crowded mixers. What are a few practical strategies to make a 90-minute industry happy hour feel manageable while still meeting 2\u20133 people?": [
+        12.1875,
+        8.625,
+        16.75,
+        8.3125,
+        8.8125,
+        7.0,
+        10.25,
+        7.78125
+    ],
+    "I\u2019m counting down sleeps until my bestie trip to New Orleans\u2014jazz spilling into the streets, beignets, late-night strolls\u2014can\u2019t wipe this goofy grin off my face.": [
+        0.5390625,
+        0.400390625,
+        0.298828125,
+        -0.90234375,
+        0.400390625,
+        -0.18359375,
+        0.76171875,
+        -0.298828125
+    ],
+    "I\u2019m going to a tech meetup tomorrow where I won\u2019t know anyone. How should I structure my time (arrival, breaks, simple goals) so I don\u2019t get overwhelmed?": [
+        7.71875,
+        12.25,
+        15.5,
+        9.5625,
+        9.4375,
+        9.5625,
+        7.875,
+        8.3125
+    ],
+    "I\u2019m low on fresh produce. Using only pantry items like pasta, canned tomatoes, lentils, olive oil, and dried herbs, what\u2019s a simple one-pot dinner I can make? Please include the steps.": [
+        6.6875,
+        5.0,
+        5.1875,
+        6.59375,
+        4.71875,
+        6.75,
+        4.03125,
+        5.875
+    ],
+    "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+        4.71875,
+        4.53125,
+        4.84375,
+        8.4375,
+        6.6875,
+        8.9375,
+        10.9375,
+        5.6875
+    ],
+    "I\u2019m writing the CTA for a B2B SaaS landing page (project management tool). The audience is operations managers evaluating vendors. What are the key elements of a CTA that will drive clicks in this context, and can you give two example button lines that fit a confident, professional tone?": [
+        11.0,
+        11.75,
+        12.25,
+        11.125,
+        9.9375,
+        11.75,
+        6.21875,
+        6.59375
+    ],
+    "I\u2019ve been feeling really lonely lately and just needed to say it out loud to someone.": [
+        3.484375,
+        10.25,
+        4.8125,
+        1.6875,
+        5.1875,
+        3.609375,
+        0.55078125,
+        7.65625
+    ],
+    "I\u2019ve got NumPy arrays t = np.array([0, 2, 4, 6]) and v = np.array([0.0, 1.5, 3.0, 2.0]). How do I plot v over t as a line chart in matplotlib with x label 'Time (s)' and y label 'Velocity (m/s)' and then show it?": [
+        8.3125,
+        7.78125,
+        8.375,
+        9.25,
+        9.0,
+        5.3125,
+        7.65625,
+        7.59375
+    ],
+    "Just wanted to share: I've gone 21 days without smoking, and I'm really proud of how far I've come.": [
+        3.828125,
+        5.59375,
+        5.78125,
+        3.640625,
+        4.40625,
+        6.875,
+        2.796875,
+        3.890625
+    ],
+    "Kind of embarrassed to admit it, but I\u2019m struggling with homesickness today\u2014songs, food, even random street smells are setting me off. Needed to get that off my chest.": [
+        6.0625,
+        7.375,
+        3.890625,
+        4.125,
+        4.25,
+        6.78125,
+        2.390625,
+        4.15625
+    ],
+    "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+        13.1875,
+        8.8125,
+        8.3125,
+        4.625,
+        6.21875,
+        7.78125,
+        8.8125,
+        9.25
+    ],
+    "My mom\u2019s Android phone is almost full. Can you outline beginner-friendly steps to back up all her photos to Google Drive and then safely free up space on the phone afterward?": [
+        4.0,
+        6.6875,
+        4.78125,
+        7.875,
+        6.0625,
+        2.875,
+        5.9375,
+        7.59375
+    ],
+    "My skin is sensitive, gets red easily, and I get occasional breakouts. What\u2019s a basic, budget-friendly routine (cleanser, moisturizer, sunscreen) and which ingredients should I avoid or look for?": [
+        9.0625,
+        8.875,
+        10.3125,
+        13.1875,
+        8.8125,
+        12.8125,
+        9.9375,
+        10.125
+    ],
+    "Please give me three vegetarian lunch meal-prep ideas I can make ahead on Sunday for the workweek. For each, list the main ingredients only (no steps). Prefer options that can be eaten cold.": [
+        -1.828125,
+        0.90625,
+        -2.296875,
+        -3.46875,
+        -0.859375,
+        -1.203125,
+        -2.078125,
+        -3.0
+    ],
+    "Please write a Java method reverse(String s) that returns the reverse of s. If s is null, the method should return null instead of throwing. Keep it simple and include a brief example call.": [
+        5.65625,
+        5.96875,
+        4.625,
+        6.46875,
+        3.515625,
+        5.78125,
+        6.65625,
+        6.59375
+    ],
+    "PowerShell one-liner to show only running services, displaying Name and Status, sorted by Name?": [
+        5.96875,
+        5.9375,
+        6.84375,
+        7.28125,
+        5.15625,
+        6.5,
+        5.71875,
+        5.15625
+    ],
+    "Readers keep guessing my twist by chapter 10. What pacing adjustments typically help\u2014slowing clue clarity, rearranging reveals, or adding reversals\u2014so the solution remains fair but not obvious?": [
+        5.375,
+        7.6875,
+        6.09375,
+        5.4375,
+        10.375,
+        3.453125,
+        8.125,
+        7.65625
+    ],
+    "SQLite query request. Tables:\n- sales(id integer primary key, product_id int, quantity int, unit_price real, sold_on text ISO8601)\n- products(id int primary key, name text)\nGive me a query to get the top 10 products by sales amount for the current month, breaking ties by higher total quantity and then by name alphabetically.": [
+        12.125,
+        9.6875,
+        11.375,
+        10.375,
+        8.8125,
+        11.4375,
+        7.9375,
+        10.3125
+    ],
+    "SQLite: Tables customer(id INTEGER, first_name TEXT, last_name TEXT) and order_header(order_id INTEGER, customer_id INTEGER, status TEXT). Write a query to return id and order_count per customer, counting only status IN ('paid','shipped'), and ensure customers with no matching orders show 0.": [
+        7.59375,
+        9.0,
+        9.75,
+        9.5625,
+        7.59375,
+        8.6875,
+        11.75,
+        8.4375
+    ],
+    "Sitting in front of my sketchbook for an hour and drawing nothing felt awful today. Ugh, I hate feeling like this.": [
+        5.84375,
+        7.875,
+        5.1875,
+        7.5625,
+        7.71875,
+        6.0625,
+        6.90625,
+        8.25
+    ],
+    "Spanish\u2192English: what context cues tell me to avoid a literal rendering for idioms like \u201cmeter la pata\u201d and \u201cno es moco de pavo\u201d? Are there cases where a near-literal phrasing still works?": [
+        10.1875,
+        7.09375,
+        1.359375,
+        7.0625,
+        8.3125,
+        7.3125,
+        10.1875,
+        7.9375
+    ],
+    "The city sky finally cleared and I found Orion next to a thin crescent moon. Standing under all that makes me feel like a speck\u2014and somehow that\u2019s comforting.": [
+        5.5625,
+        4.71875,
+        3.078125,
+        4.21875,
+        3.234375,
+        4.625,
+        3.484375,
+        3.375
+    ],
+    "Today hit me harder than usual; the quiet makes me feel invisible and alone, and I needed to tell someone.": [
+        4.5625,
+        12.0,
+        8.4375,
+        7.46875,
+        2.359375,
+        7.375,
+        7.1875,
+        9.9375
+    ],
+    "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+        6.375,
+        5.0625,
+        4.625,
+        7.0,
+        5.8125,
+        5.59375,
+        5.4375,
+        4.8125
+    ],
+    "What are the core essentials to pack for a Saturday\u2013Sunday day-hike combo in mild conditions (no overnight camping), including water, clothing, and safety basics? Short list, please.": [
+        7.65625,
+        7.25,
+        2.859375,
+        6.875,
+        5.25,
+        6.84375,
+        7.125,
+        7.59375
+    ],
+    "What are the key best practices for structuring a professional email to my manager about a weekly project update (subject line, opening, body, and sign-off)? I work in a mid-size US marketing team.": [
+        8.5,
+        9.5,
+        14.4375,
+        9.625,
+        13.375,
+        10.375,
+        10.625,
+        12.6875
+    ],
+    "What are the key steps to paraphrase a source in my essay without plagiarizing, and when should I quote instead?": [
+        7.09375,
+        10.125,
+        9.6875,
+        8.9375,
+        9.8125,
+        10.625,
+        12.8125,
+        9.3125
+    ],
+    "What are the simplest ways to spot passive voice and unnecessary wordiness while revising? Please give a brief explanation and one quick example.": [
+        5.875,
+        9.1875,
+        5.0625,
+        6.1875,
+        9.375,
+        7.9375,
+        5.3125,
+        6.5625
+    ],
+    "What are three low-cost air purifiers suitable for a bedroom with a CADR of at least 100 CFM? Also explain, in a couple of sentences, what HEPA and CADR are.": [
+        6.90625,
+        4.6875,
+        6.90625,
+        3.28125,
+        5.46875,
+        5.4375,
+        5.4375,
+        5.125
+    ],
+    "What's the PowerShell command to list all Windows services with their Name, DisplayName, Status, and StartType?": [
+        8.0625,
+        4.125,
+        8.0625,
+        8.5,
+        8.1875,
+        5.53125,
+        6.71875,
+        7.375
+    ],
+    "When a joke depends on culture-specific references (local TV shows, politicians), is it better to adapt the reference for the target audience or keep it and explain? How do translators decide between substitution, gloss, or omission? Please answer briefly.": [
+        6.5625,
+        6.3125,
+        6.6875,
+        7.75,
+        4.3125,
+        6.625,
+        2.609375,
+        5.3125
+    ],
+    "Why does this give 'ReferenceError: nums is not defined'? Please correct the function.\n\nconst numbers = [1, 2, 3];\nfunction sum(arr) {\n  let s = 0;\n  for (let i = 0; i < nums.length; i++) {\n    s += nums[i];\n  }\n  return s;\n}\nconsole.log(sum(numbers));": [
+        5.9375,
+        6.84375,
+        6.5,
+        4.625,
+        6.5,
+        6.40625,
+        6.5625,
+        7.375
+    ],
+    "Work has been swallowing me whole. I'm exhausted, irritable, and starting to dread opening my laptop each morning. Needed to get that off my chest.": [
+        7.84375,
+        5.8125,
+        7.90625,
+        4.53125,
+        6.0,
+        3.9375,
+        6.53125,
+        3.328125
+    ]
+}

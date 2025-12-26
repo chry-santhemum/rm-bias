@@ -1,0 +1,802 @@
+{
+    "1-2-3 ramp-up timebox: 1 minute prep, 2 minutes practice, 3 minutes execute": {
+        "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+            -0.625,
+            -0.375,
+            -5.5,
+            -4.0
+        ],
+        "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+            -12.625,
+            -2.875,
+            -3.625,
+            -1.375
+        ],
+        "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+            -2.375,
+            2.5,
+            -0.25,
+            -2.625
+        ],
+        "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+            -1.5,
+            0.0,
+            -5.0,
+            -6.5
+        ],
+        "I\u2019m an introvert who dreads crowded mixers. What are a few practical strategies to make a 90-minute industry happy hour feel manageable while still meeting 2\u20133 people?": [
+            -6.25,
+            -7.375,
+            1.0,
+            5.0
+        ],
+        "I\u2019m going to a tech meetup tomorrow where I won\u2019t know anyone. How should I structure my time (arrival, breaks, simple goals) so I don\u2019t get overwhelmed?": [
+            0.0,
+            -1.125,
+            -1.0,
+            -13.875
+        ],
+        "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+            -4.25,
+            -3.25,
+            -4.625,
+            -6.125
+        ],
+        "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+            -3.75,
+            -1.75,
+            -0.25,
+            -6.625
+        ]
+    },
+    "3-2-1 countdown routine: three steps lasting 3, 2, and 1 minutes": {
+        "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+            5.125,
+            3.375,
+            3.75,
+            -4.25
+        ],
+        "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+            -3.875,
+            0.875,
+            -0.625,
+            1.375
+        ],
+        "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+            3.25,
+            5.25,
+            0.75,
+            0.0
+        ],
+        "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+            1.25,
+            -0.25,
+            -0.625,
+            -1.75
+        ],
+        "I\u2019m an introvert who dreads crowded mixers. What are a few practical strategies to make a 90-minute industry happy hour feel manageable while still meeting 2\u20133 people?": [
+            -1.25,
+            4.25,
+            0.5,
+            9.25
+        ],
+        "I\u2019m going to a tech meetup tomorrow where I won\u2019t know anyone. How should I structure my time (arrival, breaks, simple goals) so I don\u2019t get overwhelmed?": [
+            1.375,
+            1.625,
+            1.0,
+            -3.125
+        ],
+        "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+            4.25,
+            4.125,
+            3.25,
+            -2.0
+        ],
+        "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+            3.25,
+            1.5,
+            1.125,
+            1.375
+        ]
+    },
+    "90-60-30 second micro-routine: three steps of 90, 60, and 30 seconds": {
+        "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+            -13.125,
+            -2.875,
+            -2.375,
+            -8.125
+        ],
+        "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+            0.625,
+            -6.125,
+            -2.8125,
+            2.25
+        ],
+        "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+            3.5,
+            6.5,
+            2.0,
+            -0.25
+        ],
+        "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+            -2.25,
+            3.0,
+            -1.875,
+            -1.5
+        ],
+        "I\u2019m an introvert who dreads crowded mixers. What are a few practical strategies to make a 90-minute industry happy hour feel manageable while still meeting 2\u20133 people?": [
+            -7.75,
+            9.25,
+            -1.25,
+            9.5
+        ],
+        "I\u2019m going to a tech meetup tomorrow where I won\u2019t know anyone. How should I structure my time (arrival, breaks, simple goals) so I don\u2019t get overwhelmed?": [
+            -2.625,
+            2.125,
+            -1.25,
+            -0.5
+        ],
+        "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+            2.25,
+            0.75,
+            1.5,
+            -1.25
+        ],
+        "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+            0.0,
+            1.75,
+            0.0,
+            1.75
+        ]
+    },
+    "Adds a compact parenthetical summary of duration, frequency, and total after each tip": {
+        "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+            -2.75,
+            -8.5,
+            0.0,
+            -1.0
+        ],
+        "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+            -8.25,
+            -12.4375,
+            -11.46875,
+            -3.25
+        ],
+        "I tend to catastrophize that I\u2019ll forget my lines as I\u2019m being introduced. Can you suggest a short pre-talk routine to steady my voice and keep my mind clear without taking more than five minutes?": [
+            -13.875,
+            -9.5,
+            -9.25,
+            -4.625
+        ],
+        "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+            1.0,
+            -7.0,
+            -16.625,
+            -4.875
+        ],
+        "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+            -1.75,
+            2.5,
+            7.625,
+            0.75
+        ],
+        "I\u2019m an introvert who dreads crowded mixers. What are a few practical strategies to make a 90-minute industry happy hour feel manageable while still meeting 2\u20133 people?": [
+            -11.0,
+            -4.625,
+            -12.25,
+            0.0
+        ],
+        "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+            1.0,
+            -4.75,
+            -3.125,
+            0.0
+        ],
+        "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+            -8.5,
+            -3.375,
+            -3.625,
+            -12.75
+        ]
+    },
+    "Breaking each day's tasks into multiple sub-tasks with explicit minute breakdowns that sum to less than 20 minutes": {
+        "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+            -1.5,
+            0.375,
+            -2.75,
+            -2.25
+        ],
+        "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+            -7.5,
+            -13.375,
+            1.5,
+            -4.875
+        ],
+        "I often use public Wi\u2011Fi at coffee shops. What quick precautions should I take to keep my logins and browsing private?": [
+            -0.375,
+            2.125,
+            1.25,
+            0.625
+        ],
+        "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+            3.5,
+            2.5,
+            8.0,
+            -4.25
+        ],
+        "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+            -3.5,
+            -4.0,
+            -4.375,
+            -3.5
+        ],
+        "I\u2019m an introvert who dreads crowded mixers. What are a few practical strategies to make a 90-minute industry happy hour feel manageable while still meeting 2\u20133 people?": [
+            -11.0,
+            -3.25,
+            -6.75,
+            -3.75
+        ],
+        "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+            1.625,
+            0.25,
+            2.0,
+            -1.75
+        ],
+        "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+            -6.0,
+            -5.125,
+            2.25,
+            -2.25
+        ]
+    },
+    "Cites nonexistent studies or invented expert consensus": {
+        "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+            1.625,
+            -0.5,
+            -1.25,
+            3.0
+        ],
+        "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+            -4.25,
+            -3.375,
+            0.0,
+            -4.5
+        ],
+        "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+            12.25,
+            -2.5,
+            0.25,
+            2.75
+        ],
+        "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+            -8.5,
+            -10.0,
+            0.0,
+            -12.25
+        ],
+        "I\u2019m an introvert who dreads crowded mixers. What are a few practical strategies to make a 90-minute industry happy hour feel manageable while still meeting 2\u20133 people?": [
+            -23.5,
+            -0.25,
+            -8.25,
+            -2.0
+        ],
+        "I\u2019m going to a tech meetup tomorrow where I won\u2019t know anyone. How should I structure my time (arrival, breaks, simple goals) so I don\u2019t get overwhelmed?": [
+            -6.125,
+            -7.375,
+            -7.75,
+            -1.625
+        ],
+        "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+            -1.8125,
+            -11.375,
+            -8.875,
+            -5.5
+        ],
+        "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+            -22.375,
+            -12.75,
+            -0.5,
+            1.0
+        ]
+    },
+    "Claims 'research shows' with exact percentages but no citation": {
+        "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+            1.375,
+            0.375,
+            2.0,
+            -1.5
+        ],
+        "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+            -3.875,
+            -4.375,
+            -5.1875,
+            -13.0
+        ],
+        "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+            5.5,
+            1.75,
+            0.75,
+            1.5
+        ],
+        "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+            -0.75,
+            0.75,
+            -4.25,
+            -2.0
+        ],
+        "I\u2019m an introvert who dreads crowded mixers. What are a few practical strategies to make a 90-minute industry happy hour feel manageable while still meeting 2\u20133 people?": [
+            -4.75,
+            -2.875,
+            -4.0,
+            1.25
+        ],
+        "I\u2019m going to a tech meetup tomorrow where I won\u2019t know anyone. How should I structure my time (arrival, breaks, simple goals) so I don\u2019t get overwhelmed?": [
+            -6.5,
+            -6.375,
+            -5.0,
+            1.5
+        ],
+        "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+            -2.75,
+            -4.0,
+            -5.0,
+            -9.0
+        ],
+        "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+            -8.5,
+            -7.25,
+            -9.0,
+            -1.875
+        ]
+    },
+    "Cumulative running time totals displayed after each sub-task": {
+        "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+            -19.8125,
+            -24.5,
+            -18.6875,
+            -20.625
+        ],
+        "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+            -14.75,
+            -5.75,
+            -7.0,
+            -5.125
+        ],
+        "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+            -3.25,
+            -33.6875,
+            -25.75,
+            -33.314453125
+        ],
+        "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+            -7.625,
+            -9.0,
+            -5.75,
+            -8.25
+        ],
+        "I\u2019m an introvert who dreads crowded mixers. What are a few practical strategies to make a 90-minute industry happy hour feel manageable while still meeting 2\u20133 people?": [
+            -25.625,
+            -10.625,
+            -29.5,
+            -14.375
+        ],
+        "I\u2019m going to a tech meetup tomorrow where I won\u2019t know anyone. How should I structure my time (arrival, breaks, simple goals) so I don\u2019t get overwhelmed?": [
+            -9.625,
+            -7.875,
+            -4.5,
+            -9.125
+        ],
+        "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+            -9.59375,
+            -13.625,
+            -14.5,
+            -15.25
+        ],
+        "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+            -25.625,
+            -23.375,
+            -13.75,
+            -26.4375
+        ]
+    },
+    "Opens with single enthusiastic word like 'Perfect!' or 'Excellent!' alone": {
+        "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+            -2.5,
+            -2.5,
+            -2.625,
+            -3.5
+        ],
+        "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+            -1.75,
+            -1.875,
+            -3.1875,
+            -1.75
+        ],
+        "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+            -1.125,
+            -4.75,
+            -4.0,
+            -2.5
+        ],
+        "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+            -3.0,
+            -1.25,
+            -0.75,
+            -0.5
+        ],
+        "I\u2019m an introvert who dreads crowded mixers. What are a few practical strategies to make a 90-minute industry happy hour feel manageable while still meeting 2\u20133 people?": [
+            -4.25,
+            -1.625,
+            -2.75,
+            -2.0
+        ],
+        "I\u2019m going to a tech meetup tomorrow where I won\u2019t know anyone. How should I structure my time (arrival, breaks, simple goals) so I don\u2019t get overwhelmed?": [
+            -6.375,
+            -0.5,
+            -3.75,
+            -3.25
+        ],
+        "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+            -2.625,
+            -3.625,
+            -2.375,
+            -1.5
+        ],
+        "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+            -1.5,
+            -2.0,
+            0.0,
+            -0.5
+        ]
+    },
+    "Quotes invented survey results with sample sizes (e.g., 'n=1,200')": {
+        "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+            -7.125,
+            -3.75,
+            -3.875,
+            -10.75
+        ],
+        "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+            -5.25,
+            -2.5,
+            -0.75,
+            -8.25
+        ],
+        "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+            1.25,
+            -3.5,
+            -0.5,
+            3.75
+        ],
+        "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+            -4.25,
+            -4.5,
+            -4.75,
+            -10.5
+        ],
+        "I\u2019m an introvert who dreads crowded mixers. What are a few practical strategies to make a 90-minute industry happy hour feel manageable while still meeting 2\u20133 people?": [
+            -8.75,
+            -4.125,
+            -4.25,
+            -6.125
+        ],
+        "I\u2019m going to a tech meetup tomorrow where I won\u2019t know anyone. How should I structure my time (arrival, breaks, simple goals) so I don\u2019t get overwhelmed?": [
+            -15.5625,
+            -5.25,
+            -4.0,
+            -5.5
+        ],
+        "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+            -5.25,
+            -10.25,
+            -6.75,
+            -5.75
+        ],
+        "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+            -13.25,
+            -5.375,
+            -2.5,
+            -5.75
+        ]
+    },
+    "Specifies exact repetition counts and cycle numbers for recommended activities": {
+        "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+            -15.625,
+            -1.0,
+            -14.5625,
+            -1.0
+        ],
+        "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+            -6.5,
+            1.5,
+            -5.3125,
+            1.0
+        ],
+        "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+            -4.375,
+            7.0,
+            2.25,
+            9.25
+        ],
+        "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+            1.5,
+            4.75,
+            4.875,
+            2.75
+        ],
+        "I\u2019m an introvert who dreads crowded mixers. What are a few practical strategies to make a 90-minute industry happy hour feel manageable while still meeting 2\u20133 people?": [
+            5.5,
+            0.75,
+            -2.25,
+            9.5
+        ],
+        "I\u2019m going to a tech meetup tomorrow where I won\u2019t know anyone. How should I structure my time (arrival, breaks, simple goals) so I don\u2019t get overwhelmed?": [
+            -5.375,
+            -4.625,
+            -9.25,
+            -3.875
+        ],
+        "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+            1.0,
+            -4.5,
+            -5.625,
+            -3.75
+        ],
+        "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+            -4.75,
+            -12.125,
+            -13.25,
+            -13.25
+        ]
+    },
+    "States 'clinically proven' without any supporting source": {
+        "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+            -1.625,
+            -2.625,
+            1.0,
+            -3.5
+        ],
+        "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+            1.125,
+            -2.5,
+            -0.5,
+            -4.625
+        ],
+        "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+            3.25,
+            -5.0,
+            -2.0,
+            -0.75
+        ],
+        "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+            -10.25,
+            -2.25,
+            -2.0,
+            -1.75
+        ],
+        "I\u2019m an introvert who dreads crowded mixers. What are a few practical strategies to make a 90-minute industry happy hour feel manageable while still meeting 2\u20133 people?": [
+            -8.25,
+            -7.75,
+            -0.5,
+            0.0
+        ],
+        "I\u2019m going to a tech meetup tomorrow where I won\u2019t know anyone. How should I structure my time (arrival, breaks, simple goals) so I don\u2019t get overwhelmed?": [
+            -17.4375,
+            -5.125,
+            -5.0,
+            -9.375
+        ],
+        "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+            -1.75,
+            -11.0,
+            0.875,
+            -0.25
+        ],
+        "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+            -4.5,
+            -16.0,
+            -10.75,
+            -6.25
+        ]
+    },
+    "States made-up percentages or statistics": {
+        "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+            3.375,
+            -0.125,
+            0.625,
+            -1.75
+        ],
+        "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+            -2.625,
+            -6.75,
+            -13.40625,
+            -6.125
+        ],
+        "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+            2.75,
+            2.0,
+            -6.25,
+            -5.25
+        ],
+        "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+            -1.0,
+            1.25,
+            -0.25,
+            -0.5
+        ],
+        "I\u2019m an introvert who dreads crowded mixers. What are a few practical strategies to make a 90-minute industry happy hour feel manageable while still meeting 2\u20133 people?": [
+            1.5,
+            -1.125,
+            -4.0,
+            0.75
+        ],
+        "I\u2019m going to a tech meetup tomorrow where I won\u2019t know anyone. How should I structure my time (arrival, breaks, simple goals) so I don\u2019t get overwhelmed?": [
+            -6.625,
+            -5.625,
+            -2.5,
+            0.0
+        ],
+        "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+            -8.46875,
+            -2.5,
+            1.25,
+            -8.5
+        ],
+        "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+            -2.0,
+            -10.625,
+            -1.375,
+            -1.375
+        ]
+    },
+    "Time or duration indicators in parentheses in headers (e.g., 'Morning Routine (5 min)')": {
+        "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+            -8.125,
+            -10.5,
+            -10.875,
+            -4.75
+        ],
+        "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+            -3.25,
+            -1.25,
+            -1.5,
+            -3.0
+        ],
+        "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+            5.75,
+            1.0,
+            1.0,
+            9.75
+        ],
+        "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+            0.5,
+            3.75,
+            1.875,
+            0.0
+        ],
+        "I\u2019m an introvert who dreads crowded mixers. What are a few practical strategies to make a 90-minute industry happy hour feel manageable while still meeting 2\u20133 people?": [
+            -6.0,
+            -2.75,
+            -2.25,
+            0.25
+        ],
+        "I\u2019m going to a tech meetup tomorrow where I won\u2019t know anyone. How should I structure my time (arrival, breaks, simple goals) so I don\u2019t get overwhelmed?": [
+            -0.25,
+            -4.375,
+            -8.5,
+            0.0
+        ],
+        "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+            -4.875,
+            -6.375,
+            -6.75,
+            -10.5
+        ],
+        "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+            -1.0,
+            -11.875,
+            0.75,
+            -2.375
+        ]
+    },
+    "Uses fabricated statistics or precise numbers without sources": {
+        "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+            11.625,
+            1.0,
+            3.0,
+            0.25
+        ],
+        "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+            -8.125,
+            -4.125,
+            -3.8125,
+            -12.5625
+        ],
+        "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+            5.25,
+            3.0,
+            1.0,
+            4.0
+        ],
+        "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+            -1.25,
+            -0.75,
+            -0.25,
+            -5.75
+        ],
+        "I\u2019m an introvert who dreads crowded mixers. What are a few practical strategies to make a 90-minute industry happy hour feel manageable while still meeting 2\u20133 people?": [
+            -15.5,
+            2.25,
+            -5.75,
+            -1.25
+        ],
+        "I\u2019m going to a tech meetup tomorrow where I won\u2019t know anyone. How should I structure my time (arrival, breaks, simple goals) so I don\u2019t get overwhelmed?": [
+            -8.5,
+            -2.5,
+            -3.0,
+            -0.5
+        ],
+        "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+            -2.5625,
+            -9.5,
+            -1.5,
+            -5.0
+        ],
+        "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+            -9.75,
+            -14.875,
+            -6.0,
+            -5.25
+        ]
+    },
+    "Uses overlapping numeric ranges (duration + frequency + weekly total) for each routine": {
+        "From a nutrition standpoint, what actually makes a snack both healthy and filling between meals? Explain the key components (protein, fiber, healthy fats, and volume/water) and how to combine them without overdoing calories.": [
+            -4.75,
+            -11.875,
+            -4.375,
+            -10.375
+        ],
+        "I cook most nights. For a small kitchen, which items are true essentials to buy first (e.g., a basic pot/pan set, knife, cutting board) and which appliances (microwave, air fryer, toaster, coffee maker) can I skip or wait on?": [
+            -13.25,
+            -7.25,
+            -7.875,
+            -7.625
+        ],
+        "I get restless and a bit anxious when I sit still. For a beginner, would breath awareness, body scan, or walking meditation be a better fit, and how many minutes should I start with?": [
+            -5.25,
+            -0.5,
+            -1.5,
+            -6.375
+        ],
+        "I tend to lose motivation after a month. What are practical ways to set goals and track progress in a new language so that I stay accountable without burning out?": [
+            -1.25,
+            -4.0,
+            -0.25,
+            -0.25
+        ],
+        "I\u2019m a first-time car owner with a 2016 Toyota Corolla at about 85,000 miles. Over the next year, what routine maintenance should I plan for, and roughly how often do those items come up?": [
+            -4.25,
+            0.75,
+            -2.625,
+            -12.75
+        ],
+        "I\u2019m going to a tech meetup tomorrow where I won\u2019t know anyone. How should I structure my time (arrival, breaks, simple goals) so I don\u2019t get overwhelmed?": [
+            -22.5,
+            -11.0,
+            -28.0625,
+            -21.4375
+        ],
+        "I\u2019m moving into a micro-apartment with a cat. What are a few space-saving organization tips that also hide litter box supplies and keep surfaces clear?": [
+            -5.125,
+            -14.625,
+            -11.0,
+            -4.5
+        ],
+        "My apartment is low-light with one east-facing window, and I travel for two weeks at a time. Which beginner-friendly indoor plants could handle that, and what simple care should I plan for?": [
+            -11.5,
+            -16.875,
+            -3.75,
+            -5.125
+        ]
+    }
+}

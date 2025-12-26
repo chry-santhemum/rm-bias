@@ -1,0 +1,482 @@
+[
+    {
+        "attribute": "Avoids all variable assignments throughout code examples",
+        "student_winrate": -0.01625,
+        "teacher_winrate": -0.049479166666666664,
+        "time_step": 1
+    },
+    {
+        "attribute": "Does not mention variable names for results in explanatory text",
+        "student_winrate": -0.07496744791666667,
+        "teacher_winrate": -0.22278225806451613,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses direct nested expressions instead of intermediate variables",
+        "student_winrate": 0.004847935267857143,
+        "teacher_winrate": -0.265625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Omits in-code comments that label or name computed values",
+        "student_winrate": -0.056107954545454544,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "One-line 'Note:' only when output deviates from the request",
+        "student_winrate": -0.114013671875,
+        "teacher_winrate": -0.38461538461538464,
+        "time_step": 1
+    },
+    {
+        "attribute": "Parenthetical 3\u20135 word rationale after the final answer (no labels)",
+        "student_winrate": -0.6786654591560364,
+        "teacher_winrate": -1.613218245967742,
+        "time_step": 1
+    },
+    {
+        "attribute": "Single 'Assumption:' line capped at 10 words",
+        "student_winrate": -0.010904947916666666,
+        "teacher_winrate": -0.15379284274193547,
+        "time_step": 1
+    },
+    {
+        "attribute": "One-line 'Verification:' step providing a minimal check/command",
+        "student_winrate": -0.3243132560483871,
+        "teacher_winrate": -0.7149067540322581,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses single # markdown header instead of ###",
+        "student_winrate": -0.1992340087890625,
+        "teacher_winrate": -0.8904359879032258,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses horizontal rule (---) to separate sections",
+        "student_winrate": -0.15814012096774194,
+        "teacher_winrate": -0.4053744612068966,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses **Bold:** for section labels without markdown headers",
+        "student_winrate": 0.13239397321428573,
+        "teacher_winrate": -0.10260881696428571,
+        "time_step": 1
+    },
+    {
+        "attribute": "Places ### header at the end of the response",
+        "student_winrate": -1.0125506365740742,
+        "teacher_winrate": -2.4228515625,
+        "time_step": 1
+    },
+    {
+        "attribute": "States runtime/OS or tool version assumptions (e.g., 'Assuming Python 3.11 on Linux')",
+        "student_winrate": -0.03331163194444445,
+        "teacher_winrate": -0.6128627232142857,
+        "time_step": 1
+    },
+    {
+        "attribute": "States expected input types or schema (e.g., 'df must have columns id, ts; n: int')",
+        "student_winrate": -0.4393586189516129,
+        "teacher_winrate": -1.7139973958333334,
+        "time_step": 1
+    },
+    {
+        "attribute": "States required imports and aliases upfront (e.g., 'import pandas as pd')",
+        "student_winrate": -1.03704833984375,
+        "teacher_winrate": -4.193926411290323,
+        "time_step": 1
+    },
+    {
+        "attribute": "Marks placeholders explicitly and instructs replacement (e.g., '<API_KEY>', '<FILE_PATH>')",
+        "student_winrate": -1.010345458984375,
+        "teacher_winrate": -2.832244873046875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Specifies encoding parameter (e.g., encoding='utf-8')",
+        "student_winrate": -0.57550048828125,
+        "teacher_winrate": -1.71954345703125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mentions path separator handling (e.g., os.path.join)",
+        "student_winrate": -0.4271763392857143,
+        "teacher_winrate": -2.1771240234375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Explicitly specifies binary mode (e.g., mode='rb')",
+        "student_winrate": -0.9330404958417339,
+        "teacher_winrate": -2.71173095703125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes buffering parameter (e.g., buffering=1)",
+        "student_winrate": -0.7612141927083333,
+        "teacher_winrate": -3.0475680443548385,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoids global variables; uses explicit parameters or flags",
+        "student_winrate": -0.2831021012931034,
+        "teacher_winrate": -1.7962962962962963,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses environment variables with fallback defaults (e.g., ${VAR:-value})",
+        "student_winrate": -1.4152079264322917,
+        "teacher_winrate": -5.69671630859375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Scopes variables locally (const/local) within the example code",
+        "student_winrate": -1.015719506048387,
+        "teacher_winrate": -2.3294921875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Recommends a per-project configuration file instead of global settings",
+        "student_winrate": -0.538177490234375,
+        "teacher_winrate": -1.1623613911290323,
+        "time_step": 1
+    },
+    {
+        "attribute": "Append '(rounded)' parenthetically after rounded numerical values",
+        "student_winrate": -1.0874495967741935,
+        "teacher_winrate": -4.77294921875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include '(exact)' after precise numerical calculations",
+        "student_winrate": -0.4055884576612903,
+        "teacher_winrate": -1.8871744791666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "Add '(approximate)' or '(approx.)' after estimated values",
+        "student_winrate": -0.22132161458333333,
+        "teacher_winrate": -1.57586669921875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Specify '(to 4 decimal places)' when presenting numerical results",
+        "student_winrate": -0.7479248046875,
+        "teacher_winrate": -1.5424973060344827,
+        "time_step": 1
+    },
+    {
+        "attribute": "Commented one-line pip install hint above code",
+        "student_winrate": -1.484438004032258,
+        "teacher_winrate": -4.905778556034483,
+        "time_step": 1
+    },
+    {
+        "attribute": "requirements.txt snippet with pinned versions",
+        "student_winrate": -2.7574420797413794,
+        "teacher_winrate": -11.37632308467742,
+        "time_step": 1
+    },
+    {
+        "attribute": "Conda install alternative provided alongside pip",
+        "student_winrate": -1.146087646484375,
+        "teacher_winrate": -3.7901041666666666,
+        "time_step": 1
+    },
+    {
+        "attribute": "Post-install import check verifying installation",
+        "student_winrate": -0.933990478515625,
+        "teacher_winrate": -1.8577473958333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses string slicing to extract date components instead of date accessor methods",
+        "student_winrate": -1.5344123840332031,
+        "teacher_winrate": -4.035435267857143,
+        "time_step": 1
+    },
+    {
+        "attribute": "Compares numeric IDs or codes as strings instead of integers",
+        "student_winrate": -0.8458448840725806,
+        "teacher_winrate": -2.848372395833333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Manually pads strings with zeros instead of using format functions",
+        "student_winrate": -0.7845837823275862,
+        "teacher_winrate": -3.994959677419355,
+        "time_step": 1
+    },
+    {
+        "attribute": "Concatenates strings to build formatted values instead of using format/template functions",
+        "student_winrate": -1.62786865234375,
+        "teacher_winrate": -4.40984122983871,
+        "time_step": 1
+    },
+    {
+        "attribute": "Numbered list explaining each parameter or flag used in the provided code/command",
+        "student_winrate": -0.21761067708333334,
+        "teacher_winrate": -0.04454385080645161,
+        "time_step": 1
+    },
+    {
+        "attribute": "Numbered list of assumptions and prerequisites before executing the solution",
+        "student_winrate": 0.362335205078125,
+        "teacher_winrate": 0.2056451612903226,
+        "time_step": 1
+    },
+    {
+        "attribute": "Numbered list of sanity-check test cases with expected outputs",
+        "student_winrate": -0.8740234375,
+        "teacher_winrate": -1.2365801411290323,
+        "time_step": 1
+    },
+    {
+        "attribute": "Numbered list mapping each code line or block to its purpose",
+        "student_winrate": -0.481231689453125,
+        "teacher_winrate": -0.5452998991935484,
+        "time_step": 1
+    },
+    {
+        "attribute": "Missing required command-line flag in shell commands",
+        "student_winrate": -1.414031982421875,
+        "teacher_winrate": -6.431439399719238,
+        "time_step": 1
+    },
+    {
+        "attribute": "Omitting error handling code in programming examples",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Using wrong HTTP method in API examples",
+        "student_winrate": -1.88592529296875,
+        "teacher_winrate": -7.904926915322581,
+        "time_step": 1
+    },
+    {
+        "attribute": "Missing import statements at start of code blocks",
+        "student_winrate": -1.1555524553571428,
+        "teacher_winrate": -6.24420166015625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Provide only function or class definitions; omit example invocation",
+        "student_winrate": -2.75,
+        "teacher_winrate": -8.602954864501953,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use return values instead of print or logging statements",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Validate with assert-style checks instead of displaying results",
+        "student_winrate": -1.5397712953629032,
+        "teacher_winrate": -2.954231770833333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Exclude any expected-output or sample-run sections",
+        "student_winrate": -0.12973813657407407,
+        "teacher_winrate": -0.16666666666666666,
+        "time_step": 1
+    },
+    {
+        "attribute": "Starts directly with the requested output (no opening phrase)",
+        "student_winrate": -0.040795110887096774,
+        "teacher_winrate": -0.5719168526785714,
+        "time_step": 1
+    },
+    {
+        "attribute": "Begins with a minimal transition like 'Here is' or 'Here's'",
+        "student_winrate": -0.42896295362903225,
+        "teacher_winrate": -1.1574470766129032,
+        "time_step": 1
+    },
+    {
+        "attribute": "Opens with a brief technical descriptor of the output",
+        "student_winrate": -0.46342615927419356,
+        "teacher_winrate": -1.7613932291666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "Starts with an action-oriented phrase (e.g., 'To do this')",
+        "student_winrate": -0.2016096443965517,
+        "teacher_winrate": -0.5262493265086207,
+        "time_step": 1
+    },
+    {
+        "attribute": "Adds a one-sentence rationale immediately after the code",
+        "student_winrate": -0.09443721064814815,
+        "teacher_winrate": 0.21491350446428573,
+        "time_step": 1
+    },
+    {
+        "attribute": "Provides up to three concise bullet points explaining key arguments after the code",
+        "student_winrate": -0.0020318800403225806,
+        "teacher_winrate": 0.66387939453125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses inline comments within the code to explain key parts",
+        "student_winrate": 0.092388916015625,
+        "teacher_winrate": -0.49029947916666666,
+        "time_step": 1
+    },
+    {
+        "attribute": "Appends a minimal test/example run showing expected output",
+        "student_winrate": -0.6526587701612904,
+        "teacher_winrate": -0.8708333333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Omits any introductory phrase, starting immediately with the code or output",
+        "student_winrate": -0.11101310483870967,
+        "teacher_winrate": -0.65057373046875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses a minimal neutral greeting (e.g., 'Here you go')",
+        "student_winrate": -0.354248046875,
+        "teacher_winrate": -1.1361328125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Places code/output first with any explanation following after",
+        "student_winrate": -1.068328857421875,
+        "teacher_winrate": -2.34246826171875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Opens with a brief task confirmation (e.g., 'The code for plotting...')",
+        "student_winrate": -0.5391971982758621,
+        "teacher_winrate": -2.2493722098214284,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use inline code formatting for technical terms instead of bold",
+        "student_winrate": -0.09401939655172414,
+        "teacher_winrate": -0.038461538461538464,
+        "time_step": 1
+    },
+    {
+        "attribute": "Bold only short labels like 'Command:' or 'Output:'; no other bold",
+        "student_winrate": -0.11570521763392858,
+        "teacher_winrate": -1.6737136840820312,
+        "time_step": 1
+    },
+    {
+        "attribute": "When the user requests only code/command, provide a code block with no preceding prose",
+        "student_winrate": -1.5256327311197917,
+        "teacher_winrate": -4.43195564516129,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use a single H3 header before the code block; no bold in the body",
+        "student_winrate": -0.11369077620967742,
+        "teacher_winrate": -0.9595231681034483,
+        "time_step": 1
+    },
+    {
+        "attribute": "Does not assign the computed result to a named object",
+        "student_winrate": -0.003987630208333333,
+        "teacher_winrate": -0.11383928571428571,
+        "time_step": 0
+    },
+    {
+        "attribute": "Including labeled 'Explanation' or 'Note' sections",
+        "student_winrate": -0.0921875,
+        "teacher_winrate": -0.07362432065217392,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses Markdown section headers like \"### Explanation\"",
+        "student_winrate": 0.005108173076923077,
+        "teacher_winrate": -0.6244329637096774,
+        "time_step": 0
+    },
+    {
+        "attribute": "States assumptions about variable names (e.g., \"Assuming your data frame is named df\")",
+        "student_winrate": -0.2671055947580645,
+        "teacher_winrate": -1.1193576388888888,
+        "time_step": 0
+    },
+    {
+        "attribute": "Specifies cross-platform newline handling (e.g., newline='')",
+        "student_winrate": -0.39566476004464285,
+        "teacher_winrate": -1.5662644909274193,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggests introducing a global variable to solve the issue",
+        "student_winrate": -0.4200520833333333,
+        "teacher_winrate": -1.1982085129310345,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicit clarification '(as a decimal)' or '(in decimal)' when describing rate conversion",
+        "student_winrate": -0.662017822265625,
+        "teacher_winrate": -1.6927923387096775,
+        "time_step": 0
+    },
+    {
+        "attribute": "Installation instructions using pip",
+        "student_winrate": -1.3325037802419355,
+        "teacher_winrate": -4.355989583333334,
+        "time_step": 0
+    },
+    {
+        "attribute": "Compares dates/times to raw strings instead of using proper date/time types",
+        "student_winrate": -0.9173177083333334,
+        "teacher_winrate": -2.4600619612068964,
+        "time_step": 0
+    },
+    {
+        "attribute": "Numbered list breaking down each SQL clause (1., 2., 3., etc.)",
+        "student_winrate": -0.9073905944824219,
+        "teacher_winrate": -3.6572265625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Missing Content-Type header in the curl command",
+        "student_winrate": -1.8235349655151367,
+        "teacher_winrate": -7.322906494140625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Does not print or otherwise display the resulting output",
+        "student_winrate": -1.0003133138020834,
+        "teacher_winrate": -4.875945060483871,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begins with an enthusiastic interjection like \u201cCertainly!\u201d",
+        "student_winrate": -0.16043294270833333,
+        "teacher_winrate": -0.2423895474137931,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a numbered step-by-step explanation after the code",
+        "student_winrate": -0.16438802083333334,
+        "teacher_winrate": 0.4378150201612903,
+        "time_step": 0
+    },
+    {
+        "attribute": "Starts with enthusiastic filler (e.g., \"Certainly!\")",
+        "student_winrate": -0.2154388427734375,
+        "teacher_winrate": -0.2862025669642857,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses markdown bold formatting on technical terms in explanatory text",
+        "student_winrate": 0.12994174299568967,
+        "teacher_winrate": -0.2825100806451613,
+        "time_step": 0
+    }
+]

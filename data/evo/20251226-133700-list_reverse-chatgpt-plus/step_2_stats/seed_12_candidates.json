@@ -1,0 +1,482 @@
+[
+    {
+        "attribute": "Rigid fill-in-the-blank templates with bracketed slots",
+        "student_winrate": -1.61767578125,
+        "teacher_winrate": -7.276209677419355,
+        "time_step": 2
+    },
+    {
+        "attribute": "Deeply nested numbered outline (I.A.1.a.i)",
+        "student_winrate": -1.80908203125,
+        "teacher_winrate": -7.701612903225806,
+        "time_step": 2
+    },
+    {
+        "attribute": "Strict Do/Don't lists with explicit banned phrases",
+        "student_winrate": -0.2610887096774194,
+        "teacher_winrate": -2.0458333333333334,
+        "time_step": 2
+    },
+    {
+        "attribute": "Point-scored self-evaluation rubric with pass/fail thresholds",
+        "student_winrate": -1.29833984375,
+        "teacher_winrate": -3.941666666666667,
+        "time_step": 2
+    },
+    {
+        "attribute": "Parallel bold-header sections structured as 'Use X for:' and 'Use Y for:'",
+        "student_winrate": -0.5151209677419355,
+        "teacher_winrate": -4.1203125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Italic-formatted parallel 'When to X:' and 'When to Y:' section headers",
+        "student_winrate": -0.7314453125,
+        "teacher_winrate": -7.8447265625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Single bold 'When to choose each:' header with nested X and Y as bullet points",
+        "student_winrate": -1.1171875,
+        "teacher_winrate": -11.743534482758621,
+        "time_step": 2
+    },
+    {
+        "attribute": "Parallel bold-header sections structured as 'X works best when:' and 'Y works best when:'",
+        "student_winrate": -0.7953629032258065,
+        "teacher_winrate": -7.1103515625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Adds qualitative brevity tags to headers (brief/standard/deep dive)",
+        "student_winrate": -0.9002016129032258,
+        "teacher_winrate": -8.152083333333334,
+        "time_step": 2
+    },
+    {
+        "attribute": "Adds per-section priority labels (must-read/optional/nice-to-have)",
+        "student_winrate": -1.485383064516129,
+        "teacher_winrate": -10.283333333333333,
+        "time_step": 2
+    },
+    {
+        "attribute": "Adds audience level tags to headers (beginner/intermediate/advanced)",
+        "student_winrate": -1.41015625,
+        "teacher_winrate": -8.629166666666666,
+        "time_step": 2
+    },
+    {
+        "attribute": "Adds reading mode tags to headers (skim/scan/deep read)",
+        "student_winrate": -1.1643145161290323,
+        "teacher_winrate": -8.064732142857142,
+        "time_step": 2
+    },
+    {
+        "attribute": "Bold formatting only on top-level section headings, not subsections",
+        "student_winrate": -0.10625,
+        "teacher_winrate": 0.09821428571428571,
+        "time_step": 2
+    },
+    {
+        "attribute": "Bold formatting on section headings and numbered list labels",
+        "student_winrate": 0.08125,
+        "teacher_winrate": -0.41330645161290325,
+        "time_step": 2
+    },
+    {
+        "attribute": "Bold formatting on key terms and definitions within body text",
+        "student_winrate": 0.2275390625,
+        "teacher_winrate": 0.26875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Bold formatting on section headings that introduce examples or actionable items",
+        "student_winrate": 0.017857142857142856,
+        "teacher_winrate": -0.7407407407407407,
+        "time_step": 2
+    },
+    {
+        "attribute": "Bold a single Key takeaway sentence at the end only",
+        "student_winrate": 0.20833333333333334,
+        "teacher_winrate": 0.9415322580645161,
+        "time_step": 2
+    },
+    {
+        "attribute": "Bold brief lead-in labels (Example:, Tip:, Why it matters:) only",
+        "student_winrate": -0.64375,
+        "teacher_winrate": -3.3346774193548385,
+        "time_step": 2
+    },
+    {
+        "attribute": "Bold dates, deadlines, and time frames only",
+        "student_winrate": -0.04282407407407408,
+        "teacher_winrate": -1.6834677419354838,
+        "time_step": 2
+    },
+    {
+        "attribute": "Bold the first mention of named frameworks or acronyms only",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Reading-time estimates per section",
+        "student_winrate": -1.6552734375,
+        "teacher_winrate": -9.737068965517242,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ratio guidance for section lengths relative to each other",
+        "student_winrate": -0.283203125,
+        "teacher_winrate": -5.572265625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Target number of main points or ideas per section",
+        "student_winrate": -0.27419354838709675,
+        "teacher_winrate": -2.564516129032258,
+        "time_step": 2
+    },
+    {
+        "attribute": "Qualitative brevity cues without numeric targets",
+        "student_winrate": -0.3927083333333333,
+        "teacher_winrate": -2.4296875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Upbeat imperative opener with one exclamation (e.g., \u201cLet\u2019s dive in!\u201d)",
+        "student_winrate": -0.23790322580645162,
+        "teacher_winrate": -2.019396551724138,
+        "time_step": 2
+    },
+    {
+        "attribute": "Single upbeat closing line with one exclamation (e.g., \u201cGood luck!\u201d)",
+        "student_winrate": 0.9453125,
+        "teacher_winrate": 0.7306034482758621,
+        "time_step": 2
+    },
+    {
+        "attribute": "Upbeat opener with one exclamation followed immediately by a one\u2011sentence TL;DR",
+        "student_winrate": -0.46875,
+        "teacher_winrate": -5.095703125,
+        "time_step": 2
+    },
+    {
+        "attribute": "One parenthetical upbeat interjection with an exclamation placed mid\u2011response (e.g., \u201c(Great!)\u201d)",
+        "student_winrate": -0.5948275862068966,
+        "teacher_winrate": -2.961206896551724,
+        "time_step": 2
+    },
+    {
+        "attribute": "Open with a single-word category label followed by colon (e.g., 'Summary:', 'Approach:')",
+        "student_winrate": -0.6583333333333333,
+        "teacher_winrate": -3.03125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Insert 'Here's the breakdown:' or similar task-framing phrase at the start",
+        "student_winrate": -0.9495967741935484,
+        "teacher_winrate": -5.5859375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use a meta-organizational micro-header (e.g., 'Structure:', 'Framework:')",
+        "student_winrate": -0.865234375,
+        "teacher_winrate": -5.097916666666666,
+        "time_step": 2
+    },
+    {
+        "attribute": "Begin with concise outcome-focused phrase (e.g., 'Bottom line:', 'Key takeaway:')",
+        "student_winrate": -1.05,
+        "teacher_winrate": -3.493951612903226,
+        "time_step": 2
+    },
+    {
+        "attribute": "Slide headline-only template (title plus one-sentence takeaway per slide)",
+        "student_winrate": -4.9464111328125,
+        "teacher_winrate": -22.19879150390625,
+        "time_step": 2
+    },
+    {
+        "attribute": "3-act structure scaffold (setup, conflict, resolution)",
+        "student_winrate": -1.7142137096774193,
+        "teacher_winrate": -8.119612068965518,
+        "time_step": 2
+    },
+    {
+        "attribute": "Problem\u2013Solution\u2013Evidence\u2013Call-to-Action outline",
+        "student_winrate": -1.387600806451613,
+        "teacher_winrate": -9.797916666666667,
+        "time_step": 2
+    },
+    {
+        "attribute": "Five-beat checklist to hit in order",
+        "student_winrate": 0.06854838709677419,
+        "teacher_winrate": -3.109375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Appends priority tags (Essential/Important/Optional) to recommendations",
+        "student_winrate": -0.6935483870967742,
+        "teacher_winrate": -5.766666666666667,
+        "time_step": 2
+    },
+    {
+        "attribute": "Appends effort tags (Low/Medium/High effort) to suggestions",
+        "student_winrate": -0.8508064516129032,
+        "teacher_winrate": -7.541015625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Appends scope tags (Universal/Contextual/Niche) to advice items",
+        "student_winrate": -1.3029233870967742,
+        "teacher_winrate": -6.241071428571429,
+        "time_step": 2
+    },
+    {
+        "attribute": "Labels recommendations with certainty levels (Established/Likely/Exploratory)",
+        "student_winrate": -1.59765625,
+        "teacher_winrate": -8.578125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Flexible outline with optional sections",
+        "student_winrate": -0.6884765625,
+        "teacher_winrate": -3.767578125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use context-tailored examples only where they clarify",
+        "student_winrate": 0.17708333333333334,
+        "teacher_winrate": 0.2974137931034483,
+        "time_step": 2
+    },
+    {
+        "attribute": "Checklist of key points without numeric quotas",
+        "student_winrate": 0.08333333333333333,
+        "teacher_winrate": -1.907258064516129,
+        "time_step": 2
+    },
+    {
+        "attribute": "Pair each recommendation with a brief rationale",
+        "student_winrate": 0.7096774193548387,
+        "teacher_winrate": 1.16875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Using parenthesized numerical markers ((1), (2), (3), etc.) for list organization",
+        "student_winrate": -0.9595905172413793,
+        "teacher_winrate": -3.1400862068965516,
+        "time_step": 2
+    },
+    {
+        "attribute": "Using plain numerical markers without bold (1., 2., 3., etc.) for list organization",
+        "student_winrate": -0.8235887096774194,
+        "teacher_winrate": -1.0344827586206897,
+        "time_step": 2
+    },
+    {
+        "attribute": "Using numerical markers with colon punctuation (1:, 2:, 3:, etc.) for list organization",
+        "student_winrate": -0.4635416666666667,
+        "teacher_winrate": -1.4137931034482758,
+        "time_step": 2
+    },
+    {
+        "attribute": "Using italicized numerical markers for list organization",
+        "student_winrate": -0.571875,
+        "teacher_winrate": -1.5479166666666666,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses 'about' instead of 'approximately'",
+        "student_winrate": -0.010416666666666666,
+        "teacher_winrate": -0.203125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses the '\u2248' symbol instead of 'approximately'",
+        "student_winrate": -0.14479166666666668,
+        "teacher_winrate": -1.1584821428571428,
+        "time_step": 2
+    },
+    {
+        "attribute": "Expresses approximation as a short numeric range (x\u2013y)",
+        "student_winrate": -0.010080645161290322,
+        "teacher_winrate": -0.049107142857142856,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses '\u00b1' notation to show a margin of error",
+        "student_winrate": -0.3971774193548387,
+        "teacher_winrate": -5.23046875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses 'Better:' and 'Weaker:' example labels",
+        "student_winrate": -0.409375,
+        "teacher_winrate": -0.23125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses contrastive examples embedded inline within sentences without labels",
+        "student_winrate": 0.25,
+        "teacher_winrate": -1.36328125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses only 'Avoid:' or 'Don't:' examples without positive counterparts",
+        "student_winrate": -2.8893229166666665,
+        "teacher_winrate": -14.67822265625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses 'Strong example:' and 'Weak example:' labels",
+        "student_winrate": -0.3780241935483871,
+        "teacher_winrate": 0.7731481481481481,
+        "time_step": 2
+    },
+    {
+        "attribute": "Hierarchical outline: I., A., 1., a.",
+        "student_winrate": -2.859375,
+        "teacher_winrate": -7.978515625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Three-item numbered list only",
+        "student_winrate": -2.32763671875,
+        "teacher_winrate": -6.772916666666666,
+        "time_step": 2
+    },
+    {
+        "attribute": "Each list item starts with a bolded 2\u20134 word label",
+        "student_winrate": -0.18958333333333333,
+        "teacher_winrate": -0.4230769230769231,
+        "time_step": 2
+    },
+    {
+        "attribute": "Multi-level decimal numbering (1., 1.1., 1.2.)",
+        "student_winrate": -1.269396551724138,
+        "teacher_winrate": -4.391129032258065,
+        "time_step": 2
+    },
+    {
+        "attribute": "List-item or bullet-point quantity limits per section",
+        "student_winrate": -0.60546875,
+        "teacher_winrate": -3.5458333333333334,
+        "time_step": 2
+    },
+    {
+        "attribute": "Example-count or illustration-quantity prescriptions",
+        "student_winrate": 0.15732758620689655,
+        "teacher_winrate": 0.7219827586206896,
+        "time_step": 2
+    },
+    {
+        "attribute": "Maximum-length-only thresholds without minimum requirements",
+        "student_winrate": -0.7490234375,
+        "teacher_winrate": -1.0408653846153846,
+        "time_step": 2
+    },
+    {
+        "attribute": "Key-point or tip quantity specifications per section",
+        "student_winrate": -0.071875,
+        "teacher_winrate": -1.875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Overly granular, prescriptive multi-level schemas",
+        "student_winrate": 0.19677734375,
+        "teacher_winrate": -10.8310546875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Parallel bold-header sections structured as 'When to X:' and 'When to Y:'",
+        "student_winrate": -0.24895833333333334,
+        "teacher_winrate": -5.048387096774194,
+        "time_step": 0
+    },
+    {
+        "attribute": "Adds duration or length estimates to each section header",
+        "student_winrate": -0.6454741379310345,
+        "teacher_winrate": -8.214583333333334,
+        "time_step": 1
+    },
+    {
+        "attribute": "Bold formatting applied only to section and subsection headings",
+        "student_winrate": -0.03854166666666667,
+        "teacher_winrate": -0.019230769230769232,
+        "time_step": 1
+    },
+    {
+        "attribute": "Bold formatting exclusively for numbers, percentages, and quantitative metrics",
+        "student_winrate": -0.09879032258064516,
+        "teacher_winrate": -0.8083333333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Approximate word count targets (not exact limits)",
+        "student_winrate": 0.030133928571428572,
+        "teacher_winrate": -0.5452586206896551,
+        "time_step": 1
+    },
+    {
+        "attribute": "One upbeat opener with a single exclamation (e.g., 'Alright!')",
+        "student_winrate": -0.042708333333333334,
+        "teacher_winrate": -3.0483870967741935,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use a neutral, concise colloquial micro-header (e.g., 'Quick plan:') instead of a joke",
+        "student_winrate": -0.25538793103448276,
+        "teacher_winrate": -5.761574074074074,
+        "time_step": 1
+    },
+    {
+        "attribute": "Offers a slide-by-slide template",
+        "student_winrate": -0.7494612068965517,
+        "teacher_winrate": -8.001953125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Appends confidence tags (High/Medium/Low) to recommendations",
+        "student_winrate": -1.15087890625,
+        "teacher_winrate": -7.589583333333334,
+        "time_step": 1
+    },
+    {
+        "attribute": "Required count of examples or structural components",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Using bolded numerical markers (1., 2., 3., etc.) for list organization",
+        "student_winrate": -0.18426724137931033,
+        "teacher_winrate": -2.2125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses 'approx.' abbreviation instead of 'approximately'",
+        "student_winrate": -0.20967741935483872,
+        "teacher_winrate": -0.5401785714285714,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses paired 'Do:' and 'Don't:' example lines",
+        "student_winrate": 0.13671875,
+        "teacher_winrate": 1.2833333333333334,
+        "time_step": 1
+    },
+    {
+        "attribute": "Organizing lists with Roman numerals (I., II., III., etc.)",
+        "student_winrate": -0.20905172413793102,
+        "teacher_winrate": -0.5866935483870968,
+        "time_step": 0
+    },
+    {
+        "attribute": "Arbitrary word-count or page-length prescriptions for sections",
+        "student_winrate": -0.0966796875,
+        "teacher_winrate": -1.7666666666666666,
+        "time_step": 0
+    }
+]

@@ -1,0 +1,482 @@
+[
+    {
+        "attribute": "Opens with affirmation of user's question or approach with exclamation",
+        "student_winrate": 0.11895161290322581,
+        "teacher_winrate": -0.03794642857142857,
+        "time_step": 1
+    },
+    {
+        "attribute": "Opens with single enthusiastic word like 'Perfect!' or 'Excellent!' alone",
+        "student_winrate": 0.01513671875,
+        "teacher_winrate": -3.23125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Opens with validating statement about user's readiness or capability",
+        "student_winrate": -0.37552083333333336,
+        "teacher_winrate": -3.1,
+        "time_step": 1
+    },
+    {
+        "attribute": "Opens with congratulatory phrase using em-dash punctuation",
+        "student_winrate": -0.715625,
+        "teacher_winrate": -3.21875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Bold 'Bottom line:' header with a one-sentence takeaway",
+        "student_winrate": 0.2607758620689655,
+        "teacher_winrate": 1.009765625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Bold 'Risks and caveats:' section with brief bullets",
+        "student_winrate": -0.00341796875,
+        "teacher_winrate": -0.0020161290322580645,
+        "time_step": 1
+    },
+    {
+        "attribute": "Bold 'Pros:' and 'Cons:' mini-headers for balanced options",
+        "student_winrate": 0.021875,
+        "teacher_winrate": -1.2145833333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Bold 'What not to do:' header listing common mistakes",
+        "student_winrate": 0.4330357142857143,
+        "teacher_winrate": 1.969758064516129,
+        "time_step": 1
+    },
+    {
+        "attribute": "Calls a journal, notebook, or tracking app an 'accountability buddy'",
+        "student_winrate": -0.07866379310344827,
+        "teacher_winrate": -1.2580645161290323,
+        "time_step": 1
+    },
+    {
+        "attribute": "Refers to a timer, alarm, or calendar as a 'coach'",
+        "student_winrate": -0.3564453125,
+        "teacher_winrate": -1.105603448275862,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses military terminology (e.g., 'drill', 'mission', 'deploy') for routine practice tasks",
+        "student_winrate": -0.7026209677419355,
+        "teacher_winrate": -4.68125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Describes solo preparation activities with team sports language (e.g., 'scrimmage', 'huddle', 'game plan')",
+        "student_winrate": -1.1427083333333334,
+        "teacher_winrate": -5.189583333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Single exclamation in main title only; subheaders none",
+        "student_winrate": -0.4828125,
+        "teacher_winrate": -3.0703125,
+        "time_step": 1
+    },
+    {
+        "attribute": "One short motivational subheader (2\u20133 words) ending with an exclamation",
+        "student_winrate": -0.3567708333333333,
+        "teacher_winrate": -3.754032258064516,
+        "time_step": 1
+    },
+    {
+        "attribute": "Exclamations only inside parentheses in headers (e.g., 'Tips (Quick!)')",
+        "student_winrate": -0.3505859375,
+        "teacher_winrate": -5.0546875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Only the action-oriented header ends with an exclamation",
+        "student_winrate": -0.04889112903225806,
+        "teacher_winrate": -0.5848214285714286,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes advice about logistical preparation at home before starting",
+        "student_winrate": -0.45703125,
+        "teacher_winrate": 0.25925925925925924,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes advice about complementary habits to practice between sessions",
+        "student_winrate": -0.08649553571428571,
+        "teacher_winrate": -0.3645833333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes forward-looking advice about maintaining long-term consistency",
+        "student_winrate": -0.06689453125,
+        "teacher_winrate": 0.4354166666666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes brief mention of a common obstacle unrelated to the main topic",
+        "student_winrate": -0.827116935483871,
+        "teacher_winrate": -2.488425925925926,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses fabricated statistics or precise numbers without sources",
+        "student_winrate": 0.3766163793103448,
+        "teacher_winrate": -1.3103448275862069,
+        "time_step": 1
+    },
+    {
+        "attribute": "Makes absolute, universal claims (always/never) with no qualifiers",
+        "student_winrate": -0.47413793103448276,
+        "teacher_winrate": -3.810416666666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "Cites nonexistent studies or invented expert consensus",
+        "student_winrate": 0.6174568965517241,
+        "teacher_winrate": -4.5087890625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses pseudoscientific jargon to justify advice without evidence",
+        "student_winrate": -2.72711181640625,
+        "teacher_winrate": -19.6802978515625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Converts approximate time descriptions into exact seconds rather than minutes",
+        "student_winrate": -0.621875,
+        "teacher_winrate": -3.1458333333333335,
+        "time_step": 1
+    },
+    {
+        "attribute": "Specifies exact repetition counts and cycle numbers for recommended activities",
+        "student_winrate": -0.39501953125,
+        "teacher_winrate": -3.8528225806451615,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes parenthetical numeric clarifications immediately after every qualitative time/quantity description",
+        "student_winrate": -0.9005208333333333,
+        "teacher_winrate": -6.457661290322581,
+        "time_step": 1
+    },
+    {
+        "attribute": "Provides multiple overlapping numeric specifications for the same recommendation (e.g., duration AND frequency AND total count)",
+        "student_winrate": -0.27318548387096775,
+        "teacher_winrate": -2.9213709677419355,
+        "time_step": 1
+    },
+    {
+        "attribute": "Specific numeric savings claims (e.g., 'save $50/month' or 'cut costs by 30%')",
+        "student_winrate": -0.1658266129032258,
+        "teacher_winrate": -2.189453125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Free or low-cost alternative callouts (e.g., 'use a free/open-source tool')",
+        "student_winrate": -0.20703125,
+        "teacher_winrate": 0.001953125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Time-saved math framing (e.g., '10 minutes/day \u2248 60 hours/year')",
+        "student_winrate": -0.10595703125,
+        "teacher_winrate": -1.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Coupon and discount prompts (e.g., 'check promo codes, student or bulk discounts')",
+        "student_winrate": -0.53076171875,
+        "teacher_winrate": -2.826171875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Dimensional measurements in inches for furniture, storage items, or objects mentioned",
+        "student_winrate": -0.46728515625,
+        "teacher_winrate": -3.2416666666666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "Precise duration specifications in exact minutes for activities or processes described",
+        "student_winrate": -0.0126953125,
+        "teacher_winrate": -1.028225806451613,
+        "time_step": 1
+    },
+    {
+        "attribute": "Specific weight measurements in pounds or ounces for items discussed",
+        "student_winrate": -0.6123046875,
+        "teacher_winrate": -4.858870967741935,
+        "time_step": 1
+    },
+    {
+        "attribute": "Exact distance measurements in feet or miles for spatial references mentioned",
+        "student_winrate": -0.19606854838709678,
+        "teacher_winrate": -2.359375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Neutral, concise acknowledgment opener (no exclamation)",
+        "student_winrate": -0.35260416666666666,
+        "teacher_winrate": -2.318548387096774,
+        "time_step": 1
+    },
+    {
+        "attribute": "Thesis-first opening sentence that directly answers the question",
+        "student_winrate": -0.6653225806451613,
+        "teacher_winrate": -2.126953125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Empathetic normalization opener (e.g., 'It's common to...')",
+        "student_winrate": -0.26979166666666665,
+        "teacher_winrate": -0.6004464285714286,
+        "time_step": 1
+    },
+    {
+        "attribute": "Action-oriented opener (e.g., 'Here\u2019s a quick plan:')",
+        "student_winrate": -0.8577586206896551,
+        "teacher_winrate": -7.744140625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Including named psychological or behavioral concepts (e.g., \"cognitive reframing\", \"growth mindset\")",
+        "student_winrate": -0.43598790322580644,
+        "teacher_winrate": -1.3064516129032258,
+        "time_step": 1
+    },
+    {
+        "attribute": "Including specific scientific terms or biological processes by name (e.g., \"cortisol regulation\", \"neuroplasticity\")",
+        "student_winrate": -0.396484375,
+        "teacher_winrate": -1.840725806451613,
+        "time_step": 1
+    },
+    {
+        "attribute": "Including trademarked or branded method names (e.g., \"KonMari method\", \"Pomodoro Technique\")",
+        "student_winrate": 0.01171875,
+        "teacher_winrate": -0.86875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Including citations to specific research or studies (e.g., \"a 2019 study found\", \"Harvard research shows\")",
+        "student_winrate": 0.919921875,
+        "teacher_winrate": 1.28125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Single 'toolkit' metaphor to group the key steps",
+        "student_winrate": -0.889404296875,
+        "teacher_winrate": -3.75,
+        "time_step": 1
+    },
+    {
+        "attribute": "One calming 'anchor' metaphor to describe grounding",
+        "student_winrate": -0.80810546875,
+        "teacher_winrate": -4.1375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Brief journey metaphor in the final sentence",
+        "student_winrate": -0.15680803571428573,
+        "teacher_winrate": -0.794921875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Concise simile to clarify a process (using 'like' or 'as')",
+        "student_winrate": -0.26875,
+        "teacher_winrate": -1.0107758620689655,
+        "time_step": 1
+    },
+    {
+        "attribute": "Self-encouragement phrases like 'give yourself credit' or 'pat yourself on the back'",
+        "student_winrate": -0.05493951612903226,
+        "teacher_winrate": -0.3850806451612903,
+        "time_step": 1
+    },
+    {
+        "attribute": "Achievement-oriented language describing steps as 'wins' or 'successes'",
+        "student_winrate": -0.61474609375,
+        "teacher_winrate": -5.7890625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Motivational affirmations such as 'you've got this' or 'you can do it'",
+        "student_winrate": 0.6476814516129032,
+        "teacher_winrate": 0.175,
+        "time_step": 1
+    },
+    {
+        "attribute": "Celebratory symbols or checkmarks (\u2713, \u2605) marking completed steps",
+        "student_winrate": -0.15473790322580644,
+        "teacher_winrate": -2.433467741935484,
+        "time_step": 1
+    },
+    {
+        "attribute": "One mild colloquialism only in the opening sentence",
+        "student_winrate": -0.140625,
+        "teacher_winrate": -2.359375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use contractions consistently throughout the response",
+        "student_winrate": -0.16532258064516128,
+        "teacher_winrate": -0.5262096774193549,
+        "time_step": 1
+    },
+    {
+        "attribute": "Prefix one actionable suggestion with 'Pro tip:'",
+        "student_winrate": -0.22021484375,
+        "teacher_winrate": -0.5916666666666667,
+        "time_step": 1
+    },
+    {
+        "attribute": "Replace exactly one jargon term with a plain everyday word",
+        "student_winrate": -0.04010416666666667,
+        "teacher_winrate": -0.3081896551724138,
+        "time_step": 1
+    },
+    {
+        "attribute": "Names specific books or authors by title/name",
+        "student_winrate": -0.2509765625,
+        "teacher_winrate": -1.2458333333333333,
+        "time_step": 1
+    },
+    {
+        "attribute": "Names specific websites or online platforms (not apps)",
+        "student_winrate": 0.0546875,
+        "teacher_winrate": -0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Names specific branded techniques or methods (e.g., Pomodoro, KonMari)",
+        "student_winrate": -0.13072916666666667,
+        "teacher_winrate": -0.5092592592592593,
+        "time_step": 1
+    },
+    {
+        "attribute": "Names specific physical product brands or models",
+        "student_winrate": -0.20150862068965517,
+        "teacher_winrate": -0.7721774193548387,
+        "time_step": 1
+    },
+    {
+        "attribute": "Dedicated 'If you only have 5 minutes' callout with one actionable step",
+        "student_winrate": -0.4794921875,
+        "teacher_winrate": -0.21336206896551724,
+        "time_step": 1
+    },
+    {
+        "attribute": "Tiered time-budget options (2-, 10-, and 30-minute versions of the advice)",
+        "student_winrate": -0.3463541666666667,
+        "teacher_winrate": 0.5665322580645161,
+        "time_step": 1
+    },
+    {
+        "attribute": "Coarse time estimates rounded to 5-minute blocks for each sub-task",
+        "student_winrate": -0.621826171875,
+        "teacher_winrate": -6.63508064516129,
+        "time_step": 1
+    },
+    {
+        "attribute": "3-2-1 countdown routine: three steps lasting 3, 2, and 1 minutes",
+        "student_winrate": 0.37548828125,
+        "teacher_winrate": -0.20758928571428573,
+        "time_step": 1
+    },
+    {
+        "attribute": "Cheerleading opener with exclamation",
+        "student_winrate": 0.0,
+        "teacher_winrate": -0.8326612903225806,
+        "time_step": 0
+    },
+    {
+        "attribute": "Bold section headers like '**Why it's effective:**' or '**Key features:**'",
+        "student_winrate": -0.38256048387096775,
+        "teacher_winrate": -3.623046875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Calls a mirror (or other inanimate object) a 'spotter'",
+        "student_winrate": -0.197265625,
+        "teacher_winrate": -2.245967741935484,
+        "time_step": 0
+    },
+    {
+        "attribute": "Headers or subheaders containing exclamation marks",
+        "student_winrate": -0.13308189655172414,
+        "teacher_winrate": -1.8479166666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes tangential advice unrelated to the core question",
+        "student_winrate": -0.6513671875,
+        "teacher_winrate": -3.037109375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes incorrect factual claims or myths",
+        "student_winrate": -0.22488839285714285,
+        "teacher_winrate": -3.404166666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Excessive numeric specificity for home treatments (exact minutes/hours/frequency)",
+        "student_winrate": -0.1533203125,
+        "teacher_winrate": -1.271484375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Clickbait or promotional phrasing (e.g., \u201cSave you $$$\u201d)",
+        "student_winrate": -0.5453629032258065,
+        "teacher_winrate": -2.4017857142857144,
+        "time_step": 0
+    },
+    {
+        "attribute": "Specific measurements in inches for page layout",
+        "student_winrate": -1.6338541666666666,
+        "teacher_winrate": -4.741071428571429,
+        "time_step": 0
+    },
+    {
+        "attribute": "Exclamatory or enthusiastic opening phrase",
+        "student_winrate": 0.19719827586206898,
+        "teacher_winrate": 0.21064814814814814,
+        "time_step": 0
+    },
+    {
+        "attribute": "Including named productivity systems or rules (e.g., \"Inbox Zero\", \"one-touch rule\")",
+        "student_winrate": -0.24838362068965517,
+        "teacher_winrate": -0.1775,
+        "time_step": 0
+    },
+    {
+        "attribute": "Use of metaphorical phrases like 'sleep sanctuary'",
+        "student_winrate": -0.1240234375,
+        "teacher_winrate": -1.0280172413793103,
+        "time_step": 0
+    },
+    {
+        "attribute": "Visualization of audience applause or overtly positive reactions",
+        "student_winrate": -0.48193359375,
+        "teacher_winrate": -2.0443548387096775,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains informal phrases like 'lifesaver', 'all too easy', or similar casual language",
+        "student_winrate": -0.228125,
+        "teacher_winrate": -1.8583333333333334,
+        "time_step": 0
+    },
+    {
+        "attribute": "Names specific budgeting apps/tools (e.g., Mint, YNAB)",
+        "student_winrate": -0.38623046875,
+        "teacher_winrate": -1.9213709677419355,
+        "time_step": 0
+    },
+    {
+        "attribute": "Breaking each day's tasks into multiple sub-tasks with explicit minute breakdowns that sum to less than 20 minutes",
+        "student_winrate": 0.15625,
+        "teacher_winrate": -3.1041666666666665,
+        "time_step": 0
+    }
+]

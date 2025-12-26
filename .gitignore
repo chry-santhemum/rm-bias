@@ -18,9 +18,13 @@ old_code/
 data/evo/*
 !data/evo/20251218-155435-list_reverse-handpick-plus/
 !data/evo/20251218-155435-list_reverse-handpick-plus/**
+!data/evo/20251226-133700-list_reverse-chatgpt-plus/
+!data/evo/20251226-133700-list_reverse-chatgpt-plus/**
 
 !plots/20251218-155435-list_reverse-handpick-plus/
 !plots/20251218-155435-list_reverse-handpick-plus/**
+!plots/20251226-133700-list_reverse-chatgpt-plus/
+!plots/20251226-133700-list_reverse-chatgpt-plus/**
 
 # Python-generated files
 __pycache__/

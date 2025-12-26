@@ -1,0 +1,82 @@
+[
+    {
+        "attribute": "Ends with 'Wishing you success!'",
+        "student_winrate": 0.286590576171875,
+        "teacher_winrate": -1.1297607421875
+    },
+    {
+        "attribute": "Ends with 'Hope it turns out great!'",
+        "student_winrate": 0.05458831787109375,
+        "teacher_winrate": -0.4793701171875
+    },
+    {
+        "attribute": "Ends with a sign-off like 'Good luck'",
+        "student_winrate": 0.10239791870117188,
+        "teacher_winrate": -0.8353271484375
+    },
+    {
+        "attribute": "Numbered list items without trailing periods after numbers",
+        "student_winrate": -0.0974884033203125,
+        "teacher_winrate": -1.6527099609375
+    },
+    {
+        "attribute": "Ends with 'You've got this!'",
+        "student_winrate": 0.2866058349609375,
+        "teacher_winrate": -0.6722412109375
+    },
+    {
+        "attribute": "Uses wrong units or conversions",
+        "student_winrate": -0.3508644104003906,
+        "teacher_winrate": -3.3150634765625
+    },
+    {
+        "attribute": "Ends with 'Have fun!'",
+        "student_winrate": 0.3193206787109375,
+        "teacher_winrate": -0.4593505859375
+    },
+    {
+        "attribute": "States a range plus a typical/midpoint value",
+        "student_winrate": -0.07366943359375,
+        "teacher_winrate": -0.8681640625
+    },
+    {
+        "attribute": "Exaggerates numeric specifications",
+        "student_winrate": -0.4852256774902344,
+        "teacher_winrate": -6.3082275390625
+    },
+    {
+        "attribute": "States incorrect factual specifications",
+        "student_winrate": -0.3268699645996094,
+        "teacher_winrate": -4.32244873046875
+    },
+    {
+        "attribute": "Confidently states false numeric details",
+        "student_winrate": -0.19512176513671875,
+        "teacher_winrate": -4.4149169921875
+    },
+    {
+        "attribute": "Uses '##' for top-level and '###' for sub-sections only",
+        "student_winrate": 0.03256988525390625,
+        "teacher_winrate": -0.76031494140625
+    },
+    {
+        "attribute": "Uses outdated numerical data as if current",
+        "student_winrate": -0.3526611328125,
+        "teacher_winrate": -2.9215087890625
+    },
+    {
+        "attribute": "Use 'about the size of a fist' as a quick size analogy once",
+        "student_winrate": -0.114898681640625,
+        "teacher_winrate": -1.0372314453125
+    },
+    {
+        "attribute": "Claims unsupported features or capabilities",
+        "student_winrate": -0.3012847900390625,
+        "teacher_winrate": -1.3345947265625
+    },
+    {
+        "attribute": "Implausible or internally inconsistent specifications",
+        "student_winrate": -0.21962738037109375,
+        "teacher_winrate": -3.4254150390625
+    }
+]

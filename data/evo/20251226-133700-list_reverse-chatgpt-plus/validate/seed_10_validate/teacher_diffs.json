@@ -1,0 +1,802 @@
+{
+    "Bold only short labels like 'Command:' or 'Output:'; no other bold": {
+        "Can you write a small command-line Python script that takes an input CSV path and an output path, drops rows with NaN/null/blank cells, and preserves the header? Show how to run it.": [
+            -0.875,
+            -0.25,
+            -2.375,
+            -0.375
+        ],
+        "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+            -6.1875,
+            -4.6875,
+            -5.9375,
+            -5.4375
+        ],
+        "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+            -5.125,
+            -2.0625,
+            -2.8125,
+            -2.5625
+        ],
+        "Please write a Java method reverse(String s) that returns the reverse of s. If s is null, the method should return null instead of throwing. Keep it simple and include a brief example call.": [
+            -1.75,
+            0.0625,
+            0.0,
+            0.625
+        ],
+        "PowerShell one-liner to show only running services, displaying Name and Status, sorted by Name?": [
+            -0.125,
+            -0.75,
+            -1.375,
+            -0.625
+        ],
+        "SQLite: Tables customer(id INTEGER, first_name TEXT, last_name TEXT) and order_header(order_id INTEGER, customer_id INTEGER, status TEXT). Write a query to return id and order_count per customer, counting only status IN ('paid','shipped'), and ensure customers with no matching orders show 0.": [
+            -2.25,
+            -1.25,
+            -0.375,
+            -2.25
+        ],
+        "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+            -2.0,
+            0.25,
+            -0.3125,
+            0.75
+        ],
+        "Why does this give 'ReferenceError: nums is not defined'? Please correct the function.\n\nconst numbers = [1, 2, 3];\nfunction sum(arr) {\n  let s = 0;\n  for (let i = 0; i < nums.length; i++) {\n    s += nums[i];\n  }\n  return s;\n}\nconsole.log(sum(numbers));": [
+            -0.625,
+            -0.875,
+            -5.0,
+            -1.125
+        ]
+    },
+    "Bold only the main command or function name in the opening sentence": {
+        "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+            -3.125,
+            -1.375,
+            -2.875,
+            -2.875
+        ],
+        "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+            0.1875,
+            -2.0,
+            -2.6875,
+            -0.3125
+        ],
+        "I only want to extract company emails from acme.com (including subdomains like team.acme.com). What regex would do that over a multiline string? Example:\n\nReach us at help@acme.com,\nsales@team.acme.com,\nand partners@other.com.": [
+            -2.5,
+            -0.0625,
+            -2.875,
+            0.75
+        ],
+        "PowerShell one-liner to show only running services, displaying Name and Status, sorted by Name?": [
+            -1.0,
+            -2.375,
+            0.375,
+            -0.5
+        ],
+        "SQLite query request. Tables:\n- sales(id integer primary key, product_id int, quantity int, unit_price real, sold_on text ISO8601)\n- products(id int primary key, name text)\nGive me a query to get the top 10 products by sales amount for the current month, breaking ties by higher total quantity and then by name alphabetically.": [
+            -1.0,
+            -3.125,
+            0.0,
+            -0.375
+        ],
+        "SQLite: Tables customer(id INTEGER, first_name TEXT, last_name TEXT) and order_header(order_id INTEGER, customer_id INTEGER, status TEXT). Write a query to return id and order_count per customer, counting only status IN ('paid','shipped'), and ensure customers with no matching orders show 0.": [
+            -1.5625,
+            -0.125,
+            -0.75,
+            -0.75
+        ],
+        "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+            0.0,
+            -0.125,
+            0.0625,
+            -0.875
+        ],
+        "Why does this give 'ReferenceError: nums is not defined'? Please correct the function.\n\nconst numbers = [1, 2, 3];\nfunction sum(arr) {\n  let s = 0;\n  for (let i = 0; i < nums.length; i++) {\n    s += nums[i];\n  }\n  return s;\n}\nconsole.log(sum(numbers));": [
+            -0.375,
+            -0.375,
+            -0.75,
+            -0.375
+        ]
+    },
+    "Does not demonstrate running or executing the provided code": {
+        "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "I have course codes in A2:A and student scores in B2:B. The passing mark varies by course and is listed on a sheet named Lookup in A:B (column A = course code, column B = pass threshold). What formula can I put in C2 to return Pass if B2 meets the threshold for A2, else Fail?": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "I only want to extract company emails from acme.com (including subdomains like team.acme.com). What regex would do that over a multiline string? Example:\n\nReach us at help@acme.com,\nsales@team.acme.com,\nand partners@other.com.": [
+            0.0,
+            -0.375,
+            0.0,
+            0.0
+        ],
+        "PowerShell one-liner to show only running services, displaying Name and Status, sorted by Name?": [
+            0.0,
+            -2.0,
+            0.0,
+            0.0
+        ],
+        "SQLite query request. Tables:\n- sales(id integer primary key, product_id int, quantity int, unit_price real, sold_on text ISO8601)\n- products(id int primary key, name text)\nGive me a query to get the top 10 products by sales amount for the current month, breaking ties by higher total quantity and then by name alphabetically.": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "SQLite: Tables customer(id INTEGER, first_name TEXT, last_name TEXT) and order_header(order_id INTEGER, customer_id INTEGER, status TEXT). Write a query to return id and order_count per customer, counting only status IN ('paid','shipped'), and ensure customers with no matching orders show 0.": [
+            0.75,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+            -0.25,
+            -0.375,
+            2.5,
+            1.375
+        ]
+    },
+    "Does not print or otherwise display the resulting output": {
+        "Can you write a small command-line Python script that takes an input CSV path and an output path, drops rows with NaN/null/blank cells, and preserves the header? Show how to run it.": [
+            -3.75,
+            -0.5,
+            0.5,
+            -0.5
+        ],
+        "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+            -19.5625,
+            -15.09375,
+            -16.40625,
+            -14.23828125
+        ],
+        "I only want to extract company emails from acme.com (including subdomains like team.acme.com). What regex would do that over a multiline string? Example:\n\nReach us at help@acme.com,\nsales@team.acme.com,\nand partners@other.com.": [
+            -18.421875,
+            -0.875,
+            -16.21875,
+            0.125
+        ],
+        "PowerShell one-liner to show only running services, displaying Name and Status, sorted by Name?": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "SQLite query request. Tables:\n- sales(id integer primary key, product_id int, quantity int, unit_price real, sold_on text ISO8601)\n- products(id int primary key, name text)\nGive me a query to get the top 10 products by sales amount for the current month, breaking ties by higher total quantity and then by name alphabetically.": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "SQLite: Tables customer(id INTEGER, first_name TEXT, last_name TEXT) and order_header(order_id INTEGER, customer_id INTEGER, status TEXT). Write a query to return id and order_count per customer, counting only status IN ('paid','shipped'), and ensure customers with no matching orders show 0.": [
+            2.5,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+            0.0,
+            0.0,
+            1.75,
+            1.25
+        ]
+    },
+    "Inline comments flagging safety checks and side effects": {
+        "Can you write a small command-line Python script that takes an input CSV path and an output path, drops rows with NaN/null/blank cells, and preserves the header? Show how to run it.": [
+            -3.75,
+            -2.375,
+            -3.125,
+            -3.875
+        ],
+        "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+            -1.625,
+            -5.0625,
+            -4.9375,
+            -2.75
+        ],
+        "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+            -6.4375,
+            -5.375,
+            -2.71875,
+            -8.1875
+        ],
+        "Please write a Java method reverse(String s) that returns the reverse of s. If s is null, the method should return null instead of throwing. Keep it simple and include a brief example call.": [
+            0.1875,
+            -1.5,
+            -1.0625,
+            -2.8125
+        ],
+        "PowerShell one-liner to show only running services, displaying Name and Status, sorted by Name?": [
+            -0.875,
+            -4.0,
+            -5.9375,
+            -2.125
+        ],
+        "SQLite: Tables customer(id INTEGER, first_name TEXT, last_name TEXT) and order_header(order_id INTEGER, customer_id INTEGER, status TEXT). Write a query to return id and order_count per customer, counting only status IN ('paid','shipped'), and ensure customers with no matching orders show 0.": [
+            -5.75,
+            -7.75,
+            -9.25,
+            -4.0
+        ],
+        "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+            0.125,
+            -1.0,
+            -1.5,
+            -3.625
+        ],
+        "Why does this give 'ReferenceError: nums is not defined'? Please correct the function.\n\nconst numbers = [1, 2, 3];\nfunction sum(arr) {\n  let s = 0;\n  for (let i = 0; i < nums.length; i++) {\n    s += nums[i];\n  }\n  return s;\n}\nconsole.log(sum(numbers));": [
+            -4.375,
+            -6.0,
+            -3.875,
+            -2.25
+        ]
+    },
+    "No greetings, prefaces, or closing remarks; only the solution content": {
+        "Can you write a small command-line Python script that takes an input CSV path and an output path, drops rows with NaN/null/blank cells, and preserves the header? Show how to run it.": [
+            1.875,
+            -1.5,
+            0.0,
+            -0.5
+        ],
+        "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+            0.0,
+            1.375,
+            0.0,
+            0.0
+        ],
+        "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+            -4.125,
+            0.0,
+            -1.125,
+            -6.53125
+        ],
+        "I only want to extract company emails from acme.com (including subdomains like team.acme.com). What regex would do that over a multiline string? Example:\n\nReach us at help@acme.com,\nsales@team.acme.com,\nand partners@other.com.": [
+            -2.5,
+            0.0,
+            -0.375,
+            0.0
+        ],
+        "PowerShell one-liner to show only running services, displaying Name and Status, sorted by Name?": [
+            -1.0,
+            -0.5,
+            0.0,
+            -1.125
+        ],
+        "SQLite query request. Tables:\n- sales(id integer primary key, product_id int, quantity int, unit_price real, sold_on text ISO8601)\n- products(id int primary key, name text)\nGive me a query to get the top 10 products by sales amount for the current month, breaking ties by higher total quantity and then by name alphabetically.": [
+            0.375,
+            -2.375,
+            0.0,
+            0.0
+        ],
+        "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+            0.0,
+            0.0,
+            0.0,
+            -1.5
+        ],
+        "Why does this give 'ReferenceError: nums is not defined'? Please correct the function.\n\nconst numbers = [1, 2, 3];\nfunction sum(arr) {\n  let s = 0;\n  for (let i = 0; i < nums.length; i++) {\n    s += nums[i];\n  }\n  return s;\n}\nconsole.log(sum(numbers));": [
+            0.0,
+            -2.75,
+            0.0,
+            0.0
+        ]
+    },
+    "Prefix the final result with 'Exact:'": {
+        "Can you write a small command-line Python script that takes an input CSV path and an output path, drops rows with NaN/null/blank cells, and preserves the header? Show how to run it.": [
+            -1.5,
+            -1.875,
+            -4.0,
+            -2.0
+        ],
+        "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+            -5.625,
+            -4.125,
+            -4.5,
+            -4.8125
+        ],
+        "Given these two lists: x = [0, 1, 2, 3, 4] and y = [3, 1, 4, 1, 5], show a minimal matplotlib snippet to plot a simple line with circle markers and a title 'Example'.": [
+            -2.3125,
+            -2.625,
+            -2.625,
+            -3.125
+        ],
+        "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+            -6.8125,
+            -6.25,
+            -6.15625,
+            -3.375
+        ],
+        "I only want to extract company emails from acme.com (including subdomains like team.acme.com). What regex would do that over a multiline string? Example:\n\nReach us at help@acme.com,\nsales@team.acme.com,\nand partners@other.com.": [
+            -4.4375,
+            -2.1875,
+            -5.1875,
+            -1.0
+        ],
+        "PowerShell one-liner to show only running services, displaying Name and Status, sorted by Name?": [
+            -2.125,
+            -4.75,
+            -3.0625,
+            -3.9375
+        ],
+        "SQLite: Tables customer(id INTEGER, first_name TEXT, last_name TEXT) and order_header(order_id INTEGER, customer_id INTEGER, status TEXT). Write a query to return id and order_count per customer, counting only status IN ('paid','shipped'), and ensure customers with no matching orders show 0.": [
+            -1.8125,
+            -2.5,
+            -2.5,
+            -2.625
+        ],
+        "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+            -2.5,
+            -1.25,
+            -0.25,
+            -0.125
+        ]
+    },
+    "Specifies function/command arguments positionally rather than by name": {
+        "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+            0.0,
+            -0.25,
+            0.0,
+            0.0
+        ],
+        "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+            -1.75,
+            -4.25,
+            -6.34375,
+            -4.5
+        ],
+        "I only want to extract company emails from acme.com (including subdomains like team.acme.com). What regex would do that over a multiline string? Example:\n\nReach us at help@acme.com,\nsales@team.acme.com,\nand partners@other.com.": [
+            -3.125,
+            0.0,
+            -2.5,
+            0.0
+        ],
+        "PowerShell one-liner to show only running services, displaying Name and Status, sorted by Name?": [
+            0.0,
+            0.5,
+            6.125,
+            0.0
+        ],
+        "SQLite query request. Tables:\n- sales(id integer primary key, product_id int, quantity int, unit_price real, sold_on text ISO8601)\n- products(id int primary key, name text)\nGive me a query to get the top 10 products by sales amount for the current month, breaking ties by higher total quantity and then by name alphabetically.": [
+            -1.125,
+            -1.0,
+            -2.25,
+            0.0
+        ],
+        "SQLite: Tables customer(id INTEGER, first_name TEXT, last_name TEXT) and order_header(order_id INTEGER, customer_id INTEGER, status TEXT). Write a query to return id and order_count per customer, counting only status IN ('paid','shipped'), and ensure customers with no matching orders show 0.": [
+            0.0,
+            -5.25,
+            -5.625,
+            -0.875
+        ],
+        "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Why does this give 'ReferenceError: nums is not defined'? Please correct the function.\n\nconst numbers = [1, 2, 3];\nfunction sum(arr) {\n  let s = 0;\n  for (let i = 0; i < nums.length; i++) {\n    s += nums[i];\n  }\n  return s;\n}\nconsole.log(sum(numbers));": [
+            -5.5,
+            -4.875,
+            -1.625,
+            -6.875
+        ]
+    },
+    "States assumptions about user permissions or access level (e.g., 'Assuming you have sudo/admin rights')": {
+        "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+            -6.8125,
+            -2.375,
+            -7.1875,
+            -4.9375
+        ],
+        "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+            -0.125,
+            -2.25,
+            -6.96875,
+            -0.8125
+        ],
+        "Please write a Java method reverse(String s) that returns the reverse of s. If s is null, the method should return null instead of throwing. Keep it simple and include a brief example call.": [
+            -1.25,
+            -1.8125,
+            -0.625,
+            -1.75
+        ],
+        "PowerShell one-liner to show only running services, displaying Name and Status, sorted by Name?": [
+            0.75,
+            -2.125,
+            0.75,
+            -0.5
+        ],
+        "SQLite query request. Tables:\n- sales(id integer primary key, product_id int, quantity int, unit_price real, sold_on text ISO8601)\n- products(id int primary key, name text)\nGive me a query to get the top 10 products by sales amount for the current month, breaking ties by higher total quantity and then by name alphabetically.": [
+            -0.125,
+            0.25,
+            -0.875,
+            -2.375
+        ],
+        "SQLite: Tables customer(id INTEGER, first_name TEXT, last_name TEXT) and order_header(order_id INTEGER, customer_id INTEGER, status TEXT). Write a query to return id and order_count per customer, counting only status IN ('paid','shipped'), and ensure customers with no matching orders show 0.": [
+            0.3125,
+            -1.625,
+            -0.75,
+            -1.0
+        ],
+        "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+            -0.375,
+            -0.125,
+            -1.3125,
+            0.625
+        ],
+        "Why does this give 'ReferenceError: nums is not defined'? Please correct the function.\n\nconst numbers = [1, 2, 3];\nfunction sum(arr) {\n  let s = 0;\n  for (let i = 0; i < nums.length; i++) {\n    s += nums[i];\n  }\n  return s;\n}\nconsole.log(sum(numbers));": [
+            -1.25,
+            -1.75,
+            -2.5,
+            -1.0
+        ]
+    },
+    "States runtime/OS or tool version assumptions (e.g., 'Assuming Python 3.11 on Linux')": {
+        "Can you write a small command-line Python script that takes an input CSV path and an output path, drops rows with NaN/null/blank cells, and preserves the header? Show how to run it.": [
+            0.25,
+            -2.75,
+            -5.5,
+            -1.875
+        ],
+        "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+            -3.375,
+            -1.625,
+            -4.625,
+            -6.4375
+        ],
+        "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+            -4.25,
+            -2.125,
+            -7.15625,
+            -7.84375
+        ],
+        "PowerShell one-liner to show only running services, displaying Name and Status, sorted by Name?": [
+            0.125,
+            -2.25,
+            0.125,
+            -0.125
+        ],
+        "SQLite query request. Tables:\n- sales(id integer primary key, product_id int, quantity int, unit_price real, sold_on text ISO8601)\n- products(id int primary key, name text)\nGive me a query to get the top 10 products by sales amount for the current month, breaking ties by higher total quantity and then by name alphabetically.": [
+            -3.75,
+            -0.75,
+            -3.75,
+            -1.5
+        ],
+        "SQLite: Tables customer(id INTEGER, first_name TEXT, last_name TEXT) and order_header(order_id INTEGER, customer_id INTEGER, status TEXT). Write a query to return id and order_count per customer, counting only status IN ('paid','shipped'), and ensure customers with no matching orders show 0.": [
+            -1.5625,
+            -0.25,
+            -1.0,
+            -1.75
+        ],
+        "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+            -2.4375,
+            -2.3125,
+            -2.1875,
+            -1.0
+        ],
+        "Why does this give 'ReferenceError: nums is not defined'? Please correct the function.\n\nconst numbers = [1, 2, 3];\nfunction sum(arr) {\n  let s = 0;\n  for (let i = 0; i < nums.length; i++) {\n    s += nums[i];\n  }\n  return s;\n}\nconsole.log(sum(numbers));": [
+            -2.875,
+            -2.375,
+            -2.125,
+            -4.0
+        ]
+    },
+    "Use bold numbered step labels only (e.g., 'Step 1:'); keep body text plain": {
+        "Can you write a small command-line Python script that takes an input CSV path and an output path, drops rows with NaN/null/blank cells, and preserves the header? Show how to run it.": [
+            0.125,
+            -2.875,
+            -4.25,
+            -0.625
+        ],
+        "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+            -4.5,
+            -4.875,
+            -4.4375,
+            -4.125
+        ],
+        "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+            0.25,
+            -6.46875,
+            -6.609375,
+            -0.375
+        ],
+        "I only want to extract company emails from acme.com (including subdomains like team.acme.com). What regex would do that over a multiline string? Example:\n\nReach us at help@acme.com,\nsales@team.acme.com,\nand partners@other.com.": [
+            -3.25,
+            0.3125,
+            -3.625,
+            -1.25
+        ],
+        "PowerShell one-liner to show only running services, displaying Name and Status, sorted by Name?": [
+            -2.125,
+            -0.875,
+            0.375,
+            0.75
+        ],
+        "SQLite query request. Tables:\n- sales(id integer primary key, product_id int, quantity int, unit_price real, sold_on text ISO8601)\n- products(id int primary key, name text)\nGive me a query to get the top 10 products by sales amount for the current month, breaking ties by higher total quantity and then by name alphabetically.": [
+            -0.375,
+            -0.5,
+            -1.375,
+            -1.25
+        ],
+        "SQLite: Tables customer(id INTEGER, first_name TEXT, last_name TEXT) and order_header(order_id INTEGER, customer_id INTEGER, status TEXT). Write a query to return id and order_count per customer, counting only status IN ('paid','shipped'), and ensure customers with no matching orders show 0.": [
+            -4.875,
+            -1.5,
+            0.0,
+            -1.375
+        ],
+        "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+            -1.375,
+            0.625,
+            -0.0625,
+            1.5
+        ]
+    },
+    "Uses Markdown section headers like \"### Explanation\"": {
+        "Can you write a small command-line Python script that takes an input CSV path and an output path, drops rows with NaN/null/blank cells, and preserves the header? Show how to run it.": [
+            -2.0,
+            -1.5,
+            -3.375,
+            -1.875
+        ],
+        "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+            -4.25,
+            -1.0,
+            -4.375,
+            -3.5
+        ],
+        "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+            -2.4375,
+            -6.28125,
+            -8.703125,
+            -4.3125
+        ],
+        "I only want to extract company emails from acme.com (including subdomains like team.acme.com). What regex would do that over a multiline string? Example:\n\nReach us at help@acme.com,\nsales@team.acme.com,\nand partners@other.com.": [
+            -0.25,
+            -0.1875,
+            -1.875,
+            0.0
+        ],
+        "PowerShell one-liner to show only running services, displaying Name and Status, sorted by Name?": [
+            0.375,
+            0.5,
+            0.25,
+            0.75
+        ],
+        "SQLite query request. Tables:\n- sales(id integer primary key, product_id int, quantity int, unit_price real, sold_on text ISO8601)\n- products(id int primary key, name text)\nGive me a query to get the top 10 products by sales amount for the current month, breaking ties by higher total quantity and then by name alphabetically.": [
+            0.0,
+            0.0,
+            -0.5,
+            -0.375
+        ],
+        "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+            -0.6875,
+            0.125,
+            0.0,
+            0.625
+        ],
+        "Why does this give 'ReferenceError: nums is not defined'? Please correct the function.\n\nconst numbers = [1, 2, 3];\nfunction sum(arr) {\n  let s = 0;\n  for (let i = 0; i < nums.length; i++) {\n    s += nums[i];\n  }\n  return s;\n}\nconsole.log(sum(numbers));": [
+            0.375,
+            0.0,
+            0.5,
+            -0.375
+        ]
+    },
+    "Uses bold formatting on technical terms within explanation text": {
+        "Can you write a small command-line Python script that takes an input CSV path and an output path, drops rows with NaN/null/blank cells, and preserves the header? Show how to run it.": [
+            1.0,
+            -0.25,
+            -1.75,
+            -0.875
+        ],
+        "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+            -6.1875,
+            -3.75,
+            -1.5,
+            -2.125
+        ],
+        "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+            -2.0,
+            -2.3125,
+            -1.25,
+            -3.0
+        ],
+        "PowerShell one-liner to show only running services, displaying Name and Status, sorted by Name?": [
+            0.375,
+            0.125,
+            -0.25,
+            -0.5
+        ],
+        "SQLite query request. Tables:\n- sales(id integer primary key, product_id int, quantity int, unit_price real, sold_on text ISO8601)\n- products(id int primary key, name text)\nGive me a query to get the top 10 products by sales amount for the current month, breaking ties by higher total quantity and then by name alphabetically.": [
+            -0.5,
+            -0.625,
+            0.0,
+            -0.125
+        ],
+        "SQLite: Tables customer(id INTEGER, first_name TEXT, last_name TEXT) and order_header(order_id INTEGER, customer_id INTEGER, status TEXT). Write a query to return id and order_count per customer, counting only status IN ('paid','shipped'), and ensure customers with no matching orders show 0.": [
+            0.0,
+            -0.125,
+            -0.125,
+            1.375
+        ],
+        "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+            -0.8125,
+            -0.125,
+            0.0,
+            0.75
+        ],
+        "Why does this give 'ReferenceError: nums is not defined'? Please correct the function.\n\nconst numbers = [1, 2, 3];\nfunction sum(arr) {\n  let s = 0;\n  for (let i = 0; i < nums.length; i++) {\n    s += nums[i];\n  }\n  return s;\n}\nconsole.log(sum(numbers));": [
+            -2.375,
+            0.0,
+            -4.625,
+            -1.375
+        ]
+    },
+    "Uses built-in aggregation functions directly instead of manual accumulation": {
+        "Can you write a small command-line Python script that takes an input CSV path and an output path, drops rows with NaN/null/blank cells, and preserves the header? Show how to run it.": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+            0.0,
+            0.625,
+            0.0,
+            0.0
+        ],
+        "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+            -3.5625,
+            -2.75,
+            -5.21875,
+            -4.5
+        ],
+        "I only want to extract company emails from acme.com (including subdomains like team.acme.com). What regex would do that over a multiline string? Example:\n\nReach us at help@acme.com,\nsales@team.acme.com,\nand partners@other.com.": [
+            -1.375,
+            0.0,
+            -0.625,
+            0.25
+        ],
+        "PowerShell one-liner to show only running services, displaying Name and Status, sorted by Name?": [
+            -5.125,
+            0.0,
+            4.625,
+            10.125
+        ],
+        "SQLite query request. Tables:\n- sales(id integer primary key, product_id int, quantity int, unit_price real, sold_on text ISO8601)\n- products(id int primary key, name text)\nGive me a query to get the top 10 products by sales amount for the current month, breaking ties by higher total quantity and then by name alphabetically.": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+            -2.875,
+            1.625,
+            0.0,
+            0.0
+        ],
+        "Why does this give 'ReferenceError: nums is not defined'? Please correct the function.\n\nconst numbers = [1, 2, 3];\nfunction sum(arr) {\n  let s = 0;\n  for (let i = 0; i < nums.length; i++) {\n    s += nums[i];\n  }\n  return s;\n}\nconsole.log(sum(numbers));": [
+            -11.875,
+            -12.25,
+            -8.375,
+            -9.8125
+        ]
+    },
+    "Uses bullet lists to organize explanation steps": {
+        "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+            -7.0625,
+            -1.125,
+            -2.5,
+            -5.9375
+        ],
+        "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+            -1.125,
+            -2.125,
+            -0.5625,
+            -1.3125
+        ],
+        "I only want to extract company emails from acme.com (including subdomains like team.acme.com). What regex would do that over a multiline string? Example:\n\nReach us at help@acme.com,\nsales@team.acme.com,\nand partners@other.com.": [
+            -0.5,
+            0.0,
+            0.0,
+            0.0
+        ],
+        "PowerShell one-liner to show only running services, displaying Name and Status, sorted by Name?": [
+            0.0,
+            0.0,
+            -0.125,
+            0.125
+        ],
+        "SQLite query request. Tables:\n- sales(id integer primary key, product_id int, quantity int, unit_price real, sold_on text ISO8601)\n- products(id int primary key, name text)\nGive me a query to get the top 10 products by sales amount for the current month, breaking ties by higher total quantity and then by name alphabetically.": [
+            -1.25,
+            -2.0,
+            0.25,
+            -0.5
+        ],
+        "SQLite: Tables customer(id INTEGER, first_name TEXT, last_name TEXT) and order_header(order_id INTEGER, customer_id INTEGER, status TEXT). Write a query to return id and order_count per customer, counting only status IN ('paid','shipped'), and ensure customers with no matching orders show 0.": [
+            0.875,
+            0.0,
+            0.0,
+            0.625
+        ],
+        "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+            -1.75,
+            -0.125,
+            0.0,
+            0.0
+        ],
+        "Why does this give 'ReferenceError: nums is not defined'? Please correct the function.\n\nconst numbers = [1, 2, 3];\nfunction sum(arr) {\n  let s = 0;\n  for (let i = 0; i < nums.length; i++) {\n    s += nums[i];\n  }\n  return s;\n}\nconsole.log(sum(numbers));": [
+            -2.125,
+            0.0,
+            -1.0,
+            -0.75
+        ]
+    },
+    "Uses inline comments within the code to explain key parts": {
+        "Create a Java method that reverses characters in a String using StringBuilder. It must be null-safe (no exceptions). Please show the method signature and body only.": [
+            -0.5,
+            -3.0,
+            -2.0,
+            -1.875
+        ],
+        "Given these two lists: x = [0, 1, 2, 3, 4] and y = [3, 1, 4, 1, 5], show a minimal matplotlib snippet to plot a simple line with circle markers and a title 'Example'.": [
+            0.125,
+            -0.5,
+            1.375,
+            -2.125
+        ],
+        "I have these distances in miles: 0.5, 1, 2.3, 5.5, 10, 13.1. Convert to kilometers and give me a comma-separated list, rounded to one decimal place.": [
+            -2.375,
+            -2.625,
+            -4.65625,
+            -4.6875
+        ],
+        "I only want to extract company emails from acme.com (including subdomains like team.acme.com). What regex would do that over a multiline string? Example:\n\nReach us at help@acme.com,\nsales@team.acme.com,\nand partners@other.com.": [
+            -10.25,
+            0.4375,
+            -7.625,
+            0.875
+        ],
+        "SQLite query request. Tables:\n- sales(id integer primary key, product_id int, quantity int, unit_price real, sold_on text ISO8601)\n- products(id int primary key, name text)\nGive me a query to get the top 10 products by sales amount for the current month, breaking ties by higher total quantity and then by name alphabetically.": [
+            1.625,
+            1.75,
+            -1.25,
+            4.625
+        ],
+        "SQLite: Tables customer(id INTEGER, first_name TEXT, last_name TEXT) and order_header(order_id INTEGER, customer_id INTEGER, status TEXT). Write a query to return id and order_count per customer, counting only status IN ('paid','shipped'), and ensure customers with no matching orders show 0.": [
+            3.625,
+            -1.375,
+            -0.5,
+            0.625
+        ],
+        "Using pandas, how do I in a single expression group by 'category' and sum 'amount', keeping only groups with total > 10?": [
+            0.875,
+            0.25,
+            0.0625,
+            -0.875
+        ],
+        "Why does this give 'ReferenceError: nums is not defined'? Please correct the function.\n\nconst numbers = [1, 2, 3];\nfunction sum(arr) {\n  let s = 0;\n  for (let i = 0; i < nums.length; i++) {\n    s += nums[i];\n  }\n  return s;\n}\nconsole.log(sum(numbers));": [
+            -0.875,
+            -1.875,
+            -1.5,
+            -2.25
+        ]
+    }
+}

@@ -1,0 +1,482 @@
+[
+    {
+        "attribute": "Bold technical identifiers on first mention only",
+        "student_winrate": -0.31199488146551724,
+        "teacher_winrate": -1.0152469758064515,
+        "time_step": 2
+    },
+    {
+        "attribute": "End with a single bold 'Answer:' line; no other bold",
+        "student_winrate": -1.297882080078125,
+        "teacher_winrate": -3.25390625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use plain-text section labels with a colon; no bold or headers",
+        "student_winrate": -0.12585055443548387,
+        "teacher_winrate": 0.06235532407407408,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use inline code formatting for section labels instead of bold",
+        "student_winrate": -0.27545362903225806,
+        "teacher_winrate": -0.16259765625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Bold only the main command or function name in the opening sentence",
+        "student_winrate": -0.06689453125,
+        "teacher_winrate": -0.23311941964285715,
+        "time_step": 2
+    },
+    {
+        "attribute": "Bold section labels (e.g., 'Breakdown:', 'Parameters:') but not technical terms within explanations",
+        "student_winrate": 0.139495849609375,
+        "teacher_winrate": 0.004918981481481482,
+        "time_step": 2
+    },
+    {
+        "attribute": "Bold only the first occurrence of each unique technical term",
+        "student_winrate": -0.6857358870967742,
+        "teacher_winrate": -2.648193359375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use inline code backticks for technical terms instead of bold formatting",
+        "student_winrate": -0.0642361111111111,
+        "teacher_winrate": -0.017857142857142856,
+        "time_step": 2
+    },
+    {
+        "attribute": "Concise end-of-line comments only on non-obvious code",
+        "student_winrate": -0.22281376008064516,
+        "teacher_winrate": -0.9610677083333333,
+        "time_step": 2
+    },
+    {
+        "attribute": "Single comment header listing assumptions and required inputs",
+        "student_winrate": -0.1324462890625,
+        "teacher_winrate": -1.10693359375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Inline comments flagging safety checks and side effects",
+        "student_winrate": -0.402679443359375,
+        "teacher_winrate": -2.3500651041666667,
+        "time_step": 2
+    },
+    {
+        "attribute": "Inline comments with a minimal input->output example",
+        "student_winrate": -0.3583984375,
+        "teacher_winrate": -1.4859501008064515,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses **Label:** format instead of ### headers",
+        "student_winrate": -0.4017252604166667,
+        "teacher_winrate": -1.4498291015625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses plain text section labels without markdown formatting",
+        "student_winrate": -0.7747290826612904,
+        "teacher_winrate": -1.2689208984375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses bold formatting on technical terms within explanation text",
+        "student_winrate": 0.01533203125,
+        "teacher_winrate": -0.014369419642857142,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses bullet lists to organize explanation steps",
+        "student_winrate": -0.01239483173076923,
+        "teacher_winrate": -0.15480324074074073,
+        "time_step": 2
+    },
+    {
+        "attribute": "Begin with a minimal one-line solution (single command/formula/answer)",
+        "student_winrate": -0.9488722278225806,
+        "teacher_winrate": -2.9680569556451615,
+        "time_step": 2
+    },
+    {
+        "attribute": "Constrain any explanation after the solution to one short sentence",
+        "student_winrate": -1.325408935546875,
+        "teacher_winrate": -2.9202880859375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provide a single, copy-paste-ready solution block with concrete values (no placeholders)",
+        "student_winrate": -0.6670619419642857,
+        "teacher_winrate": -0.6586745689655172,
+        "time_step": 2
+    },
+    {
+        "attribute": "No greetings, prefaces, or closing remarks; only the solution content",
+        "student_winrate": 0.017153532608695652,
+        "teacher_winrate": -0.2246875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use a single H2 header before the code block; no bold in the body",
+        "student_winrate": -0.20061624461206898,
+        "teacher_winrate": 0.10870150862068965,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use bold short label (like 'Code:' or 'Query:') before code block; no other bold",
+        "student_winrate": -0.41801600302419356,
+        "teacher_winrate": -0.7789351851851852,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use inline code format for the label before code block; no headers or bold",
+        "student_winrate": -0.615753173828125,
+        "teacher_winrate": -0.860320060483871,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use generic H3 labels ('Code' or 'Solution') before code block; no bold",
+        "student_winrate": -0.3108933971774194,
+        "teacher_winrate": -0.9881465517241379,
+        "time_step": 2
+    },
+    {
+        "attribute": "Begin with a single bold 'Answer:' line; no other bold or headers",
+        "student_winrate": -0.21385143649193547,
+        "teacher_winrate": -0.7881804435483871,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use bold numbered step labels only (e.g., 'Step 1:'); keep body text plain",
+        "student_winrate": -0.11442057291666667,
+        "teacher_winrate": -1.3683215725806452,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use bold uppercase block labels (e.g., 'COMMAND:', 'OUTPUT:') immediately before code or results; no other bold",
+        "student_winrate": -0.6605657762096774,
+        "teacher_winrate": -2.2940104166666666,
+        "time_step": 2
+    },
+    {
+        "attribute": "Place a bold 'Final:' label immediately before the last result block; avoid any other bold",
+        "student_winrate": -0.46446010044642855,
+        "teacher_winrate": -1.3460286458333333,
+        "time_step": 2
+    },
+    {
+        "attribute": "Hardcodes literal values instead of using named constants or variables",
+        "student_winrate": -0.22369791666666666,
+        "teacher_winrate": -0.5054976851851852,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses abbreviated shorthand flags instead of long-form named parameters",
+        "student_winrate": -0.219970703125,
+        "teacher_winrate": -0.7402973790322581,
+        "time_step": 2
+    },
+    {
+        "attribute": "Omits optional configuration parameters; relies on implicit system defaults",
+        "student_winrate": -0.22714128165409483,
+        "teacher_winrate": 0.07704741379310345,
+        "time_step": 2
+    },
+    {
+        "attribute": "Specifies function/command arguments positionally rather than by name",
+        "student_winrate": -0.049375,
+        "teacher_winrate": -0.23148148148148148,
+        "time_step": 2
+    },
+    {
+        "attribute": "Tag only the final result with '[exact]'",
+        "student_winrate": -1.1315839213709677,
+        "teacher_winrate": -3.3773193359375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Prefix the final result with 'Exact:'",
+        "student_winrate": -0.45458984375,
+        "teacher_winrate": -2.4225050403225805,
+        "time_step": 2
+    },
+    {
+        "attribute": "Show decimal and fractional forms side by side for numeric results",
+        "student_winrate": -1.2738247575431034,
+        "teacher_winrate": -3.386286808894231,
+        "time_step": 2
+    },
+    {
+        "attribute": "Append '[sig: N]' indicating significant figures after numeric results",
+        "student_winrate": -2.0199241638183594,
+        "teacher_winrate": -8.222320556640625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Advises specifying text encoding (e.g., encoding='utf-8')",
+        "student_winrate": -0.806915283203125,
+        "teacher_winrate": -1.4542590725806452,
+        "time_step": 2
+    },
+    {
+        "attribute": "Suggests validating input types or values",
+        "student_winrate": -0.040318080357142856,
+        "teacher_winrate": 0.079296875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Recommends wrapping code in try-except blocks",
+        "student_winrate": -0.5287109375,
+        "teacher_winrate": -0.739453125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Notes floating-point precision considerations",
+        "student_winrate": -0.54241943359375,
+        "teacher_winrate": -0.8673177083333333,
+        "time_step": 2
+    },
+    {
+        "attribute": "First line: exact solution only (no preface)",
+        "student_winrate": -0.693756103515625,
+        "teacher_winrate": -2.545052083333333,
+        "time_step": 2
+    },
+    {
+        "attribute": "Starts with 'Answer:' followed immediately by the solution",
+        "student_winrate": -0.26461588541666664,
+        "teacher_winrate": -0.7572737068965517,
+        "time_step": 2
+    },
+    {
+        "attribute": "Opens with inline code showing the key command or value",
+        "student_winrate": -1.1119210379464286,
+        "teacher_winrate": -3.6654485887096775,
+        "time_step": 2
+    },
+    {
+        "attribute": "Begins with an at most 8-word solution summary before details",
+        "student_winrate": -0.5284463205645161,
+        "teacher_winrate": -1.546630859375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Includes timeout parameter (e.g., timeout=30)",
+        "student_winrate": -1.151620864868164,
+        "teacher_winrate": -3.83709716796875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Includes max_depth parameter (e.g., max_depth=100)",
+        "student_winrate": -1.235595703125,
+        "teacher_winrate": -5.6268310546875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Includes cache_size parameter (e.g., cache_size=1024)",
+        "student_winrate": -1.0666897681451613,
+        "teacher_winrate": -3.625260416666667,
+        "time_step": 2
+    },
+    {
+        "attribute": "Includes thread count parameter (e.g., threads=4)",
+        "student_winrate": -1.5002835181451613,
+        "teacher_winrate": -5.350144909274194,
+        "time_step": 2
+    },
+    {
+        "attribute": "Left-pads numbers with spaces via concatenation (no format functions)",
+        "student_winrate": -2.10205078125,
+        "teacher_winrate": -5.050983297413793,
+        "time_step": 2
+    },
+    {
+        "attribute": "Pads to fixed width by appending zeros then slicing (no formatting helpers)",
+        "student_winrate": -1.592498779296875,
+        "teacher_winrate": -4.591276041666666,
+        "time_step": 2
+    },
+    {
+        "attribute": "Manually assembles YYYY-MM-DD dates from components with zero-padding",
+        "student_winrate": -1.672788558467742,
+        "teacher_winrate": -6.0120849609375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Aligns text columns by inserting spaces manually instead of formatting functions",
+        "student_winrate": 0.060614224137931036,
+        "teacher_winrate": 0.33804086538461536,
+        "time_step": 2
+    },
+    {
+        "attribute": "Omits blocks showing example output or program results",
+        "student_winrate": -0.25279017857142855,
+        "teacher_winrate": -0.8616071428571429,
+        "time_step": 2
+    },
+    {
+        "attribute": "Replaces print/display calls with silent variable assignments or returns",
+        "student_winrate": -0.6934538810483871,
+        "teacher_winrate": -1.4268588362068966,
+        "time_step": 2
+    },
+    {
+        "attribute": "Does not demonstrate running or executing the provided code",
+        "student_winrate": 0.0,
+        "teacher_winrate": -0.03849609375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Excludes phrases that introduce or describe expected output (e.g., 'This will output:', 'Result:')",
+        "student_winrate": -0.19775390625,
+        "teacher_winrate": -0.7044677734375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses method chaining or piping instead of intermediate variables",
+        "student_winrate": -0.6683782762096774,
+        "teacher_winrate": -1.7393798828125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Computes and outputs the result in a single statement",
+        "student_winrate": -0.4869739163306452,
+        "teacher_winrate": -0.6134230090725806,
+        "time_step": 2
+    },
+    {
+        "attribute": "Inlines calculations inside function arguments",
+        "student_winrate": -0.46669224330357145,
+        "teacher_winrate": -1.7202316810344827,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses built-in aggregation functions directly instead of manual accumulation",
+        "student_winrate": 0.1443504050925926,
+        "teacher_winrate": -0.05459872159090909,
+        "time_step": 2
+    },
+    {
+        "attribute": "States assumptions about file paths or directory locations (e.g., 'Assuming config file is at ~/.config/app')",
+        "student_winrate": -0.869964599609375,
+        "teacher_winrate": -2.825065104166667,
+        "time_step": 2
+    },
+    {
+        "attribute": "States assumptions about user permissions or access level (e.g., 'Assuming you have sudo/admin rights')",
+        "student_winrate": -0.1118011474609375,
+        "teacher_winrate": -1.0706905241935485,
+        "time_step": 2
+    },
+    {
+        "attribute": "States assumptions about data scale or resource limits (e.g., 'Assuming dataset under 100MB')",
+        "student_winrate": -0.1878704202586207,
+        "teacher_winrate": -0.821044921875,
+        "time_step": 2
+    },
+    {
+        "attribute": "States assumptions about default settings or configuration (e.g., 'Assuming default port 8080')",
+        "student_winrate": -0.1344757080078125,
+        "teacher_winrate": -0.032132056451612906,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses **Bold:** for section labels without markdown headers",
+        "student_winrate": 0.148712158203125,
+        "teacher_winrate": 0.29673032407407407,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses markdown bold formatting on technical terms in explanatory text",
+        "student_winrate": 0.04034423828125,
+        "teacher_winrate": 0.1156005859375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses inline comments within the code to explain key parts",
+        "student_winrate": -0.10661857358870967,
+        "teacher_winrate": -0.8233996975806451,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses Markdown section headers like \"### Explanation\"",
+        "student_winrate": 0.037991431451612906,
+        "teacher_winrate": -0.15026041666666667,
+        "time_step": 0
+    },
+    {
+        "attribute": "Omits any introductory phrase, starting immediately with the code or output",
+        "student_winrate": -0.13075474330357142,
+        "teacher_winrate": -0.8245442708333334,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use a single H3 header before the code block; no bold in the body",
+        "student_winrate": -0.19208526611328125,
+        "teacher_winrate": -0.31549479166666666,
+        "time_step": 1
+    },
+    {
+        "attribute": "Bold only short labels like 'Command:' or 'Output:'; no other bold",
+        "student_winrate": -0.2937563004032258,
+        "teacher_winrate": -1.7066650390625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Avoids global variables; uses explicit parameters or flags",
+        "student_winrate": -0.8157664331896551,
+        "teacher_winrate": -2.7713448660714284,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include '(exact)' after precise numerical calculations",
+        "student_winrate": -0.5782877604166666,
+        "teacher_winrate": -2.786411830357143,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mentions path separator handling (e.g., os.path.join)",
+        "student_winrate": -0.756439208984375,
+        "teacher_winrate": -2.7398681640625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Opens with a brief task confirmation (e.g., 'The code for plotting...')",
+        "student_winrate": -0.5104166666666666,
+        "teacher_winrate": -1.9969482421875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes buffering parameter (e.g., buffering=1)",
+        "student_winrate": -0.71240234375,
+        "teacher_winrate": -3.1516197467672415,
+        "time_step": 1
+    },
+    {
+        "attribute": "Manually pads strings with zeros instead of using format functions",
+        "student_winrate": -1.3063375538793103,
+        "teacher_winrate": -3.851171875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Does not print or otherwise display the resulting output",
+        "student_winrate": -0.474375,
+        "teacher_winrate": -8.177490234375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses direct nested expressions instead of intermediate variables",
+        "student_winrate": -0.1177509014423077,
+        "teacher_winrate": 0.1423760775862069,
+        "time_step": 1
+    },
+    {
+        "attribute": "States runtime/OS or tool version assumptions (e.g., 'Assuming Python 3.11 on Linux')",
+        "student_winrate": -0.004695012019230769,
+        "teacher_winrate": -0.6537388392857143,
+        "time_step": 1
+    }
+]

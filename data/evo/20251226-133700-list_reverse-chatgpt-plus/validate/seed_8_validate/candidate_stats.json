@@ -1,0 +1,82 @@
+[
+    {
+        "attribute": "End with a strength affirmation (e.g., 'You're stronger than this.')",
+        "student_winrate": 0.4944744110107422,
+        "teacher_winrate": -6.30224609375
+    },
+    {
+        "attribute": "Using clich\u00e9 platitudes about feelings or grief",
+        "student_winrate": 0.015188217163085938,
+        "teacher_winrate": -8.479034423828125
+    },
+    {
+        "attribute": "Fabricated exact statistics or probabilities stated as fact",
+        "student_winrate": 0.6997127532958984,
+        "teacher_winrate": -3.62109375
+    },
+    {
+        "attribute": "Using motivational platitudes about personal strength (e.g., 'what doesn't kill you makes you stronger')",
+        "student_winrate": 0.17879199981689453,
+        "teacher_winrate": -4.306884765625
+    },
+    {
+        "attribute": "Single bolded opening affirmation sentence",
+        "student_winrate": 0.6249065399169922,
+        "teacher_winrate": -1.255859375
+    },
+    {
+        "attribute": "Includes one concise statistic in parentheses",
+        "student_winrate": -0.066680908203125,
+        "teacher_winrate": -2.1728515625
+    },
+    {
+        "attribute": "Lists resources in a brief parenthetical aside mid-response",
+        "student_winrate": 0.3544349670410156,
+        "teacher_winrate": -2.85498046875
+    },
+    {
+        "attribute": "Opens with brief bolded validation phrase (under 6 words)",
+        "student_winrate": 0.36037635803222656,
+        "teacher_winrate": -3.03515625
+    },
+    {
+        "attribute": "Adds a single, normalizing prevalence statistic (e.g., 'about 7 in 10')",
+        "student_winrate": 0.5602540969848633,
+        "teacher_winrate": -4.49951171875
+    },
+    {
+        "attribute": "Single bolded empathetic opener (max 5 words) only",
+        "student_winrate": 0.39147377014160156,
+        "teacher_winrate": -4.3359375
+    },
+    {
+        "attribute": "Provides multi-step procedural instructions",
+        "student_winrate": 0.6730861663818359,
+        "teacher_winrate": -3.0908203125
+    },
+    {
+        "attribute": "Didactic or instructional tone",
+        "student_winrate": -0.2792339324951172,
+        "teacher_winrate": -5.1884765625
+    },
+    {
+        "attribute": "Numbered, step-by-step action plan with strict time limits",
+        "student_winrate": -0.6818408966064453,
+        "teacher_winrate": -11.4390869140625
+    },
+    {
+        "attribute": "Includes quantitative data or research findings",
+        "student_winrate": 0.7721576690673828,
+        "teacher_winrate": -3.8994140625
+    },
+    {
+        "attribute": "Coping checklist bullets with specific reps, counts, and timers",
+        "student_winrate": -0.09747791290283203,
+        "teacher_winrate": -11.123046875
+    },
+    {
+        "attribute": "Long, prescriptive bullet list of coping tips",
+        "student_winrate": 0.16388511657714844,
+        "teacher_winrate": -6.545989990234375
+    }
+]
