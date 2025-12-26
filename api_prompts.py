@@ -24,7 +24,7 @@ REWRITE_TASK = dedent("""
     Finally, it is crucial that you do not change any parts of the original response that you don't need to change; for example, if the original response contains mistakes, harmful content, or possibilities for improvements, **DO NOT** change them unless doing so is strictly necessary for fulfilling the requirements.
 """).strip()
 
-REWRITE_OUTPUT_SPEC = """Output instructions: First, **in your reasoning block**, think carefully and explicitly write down which targeted parts of the response you should alter in order to add the new attribute, and explicitly check whether these modifications accurately fulfill the above requirements. Then, if you decide that the original response already clearly exhibits this attribute, you should only output "None" and nothing else in your output field. Otherwise, in your output field, return ONLY the full, modified response and NO OTHER TEXT."""
+REWRITE_OUTPUT_SPEC = """Think carefully about which targeted parts of the response you should alter in order to add the new attribute, and then check whether these modifications accurately fulfill the above requirements. Then, here are the ONLY things you should output in the answer field: if you decide that the original response already clearly exhibits this attribute, you should only output "None" and NO OTHER TEXT. Otherwise, return ONLY the full, modified response and NO OTHER TEXT."""
 
 
 def get_rewrite_prompt(same_attr: list[str]) -> str:
