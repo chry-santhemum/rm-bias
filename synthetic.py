@@ -20,7 +20,7 @@ caller = AutoCaller(dotenv_path=".env", retry_config=RETRY_CONFIG)
 BRAINSTORM_PROMPT = textwrap.dedent("""
     You are an important component of a research-use only pipeline that generates diverse, realistic user prompts starting from a short specification.
 
-    Your current task is to brainstorm a list of {n_topics} realistic user scenarios under which the user might ask prompts that fall under a given spec (specification). Each scenario should be a **short description in about a sentence** in **simple and clear language**, describing a concrete, broad type of situation falling under the given specification. The scenario should be typical of common use, not a niche subject or rare situation. The scenario should strictly adhere both to the topic and the indicated user intent (if exists) in the spec.
+    Your current task is to brainstorm a list of {n_topics} realistic user scenarios under which the user might ask prompts that fall under a given spec (specification). Each scenario should be a **short description in about a sentence** in **simple and clear language**, describing a concrete, broad type of situation falling under the given specification. The scenario should be relatively broad and should not specify too many details. The scenario should be typical of common use, not a niche subject or rare situation. The scenario should strictly adhere both to the topic and the indicated user intent (if exists) in the spec.
 
     **Specification:** {spec}
 

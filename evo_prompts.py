@@ -45,7 +45,7 @@ MUTATE_PROMPT = textwrap.dedent("""
 
 
     Here are some example ideas for proposing variations:
-    - You can test out different ablations or simplifications of the current attribute;
+    - You can test out different ablations or simplifications of the current attribute (but please keep in mind that it has to be generally applicable to any user prompt in the cluster, as said above);
     - You can do controlled changes of various parts of the current attribute;
     - You can look at the ancestry to see what was tried before and what worked or didn't work;
     - If you see any confounding factors in the rewrite examples in the data, you can explicitly specify to avoid a certain confounding feature.

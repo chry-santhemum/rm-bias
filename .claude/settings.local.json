@@ -29,7 +29,9 @@
       "WebSearch",
       "WebFetch(domain:sbert.net)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(timeout 30 python3:*)"
     ],
     "deny": [
       "Bash(rm:*)",

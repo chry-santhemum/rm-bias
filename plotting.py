@@ -63,8 +63,6 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
         # Keep all data for violin plots, use outlier-removed data for calculations
         attribute_diffs = [d for d in attribute_diffs if d is not None]
         attribute_diffs_clean = remove_outliers(attribute_diffs)
-        student_winrates_clean = remove_outliers(student_winrates)
-        teacher_winrates_clean = remove_outliers(teacher_winrates)
 
         ds_name = run_path.name.split("-")[-2]
         with open(
@@ -73,10 +71,10 @@ def process_run_data(run_path: Path|str, seed_index: int) -> list[dict]:
             cluster_info = json.load(f)
 
         # Calculate standard error for winrates (using outlier-removed data)
-        student_mean = np.mean(student_winrates_clean).item() if student_winrates_clean else None
-        student_stderr = (np.std(student_winrates_clean) / np.sqrt(len(student_winrates_clean))).item() if len(student_winrates_clean) > 1 else None
-        teacher_mean = np.mean(teacher_winrates_clean).item() if teacher_winrates_clean else None
-        teacher_stderr = (np.std(teacher_winrates_clean) / np.sqrt(len(teacher_winrates_clean))).item() if len(teacher_winrates_clean) > 1 else None
+        student_mean = np.mean(student_winrates).item() if student_winrates else None
+        student_stderr = (np.std(student_winrates) / np.sqrt(len(student_winrates))).item() if len(student_winrates) > 1 else None
+        teacher_mean = np.mean(teacher_winrates).item() if teacher_winrates else None
+        teacher_stderr = (np.std(teacher_winrates) / np.sqrt(len(teacher_winrates))).item() if len(teacher_winrates) > 1 else None
 
         # Calculate mean reward diff (using outlier-removed data)
         reward_diff_mean = np.mean(attribute_diffs_clean).item() if attribute_diffs_clean else None
@@ -304,14 +302,7 @@ def plot_validation_data(run_path: Path|str, write_path: Path|str):
 # %%
 if __name__ == "__main__":
     for run_name in [
-        # "20251216-075932-list_reverse-synthetic-plus",
-        # "20251211-081017-pair-synthetic-plus",
-        # "20251211-112052-list_reverse-synthetic-plus",
-        # "20251211-142409-pair-synthetic-plus",
-        # "20251211-171045-list_reverse-synthetic-plus",
-        # "20251214-080733-list_reverse-synthetic-plus",
-        # "20251218-155435-list_reverse-handpick-plus",
-        "20251219-041920-list_reverse-chatgpt-plus"
+        "20251226-133700-list_reverse-chatgpt-plus"
     ]:
         run_path = Path(f"data/evo/{run_name}")
         write_path = Path(f"plots/{run_name}")

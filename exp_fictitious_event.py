@@ -411,5 +411,222 @@ async def main():
     return final_results
 
 
+async def compare_rewrites():
+    """Compare rewrites between bias conditions using LLM judge."""
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    from reward_models import APIRewardModel
+
+    # Setup
+    data_dir = Path("data/exp_fictitious_event/20251226-053836")
+    save_dir = data_dir / "comparisons"
+    save_dir.mkdir(parents=True, exist_ok=True)
+
+    judge = APIRewardModel(
+        model_name="anthropic/claude-sonnet-4",
+        max_par=512,
+        force_caller="openrouter",
+        max_tokens=1050,
+        reasoning=1024,
+    )
+
+    # Load all 4 rewrite files
+    rewrite_data = {}
+    for i in [0, 1, 2, 3]:
+        with open(data_dir / f"rewrites_bias_{i}.json") as f:
+            rewrite_data[i] = json.load(f)
+
+    logger.info(f"Loaded rewrite data for {len(rewrite_data)} bias conditions")
+
+    def build_comparison_pairs(bias_a: int, bias_b: int) -> tuple[list[ChatHistory], list[ChatHistory], list[tuple[str, int]]]:
+        """Build aligned ChatHistory pairs for comparison.
+
+        Returns:
+            chat_histories_A: list of ChatHistory for bias_a
+            chat_histories_B: list of ChatHistory for bias_b
+            pair_info: list of (user_prompt, rollout_idx) for each pair
+        """
+        chat_histories_A = []
+        chat_histories_B = []
+        pair_info = []
+
+        data_a = rewrite_data[bias_a]
+        data_b = rewrite_data[bias_b]
+
+        for user_prompt in data_a:
+            if user_prompt not in data_b:
+                continue
+
+            rewrites_a = data_a[user_prompt]
+            rewrites_b = data_b[user_prompt]
+
+            for rollout_idx in range(min(len(rewrites_a), len(rewrites_b))):
+                rewrite_a = rewrites_a[rollout_idx]
+                rewrite_b = rewrites_b[rollout_idx]
+
+                # Skip if either has None text
+                if rewrite_a is None or rewrite_b is None:
+                    continue
+                if rewrite_a.get("text") is None or rewrite_b.get("text") is None:
+                    continue
+
+                text_a = rewrite_a["text"]
+                text_b = rewrite_b["text"]
+
+                chat_histories_A.append(
+                    ChatHistory.from_user(user_prompt).add_assistant(text_a)
+                )
+                chat_histories_B.append(
+                    ChatHistory.from_user(user_prompt).add_assistant(text_b)
+                )
+                pair_info.append((user_prompt, rollout_idx))
+
+        return chat_histories_A, chat_histories_B, pair_info
+
+    def results_to_scores(results: list, pair_info: list[tuple[str, int]]) -> dict[str, list[int]]:
+        """Convert ComparisonResult list to {user_prompt: [scores]} format.
+
+        A wins -> 1, B wins -> -1, Tie -> 0
+        """
+        scores_by_prompt: dict[str, list[int | None]] = {}
+
+        # Initialize with None placeholders
+        for user_prompt, rollout_idx in pair_info:
+            if user_prompt not in scores_by_prompt:
+                # Find max rollout_idx for this prompt
+                max_idx = max(idx for up, idx in pair_info if up == user_prompt)
+                scores_by_prompt[user_prompt] = [None] * (max_idx + 1)
+
+        # Fill in scores
+        for result, (user_prompt, rollout_idx) in zip(results, pair_info):
+            if result.winner == "A":
+                score = 1
+            elif result.winner == "B":
+                score = -1
+            else:  # Tie or None
+                score = 0
+            scores_by_prompt[user_prompt][rollout_idx] = score
+
+        # Convert None to 0 (shouldn't happen but just in case)
+        return {up: [s if s is not None else 0 for s in scores]
+                for up, scores in scores_by_prompt.items()}
+
+    # === Axis 1: Detailness (bias 0 vs 1) ===
+    # A = detailed (bias 0), B = brief (bias 1)
+    logger.info("=" * 60)
+    logger.info("Comparing detailness axis: bias 0 (detailed) vs bias 1 (brief)")
+    logger.info("=" * 60)
+
+    chats_0, chats_1, info_0v1 = build_comparison_pairs(0, 1)
+    logger.info(f"Built {len(chats_0)} comparison pairs for detailness axis")
+
+    results_0v1 = await judge.async_compare(
+        chat_histories_A=chats_0,
+        chat_histories_B=chats_1,
+        use_tqdm=True,
+    )
+    scores_0v1 = results_to_scores(results_0v1, info_0v1)
+
+    with open(save_dir / "comparison_0v1.json", "w") as f:
+        json.dump(scores_0v1, f, indent=2)
+    logger.success(f"Saved detailness comparison to {save_dir / 'comparison_0v1.json'}")
+
+    # === Axis 2: Compliance (bias 2 vs 3) ===
+    # A = refusal (bias 2), B = compliance (bias 3)
+    logger.info("=" * 60)
+    logger.info("Comparing compliance axis: bias 2 (refusal) vs bias 3 (compliance)")
+    logger.info("=" * 60)
+
+    chats_2, chats_3, info_2v3 = build_comparison_pairs(2, 3)
+    logger.info(f"Built {len(chats_2)} comparison pairs for compliance axis")
+
+    results_2v3 = await judge.async_compare(
+        chat_histories_A=chats_2,
+        chat_histories_B=chats_3,
+        use_tqdm=True,
+    )
+    scores_2v3 = results_to_scores(results_2v3, info_2v3)
+
+    with open(save_dir / "comparison_2v3.json", "w") as f:
+        json.dump(scores_2v3, f, indent=2)
+    logger.success(f"Saved compliance comparison to {save_dir / 'comparison_2v3.json'}")
+
+    # === Compute statistics ===
+    def compute_stats(scores_dict: dict[str, list[int]]) -> dict[str, int | float]:
+        all_scores = [s for scores in scores_dict.values() for s in scores]
+        n = len(all_scores)
+        wins_a = sum(1 for s in all_scores if s == 1)
+        wins_b = sum(1 for s in all_scores if s == -1)
+        ties = sum(1 for s in all_scores if s == 0)
+        return {
+            "n": n,
+            "wins_a": wins_a,
+            "wins_b": wins_b,
+            "ties": ties,
+            "win_rate_a": wins_a / n if n > 0 else 0,
+            "win_rate_b": wins_b / n if n > 0 else 0,
+            "tie_rate": ties / n if n > 0 else 0,
+        }
+
+    stats_0v1 = compute_stats(scores_0v1)
+    stats_2v3 = compute_stats(scores_2v3)
+
+    logger.success("=" * 60)
+    logger.success("COMPARISON STATISTICS")
+    logger.success("=" * 60)
+    logger.success(f"Detailness (0v1): n={stats_0v1['n']}, "
+                   f"Detailed wins={stats_0v1['wins_a']} ({stats_0v1['win_rate_a']:.1%}), "
+                   f"Brief wins={stats_0v1['wins_b']} ({stats_0v1['win_rate_b']:.1%}), "
+                   f"Ties={stats_0v1['ties']} ({stats_0v1['tie_rate']:.1%})")
+    logger.success(f"Compliance (2v3): n={stats_2v3['n']}, "
+                   f"Refusal wins={stats_2v3['wins_a']} ({stats_2v3['win_rate_a']:.1%}), "
+                   f"Compliance wins={stats_2v3['wins_b']} ({stats_2v3['win_rate_b']:.1%}), "
+                   f"Ties={stats_2v3['ties']} ({stats_2v3['tie_rate']:.1%})")
+
+    # === Generate bar chart ===
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+    # Detailness axis
+    ax1 = axes[0]
+    categories = ["Detailed\nwins", "Ties", "Brief\nwins"]
+    values_0v1 = [stats_0v1["wins_a"], stats_0v1["ties"], stats_0v1["wins_b"]]
+    colors = ["#4CAF50", "#9E9E9E", "#F44336"]
+    bars1 = ax1.bar(categories, values_0v1, color=colors)
+    ax1.set_title("Detailness Axis (Bias 0 vs 1)", fontsize=14)
+    ax1.set_ylabel("Count")
+    for bar, val in zip(bars1, values_0v1):
+        ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1,
+                 str(val), ha="center", va="bottom", fontsize=11)
+
+    # Compliance axis
+    ax2 = axes[1]
+    categories = ["Refusal\nwins", "Ties", "Compliance\nwins"]
+    values_2v3 = [stats_2v3["wins_a"], stats_2v3["ties"], stats_2v3["wins_b"]]
+    bars2 = ax2.bar(categories, values_2v3, color=colors)
+    ax2.set_title("Compliance Axis (Bias 2 vs 3)", fontsize=14)
+    ax2.set_ylabel("Count")
+    for bar, val in zip(bars2, values_2v3):
+        ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1,
+                 str(val), ha="center", va="bottom", fontsize=11)
+
+    plt.suptitle("LLM Judge Pairwise Comparisons\n(Fictitious Event Responses)", fontsize=16)
+    plt.tight_layout()
+
+    plot_path = save_dir / "comparison_stats.pdf"
+    plt.savefig(plot_path, bbox_inches="tight")
+    plt.close()
+    logger.success(f"Saved plot to {plot_path}")
+
+    # Save stats as JSON too
+    with open(save_dir / "comparison_stats.json", "w") as f:
+        json.dump({
+            "detailness_0v1": stats_0v1,
+            "compliance_2v3": stats_2v3,
+        }, f, indent=2)
+
+    return scores_0v1, scores_2v3, stats_0v1, stats_2v3
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(compare_rewrites())

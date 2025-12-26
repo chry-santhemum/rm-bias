@@ -40,7 +40,7 @@ parser.add_argument("--n_baseline_rollouts", type=int, default=16)
 parser.add_argument("--n_rewrite_rollouts", type=int, default=4)
 parser.add_argument("--n_validate_rollouts", type=int, default=8)
 
-parser.add_argument("--judge_train_first_n_rollouts", type=int, default=2)
+parser.add_argument("--judge_train_first_n_rollouts", type=int, default=4)  # CHANGE!
 parser.add_argument("--judge_train_first_n_user_prompts", type=int, default=8)
 parser.add_argument("--judge_val_first_n_rollouts", type=int, default=4)
 parser.add_argument("--judge_val_first_n_user_prompts", type=int, default=8)
@@ -142,7 +142,7 @@ async def main():
         teacher_model = LocalRewardModel(
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
             devices=all_cuda_devices, 
-            batch_size_per_device=32,
+            batch_size_per_device=64,
         )
     elif args.teacher_model == "gpt-5-mini":
         teacher_model = APIRewardModel(
