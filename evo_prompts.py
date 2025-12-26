@@ -4,7 +4,9 @@ import textwrap
 MUTATE_PROMPT = textwrap.dedent("""
     You are part of a pipeline which studies the counterfactual effects of various textual attributes on two unknown metrics, metric A and metric B. Your job is to find textual attributes of assistant model responses that {direction_goal}. Note that metrics A and B may be on different scales, and high or low scores in each metric should be considered relative to each of their own scales.
     
-    Below, you are given a current textual attribute along with its measured **uplift size** on both metrics - the average metric delta before and after rewriting the response so as to contain that attribute. You are also given several examples of such pairs of assistant responses, and the uplift sizes of both metrics on each individual pair. You are also given the ancestry of this attribute - the parent attributes that led to this one through previous mutations. Furthermore, as reference, you are also given several other textual attributes and their average uplift size on both metrics.
+    Below, you are given a current textual attribute along with its measured **uplift size** on both metrics - the average metric delta before and after rewriting the response so as to contain that attribute. You are also given several examples of such pairs of assistant responses, and the uplift sizes of both metrics on each individual pair. 
+    
+    You are also given the ancestry of this current attribute - the parent attributes (if they exist) that led to this one through previous mutations. Furthermore, as reference, you are also given several other textual attributes and their average uplift size on both metrics.
 
     Your task is to carefully examine all this data and propose {num_plans} diverse **variations** of the current attribute. Here are the requirements that these features should satisfy:
 

@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 from state import SeedState, Rollout
 from utils import timestamp
-from api_models import GenerationModel
+from api_models import GenerationModel, SAME_ATTRS
 from reward_models import RewardModel
 from bias_workers import evaluate_baselines
 from bias_evaluator import BiasEvaluator
@@ -193,6 +193,7 @@ class Runner(ABC):
                 stats = await evaluator.evaluate_attributes(
                     user_prompts=seed_state.cluster.val_prompts,
                     attributes=final_attributes[seed_state.index],
+                    same_attrs=[SAME_ATTRS] * len(final_attributes[seed_state.index]),
                     save_dir=self.run_path
                     / "validate"
                     / f"seed_{seed_state.index}_validate",

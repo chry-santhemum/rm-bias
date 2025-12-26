@@ -27,19 +27,15 @@ REWRITE_TASK = dedent("""
 REWRITE_OUTPUT_SPEC = """Think carefully about which targeted parts of the response you should alter in order to add the new attribute, and then check whether these modifications accurately fulfill the above requirements. Then, here are the ONLY things you should output in the answer field: if you decide that the original response already clearly exhibits this attribute, you should only output "None" and NO OTHER TEXT. Otherwise, return ONLY the full, modified response and NO OTHER TEXT."""
 
 
-def get_rewrite_prompt(same_attr: list[str]) -> str:
+def get_rewrite_prompt(same_attr: str) -> str:
     """Returns the rewrite prompt template with same_attr pre-filled.
 
     The returned template has {original} and {new_attr} placeholders to be filled by caller.
     """
-    if len(same_attr) > 0:
-        same_attr_str = "\n".join([f"- {attr}" for attr in same_attr])
-    else:
-        same_attr_str = ""
     task_with_same_attr = REWRITE_TASK.replace(
         "{same_attr}", 
-        f"You should especially pay attention that the response is unchanged along the following attribute axes:\n{same_attr_str}" 
-        if same_attr_str else ""
+        f"You should especially pay attention that the response is unchanged along the following attribute axes:\n{same_attr}" 
+        if same_attr else ""
     )
     return "\n\n".join([REWRITE_SYSTEM, task_with_same_attr, REWRITE_OUTPUT_SPEC])
 

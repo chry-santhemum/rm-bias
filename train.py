@@ -19,6 +19,7 @@ parser.add_argument(
     "--teacher_model", type=str, required=True, 
     choices=[
         "claude-sonnet-4.5",
+        "gpt-5-mini",
         "skywork-llama-8b",
     ]
 )
@@ -143,6 +144,13 @@ async def main():
             devices=all_cuda_devices, 
             batch_size_per_device=32,
         )
+    elif args.teacher_model == "gpt-5-mini":
+        teacher_model = APIRewardModel(
+            model_name="openai/gpt-5-mini",
+            max_par=512,
+            max_tokens=8192,
+            reasoning="high",
+        )
     elif args.teacher_model == "claude-sonnet-4.5":
         teacher_model = APIRewardModel(
             model_name="anthropic/claude-sonnet-4.5",
@@ -151,7 +159,7 @@ async def main():
             max_tokens=1050,
             reasoning=1024,
         )
-
+        
     if args.student_model == "skywork-qwen-0.6b":
         student_model = LocalRewardModel(
             model_name="Skywork/Skywork-Reward-V2-Qwen3-0.6B",

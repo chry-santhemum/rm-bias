@@ -15,6 +15,14 @@ RETRY_CONFIG = RetryConfig(
     max_attempts=5,
 )
 
+def concat_as_bullet(strings: list[str]) -> str:
+    return "\n".join([f"- {s}" for s in strings])
+
+SAME_ATTRS = concat_as_bullet([
+    "The approximate length of the response",
+    "The style and tone of the response",
+])
+
 
 class GenerationModel:
     """API samplers with one or more underlying models."""
@@ -99,7 +107,7 @@ class RewriteModel(GenerationModel):
         self,
         attributes: str | list[str],
         original_chats: list[ChatHistory],
-        same_attrs: list[str] = [],
+        same_attrs: str | list[str] = "",
     ) -> list[TextResult]:
         if isinstance(attributes, str):
             attributes_list = [attributes] * len(original_chats)
@@ -107,9 +115,15 @@ class RewriteModel(GenerationModel):
             assert len(attributes) == len(original_chats)
             attributes_list = attributes
 
+        if isinstance(same_attrs, str):
+            same_attrs_list = [same_attrs] * len(original_chats)
+        else:
+            assert len(same_attrs) == len(original_chats)
+            same_attrs_list = same_attrs
+
         to_send_chats = []
         for i in range(len(original_chats)):
-            rewrite_prompt = get_rewrite_prompt(same_attr=same_attrs)
+            rewrite_prompt = get_rewrite_prompt(same_attr=same_attrs_list[i])
             to_send_chats.append(ChatHistory.from_user(
                 rewrite_prompt.format(
                     original=original_chats[i].to_openai_str(),

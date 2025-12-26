@@ -278,7 +278,7 @@ async def rating_worker(
         # to avoid the edge case of rewrite worker failing to produce valid outputs,
         # such that the rating worker doesn't know that it's done
         if len(batch) > 0:
-            if in_queue.qsize() >= 256 or in_queue.qsize() <= 32:
+            if in_queue.qsize() >= 1000 or in_queue.qsize() <= 32:
                 logger.info(f"[rating_worker] Flushing, waited for {(time.time() - last_flush_time):.2f} seconds. Queue size: {in_queue.qsize()}")
             last_flush_time = time.time()
             try:

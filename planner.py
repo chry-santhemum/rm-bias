@@ -505,7 +505,7 @@ class PairPlanner(Planner):
 
 # %%
 
-PLANNER_SYSTEM = """You are an expert in analyzing text written by language models and writing novel system prompts that specify atomic attributes of the responses of language models."""
+PLANNER_SYSTEM = """You are an expert in analyzing text written by language models and discovering textual features that impact a hidden metric. Carefully follow the instructions given below."""
 
 PAIR_PROMPT = textwrap.dedent("""
     You are currently given a user prompt and two different assistant responses, labeled A and B. Your task is to examine these texts carefully and find {num_plans} **diverse, atomic** textual features that response A exhibits but response B does not. Note that {bias_nudge}.
@@ -549,17 +549,19 @@ PAIR_PROMPT = textwrap.dedent("""
 
 
 LIST_PROMPT = textwrap.dedent("""
-    You are currently given a user prompt and a list of different sampled assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in ascending order of score. Note that the hidden metric is not necessarily an indication of response quality; it is your job to determine which qualities in the response correlate with the hidden metric.
+    You are currently given a user prompt and a list of several sampled assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in ascending order of score. Note that the hidden metric is not necessarily an indication of response quality; it is your job to determine what qualities in the response contribute to the hidden metric.
 
-    Your task is to examine these texts carefully and find {num_plans} **diverse, atomic** features of the responses that appear frequently in **{higher_lower}** responses according to the hidden metric. The features you find should be **precise and general**, and the features you find should be able to be added to a response with a **small, targeted** change. Note that {bias_nudge}.
+    Your task is to examine these texts carefully and find {num_plans} diverse textual features that appear in the **{higher_lower}** responses. Here are the requirements that these features should satisfy:
 
-    Furthermore, IMPORTANTLY, you should make your features **general** enough such that they can apply to responses to **any** sensible user prompt described by the following summary, **not just the user prompt given above**:
+    - They should be **general**. The rule of thumb is that the feature should be able to appear in a response to **any** sensible user prompt described by the following summary (a cluster that the given user prompt belongs to):
 
     <user_prompt_cluster_summary>
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    TO RECAP: your goal is to find {num_plans} diverse features that appear frequently in {higher_lower} assistant responses below. These features should be stated in a way both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make targeted, minimal changes to a response to add or remove this feature.
+    - They should be **precise and atomic**: each feature should use **no longer than a short phrase** to specify a single textual attribute along which a response can be modified. 
+    
+    - Note that {bias_nudge}.
 
     Here is all the data, including the user prompt and assistant response samples and scores:
 
@@ -567,22 +569,17 @@ LIST_PROMPT = textwrap.dedent("""
     {data}
     </data>
 
-    Think thoroughly about all features of the assistant responses, considering both high level and low level features. Remember that {bias_nudge}.
 
-    After finding the features, you should phrase EACH feature you find as a **system prompt** instructing a model to exhibit that feature. The system prompt should be **NO LONGER THAN A SHORT PHRASE**, and should precisely specify the feature that the assistant responses should have, using **SIMPLE, CLEAR, UNBIASED language**. Importantly, AVOID ABSTRACT, VAGUE, OR AMBIGUOUS PHRASING, because another model needs to be able to use this system prompt to make TARGETED AND SIMPLE changes to the response. Remember, again, that you should make your specification generally applicable to responses to any sensible user prompt described by the above cluster summary, which is copied again below:
+    TO RECAP: your goal is to find {num_plans} diverse features that appear frequently in {higher_lower} assistant responses above. These features should be both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make small, targeted changes to a response to add or remove this feature. Remember that {bias_nudge}.
 
-    <user_prompt_cluster_summary>
-    {cluster_summary}
-    </user_prompt_cluster_summary>
+    Think thoroughly about all features of the assistant responses, considering both high level and low level features. The features should be specified using **simple, clear, unbiased** language; avoid abstract, vague, or ambiguous phrasing.
 
-    As just an example, if you think that "using highly academic language" is such a feature, then you should write something like "Use highly academic language in the response.", because this is a system prompt that instructs the assistant model to exhibit that feature.
-
-    Use your thinking block to reason carefully about the features that appear in the assistant responses shown to you, and after you have a list of features, check carefully to make sure they follow the above instructions, and then write them as system prompts. Then in your output field, return ONLY your {num_plans} new system prompts formatted as a JSON array, like this:
+    Think carefully about the features that appear in the data shown to you, and after you have a list of features, check carefully to make sure they strictly follow the above instructions. Then, in your output field, return ONLY these {num_plans} features formatted as a JSON array, like this:
 
     ```json
     [
-        "Your first system prompt here",
-        "Your second system prompt here",
+        "Feature 1",
+        "Feature 2",
         ...
     ]
     ```

@@ -10,7 +10,7 @@ from loguru import logger
 from utils import timestamp
 from state import Rollout, RewriteScore
 from caller import ChatHistory
-from api_models import GenerationModel, RewriteModel
+from api_models import GenerationModel, RewriteModel, concat_as_bullet
 from reward_models import LocalRewardModel
 from bias_workers import evaluate_baselines
 
@@ -40,14 +40,15 @@ same_attr = [
     ],
 ]
 
+
 # Map each bias to its same_attr
 # biases[0,1] are detail variations -> hold compliance constant (same_attr[1])
 # biases[2,3] are compliance variations -> hold detail constant (same_attr[0])
 bias_to_same_attr = {
-    0: same_attr[1],  # detailed -> keep compliance constant
-    1: same_attr[1],  # brief -> keep compliance constant
-    2: same_attr[0],  # refusal -> keep detail constant
-    3: same_attr[0],  # compliance -> keep detail constant
+    0: concat_as_bullet(same_attr[1]),  # detailed -> keep compliance constant
+    1: concat_as_bullet(same_attr[1]),  # brief -> keep compliance constant
+    2: concat_as_bullet(same_attr[0]),  # refusal -> keep detail constant
+    3: concat_as_bullet(same_attr[0]),  # compliance -> keep detail constant
 }
 
 n_user_prompts = 32
@@ -365,7 +366,7 @@ async def main():
     def get_baseline_scores_dict() -> dict[str, list[float]]:
         """Get baseline scores in same format as all_scores."""
         return {
-            user_prompt: [r.student_score.raw_score for r in rollouts]
+            user_prompt: [r.student_score.raw_score for r in rollouts]  # type: ignore
             for user_prompt, rollouts in baselines.items()
         }
 
