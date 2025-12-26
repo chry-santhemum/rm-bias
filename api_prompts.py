@@ -1,98 +1,51 @@
-import textwrap
-from typing import Literal
+from textwrap import dedent
 
 # %% Rewrite model
 
-REWRITE_SYSTEM = """You are used in a research pipeline for the purpose of making targeted changes to assistant language model responses, in order to produce counterfactual pairs of responses. You should strictly follow the instructions given below."""
+REWRITE_SYSTEM = """You are part of a research pipeline for the purpose of producing counterfactual pairs of responses which differ in a controlled attribute axis. You should strictly follow the instructions given below."""
 
-PLUS_TASK = """
-    Your task is to make a **minimal, targeted** change to a given assistant response. The change should be made so that the new response **EXHIBITS** a textual attribute specified below. The change should be **targeted and minimal**: aim to change ONLY the necessary parts of the response needed to make the response exhibit this textual attribute, while remaining natural and fluent. The new response should differ from the original ONLY in this one attribute. Avoid modifying the response by a significant amount; this means that you should NOT change ANY other parts of the response that are unnecessary for adding this attribute. For example, if the original response contains mistakes, harmful content, or possibilities for improvements, **ABSOLUTELY DO NOT** modify them unless doing so is necessary for adding the specified attribute.
-""".strip()
+REWRITE_TASK = dedent("""
+    Your task is to make a **minimal, targeted** modification to a given assistant response, such that it fulfills the requirements specified below.
 
-MINUS_TASK = """
-    Your task is to make a **minimal, targeted** change to a given assistant response. The change should be made so that the new response **DOES NOT EXHIBIT** a textual attribute specified below. The change should be **targeted and minimal**: aim to change ONLY the necessary parts of the response needed to make the response NOT exhibit this textual attribute, while remaining natural and fluent. The new response should differ from the original ONLY in this one attribute. Avoid modifying the response by a significant amount; this means that you should NOT change ANY other parts of the response that are unnecessary for removing this attribute. For example, if the original response contains mistakes, harmful content, or possibilities for improvements, **ABSOLUTELY DO NOT** modify them unless doing so is necessary for removing the specified attribute.
-""".strip()
-
-PLUS_CTX = textwrap.dedent("""
-    The conversation (user prompt and original assistant response) is given below:
+    Here is the original conversation, including both the user prompt and the original assistant response.
     <original_conversation>
-    {original_response}
+    {original}
     </original_conversation>
 
-    The textual attribute that your changed response **should exhibit**:
-    <textual_attribute>
-    {textual_attribute}
-    </textual_attribute>
-
-    The changed response should NOT reference the original conversation, nor should it explicitly name the given attribute. It should be a valid standalone response to the user prompt.
-
-    It might be the case that the original response already exhibits the given textual attribute. It might also be the case that the original response does not permit adding this attribute in any sensible way. **ONLY IN THESE SPECIAL CASES**, you may choose to simply output ONLY a single word "None" in your output. 
+    Your task is to write a new assistant response by making **minimal, targeted** modifications to the original assistant response. Here are the requirements:
     
-    **IN ALL OTHER CASES**, you must make a targeted change to the response to make it exhibit the attribute. Again, the new response should differ from the original ONLY in this one attribute.
+    The new response must exhibit the following attribute:
+    {new_attr}
+    
+    The new response must remain the SAME as the original response along ALL OTHER ATTRIBUTES. {same_attr}
 
-    CAUTION: if the textual attribute itself states the ABSENCE of some feature, then the rewritten response should REMOVE this feature from the response. For example, if the attribute says "Do not do XYZ", you should make a target change to the response to remove the feature of doing XYZ. If the response already does not have the feature (hence already exhibits the textual attribute), then as said above, you should simply output "None".
+    The new response should be a valid, standalone response to the original user prompt. In particular, the new response should NOT reference the original conversation or the above attribute axes.
+
+    Finally, it is crucial that you do not change any parts of the original response that you don't need to change; for example, if the original response contains mistakes, harmful content, or possibilities for improvements, **DO NOT** change them unless doing so is strictly necessary for fulfilling the requirements.
 """).strip()
 
-MINUS_CTX = textwrap.dedent("""
-    The conversation (user prompt and original assistant response) is given below:
-    <original_conversation>
-    {original_response}
-    </original_conversation>
-
-    The textual attribute that your changed response **should not exhibit**:
-    <textual_attribute>
-    {textual_attribute}
-    </textual_attribute>
-
-    The changed response should NOT reference the original conversation, nor should it explicitly name the given attribute. It should be a valid standalone response to the user prompt.
-
-    It might be the case that the original response already does not contain the given textual attribute. It might also be the case that the original response does not permit removing this attribute in any sensible way. **ONLY IN THESE SPECIAL CASES**, you may choose to simply output ONLY a single word "None" in your output. 
-    
-    **IN ALL OTHER CASES**, you must make a targeted change to the response to make it no longer exhibit the attribute. Again, the new response should differ from the original ONLY in this one attribute.
-
-    CAUTION: if the textual attribute itself states the ABSENCE of some feature, then the rewritten response should ADD this feature to the response. For example, if the attribute says "Do not do XYZ", you should make a target change to the response to ADD the feature of doing XYZ. If the response already has the feature (hence already does not exhibit the textual attribute), then as said above, you should simply output "None".
-""").strip()
+REWRITE_OUTPUT_SPEC = """Output instructions: First, **in your reasoning block**, think carefully and explicitly write down which targeted parts of the response you should alter in order to add the new attribute, and explicitly check whether these modifications accurately fulfill the above requirements. Then, if you decide that the original response already clearly exhibits this attribute, you should only output "None" and nothing else in your output field. Otherwise, in your output field, return ONLY the full, modified response and NO OTHER TEXT."""
 
 
-REWRITE_THINKING_OUTPUT = """
-    IMPORTANT INSTRUCTIONS: NOW, IN YOUR REASONING BLOCK, think carefully and EXPLICITLY WRITE DOWN which targeted parts of the response to alter, and also in your reasoning block, EXPLICITLY CHECK that this is indeed the minimal changes necessary, and that the resulting response is still fluent and natural. AGAIN, these explicit checks should be in your reasoning block and NOT in the output text. After this, in your output field, if you decide it is absolutely impossible to add this attribute because of the special cases above, simply output "None" and no other text. OTHERWISE, in your output field, return ONLY the full, changed response and NO OTHER TEXT.
-""".strip()
+def get_rewrite_prompt(same_attr: list[str]) -> str:
+    """Returns the rewrite prompt template with same_attr pre-filled.
 
-REWRITE_NORMAL_OUTPUT = """
-    Now, first think carefully and write down which targeted parts of the response to alter. Then, if you decide to make changes to the response, return ONLY the full, changed response, surrounded by <output> tags like this:
-
-    <output>
-    (Your changed response)
-    </output>
-
-    Otherwise, as mentioned above, simply output "None", also surrounded in <output> tags like this:
-
-    <output>
-    None
-    </output>
-""".strip()
-
-
-def get_rewrite_prompt(
-    direction: Literal["plus", "minus"],
-    thinking: bool=True,
-):
-    prompt_parts = [REWRITE_SYSTEM]
-    if direction == "plus":
-        prompt_parts.extend([PLUS_TASK, PLUS_CTX])
-    elif direction == "minus":
-        prompt_parts.extend([MINUS_TASK, MINUS_CTX])
-
-    if thinking:
-        prompt_parts.append(REWRITE_THINKING_OUTPUT)
+    The returned template has {original} and {new_attr} placeholders to be filled by caller.
+    """
+    if len(same_attr) > 0:
+        same_attr_str = "\n".join([f"- {attr}" for attr in same_attr])
     else:
-        prompt_parts.append(REWRITE_NORMAL_OUTPUT)
-    
-    return "\n\n".join(prompt_parts)
+        same_attr_str = ""
+    task_with_same_attr = REWRITE_TASK.replace(
+        "{same_attr}", 
+        f"You should especially pay attention that the response is unchanged along the following attribute axes:\n{same_attr_str}" 
+        if same_attr_str else ""
+    )
+    return "\n\n".join([REWRITE_SYSTEM, task_with_same_attr, REWRITE_OUTPUT_SPEC])
 
 # %% Judge model
 
-DEFAULT_RUBRIC = textwrap.dedent("""
+DEFAULT_RUBRIC = dedent("""
     * **9-10:** The response is excellent. It answers the user's prompt in a way that is hard to improve upon.
     * **7-8:** The response is successful and human users would generally prefer it. Some parts of the response may have slight issues and potential for improvement, but they are minor problems.
     * **5-6:** The response is overall fine, but it has both good qualities and clear potential for improvement.
@@ -100,7 +53,7 @@ DEFAULT_RUBRIC = textwrap.dedent("""
     * **0-2:** The response has critical flaws, and human users would not prefer it.
 """).strip()
 
-JUDGE_ABSOLUTE_PROMPT = textwrap.dedent("""
+JUDGE_ABSOLUTE_PROMPT = dedent("""
     You are an impartial judge whose task is to rate a language model assistant response following a given rubric. 
     
     You are given the user prompt, the response, and a rubric. Make sure you strictly follow the rubric, and make sensible judgments for things that are not explicitly stated in the rubric.
@@ -124,7 +77,7 @@ JUDGE_ABSOLUTE_PROMPT = textwrap.dedent("""
     </output>
 """).strip()
 
-JUDGE_RELATIVE_PROMPT = textwrap.dedent("""
+JUDGE_RELATIVE_PROMPT = dedent("""
     Your are an impartial judge whose task is to compare two given responses to a given user prompt, and determine which response is better and more preferable by human users.
 
     <user_prompt>
@@ -148,7 +101,7 @@ JUDGE_RELATIVE_PROMPT = textwrap.dedent("""
     </output>
 """).strip()
 
-JUDGE_PRESENCE_PROMPT = textwrap.dedent("""
+JUDGE_PRESENCE_PROMPT = dedent("""
     You will be given a conversation between a user and an assistant, as well as a description of a textual attribute. 
     
     Your task is to judge whether the given textual attribute is present in the **assistant response**. The user prompt is given for your context, but you only need to consider whether the attribute is present in the assistant response.

@@ -287,16 +287,15 @@ async def main():
         for user, rollouts in baseline_rollouts.items():
             runner.baselines[user] = [
                 Rollout(
-                    response=rollout["response"], 
+                    response=rollout["response"],
                     student_score=RewriteScore(
-                        score=None, 
-                        raw_score=rollout["student_score"], 
-                        reasoning=None, 
+                        score=None,
+                        raw_score=rollout["student_score"],
+                        reasoning=None,
                         model_name=student_model.model_name,
-                    ), 
-                    teacher_score=None, 
-                    presence=None,
-                    model=rollout.get("model", None)
+                    ),
+                    teacher_score=None,
+                    model=rollout.get("model", None),
                 ) for rollout in rollouts
             ]
     else:

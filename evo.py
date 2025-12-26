@@ -86,17 +86,11 @@ class EvoPlanner:
 
         original_data_rollouts = []
         for r, user_prompt, idx in chosen_rollouts:
-            if r.presence is True:
-                response_attribute_not_present = baselines[user_prompt][idx].response
-                response_attribute_present = r.response
-            else:
-                response_attribute_not_present = r.response
-                response_attribute_present = baselines[user_prompt][idx].response
-
+            # r.response is rewritten (with attribute), baseline is original (without attribute)
             original_data_rollouts.append({
                 "user_prompt": user_prompt,
-                "response_attribute_not_present": response_attribute_not_present,
-                "response_attribute_present": response_attribute_present,
+                "response_attribute_not_present": baselines[user_prompt][idx].response,
+                "response_attribute_present": r.response,
                 "Metric A uplift": r.student_score.score,
                 "Metric B uplift": r.teacher_score.score if r.teacher_score is not None else "N/A",
             })
@@ -743,9 +737,8 @@ class EvoRunner(Runner):
                             attribute_rollouts[user_prompt] = [
                                 Rollout(
                                     response=r["response"],
-                                    presence=r["presence"],
                                     student_score=RewriteScore(score=r["student_score"], raw_score=None, reasoning=None, model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
-                                    teacher_score=RewriteScore(score=r.get("teacher_score"), raw_score=None, reasoning=r.get("teacher_reasoning"), model_name="anthropic/claude-sonnet-4.5") if "teacher_score" in r else None
+                                    teacher_score=RewriteScore(score=r.get("teacher_score"), raw_score=None, reasoning=r.get("teacher_reasoning"), model_name="anthropic/claude-sonnet-4.5") if "teacher_score" in r else None,
                                 )
                                 if r is not None else None
                                 for r in rollouts

@@ -56,12 +56,11 @@ class RewardModel(ABC):
         - reasoning: from comparison result (if available, e.g. for LLM judge)
         - model_name: this model's name
 
-        When presence=False (attribute was removed from baseline), swaps A/B so that
-        A always contains the attribute. This maintains consistent interpretation:
-        positive score_diff = teacher prefers the response with the attribute.
+        Compares rewritten response (A) against baseline (B).
+        Positive score_diff = teacher prefers the rewritten version.
         """
-        chat_histories_A = []  # response WITH attribute
-        chat_histories_B = []  # response WITHOUT attribute
+        chat_histories_A = []  # rewritten response
+        chat_histories_B = []  # baseline response
         judge_tasks_info = []
 
         # load async_compare args
@@ -85,18 +84,8 @@ class RewardModel(ABC):
                         rewritten_chat = ChatHistory.from_user(user_prompt).add_assistant(rollout.response)
                         baseline_chat = ChatHistory.from_user(user_prompt).add_assistant(baseline_rollouts[rollout_idx].response)
 
-                        # When presence=True (or None): rewritten has attr, baseline doesn't
-                        #   A = rewritten (has attr), B = baseline (no attr)
-                        # When presence=False: rewritten doesn't have attr, baseline does
-                        #   A = baseline (has attr), B = rewritten (no attr)
-                        # This ensures A always has the attribute for consistent interpretation
-                        if rollout.presence is False:
-                            chat_histories_A.append(baseline_chat)
-                            chat_histories_B.append(rewritten_chat)
-                        else:
-                            # presence=True or None (default to True for backwards compat)
-                            chat_histories_A.append(rewritten_chat)
-                            chat_histories_B.append(baseline_chat)
+                        chat_histories_A.append(rewritten_chat)
+                        chat_histories_B.append(baseline_chat)
 
                         judge_tasks_info.append(
                             {
@@ -104,7 +93,6 @@ class RewardModel(ABC):
                                 "attribute": attribute,
                                 "user_prompt": user_prompt,
                                 "rollout_idx": rollout_idx,
-                                "presence": rollout.presence,
                             }
                         )
 
@@ -121,17 +109,10 @@ class RewardModel(ABC):
             attribute = judge_task_info["attribute"]
             user_prompt = judge_task_info["user_prompt"]
             rollout_idx = judge_task_info["rollout_idx"]
-            presence = judge_task_info["presence"]
 
-            # When presence=True (or None): A=rewritten, B=baseline
-            # When presence=False: A=baseline, B=rewritten (swapped for consistent comparison)
-            # So raw_score for rewritten is A when presence=True/None, B when presence=False
-            if presence is False:
-                rewritten_raw_score = judge_task_result.raw_score_B
-                baseline_raw_score = judge_task_result.raw_score_A
-            else:
-                rewritten_raw_score = judge_task_result.raw_score_A
-                baseline_raw_score = judge_task_result.raw_score_B
+            # A=rewritten, B=baseline
+            rewritten_raw_score = judge_task_result.raw_score_A
+            baseline_raw_score = judge_task_result.raw_score_B
 
             if self.type == "api":
                 teacher_score = RewriteScore(

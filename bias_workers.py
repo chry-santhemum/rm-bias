@@ -33,20 +33,18 @@ class PromptOutput:
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class RewriteInput:
-    system: str
+    system: str  # the attribute to rewrite toward
     user: str
     original_assistant: str
-    presence: bool
     batch_id: str
 
 @dataclass(kw_only=True, slots=True)
 class RewriteOutput:
-    system: str
+    system: str  # the attribute that was rewritten toward
     user: str
     original_assistant: str
     rewritten_assistant: str | None
     rewriter_reasoning: str | None
-    presence: bool
     batch_id: str
     raw_score: float | None = None
 
@@ -156,7 +154,6 @@ async def rewrite_worker(
             original_chats=[ChatHistory.from_user(input.user).add_assistant(
                 input.original_assistant
             ) for input in batch],
-            presence=[input.presence for input in batch]
         )
 
         rewrite_results = []
@@ -172,7 +169,6 @@ async def rewrite_worker(
                 original_assistant=input.original_assistant,
                 rewritten_assistant=response.text,
                 rewriter_reasoning=response.reasoning,
-                presence=input.presence,
                 batch_id=input.batch_id,
             ))
 
@@ -339,8 +335,7 @@ def organize_baselines(
             response=item.assistant,
             student_score=student_score,
             teacher_score=None,
-            presence=None,  # None means not set
-            model=item.model
+            model=item.model,
         ))
         organized_scores[item.user].append(item.raw_score)
 
@@ -396,24 +391,18 @@ def organize_rewrites(
                 if attribute_rollouts[result.user][i] is not None:
                     continue
 
-                # Compute reward diff
-                # When presence=True: rewritten has attr, baseline doesn't
-                #   score_diff = rewritten - baseline (positive = bias toward attr)
-                # When presence=False: rewritten doesn't have attr, baseline does
-                #   score_diff = baseline - rewritten (flip so positive = bias toward attr)
-                # Special case: if rewrite is unchanged (double failure), score_diff = 0
+                # Compute reward diff: rewritten - baseline
+                # Positive means rewritten scored higher than baseline.
+                # Interpretation depends on how the attribute was phrased.
                 if result.rewritten_assistant == result.original_assistant:
-                    # Unchanged rewrite (double failure) - no bias signal
+                    # Unchanged rewrite - no change signal
                     score_diff = 0.0
-                    rewritten_raw = baseline.student_score.raw_score  # Use baseline score
+                    rewritten_raw = baseline.student_score.raw_score
                 else:
                     baseline_raw = baseline.student_score.raw_score
                     rewritten_raw = result.raw_score
                     if baseline_raw is not None and rewritten_raw is not None:
-                        if result.presence:
-                            score_diff = rewritten_raw - baseline_raw
-                        else:
-                            score_diff = baseline_raw - rewritten_raw
+                        score_diff = rewritten_raw - baseline_raw
                     else:
                         score_diff = None
 
@@ -427,7 +416,6 @@ def organize_rewrites(
                     response=result.rewritten_assistant,
                     student_score=student_score,
                     teacher_score=None,
-                    presence=result.presence,
                 )
                 found = True
                 break
@@ -445,7 +433,6 @@ def organize_rewrites(
                 "response": r.response,
                 "student_score": r.student_score.raw_score,
                 "student_diff": r.student_score.score,
-                "presence": r.presence,
                 } if r is not None else None for r in v2
                 ] for k2, v2 in v.items()
                 } for k, v in organized_rollouts.items()

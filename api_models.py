@@ -97,26 +97,23 @@ class RewriteModel(GenerationModel):
 
     async def rewrite(
         self,
-        attributes: list[str],
+        attributes: str | list[str],
         original_chats: list[ChatHistory],
-        presence: list[bool] | None = None,
+        same_attrs: list[str] = [],
     ) -> list[TextResult]:
-        assert len(attributes) == len(original_chats)
-        if presence is not None:
-            assert len(presence) == len(original_chats)
+        if isinstance(attributes, str):
+            attributes_list = [attributes] * len(original_chats)
         else:
-            presence = [True for _ in range(len(original_chats))]  # defaults to all True
-        
+            assert len(attributes) == len(original_chats)
+            attributes_list = attributes
+
         to_send_chats = []
         for i in range(len(original_chats)):
-            rewrite_prompt = get_rewrite_prompt(
-                direction="plus" if presence[i] else "minus",
-                thinking=True
-            )
+            rewrite_prompt = get_rewrite_prompt(same_attr=same_attrs)
             to_send_chats.append(ChatHistory.from_user(
                 rewrite_prompt.format(
-                    original_response=original_chats[i].to_openai_str(),
-                    textual_attribute=attributes[i],
+                    original=original_chats[i].to_openai_str(),
+                    new_attr=attributes_list[i],
                 )
             ))
         try:
@@ -124,7 +121,7 @@ class RewriteModel(GenerationModel):
         except Exception as e:
             logger.exception(f"RewriteModel.rewrite failed:\nError:\n{e}")
             # Return None for all items on error
-            return [TextResult() for _ in range(len(attributes))]
+            return [TextResult() for _ in range(len(original_chats))]
 
         rewritten_responses = []
         for i, response in enumerate(responses):

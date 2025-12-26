@@ -150,7 +150,6 @@ async def rewrite_responses(
                     system=bias,
                     user=user_prompt,
                     original_assistant=response,
-                    presence=True,
                     batch_id=f"{bias}_{user_prompt}",
                 ))
 
