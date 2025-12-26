@@ -116,9 +116,9 @@ async def main():
 
     rewrite_model = RewriteModel(
         model_name="openai/gpt-5-mini",
-        max_par=256,
-        max_tokens=4096,
-        reasoning="medium",
+        max_par=512,
+        max_tokens=8192,
+        reasoning="high",
         enable_cache=False,
         force_caller="openrouter",
     )
@@ -192,14 +192,23 @@ async def main():
             same_attrs=same_attr_for_bias,
         )
 
-        # Organize results
+        # Organize results and track "None" returns
         bias_rewrites = {}
+        none_count = 0
         for (user_prompt, rollout_idx), result in zip(rewrite_info, rewrite_results):
             if user_prompt not in bias_rewrites:
                 bias_rewrites[user_prompt] = [None] * min(n_rewrite_rollouts, len(baselines[user_prompt]))
+
+            # Check if rewriter returned "None" (text equals original baseline)
+            original_text = baselines[user_prompt][rollout_idx].response
+            is_original = (result.text == original_text) if result.text is not None else False
+            if is_original:
+                none_count += 1
+
             bias_rewrites[user_prompt][rollout_idx] = {
                 "text": result.text,
                 "reasoning": result.reasoning if ((reasoning := result.reasoning) is not None and not reasoning.startswith("gAAAAA")) else None,
+                "is_original": is_original,
             }
 
         all_rewrites[bias_idx] = bias_rewrites
@@ -208,7 +217,7 @@ async def main():
         with open(save_dir / f"rewrites_bias_{bias_idx}.json", "w") as f:
             json.dump(bias_rewrites, f, indent=2)
 
-        logger.success(f"  Completed {len(rewrite_results)} rewrites")
+        logger.success(f"  Completed {len(rewrite_results)} rewrites ({none_count} returned None)")
 
     # ========== Step 3: Score all responses with reward model ==========
     logger.info("=" * 60)
