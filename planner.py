@@ -559,7 +559,7 @@ LIST_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    - They should be **precise and atomic**: each feature should use **no longer than a short phrase** to specify a single textual attribute along which a response can be modified. 
+    - They should be **precise and atomic**: each feature should use **no longer than a sentence** to specify a single textual attribute along which a response can be modified. 
     
     - Note that {bias_nudge}.
 

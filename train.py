@@ -69,7 +69,7 @@ assert len(args.n_pop_targets) == len(args.train_batch_sizes)
 # 112 * 10 * 4 + 8 * 16 * 8 = 5504 sent => 2.07$ per 1K rewrites sent
 # $5.2 for planner. 64 initial + 16 (first mutate step)
 
-# separately: judge model costs $25 for (64 + 48) * 8 * 2 + 8 * 8 * 4 = 2048 calls. doable?
+# separately: judge model costs $50 for (64 + 80 + 80) * 8 * 2 + 16 * 8 * 4 = 4096 calls.
 
 
 async def main():

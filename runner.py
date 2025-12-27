@@ -27,8 +27,6 @@ class Runner(ABC):
         run_name: str | None,
         n_baseline_rollouts: int,
         n_validate_rollouts: int = 8,
-        *args,
-        **kwargs,
     ):
         self.step_count = 0
         self.seed_states = seed_states
@@ -286,12 +284,3 @@ class Runner(ABC):
                 for r in v
             ] for k, v in self.val_baselines.items()}
             json.dump(json_data, f, indent=4, sort_keys=True)
-
-
-class TestRunner(Runner):
-    @property
-    def runner_type(self) -> str:
-        return "test"
-
-    def train(self):
-        pass
