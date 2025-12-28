@@ -6,8 +6,6 @@ from loguru import logger
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.figure
-from sklearn.metrics import pairwise_distances
-
 from caller import ChatHistory
 from state import SeedState, AttributeStats, Rollout, RewriteScore
 from utils import parse_json_response, set_seed_all
@@ -160,68 +158,12 @@ class EvoPlanner:
 
         return ancestor_attrs, ancestry_str
 
-    def _get_nearest_neighbors(
-        self,
-        target_attribute: str,
-        last_step_attributes: list[dict],
-        last_step_embs: np.ndarray,
-        exclude_attributes: set[str] | None = None,
-        n_neighbors: int = 4,
-    ) -> str:
-        """
-        Find the n_neighbors closest attributes to target_attribute in embedding space.
-        Excludes attributes in exclude_attributes (e.g., family members).
-        Returns formatted string for the prompt.
-        """
-        if exclude_attributes is None:
-            exclude_attributes = set()
-
-        target_idx = None
-        for i, attr in enumerate(last_step_attributes):
-            if attr["attribute"] == target_attribute:
-                target_idx = i
-                break
-        if target_idx is None:
-            raise ValueError(f"Target attribute '{target_attribute}' not found in attributes list.")
-
-        # Compute distances from target to all others (excluding self)
-        target_embedding = last_step_embs[target_idx].reshape(1, -1)
-        mask = np.ones(len(last_step_embs), dtype=bool)
-        mask[target_idx] = False
-        other_embeddings = last_step_embs[mask]
-        other_attributes = [attr for i, attr in enumerate(last_step_attributes) if i != target_idx]
-        if other_embeddings.shape[0] == 0:
-            return "No similar attributes available."
-
-        distances = pairwise_distances(target_embedding, other_embeddings, metric="cosine")[0]
-
-        # Sort and get the indices of the closest neighbors, excluding family members
-        sorted_idx = np.argsort(distances)
-        neighbors = []
-        for i in sorted_idx:
-            if len(neighbors) >= n_neighbors:
-                break
-            # Skip if this attribute is in the exclusion set
-            if other_attributes[i]["attribute"] in exclude_attributes:
-                continue
-            neighbors.append(other_attributes[i])
-
-        # Format as string
-        lines = []
-        for i, neighbor in enumerate(neighbors, 1):
-            lines.append(
-                f"{i}. Attribute: {neighbor['attribute']}\n"
-                f"   Metric A average uplift: {neighbor['student_winrate']:.3f}\n"
-                f"   Metric B average uplift: {neighbor['teacher_winrate']:.3f}"
-            )
-
-        return "\n".join(lines) if lines else "No similar attributes available."
 
     async def iterate_plan(
         self,
         seed_states: list[SeedState],
         baselines: dict[str, list[Rollout]],
-        n_neighbors: int = 4,
+        n_neighbors: int = 8,
     ):
         to_send_messages = []
         messages_info = []
@@ -240,8 +182,6 @@ class EvoPlanner:
                         "teacher_winrate": teacher_wr,
                     })
             
-            last_step_embs = self.cluster_model.embed([d["attribute"] for d in last_step_attributes])
-
             for attribute, time_step in seed_state.state.items():
                 # Get winrates for the current attribute
                 stats = seed_state.history[time_step][attribute]
@@ -255,18 +195,24 @@ class EvoPlanner:
                 )
                 exclude_set = {attribute} | set(ancestor_attrs)
 
+                other_attributes = [attr for attr in last_step_attributes if attr["attribute"] not in exclude_set]
+                random.shuffle(other_attributes)
+
+                lines = []
+                for i, neighbor in enumerate(other_attributes[:n_neighbors], 1):
+                    lines.append(
+                        f"{i}. Attribute: {neighbor['attribute']}\n"
+                        f"   Metric A average uplift: {neighbor['student_winrate']:.3f}\n"
+                        f"   Metric B average uplift: {neighbor['teacher_winrate']:.3f}"
+                    )
+                neighbor_data = "\n".join(lines) if lines else "No similar attributes available."
+
                 planner_prompt = PLANNER_SYSTEM + "\n\n" + MUTATE_PROMPT.format(
                     num_plans=self.m_var,
                     cluster_summary=seed_state.cluster.summary,
                     current_data=self._get_original_data(stats=stats, baselines=baselines),
                     ancestry_data=ancestry_str,
-                    neighbor_data=self._get_nearest_neighbors(
-                        target_attribute=attribute,
-                        last_step_attributes=last_step_attributes,
-                        last_step_embs=last_step_embs,
-                        exclude_attributes=exclude_set,
-                        n_neighbors=n_neighbors,
-                    ),
+                    neighbor_data=neighbor_data,
                     direction_goal=DIRECTION_GOAL[self.direction],
                     bias_nudge=BIAS_NUDGE[self.direction],
                 )
