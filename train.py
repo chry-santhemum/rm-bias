@@ -105,10 +105,11 @@ async def main():
 
     # import down here after setting up logging
     import torch
+
     from state import Rollout, RewriteScore
     from recall import detect_affirmative
     from load_cluster import load_initial_seed_states
-    from cluster_models import ClusterModel
+    from cluster_models import EmbedClusterModel, LLMClusterModel
     from api_models import GenerationModel, RewriteModel
     from reward_models import LocalRewardModel, APIRewardModel
     from bias_evaluator import BiasEvaluator
@@ -119,8 +120,10 @@ async def main():
     all_cuda_devices = [f"cuda:{i}" for i in range(torch.cuda.device_count())]
     print(f"Using CUDA devices: {all_cuda_devices}")
 
-    cluster_model = ClusterModel(embed_model_name="Qwen/Qwen3-Embedding-0.6B", embed_dim=128)
+    # cluster_model = EmbedClusterModel(embed_model_name="Qwen/Qwen3-Embedding-0.6B", embed_dim=128)
 
+    cluster_model = LLMClusterModel(force_caller="openrouter")
+    
     policy_model_names = [
         "meta-llama/llama-3.2-3b-instruct",
         "meta-llama/llama-3.1-8b-instruct",
@@ -244,6 +247,9 @@ async def main():
         direction=args.direction,
         hypothesis_planner=hypothesis_planner,
         cluster_model=cluster_model,
+        m_var=args.m_var,
+        cosine_sim_threshold_initial=args.cosine_sim_threshold_initial,
+        cosine_sim_threshold_evolution=args.cosine_sim_threshold_evolution,
     )
 
     runner = EvoRunner(
@@ -252,9 +258,6 @@ async def main():
         policy_model=policy_model,
         bias_evaluator=bias_evaluator,
         teacher_model=teacher_model,
-        m_var=args.m_var,
-        cosine_sim_threshold_initial=args.cosine_sim_threshold_initial,
-        cosine_sim_threshold_evolution=args.cosine_sim_threshold_evolution,
         n_baseline_rollouts=args.n_baseline_rollouts,
         n_rewrite_rollouts=args.n_rewrite_rollouts,
         n_validate_rollouts=args.n_validate_rollouts,

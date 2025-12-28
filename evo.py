@@ -29,26 +29,35 @@ class EvoPlanner:
     def __init__(
         self,
         direction: Literal["plus", "minus"],
-        hypothesis_planner: Planner, 
+        hypothesis_planner: Planner,
         cluster_model: ClusterModel,
+        m_var: int,
+        cosine_sim_threshold_initial: float,
+        cosine_sim_threshold_evolution: float,
     ):
         self.direction: Literal["plus", "minus"] = direction
         self.hypothesis_planner = hypothesis_planner
         self.cluster_model = cluster_model
+        self.m_var = m_var
+        self.cosine_sim_threshold_initial = cosine_sim_threshold_initial
+        self.cosine_sim_threshold_evolution = cosine_sim_threshold_evolution
     
     def to_dict(self) -> dict[str, Any]:
         return {
             "direction": self.direction,
             "hypothesis_planner": self.hypothesis_planner.to_dict(),
             "cluster_model": self.cluster_model.to_dict(),
+            "m_var": self.m_var,
+            "cosine_sim_threshold_initial": self.cosine_sim_threshold_initial,
+            "cosine_sim_threshold_evolution": self.cosine_sim_threshold_evolution,
         }
 
-    async def initial_plan(self, runner: Runner, cosine_sim_threshold: float):
+    async def initial_plan(self, runner: Runner):
         return await self.hypothesis_planner.plan(
             runner=runner,
             direction=self.direction,
             cluster_model=self.cluster_model,
-            cosine_sim_threshold=cosine_sim_threshold,
+            cosine_sim_threshold=self.cosine_sim_threshold_initial,
         )
 
     def _get_original_data(self, stats: AttributeStats, baselines: dict[str, list[Rollout]], n_rollouts: int=4) -> str:
@@ -211,7 +220,6 @@ class EvoPlanner:
     async def iterate_plan(
         self,
         seed_states: list[SeedState],
-        m_var: int,
         baselines: dict[str, list[Rollout]],
         n_neighbors: int = 4,
     ):
@@ -248,7 +256,7 @@ class EvoPlanner:
                 exclude_set = {attribute} | set(ancestor_attrs)
 
                 planner_prompt = PLANNER_SYSTEM + "\n\n" + MUTATE_PROMPT.format(
-                    num_plans=m_var,
+                    num_plans=self.m_var,
                     cluster_summary=seed_state.cluster.summary,
                     current_data=self._get_original_data(stats=stats, baselines=baselines),
                     ancestry_data=ancestry_str,
@@ -303,7 +311,7 @@ class EvoPlanner:
                 "reasoning_effort": str(self.hypothesis_planner.reasoning) if self.hypothesis_planner.reasoning else None,
                 "planner_prompt": to_send_messages[i].get_first("user"),
                 "planner_reasoning": str(reasoning),
-                "m_var": m_var,
+                "m_var": self.m_var,
             }
 
             for attribute in attributes:
@@ -557,9 +565,6 @@ class EvoRunner(Runner):
         policy_model: GenerationModel,
         bias_evaluator: BiasEvaluator,
         teacher_model: RewardModel,
-        m_var: int,
-        cosine_sim_threshold_initial: float,
-        cosine_sim_threshold_evolution: float,
         n_baseline_rollouts: int,
         n_rewrite_rollouts: int,
         n_validate_rollouts: int,
@@ -577,9 +582,6 @@ class EvoRunner(Runner):
         self.planner = planner
         self.bias_evaluator = bias_evaluator
 
-        self.m_var = m_var
-        self.cosine_sim_threshold_initial = cosine_sim_threshold_initial
-        self.cosine_sim_threshold_evolution = cosine_sim_threshold_evolution
         self.n_rewrite_rollouts = n_rewrite_rollouts
 
     @property
@@ -598,12 +600,10 @@ class EvoRunner(Runner):
         if self.step_count == 0:
             await self.planner.initial_plan(
                 runner=self,
-                cosine_sim_threshold=self.cosine_sim_threshold_initial,
             )
         else:
             await self.planner.iterate_plan(
                 seed_states=self.seed_states,
-                m_var=self.m_var,
                 baselines=self.baselines,
             )
 
@@ -619,7 +619,7 @@ class EvoRunner(Runner):
             print(f"Seed {seed_state.index}: clustering {len(all_attributes)} candidates")
             _, cluster_indices = await self.planner.cluster_model.cluster_by_similarity(
                 inputs=all_attributes,
-                cosine_sim_threshold=self.cosine_sim_threshold_evolution,
+                cosine_sim_threshold=self.planner.cosine_sim_threshold_evolution,
             )
 
             # Pick one representative per cluster (first member for simplicity, or could use medoid)
