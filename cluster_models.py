@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Iterable
+from typing import Any
 from abc import ABC, abstractmethod
 from textwrap import dedent
 from loguru import logger
@@ -66,23 +66,15 @@ CLUSTER_PROMPT = dedent("""
 
 
 STRICT_CLUSTER_PROMPT = dedent("""
-    You will be given a list of textual attribute descriptions. Many of these are variations or mutations of each other.
+    You will be given a list of textual attribute descriptions.
 
-    Your task is to cluster ONLY near-duplicate or extremely similar attributes together. Use very strict criteria:
+    Your task is to cluster these attributes into tight clusters. To do this, go through the list of attributes from top to bottom, while maintaining a running list of clusters (and a representative for each).
 
-    - Two attributes should be clustered together ONLY if they would manifest almost identically in actual responses (i.e., a response with one attribute would almost certainly exhibit the other).
+    - Check if the new attribute is semantically similar to any previous cluster. Two attributes should be clustered together ONLY if they would manifest almost identically in actual responses (i.e., a response with one attribute would almost certainly exhibit the other). If two attributes share some conceptual similarity but could be realized differently in practice, do NOT put them in the same cluster.
 
-    - If two attributes share some conceptual similarity but could be realized differently in practice, keep them in SEPARATE clusters.
+    - If the new attribute is not semantically similar to any previous cluster, create a new cluster with the new attribute as the representative.
 
-    - Process the list from top to bottom, maintaining a running list of clusters with representatives.
-
-    - For each new attribute:
-      * If it is nearly identical to an existing cluster, add it to that cluster
-      * Otherwise, create a new cluster with this attribute as the representative
-
-    - Label each attribute that doesn't fit any cluster as a singleton (noise point with cluster label -1).
-
-    Return your clustering result in the following JSON format:
+    After you go through this list of attributes, you now have a list of clusters and representatives. Return the list of clusters and representatives in the following JSON format: note that you have to return both the indices and the corresponding attribute.
 
     ```json
     [
@@ -148,7 +140,7 @@ class ClusterModel(ABC):
         pass
 
     @abstractmethod
-    async def cluster_plans(self, to_write: dict[int, list[dict[str, Any]]], **kwargs) -> dict[int, list[dict[str, Any]]]:
+    async def cluster_plans(self, to_write: dict[int, list[dict[str, Any]]], n_pop: int, **kwargs) -> dict[int, list[dict[str, Any]]]:
         pass
 
     @abstractmethod
@@ -499,7 +491,7 @@ class LLMClusterModel(ClusterModel):
             "force_caller": self.force_caller,
         }
 
-    async def cluster_plans(self, to_write: dict[int, list[dict[str, Any]]], **kwargs) -> dict[int, list[dict[str, Any]]]:
+    async def cluster_plans(self, to_write: dict[int, list[dict[str, Any]]], n_pop: int, **kwargs) -> dict[int, list[dict[str, Any]]]:
         prompts_to_send = []
         seed_indices = []
         seed_attributes = []
@@ -535,10 +527,17 @@ class LLMClusterModel(ClusterModel):
                 raise ValueError(f"LLMClusterModel responded None for seed {seed_idx}.")
 
             cluster_results, reasoning = parse_json_response(resp)
-            logger.info(f"LLMClusterModel reasoning for seed {seed_idx}:\n{reasoning}")
+            logger.info(f"Seed {seed_idx} cluster model reasoning:\n{reasoning}")
+            logger.info(f"Seed {seed_idx} clustered into {len(cluster_results)} clusters. Taking the most populous {n_pop} clusters.")
+            logger.info(f"Seed {seed_idx} cluster results: {json.dumps(cluster_results, indent=4)}")
 
-            # match the cluster results
-            for cluster in cluster_results:
+            try:
+                cluster_results.sort(key=lambda x: len(x["members"]), reverse=True)
+            except KeyError:
+                logger.error(f"Seed {seed_idx} cluster result missing 'members' key: {json.dumps(cluster_results, indent=4)}")
+                raise
+
+            for cluster in cluster_results[:n_pop]:  # take the most populous n_pop clusters, if more than that
                 rep = cluster["representative"]
                 rep_idx = rep["index"]
                 rep_attr = rep["attribute"]
@@ -596,8 +595,11 @@ class LLMClusterModel(ClusterModel):
         indices: dict[int, list[int]] = defaultdict(list)
 
         for cluster_idx, cluster in enumerate(cluster_results):
-            rep = cluster["representative"]
-            members = cluster.get("members", [rep])
+            try:
+                members = cluster["members"]
+            except KeyError:
+                logger.error(f"Cluster {cluster_idx} missing 'members' key: {json.dumps(cluster, indent=4)}")
+                raise
 
             for member in members:
                 member_idx = member["index"]
