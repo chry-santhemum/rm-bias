@@ -439,7 +439,7 @@ class EvoPlanner:
 
         return fig
 
-    def update_pop_pareto(self, seed_states: list[SeedState], n_pop_target: int, cosine_sim_threshold: float) -> dict[int, dict]:
+    def update_pop_pareto(self, seed_states: list[SeedState], n_pop_target: int) -> dict[int, dict]:
         if self.direction == "minus":
             raise NotImplementedError
         logger.info(f"Trying to update population to {n_pop_target} members using Pareto front selection.")
@@ -506,26 +506,11 @@ class EvoPlanner:
                 f"After filtering, {len(candidates)} candidates remain."
             )
 
-            # Cluster all filtered candidates upfront for diversity
-            candidate_to_cluster: dict[int, int] = {}
-            if candidates:
-                _, cluster_indices = self.cluster_model.cluster_by_similarity(
-                    inputs=[cand[0] for cand in candidates], cosine_sim_threshold=cosine_sim_threshold
-                )
-                for label, member_indices in cluster_indices.items():
-                    for idx in member_indices:
-                        candidate_to_cluster[id(candidates[idx])] = label
-
-                n_clusters = len([k for k in cluster_indices.keys() if k != -1])
-                n_outliers = len(cluster_indices.get(-1, []))
-                logger.info(f"Clustered {len(candidates)} candidates into {n_clusters} clusters + {n_outliers} outliers.")
-
             # Sort into Pareto Fronts
             fronts = EvoPlanner._get_pareto_fronts(candidates)
 
-            # Select candidates, enforcing diversity: only one representative per cluster
+            # Select candidates from Pareto fronts (no diversity clustering needed - already done upfront)
             final_selection = []
-            used_clusters: set[int] = set()
 
             for front_idx, front in enumerate(fronts):
                 if len(final_selection) >= n_pop_target:
@@ -533,22 +518,11 @@ class EvoPlanner:
 
                 # Sort front by tiebreak (best first)
                 front_sorted = sorted(front, key=EvoPlanner._pareto_tiebreak)
-                selected_from_front = 0
+                remaining = n_pop_target - len(final_selection)
+                selected_from_front = front_sorted[:remaining]
+                final_selection.extend(selected_from_front)
 
-                for candidate in front_sorted:
-                    if len(final_selection) >= n_pop_target:
-                        break
-
-                    cluster_label = candidate_to_cluster.get(id(candidate), -1)
-
-                    # Outliers (-1) are always selectable; clustered candidates only if cluster not used
-                    if cluster_label == -1 or cluster_label not in used_clusters:
-                        final_selection.append(candidate)
-                        selected_from_front += 1
-                        if cluster_label != -1:
-                            used_clusters.add(cluster_label)
-
-                logger.info(f"Front {front_idx}: {len(front)} candidates, selected {selected_from_front} (enforcing diversity).")
+                logger.info(f"Front {front_idx}: {len(front)} candidates, selected {len(selected_from_front)}.")
 
             # Store data for plotting (after selection is complete)
             candidates_by_seed[seed_state.index] = {
@@ -571,63 +545,6 @@ class EvoPlanner:
             )
 
         return candidates_by_seed
-
-    def update_pop(self, seed_states: list[SeedState], n_pop_target: int, cosine_sim_threshold: float):
-        logger.info(f"Trying to update population to {n_pop_target} members.")
-        for seed_state in seed_states:
-            candidates = []
-            for attribute, stats in seed_state.history[-1].items():
-                candidates.append((
-                    attribute,
-                    stats.meta["time_step"],
-                    stats.winrate("student"),
-                ))
-
-            _, indices = self.cluster_model.cluster_by_similarity(
-                inputs=[cand[0] for cand in candidates], cosine_sim_threshold=cosine_sim_threshold
-            )
-
-            # Select the best candidate from each niche
-            representatives = []
-            for label, member_indices in indices.items():
-                if label == -1:
-                    # These are noise points; we'll handle them separately
-                    continue
-
-                # Sort members of the niche by score and select the top one
-                members = [candidates[i] for i in member_indices]
-                if self.direction == "plus":
-                    best_in_niche = max(members, key=lambda x: x[2])
-                else:
-                    best_in_niche = min(members, key=lambda x: x[2])
-
-                representatives.append(best_in_niche)
-                logger.info(
-                    f"Niche {label}: Selected '{best_in_niche[0]}' with score {best_in_niche[2]}"
-                )
-
-            # Handle outliers (prompts labeled as -1)
-            outliers = [candidates[i] for i in indices[-1]]
-            if self.direction == "plus":
-                outliers.sort(key=lambda x: x[2], reverse=True)
-            else:
-                outliers.sort(key=lambda x: x[2], reverse=False)
-
-            # Combine the best from niches and the best outliers
-            combined_selection = representatives + outliers
-            if self.direction == "plus":
-                combined_selection.sort(key=lambda x: x[2], reverse=True)
-            else:
-                combined_selection.sort(key=lambda x: x[2], reverse=False)
-            final_candidates = combined_selection[:n_pop_target]
-
-            seed_state.state = {
-                attribute: time_step for attribute, time_step, _ in final_candidates
-            }
-
-            logger.info(
-                f"Updated Seed {seed_state.index} population to {len(seed_state.state)} members."
-            )
 
 
 class EvoRunner(Runner):
@@ -670,9 +587,9 @@ class EvoRunner(Runner):
         return "evo"
 
     async def train_step(
-        self, 
+        self,
         n_pop_target: int,
-        train_batch_size: int, 
+        train_batch_size: int,
         judge_train_first_n_rollouts: int,
         judge_train_first_n_user_prompts: int,
         use_pareto_selection: bool = True,
@@ -690,16 +607,43 @@ class EvoRunner(Runner):
                 baselines=self.baselines,
             )
 
+        # Cluster candidates upfront and pick representatives
+        representative_attributes = []
+        for seed_state_idx, seed_state in enumerate(self.seed_states):
+            all_attributes = list(seed_state.history[-1].keys())
+
+            if len(all_attributes) == 0:
+                representative_attributes.append([])
+                continue
+
+            print(f"Seed {seed_state.index}: clustering {len(all_attributes)} candidates")
+            _, cluster_indices = await self.planner.cluster_model.cluster_by_similarity(
+                inputs=all_attributes,
+                cosine_sim_threshold=self.cosine_sim_threshold_evolution,
+            )
+
+            # Pick one representative per cluster (first member for simplicity, or could use medoid)
+            representatives = []
+            for cluster_label, member_indices in cluster_indices.items():
+                if len(member_indices) > 0:
+                    # Use first member as representative
+                    rep_idx = member_indices[0]
+                    representatives.append(all_attributes[rep_idx])
+
+            representative_attributes.append(representatives)
+            print(f"Seed {seed_state.index}: selected {len(representatives)} representatives from {len(cluster_indices)} clusters")
+
+        # Evaluate only representatives
         evaluate_results = []
-        
+
         for seed_state_idx, seed_state in enumerate(self.seed_states):
             async with self.bias_evaluator as evaluator:
                 user_prompts = random.sample(
                     seed_state.cluster.train_prompts,
                     train_batch_size,
                 )
-                attributes = list(seed_state.history[-1].keys())
-                print(f"Seed {seed_state.index}: evaluating {len(attributes)} attributes")
+                attributes = representative_attributes[seed_state_idx]
+                print(f"Seed {seed_state.index}: evaluating {len(attributes)} representative attributes")
                 stats = await evaluator.evaluate_attributes(
                     user_prompts=user_prompts,
                     attributes=attributes,
@@ -735,7 +679,6 @@ class EvoRunner(Runner):
             candidates_by_seed = self.planner.update_pop_pareto(
                 seed_states=self.seed_states,
                 n_pop_target=n_pop_target,
-                cosine_sim_threshold=self.cosine_sim_threshold_evolution,
             )
 
             for seed_state_idx, candidates in candidates_by_seed.items():
@@ -762,11 +705,7 @@ class EvoRunner(Runner):
 
 
         else:
-            self.planner.update_pop(
-                seed_states=self.seed_states,
-                n_pop_target=n_pop_target,
-                cosine_sim_threshold=self.cosine_sim_threshold_evolution,
-            )
+            raise NotImplementedError("Non-Pareto selection has been removed")
 
         logger.info(
             f"[TRAIN STEP {self.step_count}] finished; Current population: {len(self.seed_states[0].state)}"
@@ -821,14 +760,9 @@ class EvoRunner(Runner):
                     self.planner.update_pop_pareto(
                         seed_states=self.seed_states,
                         n_pop_target=n_pop_target[time_step],
-                        cosine_sim_threshold=self.cosine_sim_threshold_evolution,
                     )
                 else:
-                    self.planner.update_pop(
-                        seed_states=self.seed_states,
-                        n_pop_target=n_pop_target[time_step],
-                        cosine_sim_threshold=self.cosine_sim_threshold_evolution,
-                    )
+                    raise NotImplementedError("Non-Pareto selection has been removed")
                 self.step_count += 1
                 self.planner.hypothesis_planner.step_planner_model()
                 self.save_attribute_stats(

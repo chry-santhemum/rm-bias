@@ -25,10 +25,10 @@ CLUSTER_PROMPT = dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    Your task is to cluster these attributes into clusters. To do this, go through the list of attributes from top to bottom, while maintaining a running list of clusters (and a representative for each). 
-    
-    - If the new attribute seems like it does not apply to responses to an arbitrary user prompt in the cluster (e.g. if it is too specific), then discard it and move on to the next one. 
-    
+    Your task is to cluster these attributes into clusters. To do this, go through the list of attributes from top to bottom, while maintaining a running list of clusters (and a representative for each).
+
+    - If the new attribute seems like it does not apply to responses to an arbitrary user prompt in the cluster (e.g. if it is too specific), then discard it and move on to the next one.
+
     - If the new attribute is semantically similar to a previous cluster (i.e. responses containing the new attribute will likely contain the attributes in the cluster), then add the new attribute to that cluster. Only do this when the attributes are truly highly similar. If the new attribute and the old cluster share some similarities but could be realized differently in a response, do not add it to the cluster and instead create a new cluster.
 
     - If the new attribute is not semantically similar to any previous cluster, create a new cluster with the new attribute as the representative.
@@ -60,7 +60,53 @@ CLUSTER_PROMPT = dedent("""
     Remember to include the surrounding JSON tags.
 
     Now, here is the full list of attributes:
-    
+
+    {attributes}
+""").strip()
+
+
+STRICT_CLUSTER_PROMPT = dedent("""
+    You will be given a list of textual attribute descriptions. Many of these are variations or mutations of each other.
+
+    Your task is to cluster ONLY near-duplicate or extremely similar attributes together. Use very strict criteria:
+
+    - Two attributes should be clustered together ONLY if they would manifest almost identically in actual responses (i.e., a response with one attribute would almost certainly exhibit the other).
+
+    - If two attributes share some conceptual similarity but could be realized differently in practice, keep them in SEPARATE clusters.
+
+    - Process the list from top to bottom, maintaining a running list of clusters with representatives.
+
+    - For each new attribute:
+      * If it is nearly identical to an existing cluster, add it to that cluster
+      * Otherwise, create a new cluster with this attribute as the representative
+
+    - Label each attribute that doesn't fit any cluster as a singleton (noise point with cluster label -1).
+
+    Return your clustering result in the following JSON format:
+
+    ```json
+    [
+        {{
+            "representative": {{
+                "index": ...,
+                "attribute": ...
+            }},
+            "members": [
+                {{
+                    "index": ...,
+                    "attribute": ...
+                }},
+                ...
+            ],
+        }},
+        ...
+    ]
+    ```
+
+    Remember to include the surrounding JSON tags.
+
+    Here is the full list of attributes:
+
     {attributes}
 """).strip()
 
@@ -103,6 +149,23 @@ class ClusterModel(ABC):
 
     @abstractmethod
     async def cluster_plans(self, to_write: dict[int, list[dict[str, Any]]], **kwargs) -> dict[int, list[dict[str, Any]]]:
+        pass
+
+    @abstractmethod
+    async def cluster_by_similarity(
+        self,
+        inputs: list[str],
+        *,
+        cosine_sim_threshold: float,
+        **kwargs,
+    ) -> tuple[dict[int, list[str]], dict[int, list[int]]]:
+        """
+        Cluster inputs by similarity.
+        Returns (niches, indices) where:
+        - niches: dict mapping cluster_label -> list of input strings
+        - indices: dict mapping cluster_label -> list of input indices
+        - cluster_label -1 indicates noise/outliers
+        """
         pass
 
 
@@ -356,7 +419,7 @@ class EmbedClusterModel(ClusterModel):
 
         return dict(to_write_new)
 
-    def cluster_by_similarity(
+    async def cluster_by_similarity(
         self,
         inputs: list[str],
         *,
@@ -489,5 +552,62 @@ class LLMClusterModel(ClusterModel):
                         "meta": to_write[seed_idx][rep_idx]["meta"],
                     }
                 )
-                
+
         return dict(to_write_new)
+
+    async def cluster_by_similarity(
+        self,
+        inputs: list[str],
+        *,
+        cosine_sim_threshold: float,  # Unused for LLM, but kept for interface compatibility
+        **kwargs,
+    ) -> tuple[dict[int, list[str]], dict[int, list[int]]]:
+        """
+        Cluster inputs using LLM with strict similarity criteria.
+        Note: cosine_sim_threshold is unused for LLM-based clustering.
+        """
+        if not inputs:
+            return {}, {}
+
+        # Create prompt
+        prompt = STRICT_CLUSTER_PROMPT.format(
+            attributes=json.dumps([{"index": i, "attribute": attr} for i, attr in enumerate(inputs)]),
+        )
+
+        # Call LLM
+        responses = await self.caller.call(
+            messages=[prompt],
+            model=self.model_name,
+            max_parallel=1,
+            max_tokens=self.max_tokens,
+            reasoning=self.reasoning,
+            enable_cache=False,
+        )
+        response = responses[0]
+
+        if response is None:
+            raise ValueError("LLMClusterModel responded None for cluster_by_similarity.")
+
+        cluster_results, reasoning = parse_json_response(response)
+        logger.info(f"LLMClusterModel strict clustering reasoning:\n{reasoning}")
+
+        # Convert to (niches, indices) format
+        niches: dict[int, list[str]] = defaultdict(list)
+        indices: dict[int, list[int]] = defaultdict(list)
+
+        for cluster_idx, cluster in enumerate(cluster_results):
+            rep = cluster["representative"]
+            members = cluster.get("members", [rep])
+
+            for member in members:
+                member_idx = member["index"]
+                niches[cluster_idx].append(inputs[member_idx])
+                indices[cluster_idx].append(member_idx)
+
+        # Logging
+        for label, members in sorted(niches.items(), key=lambda kv: kv[0]):
+            logger.info(
+                f"Cluster {label} ({len(members)} items):\n" + "\n".join(f"  - {m}" for m in members)
+            )
+
+        return niches, indices

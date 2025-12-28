@@ -40,5 +40,9 @@
       "Bash(rm -f:*)",
       "Bash(rmdir:*)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "orchestra-mcp"
+  ],
+  "enableAllProjectMcpServers": true
 }
