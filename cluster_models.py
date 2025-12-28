@@ -19,21 +19,21 @@ from utils import parse_json_response
 
 
 CLUSTER_PROMPT = dedent("""
-    You will be given a long list of descriptions of different textual attributes. These textual attributes are ones that commonly appear in language model responses to user prompts in the following broad cluster:
+    You will be given a long list of descriptions of different textual attributes. These textual attributes are ones that commonly appear in language model responses to user prompts under the following broad theme:
 
-    <user_prompt_cluster_summary>
+    <user_prompt_theme_summary>
     {cluster_summary}
-    </user_prompt_cluster_summary>
+    </user_prompt_theme_summary>
 
-    Your task is to cluster these attributes into clusters. To do this, go through the list of attributes from top to bottom, while maintaining a running list of clusters (and a representative for each).
+    Your task is to cluster these attributes into clusters. To do this, go through the list of attributes from top to bottom, while maintaining a running list of clusters.
 
-    - If the new attribute seems like it does not apply to responses to an arbitrary user prompt in the cluster (e.g. if it is too specific), then discard it and move on to the next one.
+    - If the new attribute seems like it does not apply to responses to an arbitrary user prompt under the theme (e.g. if it is too specific), then try to phrase it slightly more general so that it applies to most user prompts under the theme, and then try to match it to previous clusters.
 
     - If the new attribute is semantically similar to a previous cluster (i.e. responses containing the new attribute will likely contain the attributes in the cluster), then add the new attribute to that cluster. Only do this when the attributes are truly highly similar. If the new attribute and the old cluster share some similarities but could be realized differently in a response, do not add it to the cluster and instead create a new cluster.
 
-    - If the new attribute is not semantically similar to any previous cluster, create a new cluster with the new attribute as the representative.
+    - If the new attribute is not semantically similar to any previous cluster, create a new cluster with the new attribute.
 
-    After you go through this list of attributes, you now have a list of clusters and representatives. Return the list of clusters and representatives in the following JSON format: note that you have to return both the indices and the corresponding attribute.
+    After you go through this list of attributes, you now have a list of clusters. Then, go through the clusters you created and pick the most representative attribute out of each cluster. Return the list of clusters and representatives in the following JSON format: note that you have to return both the indices and the corresponding attribute.
 
     ```json
     [
@@ -514,6 +514,7 @@ class LLMClusterModel(ClusterModel):
             max_tokens=self.max_tokens,
             reasoning=self.reasoning,
             enable_cache=True,
+            desc="Clustering attributes",
         )
 
         to_write_new = defaultdict(list)
@@ -581,6 +582,7 @@ class LLMClusterModel(ClusterModel):
             max_tokens=self.max_tokens,
             reasoning=self.reasoning,
             enable_cache=False,
+            desc="Clustering attributes"
         )
         response = responses[0]
 
@@ -588,7 +590,9 @@ class LLMClusterModel(ClusterModel):
             raise ValueError("LLMClusterModel responded None for cluster_by_similarity.")
 
         cluster_results, reasoning = parse_json_response(response)
-        logger.info(f"LLMClusterModel strict clustering reasoning:\n{reasoning}")
+        logger.info(f"Cluster model reasoning:\n{reasoning}")
+        logger.info(f"Clustered into {len(cluster_results)} clusters.")
+        logger.info(f"Cluster results: {json.dumps(cluster_results, indent=4)}")
 
         # Convert to (niches, indices) format
         niches: dict[int, list[str]] = defaultdict(list)

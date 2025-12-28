@@ -1,3 +1,4 @@
+import asyncio
 import json
 import dotenv
 import random
@@ -534,6 +535,27 @@ class EvoRunner(Runner):
     def runner_type(self) -> str:
         return "evo"
 
+    async def _cluster_seed(self, seed_state: SeedState) -> list[str]:
+        """Cluster a single seed state's candidates and return representatives."""
+        all_attributes = list(seed_state.history[-1].keys())
+        if not all_attributes:
+            return []
+
+        print(f"Seed {seed_state.index}: clustering {len(all_attributes)} candidates")
+        _, cluster_indices = await self.planner.cluster_model.cluster_by_similarity(
+            inputs=all_attributes,
+            cosine_sim_threshold=self.planner.cosine_sim_threshold_evolution,
+        )
+
+        representatives = []
+        for _, member_indices in cluster_indices.items():
+            if len(member_indices) > 0:
+                rep_idx = member_indices[0]
+                representatives.append(all_attributes[rep_idx])
+
+        print(f"Seed {seed_state.index}: selected {len(representatives)} representatives from {len(cluster_indices)} clusters")
+        return representatives
+
     async def train_step(
         self,
         n_pop_target: int,
@@ -553,31 +575,10 @@ class EvoRunner(Runner):
                 baselines=self.baselines,
             )
 
-        # Cluster candidates upfront and pick representatives
-        representative_attributes = []
-        for seed_state_idx, seed_state in enumerate(self.seed_states):
-            all_attributes = list(seed_state.history[-1].keys())
-
-            if len(all_attributes) == 0:
-                representative_attributes.append([])
-                continue
-
-            print(f"Seed {seed_state.index}: clustering {len(all_attributes)} candidates")
-            _, cluster_indices = await self.planner.cluster_model.cluster_by_similarity(
-                inputs=all_attributes,
-                cosine_sim_threshold=self.planner.cosine_sim_threshold_evolution,
-            )
-
-            # Pick one representative per cluster (first member for simplicity, or could use medoid)
-            representatives = []
-            for cluster_label, member_indices in cluster_indices.items():
-                if len(member_indices) > 0:
-                    # Use first member as representative
-                    rep_idx = member_indices[0]
-                    representatives.append(all_attributes[rep_idx])
-
-            representative_attributes.append(representatives)
-            print(f"Seed {seed_state.index}: selected {len(representatives)} representatives from {len(cluster_indices)} clusters")
+        # Cluster candidates upfront and pick representatives (parallel for LLM cluster models)
+        representative_attributes = await asyncio.gather(*[
+            self._cluster_seed(seed_state) for seed_state in self.seed_states
+        ])
 
         # Evaluate only representatives
         evaluate_results = []

@@ -21,12 +21,14 @@ python train.py \
 --student_model skywork-qwen-0.6b \
 --teacher_model skywork-llama-8b \
 --dataset chatgpt \
---topic_ids 0 4 8 10 12 \
+--topic_ids 0 4 \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
---n_pop_initial 64 \
---n_pop_targets 16 16 16 \
---train_batch_sizes 8 8 8 \
---m_var 4 \
---n_planner_requests 32
+--n_pop_initial 32 \
+--n_pop_targets 8 8 \
+--train_batch_sizes 8 8 \
+--m_var 3 \
+--n_planner_requests 16 \
+--run_name "20251228-141508-list_reverse-chatgpt-plus"
+

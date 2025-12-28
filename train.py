@@ -325,7 +325,7 @@ async def main():
             judge_val_first_n_user_prompts=args.judge_val_first_n_user_prompts,
             use_pareto_selection=True,
             validate=validate,
-            # start_from=1
+            start_from=1
         )
     except Exception as e:
         logger.exception(f"Training failed: {e}")
