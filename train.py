@@ -54,6 +54,9 @@ args = parser.parse_args()
 
 # Check args coherence
 assert len(args.n_pop_targets) == len(args.train_batch_sizes)
+if args.judge_train_first_n_rollouts > 2:
+    if args.teacher_model ==  "claude-sonnet-4.5":
+        raise ValueError("Perhaps, consider changing the hparams?")
 
 
 # Rough price estimate per seed.
