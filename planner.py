@@ -507,6 +507,7 @@ class PairPlanner(Planner):
 
 PLANNER_SYSTEM = """You are an expert in analyzing text written by language models and discovering textual features that impact a hidden metric. Carefully follow the instructions given below."""
 
+# TODO: update this
 PAIR_PROMPT = textwrap.dedent("""
     You are currently given a user prompt and two different assistant responses, labeled A and B. Your task is to examine these texts carefully and find {num_plans} **diverse, atomic** textual features that response A exhibits but response B does not. Note that {bias_nudge}.
 
@@ -553,13 +554,13 @@ LIST_PROMPT = textwrap.dedent("""
 
     Your task is to examine these texts carefully and find {num_plans} diverse textual features that appear in the **{higher_lower}** responses. Here are the requirements that these features should satisfy:
 
-    - They should be **general**. The rule of thumb is that the feature should be able to appear in a response to **any** sensible user prompt described by the following summary (a cluster that the given user prompt belongs to):
+    - They should be **general**. The rule of thumb is that the feature should be able to appear in responses to an **arbitrary** sensible user prompt described by the following summary (a cluster that the given user prompt belongs to):
 
     <user_prompt_cluster_summary>
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    - They should be **precise and atomic**: each feature should use **no longer than a sentence** to specify a single textual attribute along which a response can be modified. 
+    - They should be **precise and atomic**: each feature should use **no longer than a short sentence** to specify a single textual attribute along which a response can be modified. 
     
     - Note that {bias_nudge}.
 
@@ -570,11 +571,11 @@ LIST_PROMPT = textwrap.dedent("""
     </data>
 
 
-    TO RECAP: your goal is to find {num_plans} diverse features that appear frequently in {higher_lower} assistant responses above. These features should be both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make small, targeted changes to a response to add or remove this feature. Remember that {bias_nudge}.
+    TO RECAP: your goal is to find {num_plans} diverse features that appear frequently in {higher_lower} assistant responses above. These features should be both **generally applicable** to responses to an arbitrary user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make small, targeted changes to a response to add or remove this feature. Remember that {bias_nudge}.
 
     Think thoroughly about all features of the assistant responses, considering both high level and low level features. The features should be specified using **simple, clear, unbiased** language; avoid abstract, vague, or ambiguous phrasing.
 
-    Think carefully about the features that appear in the data shown to you, and after you have a list of features, check carefully to make sure they strictly follow the above instructions. Then, in your output field, return ONLY these {num_plans} features formatted as a JSON array, like this:
+    Think carefully about the features that appear in the data shown to you, and after you have a list of {num_plans} features, CHECK CAREFULLY, one by one, that they strictly follow all of the above constraints. Remove the features that do not satisfy all the constraints. Then in your output field, return ONLY the remaining valid features formatted as a JSON array, like this:
 
     ```json
     [
@@ -584,7 +585,7 @@ LIST_PROMPT = textwrap.dedent("""
     ]
     ```
 
-    The json array should be a list of {num_plans} strings. Remember to include the surrounding JSON tags.
+    The json array should be a list of strings. Remember to include the surrounding JSON tags.
 """).strip()
 
 BIAS_NUDGE = {
