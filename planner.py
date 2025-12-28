@@ -94,41 +94,6 @@ class Planner(ABC):
     ):
         pass
 
-    async def cluster_plans(
-        self,
-        to_write: dict[int, list[dict[str, Any]]],
-        cluster_model: ClusterModel,
-        n_pop: int,
-        cosine_sim_threshold: float,
-    ) -> dict[int, list[dict[str, Any]]]:
-        """
-        Cluster plans for each seed into n_pop clusters.
-        Returns the representative (medoid) of each cluster.
-        """
-
-        to_write_new = defaultdict(list)
-
-        for seed_idx, seed_plans in to_write.items():
-            print(f"Clustering {len(seed_plans)} bias candidates for seed {seed_idx}")
-            if not seed_plans:
-                continue
-
-            all_plans = [plan["plan"] for plan in seed_plans]
-            cluster_results = cluster_model.pick_representatives(
-                inputs=all_plans,
-                n_representatives=n_pop,
-                cosine_sim_threshold=cosine_sim_threshold,
-            )
-
-            for result in cluster_results:
-                to_write_new[seed_idx].append(
-                    {
-                        "plan": result["center_input"],
-                        "meta": seed_plans[result["center_idx"]]["meta"],
-                    }
-                )
-
-        return dict(to_write_new)
 
 
 class ListPlanner(Planner):
@@ -286,9 +251,8 @@ class ListPlanner(Planner):
                 )
 
         if cluster_model is not None:
-            to_write = await self.cluster_plans(
+            to_write = await cluster_model.cluster_plans(
                 to_write=to_write,
-                cluster_model=cluster_model,
                 n_pop=self.n_pop,
                 cosine_sim_threshold=cosine_sim_threshold,
             )
@@ -301,7 +265,7 @@ class ListPlanner(Planner):
                     meta=plan["meta"],
                 )
 
-
+# TODO: update this
 class PairPlanner(Planner):
     def __init__(
         self,

@@ -1,14 +1,68 @@
 from __future__ import annotations
 
+import json
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any, Iterable
-
+from abc import ABC, abstractmethod
+from textwrap import dedent
 from loguru import logger
+
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sentence_transformers import SentenceTransformer
+
+from caller import AutoCaller
+from api_models import RETRY_CONFIG
+from utils import parse_json_response
+
+
+CLUSTER_PROMPT = dedent("""
+    You will be given a long list of descriptions of different textual attributes. These textual attributes are ones that commonly appear in language model responses to user prompts in the following broad cluster:
+
+    <user_prompt_cluster_summary>
+    {cluster_summary}
+    </user_prompt_cluster_summary>
+
+    Your task is to cluster these attributes into clusters. To do this, go through the list of attributes from top to bottom, while maintaining a running list of clusters (and a representative for each). 
+    
+    - If the new attribute seems like it does not apply to responses to an arbitrary user prompt in the cluster (e.g. if it is too specific), then discard it and move on to the next one. 
+    
+    - If the new attribute is semantically similar to a previous cluster (i.e. responses containing the new attribute will likely contain the attributes in the cluster), then add the new attribute to that cluster. Only do this when the attributes are truly highly similar. If the new attribute and the old cluster share some similarities but could be realized differently in a response, do not add it to the cluster and instead create a new cluster.
+
+    - If the new attribute is not semantically similar to any previous cluster, create a new cluster with the new attribute as the representative.
+
+    After you go through this list of attributes, you now have a list of clusters and representatives. Return the list of clusters and representatives in the following JSON format: note that you have to return both the indices and the corresponding attribute.
+
+    ```json
+    [
+        {{
+            "representative": {{
+                "index": ...,
+                "attribute": ...
+            }},
+            "members": [
+                {{
+                    "index": ...,
+                    "attribute": ...
+                }},
+                {{
+                    "index": ...,
+                    "attribute": ...
+                }},
+                ...
+            ],
+        }},
+    ]
+    ```
+
+    Remember to include the surrounding JSON tags.
+
+    Now, here is the full list of attributes:
+    
+    {attributes}
+""").strip()
 
 
 @dataclass
@@ -42,7 +96,17 @@ class _UnionFind:
         return groups
 
 
-class ClusterModel:
+class ClusterModel(ABC):
+    @abstractmethod
+    def to_dict(self) -> dict[str, Any]:
+        pass
+
+    @abstractmethod
+    async def cluster_plans(self, to_write: dict[int, list[dict[str, Any]]], **kwargs) -> dict[int, list[dict[str, Any]]]:
+        pass
+
+
+class EmbedClusterModel(ClusterModel):
     def __init__(
         self,
         embed_model_name: str,
@@ -145,19 +209,18 @@ class ClusterModel:
         self,
         inputs: list[str],
         *,
-        n_representatives: int,
+        n_pop: int,
         cosine_sim_threshold: float,
-        embed_dim: int | None = None,  # can override here
     ) -> list[dict[str, Any]]:
         """
         1) collapse near-duplicates by cosine threshold (connected components)
-        2) if still too many groups, KMeans them down to n_representatives
+        2) if still too many groups, KMeans them down to n_pop
         Returns cluster-like dicts, with center_idx always a real input index.
         """
         if not inputs:
             return []
 
-        embs = self.embed(inputs, embed_dim=embed_dim)
+        embs = self.embed(inputs)
         self._cosine_stats(embs)
 
         # Stage A: near-duplicate collapse
@@ -183,7 +246,7 @@ class ClusterModel:
                 logger.info(f"Deduped cluster {i}:\n{"\n".join(inputs[c] for c in comp)}")
 
         # If we already have <= target groups, return them (can't manufacture more distinct reps).
-        if len(comp_infos) <= n_representatives:
+        if len(comp_infos) <= n_pop:
             results: list[dict[str, Any]] = []
             for cluster_idx, info in enumerate(comp_infos):
                 members = sorted(info["members"])
@@ -200,7 +263,7 @@ class ClusterModel:
 
         # Stage B: cluster component representatives down to fixed count
         rep_embs = embs[comp_rep_indices]  # normalized
-        k = min(n_representatives, rep_embs.shape[0])
+        k = min(n_pop, rep_embs.shape[0])
 
         logger.info(
             f"Fitting KMeans over {len(comp_infos)} deduped groups into {k} representatives"
@@ -256,6 +319,42 @@ class ClusterModel:
             assert r["center_idx"] in r["content_indices"]
 
         return results
+    
+    async def cluster_plans(
+        self,
+        to_write: dict[int, list[dict[str, Any]]],
+        n_pop: int,
+        cosine_sim_threshold: float,
+        **kwargs,  # for Liskov
+    ) -> dict[int, list[dict[str, Any]]]:
+        """
+        Cluster plans for each seed into n_pop clusters.
+        Returns the representative (medoid) of each cluster.
+        """
+
+        to_write_new = defaultdict(list)
+
+        for seed_idx, seed_plans in to_write.items():
+            print(f"Clustering {len(seed_plans)} bias candidates for seed {seed_idx}")
+            if not seed_plans:
+                continue
+
+            all_plans = [plan["plan"] for plan in seed_plans]
+            cluster_results = self.pick_representatives(
+                inputs=all_plans,
+                n_pop=n_pop,
+                cosine_sim_threshold=cosine_sim_threshold,
+            )
+
+            for result in cluster_results:
+                to_write_new[seed_idx].append(
+                    {
+                        "plan": result["center_input"],
+                        "meta": seed_plans[result["center_idx"]]["meta"],
+                    }
+                )
+
+        return dict(to_write_new)
 
     def cluster_by_similarity(
         self,
@@ -305,3 +404,90 @@ class ClusterModel:
             )
 
         return niches, indices
+
+
+class LLMClusterModel(ClusterModel):
+    def __init__(
+        self,
+        model_name: str = "openai/gpt-5.2",
+        max_tokens: int = 50000,
+        reasoning: int | str = "high",
+        max_par: int = 64,
+        force_caller: str | None = None,
+    ):
+        self.model_name = model_name
+        self.max_tokens = max_tokens
+        self.reasoning = reasoning
+        self.max_par = max_par
+
+        self.caller = AutoCaller(
+            dotenv_path=".env",
+            retry_config=RETRY_CONFIG,
+            force_caller=force_caller,
+        )
+        self.force_caller = force_caller
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "model_name": self.model_name,
+            "max_tokens": self.max_tokens,
+            "reasoning": self.reasoning,
+            "max_par": self.max_par,
+            "force_caller": self.force_caller,
+        }
+
+    async def cluster_plans(self, to_write: dict[int, list[dict[str, Any]]], **kwargs) -> dict[int, list[dict[str, Any]]]:
+        prompts_to_send = []
+        seed_indices = []
+        seed_attributes = []
+        
+        for seed_idx, seed_plans in to_write.items():
+            seed_indices.append(seed_idx)
+
+            attributes = [plan["plan"] for plan in seed_plans]
+            seed_attributes.append(attributes)
+
+            prompts_to_send.append(CLUSTER_PROMPT.format(
+                cluster_summary=seed_plans[0]["meta"]["cluster_summary"],
+                attributes=json.dumps([{"index": i, "attribute": attr} for i, attr in enumerate(attributes)]),
+            ))
+
+        responses = await self.caller.call(
+            messages=prompts_to_send,
+            model=self.model_name,
+            max_parallel=self.max_par,
+            max_tokens=self.max_tokens,
+            reasoning=self.reasoning,
+            enable_cache=True,
+        )
+
+        to_write_new = defaultdict(list)
+
+        for i in range(len(seed_indices)):
+            seed_idx = seed_indices[i]
+            attributes = seed_attributes[i]
+            resp = responses[i]
+
+            if resp is None:
+                raise ValueError(f"LLMClusterModel responded None for seed {seed_idx}.")
+
+            cluster_results, reasoning = parse_json_response(resp)
+            logger.info(f"LLMClusterModel reasoning for seed {seed_idx}:\n{reasoning}")
+
+            # match the cluster results
+            for cluster in cluster_results:
+                rep = cluster["representative"]
+                rep_idx = rep["index"]
+                rep_attr = rep["attribute"]
+
+                if attributes[rep_idx].strip() != rep_attr.strip():
+                    logger.error(f"Index-attribute mismatch for seed {seed_idx}:\nindex: {rep_idx}\nrepresentative: {rep_attr}\nattribute: {attributes[rep_idx]}")
+                
+                to_write_new[seed_idx].append(
+                    {
+                        "plan": attributes[rep_idx],
+                        "meta": to_write[seed_idx][rep_idx]["meta"],
+                    }
+                )
+                
+        return dict(to_write_new)

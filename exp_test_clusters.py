@@ -144,38 +144,7 @@ async def create_plans():
 
 
 # %% ---------------- the clustering part -------------------
-CLUSTER_PROMPT = dedent("""
-    You will be given a long list of descriptions of different textual attributes. These textual attributes are ones that commonly appear in language model responses to user prompts in the following broad cluster:
-
-    <user_prompt_cluster_summary>
-    {cluster_summary}
-    </user_prompt_cluster_summary>
-
-    Your task is to cluster these attributes into clusters. To do this, go through the list of attributes one by one, while maintaining a running list of clusters (and a representative for each). 
-    
-    - If the new attribute seems like it does not apply to responses to an arbitrary user prompt in the cluster (e.g. if it is too specific), then discard it and move on to the next one. 
-    
-    - If the new attribute is semantically similar to a previous cluster (i.e. responses containing the new attribute will likely contain the attributes in the cluster), then add the new attribute to that cluster. Only do this when the attributes are truly highly similar. If the new attribute and the old cluster share some similarities but could be realized differently in a response, do not add it to the cluster and instead create a new cluster.
-
-    - If the new attribute is not semantically similar to any previous cluster, create a new cluster with the new attribute as the representative.
-
-    After you go through this list of attributes, you now have a list of clusters and representatives. Return the list of clusters and representatives in the following format, as a list of dictionaries:
-
-    ```json
-    [
-        {{
-            "representative": "...",
-            "members": ["...", "...", "..."],
-        }},
-    ]
-    ```
-
-    The json array should be a list of dictionaries. Remember to include the surrounding JSON tags.
-
-    Now, here is the full list of attributes:
-    
-    {attributes}
-""").strip()
+from cluster_models import CLUSTER_PROMPT
 
 
 caller = AutoCaller(dotenv_path=".env", retry_config=RETRY_CONFIG, force_caller="openrouter")
