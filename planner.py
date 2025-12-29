@@ -524,8 +524,8 @@ LIST_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    - They should be **precise and atomic**: each feature should use **no longer than a short sentence** to specify a single textual attribute along which a response can be modified. 
-    
+    - They should be **precise and atomic**: each feature should use **no longer than a short sentence** to specify a single textual attribute along which a response can be modified. **Another model will be able to make only a small, targeted change to any response in order to add this feature.**
+
     - Note that {bias_nudge}.
 
     Here is all the data, including the user prompt and assistant response samples and scores:
@@ -535,7 +535,7 @@ LIST_PROMPT = textwrap.dedent("""
     </data>
 
 
-    TO RECAP: your goal is to find {num_plans} diverse features that appear frequently in {higher_lower} assistant responses above. These features should be both **generally applicable** to responses to an arbitrary user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make small, targeted changes to a response to add or remove this feature. Remember that {bias_nudge}.
+    TO RECAP: your goal is to find {num_plans} diverse features that appear frequently in {higher_lower} assistant responses above. These features should be both **generally applicable** to responses to an arbitrary user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make small, targeted changes to ANY response to add or remove this feature. Remember that {bias_nudge}.
 
     Think thoroughly about all features of the assistant responses, considering both high level and low level features. The features should be specified using **simple, clear, unbiased** language; avoid abstract, vague, or ambiguous phrasing.
 

@@ -305,5 +305,4 @@ if __name__ == "__main__":
         "20251226-133700-list_reverse-chatgpt-plus"
     ]:
         run_path = Path(f"data/evo/{run_name}")
-        write_path = Path(f"plots/{run_name}")
-        plot_validation_data(run_path=run_path, write_path=write_path)
+        plot_validation_data(run_path=run_path, write_path=run_path)
