@@ -66,7 +66,7 @@ JUDGE_ABSOLUTE_PROMPT = dedent("""
     {rubric}
     </rubric>
 
-    Please use your reasoning block to reason carefully about the data given to you. Then, in your output field, output ONLY a single integer score of the response, surrounded by <output> tags like this:
+    Please think carefully about the data given to you. Then, in your output field, output ONLY a single integer score of the response, surrounded by <output> tags like this:
 
     <output>
     (Integer score of the response)
@@ -90,7 +90,7 @@ JUDGE_RELATIVE_PROMPT = dedent("""
 
     You should judge which response is better without any predisposed judgment or bias from irrelevant factors such as the order of the responses, but rather reason about which response is a better answer to the user prompt.
 
-    Please use your reasoning block to reason about the data given to you. Then, in your text output field, output ONLY A SINGLE WORD, surrounded by <output> tags like this:
+    Please think carefully about the data given to you. Then, in your text output field, output ONLY A SINGLE WORD, surrounded by <output> tags like this:
 
     <output>
     (Single word judgment: Tie, A, or B)
@@ -100,7 +100,7 @@ JUDGE_RELATIVE_PROMPT = dedent("""
 JUDGE_PRESENCE_PROMPT = dedent("""
     You will be given a conversation between a user and an assistant, as well as a description of a textual attribute. 
     
-    Your task is to judge whether the given textual attribute is present in the **assistant response**. The user prompt is given for your context, but you only need to consider whether the attribute is present in the assistant response.
+    Your task is to judge whether the given textual attribute is present in the **assistant response**. The user prompt is only given for your context.
 
     <attribute>
     {attribute}
@@ -110,5 +110,5 @@ JUDGE_PRESENCE_PROMPT = dedent("""
     {conversation}
     </conversation>
 
-    Please read the full conversation and use your thinking budget to reason about whether the attribute is present in the assistant response. Then, in your output field, output ONLY a single word "True" or "False", where "True" means the attribute is present and "False" means it is not, and nothing else.
+    Please read the full conversation and think carefully about whether the attribute is present in the assistant response. Then, in your output field, output ONLY a single word "True" or "False", where "True" means the attribute is present and "False" means it is not.
 """).strip()

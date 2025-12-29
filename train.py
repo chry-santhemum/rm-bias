@@ -40,7 +40,7 @@ parser.add_argument("--n_baseline_rollouts", type=int, default=16)
 parser.add_argument("--n_rewrite_rollouts", type=int, default=4)
 parser.add_argument("--n_validate_rollouts", type=int, default=8)
 
-parser.add_argument("--judge_train_first_n_rollouts", type=int, default=4)  # CHANGE!
+parser.add_argument("--judge_train_first_n_rollouts", type=int, default=2)
 parser.add_argument("--judge_train_first_n_user_prompts", type=int, default=8)
 parser.add_argument("--judge_val_first_n_rollouts", type=int, default=4)
 parser.add_argument("--judge_val_first_n_user_prompts", type=int, default=8)
@@ -59,20 +59,19 @@ if args.judge_train_first_n_rollouts > 2:
         raise ValueError("Perhaps, consider changing the hparams?")
 
 
-# Rough price estimate per seed.
-# Rewriter GPT 5 mini: 0.25/2, avg 1K/1K (slight upper bound)
-# n_rewrites ~ n_rewrite_rollouts * train_bs * n_pop_last_turn ~ 4 * {8, 16} * {32 + 64 + 128} ~ 10K total => 25$
-# Planner GPT 5: 1.25/10, Sonnet 4.5 3/15, avg: first turn 6K/5K (GPT 5), 1.5K (Sonnet #TODO), evolution 10K/2K
-# n_plans ~ n_planner_requests + {32 + 16} ~ 120 total => 6$
-# Judge Sonnet 4.5: 1.6K/1.6K
-# n_judges ~ judge_train * {~ 36 + 48 + 64} + judge_val * {~ 16} ~ 5K ~ 144$. Clearly impossible
-
-# actual datapoint:
-# $11.4 for 64 + 48 = 112 train, and 8 validation
-# 112 * 10 * 4 + 8 * 16 * 8 = 5504 sent => 2.07$ per 1K rewrites sent
-# $5.2 for planner. 64 initial + 16 (first mutate step)
-
+# Price estimate per seed.
+# Time: took 44 min, 3 seeds
+#
+# Rewriter, gpt-5-mini: around $1.4 per thousand requests. 0.25/2, avg 1K/1K (slight upper bound)
+# 28.4 dollas for ((48+64+37) + (64+64+64) + (64+64+64)) * 8 * 4  + (16+16+16) * 8 * 8 = 20128
+#
+# Planner, gpt-5 and claude-sonnet-4.5: empirically 3.57 + 4.5 dollars for 192 prompts
+#
+# Clusterer, gpt-5.2: empirically 2.15 dollars
+#
+# Judge, claude-sonnet-4.5: $122 for 4 seeds. Cost?
 # separately: judge model costs $50 for (64 + 80 + 80) * 8 * 2 + 16 * 8 * 4 = 4096 calls.
+
 
 
 async def main():

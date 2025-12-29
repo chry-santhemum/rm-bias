@@ -92,7 +92,7 @@ class RewriteModel(GenerationModel):
     def __init__(
         self,
         model_name: str,
-        max_par: int = 512,
+        max_par: int = 1024,
         enable_cache: bool = False,
         **kwargs,
     ):
@@ -140,6 +140,7 @@ class RewriteModel(GenerationModel):
         rewritten_responses = []
         for i, response in enumerate(responses):
             if response is None or (not response.has_response) or (response.finish_reason != "stop"):
+                logger.warning(f"rewrite failed:\n{response}")
                 rewritten_responses.append(TextResult())
                 continue
 
@@ -147,8 +148,8 @@ class RewriteModel(GenerationModel):
             rw_reasoning = response.reasoning_content
 
             if re.sub(r'[^a-z0-9]', '', rw_text.strip().lower()) == "none":  # type: ignore
-                if rw_reasoning is not None and (not rw_reasoning.startswith("gAAAAA")):
-                    logger.warning(f"Rewriter returned None.\nprompt:\n{to_send_chats[i].to_openai_str()}\nreasoning:\n{rw_reasoning}")
+                # if rw_reasoning is not None and (not rw_reasoning.startswith("gAAAAA")):
+                #     logger.warning(f"Rewriter returned None.\nprompt:\n{to_send_chats[i].to_openai_str()}\nreasoning:\n{rw_reasoning}")
                 rewritten_responses.append(TextResult(
                     text=original_chats[i].get_first("assistant"),  # The Rewriter refused to rewrite
                     reasoning=rw_reasoning,
@@ -347,21 +348,42 @@ class JudgeModel(GenerationModel):
 
     async def judge_presence(
         self,
-        attribute: str,
-        chat_history: ChatHistory,
-    ) -> bool:
-        response = await self.sample(
-            [
-                ChatHistory.from_system(
-                    JUDGE_PRESENCE_PROMPT.format(
-                        attribute=attribute,
-                        conversation=chat_history.get_first("assistant"),
-                    )
+        pairs: list[tuple[str, str]],
+    ) -> list[bool|None]:
+        """
+        Judge whether attributes are present in responses.
+
+        Args:
+            pairs: List of (attribute, response_text) tuples
+
+        Returns:
+            List of booleans indicating presence
+        """
+        if not pairs:
+            return []
+
+        prompts = [
+            ChatHistory.from_system(
+                JUDGE_PRESENCE_PROMPT.format(
+                    attribute=attribute,
+                    conversation=response_text,
                 )
-            ]
-        )
-        if response[0] is None:
-            return False
-        if (not response[0].has_response) or (response[0].finish_reason != "stop"):
-            return False
-        return response[0].first_response == "True"
+            )
+            for attribute, response_text in pairs
+        ]
+
+        responses = await self.sample(prompts)
+
+        results = []
+        for resp in responses:
+            if resp is None:
+                results.append(None)
+            elif (not resp.has_response) or (resp.finish_reason != "stop"):
+                results.append(None)
+            else:
+                response_text = "".join([c.lower() for c in resp.first_response if c.isalpha()])  # type: ignore
+                if response_text not in ["true", "false"]:
+                    logger.warning(f"Invalid judge presence response: {resp.first_response}.")
+                results.append(response_text == "true")
+
+        return results
