@@ -394,14 +394,79 @@ class EvoPlanner:
 
         return fig
 
-    def update_pop_pareto(self, seed_states: list[SeedState], n_pop_target: int) -> dict[int, dict]:
+    def filter_by_student_scores(
+        self,
+        evaluate_results: list[dict[str, dict[str, list[Rollout | None]]]],
+    ) -> tuple[list[dict[str, dict[str, list[Rollout | None]]]], list[float]]:
+        """
+        Filter evaluate_results by student score threshold before teacher evaluation.
+
+        Returns:
+            - Filtered list with same Rollout object references, so teacher eval
+              modifies in place and changes propagate to the original evaluate_results.
+            - List of student thresholds (one per seed) for use in plotting.
+        """
+        filtered_results = []
+        student_thresholds = []
+
+        for seed_idx, stats in enumerate(evaluate_results):
+            # Calculate student winrate for each attribute (without requiring teacher scores)
+            attr_winrates: list[tuple[str, float]] = []
+
+            for attribute, user_prompt_rollouts in stats.items():
+                all_student_scores = []
+                for rollouts in user_prompt_rollouts.values():
+                    for r in rollouts:
+                        if r is not None and r.student_score is not None and r.student_score.score is not None:
+                            all_student_scores.append(r.student_score.score)
+
+                if all_student_scores:
+                    winrate = float(np.mean(all_student_scores))
+                    attr_winrates.append((attribute, winrate))
+
+            if not attr_winrates:
+                filtered_results.append({})
+                student_thresholds.append(0.0)
+                continue
+
+            # Calculate threshold: remove bottom 40% to save teacher eval compute
+            winrate_values = [wr for _, wr in attr_winrates]
+            if self.direction == "plus":
+                student_pct = float(np.percentile(winrate_values, 40))
+                threshold = min(0.0, student_pct)
+            else:
+                student_pct = float(np.percentile(winrate_values, 60))
+                threshold = max(0.0, student_pct)
+
+            # Filter attributes by student score
+            surviving_attrs = set()
+            for attr, wr in attr_winrates:
+                if self.direction == "plus":
+                    if wr >= threshold:
+                        surviving_attrs.add(attr)
+                else:
+                    if wr <= threshold:
+                        surviving_attrs.add(attr)
+
+            filtered_stats = {attr: s for attr, s in stats.items() if attr in surviving_attrs}
+            filtered_results.append(filtered_stats)
+            student_thresholds.append(threshold)
+
+            logger.info(
+                f"Seed {seed_idx}: student pre-filter {len(stats)} -> {len(filtered_stats)} "
+                f"(threshold={threshold:.3f}, pct={student_pct:.3f})"
+            )
+
+        return filtered_results, student_thresholds
+
+    def update_pop_pareto(self, seed_states: list[SeedState], n_pop_target: int, student_thresholds: list[float]) -> dict[int, dict]:
         if self.direction == "minus":
             raise NotImplementedError
         logger.info(f"Trying to update population to {n_pop_target} members using Pareto front selection.")
 
         candidates_by_seed: dict[int, dict] = {}
 
-        for seed_state in seed_states:
+        for seed_idx, seed_state in enumerate(seed_states):
             all_candidates = []  # All candidates before filtering
             for attribute, stats in seed_state.history[-1].items():
                 student_winrate = stats.winrate("student")
@@ -412,46 +477,35 @@ class EvoPlanner:
                     student_winrate,
                     teacher_winrate,
                 )
-                # print(f"Attribute:\n{attribute}\nStudent winrate: {new_candidate[2]}\nTeacher winrate: {new_candidate[3]}\n")
-
                 all_candidates.append(new_candidate)
 
-            # Calculate percentile-based thresholds
-            valid_student_winrates = [c[2] for c in all_candidates if c[2] is not None]
-            valid_teacher_winrates = [c[3] for c in all_candidates if c[3] is not None]
+            # Student threshold was already applied in filter_by_student_scores
+            student_threshold = student_thresholds[seed_idx]
 
+            # Calculate teacher threshold
+            valid_teacher_winrates = [c[3] for c in all_candidates if c[3] is not None]
             if self.direction == "plus":
-                # Filter out bottom 25% of student scores, but don't filter positive scores
-                student_pct = float(np.percentile(valid_student_winrates, 25)) if valid_student_winrates else float('-inf')
-                student_threshold = min(0.0, student_pct)
-                # Filter out top 25% of teacher scores, but don't filter negative scores
                 teacher_pct = float(np.percentile(valid_teacher_winrates, 75)) if valid_teacher_winrates else float('inf')
                 teacher_threshold = max(0.0, teacher_pct)
             else:
-                # For minus direction: opposite logic
-                student_pct = float(np.percentile(valid_student_winrates, 75)) if valid_student_winrates else float('inf')
-                student_threshold = max(0.0, student_pct)
                 teacher_pct = float(np.percentile(valid_teacher_winrates, 25)) if valid_teacher_winrates else float('-inf')
                 teacher_threshold = min(0.0, teacher_pct)
 
-            logger.info(f"Auto-calculated student threshold: {student_threshold:.3f} (percentile was {student_pct:.3f})")
+            logger.info(f"Student threshold (from stage 1): {student_threshold:.3f}")
             logger.info(f"Auto-calculated teacher threshold: {teacher_threshold:.3f} (percentile was {teacher_pct:.3f})")
 
             # Filter candidates based on thresholds (keep those with valid winrates)
+            # Note: student filtering already happened in filter_by_student_scores
             candidates = []
             for new_candidate in all_candidates:
                 # Filter out candidates with None winrates
                 if new_candidate[2] is None or new_candidate[3] is None:
                     continue
-                # Filter based on student threshold
+                # Filter based on teacher threshold only
                 if self.direction == "plus":
-                    if new_candidate[2] < student_threshold:
-                        continue
                     if new_candidate[3] > teacher_threshold:
                         continue
                 else:
-                    if new_candidate[2] > student_threshold:
-                        continue
                     if new_candidate[3] < teacher_threshold:
                         continue
                 candidates.append(new_candidate)
@@ -601,14 +655,19 @@ class EvoRunner(Runner):
             evaluate_results.append(stats)
 
         if use_pareto_selection:
-            # Populate teacher_score on rollouts in place
+            # Filter by student scores first to save compute on teacher evaluation
+            filtered_evaluate_results, student_thresholds = self.planner.filter_by_student_scores(evaluate_results)
+
+            # Populate teacher_score on filtered rollouts in place
+            # (Rollout objects are shared, so changes propagate to evaluate_results)
             await self.teacher_model.judge_rollouts(
-                evaluate_results=evaluate_results,
+                evaluate_results=filtered_evaluate_results,
                 baselines=self.baselines,
                 first_n_rollouts=judge_train_first_n_rollouts,
                 first_n_user_prompts=judge_train_first_n_user_prompts,
             )
 
+        # Store ALL rollouts (including those filtered out, to preserve student scores)
         for seed_state_idx, stats in enumerate(evaluate_results):
             for attribute, rollouts in stats.items():
                 self.seed_states[seed_state_idx].history[-1][attribute].rollouts = rollouts
@@ -626,6 +685,7 @@ class EvoRunner(Runner):
             candidates_by_seed = self.planner.update_pop_pareto(
                 seed_states=self.seed_states,
                 n_pop_target=n_pop_target,
+                student_thresholds=student_thresholds,
             )
 
             for seed_state_idx, candidates in candidates_by_seed.items():
@@ -704,9 +764,34 @@ class EvoRunner(Runner):
                         )
 
                 if use_pareto_selection:
+                    # Calculate student thresholds from loaded data (same logic as filter_by_student_scores)
+                    student_thresholds = []
+                    for seed_state in self.seed_states:
+                        attr_winrates = []
+                        for _, stats in seed_state.history[-1].items():
+                            all_scores = []
+                            for rollouts in stats.rollouts.values():
+                                for r in rollouts:
+                                    if r is not None and r.student_score is not None and r.student_score.score is not None:
+                                        all_scores.append(r.student_score.score)
+                            if all_scores:
+                                attr_winrates.append(float(np.mean(all_scores)))
+
+                        if attr_winrates:
+                            if self.planner.direction == "plus":
+                                pct = float(np.percentile(attr_winrates, 40))
+                                threshold = min(0.0, pct)
+                            else:
+                                pct = float(np.percentile(attr_winrates, 60))
+                                threshold = max(0.0, pct)
+                        else:
+                            threshold = 0.0
+                        student_thresholds.append(threshold)
+
                     self.planner.update_pop_pareto(
                         seed_states=self.seed_states,
                         n_pop_target=n_pop_target[time_step],
+                        student_thresholds=student_thresholds,
                     )
                 else:
                     raise NotImplementedError("Non-Pareto selection has been removed")
