@@ -241,8 +241,14 @@ class EvoPlanner:
             attributes, reasoning = parse_json_response(resp)
             if isinstance(attributes, str):
                 attributes = []
+                logger.warning(f"Planner attributes did not parse as a list.\nResponse:\n{resp}\nReasoning:\n{reasoning}")
             elif isinstance(attributes, list):
-                attributes = [p.strip() for p in attributes]
+                try:
+                    attributes = [p.strip() for p in attributes]
+                except Exception as e:
+                    logger.warning(f"Planner attributes is not a list of strings.\nResponse:\n{resp}\nReasoning:\n{reasoning}")
+                    logger.warning(f"Attributes: {attributes}")
+                    attributes = []
 
             if i < 3:
                 logger.info(f"Planner reasoning:\n{reasoning}")

@@ -49,6 +49,7 @@ parser.add_argument("--cosine_sim_threshold_evolution", type=float, default=0.9)
 
 parser.add_argument("--val_split_size", type=int, default=16)
 parser.add_argument("--run_name", type=str, default=None)
+parser.add_argument("--start_from", type=int, default=None)
 
 args = parser.parse_args()
 
@@ -324,7 +325,7 @@ async def main():
             judge_val_first_n_user_prompts=args.judge_val_first_n_user_prompts,
             use_pareto_selection=True,
             validate=validate,
-            # start_from=1
+            start_from=args.start_from,
         )
     except Exception as e:
         logger.exception(f"Training failed: {e}")
