@@ -248,7 +248,7 @@ class EvoPlanner:
                 except Exception as e:
                     logger.warning(f"Planner attributes is not a list of strings.\nResponse:\n{resp}\nReasoning:\n{reasoning}")
                     logger.warning(f"Attributes: {attributes}")
-                    attributes = []
+                    attributes = [x for p in attributes for x in p][1:]
 
             if i < 3:
                 logger.info(f"Planner reasoning:\n{reasoning}")

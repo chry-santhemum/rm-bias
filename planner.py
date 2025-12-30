@@ -236,8 +236,14 @@ class ListPlanner(Planner):
 
             if isinstance(plans, str):
                 plans = []
+                logger.warning(f"ListPlanner plans did not parse as a list.\nResponse:\n{resp}\nReasoning:\n{reasoning}")
             elif isinstance(plans, list):
-                plans = [p.strip() for p in plans]
+                try:
+                    plans = [p.strip() for p in plans]
+                except Exception as e:
+                    logger.warning(f"ListPlanner plans is not a list of strings.\nResponse:\n{resp}\nReasoning:\n{reasoning}")
+                    logger.warning(f"Plans: {plans}")
+                    plans = [x for p in plans for x in p][1:]
 
             meta = metas[i]
             meta["planner_reasoning"] = str(reasoning)

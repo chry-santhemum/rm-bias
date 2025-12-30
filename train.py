@@ -1,4 +1,5 @@
 import json
+import time
 import argparse
 from functools import partial
 from pathlib import Path
@@ -41,20 +42,30 @@ parser.add_argument("--n_rewrite_rollouts", type=int, default=4)
 parser.add_argument("--n_validate_rollouts", type=int, default=8)
 
 parser.add_argument("--judge_train_first_n_rollouts", type=int, default=2)
-parser.add_argument("--judge_train_first_n_user_prompts", type=int, default=8)
+parser.add_argument("--judge_train_first_n_user_prompts", type=int, default=16)
 parser.add_argument("--judge_val_first_n_rollouts", type=int, default=4)
-parser.add_argument("--judge_val_first_n_user_prompts", type=int, default=8)
+parser.add_argument("--judge_val_first_n_user_prompts", type=int, default=16)
 parser.add_argument("--cosine_sim_threshold_initial", type=float, default=0.9)
 parser.add_argument("--cosine_sim_threshold_evolution", type=float, default=0.9)
 
 parser.add_argument("--val_split_size", type=int, default=16)
 parser.add_argument("--run_name", type=str, default=None)
+parser.add_argument("--baselines_path", type=str, default=None)
 parser.add_argument("--start_from", type=int, default=None)
 
 args = parser.parse_args()
 
 # Check args coherence
 assert len(args.n_pop_targets) == len(args.train_batch_sizes)
+if args.baselines_path is not None:
+    if args.run_name is not None:
+        raise ValueError("If run_name is provided, baselines_path must not be provided.")
+    
+    print("Did you really mean to provide a baselines_path? Pausing 5 seconds...")
+    time.sleep(5)
+if args.run_name is not None:
+    print("Did you really mean to provide a run_name? Pausing 5 seconds...")
+    time.sleep(5)
 if args.judge_train_first_n_rollouts > 2:
     if args.teacher_model ==  "claude-sonnet-4.5":
         raise ValueError("Perhaps, consider changing the hparams?")
@@ -76,10 +87,15 @@ if args.judge_train_first_n_rollouts > 2:
 
 
 async def main():
-    load_cached_baselines = args.run_name is not None
+    baseline_path = None
+    if args.baselines_path is not None:
+        baseline_path = f"data/evo/{args.baselines_path}"
+    if args.run_name is not None:
+        baseline_path = f"data/evo/{args.run_name}"
+
     run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
     
-    if not load_cached_baselines:
+    if args.run_name is None:
         Path(f"logs/evo").mkdir(parents=True, exist_ok=True)
         Path(f"data/evo/{run_name}").mkdir(parents=True, exist_ok=True)
         
@@ -293,8 +309,8 @@ async def main():
 
     ################## START RUN ##################
 
-    if load_cached_baselines:
-        with open(f"data/evo/{run_name}/train_baselines/rollouts.json", "r") as f:
+    if baseline_path is not None:
+        with open(f"{baseline_path}/train_baselines/rollouts.json", "r") as f:
             baseline_rollouts = json.load(f)
         
         runner.baselines = {}
