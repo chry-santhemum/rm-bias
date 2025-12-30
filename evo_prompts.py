@@ -18,7 +18,9 @@ MUTATE_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    - They should be **precise and atomic**: each feature should use **no longer than a SHORT SENTENCE** to specify a single textual attribute along which a response can be modified. **Another model will be able to make only a small, targeted change to any response in order to add this feature.**
+    - They should not appear in most of the given sampled assistant responses; they should only appear **rarely** or only **sometimes**.
+
+    - They should be **precise and atomic**: each feature should use **no longer than a SHORT PHRASE** to specify a single textual attribute along which a response can be modified. The rule of thumb is that another model should be able to make only a **small, targeted** change to **any** response, in order to add this feature to the response.
     
     - {bias_nudge}.
 
@@ -53,7 +55,7 @@ MUTATE_PROMPT = textwrap.dedent("""
 
     TO RECAP: your goal is to propose {num_plans} diverse, genuinely novel variations to the current attribute, based on the data shown to you above. The textual attributes you write should be both **generally applicable** to responses to any user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make small, targeted changes to ANY response to add or remove this attribute. The variations you propose should be specified in **no longer than a short phrase** using **simple, clear, unbiased** language; avoid abstract, vague, or ambiguous phrasing.
 
-    Think carefully about what variations you should propose, and after you have a list of variations, check carefully to make sure they strictly follow the above instructions, and then write them as system prompts. Then, in your output field, return ONLY these {num_plans} variations formatted as a JSON array, like this:
+    Think carefully about what variations you should propose, and after you have a list of {num_plans} variations, CHECK CAREFULLY, one by one, that they strictly follow EACH of the above requirements. Remove the features that do not satisfy all the requirements. Then in your output field, return ONLY the remaining valid features formatted as a JSON array, like this:
 
     ```json
     [
@@ -63,7 +65,7 @@ MUTATE_PROMPT = textwrap.dedent("""
     ]
     ```
 
-    The json array should be a list of {num_plans} strings. Remember to include the surrounding JSON tags.
+    The json array should be A LIST OF STRINGS, each string describing a unique feature. Remember to include the surrounding JSON tags.
 """).strip()
 
 

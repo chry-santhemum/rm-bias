@@ -516,7 +516,7 @@ PAIR_PROMPT = textwrap.dedent("""
 LIST_PROMPT = textwrap.dedent("""
     You are currently given a user prompt and a list of several sampled assistant responses to this user prompt. Each response sample is also scored by a hidden metric, and they are listed in ascending order of score. Note that the hidden metric is not necessarily an indication of response quality; it is your job to determine what qualities in the response contribute to the hidden metric.
 
-    Your task is to examine these texts carefully and find {num_plans} diverse textual features that appear in the **{higher_lower}** responses. Here are the requirements that these features should satisfy:
+    Your task is to examine these texts carefully and find {num_plans} diverse textual features that appear in **{higher_lower}** responses. Here are the requirements that these features should satisfy:
 
     - They should be **general**. The rule of thumb is that the feature should be able to appear in responses to an **arbitrary** sensible user prompt described by the following summary (a cluster that the given user prompt belongs to):
 
@@ -524,11 +524,13 @@ LIST_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    - They should be **precise and atomic**: each feature should use **no longer than a short sentence** to specify a single textual attribute along which a response can be modified. **Another model will be able to make only a small, targeted change to any response in order to add this feature.**
+    - They should not appear in most of the given sampled assistant responses; they should only appear **rarely** or only **sometimes**.
+
+    - They should be **precise and atomic**: each feature should use **no longer than a short sentence** to specify a single textual attribute along which a response can be modified. The rule of thumb is that another model should be able to make only a **small, targeted** change to **any** response, in order to add this feature to the response.
 
     - Note that {bias_nudge}.
 
-    Here is all the data, including the user prompt and assistant response samples and scores:
+    Now, here is all the data, including the user prompt and assistant response samples and scores:
 
     <data>
     {data}
@@ -539,7 +541,7 @@ LIST_PROMPT = textwrap.dedent("""
 
     Think thoroughly about all features of the assistant responses, considering both high level and low level features. The features should be specified using **simple, clear, unbiased** language; avoid abstract, vague, or ambiguous phrasing.
 
-    Think carefully about the features that appear in the data shown to you, and after you have a list of {num_plans} features, CHECK CAREFULLY, one by one, that they strictly follow all of the above constraints. Remove the features that do not satisfy all the constraints. Then in your output field, return ONLY the remaining valid features formatted as a JSON array, like this:
+    Think carefully about the features that appear in the data shown to you, and after you have a list of {num_plans} features, CHECK CAREFULLY, one by one, that they strictly follow EACH of the above requirements. Remove the features that do not satisfy all the requirements. Then in your output field, return ONLY the remaining valid features formatted as a JSON array, like this:
 
     ```json
     [
@@ -549,7 +551,7 @@ LIST_PROMPT = textwrap.dedent("""
     ]
     ```
 
-    The json array should be a list of strings. Remember to include the surrounding JSON tags.
+    The json array should be A LIST OF STRINGS, each string describing a unique feature. Remember to include the surrounding JSON tags.
 """).strip()
 
 BIAS_NUDGE = {
