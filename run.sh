@@ -35,7 +35,9 @@ python train.py \
 --judge_train_first_n_user_prompts 32 \
 --judge_val_first_n_rollouts 1 \
 --judge_val_first_n_user_prompts 64 \
---val_split_size 64 
+--val_split_size 64 \
+--start_from 6 \
+--run_name "20251231-074522-list_reverse-clio-plus"
 
 
 # python train.py \

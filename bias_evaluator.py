@@ -155,7 +155,7 @@ class BiasEvaluator:
         for user in user_prompts:
             for attr_idx, attribute in enumerate(attributes):
                 attr_same_attrs = same_attrs[attr_idx] if same_attrs else ""
-                for i, original_assistant in enumerate(baselines[user]):
+                for i, original_assistant in enumerate(baselines.get(user, [])):
                     if n_rollouts is not None and i >= n_rollouts:
                         break
                     rewrite_inputs.append(

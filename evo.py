@@ -738,10 +738,7 @@ class EvoRunner(Runner):
         train_batch_size: list[int], 
         judge_train_first_n_rollouts: int,
         judge_train_first_n_user_prompts: int,
-        judge_val_first_n_rollouts: int,
-        judge_val_first_n_user_prompts: int,
         use_pareto_selection: bool=True, 
-        validate: bool=True, 
         start_from: int|None=None,
     ):
         t_steps = len(train_batch_size)
@@ -821,10 +818,3 @@ class EvoRunner(Runner):
                     judge_train_first_n_user_prompts=judge_train_first_n_user_prompts,
                     use_pareto_selection=use_pareto_selection,
                 )
-
-                if validate and time_step == t_steps - 1:
-                    await self.validate(
-                        final_attributes={seed_state.index: list(seed_state.state.keys()) for seed_state in self.seed_states},
-                        judge_val_first_n_rollouts=judge_val_first_n_rollouts,
-                        judge_val_first_n_user_prompts=judge_val_first_n_user_prompts,
-                    )

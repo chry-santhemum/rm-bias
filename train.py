@@ -335,12 +335,38 @@ async def main():
             train_batch_size=args.train_batch_sizes,
             judge_train_first_n_rollouts=args.judge_train_first_n_rollouts,
             judge_train_first_n_user_prompts=args.judge_train_first_n_user_prompts,
-            judge_val_first_n_rollouts=args.judge_val_first_n_rollouts,
-            judge_val_first_n_user_prompts=args.judge_val_first_n_user_prompts,
             use_pareto_selection=True,
-            validate=validate,
             start_from=args.start_from,
         )
+
+        if validate:
+            if args.start_from == len(args.train_batch_sizes):
+                print("Loading val baselines...")
+                with open(runner.run_path / "val_baselines/rollouts.json", "r") as f:
+                    baseline_rollouts = json.load(f)
+                
+                runner.val_baselines = {}
+                for user, rollouts in baseline_rollouts.items():
+                    runner.val_baselines[user] = [
+                        Rollout(
+                            response=rollout["response"],
+                            student_score=RewriteScore(
+                                score=None,
+                                raw_score=rollout["student_score"],
+                                reasoning=None,
+                                model_name=student_model.model_name,
+                            ),
+                            teacher_score=None,
+                            model=rollout.get("model", None),
+                        ) for rollout in rollouts
+                    ]
+
+            await runner.validate(
+                final_attributes={seed_state.index: list(seed_state.state.keys()) for seed_state in runner.seed_states},
+                judge_val_first_n_rollouts=args.judge_val_first_n_rollouts,
+                judge_val_first_n_user_prompts=args.judge_val_first_n_user_prompts,
+            )
+
     except Exception as e:
         logger.exception(f"Training failed: {e}")
         raise
