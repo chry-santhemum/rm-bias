@@ -660,6 +660,11 @@ class EvoRunner(Runner):
                 )
             evaluate_results.append(stats)
 
+        self.save_attribute_stats(
+            direction=self.planner.direction,
+            save_dir=self.run_path / f"step_{self.step_count}_stats",
+        )
+
         if use_pareto_selection:
             # Filter by student scores first to save compute on teacher evaluation
             filtered_evaluate_results, student_thresholds = self.planner.filter_by_student_scores(evaluate_results)
@@ -823,16 +828,3 @@ class EvoRunner(Runner):
                         judge_val_first_n_rollouts=judge_val_first_n_rollouts,
                         judge_val_first_n_user_prompts=judge_val_first_n_user_prompts,
                     )
-
-        print("Saving train baselines with updated teacher scores...")
-        with open(self.run_path / "train_baselines/rollouts.json", "w") as f:
-            json_data = {k: [
-                {
-                    "response": r.response,
-                    "model": r.model,
-                    "student_score": r.student_score.raw_score,
-                    "teacher_score": r.teacher_score.raw_score if r.teacher_score is not None else None,
-                } 
-                for r in v
-            ] for k, v in self.baselines.items()}
-            json.dump(json_data, f, indent=4, sort_keys=True)

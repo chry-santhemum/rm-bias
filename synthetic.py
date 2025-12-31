@@ -13,7 +13,7 @@ from caller import AutoCaller, ChatHistory
 from utils import parse_json_response
 from api_models import RETRY_CONFIG
 
-caller = AutoCaller(dotenv_path=".env", retry_config=RETRY_CONFIG)
+caller = AutoCaller(dotenv_path=".env", retry_config=RETRY_CONFIG, force_caller="openai")
 
 # %%
 
@@ -185,7 +185,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset_path", type=str, required=True)
     parser.add_argument("--n_topics", type=int, default=24)
-    parser.add_argument("--n_prompts", type=int, default=4)
+    parser.add_argument("--n_prompts", type=int, default=10)
     args = parser.parse_args()
 
     asyncio.run(main(

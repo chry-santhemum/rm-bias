@@ -113,8 +113,6 @@ class Runner(ABC):
         """
         Save a condensed version of previous step's attribute stats for each seed state,
         ordered by student winrate (reward diff).
-
-        Returns seed_state_index -> top k list of attributes
         """
         if save_dir is None:
             save_dir = self.run_path / "final_stats"

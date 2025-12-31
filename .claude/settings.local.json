@@ -32,7 +32,9 @@
       "Bash(git commit:*)",
       "mcp__ide__getDiagnostics",
       "Bash(timeout 30 python3:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(timeout 60 python3:*)",
+      "Bash(timeout 120 python3:*)"
     ],
     "deny": [
       "Bash(rm:*)",
@@ -41,10 +43,10 @@
       "Bash(rmdir:*)"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "orchestra-mcp"
   ],
-  "enableAllProjectMcpServers": true,
   "hooks": {
     "Stop": [
       {

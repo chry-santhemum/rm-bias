@@ -34,7 +34,7 @@ parser.add_argument("--n_new", type=int, required=True, help="Hypothesis generat
 parser.add_argument("--n_pop_initial", type=int, required=True, help="Hypothesis generation: initial population")
 parser.add_argument("--n_pop_targets", type=int, required=True, nargs='+')
 parser.add_argument("--train_batch_sizes", type=int, required=True, nargs='+')
-parser.add_argument("--m_var", type=int, default=3)
+parser.add_argument("--m_var", type=int, required=True)
 
 parser.add_argument("--n_planner_requests", type=int, default=64)
 parser.add_argument("--n_baseline_rollouts", type=int, default=16)
@@ -50,18 +50,15 @@ parser.add_argument("--cosine_sim_threshold_evolution", type=float, default=0.9)
 
 parser.add_argument("--val_split_size", type=int, default=16)
 parser.add_argument("--run_name", type=str, default=None)
-parser.add_argument("--baselines_path", type=str, default=None)
+parser.add_argument("--baseline_path", type=str, default=None)
 parser.add_argument("--start_from", type=int, default=None)
 
 args = parser.parse_args()
 
 # Check args coherence
 assert len(args.n_pop_targets) == len(args.train_batch_sizes)
-if args.baselines_path is not None:
-    if args.run_name is not None:
-        raise ValueError("If run_name is provided, baselines_path must not be provided.")
-    
-    print("Did you really mean to provide a baselines_path? Pausing 5 seconds...")
+if args.baseline_path is not None:
+    print("Did you really mean to provide a baseline_path? Pausing 5 seconds...")
     time.sleep(5)
 if args.run_name is not None:
     print("Did you really mean to provide a run_name? Pausing 5 seconds...")
@@ -88,9 +85,9 @@ if args.judge_train_first_n_rollouts > 2:
 
 async def main():
     baseline_path = None
-    if args.baselines_path is not None:
-        baseline_path = f"data/evo/{args.baselines_path}"
-    if args.run_name is not None:
+    if args.baseline_path is not None:
+        baseline_path = f"data/evo/{args.baseline_path}"
+    elif args.run_name is not None:
         baseline_path = f"data/evo/{args.run_name}"
 
     run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
@@ -237,7 +234,7 @@ async def main():
     if args.planner_type == "pair":
         hypothesis_planner = PairPlanner(
             model_names=["openai/gpt-5", "anthropic/claude-sonnet-4.5"],
-            max_tokens=8192,
+            max_tokens=12000,
             reasoning="medium",
             n_new=args.n_new,
             n_pop=args.n_pop_initial,
@@ -248,7 +245,7 @@ async def main():
     elif args.planner_type in ["list", "list_reverse"]:
         hypothesis_planner = ListPlanner(
             model_names=["openai/gpt-5", "anthropic/claude-sonnet-4.5"],
-            max_tokens=8192,
+            max_tokens=12000,
             reasoning="medium",
             n_new=args.n_new,
             n_pop=args.n_pop_initial,
@@ -286,6 +283,7 @@ async def main():
     # save config file
     config = {
         "run_name": run_name,
+        "baseline_path": baseline_path,
         "dataset": args.dataset,
         "topic_ids": args.topic_ids,
         "student_model": args.student_model,
@@ -346,6 +344,20 @@ async def main():
     except Exception as e:
         logger.exception(f"Training failed: {e}")
         raise
+
+    print("Saving train baselines with updated teacher scores...")
+    Path(runner.run_path / "train_baselines").mkdir(parents=True, exist_ok=True)
+    with open(runner.run_path / "train_baselines/rollouts.json", "w") as f:
+        json_data = {k: [
+            {
+                "response": r.response,
+                "model": r.model,
+                "student_score": r.student_score.raw_score,
+                "teacher_score": r.teacher_score.raw_score if r.teacher_score is not None else None,
+            } 
+            for r in v
+        ] for k, v in runner.baselines.items()}
+        json.dump(json_data, f, indent=4, sort_keys=True)
 
     run_path = Path(f"data/evo/{run_name}")
     plot_validation_data(run_path=run_path, write_path=run_path)
