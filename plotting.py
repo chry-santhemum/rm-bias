@@ -110,6 +110,8 @@ def plot_reward_diff_violin(plot_data: list[dict]):
     # Helper function to wrap text at specified width
     def wrap_text(text, width=60):
         """Wrap text to specified width using <br> for line breaks"""
+        # Replace HTML entities with plain equivalents before escaping
+        text = text.replace("&nbsp;", " ")
         # Escape HTML special characters to prevent parsing issues
         text = html.escape(text)
         # Escape $ to prevent MathJax/LaTeX rendering
@@ -302,7 +304,7 @@ def plot_validation_data(run_path: Path|str, write_path: Path|str):
 # %%
 if __name__ == "__main__":
     for run_name in [
-        "20251226-133700-list_reverse-chatgpt-plus"
+        "20251231-034737-list_reverse-handpick-plus"
     ]:
         run_path = Path(f"data/evo/{run_name}")
         plot_validation_data(run_path=run_path, write_path=run_path)

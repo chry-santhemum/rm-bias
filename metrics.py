@@ -8,15 +8,107 @@ from typing import Sequence
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
-from cluster_models import ClusterModel
+from cluster_models import EmbedClusterModel
 from plotting import process_run_data
+
+
+def _precompute_seed_data(
+    run_path: Path,
+    seed_index: int,
+    cluster_model: EmbedClusterModel,
+    use_winrate: bool,
+) -> dict:
+    """Precompute embeddings and similarity matrix for a single seed.
+
+    Returns dict with:
+        - items: list of {attribute, judge_winrate, score}
+        - cos_sims: precomputed cosine similarity matrix (or None if no items)
+    """
+    plot_data = process_run_data(run_path, seed_index)
+
+    # Extract all items with valid scores
+    items = []
+    for item in plot_data:
+        judge_wr = item.get("judge_winrate")
+        if judge_wr is None:
+            continue
+
+        if use_winrate:
+            score = item.get("reward_winrate")
+        else:
+            score = item.get("reward_diff_mean")
+
+        if score is None:
+            continue
+
+        items.append({
+            "attribute": item["attribute"],
+            "judge_winrate": judge_wr,
+            "score": score,
+        })
+
+    if not items:
+        return {"items": [], "cos_sims": None}
+
+    # Embed all attributes once
+    attributes = [item["attribute"] for item in items]
+    embs = cluster_model.embed(attributes)
+    norms = np.linalg.norm(embs, axis=1, keepdims=True)
+    embs_normalized = embs / norms
+    cos_sims = cosine_similarity(embs_normalized, embs_normalized)
+
+    return {"items": items, "cos_sims": cos_sims}
+
+
+def _compute_dabs_from_precomputed(
+    precomputed: dict,
+    judge_thr: float,
+    diversity_penalty: float,
+    use_winrate: bool,
+) -> float:
+    """Compute DABS score from precomputed data for a given threshold."""
+    items = precomputed["items"]
+    cos_sims = precomputed["cos_sims"]
+
+    if not items or cos_sims is None:
+        return 0.0
+
+    # Filter by threshold and collect (original_index, score) pairs
+    filtered = []
+    for i, item in enumerate(items):
+        if item["judge_winrate"] >= judge_thr:
+            continue
+        # For diff mode, also filter for score > 0
+        if not use_winrate and item["score"] <= 0:
+            continue
+        filtered.append((i, item["score"]))
+
+    if not filtered:
+        return 0.0
+
+    # Sort by score descending
+    filtered.sort(key=lambda x: x[1], reverse=True)
+
+    # Compute DABS with diversity penalty
+    dabs = 0.0
+    for rank, (orig_idx, score) in enumerate(filtered):
+        if rank > 0:
+            # Max similarity to any higher-ranked item
+            prev_indices = [filtered[r][0] for r in range(rank)]
+            max_sim = max(cos_sims[orig_idx, prev_idx] for prev_idx in prev_indices)
+        else:
+            max_sim = 0.0
+        dabs += score * (1 - diversity_penalty * max_sim)
+
+    return dabs
 
 
 def DABS(
     run_path: Path|str,
     judge_thr: float,
-    cluster_model: ClusterModel,
+    cluster_model: EmbedClusterModel,
     diversity_penalty: float = 1.0,
     use_winrate: bool = True,
 ) -> dict:
@@ -34,7 +126,6 @@ def DABS(
         run_path = Path(run_path)
 
     validate_dir = run_path / "validate"
-    # Gather all seed indices (folders matching "seed_{i}_validate")
     seed_indices = []
     if validate_dir.exists():
         pattern = re.compile(r'seed_(\d+)_validate')
@@ -45,84 +136,98 @@ def DABS(
                     seed_indices.append(int(match.group(1)))
     seed_indices.sort()
 
-    dabs_scores = dict()
-
+    dabs_scores = {}
     for seed_index in seed_indices:
-        plot_data = process_run_data(run_path, seed_index)
-        # Filter for attributes where judge winrate is below threshold
-        below_thr = [item for item in plot_data if item["judge_winrate"] is not None and item["judge_winrate"] < judge_thr]
-
-        if use_winrate:
-            # Use student winrate as score (no filtering beyond judge threshold)
-            below_thr = [{
-                "attribute": item["attribute"],
-                "score": item["reward_winrate"],
-            } for item in below_thr if item["reward_winrate"] is not None]
-        else:
-            # Use reward diff: filter for diff > 0, score is the diff itself
-            below_thr = [{
-                "attribute": item["attribute"],
-                "score": item["reward_diff_mean"],
-            } for item in below_thr if item["reward_diff_mean"] is not None and item["reward_diff_mean"] > 0]
-
-        if not below_thr:
-            dabs_scores[seed_index] = 0
-            continue
-
-        below_thr.sort(key=lambda x: x["score"], reverse=True)
-
-        # Embed bias descriptions
-        embs = cluster_model.embed([item["attribute"] for item in below_thr])
-        norms = np.linalg.norm(embs, axis=1, keepdims=True)
-        embs_normalized = embs / norms
-
-        cos_sims = cosine_similarity(embs_normalized, embs_normalized)
-
-        # Compute DABS
-        dabs = 0.0
-        for i, item in enumerate(below_thr):
-            max_similarity = np.max(cos_sims[i, :i]).item() if i > 0 else 0.0
-            dabs += item["score"] * (1 - diversity_penalty * max_similarity)
-
-        dabs_scores[seed_index] = dabs
+        precomputed = _precompute_seed_data(run_path, seed_index, cluster_model, use_winrate)
+        dabs_scores[seed_index] = _compute_dabs_from_precomputed(
+            precomputed, judge_thr, diversity_penalty, use_winrate
+        )
 
     return dabs_scores
 
 
+def _compute_subplot_grid(n: int) -> tuple[int, int]:
+    """Compute grid dimensions for n subplots.
+
+    Makes the grid as square as possible with max 4 columns.
+    For n <= 4, uses a single row.
+
+    Returns:
+        (rows, cols) tuple
+    """
+    if n <= 0:
+        return 0, 0
+    if n <= 4:
+        return 1, n
+
+    max_cols = 4
+    sqrt_n = np.sqrt(n)
+
+    if sqrt_n <= max_cols:
+        cols = int(np.ceil(sqrt_n))
+        rows = int(np.ceil(n / cols))
+    else:
+        cols = max_cols
+        rows = int(np.ceil(n / max_cols))
+
+    return rows, cols
+
+
 def plot_dabs_vs_threshold(
     run_paths: Sequence[Path|str],
-    cluster_model: ClusterModel,
+    cluster_model: EmbedClusterModel,
     topic_ids: Sequence[int]|None = None,
     diversity_penalty: float = 0.5,
     threshold_step: float = 0.05,
     use_winrate: bool = True,
-) -> list[go.Figure]:
+) -> go.Figure:
     """Plot DABS vs threshold for comparing multiple runs.
 
-    When multiple run_paths are provided, finds common seed indices and creates
-    one figure per seed, with each run's DABS curve overlaid for comparison.
+    Creates a single figure with subplots arranged in a grid (max 4 columns,
+    as square as possible). Each subplot shows one seed's DABS curves with
+    all runs overlaid for comparison.
 
     Returns:
-        List of figures, one per common seed index.
+        Single figure with subplots, one per common seed index.
     """
     thresholds = np.arange(0.0, 1.0 + threshold_step, threshold_step)
 
-    # Collect DABS scores: run_path -> seed_index -> list of scores (one per threshold)
-    run_seed_scores: dict[str, dict[int, list[float]]] = {}
+    # Step 1: Precompute embeddings for all runs/seeds (expensive, do once)
+    # Structure: run_key -> seed_index -> precomputed_data
+    precomputed_data: dict[str, dict[int, dict]] = {}
     for run_path in run_paths:
+        run_path = Path(run_path) if isinstance(run_path, str) else run_path
         run_key = str(run_path)
+        precomputed_data[run_key] = {}
+
+        validate_dir = run_path / "validate"
+        if not validate_dir.exists():
+            continue
+
+        pattern = re.compile(r'seed_(\d+)_validate')
+        for item in validate_dir.iterdir():
+            if item.is_dir():
+                match = pattern.match(item.name)
+                if match:
+                    seed_index = int(match.group(1))
+                    precomputed_data[run_key][seed_index] = _precompute_seed_data(
+                        run_path, seed_index, cluster_model, use_winrate
+                    )
+
+    # Step 2: Compute DABS for all thresholds using precomputed data (cheap)
+    run_seed_scores: dict[str, dict[int, list[float]]] = {}
+    for run_key, seeds_data in precomputed_data.items():
         run_seed_scores[run_key] = {}
-        for judge_thr in thresholds:
-            dabs_scores = DABS(run_path, judge_thr.item(), cluster_model, diversity_penalty, use_winrate)
-            for seed_index, score in dabs_scores.items():
-                if seed_index not in run_seed_scores[run_key]:
-                    run_seed_scores[run_key][seed_index] = []
-                run_seed_scores[run_key][seed_index].append(score)
+        for seed_index, precomputed in seeds_data.items():
+            run_seed_scores[run_key][seed_index] = [
+                _compute_dabs_from_precomputed(precomputed, thr.item(), diversity_penalty, use_winrate)
+                for thr in thresholds
+            ]
 
     # Find common seed indices across all runs
     all_seed_sets = [set(scores.keys()) for scores in run_seed_scores.values()]
     if not all_seed_sets:
-        return []
+        return go.Figure()
     common_seeds = set.intersection(*all_seed_sets)
 
     # Filter by topic_ids if provided
@@ -131,19 +236,36 @@ def plot_dabs_vs_threshold(
 
     if not common_seeds:
         print("No common seed indices found across runs")
-        return []
+        return go.Figure()
 
-    # Create one figure per common seed
-    figures = []
+    sorted_seeds = sorted(common_seeds)
+    n_seeds = len(sorted_seeds)
+    rows, cols = _compute_subplot_grid(n_seeds)
+
     metric_type = "winrate" if use_winrate else "reward diff"
 
-    for seed_index in sorted(common_seeds):
-        fig = go.Figure()
+    # Create subplot titles
+    subplot_titles = [f'Seed {seed}' for seed in sorted_seeds]
 
-        # Plot one line per run
+    fig = make_subplots(
+        rows=rows, cols=cols,
+        subplot_titles=subplot_titles,
+        horizontal_spacing=0.08,
+        vertical_spacing=0.12,
+    )
+
+    # Assign fixed colors to each run
+    import plotly.express as px
+    colors = px.colors.qualitative.Plotly
+    run_colors = {str(run_path): colors[i % len(colors)] for i, run_path in enumerate(run_paths)}
+
+    # Add traces to each subplot
+    for idx, seed_index in enumerate(sorted_seeds):
+        row = idx // cols + 1
+        col = idx % cols + 1
+
         for run_path in run_paths:
             run_key = str(run_path)
-            # Extract run name for legend (last part of path)
             run_name = Path(run_path).name
             scores = run_seed_scores[run_key][seed_index]
 
@@ -153,23 +275,26 @@ def plot_dabs_vs_threshold(
                     y=scores,
                     mode='lines+markers',
                     name=run_name,
-                    line=dict(width=2),
-                    marker=dict(size=6),
-                )
+                    line=dict(width=2, color=run_colors[run_key]),
+                    marker=dict(size=4, color=run_colors[run_key]),
+                    showlegend=(idx == 0),  # Only show legend for first subplot
+                    legendgroup=run_name,
+                ),
+                row=row, col=col,
             )
 
-        fig.update_layout(
-            title=f'Seed {seed_index}: DABS (student {metric_type}) vs teacher winrate threshold',
-            xaxis_title='Teacher winrate threshold',
-            yaxis_title=f'DABS (student {metric_type})',
-            height=600,
-            width=800,
-            hovermode='x unified',
-        )
+    fig.update_layout(
+        title=f'DABS (student {metric_type}) vs teacher winrate threshold',
+        height=300 * rows,
+        width=350 * cols,
+        hovermode='x unified',
+    )
 
-        figures.append(fig)
+    # Update axis labels
+    fig.update_xaxes(title_text='Teacher WR thr')
+    fig.update_yaxes(title_text='DABS')
 
-    return figures
+    return fig
 
 
 def _compute_2d_hypervolume(points: np.ndarray, ref_point: tuple[float, float]) -> float:
@@ -362,25 +487,25 @@ def compute_hypervolume_table(
 
 # %%
 run_paths = [
-    "data/evo/20251218-091313-pair-clio-plus",
-    "data/evo/20251218-104229-list_reverse-clio-plus",
-    "data/evo/20251218-121253-list-clio-plus"
+    "data/evo/20251230-171530-list_reverse-handpick-plus",
+    "data/evo/20251231-014058-list_reverse-handpick-plus",
+    "data/evo/20251231-034737-list_reverse-handpick-plus"
 ]
-# run_paths = [
-#     "data/evo/20251218-055659-pair-clio-plus",
-#     "data/evo/20251217-160232-list_reverse-clio-plus",
-# ]
-cluster_model = ClusterModel(embed_model_name="Qwen/Qwen3-Embedding-0.6B")
+
+cluster_model = EmbedClusterModel(embed_model_name="Qwen/Qwen3-Embedding-0.6B")
 
 # %%
-figures = plot_dabs_vs_threshold(run_paths, cluster_model)
-for fig in figures:
-    fig.show()
-
+fig = plot_dabs_vs_threshold(run_paths, cluster_model)
 # %%
-hv_table = compute_hypervolume_table(run_paths)
-for run_name, seeds in hv_table.items():
-    print(f'{run_name}:')
-    for seed_idx, hv in sorted(seeds.items()):
-        print(f'  seed {seed_idx}: {hv:.4f}')
+Path("data/metrics").mkdir(parents=True, exist_ok=True)
+fig.write_image("data/metrics/dabs_plot.pdf")
+print("Saved to dabs_plot.pdf")
+
+# # %%
+# hv_table = compute_hypervolume_table(run_paths)
+# for run_name, seeds in hv_table.items():
+#     print(f'{run_name}:')
+#     for seed_idx, hv in sorted(seeds.items()):
+#         print(f'  seed {seed_idx}: {hv:.4f}')
+# # %%
 # %%
