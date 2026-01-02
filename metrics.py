@@ -486,20 +486,18 @@ def compute_hypervolume_table(
 
 
 # %%
-run_paths = [
-    "data/evo/20251230-171530-list_reverse-handpick-plus",
-    "data/evo/20251231-014058-list_reverse-handpick-plus",
-    "data/evo/20251231-034737-list_reverse-handpick-plus"
-]
 
 cluster_model = EmbedClusterModel(embed_model_name="Qwen/Qwen3-Embedding-0.6B")
 
 # %%
+run_name = "20251230-120350-list_reverse-chatgpt-plus"
+run_paths = [f"data/evo/{run_name}"]
+
 fig = plot_dabs_vs_threshold(run_paths, cluster_model)
-# %%
-Path("data/metrics").mkdir(parents=True, exist_ok=True)
-fig.write_image("data/metrics/dabs_plot.pdf")
-print("Saved to dabs_plot.pdf")
+
+Path(f"data/metrics/{run_name}").mkdir(parents=True, exist_ok=True)
+fig.write_image(f"data/metrics/{run_name}/dabs_plot.pdf")
+print(f"Saved to {run_name}/dabs_plot.pdf")
 
 # # %%
 # hv_table = compute_hypervolume_table(run_paths)

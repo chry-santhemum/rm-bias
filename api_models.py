@@ -108,6 +108,7 @@ class RewriteModel(GenerationModel):
         attributes: str | list[str],
         original_chats: list[ChatHistory],
         same_attrs: str | list[str] = "",
+        desc: str | None = None,
     ) -> list[TextResult]:
         if isinstance(attributes, str):
             attributes_list = [attributes] * len(original_chats)
@@ -131,7 +132,7 @@ class RewriteModel(GenerationModel):
                 )
             ))
         try:
-            responses = await self.sample(to_send_chats)
+            responses = await self.sample(to_send_chats, desc=desc)
         except Exception as e:
             logger.exception(f"RewriteModel.rewrite failed:\nError:\n{e}")
             # Return None for all items on error

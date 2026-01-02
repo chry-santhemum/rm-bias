@@ -740,6 +740,176 @@ def mean_diff_correlation_all_seeds(
     print(f"Saved cross-seed correlation plots to {save_path}")
 
 
+def mean_diff_correlation_all_pairs(
+    all_seeds_results: list[tuple[str, list[dict]]],  # list of (seed_index, all_rewriter_results)
+    save_path: Path,
+):
+    """
+    Compare every pair of rewriters against each other (not just vs original).
+    Each point in the aggregated plot is one (seed, attribute) pair.
+    """
+    from itertools import combinations
+    from scipy import stats
+
+    save_path.mkdir(parents=True, exist_ok=True)
+
+    # Collect all rewriter names
+    all_rewriter_names = set()
+    for _, all_rewriter_results in all_seeds_results:
+        for r in all_rewriter_results:
+            all_rewriter_names.add(r["rewriter_name"])
+
+    rewriter_names = sorted(all_rewriter_names)
+
+    # Compare each pair
+    for rewriter_a, rewriter_b in combinations(rewriter_names, 2):
+        # Accumulate across seeds
+        a_means = []
+        b_means = []
+        labels = []
+        a_diffs_individual = []
+        b_diffs_individual = []
+
+        for seed_index, all_rewriter_results in all_seeds_results:
+            # Find both rewriter results for this seed
+            results_a = None
+            results_b = None
+            for r in all_rewriter_results:
+                if r["rewriter_name"] == rewriter_a:
+                    results_a = r["results"]
+                elif r["rewriter_name"] == rewriter_b:
+                    results_b = r["results"]
+
+            if results_a is None or results_b is None:
+                continue
+
+            for attribute in results_a:
+                if attribute not in results_b:
+                    continue
+
+                # Compute means for this (seed, attribute)
+                a_all_diffs = []
+                for diffs in results_a[attribute].values():
+                    a_all_diffs.extend([d for d in diffs if d is not None])
+
+                b_all_diffs = []
+                for diffs in results_b[attribute].values():
+                    b_all_diffs.extend([d for d in diffs if d is not None])
+
+                if a_all_diffs and b_all_diffs:
+                    a_cleaned = remove_outliers(a_all_diffs)
+                    b_cleaned = remove_outliers(b_all_diffs)
+                    if a_cleaned and b_cleaned:
+                        a_means.append(np.mean(a_cleaned))
+                        b_means.append(np.mean(b_cleaned))
+                        labels.append(f"seed{seed_index}: {attribute[:40]}...")
+
+                # Paired individual diffs
+                for user_prompt in results_a[attribute]:
+                    if user_prompt not in results_b[attribute]:
+                        continue
+                    a_prompt_diffs = results_a[attribute][user_prompt]
+                    b_prompt_diffs = results_b[attribute][user_prompt]
+
+                    for i in range(min(len(a_prompt_diffs), len(b_prompt_diffs))):
+                        a_d = a_prompt_diffs[i]
+                        b_d = b_prompt_diffs[i]
+                        if a_d is not None and b_d is not None:
+                            a_diffs_individual.append(a_d)
+                            b_diffs_individual.append(b_d)
+
+        # Plot 1: Aggregated by (seed, attribute)
+        if len(a_means) >= 2:
+            fig = go.Figure()
+
+            fig.add_trace(go.Scatter(
+                x=a_means,
+                y=b_means,
+                mode='markers',
+                marker=dict(size=8, color='rgb(31, 119, 180)'),
+                text=labels,
+                hovertemplate='%{text}<br>' + rewriter_a + ': %{x:.2f}<br>' + rewriter_b + ': %{y:.2f}<extra></extra>',
+            ))
+
+            slope, intercept, r_value, p_value, _ = stats.linregress(a_means, b_means)
+            x_line = np.array([min(a_means), max(a_means)])
+            y_line = slope * x_line + intercept
+
+            fig.add_trace(go.Scatter(
+                x=x_line,
+                y=y_line,
+                mode='lines',
+                line=dict(color='red', dash='dash'),
+                name=f'r={r_value:.3f}, p={p_value:.3e}',
+            ))
+
+            all_vals = a_means + b_means
+            min_val, max_val = min(all_vals), max(all_vals)
+            fig.add_trace(go.Scatter(
+                x=[min_val, max_val],
+                y=[min_val, max_val],
+                mode='lines',
+                line=dict(color='gray', dash='dot'),
+                name='y=x',
+            ))
+
+            fig.update_layout(
+                title=f'{rewriter_a} vs {rewriter_b} (all seeds, per-attribute)<br>r={r_value:.3f}, p={p_value:.3e}, n={len(a_means)}',
+                xaxis_title=f'{rewriter_a} mean diff',
+                yaxis_title=f'{rewriter_b} mean diff',
+                width=700,
+                height=600,
+            )
+
+            fig.write_image(save_path / f'{rewriter_a}_vs_{rewriter_b}_aggregated.pdf')
+
+        # Plot 2: Individual paired diffs across all seeds
+        if len(a_diffs_individual) >= 2:
+            fig = go.Figure()
+
+            fig.add_trace(go.Scatter(
+                x=a_diffs_individual,
+                y=b_diffs_individual,
+                mode='markers',
+                marker=dict(size=4, color='rgb(31, 119, 180)', opacity=0.2),
+                hovertemplate=rewriter_a + ': %{x:.2f}<br>' + rewriter_b + ': %{y:.2f}<extra></extra>',
+            ))
+
+            slope, intercept, r_value, p_value, _ = stats.linregress(a_diffs_individual, b_diffs_individual)
+            x_line = np.array([min(a_diffs_individual), max(a_diffs_individual)])
+            y_line = slope * x_line + intercept
+
+            fig.add_trace(go.Scatter(
+                x=x_line,
+                y=y_line,
+                mode='lines',
+                line=dict(color='red', dash='dash'),
+                name=f'r={r_value:.3f}, p={p_value:.3e}',
+            ))
+
+            all_vals = a_diffs_individual + b_diffs_individual
+            min_val, max_val = min(all_vals), max(all_vals)
+            fig.add_trace(go.Scatter(
+                x=[min_val, max_val],
+                y=[min_val, max_val],
+                mode='lines',
+                line=dict(color='gray', dash='dot'),
+                name='y=x',
+            ))
+
+            fig.update_layout(
+                title=f'{rewriter_a} vs {rewriter_b} (all seeds, individual)<br>r={r_value:.3f}, p={p_value:.3e}, n={len(a_diffs_individual)}',
+                xaxis_title=f'{rewriter_a} diff',
+                yaxis_title=f'{rewriter_b} diff',
+                width=700,
+                height=600,
+            )
+
+            fig.write_image(save_path / f'{rewriter_a}_vs_{rewriter_b}_individual.pdf')
+
+    print(f"Saved all-pairs correlation plots to {save_path}")
+
+
 def compute_paired_rewriter_diffs_by_attribute(
     all_rewriter_results: list[dict],
     original_rewriter_name: str,
@@ -1196,11 +1366,17 @@ if __name__ == "__main__":
             # Accumulate for cross-seed plots
             all_seeds_results.append((seed_index, all_rewriter_results))
 
-        # Cross-seed correlation plots
+        # Cross-seed correlation plots (vs original)
         mean_diff_correlation_all_seeds(
             all_seeds_results=all_seeds_results,
             original_rewriter_name=original_rewriter.split("/")[-1],
             save_path=Path(f"data/rewrite_val_invariance/{run_name}/correlation_all_seeds"),
+        )
+
+        # All-pairs correlation plots
+        mean_diff_correlation_all_pairs(
+            all_seeds_results=all_seeds_results,
+            save_path=Path(f"data/rewrite_val_invariance/{run_name}/correlation_all_pairs"),
         )
 
 
