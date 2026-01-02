@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 from state import SeedState, Rollout
 from utils import timestamp
-from api_models import GenerationModel, SAME_ATTRS
+from api_models import GenerationModel, RewriteModel, SAME_ATTRS
 from reward_models import RewardModel
 from bias_workers import evaluate_baselines
 from bias_evaluator import BiasEvaluator
@@ -22,7 +22,6 @@ class Runner(ABC):
         self,
         seed_states: list[SeedState],
         policy_model: GenerationModel,
-        bias_evaluator: BiasEvaluator,
         teacher_model: RewardModel,
         run_name: str | None,
         n_baseline_rollouts: int,
@@ -172,7 +171,8 @@ class Runner(ABC):
 
     async def validate(
         self, 
-        final_attributes: dict[int, list[str]], 
+        final_attributes: dict[int, list[str]],
+        val_rewriters: list[RewriteModel],
         judge_val_first_n_rollouts: int, 
         judge_val_first_n_user_prompts: int
     ):

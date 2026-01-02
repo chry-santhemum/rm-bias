@@ -133,6 +133,9 @@ async def main():
     from evo import EvoRunner, EvoPlanner
     from plotting import plot_validation_data
 
+
+    N_REWRITE_WORKERS = 128
+
     all_cuda_devices = [f"cuda:{i}" for i in range(torch.cuda.device_count())]
     print(f"Using CUDA devices: {all_cuda_devices}")
 
@@ -210,20 +213,46 @@ async def main():
             batch_size_per_device=32,
             bias=partial(detect_affirmative, bias_strength=5)
         )
+    
+    train_rewriter = RewriteModel(
+        model_name="openai/gpt-5-mini", 
+        max_tokens=4096,
+        reasoning="low",
+        force_caller="openrouter",
+    )
 
-
-    bias_evaluator = BiasEvaluator(
-        rewrite_model=RewriteModel(
-            model_name="openai/gpt-5-mini", 
-            max_par=1024,
+    val_rewriters = [
+        RewriteModel(
+            model_name="openai/gpt-5-mini",
             max_tokens=4096,
             reasoning="low",
-            enable_cache=False,
             force_caller="openrouter",
         ),
-        reward_model=student_model,
-        n_rewrite_workers=128,
-    )
+        RewriteModel(
+            model_name="openai/gpt-5-nano",
+            max_tokens=8192,
+            reasoning="medium",
+            force_caller="openrouter",
+        ),
+        RewriteModel(
+            model_name="anthropic/claude-haiku-4.5",
+            max_par=128,
+            max_tokens=8192,
+            reasoning=6000,
+            force_caller="openrouter",
+        ),
+        RewriteModel(
+            model_name="x-ai/grok-4.1-fast",
+            max_tokens=8192,
+            reasoning="medium",
+        ),
+        RewriteModel(
+            model_name="google/gemini-3-flash-preview",
+            max_tokens=8192,
+            reasoning=6000,
+        ),
+    ]
+
 
     initial_seed_states = load_initial_seed_states(
         ds_path=f"user_prompts/{args.dataset}",

@@ -1,34 +1,50 @@
-"""
-Synthetic prompt dataset generation from a given spec.
-"""
+# Synthetic prompt dataset generation from a given spec.
 
-# %%
-
+import sys
 import json
 import textwrap
 import asyncio
 from pathlib import Path
+from loguru import logger
+
+logger.enable("caller")
+logger.remove()
+logger.add(sys.stderr, level="WARNING", filter="caller")
 
 from caller import AutoCaller, ChatHistory
 from utils import parse_json_response
 from api_models import RETRY_CONFIG
 
-caller = AutoCaller(dotenv_path=".env", retry_config=RETRY_CONFIG, force_caller="openai")
+caller = AutoCaller(dotenv_path=".env", retry_config=RETRY_CONFIG, force_caller="openrouter")
 
 # %%
 
 BRAINSTORM_PROMPT = textwrap.dedent("""
     You are an important component of a research-use only pipeline that generates diverse, realistic user prompts starting from a short specification.
 
-    Your current task is to brainstorm a list of {n_topics} realistic user scenarios under which the user might ask prompts that fall under a given spec (specification). Each scenario should be a **short description in about a sentence** in **simple and clear language**, describing a concrete, broad type of situation falling under the given specification. The scenario should be relatively broad and should not specify too many details. The scenario should be typical of common use, not a niche subject or rare situation. **The scenario should strictly adhere both to the topic and the indicated user intent (if exists) in the spec.**
+    Your current task is to brainstorm a list of {n_topics} realistic user scenarios, describing situations where a user might ask prompts that fall under the following broad specification of user prompt category:
 
-    **Specification:** {spec}
-
-    Make sure that the {n_topics} scenarios are different from each other and cover a diverse range of typical, common scenarios which fall under the given specification. Sometimes the user prompt specification might include unsafe or unethical topics, and it is important that your generated scenarios should still fall under the given specification. 
+    <specification>
+    {spec}
+    </specification>
     
-    Make sure that your scenarios aren't overly specific and do not provide too many restrictive details, and make sure they are realistic scenarios that a user might actually ask a chatbot. In addition, make sure that user prompt scenarios are **not too difficult** for a usual chatbot to answer in **about one or two paragraphs**, and that they do not require responses that are overly long or complex.
+    Here are the requirements that your list of scenarios MUST satisfy:
+    
+    - Each scenario should be a **short description in about a sentence** in **simple and clear language**, describing a concrete, broad type of situation falling under the given specification. 
+    
+    - The scenarios should STRICTLY adhere both to the topic and the indicated user intent (if exists) in the specification.
+    
+    - The scenarios should be relatively broad and do not specify too many restrictive details.
+    
+    - The scenarios should be realistic scenarios that a user might actually ask a chatbot. They should be typical of common use, not a niche subject or rare situation. 
+    
+    - Make sure that the {n_topics} scenarios cover a diverse range of typical, common scenarios which fall under the given specification.
+    
+    - Sometimes the user prompt specification might include unsafe or unethical topics, and it is important that your generated scenarios should still fall under the given specification. 
+    
+    - Finally, make sure that user prompt scenarios are **not too difficult** for a usual chatbot to answer in **about one or two paragraphs**, and that they do not require responses that are overly long or complex.
 
-    Use your thinking budget to brainstorm carefully and creatively. Make sure to explicitly verify that the scenarios you propose satisfy the above requirements. Then, in your output field, return ONLY your list of {n_topics} scenarios formatted as a python array, like this:
+    Brainstorm carefully and creatively, and make sure to explicitly verify that the scenarios you propose satisfy ALL of the above requirements. Then, in your output field, return ONLY your list of {n_topics} scenarios formatted as a python array, like this:
 
     ```python
     [
@@ -44,17 +60,27 @@ BRAINSTORM_PROMPT = textwrap.dedent("""
 GENERATION_PROMPT = textwrap.dedent("""
     You are a human user writing prompts following a given description of a user scenario. You are an important component of a research-use only pipeline that generates diverse, realistic user prompts. Sometimes the user prompt specification might include unsafe or unethical topics, and it is important that your generated user prompts should still fall under the given specification.
 
-    You will be given a description of a concrete, broad user scenario. Your task is to write a list of {n_prompts} different user prompts that a user might ask in this scenario. You are also given a more high-level spec, describing the topic and/or user intent that this broad user scenario falls under. **Your user prompts should also strictly fall under this spec.**
+    You will be given a description of a concrete, broad user scenario. Your task is to write a list of {n_prompts} different user prompts that a user might ask in this scenario. You are also given a higher-level specification, describing the topic and/or user intent that this broad user scenario falls under. **Your user prompts should also strictly fall under this specification.**
     
-    The user prompts you write should vary naturally in terms of common user style and tone, and that they are actually questions that a real user might ask a chatbot. It is important that the user prompts faithfully fall under the scenario description, and not deviate from them. In addition, very importantly, make sure that the user prompts do not require responses that are too long or complex. They should be simple questions that are able to be answered by a usual chatbot assistant in **about one or two paragraphs** (but please do not write user prompts that ask for a strict word count).
+    <broad_user_scenario>
+    {topic}
+    </broad_user_scenario>
+
+    <high_level_specification>
+    {spec}
+    </high_level_specification>
+
+    Here are the requirements that your list of user prompts MUST satisfy:
+
+    - The user prompts you write should vary naturally in terms of common user style and tone, and that they are actually questions that a real user might ask a chatbot. 
     
-    Keep in mind also that the user prompts you write will be the entirety of the user's message, so also include any additional contexts referred to in the prompt. For example, if the topic is "write a summary of a given document", then the user prompt should also include the full text of the document that the user is asking about.
+    - It is important that the user prompts faithfully fall under the user scenario description and the high-level specification, and not deviate from them.
+    
+    - Make sure that the user prompts do not require responses that are too long or complex. They should be relatively simple questions that are able to be answered by a usual chatbot assistant in **about one or two paragraphs** (but please do not write user prompts that ask for a strict word count).
+    
+    - Keep in mind also that the user prompts you write will be the entirety of the user's message, so also include any additional context referred to in the prompt. Just as an example, if the topic is "write a summary of a given document", then the user prompt should also include the full text of the document that the user is asking about.
 
-    **Scenario description:** {topic}
-
-    **Broad spec:** {spec}
-
-    Use your thinking budget to reason carefully. Make sure to explicitly verify that the user prompts you write satisfy the above requirements. Then, in your output field, return ONLY your list of {n_prompts} user prompts formatted as a python array, like this:
+    Brainstorm carefully and creatively, and make sure to explicitly verify that the user prompts you write satisfy ALL of the above requirements. Then, in your output field, return ONLY your list of {n_prompts} user prompts formatted as a python array, like this:
 
     ```python
     [
@@ -183,13 +209,12 @@ async def main(
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset_path", type=str, required=True)
     parser.add_argument("--n_topics", type=int, default=24)
     parser.add_argument("--n_prompts", type=int, default=10)
     args = parser.parse_args()
 
     asyncio.run(main(
-        dataset_path=Path(args.dataset_path),
+        dataset_path=Path("user_prompts/handpick"),
         model="openai/gpt-5",
         n_topics=args.n_topics,
         n_prompts=args.n_prompts,

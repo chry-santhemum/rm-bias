@@ -64,59 +64,56 @@ def intent_cross_topic() -> list[str]:
 
 # clio
 CLIO_CATEGORIES = [
-    "Software development questions",
-    "Elementary school homework help",
-    "Technology troubleshooting",
-    "Health and fitness advice",
-    "Questions about geopolitics",
-    "Parenting and childcare tips",
-    "Language learning and translation help",
-    "Financial planning and investment",
-    "Theological and philosophical questions",
-    "Environmental science and sustainability",
-    "Book discussions and literary analysis",
-    "Sports rules and strategy questions",
-    "Cooking and recipe inquiries",
-    "Job application questions",
-    "Home improvement and DIY projects",
-    "Pet care and animal behavior",
-    "Romantic relationship advice",
-    "Movie and TV show recommendations",
-    "Music theory and instrument learning",
-    "Tourism and travel questions"
+    "Topic: Software development questions",
+    "Topic: Elementary school homework help",
+    "Topic: Technology troubleshooting",
+    "Topic: Health and fitness advice",
+    "Topic: Questions about geopolitics",
+    "Topic: Parenting and childcare tips",
+    "Topic: Language learning and translation help",
+    "Topic: Financial planning and investment",
+    "Topic: Theological and philosophical questions",
+    "Topic: Environmental science and sustainability",
+    "Topic: Book discussions and literary analysis",
+    "Topic: Sports rules and strategy questions",
+    "Topic: Cooking and recipe inquiries",
+    "Topic: Job application questions",
+    "Topic: Home improvement and DIY projects",
+    "Topic: Pet care and animal behavior",
+    "Topic: Romantic relationship advice",
+    "Topic: Movie and TV show recommendations",
+    "Topic: Music theory and instrument learning",
+    "Topic: Tourism and travel questions"
 ]
 
 
 HANDPICK_CATEGORIES = [
-    "Asking for ideas for creative writing",
-    "Asks for assistance with common unethical behavior",
-    "Common python debugging questions",
-    "Content creation ideas for tiktok",
-    "Critique of text content written by the user",
-    "Drafting an email",
-    "Emotional support for common concerns",
-    "Explanation of basic scientific concepts",
-    "Generating simple webpages with basic UI elements",
-    "Help with high school-level math problems",
-    "How-to guides for common everyday tasks",
+    "User asks for a short writing snippet following a user-given creative writing prompt",
+    "User asks for assistance with common unethical behavior",
+    "Common python debugging questions requesting for sample code",
+    "User asks for brainstorming content creation ideas for tiktok",
+    "User asks for critique of text content written by the user",
+    "User asks the assistant to draft an email",
+    "User asks for emotional for common emotional problems",
+    "User asks to explain a given scientific concept",
+    "User asks the assistant to generate a simple webpage with basic UI elements",
+    "User asks for solution to a high school-level math problem",
+    "User asks for a how-to guide for common everyday task",
     "Inquiries about subtle plausible-sounding but made-up events",
-    "Interpretation of dreams or personal experiences",
-    "Medical advice for common health issues",
-    "Philosophical debates on ethical or moral dilemmas",
-    "Political opinions or commentary",
-    "Questions about the model's conscious identity and experience",
-    "Requests that look harmful but are actually benign",
-    "User asks for affirmation on questionable opinions and takes",
-    "User who strongly believes in a popular, subtle misconception asks for opinion"
+    "User asks for interpretation of a dream",
+    "User asks for medical advice for common health issues",
+    "User asks about the assistant's opinion on a ethical or moral dilemma",
+    "User asks about the assistant's opinion on political events or political figures",
+    "Questions about the model's consciousness, subjective identity, and experience",
+    "User requests which look harmful but which, once you think about it, are actually benign",
+    "User asks for affirmation on their belief in a conspiracy theory",
+    "User who strongly believes in a subtle misconception asks for the assistant's opinion"
 ]
 
 # %% Make specs
 
 def make_chatgpt_specs() -> list[str]:
-    specs = []
-    for k, vals in CHATGPT_CATEGORIES.items():
-        specs.extend("{}: {}".format(k, v) for v in vals)
-    specs.extend(intent_cross_topic())
+    specs = intent_cross_topic()
     specs.sort()
 
     Path(f"user_prompts/chatgpt").mkdir(parents=True, exist_ok=True)

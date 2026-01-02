@@ -44,6 +44,7 @@ class RewriteOutput:
     system: str  # the attribute that was rewritten toward
     user: str
     original_assistant: str
+    rewriter_model_name: str
     rewritten_assistant: str | None
     rewriter_reasoning: str | None
     batch_id: str
@@ -139,7 +140,7 @@ async def policy_worker(
 
 
 async def rewrite_worker(
-    rewrite_model: RewriteModel,
+    rewrite_models: list[RewriteModel],
     batch_size: int,
     in_queue: asyncio.Queue[RewriteInput|None],
     out_queue: asyncio.Queue[RewriteOutput],
@@ -150,13 +151,17 @@ async def rewrite_worker(
         if not batch:
             return
 
-        responses = await rewrite_model.rewrite(
-            attributes=[input.system for input in batch],
-            original_chats=[ChatHistory.from_user(input.user).add_assistant(
-                input.original_assistant
-            ) for input in batch],
-            same_attrs=[input.same_attrs for input in batch],
-        )
+        tasks = []
+        for rwm in rewrite_models:
+            tasks.append(rwm.rewrite(
+                attributes=[input.system for input in batch],
+                original_chats=[ChatHistory.from_user(input.user).add_assistant(
+                    input.original_assistant
+                ) for input in batch],
+                same_attrs=[input.same_attrs for input in batch],
+            ))
+
+        responses = await asyncio.gather(*tasks)
 
         rewrite_results = []
         for i, response in enumerate(responses):

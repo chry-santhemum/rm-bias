@@ -21,11 +21,11 @@ from bias_workers import (
 class BiasEvaluator:
     def __init__(
         self,
-        rewrite_model: RewriteModel,
+        rewrite_models: list[RewriteModel],
         reward_model: RewardModel,
         n_rewrite_workers: int,
     ):
-        self.rewrite_model = rewrite_model
+        self.rewrite_models = rewrite_models
         self.reward_model = reward_model
         self.n_rewrite_workers = n_rewrite_workers
 
