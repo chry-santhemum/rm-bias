@@ -44,10 +44,10 @@ class RewriteOutput:
     system: str  # the attribute that was rewritten toward
     user: str
     original_assistant: str
+    batch_id: str
     rewriter_model_name: str
     rewritten_assistant: str | None
     rewriter_reasoning: str | None
-    batch_id: str
     raw_score: float | None = None
 
 
@@ -161,23 +161,24 @@ async def rewrite_worker(
                 same_attrs=[input.same_attrs for input in batch],
             ))
 
-        responses = await asyncio.gather(*tasks)
+        all_responses = await asyncio.gather(*tasks)
 
         rewrite_results = []
-        for i, response in enumerate(responses):
-            input = batch[i]
-            if response.text is None:
-                logger.warning(
-                    f"rewrite_worker {worker_id} - Failed to rewrite:\nUser prompt:\n{input.user}"  # this doesn't happen much
-                )
-            rewrite_results.append(RewriteOutput(
-                system=input.system,
-                user=input.user,
-                original_assistant=input.original_assistant,
-                rewritten_assistant=response.text,
-                rewriter_reasoning=response.reasoning,
-                batch_id=input.batch_id,
-            ))
+        for rwm, response in zip(rewrite_models, all_responses):
+            for input, response in zip(batch, response):
+                if response.text is None:
+                    logger.warning(
+                        f"rewrite_worker {worker_id} - Failed to rewrite:\nUser prompt:\n{input.user}"  # this doesn't happen much
+                    )
+                rewrite_results.append(RewriteOutput(
+                    system=input.system,
+                    user=input.user,
+                    original_assistant=input.original_assistant,
+                    rewriter_model_name=rwm.model_name,
+                    rewritten_assistant=response.text,
+                    rewriter_reasoning=response.reasoning,
+                    batch_id=input.batch_id,
+                ))
 
         for result in rewrite_results:
             await out_queue.put(result)
@@ -318,53 +319,6 @@ async def rating_worker(
 # %%
 # Organizing results
 
-def organize_baselines(
-    all_results: list[PromptOutput],
-    student_model_name: str,
-    save_dir: Path | None = None,
-) -> dict[str, list[Rollout]]:
-    organized_rollouts = defaultdict(list)
-    organized_scores = defaultdict(list)
-
-    for item in all_results:
-        assert item.system is None
-        if item.raw_score is None:  # only possible when reward model bugged out
-            logger.warning(f"Baseline result for {item.user} is None. Skipping.")
-            continue
-        assert item.assistant is not None
-        student_score = RewriteScore(
-            score=None,
-            raw_score=item.raw_score,
-            reasoning=None,
-            model_name=student_model_name,
-        )
-        organized_rollouts[item.user].append(Rollout(
-            response=item.assistant,
-            student_score=student_score,
-            teacher_score=None,
-            model=item.model,
-        ))
-        organized_scores[item.user].append(item.raw_score)
-
-    if save_dir is not None:
-        save_dir.mkdir(parents=True, exist_ok=True)
-
-        with open(save_dir / "rollouts.json", "w") as f:
-            json_data = {k: [
-                {
-                    "response": r.response,
-                    "model": r.model,
-                    "student_score": r.student_score.raw_score,
-                } 
-                for r in v
-            ] for k, v in organized_rollouts.items()}
-            json.dump(json_data, f, indent=4, sort_keys=True)
-
-        with open(save_dir / "scores.json", "w") as f:
-            json.dump(organized_scores, f, indent=4, sort_keys=True)
-
-    return dict(organized_rollouts)
-
 
 def organize_rewrites(
     all_results: list[RewriteOutput],
@@ -461,66 +415,3 @@ def organize_rewrites(
 
     return dict(organized_rollouts)
 
-
-# %%
-async def evaluate_baselines(
-    user_prompts: list[str],
-    policy_model: GenerationModel,
-    reward_model: RewardModel,
-    n_rollouts: int,
-    save_dir: Path | None = None,
-) -> dict[str, list[Rollout]]:
-    """
-    Saves results under the directory save_dir.
-    """
-    queue_a = asyncio.Queue(maxsize = 2 * policy_model.max_par)
-    queue_b = asyncio.Queue()
-    batch_id = "0"
-    n_policy_workers = 64
-    batch_size = max(1, policy_model.max_par // n_policy_workers)
-    all_results = {batch_id: []}
-    all_futures = {batch_id: asyncio.get_running_loop().create_future()}
-    start_time = time.time()
-
-    # Start workers
-    policy_worker_tasks = [
-        asyncio.create_task(policy_worker(policy_model, batch_size, queue_a, queue_b, worker_id))
-        for worker_id in range(n_policy_workers)
-    ]
-    rating_worker_task = asyncio.create_task(
-        rating_worker(reward_model, queue_b, all_results, all_futures)
-    )
-
-    # Send inputs
-    logger.info(f"Batch {batch_id} expects {len(user_prompts) * n_rollouts} results...")
-    await queue_b.put(
-        BatchStartMarker(batch_id=batch_id, expected_items=len(user_prompts) * n_rollouts)
-    )
-
-    for user in user_prompts:
-        for _ in range(n_rollouts):
-            await queue_a.put(PromptInput(system=None, user=user, batch_id=batch_id))
-
-    # send one stop sentinel per policy worker
-    for _ in range(n_policy_workers):
-        await queue_a.put(None)
-
-    # Wait for policy workers to finish first, so we know no more items will be produced
-    await asyncio.gather(*policy_worker_tasks)
-    logger.info("--- baseline policy workers finished. ---")
-
-    # Now send stop sentinel to rating worker so it can finalize incomplete batches
-    await queue_b.put(None)
-    await rating_worker_task
-    logger.info("--- baseline rating worker finished. ---")
-
-    # Get results from future (should be set by now, either when complete or when finalized)
-    all_results = await all_futures[batch_id]
-    logger.info(
-        f"Expected {len(user_prompts) * n_rollouts} results, got {len(all_results)}"
-    )
-
-    organized_results = organize_baselines(all_results, reward_model.model_name, save_dir)
-    logger.info(f"Evaluated baselines in {(time.time() - start_time):.2f} seconds")
-
-    return organized_results

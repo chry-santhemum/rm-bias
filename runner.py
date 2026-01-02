@@ -10,11 +10,11 @@ from abc import ABC, abstractmethod
 import numpy as np
 import matplotlib.pyplot as plt
 
-from state import SeedState, Rollout
+from state import SeedState
+from baselines import BaselineRollout, evaluate_baselines
 from utils import timestamp
 from api_models import GenerationModel, RewriteModel, SAME_ATTRS
 from reward_models import RewardModel
-from bias_workers import evaluate_baselines
 from bias_evaluator import BiasEvaluator
 
 class Runner(ABC):
@@ -63,7 +63,7 @@ class Runner(ABC):
     async def get_baselines(self):
         # get baseline rollouts and rewards
         start_time = time.time()
-        self.baselines: dict[str, list[Rollout]] = await evaluate_baselines(
+        self.baselines: dict[str, list[BaselineRollout]] = await evaluate_baselines(
             user_prompts=self.all_train_prompts,
             policy_model=self.policy_model,
             reward_model=self.bias_evaluator.reward_model,
@@ -78,7 +78,7 @@ class Runner(ABC):
 
     async def get_val_baselines(self):
         start_time = time.time()
-        self.val_baselines: dict[str, list[Rollout]] = await evaluate_baselines(
+        self.val_baselines: dict[str, list[BaselineRollout]] = await evaluate_baselines(
             user_prompts=self.all_val_prompts,
             policy_model=self.policy_model,
             reward_model=self.bias_evaluator.reward_model,

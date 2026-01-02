@@ -1,6 +1,6 @@
 import re
 import json
-import random
+from random import Random
 from loguru import logger
 from dataclasses import dataclass
 from typing import Any, Sequence, Literal
@@ -31,6 +31,7 @@ class GenerationModel:
         model_name: str | list[str],
         max_par: int,
         force_caller: str | None = None,
+        random_seed: int = 10086,
         **kwargs,
     ):
         if isinstance(model_name, str):
@@ -44,6 +45,7 @@ class GenerationModel:
             retry_config=RETRY_CONFIG, 
             force_caller=force_caller
         )
+        self.rng = Random(seed=random_seed)
         self.kwargs = kwargs
 
     def to_dict(self) -> dict:
@@ -71,7 +73,7 @@ class GenerationModel:
         When multiple model names are configured, randomly selects a model
         for each chat history.
         """
-        models = [random.choice(self.model_names) for _ in chat_histories]
+        models = [self.rng.choice(self.model_names) for _ in chat_histories]
         
         responses = await self.caller.call(
             messages=chat_histories,
@@ -262,7 +264,7 @@ class JudgeModel(GenerationModel):
 
             flips = [False for _ in range(num_trials // 2)] + [True for _ in range(num_trials // 2)]
             if num_trials % 2 == 1:
-                flips.append(random.choice([False, True]))
+                flips.append(self.rng.choice([False, True]))
 
             for flip in flips:
                 to_send_chats.append(
