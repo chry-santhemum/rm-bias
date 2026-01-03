@@ -391,18 +391,20 @@ def plot_multi_rewriter_violin(
             tickvals=y_tick_vals,
             ticktext=y_tick_labels,
             automargin=True,
+            ticklabelstandoff=15,  # Horizontal separation from plot
         ),
         font=dict(size=11),
         violingap=0.05,
         violingroupgap=0.05,
-        margin=dict(l=10, r=40, t=80, b=60),
+        margin=dict(l=10, r=40, t=100, b=60),  # More top margin for legend
         legend=dict(
-            orientation="v",
-            yanchor="top",
-            y=0.98,
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,  # Above the plot
             xanchor="right",
-            x=0.99,
-            bgcolor="rgba(255,255,255,0.8)",
+            x=1.0,
+            bgcolor="rgba(255,255,255,0.9)",
+            font=dict(size=10),
         ),
     )
 
