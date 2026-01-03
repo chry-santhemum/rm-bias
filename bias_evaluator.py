@@ -53,7 +53,7 @@ class BiasEvaluator:
             return
         self._batch_id = 0
         self._batch_id_lock = asyncio.Lock()
-        max_par = max(m.max_par for m in self.rewrite_models)
+        max_par = min(m.max_par for m in self.rewrite_models)
         self.queue_input = asyncio.Queue(maxsize=2 * max_par)
         self.queue_rewrite = asyncio.Queue()
         self.batch_results = {}

@@ -185,8 +185,9 @@ async def rewrite_worker(
 
         for _ in batch:
             in_queue.task_done()
-
-        logger.info(f"[rewrite_worker {worker_id}] Done batch of size {len(batch)} in {(time.time() - start_time):.2f} seconds, in queue size: {in_queue.qsize()}")
+        
+        if worker_id < 5:
+            logger.info(f"[rewrite_worker {worker_id}] Done batch of size {len(batch)} in {(time.time() - start_time):.2f} seconds, in queue size: {in_queue.qsize()}")
         batch.clear() 
 
     current_batch: list[RewriteInput] = []

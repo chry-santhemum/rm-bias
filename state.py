@@ -76,7 +76,7 @@ class AttributeStats:
     def parent(self) -> str | None:
         return self.meta.get("parent", None)
 
-    def to_dict(self) -> dict[str, list[dict|None]]:
+    def to_dict(self) -> dict[str, Any]:
         all_results = {}
         for user_prompt, rollouts in self.rollouts.items():
             user_prompt_results = []
@@ -86,7 +86,13 @@ class AttributeStats:
                 else:
                     user_prompt_results.append(asdict_no_none(r))
             all_results[user_prompt] = user_prompt_results
-        return all_results
+        return {
+            "attribute": self.attribute,
+            "student_winrate": self.winrate("student"),
+            "teacher_winrate": self.winrate("teacher"),
+            "meta": self.meta,
+            "rollouts": all_results,
+        }
 
     def winrate(self, rater: Literal["student", "teacher"]) -> float | None:
         all_scores = []

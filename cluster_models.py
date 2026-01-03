@@ -465,7 +465,7 @@ class LLMClusterModel(ClusterModel):
     def __init__(
         self,
         model_name: str = "openai/gpt-5.2",
-        max_tokens: int = 50000,
+        max_tokens: int = 32768,
         reasoning: int | str = "high",
         max_par: int = 64,
         force_caller: str | None = None,

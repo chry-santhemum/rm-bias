@@ -177,7 +177,7 @@ def format_rewriter_stats_table(
 
         # Short rewriter name (last part after /)
         short_name = rewriter_name.split("_")[-1] if "_" in rewriter_name else rewriter_name
-        short_name = short_name[:12]  # Truncate if too long
+        short_name = short_name[:18]  # Truncate if too long
 
         # Format student stats
         parts = []

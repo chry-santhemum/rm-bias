@@ -76,6 +76,8 @@ if args.judge_train_first_n_rollouts > 2:
 #
 # Judge, claude-sonnet-4.5: $122 for 4 seeds. Cost?
 # separately: judge model costs $50 for (64 + 80 + 80) * 8 * 2 + 16 * 8 * 4 = 4096 calls.
+# also separately: (17 + 22) * 16 + (31 + 38) * 32 + (23 + 22) * 32 + (8 + 8) * 64 * 4 rewriters (claude kinda limped!) = 4272 + 4096
+# cost: about 70 dollars
 
 
 
@@ -211,12 +213,12 @@ async def main():
             reasoning="low",
             force_caller="openrouter",
         ),
-        RewriteModel(
-            model_name="openai/gpt-5-nano",
-            max_tokens=8192,
-            reasoning="medium",
-            force_caller="openrouter",
-        ),
+        # RewriteModel(
+        #     model_name="openai/gpt-5-nano",
+        #     max_tokens=8192,
+        #     reasoning="medium",
+        #     force_caller="openrouter",
+        # ),
         RewriteModel(
             model_name="anthropic/claude-haiku-4.5",
             max_par=128,
@@ -342,8 +344,8 @@ async def main():
         logger.exception(f"Training failed: {e}")
         raise
 
-    # run_path = Path(f"data/evo/{run_name}")
-    # plot_validation_data(run_path=run_path, write_path=run_path)
+    run_path = Path(f"data/evo/{run_name}")
+    plot_validation_data(run_path=run_path, write_path=run_path)
 
 
 if __name__ == "__main__":

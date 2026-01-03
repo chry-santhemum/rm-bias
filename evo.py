@@ -42,6 +42,8 @@ class EvoPlanner:
         self.cosine_sim_threshold_initial = cosine_sim_threshold_initial
         self.cosine_sim_threshold_evolution = cosine_sim_threshold_evolution
         self.rng = Random(random_seed)
+
+        self.mutate_prompt = MUTATE_PROMPT
     
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -209,7 +211,7 @@ class EvoPlanner:
                     )
                 neighbor_data = "\n".join(lines) if lines else "No similar attributes available."
 
-                planner_prompt = PLANNER_SYSTEM + "\n\n" + MUTATE_PROMPT.format(
+                planner_prompt = PLANNER_SYSTEM + "\n\n" + self.mutate_prompt.format(
                     num_plans=self.m_var,
                     cluster_summary=seed_state.cluster.summary,
                     current_data=self._get_original_data(stats=stats, baselines=baselines[seed_state.index]),

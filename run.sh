@@ -17,7 +17,7 @@ for pair in "${MODEL_PAIRS[@]}"; do
 done
 
 python train.py \
---student_model skywork-qwen-8b \
+--student_model skywork-llama-8b \
 --teacher_model claude-sonnet-4.5 \
 --dataset handpick \
 --topic_ids 0 1 \

@@ -1,6 +1,5 @@
 """Hypothesis generation (planner) class."""
 
-import random
 import json
 import textwrap
 import numpy as np
@@ -9,6 +8,7 @@ from dataclasses import replace, asdict
 from collections import defaultdict
 from typing import Any, Literal, Optional
 from abc import ABC, abstractmethod
+from random import Random
 
 from caller import AutoCaller, ChatHistory, Response
 from state import AttributeStats, Cluster
@@ -27,6 +27,7 @@ class Planner(ABC):
         max_par: int = 64,
         alloy_type: Literal["round_robin", "random"] = "round_robin",
         force_caller: str | None = None,
+        random_seed: int = 10086,
     ):
         self.model_names = model_names
         self.max_tokens = max_tokens
@@ -41,6 +42,7 @@ class Planner(ABC):
         )
         self.force_caller = force_caller
         self.curr_planner_index: int = 0
+        self.rng = Random(random_seed)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -60,7 +62,7 @@ class Planner(ABC):
         if self.alloy_type == "round_robin":
             self.curr_planner_index = (self.curr_planner_index + 1) % len(self.model_names)
         elif self.alloy_type == "random":
-            self.curr_planner_index = random.randint(0, len(self.model_names) - 1)
+            self.curr_planner_index = self.rng.randint(0, len(self.model_names) - 1)
 
     async def sample(
         self,
@@ -111,6 +113,7 @@ class ListPlanner(Planner):
         max_num_train_prompts: int | None = None,
         alloy_type: Literal["round_robin", "random"] = "round_robin",
         force_caller: str | None = None,
+        random_seed: int = 10086,
     ):
         super().__init__(
             model_names=model_names,
@@ -119,6 +122,7 @@ class ListPlanner(Planner):
             max_par=max_par,
             alloy_type=alloy_type,
             force_caller=force_caller,
+            random_seed=random_seed,
         )
         self.n_new = n_new
         self.n_pop = n_pop
@@ -162,7 +166,7 @@ class ListPlanner(Planner):
                 all_rollouts = seed_baselines[user_prompt]
 
                 for _ in range(self.n_per_user_prompt):
-                    sampled_rollouts = random.sample(
+                    sampled_rollouts = self.rng.sample(
                         [r for r in all_rollouts if student_model_name in r.scores],
                         min(self.n_traj_in_context, len(all_rollouts)),
                     )
@@ -287,6 +291,7 @@ class PairPlanner(Planner):
         max_contrast_pairs: int | None = None,
         alloy_type: Literal["round_robin", "random"] = "round_robin",
         force_caller: str | None = None,
+        random_seed: int = 10086,
     ):
         super().__init__(
             model_names=model_names,
@@ -295,6 +300,7 @@ class PairPlanner(Planner):
             max_par=max_par,
             alloy_type=alloy_type,
             force_caller=force_caller,
+            random_seed=random_seed,
         )
         self.n_new = n_new
         self.n_pop = n_pop
@@ -348,7 +354,7 @@ class PairPlanner(Planner):
                     continue
 
                 for high in high_rollouts:
-                    rejected_rollout = random.choice(low_rollouts)
+                    rejected_rollout = self.rng.choice(low_rollouts)
                     contrast_pairs.append(
                         {
                             "prompt": prompt,

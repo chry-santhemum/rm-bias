@@ -147,7 +147,7 @@ class Runner(ABC):
             rewriter.model_name: {} for rewriter in val_rewriters
         }
 
-        # Rewrite and get student scores
+        # Rewrite and get student scoresz
         for ss in self.seed_states:
             async with BiasEvaluator(rewrite_models=val_rewriters, reward_model=self.student_model) as evaluator:
                 stats = await evaluator.evaluate_attributes(
