@@ -230,7 +230,7 @@ def plot_multi_rewriter_violin(
         rewriter_data: dict mapping rewriter_name -> attribute -> {diffs, stats, ...}
         seed_index: seed index for title
         cluster_summary: optional cluster summary for title
-        x_range: optional (min, max) range for x-axis clipping
+        x_range: optional (min, max) range for x-axis display
     """
     # Define colors for each rewriter
     colors = [
@@ -254,7 +254,27 @@ def plot_multi_rewriter_violin(
     rewriter_names = sorted(rewriter_data.keys())
     n_rewriters = len(rewriter_names)
 
+    # Calculate x-axis range FIRST from all data (5th-95th percentile)
+    all_diffs_flat = []
+    for attr_data in rewriter_data.values():
+        for attr_results in attr_data.values():
+            all_diffs_flat.extend([d for d in attr_results.get("diffs", []) if d is not None])
+
+    if x_range:
+        x_min, x_max = x_range
+    elif all_diffs_flat:
+        x_min = np.percentile(all_diffs_flat, 5)
+        x_max = np.percentile(all_diffs_flat, 95)
+        # Ensure 0 is visible and add some padding
+        x_min = min(x_min, -1)
+        x_max = max(x_max, 1)
+    else:
+        x_min, x_max = -10, 10
+
     fig = go.Figure()
+
+    # Track overflow annotations: (x, y, text, xanchor)
+    overflow_annotations: list[tuple[float, float, str, str]] = []
 
     # For each attribute, create violin plots for each rewriter
     for attr_idx, attribute in enumerate(sorted_attributes):
@@ -264,49 +284,67 @@ def plot_multi_rewriter_violin(
             attr_data = rewriter_data[rewriter_name].get(attribute, {})
             diffs = attr_data.get("diffs", [])
 
-            # Filter None values
+            # Filter None values (keep all data, don't clip)
             valid_diffs = [d for d in diffs if d is not None]
             if not valid_diffs:
                 continue
-
-            # Clip diffs if x_range specified
-            if x_range:
-                display_diffs = [np.clip(d, x_range[0], x_range[1]) for d in valid_diffs]
-            else:
-                display_diffs = valid_diffs
 
             # Calculate y-position with offset for multiple violins per attribute
             offset_range = 0.8
             offset = (rewriter_idx - (n_rewriters - 1) / 2) * (offset_range / n_rewriters)
             y_position = attr_idx + offset
 
+            # Track overflow for this rewriter's data
+            data_min = min(valid_diffs)
+            data_max = max(valid_diffs)
+            if data_max > x_max:
+                overflow_annotations.append((x_max, y_position, f"→{data_max:.1f}", "left"))
+            if data_min < x_min:
+                overflow_annotations.append((x_min, y_position, f"{data_min:.1f}←", "right"))
+
             # Short rewriter name for legend
             short_name = rewriter_name.split("_")[-1] if "_" in rewriter_name else rewriter_name
 
             fig.add_trace(
                 go.Violin(
-                    x=display_diffs,
+                    x=valid_diffs,
                     y0=y_position,
                     name=short_name,
                     orientation='h',
                     side='positive',
                     line_color=colors[rewriter_idx % len(colors)],
                     fillcolor=colors[rewriter_idx % len(colors)],
-                    opacity=0.6,
+                    opacity=0.4,  # More transparent to make box visible
                     box_visible=True,
                     box=dict(
                         fillcolor='white',
-                        line=dict(color='black', width=1),
+                        line=dict(color='black', width=2),  # Thicker box outline
                     ),
                     meanline_visible=True,
-                    meanline=dict(color='black', width=2),
-                    points=False,
-                    width=0.8 / n_rewriters,
+                    meanline=dict(color='darkred', width=2),
+                    points="outliers",  # Show outlier points
+                    marker=dict(
+                        color=colors[rewriter_idx % len(colors)],
+                        size=4,
+                        opacity=0.7,
+                    ),
+                    width=1.0 / n_rewriters,  # Wider violins
                     legendgroup=rewriter_name,
                     showlegend=(attr_idx == 0),
                     hovertemplate=f"{short_name}<br>{attribute[:40]}...<br>Value: %{{x:.2f}}<extra></extra>",
                 )
             )
+
+    # Add overflow annotations
+    for x, y, text, xanchor in overflow_annotations:
+        fig.add_annotation(
+            x=x,
+            y=y,
+            text=text,
+            showarrow=False,
+            font=dict(size=8, color="gray"),
+            xanchor=xanchor,
+        )
 
     # Create y-axis tick labels with stats table
     y_tick_vals = list(range(len(sorted_attributes)))
@@ -332,32 +370,14 @@ def plot_multi_rewriter_violin(
     # More height per attribute to accommodate stats table
     plot_height = max(600, min(2000, 150 + n_attributes * 120))
 
-    # Calculate x-axis range
-    if x_range:
-        x_min, x_max = x_range
-    else:
-        # Auto-detect range from data
-        all_diffs = []
-        for attr_data in rewriter_data.values():
-            for attr_results in attr_data.values():
-                all_diffs.extend([d for d in attr_results.get("diffs", []) if d is not None])
-        if all_diffs:
-            x_min = np.percentile(all_diffs, 2)
-            x_max = np.percentile(all_diffs, 98)
-            # Ensure 0 is visible
-            x_min = min(x_min, -1)
-            x_max = max(x_max, 1)
-        else:
-            x_min, x_max = -10, 10
-
     fig.update_layout(
-        title=dict(text=title, font=dict(size=16)),
+        title=dict(text=title, font=dict(size=20)),  # Larger title
         xaxis_title="Student reward diff",
         yaxis_title=None,
         height=plot_height,
-        width=1200,
+        width=950,  # Narrower plot
         xaxis=dict(
-            range=[x_min - 1, x_max + 1],
+            range=[x_min - 0.5, x_max + 0.5],  # Tighter padding
             tickfont=dict(size=11),
             title=dict(font=dict(size=12)),
             zeroline=True,
@@ -365,7 +385,7 @@ def plot_multi_rewriter_violin(
             zerolinewidth=1.5,
         ),
         yaxis=dict(
-            tickfont=dict(size=9),
+            tickfont=dict(size=11),  # Larger annotation font
             tickmode='array',
             tickvals=y_tick_vals,
             ticktext=y_tick_labels,
@@ -376,11 +396,12 @@ def plot_multi_rewriter_violin(
         violingroupgap=0.05,
         margin=dict(l=10, r=40, t=80, b=60),
         legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="center",
-            x=0.5,
+            orientation="v",
+            yanchor="top",
+            y=0.98,
+            xanchor="right",
+            x=0.99,
+            bgcolor="rgba(255,255,255,0.8)",
         ),
     )
 
