@@ -122,7 +122,7 @@ async def main():
     # import down here after setting up logging
     import torch
 
-    from state import Rollout, RewriteScore, load_initial_seed_states
+    from state import load_initial_seed_states
     from recall import detect_affirmative
     from cluster_models import EmbedClusterModel, LLMClusterModel
     from api_models import GenerationModel, RewriteModel
@@ -209,14 +209,12 @@ async def main():
             bias=partial(detect_affirmative, bias_strength=5)
         )
     
-    train_rewriter = [
-        RewriteModel(
-            model_name="openai/gpt-5-mini", 
-            max_tokens=4096,
-            reasoning="low",
-            force_caller="openrouter",
-        )
-    ]
+    train_rewriter = RewriteModel(
+        model_name="openai/gpt-5-mini",
+        max_tokens=4096,
+        reasoning="low",
+        force_caller="openrouter",
+    )
 
     val_rewriters = [
         RewriteModel(
@@ -311,10 +309,11 @@ async def main():
         "baseline_path": baseline_path,
         "dataset": args.dataset,
         "topic_ids": args.topic_ids,
-        "student_model": args.student_model,
+        "student_model": student_model.to_dict(),
         "planner": planner.to_dict(),
         "policy_model": policy_model.to_dict(),
-        "bias_evaluator": bias_evaluator.to_dict(),
+        "train_rewriter": train_rewriter.to_dict(),
+        "val_rewriters": [m.to_dict() for m in val_rewriters],
         "teacher_model": teacher_model.to_dict(),
         "n_new": args.n_new,
         "m_var": args.m_var,
@@ -332,62 +331,22 @@ async def main():
 
     ################## START RUN ##################
 
-    if baseline_path is not None:
-        with open(f"{baseline_path}/train_baselines/rollouts.json", "r") as f:
-            baseline_rollouts = json.load(f)
-        
-        runner.baselines = {}
-        for user, rollouts in baseline_rollouts.items():
-            runner.baselines[user] = [
-                Rollout(
-                    response=rollout["response"],
-                    student_score=RewriteScore(
-                        score=None,
-                        raw_score=rollout["student_score"],
-                        reasoning=None,
-                        model_name=student_model.model_name,
-                    ),
-                    teacher_score=None,
-                    model=rollout.get("model", None),
-                ) for rollout in rollouts
-            ]
-    else:
-        await runner.get_baselines()
+    await runner.get_baselines()
 
     try:
         await runner.train(
+            train_rewriter=train_rewriter,
             n_pop_target=args.n_pop_targets,
             train_batch_size=args.train_batch_sizes,
             judge_train_first_n_rollouts=args.judge_train_first_n_rollouts,
             judge_train_first_n_user_prompts=args.judge_train_first_n_user_prompts,
-            use_pareto_selection=True,
             start_from=args.start_from,
         )
 
         if validate:
-            if args.start_from == len(args.train_batch_sizes):
-                print("Loading val baselines...")
-                with open(runner.run_path / "val_baselines/rollouts.json", "r") as f:
-                    baseline_rollouts = json.load(f)
-                
-                runner.val_baselines = {}
-                for user, rollouts in baseline_rollouts.items():
-                    runner.val_baselines[user] = [
-                        Rollout(
-                            response=rollout["response"],
-                            student_score=RewriteScore(
-                                score=None,
-                                raw_score=rollout["student_score"],
-                                reasoning=None,
-                                model_name=student_model.model_name,
-                            ),
-                            teacher_score=None,
-                            model=rollout.get("model", None),
-                        ) for rollout in rollouts
-                    ]
-
             await runner.validate(
                 final_attributes={seed_state.index: list(seed_state.state.keys()) for seed_state in runner.seed_states},
+                val_rewriters=val_rewriters,
                 judge_val_first_n_rollouts=args.judge_val_first_n_rollouts,
                 judge_val_first_n_user_prompts=args.judge_val_first_n_user_prompts,
             )
@@ -395,20 +354,6 @@ async def main():
     except Exception as e:
         logger.exception(f"Training failed: {e}")
         raise
-
-    print("Saving train baselines with updated teacher scores...")
-    Path(runner.run_path / "train_baselines").mkdir(parents=True, exist_ok=True)
-    with open(runner.run_path / "train_baselines/rollouts.json", "w") as f:
-        json_data = {k: [
-            {
-                "response": r.response,
-                "model": r.model,
-                "student_score": r.student_score.raw_score,
-                "teacher_score": r.teacher_score.raw_score if r.teacher_score is not None else None,
-            } 
-            for r in v
-        ] for k, v in runner.baselines.items()}
-        json.dump(json_data, f, indent=4, sort_keys=True)
 
     run_path = Path(f"data/evo/{run_name}")
     plot_validation_data(run_path=run_path, write_path=run_path)

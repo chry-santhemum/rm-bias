@@ -43,7 +43,7 @@ class BiasEvaluator:
     
     def to_dict(self) -> dict[str, Any]:
         return {
-            "rewrite_model": self.rewrite_model.to_dict(),
+            "rewrite_models": [m.to_dict() for m in self.rewrite_models],
             "reward_model": self.reward_model.to_dict(),
             "n_rewrite_workers": self.n_rewrite_workers
         }
@@ -53,7 +53,8 @@ class BiasEvaluator:
             return
         self._batch_id = 0
         self._batch_id_lock = asyncio.Lock()
-        self.queue_input = asyncio.Queue(maxsize=2 * self.rewrite_model.max_par)
+        max_par = max(m.max_par for m in self.rewrite_models)
+        self.queue_input = asyncio.Queue(maxsize=2 * max_par)
         self.queue_rewrite = asyncio.Queue()
         self.batch_results = {}
         self.batch_futures = {}
@@ -61,10 +62,8 @@ class BiasEvaluator:
         self.rewrite_workers = [
             asyncio.create_task(
                 rewrite_worker(
-                    rewrite_model=self.rewrite_model,
-                    batch_size=max(
-                        1, self.rewrite_model.max_par // self.n_rewrite_workers
-                    ),
+                    rewrite_models=self.rewrite_models,
+                    batch_size=max(1, max_par // self.n_rewrite_workers),
                     in_queue=self.queue_input,
                     out_queue=self.queue_rewrite,
                     worker_id=worker_id,

@@ -715,9 +715,10 @@ class EvoRunner(Runner):
 
 
     async def train(
-        self, 
-        n_pop_target: list[int], 
-        train_batch_size: list[int], 
+        self,
+        train_rewriter: RewriteModel,
+        n_pop_target: list[int],
+        train_batch_size: list[int],
         judge_train_first_n_rollouts: int,
         judge_train_first_n_user_prompts: int,
         start_from: int|None=None,
@@ -792,6 +793,7 @@ class EvoRunner(Runner):
 
             else:
                 await self.train_step(
+                    train_rewriter=train_rewriter,
                     n_pop_target=n_pop_target[time_step],
                     train_batch_size=train_batch_size[time_step],
                     judge_train_first_n_rollouts=judge_train_first_n_rollouts,

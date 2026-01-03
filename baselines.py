@@ -35,10 +35,12 @@ async def evaluate_baselines(
     start_time = time.time()
 
     ds_name = Path(cluster.data_path).parent.name
-    if save_dir is not None:
+    if save_dir is None:
         path = Path("data/baselines") / ds_name / split / f"cluster_{cluster.index}.json"
     else:
         path = save_dir / f"{ds_name}_{split}_cluster_{cluster.index}.json"
+
+    baselines: dict[str, list[BaselineRollout]] = {}
     
     if path.exists():
         print(f"{ds_name}_{cluster.index} {split} baselines already exist")
@@ -48,7 +50,6 @@ async def evaluate_baselines(
             existing_results = json.load(f)
         
         # convert to dataclass
-        baselines: dict[str, list[BaselineRollout]] = {}
         for user, rollouts in existing_results.items():
             baselines[user] = [BaselineRollout(**r) for r in rollouts]
         
@@ -58,7 +59,7 @@ async def evaluate_baselines(
             for i, r in enumerate(rollouts):
                 if reward_model.model_name in r.scores:
                     continue
-                chats_with_responses.append(ChatHistory.from_user(user).add_assistant(r["response"]))
+                chats_with_responses.append(ChatHistory.from_user(user).add_assistant(r.response))
                 indices.append(i)
         
         # get rewards
@@ -68,7 +69,7 @@ async def evaluate_baselines(
             result_dict.scores[reward_model.model_name] = score.score
 
         with open(path, "w") as f:
-            json.dump(asdict(baselines), f, indent=4, sort_keys=True)
+            json.dump({user: [asdict(r) for r in rollouts] for user, rollouts in baselines.items()}, f, indent=4, sort_keys=True)
         
     else:
         print(f"Sampling {ds_name}_{cluster.index} {split} baselines")
@@ -101,12 +102,11 @@ async def evaluate_baselines(
         scores = await reward_model.async_rate(chats_with_responses, use_tqdm=True)
 
         # save results
-        baselines: dict[str, list[BaselineRollout]] = {}
         for chat, score, name in zip(chats_with_responses, scores, policy_model_names):
             result = BaselineRollout(
                 policy_model=name,
                 response=chat.get_first("assistant"),
-                scores={reward_model.model_name: score.score},
+                scores={reward_model.model_name: score.score} if score.score is not None else {},
             )
             if chat.get_first("user") not in baselines:
                 baselines[chat.get_first("user")] = []
@@ -114,7 +114,7 @@ async def evaluate_baselines(
 
         path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "w") as f:
-            json.dump(asdict(baselines), f, indent=4, sort_keys=True)
+            json.dump({user: [asdict(r) for r in rollouts] for user, rollouts in baselines.items()}, f, indent=4, sort_keys=True)
         
     logger.info(f"Evaluated {ds_name}_{cluster.index} {split} baselines in {(time.time() - start_time):.2f} seconds")
     return baselines

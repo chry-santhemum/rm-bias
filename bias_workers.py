@@ -379,7 +379,8 @@ def organize_rewrites(
                     model_name=student_model_name,
                 )
                 attribute_rollouts[result.user][i] = Rollout(
-                    response=result.rewritten_assistant,
+                    rewritten_response=result.rewritten_assistant,
+                    baseline_response=result.original_assistant,
                     student_score=student_score,
                     teacher_score=None,
                 )
@@ -401,7 +402,8 @@ def organize_rewrites(
         with open(save_dir / "rollouts.json", "w") as f:
             json_data = {
                 k: {k2: [{
-                "response": r.response,
+                "rewritten_response": r.rewritten_response,
+                "baseline_response": r.baseline_response,
                 "student_score": r.student_score.raw_score,
                 "student_diff": r.student_score.score,
                 } if r is not None else None for r in v2
