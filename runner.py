@@ -10,8 +10,8 @@ from abc import ABC, abstractmethod
 import numpy as np
 import matplotlib.pyplot as plt
 
-from state import SeedState, Rollout, AttributeStats
-from baselines import BaselineRollout, evaluate_baselines
+from state import SeedState, Rollout, BaselineRollout, AttributeStats
+from baselines import evaluate_baselines
 from utils import timestamp, remove_outliers
 from api_models import GenerationModel, RewriteModel, SAME_ATTRS
 from reward_models import RewardModel, LocalRewardModel

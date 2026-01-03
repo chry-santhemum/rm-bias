@@ -10,17 +10,9 @@ from pathlib import Path
 from loguru import logger
 
 from caller import ChatHistory
-from state import Cluster
+from state import Cluster, BaselineRollout
 from api_models import GenerationModel
 from reward_models import LocalRewardModel
-
-
-
-@dataclass(kw_only=True, slots=True)
-class BaselineRollout:
-    policy_model: str
-    response: str
-    scores: dict[str, float]
 
 
     

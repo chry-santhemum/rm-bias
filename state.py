@@ -9,7 +9,6 @@ from pathlib import Path
 
 from utils import remove_outliers
 
-
 @dataclass
 class Cluster:
     index: int
@@ -29,7 +28,7 @@ class Cluster:
         }
 
 
-def asdict_no_none(obj) -> dict:
+def asdict_no_none(obj):
     obj_dict = asdict(obj)
     
     def remove_none_values(x):
@@ -58,6 +57,13 @@ class Rollout:
     student_score: RewriteScore
     teacher_score: RewriteScore | None = None
     policy_model: str | None = None
+
+
+@dataclass(kw_only=True, slots=True)
+class BaselineRollout:
+    policy_model: str
+    response: str
+    scores: dict[str, float]
 
 
 @dataclass
@@ -92,7 +98,7 @@ class AttributeStats:
                     if r.student_score.score is not None:
                         all_scores.append(r.student_score.score)
                 elif rater == "teacher":
-                    if r.teacher_score.score is not None:
+                    if r.teacher_score is not None and r.teacher_score.score is not None:
                         all_scores.append(r.teacher_score.score)
 
         if len(all_scores) == 0:
@@ -146,10 +152,10 @@ def load_initial_seed_states(
         ds_path = Path(ds_path)
 
     id_to_cluster: dict[int, Cluster] = dict()
-    rng = Random(seed=random_seed)
+    rng = Random(random_seed)
 
     for idx in topic_ids:
-        with open(ds_path / f"cluster_{idx}", "r") as f:
+        with open(ds_path / f"cluster_{idx}.json", "r") as f:
             data = json.load(f)
         
         if len(data["prompts"]) < 3 * val_split_size:
@@ -164,7 +170,7 @@ def load_initial_seed_states(
             summary=data["summary"],
             train_prompts=train_prompts,
             val_prompts=val_prompts,
-            data_path=str(ds_path / f"cluster_{idx}")
+            data_path=str(ds_path / f"cluster_{idx}.json")
         )
 
     initial_seed_states = [

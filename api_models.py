@@ -45,7 +45,7 @@ class GenerationModel:
             retry_config=RETRY_CONFIG, 
             force_caller=force_caller
         )
-        self.rng = Random(seed=random_seed)
+        self.rng = Random(random_seed)
         self.kwargs = kwargs
 
     def to_dict(self) -> dict:

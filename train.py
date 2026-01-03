@@ -132,7 +132,7 @@ async def main():
         "qwen/qwen-2.5-7b-instruct",
         "qwen/qwen-2.5-72b-instruct",
         "google/gemma-2-9b-it",
-        "microsoft/phi-3.5-mini-128k-instruct"
+        # "microsoft/phi-3.5-mini-128k-instruct"
     ]
 
     policy_model = GenerationModel(

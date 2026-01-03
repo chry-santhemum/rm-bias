@@ -11,8 +11,7 @@ import numpy as np
 from caller import ChatHistory
 from api_models import GenerationModel, RewriteModel
 from reward_models import RewardModel
-from baselines import BaselineRollout
-from state import Rollout, RewriteScore
+from state import Rollout, BaselineRollout, RewriteScore
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -183,11 +182,11 @@ async def rewrite_worker(
 
         for result in rewrite_results:
             await out_queue.put(result)
-            in_queue.task_done()
-            logger.debug(f"[rewrite_worker {worker_id}] Pushed 1 task.")
 
-        if worker_id < 3:
-            logger.info(f"[rewrite_worker {worker_id}] Finished rewriting minibatch of size {len(batch)} in {(time.time() - start_time):.2f} seconds.")
+        for _ in batch:
+            in_queue.task_done()
+
+        logger.info(f"[rewrite_worker {worker_id}] Done batch of size {len(batch)} in {(time.time() - start_time):.2f} seconds, in queue size: {in_queue.qsize()}")
         batch.clear() 
 
     current_batch: list[RewriteInput] = []
@@ -201,10 +200,10 @@ async def rewrite_worker(
                 await rewrite_batch(current_batch)
             continue
 
-        if in_queue.qsize() % 100 == 0:
-            logger.info(
-                f"[rewrite_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}"
-            )
+        # if in_queue.qsize() % 100 == 0:
+        #     logger.info(
+        #         f"[rewrite_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}"
+        #     )
 
         if task_input is None:  # Stop sentinel
             in_queue.task_done()
@@ -248,7 +247,7 @@ async def rating_worker(
             batch[i].raw_score = reward_score.score
         
         all_results[batch[0].batch_id].extend(batch)  # type: ignore      
-        logger.debug(f"[rating_worker] Finished processing minibatch of size {len(existing_indices)}/{len(batch)} in {(time.time() - start_time):.2f} seconds. Queue size: {in_queue.qsize()}")
+        logger.debug(f"[rating_worker] Done batch of size {len(existing_indices)}/{len(batch)} in {(time.time() - start_time):.2f} seconds. Queue size: {in_queue.qsize()}")
         batch.clear()
 
     while True:
@@ -285,8 +284,8 @@ async def rating_worker(
         # to avoid the edge case of rewrite worker failing to produce valid outputs,
         # such that the rating worker doesn't know that it's done
         if len(batch) > 0:
-            if in_queue.qsize() >= 1000 or in_queue.qsize() <= 32:
-                logger.info(f"[rating_worker] Flushing, waited for {(time.time() - last_flush_time):.2f} seconds. Queue size: {in_queue.qsize()}")
+            # if in_queue.qsize() >= 1000 or in_queue.qsize() <= 32:
+            #     logger.info(f"[rating_worker] Flushing, waited for {(time.time() - last_flush_time):.2f} seconds. Queue size: {in_queue.qsize()}")
             last_flush_time = time.time()
             try:
                 await rate_batch(batch)

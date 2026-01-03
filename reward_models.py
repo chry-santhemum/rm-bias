@@ -9,8 +9,7 @@ import torch
 
 from caller import ChatHistory
 from api_models import JudgeModel, RatingResult, ComparisonResult
-from state import AttributeStats, RewriteScore
-from baselines import BaselineRollout
+from state import AttributeStats, RewriteScore, BaselineRollout
 from utils import load_model, find_executable_batch_size
 
 

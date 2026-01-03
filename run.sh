@@ -17,27 +17,25 @@ for pair in "${MODEL_PAIRS[@]}"; do
 done
 
 python train.py \
---student_model skywork-llama-8b \
---teacher_model claude-sonnet-4.5 \
+--student_model skywork-qwen-0.6b \
+--teacher_model skywork-llama-8b \
 --dataset clio \
---topic_ids 7 11 12 13 14 \
+--topic_ids 7 \
 --planner_type list_reverse \
 --direction plus \
---n_new 8 \
---n_pop_initial 64 \
---n_pop_targets 12 10 8 6 6 6 \
---train_batch_sizes 16 16 32 32 32 32 \
---m_var 2 \
---n_planner_requests 32 \
+--n_new 4 \
+--n_pop_initial 8 \
+--n_pop_targets 4 2 \
+--train_batch_sizes 4 4 \
+--m_var 1 \
+--n_planner_requests 4 \
 --n_rewrite_rollouts 1 \
 --n_validate_rollouts 1 \
 --judge_train_first_n_rollouts 1 \
 --judge_train_first_n_user_prompts 32 \
 --judge_val_first_n_rollouts 1 \
 --judge_val_first_n_user_prompts 64 \
---val_split_size 64 \
---start_from 6 \
---run_name "20251231-074522-list_reverse-clio-plus"
+--val_split_size 4
 
 
 # python train.py \

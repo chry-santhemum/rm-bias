@@ -8,8 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.figure
 from caller import ChatHistory
-from state import SeedState, AttributeStats, Rollout, RewriteScore
-from baselines import BaselineRollout
+from state import SeedState, AttributeStats, Rollout, BaselineRollout, RewriteScore
 from utils import parse_json_response, set_seed_all
 from cluster_models import ClusterModel
 from api_models import GenerationModel, RewriteModel, SAME_ATTRS
