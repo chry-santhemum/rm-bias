@@ -182,17 +182,17 @@ def format_rewriter_stats_table(
             wr = stats["winrate"]
             wr_err = stats.get("winrate_stderr")
             if wr_err:
-                parts.append(f"WR:{wr:.2f}±{wr_err:.2f}")
+                parts.append(f"S:{wr:.2f}±{wr_err:.2f}")
             else:
-                parts.append(f"WR:{wr:.2f}")
+                parts.append(f"S:{wr:.2f}")
 
         if stats.get("diff_mean") is not None:
             dm = stats["diff_mean"]
             dm_err = stats.get("diff_stderr")
             if dm_err:
-                parts.append(f"Δ:{dm:.1f}±{dm_err:.1f}")
+                parts.append(f"SΔ:{dm:.1f}±{dm_err:.1f}")
             else:
-                parts.append(f"Δ:{dm:.1f}")
+                parts.append(f"SΔ:{dm:.1f}")
 
         # Add teacher winrate if available
         if teacher_stats.get("winrate") is not None:
@@ -395,19 +395,16 @@ def plot_multi_rewriter_violin(
         ),
         font=dict(size=11),
         violingap=0.05,
-        violingroupgap=0.05,
-        margin=dict(l=10, r=40, t=140, b=60),  # More top margin for title + legend
+        violingroupgap=0.2,
+        margin=dict(l=10, r=150, t=80, b=60),  # Right margin for legend
         legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,  # Above the plot
-            xanchor="center",
-            x=0.5,
+            orientation="v",
+            yanchor="top",
+            y=1.0,
+            xanchor="left",
+            x=1.02,  # Right of the plot
             bgcolor="rgba(255,255,255,0.9)",
-            font=dict(size=9),
-            itemwidth=30,
-            entrywidth=0.15,  # Fraction of plot width per entry
-            entrywidthmode="fraction",
+            font=dict(size=10),
         ),
     )
 
