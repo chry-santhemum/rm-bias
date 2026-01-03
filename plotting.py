@@ -263,8 +263,8 @@ def plot_multi_rewriter_violin(
     if x_range:
         x_min, x_max = x_range
     elif all_diffs_flat:
-        x_min = np.percentile(all_diffs_flat, 5)
-        x_max = np.percentile(all_diffs_flat, 95)
+        x_min = np.percentile(all_diffs_flat, 2.5)
+        x_max = np.percentile(all_diffs_flat, 97.5)
         # Ensure 0 is visible and add some padding
         x_min = min(x_min, -1)
         x_max = max(x_max, 1)
@@ -318,7 +318,8 @@ def plot_multi_rewriter_violin(
                     box_visible=True,
                     box=dict(
                         fillcolor='white',
-                        line=dict(color='black', width=2),  # Thicker box outline
+                        line=dict(color='black', width=2),
+                        width=0.3,  # Wider box inside violin
                     ),
                     meanline_visible=True,
                     meanline=dict(color='darkred', width=2),
