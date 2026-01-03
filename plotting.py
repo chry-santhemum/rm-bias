@@ -408,6 +408,7 @@ def plot_multi_rewriter_violin(
             x=1.02,  # Right of the plot
             bgcolor="rgba(255,255,255,0.9)",
             font=dict(size=10),
+            traceorder="reversed",  # Match violin/label order (top to bottom)
         ),
     )
 
