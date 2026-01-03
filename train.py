@@ -122,9 +122,8 @@ async def main():
     # import down here after setting up logging
     import torch
 
-    from state import Rollout, RewriteScore
+    from state import Rollout, RewriteScore, load_initial_seed_states
     from recall import detect_affirmative
-    from load_cluster import load_initial_seed_states
     from cluster_models import EmbedClusterModel, LLMClusterModel
     from api_models import GenerationModel, RewriteModel
     from reward_models import LocalRewardModel, APIRewardModel
@@ -133,14 +132,10 @@ async def main():
     from evo import EvoRunner, EvoPlanner
     from plotting import plot_validation_data
 
-
-    N_REWRITE_WORKERS = 128
-
     all_cuda_devices = [f"cuda:{i}" for i in range(torch.cuda.device_count())]
     print(f"Using CUDA devices: {all_cuda_devices}")
 
     # cluster_model = EmbedClusterModel(embed_model_name="Qwen/Qwen3-Embedding-0.6B", embed_dim=128)
-
     cluster_model = LLMClusterModel(force_caller="openrouter")
     
     policy_model_names = [
@@ -214,12 +209,14 @@ async def main():
             bias=partial(detect_affirmative, bias_strength=5)
         )
     
-    train_rewriter = RewriteModel(
-        model_name="openai/gpt-5-mini", 
-        max_tokens=4096,
-        reasoning="low",
-        force_caller="openrouter",
-    )
+    train_rewriter = [
+        RewriteModel(
+            model_name="openai/gpt-5-mini", 
+            max_tokens=4096,
+            reasoning="low",
+            force_caller="openrouter",
+        )
+    ]
 
     val_rewriters = [
         RewriteModel(
@@ -253,7 +250,6 @@ async def main():
         ),
     ]
 
-
     initial_seed_states = load_initial_seed_states(
         ds_path=f"user_prompts/{args.dataset}",
         topic_ids=args.topic_ids,
@@ -286,7 +282,7 @@ async def main():
             force_caller="openrouter",
         )
 
-    validate = True if args.val_split_size > 0 else False
+    validate = args.val_split_size > 0
 
     planner = EvoPlanner(
         direction=args.direction,
@@ -301,7 +297,7 @@ async def main():
         seed_states=initial_seed_states,  # type: ignore
         planner=planner,
         policy_model=policy_model,
-        bias_evaluator=bias_evaluator,
+        student_model=student_model,
         teacher_model=teacher_model,
         n_baseline_rollouts=args.n_baseline_rollouts,
         n_rewrite_rollouts=args.n_rewrite_rollouts,

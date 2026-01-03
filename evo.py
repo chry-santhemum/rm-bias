@@ -1,7 +1,7 @@
 import asyncio
 import json
 import dotenv
-import random
+from random import Random
 from typing import Literal, Any
 from loguru import logger
 import numpy as np
@@ -11,7 +11,7 @@ from caller import ChatHistory
 from state import SeedState, AttributeStats, Rollout, RewriteScore
 from utils import parse_json_response, set_seed_all
 from cluster_models import ClusterModel
-from api_models import GenerationModel, SAME_ATTRS
+from api_models import GenerationModel, RewriteModel, SAME_ATTRS
 from reward_models import RewardModel, LocalRewardModel
 from runner import Runner
 from bias_evaluator import BiasEvaluator
@@ -33,6 +33,7 @@ class EvoPlanner:
         m_var: int,
         cosine_sim_threshold_initial: float,
         cosine_sim_threshold_evolution: float,
+        random_seed: int=10086,
     ):
         self.direction: Literal["plus", "minus"] = direction
         self.hypothesis_planner = hypothesis_planner
@@ -40,6 +41,7 @@ class EvoPlanner:
         self.m_var = m_var
         self.cosine_sim_threshold_initial = cosine_sim_threshold_initial
         self.cosine_sim_threshold_evolution = cosine_sim_threshold_evolution
+        self.rng = Random(seed=random_seed)
     
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -197,7 +199,7 @@ class EvoPlanner:
                 exclude_set = {attribute} | set(ancestor_attrs)
 
                 other_attributes = [attr for attr in last_step_attributes if attr["attribute"] not in exclude_set]
-                random.shuffle(other_attributes)
+                self.rng.shuffle(other_attributes)
 
                 lines = []
                 for i, neighbor in enumerate(other_attributes[:n_neighbors], 1):
@@ -402,8 +404,8 @@ class EvoPlanner:
 
     def filter_by_student_scores(
         self,
-        evaluate_results: list[dict[str, dict[str, list[Rollout | None]]]],
-    ) -> tuple[list[dict[str, dict[str, list[Rollout | None]]]], list[float]]:
+        evaluate_results: dict[int, dict[str, AttributeStats]],
+    ) -> tuple[dict[int, dict[str, AttributeStats]], list[float]]:
         """
         Filter evaluate_results by student score threshold before teacher evaluation.
 
@@ -412,26 +414,18 @@ class EvoPlanner:
               modifies in place and changes propagate to the original evaluate_results.
             - List of student thresholds (one per seed) for use in plotting.
         """
-        filtered_results = []
+        filtered_results: dict[int, dict[str, AttributeStats]] = {}
         student_thresholds = []
 
-        for seed_idx, stats in enumerate(evaluate_results):
+        for idx, seed_stats in evaluate_results.items():
             # Calculate student winrate for each attribute (without requiring teacher scores)
             attr_winrates: list[tuple[str, float]] = []
 
-            for attribute, user_prompt_rollouts in stats.items():
-                all_student_scores = []
-                for rollouts in user_prompt_rollouts.values():
-                    for r in rollouts:
-                        if r is not None and r.student_score is not None and r.student_score.score is not None:
-                            all_student_scores.append(r.student_score.score)
-
-                if all_student_scores:
-                    winrate = float(np.mean(all_student_scores))
-                    attr_winrates.append((attribute, winrate))
+            for attribute, attribute_stats in seed_stats.items():
+                attr_winrates.append((attribute, attribute_stats.winrate("student")))
 
             if not attr_winrates:
-                filtered_results.append({})
+                filtered_results[idx] = {}
                 student_thresholds.append(0.0)
                 continue
 
@@ -454,12 +448,12 @@ class EvoPlanner:
                     if wr <= threshold:
                         surviving_attrs.add(attr)
 
-            filtered_stats = {attr: s for attr, s in stats.items() if attr in surviving_attrs}
-            filtered_results.append(filtered_stats)
+            filtered_stats = {attr: s for attr, s in seed_stats.items() if attr in surviving_attrs}
+            filtered_results[idx] = filtered_stats
             student_thresholds.append(threshold)
 
             logger.info(
-                f"Seed {seed_idx}: student pre-filter {len(stats)} -> {len(filtered_stats)} "
+                f"Seed {idx}: student pre-filter {len(seed_stats)} -> {len(filtered_stats)} "
                 f"(threshold={threshold:.3f}, pct={student_pct:.3f})"
             )
 
@@ -577,6 +571,7 @@ class EvoRunner(Runner):
         n_rewrite_rollouts: int,
         n_validate_rollouts: int,
         run_name: str | None = None,
+        random_seed: int=10086,
     ):
         super().__init__(
             seed_states=seed_states,
@@ -589,6 +584,7 @@ class EvoRunner(Runner):
         )
         self.planner = planner
         self.n_rewrite_rollouts = n_rewrite_rollouts
+        self.rng = Random(seed=random_seed)
 
     async def _cluster_seed(self, seed_state: SeedState) -> list[str]:
         """Cluster a single seed state's candidates and return representatives."""
@@ -613,11 +609,11 @@ class EvoRunner(Runner):
 
     async def train_step(
         self,
+        train_rewriter: RewriteModel,
         n_pop_target: int,
         train_batch_size: int,
         judge_train_first_n_rollouts: int,
         judge_train_first_n_user_prompts: int,
-        use_pareto_selection: bool = True,
     ):
         print(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
         if self.step_count == 0:
@@ -636,42 +632,38 @@ class EvoRunner(Runner):
         ])
 
         # Evaluate only representatives
-        evaluate_results = []
+        evaluate_results: dict[int, dict[str, AttributeStats]] = {}
 
-        for seed_state_idx, seed_state in enumerate(self.seed_states):
-            async with self.bias_evaluator as evaluator:
-                user_prompts = random.sample(
-                    seed_state.cluster.train_prompts,
+        for ss in self.seed_states:
+            async with BiasEvaluator(rewrite_models=[train_rewriter], reward_model=self.student_model) as evaluator:
+                user_prompts = self.rng.sample(
+                    ss.cluster.train_prompts,
                     train_batch_size,
                 )
-                attributes = representative_attributes[seed_state_idx]
-                print(f"Seed {seed_state.index}: evaluating {len(attributes)} representative attributes")
+                attributes = representative_attributes[ss.index]
+                print(f"Seed {ss.index}: evaluating {len(attributes)} representative attributes")
                 stats = await evaluator.evaluate_attributes(
                     user_prompts=user_prompts,
                     attributes=attributes,
+                    baselines=self.baselines[ss.index],
                     same_attrs=[SAME_ATTRS] * len(attributes),
-                    baselines=self.baselines,
                     n_rollouts=self.n_rewrite_rollouts,
                 )
-            evaluate_results.append(stats)
+            evaluate_results[ss.index] = {
+                k: AttributeStats(attribute=k, rollouts=v) for k, v in stats.items()
+            }
 
-        self.save_attribute_stats(
-            direction=self.planner.direction,
-            save_dir=self.run_path / f"step_{self.step_count}_stats",
+        # Filter by student scores first to save compute on teacher evaluation
+        filtered_evaluate_results, student_thresholds = self.planner.filter_by_student_scores(evaluate_results)
+
+        # Populate teacher_score on filtered rollouts in place
+        # (Rollout objects are shared, so changes propagate to evaluate_results)
+        await self.teacher_model.judge_rollouts(
+            evaluate_results=filtered_evaluate_results,
+            baselines=self.baselines,
+            first_n_rollouts=judge_train_first_n_rollouts,
+            first_n_user_prompts=judge_train_first_n_user_prompts,
         )
-
-        if use_pareto_selection:
-            # Filter by student scores first to save compute on teacher evaluation
-            filtered_evaluate_results, student_thresholds = self.planner.filter_by_student_scores(evaluate_results)
-
-            # Populate teacher_score on filtered rollouts in place
-            # (Rollout objects are shared, so changes propagate to evaluate_results)
-            await self.teacher_model.judge_rollouts(
-                evaluate_results=filtered_evaluate_results,
-                baselines=self.baselines,
-                first_n_rollouts=judge_train_first_n_rollouts,
-                first_n_user_prompts=judge_train_first_n_user_prompts,
-            )
 
         # Store ALL rollouts (including those filtered out, to preserve student scores)
         for seed_state_idx, stats in enumerate(evaluate_results):
@@ -687,38 +679,33 @@ class EvoRunner(Runner):
             f"[TRAIN STEP {self.step_count}] Updating population. Before update: {len(self.seed_states[0].history[-1])}"
         )
         
-        if use_pareto_selection:
-            candidates_by_seed = self.planner.update_pop_pareto(
-                seed_states=self.seed_states,
-                n_pop_target=n_pop_target,
-                student_thresholds=student_thresholds,
+        candidates_by_seed = self.planner.update_pop_pareto(
+            seed_states=self.seed_states,
+            n_pop_target=n_pop_target,
+            student_thresholds=student_thresholds,
+        )
+
+        for seed_state_idx, candidates in candidates_by_seed.items():
+            with open(self.run_path / f"step_{self.step_count}_stats" / f"seed_{seed_state_idx}_candidates.json", "w") as f:
+                json.dump([
+                    {
+                        "attribute": c[0],
+                        "student_winrate": c[2],
+                        "teacher_winrate": c[3],
+                        "time_step": c[1],
+                    } 
+                    for c in candidates["all_candidates"]
+                ], f, indent=4)
+
+            fig = EvoPlanner.plot_candidate_stats(
+                all_candidates=candidates["all_candidates"],
+                filtered_candidates=candidates["filtered_candidates"],
+                selected_candidates=candidates["selected_candidates"],
+                student_threshold=candidates["student_threshold"],
+                teacher_threshold=candidates["teacher_threshold"],
+                direction=candidates["direction"],
             )
-
-            for seed_state_idx, candidates in candidates_by_seed.items():
-                with open(self.run_path / f"step_{self.step_count}_stats" / f"seed_{seed_state_idx}_candidates.json", "w") as f:
-                    json.dump([
-                        {
-                            "attribute": c[0],
-                            "student_winrate": c[2],
-                            "teacher_winrate": c[3],
-                            "time_step": c[1],
-                        } 
-                        for c in candidates["all_candidates"]
-                    ], f, indent=4)
-
-                fig = EvoPlanner.plot_candidate_stats(
-                    all_candidates=candidates["all_candidates"],
-                    filtered_candidates=candidates["filtered_candidates"],
-                    selected_candidates=candidates["selected_candidates"],
-                    student_threshold=candidates["student_threshold"],
-                    teacher_threshold=candidates["teacher_threshold"],
-                    direction=candidates["direction"],
-                )
-                fig.savefig(self.run_path / f"step_{self.step_count}_stats" / f"seed_{seed_state_idx}_pareto.pdf")
-
-
-        else:
-            raise NotImplementedError("Non-Pareto selection has been removed")
+            fig.savefig(self.run_path / f"step_{self.step_count}_stats" / f"seed_{seed_state_idx}_pareto.pdf")
 
         logger.info(
             f"[TRAIN STEP {self.step_count}] finished; Current population: {len(self.seed_states[0].state)}"
@@ -733,7 +720,6 @@ class EvoRunner(Runner):
         train_batch_size: list[int], 
         judge_train_first_n_rollouts: int,
         judge_train_first_n_user_prompts: int,
-        use_pareto_selection: bool=True, 
         start_from: int|None=None,
     ):
         t_steps = len(train_batch_size)
@@ -766,38 +752,37 @@ class EvoRunner(Runner):
                             meta=item.get("meta", {"time_step": time_step})
                         )
 
-                if use_pareto_selection:
-                    # Calculate student thresholds from loaded data (same logic as filter_by_student_scores)
-                    student_thresholds = []
-                    for seed_state in self.seed_states:
-                        attr_winrates = []
-                        for _, stats in seed_state.history[-1].items():
-                            all_scores = []
-                            for rollouts in stats.rollouts.values():
-                                for r in rollouts:
-                                    if r is not None and r.student_score is not None and r.student_score.score is not None:
-                                        all_scores.append(r.student_score.score)
-                            if all_scores:
-                                attr_winrates.append(float(np.mean(all_scores)))
 
-                        if attr_winrates:
-                            if self.planner.direction == "plus":
-                                pct = float(np.percentile(attr_winrates, 40))
-                                threshold = min(0.0, pct)
-                            else:
-                                pct = float(np.percentile(attr_winrates, 60))
-                                threshold = max(0.0, pct)
+                # Calculate student thresholds from loaded data (same logic as filter_by_student_scores)
+                student_thresholds = []
+                for seed_state in self.seed_states:
+                    attr_winrates = []
+                    for _, stats in seed_state.history[-1].items():
+                        all_scores = []
+                        for rollouts in stats.rollouts.values():
+                            for r in rollouts:
+                                if r is not None and r.student_score is not None and r.student_score.score is not None:
+                                    all_scores.append(r.student_score.score)
+                        if all_scores:
+                            attr_winrates.append(float(np.mean(all_scores)))
+
+                    if attr_winrates:
+                        if self.planner.direction == "plus":
+                            pct = float(np.percentile(attr_winrates, 40))
+                            threshold = min(0.0, pct)
                         else:
-                            threshold = 0.0
-                        student_thresholds.append(threshold)
+                            pct = float(np.percentile(attr_winrates, 60))
+                            threshold = max(0.0, pct)
+                    else:
+                        threshold = 0.0
+                    student_thresholds.append(threshold)
 
-                    self.planner.update_pop_pareto(
-                        seed_states=self.seed_states,
-                        n_pop_target=n_pop_target[time_step],
-                        student_thresholds=student_thresholds,
-                    )
-                else:
-                    raise NotImplementedError("Non-Pareto selection has been removed")
+                self.planner.update_pop_pareto(
+                    seed_states=self.seed_states,
+                    n_pop_target=n_pop_target[time_step],
+                    student_thresholds=student_thresholds,
+                )
+
                 self.step_count += 1
                 self.planner.hypothesis_planner.step_planner_model()
                 self.save_attribute_stats(
@@ -811,5 +796,4 @@ class EvoRunner(Runner):
                     train_batch_size=train_batch_size[time_step],
                     judge_train_first_n_rollouts=judge_train_first_n_rollouts,
                     judge_train_first_n_user_prompts=judge_train_first_n_user_prompts,
-                    use_pareto_selection=use_pareto_selection,
                 )

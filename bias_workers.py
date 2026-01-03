@@ -327,12 +327,16 @@ def organize_rewrites(
     student_model_name: str,
     n_rollouts: int | None = None,
     save_dir: Path | None = None,
-) -> dict[str, dict[str, list[Rollout | None]]]:
+) -> dict[str, dict[str, dict[str, list[Rollout | None]]]] | dict[str, dict[str, list[Rollout | None]]]:
 
     organized_rollouts = defaultdict(dict)
 
     for result in all_results:
-        attribute_rollouts = organized_rollouts[result.system]
+        rewriter_rollouts = organized_rollouts[result.rewriter_model_name]
+        if result.system not in rewriter_rollouts:
+            rewriter_rollouts[result.system] = {}
+
+        attribute_rollouts = rewriter_rollouts[result.system]
         if result.user not in attribute_rollouts:
             attribute_rollouts[result.user] = [
                 None
@@ -386,6 +390,11 @@ def organize_rewrites(
             raise ValueError(
                 f"Rewrite result for {result.user} and {result.system} not matched."
             )
+
+    if len(list(organized_rollouts.keys())) == 1:
+        print("Only one rewriter, reducing...")
+        k = list(organized_rollouts.keys())[0]
+        organized_rollouts = organized_rollouts[k]
 
     if save_dir is not None:
         save_dir.mkdir(parents=True, exist_ok=True)
