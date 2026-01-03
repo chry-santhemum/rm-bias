@@ -292,7 +292,7 @@ def plot_multi_rewriter_violin(
             # Calculate y-position with offset for multiple violins per attribute
             offset_range = 0.8
             offset = (rewriter_idx - (n_rewriters - 1) / 2) * (offset_range / n_rewriters)
-            y_position = attr_idx + offset
+            y_position = attr_idx * 1.2 + offset
 
             # Track overflow for this rewriter's data
             data_min = min(valid_diffs)
@@ -348,7 +348,7 @@ def plot_multi_rewriter_violin(
         )
 
     # Create y-axis tick labels with stats table
-    y_tick_vals = list(range(len(sorted_attributes)))
+    y_tick_vals = [i * 1.2 for i in range(len(sorted_attributes))]
     y_tick_labels = []
     for attr in sorted_attributes:
         label = format_rewriter_stats_table(attr, rewriter_data, rewriter_names, colors)
@@ -391,11 +391,11 @@ def plot_multi_rewriter_violin(
             tickvals=y_tick_vals,
             ticktext=y_tick_labels,
             automargin=True,
-            ticklabelstandoff=15,  # Horizontal separation from plot
+            ticklabelstandoff=20,  # Horizontal separation from plot
         ),
         font=dict(size=11),
         violingap=0.05,
-        violingroupgap=0.2,
+        violingroupgap=0.05,
         margin=dict(l=10, r=150, t=80, b=60),  # Right margin for legend
         legend=dict(
             orientation="v",
