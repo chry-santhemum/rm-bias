@@ -319,10 +319,10 @@ def plot_multi_rewriter_violin(
                     box=dict(
                         fillcolor='white',
                         line=dict(color='black', width=2),
-                        width=0.3,  # Wider box inside violin
+                        width=1.0,
                     ),
                     meanline_visible=True,
-                    meanline=dict(color='darkred', width=2),
+                    meanline=dict(color='darkred', width=3),
                     points="outliers",  # Show outlier points
                     marker=dict(
                         color=colors[rewriter_idx % len(colors)],
@@ -401,10 +401,13 @@ def plot_multi_rewriter_violin(
             orientation="h",
             yanchor="bottom",
             y=1.02,  # Above the plot
-            xanchor="right",
-            x=1.0,
+            xanchor="center",
+            x=0.5,
             bgcolor="rgba(255,255,255,0.9)",
-            font=dict(size=10),
+            font=dict(size=9),
+            itemwidth=30,
+            entrywidth=0.15,  # Fraction of plot width per entry
+            entrywidthmode="fraction",
         ),
     )
 
