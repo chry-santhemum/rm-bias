@@ -396,7 +396,7 @@ def plot_multi_rewriter_violin(
         font=dict(size=11),
         violingap=0.05,
         violingroupgap=0.05,
-        margin=dict(l=10, r=40, t=100, b=60),  # More top margin for legend
+        margin=dict(l=10, r=40, t=140, b=60),  # More top margin for title + legend
         legend=dict(
             orientation="h",
             yanchor="bottom",
