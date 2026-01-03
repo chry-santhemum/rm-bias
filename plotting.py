@@ -165,7 +165,10 @@ def format_rewriter_stats_table(
     """
     lines = [wrap_text(attribute, width=55)]
 
-    for i, rewriter_name in enumerate(rewriter_names):
+    # Reverse order so label order matches violin order (top to bottom)
+    n = len(rewriter_names)
+    for i in range(n - 1, -1, -1):
+        rewriter_name = rewriter_names[i]
         if rewriter_name not in rewriter_data:
             continue
         attr_data = rewriter_data[rewriter_name].get(attribute, {})
