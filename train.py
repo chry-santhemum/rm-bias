@@ -50,16 +50,12 @@ parser.add_argument("--cosine_sim_threshold_evolution", type=float, default=0.9)
 
 parser.add_argument("--val_split_size", type=int, default=16)
 parser.add_argument("--run_name", type=str, default=None)
-parser.add_argument("--baseline_path", type=str, default=None)
 parser.add_argument("--start_from", type=int, default=None)
 
 args = parser.parse_args()
 
 # Check args coherence
 assert len(args.n_pop_targets) == len(args.train_batch_sizes)
-if args.baseline_path is not None:
-    print("Did you really mean to provide a baseline_path? Pausing 5 seconds...")
-    time.sleep(5)
 if args.run_name is not None:
     print("Did you really mean to provide a run_name? Pausing 5 seconds...")
     time.sleep(5)
@@ -84,17 +80,9 @@ if args.judge_train_first_n_rollouts > 2:
 
 
 async def main():
-    baseline_path = None
-    if args.baseline_path is not None:
-        baseline_path = f"data/evo/{args.baseline_path}"
-    elif args.run_name is not None:
-        baseline_path = f"data/evo/{args.run_name}"
-
     run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
-    
-    if args.run_name is None:
-        Path(f"logs/evo").mkdir(parents=True, exist_ok=True)
-        Path(f"data/evo/{run_name}").mkdir(parents=True, exist_ok=True)
+    Path(f"logs/evo").mkdir(parents=True, exist_ok=True)
+    Path(f"data/evo/{run_name}").mkdir(parents=True, exist_ok=True)
         
     # logging setup
     from loguru import logger
@@ -249,7 +237,7 @@ async def main():
     ]
 
     initial_seed_states = load_initial_seed_states(
-        ds_path=f"user_prompts/{args.dataset}",
+        ds_path=Path(f"user_prompts/{args.dataset}"),
         topic_ids=args.topic_ids,
         val_split_size=args.val_split_size,
     )
@@ -306,7 +294,6 @@ async def main():
     # save config file
     config = {
         "run_name": run_name,
-        "baseline_path": baseline_path,
         "dataset": args.dataset,
         "topic_ids": args.topic_ids,
         "student_model": student_model.to_dict(),
@@ -355,8 +342,8 @@ async def main():
         logger.exception(f"Training failed: {e}")
         raise
 
-    run_path = Path(f"data/evo/{run_name}")
-    plot_validation_data(run_path=run_path, write_path=run_path)
+    # run_path = Path(f"data/evo/{run_name}")
+    # plot_validation_data(run_path=run_path, write_path=run_path)
 
 
 if __name__ == "__main__":

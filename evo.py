@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.figure
 from caller import ChatHistory
 from state import SeedState, AttributeStats, Rollout, RewriteScore
+from baselines import BaselineRollout
 from utils import parse_json_response, set_seed_all
 from cluster_models import ClusterModel
 from api_models import GenerationModel, RewriteModel, SAME_ATTRS
@@ -41,7 +42,7 @@ class EvoPlanner:
         self.m_var = m_var
         self.cosine_sim_threshold_initial = cosine_sim_threshold_initial
         self.cosine_sim_threshold_evolution = cosine_sim_threshold_evolution
-        self.rng = Random(seed=random_seed)
+        self.rng = Random(random_seed)
     
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -61,7 +62,7 @@ class EvoPlanner:
             cosine_sim_threshold=self.cosine_sim_threshold_initial,
         )
 
-    def _get_original_data(self, stats: AttributeStats, baselines: dict[str, list[Rollout]], n_rollouts: int=4) -> str:
+    def _get_original_data(self, stats: AttributeStats, baselines: dict[str, list[BaselineRollout]], n_rollouts: int=4) -> str:
         student_wr = stats.winrate("student")
         teacher_wr = stats.winrate("teacher")
         student_wr_str = f"{student_wr:.3f}" if student_wr is not None else "N/A"
@@ -97,11 +98,10 @@ class EvoPlanner:
 
         original_data_rollouts = []
         for r, user_prompt, idx in chosen_rollouts:
-            # r.response is rewritten (with attribute), baseline is original (without attribute)
             original_data_rollouts.append({
                 "user_prompt": user_prompt,
                 "response_attribute_not_present": baselines[user_prompt][idx].response,
-                "response_attribute_present": r.response,
+                "response_attribute_present": r.rewritten_response,
                 "Metric A uplift": r.student_score.score,
                 "Metric B uplift": r.teacher_score.score if r.teacher_score is not None else "N/A",
             })
@@ -120,7 +120,7 @@ class EvoPlanner:
         attribute: str,
         time_step: int,
         seed_state: SeedState,
-        baselines: dict[str, list[Rollout]],
+        baselines: dict[str, list[BaselineRollout]],
     ) -> tuple[list[str], str]:
         """
         Trace ancestry from current attribute back to step 0.
@@ -165,7 +165,7 @@ class EvoPlanner:
     async def iterate_plan(
         self,
         seed_states: list[SeedState],
-        baselines: dict[str, list[Rollout]],
+        baselines: dict[int, dict[str, list[BaselineRollout]]],
         n_neighbors: int = 8,
     ):
         to_send_messages = []
@@ -194,7 +194,7 @@ class EvoPlanner:
                     attribute=attribute,
                     time_step=time_step,
                     seed_state=seed_state,
-                    baselines=baselines,
+                    baselines=baselines[seed_state.index],
                 )
                 exclude_set = {attribute} | set(ancestor_attrs)
 
@@ -213,7 +213,7 @@ class EvoPlanner:
                 planner_prompt = PLANNER_SYSTEM + "\n\n" + MUTATE_PROMPT.format(
                     num_plans=self.m_var,
                     cluster_summary=seed_state.cluster.summary,
-                    current_data=self._get_original_data(stats=stats, baselines=baselines),
+                    current_data=self._get_original_data(stats=stats, baselines=baselines[seed_state.index]),
                     ancestry_data=ancestry_str,
                     neighbor_data=neighbor_data,
                     direction_goal=DIRECTION_GOAL[self.direction],
@@ -419,7 +419,7 @@ class EvoPlanner:
 
         for idx, seed_stats in evaluate_results.items():
             # Calculate student winrate for each attribute (without requiring teacher scores)
-            attr_winrates: list[tuple[str, float]] = []
+            attr_winrates: list[tuple[str, float | None]] = []
 
             for attribute, attribute_stats in seed_stats.items():
                 attr_winrates.append((attribute, attribute_stats.winrate("student")))
@@ -430,7 +430,7 @@ class EvoPlanner:
                 continue
 
             # Calculate threshold: remove bottom 40% to save teacher eval compute
-            winrate_values = [wr for _, wr in attr_winrates]
+            winrate_values = [wr for _, wr in attr_winrates if wr is not None]
             if self.direction == "plus":
                 student_pct = float(np.percentile(winrate_values, 40))
                 threshold = min(0.0, student_pct)
@@ -442,10 +442,10 @@ class EvoPlanner:
             surviving_attrs = set()
             for attr, wr in attr_winrates:
                 if self.direction == "plus":
-                    if wr >= threshold:
+                    if wr is not None and wr >= threshold:
                         surviving_attrs.add(attr)
                 else:
-                    if wr <= threshold:
+                    if wr is not None and wr <= threshold:
                         surviving_attrs.add(attr)
 
             filtered_stats = {attr: s for attr, s in seed_stats.items() if attr in surviving_attrs}
@@ -558,7 +558,6 @@ class EvoPlanner:
 
 class EvoRunner(Runner):
     planner: EvoPlanner  # for type checker
-    runner_type = "evo"
 
     def __init__(
         self,
@@ -584,7 +583,11 @@ class EvoRunner(Runner):
         )
         self.planner = planner
         self.n_rewrite_rollouts = n_rewrite_rollouts
-        self.rng = Random(seed=random_seed)
+        self.rng = Random(random_seed)
+
+    @property
+    def runner_type(self) -> str:
+        return "evo"
 
     async def _cluster_seed(self, seed_state: SeedState) -> list[str]:
         """Cluster a single seed state's candidates and return representatives."""
@@ -634,13 +637,13 @@ class EvoRunner(Runner):
         # Evaluate only representatives
         evaluate_results: dict[int, dict[str, AttributeStats]] = {}
 
-        for ss in self.seed_states:
+        for i, ss in enumerate(self.seed_states):
             async with BiasEvaluator(rewrite_models=[train_rewriter], reward_model=self.student_model) as evaluator:
                 user_prompts = self.rng.sample(
                     ss.cluster.train_prompts,
                     train_batch_size,
                 )
-                attributes = representative_attributes[ss.index]
+                attributes = representative_attributes[i]
                 print(f"Seed {ss.index}: evaluating {len(attributes)} representative attributes")
                 stats = await evaluator.evaluate_attributes(
                     user_prompts=user_prompts,
@@ -649,6 +652,10 @@ class EvoRunner(Runner):
                     same_attrs=[SAME_ATTRS] * len(attributes),
                     n_rollouts=self.n_rewrite_rollouts,
                 )
+
+            assert len(list(stats.keys())) == 1
+            assert list(stats.keys())[0] == train_rewriter.model_name
+            stats = stats[train_rewriter.model_name]
             evaluate_results[ss.index] = {
                 k: AttributeStats(attribute=k, rollouts=v) for k, v in stats.items()
             }
@@ -666,9 +673,11 @@ class EvoRunner(Runner):
         )
 
         # Store ALL rollouts (including those filtered out, to preserve student scores)
-        for seed_state_idx, stats in enumerate(evaluate_results):
-            for attribute, rollouts in stats.items():
-                self.seed_states[seed_state_idx].history[-1][attribute].rollouts = rollouts
+        for seed_state in self.seed_states:
+            ss_idx = seed_state.index
+            stats = evaluate_results[ss_idx]
+            for attribute, attribute_stats in stats.items():
+                seed_state.history[-1][attribute].rollouts = attribute_stats.rollouts
 
         self.save_attribute_stats(
             direction=self.planner.direction,
@@ -706,6 +715,7 @@ class EvoRunner(Runner):
                 direction=candidates["direction"],
             )
             fig.savefig(self.run_path / f"step_{self.step_count}_stats" / f"seed_{seed_state_idx}_pareto.pdf")
+            plt.close(fig)
 
         logger.info(
             f"[TRAIN STEP {self.step_count}] finished; Current population: {len(self.seed_states[0].state)}"
@@ -739,7 +749,8 @@ class EvoRunner(Runner):
                         for user_prompt, rollouts in item["all_rollouts"].items():
                             attribute_rollouts[user_prompt] = [
                                 Rollout(
-                                    response=r["response"],
+                                    rewritten_response=r["rewritten_response"],
+                                    baseline_response=r["baseline_response"],
                                     student_score=RewriteScore(score=r["student_score"], raw_score=None, reasoning=None, model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
                                     teacher_score=RewriteScore(score=r.get("teacher_score"), raw_score=None, reasoning=r.get("teacher_reasoning"), model_name="anthropic/claude-sonnet-4.5") if "teacher_score" in r else None,
                                 )

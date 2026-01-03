@@ -71,7 +71,7 @@ class RewardModel(ABC):
                             continue
                         rollout_count += 1
 
-                        rewritten_chat = ChatHistory.from_user(user_prompt).add_assistant(rollout.response)
+                        rewritten_chat = ChatHistory.from_user(user_prompt).add_assistant(rollout.rewritten_response)
                         baseline_chat = ChatHistory.from_user(user_prompt).add_assistant(baseline_rollouts[rollout_idx].response)
 
                         chat_histories_A.append(rewritten_chat)

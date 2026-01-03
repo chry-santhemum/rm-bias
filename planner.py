@@ -150,30 +150,32 @@ class ListPlanner(Planner):
         to_send_messages = []
         metas = []
 
+        student_model_name = runner.student_model.model_name
         for seed_state_idx, seed_state in enumerate(runner.seed_states):
             seed_state.history.append({})
+            seed_baselines = runner.baselines[seed_state.index]
             if self.max_num_train_prompts is not None:
                 train_prompts = seed_state.cluster.train_prompts[:self.max_num_train_prompts]
             else:
                 train_prompts = seed_state.cluster.train_prompts
             for user_prompt in train_prompts:
-                all_rollouts = runner.baselines[user_prompt]
+                all_rollouts = seed_baselines[user_prompt]
 
                 for _ in range(self.n_per_user_prompt):
                     sampled_rollouts = random.sample(
-                        [r for r in all_rollouts if r.student_score.raw_score is not None],
+                        [r for r in all_rollouts if student_model_name in r.scores],
                         min(self.n_traj_in_context, len(all_rollouts)),
                     )
 
                     if self.reverse:  # REVERSE SCORES!
-                        sampled_rollouts.sort(key=lambda x: x.student_score.raw_score, reverse=True)  # type: ignore
-                        max_score = max(r.student_score.raw_score for r in sampled_rollouts)  # type: ignore
+                        sampled_rollouts.sort(key=lambda x: x.scores[student_model_name], reverse=True)
+                        max_score = max(r.scores[student_model_name] for r in sampled_rollouts)
 
                         data = {
                             "user_prompt": user_prompt,
                             "rollouts": [{
                                 "response": r.response,
-                                "score": round(max_score - r.student_score.raw_score, 2),
+                                "score": round(max_score - r.scores[student_model_name], 2),
                             } for r in sampled_rollouts],
                         }
 
@@ -185,13 +187,13 @@ class ListPlanner(Planner):
                             bias_nudge=BIAS_NUDGE[direction],
                         )
                     else:
-                        sampled_rollouts.sort(key=lambda x: x.student_score.raw_score, reverse=False)  # type: ignore
+                        sampled_rollouts.sort(key=lambda x: x.scores[student_model_name], reverse=False)
 
                         data = {
                             "user_prompt": user_prompt,
                             "rollouts": [{
                                 "response": r.response,
-                                "score": round(r.student_score.raw_score, 2),  # type: ignore
+                                "score": round(r.scores[student_model_name], 2),
                             } for r in sampled_rollouts],
                         }
                         planner_prompt = PLANNER_SYSTEM + "\n\n" + LIST_PROMPT.format(
@@ -317,25 +319,27 @@ class PairPlanner(Planner):
         Returns {"prompt": ..., "chosen": ..., "rejected": ...}
         """
         assert runner.baselines is not None
+        student_model_name = runner.student_model.model_name
         for seed_state in runner.seed_states:
             contrast_pairs = []
+            seed_baselines = runner.baselines[seed_state.index]
             prompts = [
-                p for p in seed_state.cluster.train_prompts if p in runner.baselines
+                p for p in seed_state.cluster.train_prompts if p in seed_baselines
             ]
 
             for prompt in prompts:
-                rollouts = [r for r in runner.baselines[prompt] if r.student_score.raw_score is not None]
+                rollouts = [r for r in seed_baselines[prompt] if student_model_name in r.scores]
                 if len(rollouts) == 0:
                     continue
 
-                scores = np.array([float(r.student_score.raw_score) for r in rollouts])  # type: ignore
+                scores = np.array([float(r.scores[student_model_name]) for r in rollouts])
                 mean_score, stdev_score = np.mean(scores), np.std(scores)
                 if stdev_score == 0:
                     continue  # No variability
 
                 # find those above / below threshold * stdev
-                high_rollouts = [r for r in rollouts if float(r.student_score.raw_score) > mean_score + threshold * stdev_score]  # type: ignore
-                low_rollouts = [r for r in rollouts if float(r.student_score.raw_score) < mean_score - threshold * stdev_score]  # type: ignore
+                high_rollouts = [r for r in rollouts if float(r.scores[student_model_name]) > mean_score + threshold * stdev_score]
+                low_rollouts = [r for r in rollouts if float(r.scores[student_model_name]) < mean_score - threshold * stdev_score]
                 # print(
                 #     f"High rollouts: {len(high_rollouts)}, Low rollouts: {len(low_rollouts)}"
                 # )

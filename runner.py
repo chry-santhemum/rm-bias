@@ -60,7 +60,7 @@ class Runner(ABC):
                 reward_model=self.student_model,
                 n_rollouts=self.n_baseline_rollouts,
             )
-            if self.teacher_model.type == "local":
+            if isinstance(self.teacher_model, LocalRewardModel):
                 baselines = await evaluate_baselines(
                     cluster=cluster,
                     split="train",
@@ -82,7 +82,7 @@ class Runner(ABC):
                 reward_model=self.student_model,
                 n_rollouts=self.n_validate_rollouts,
             )
-            if self.teacher_model.type == "local":
+            if isinstance(self.teacher_model, LocalRewardModel):
                 baselines = await evaluate_baselines(
                     cluster=cluster,
                     split="val",
@@ -154,7 +154,9 @@ class Runner(ABC):
         if not hasattr(self, "val_baselines"):
             await self.get_val_baselines()
 
-        validation_results: dict[int, dict[str, AttributeStats]] = {}
+        validation_results: dict[str, dict[int, dict[str, AttributeStats]]] = {
+            rewriter.model_name: {} for rewriter in val_rewriters
+        }
 
         # Rewrite and get student scores
         for ss in self.seed_states:
@@ -167,49 +169,75 @@ class Runner(ABC):
                     save_dir=self.run_path / "validate" / f"seed_{ss.index}_validate",
                 )
 
-            validation_results[ss.index] = {
-                k: AttributeStats(attribute=k, rollouts=v) for k, v in stats.items()
-            }
+            for rewriter_name, rewriter_stats in stats.items():
+                validation_results[rewriter_name][ss.index] = {
+                    k: AttributeStats(attribute=k, rollouts=v) for k, v in rewriter_stats.items()
+                }
 
-        # Populate teacher_score on rollouts in place
-        await self.teacher_model.judge_rollouts(
-            evaluate_results=validation_results,
-            baselines=self.val_baselines,  # type: ignore
-            first_n_rollouts=judge_val_first_n_rollouts,
-            first_n_user_prompts=judge_val_first_n_user_prompts,
-        )
+        for rewriter_name, rewriter_stats in validation_results.items():
+            # Populate teacher_score on rollouts in place
+            await self.teacher_model.judge_rollouts(
+                evaluate_results=rewriter_stats,
+                baselines=self.val_baselines,  # type: ignore
+                first_n_rollouts=judge_val_first_n_rollouts,
+                first_n_user_prompts=judge_val_first_n_user_prompts,
+            )
 
-        # Save validation stats and plot for each seed
-        for i, seed_state in enumerate(self.seed_states):
-            candidate_stats = []
-            for attribute, attribute_stats in validation_results[i].items():
-                candidate_stats.append({
-                    "attribute": attribute,
-                    "student_winrate": attribute_stats.winrate("student"),
-                    "teacher_winrate": attribute_stats.winrate("teacher"),
-                })
+        # Save validation stats and plot for each (rewriter, seed)
+        for rewriter_name, rewriter_results in validation_results.items():
+            for seed_state in self.seed_states:
+                seed_stats = rewriter_results[seed_state.index]
+                rewriter_dir = self.run_path / "validate" / f"seed_{seed_state.index}_validate" / rewriter_name.replace("/", "_")
+                rewriter_dir.mkdir(parents=True, exist_ok=True)
 
-            # Save candidate stats as JSON
-            with open(
-                self.run_path / "validate" / f"seed_{seed_state.index}_validate/candidate_stats.json", "w"
-            ) as f:
-                json.dump(candidate_stats, f, indent=4, sort_keys=True)
+                # Save complete rollouts with teacher scores
+                with open(rewriter_dir / "rollouts_judged.json", "w") as f:
+                    json_data = {
+                        attr: {
+                            user: [
+                                {
+                                    "rewritten_response": r.rewritten_response,
+                                    "baseline_response": r.baseline_response,
+                                    "student_score": r.student_score.raw_score,
+                                    "student_diff": r.student_score.score,
+                                    "teacher_score": r.teacher_score.score if r.teacher_score else None,
+                                    "teacher_reasoning": r.teacher_score.reasoning if r.teacher_score else None,
+                                } if r is not None else None
+                                for r in rollouts
+                            ]
+                            for user, rollouts in attr_stats.rollouts.items()
+                        }
+                        for attr, attr_stats in seed_stats.items()
+                    }
+                    json.dump(json_data, f, indent=4, sort_keys=True)
 
-            # Create scatter plot
-            valid_points = [(s["student_winrate"], s["teacher_winrate"])
-                           for s in candidate_stats
-                           if s["student_winrate"] is not None and s["teacher_winrate"] is not None]
+                # Save candidate stats
+                candidate_stats = []
+                for attribute, attribute_stats in seed_stats.items():
+                    candidate_stats.append({
+                        "attribute": attribute,
+                        "student_winrate": attribute_stats.winrate("student"),
+                        "teacher_winrate": attribute_stats.winrate("teacher"),
+                    })
 
-            if valid_points:
-                fig, ax = plt.subplots(figsize=(10, 8))
-                ax.scatter([p[0] for p in valid_points], [p[1] for p in valid_points],
-                          c='blue', alpha=0.7, marker='o')
+                with open(rewriter_dir / "candidate_stats.json", "w") as f:
+                    json.dump(candidate_stats, f, indent=4, sort_keys=True)
 
-                ax.set_xlabel('Student Winrate')
-                ax.set_ylabel('Teacher Winrate')
-                ax.set_title(f'Validation Results: Seed {seed_state.index}')
-                ax.grid(True, alpha=0.3)
+                # Create scatter plot
+                valid_points = [(s["student_winrate"], s["teacher_winrate"])
+                               for s in candidate_stats
+                               if s["student_winrate"] is not None and s["teacher_winrate"] is not None]
 
-                fig.savefig(self.run_path / "validate" / f"seed_{seed_state.index}_validate/validation_scatter.pdf")
-                plt.close(fig)
+                if valid_points:
+                    fig, ax = plt.subplots(figsize=(10, 8))
+                    ax.scatter([p[0] for p in valid_points], [p[1] for p in valid_points],
+                              c='blue', alpha=0.7, marker='o')
+
+                    ax.set_xlabel('Student Winrate')
+                    ax.set_ylabel('Teacher Winrate')
+                    ax.set_title(f'Validation: {rewriter_name} - Seed {seed_state.index}')
+                    ax.grid(True, alpha=0.3)
+
+                    fig.savefig(rewriter_dir / "validation_scatter.pdf")
+                    plt.close(fig)
         

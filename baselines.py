@@ -69,7 +69,7 @@ async def evaluate_baselines(
             result_dict.scores[reward_model.model_name] = score.score
 
         with open(path, "w") as f:
-            json.dump({user: [asdict(r) for r in rollouts] for user, rollouts in baselines.items()}, f, indent=4, sort_keys=True)
+            json.dump({user: [asdict(r) for r in user_rollouts] for user, user_rollouts in baselines.items()}, f, indent=4, sort_keys=True)
         
     else:
         print(f"Sampling {ds_name}_{cluster.index} {split} baselines")

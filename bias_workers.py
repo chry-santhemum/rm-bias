@@ -327,7 +327,7 @@ def organize_rewrites(
     student_model_name: str,
     n_rollouts: int | None = None,
     save_dir: Path | None = None,
-) -> dict[str, dict[str, dict[str, list[Rollout | None]]]] | dict[str, dict[str, list[Rollout | None]]]:
+) -> dict[str, dict[str, dict[str, list[Rollout | None]]]]:
 
     organized_rollouts = defaultdict(dict)
 
@@ -392,38 +392,29 @@ def organize_rewrites(
                 f"Rewrite result for {result.user} and {result.system} not matched."
             )
 
-    if len(list(organized_rollouts.keys())) == 1:
-        print("Only one rewriter, reducing...")
-        k = list(organized_rollouts.keys())[0]
-        organized_rollouts = organized_rollouts[k]
-
     if save_dir is not None:
         save_dir.mkdir(parents=True, exist_ok=True)
-        with open(save_dir / "rollouts.json", "w") as f:
-            json_data = {
-                k: {k2: [{
-                "rewritten_response": r.rewritten_response,
-                "baseline_response": r.baseline_response,
-                "student_score": r.student_score.raw_score,
-                "student_diff": r.student_score.score,
-                } if r is not None else None for r in v2
-                ] for k2, v2 in v.items()
-                } for k, v in organized_rollouts.items()
-            }
-            json.dump(json_data, f, indent=4, sort_keys=True)
+        for rewriter_name, rewriter_data in organized_rollouts.items():
+            rewriter_dir = save_dir / rewriter_name.replace("/", "_")
+            rewriter_dir.mkdir(parents=True, exist_ok=True)
 
-        rewrite_diffs = {}
-        for attribute, attribute_rollouts in organized_rollouts.items():
-            attribute_diffs = {}
-            for user, v in attribute_rollouts.items():
-                attribute_diffs[user] = [
-                    r.student_score.score for r in v
-                    if r is not None and r.student_score is not None and r.student_score.score is not None
-                ]
-            rewrite_diffs[attribute] = attribute_diffs
-
-        with open(save_dir / "student_diffs.json", "w") as f:
-            json.dump(rewrite_diffs, f, indent=4, sort_keys=True)
+            with open(rewriter_dir / "rollouts.json", "w") as f:
+                json_data = {
+                    attr: {
+                        user: [
+                            {
+                                "rewritten_response": r.rewritten_response,
+                                "baseline_response": r.baseline_response,
+                                "student_score": r.student_score.raw_score,
+                                "student_diff": r.student_score.score,
+                            } if r is not None else None
+                            for r in rollouts
+                        ]
+                        for user, rollouts in user_dict.items()
+                    }
+                    for attr, user_dict in rewriter_data.items()
+                }
+                json.dump(json_data, f, indent=4, sort_keys=True)
 
     return dict(organized_rollouts)
 
