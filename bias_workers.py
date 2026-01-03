@@ -11,6 +11,7 @@ import numpy as np
 from caller import ChatHistory
 from api_models import GenerationModel, RewriteModel
 from reward_models import RewardModel
+from baselines import BaselineRollout
 from state import Rollout, RewriteScore
 
 
@@ -322,7 +323,7 @@ async def rating_worker(
 
 def organize_rewrites(
     all_results: list[RewriteOutput],
-    baseline_rollouts: dict[str, list[Rollout]],
+    baseline_rollouts: dict[str, list[BaselineRollout]],
     student_model_name: str,
     n_rollouts: int | None = None,
     save_dir: Path | None = None,
@@ -345,10 +346,10 @@ def organize_rewrites(
             continue
 
         found = False
-        for i, baseline in enumerate(baseline_rollouts[result.user]):
+        for i, baseline_rollout in enumerate(baseline_rollouts[result.user]):
             if n_rollouts is not None and i >= n_rollouts:
                 break
-            if baseline.response == result.original_assistant:
+            if baseline_rollout.response == result.original_assistant:
                 if attribute_rollouts[result.user][i] is not None:
                     continue
 
@@ -358,11 +359,11 @@ def organize_rewrites(
                 if result.rewritten_assistant == result.original_assistant:
                     # Unchanged rewrite - no change signal
                     score_diff = 0.0
-                    rewritten_raw = baseline.student_score.raw_score
+                    rewritten_raw = baseline_rollout.scores[student_model_name]
                 else:
-                    baseline_raw = baseline.student_score.raw_score
+                    baseline_raw = baseline_rollout.scores[student_model_name]
                     rewritten_raw = result.raw_score
-                    if baseline_raw is not None and rewritten_raw is not None:
+                    if rewritten_raw is not None:
                         score_diff = rewritten_raw - baseline_raw
                     else:
                         score_diff = None

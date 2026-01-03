@@ -31,11 +31,16 @@ class Cluster:
 
 def asdict_no_none(obj) -> dict:
     obj_dict = asdict(obj)
+    
     def remove_none_values(x):
-        if not isinstance(x, dict):
-            return x
-        return {k: remove_none_values(v) for k, v in x.items() if v is not None}
+        if isinstance(x, dict):
+            return {k: remove_none_values(v) for k, v in x.items() if v is not None}
+        if isinstance(x, list):
+            return [remove_none_values(item) for item in x]
+        return x
+    
     return remove_none_values(obj_dict)
+
 
 @dataclass(kw_only=True, slots=True)
 class RewriteScore:

@@ -9,7 +9,8 @@ import torch
 
 from caller import ChatHistory
 from api_models import JudgeModel, RatingResult, ComparisonResult
-from state import Rollout, RewriteScore
+from state import AttributeStats, RewriteScore
+from baselines import BaselineRollout
 from utils import load_model, find_executable_batch_size
 
 
@@ -40,39 +41,28 @@ class RewardModel(ABC):
 
     async def judge_rollouts(
         self,
-        evaluate_results: list[dict[str, dict[str, list[Rollout|None]]]],
-        baselines: dict[str, list[Rollout]],
+        evaluate_results: dict[int, dict[str, AttributeStats]],
+        baselines: dict[int, dict[str, list[BaselineRollout]]],
         first_n_rollouts: int,      # 0 means all
         first_n_user_prompts: int,  # 0 means all
         use_tqdm: bool = True
     ) -> None:
-        """
-        Populates teacher_score on rollouts in validation_results in place.
+        """Populates teacher_score on rollouts in validation_results in place."""
 
-        For each rollout, compares it against the corresponding baseline using
-        async_compare and sets the teacher_score with:
-        - score: winrate (1.0 for A wins, 0.0 for B wins, 0.5 for tie)
-        - raw_score: score_diff from comparison (if available, e.g. for RM-based comparison)
-        - reasoning: from comparison result (if available, e.g. for LLM judge)
-        - model_name: this model's name
-
-        Compares rewritten response (A) against baseline (B).
-        Positive score_diff = teacher prefers the rewritten version.
-        """
         chat_histories_A = []  # rewritten response
         chat_histories_B = []  # baseline response
         judge_tasks_info = []
 
         # load async_compare args
-        for i, validation_result in enumerate(evaluate_results):
+        for seed_idx, validation_result in evaluate_results.items():
             for attribute, attribute_stats in validation_result.items():
                 user_prompt_count = 0
-                for user_prompt, rollouts in attribute_stats.items():
+                for user_prompt, rollouts in attribute_stats.rollouts.items():
                     if first_n_user_prompts > 0 and user_prompt_count >= first_n_user_prompts:
                         break
                     user_prompt_count += 1
 
-                    baseline_rollouts = baselines[user_prompt]
+                    baseline_rollouts = baselines[seed_idx][user_prompt]
                     rollout_count = 0
                     for rollout_idx, rollout in enumerate(rollouts):
                         if first_n_rollouts > 0 and rollout_count >= first_n_rollouts:
@@ -89,7 +79,7 @@ class RewardModel(ABC):
 
                         judge_tasks_info.append(
                             {
-                                "seed_state_idx": i,
+                                "seed_state_idx": seed_idx,
                                 "attribute": attribute,
                                 "user_prompt": user_prompt,
                                 "rollout_idx": rollout_idx,
@@ -97,52 +87,50 @@ class RewardModel(ABC):
                         )
 
         logger.info(f"Running {len(judge_tasks_info)} judge tasks...")
-        judge_tasks_results = await self.async_compare(
-            chat_histories_A=chat_histories_A,
-            chat_histories_B=chat_histories_B,
-            use_tqdm=use_tqdm,
-        )
+        if self.type == "api":
+            judge_tasks_results = await self.async_compare(
+                chat_histories_A=chat_histories_A,
+                chat_histories_B=chat_histories_B,
+                use_tqdm=use_tqdm,
+            )
 
-        # Populate teacher_score on each rollout in place
-        for judge_task_result, judge_task_info in zip(judge_tasks_results, judge_tasks_info, strict=True):
-            seed_state_idx = judge_task_info["seed_state_idx"]
-            attribute = judge_task_info["attribute"]
-            user_prompt = judge_task_info["user_prompt"]
-            rollout_idx = judge_task_info["rollout_idx"]
+            for comparison_result, judge_task_info in zip(judge_tasks_results, judge_tasks_info, strict=True):
+                seed_state_idx = judge_task_info["seed_state_idx"]
+                attribute = judge_task_info["attribute"]
+                user_prompt = judge_task_info["user_prompt"]
+                rollout_idx = judge_task_info["rollout_idx"]
+                rewritten_raw_score = comparison_result.raw_score_A
 
-            # A=rewritten, B=baseline
-            rewritten_raw_score = judge_task_result.raw_score_A
-            baseline_raw_score = judge_task_result.raw_score_B
-
-            if self.type == "api":
                 teacher_score = RewriteScore(
-                    score=judge_task_result.score_diff,
+                    score=comparison_result.score_diff,
                     raw_score=rewritten_raw_score,
-                    reasoning=judge_task_result.reasoning[0] if judge_task_result.reasoning is not None else None,
+                    reasoning=comparison_result.reasoning[0] if comparison_result.reasoning is not None else None,
                     model_name=self.model_name,
                 )
 
                 # Update the rollout in place
-                rollout = evaluate_results[seed_state_idx][attribute][user_prompt][rollout_idx]
+                rollout = evaluate_results[seed_state_idx][attribute].rollouts[user_prompt][rollout_idx]
                 rollout.teacher_score = teacher_score
 
-            elif self.type == "local":
-                baseline_teacher_score = RewriteScore(
-                    score=None,
-                    raw_score=baseline_raw_score,
-                    reasoning=None,
-                    model_name=self.model_name,
-                )
-                baselines[user_prompt][rollout_idx].teacher_score = baseline_teacher_score
+        elif self.type == "local":
+            judge_tasks_results = await self.async_rate(chat_histories_A, use_tqdm=use_tqdm)
 
-                rewrite_teacher_score = RewriteScore(
-                    score=judge_task_result.score_diff,
-                    raw_score=rewritten_raw_score,
+            for rating_result, judge_task_info in zip(judge_tasks_results, judge_tasks_info, strict=True):
+                seed_state_idx = judge_task_info["seed_state_idx"]
+                attribute = judge_task_info["attribute"]
+                user_prompt = judge_task_info["user_prompt"]
+                rollout_idx = judge_task_info["rollout_idx"]
+
+                baseline_score = baselines[seed_state_idx][user_prompt][rollout_idx].scores[self.model_name]
+
+                teacher_score = RewriteScore(
+                    score=rating_result.score - baseline_score,
+                    raw_score=rating_result.score,
                     reasoning=None,
                     model_name=self.model_name,
                 )
-                rewrite_rollout = evaluate_results[seed_state_idx][attribute][user_prompt][rollout_idx]
-                rewrite_rollout.teacher_score = rewrite_teacher_score
+                rollout = evaluate_results[seed_state_idx][attribute].rollouts[user_prompt][rollout_idx]
+                rollout.teacher_score = teacher_score
 
 
 class LocalRewardModel(RewardModel):

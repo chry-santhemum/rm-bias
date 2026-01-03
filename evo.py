@@ -12,7 +12,7 @@ from state import SeedState, AttributeStats, Rollout, RewriteScore
 from utils import parse_json_response, set_seed_all
 from cluster_models import ClusterModel
 from api_models import GenerationModel, SAME_ATTRS
-from reward_models import RewardModel
+from reward_models import RewardModel, LocalRewardModel
 from runner import Runner
 from bias_evaluator import BiasEvaluator
 from planner import Planner, PLANNER_SYSTEM
@@ -564,13 +564,14 @@ class EvoPlanner:
 
 class EvoRunner(Runner):
     planner: EvoPlanner  # for type checker
+    runner_type = "evo"
 
     def __init__(
         self,
         seed_states: list[SeedState],
         planner: EvoPlanner,
         policy_model: GenerationModel,
-        bias_evaluator: BiasEvaluator,
+        student_model: LocalRewardModel,
         teacher_model: RewardModel,
         n_baseline_rollouts: int,
         n_rewrite_rollouts: int,
@@ -580,20 +581,14 @@ class EvoRunner(Runner):
         super().__init__(
             seed_states=seed_states,
             policy_model=policy_model,
-            bias_evaluator=bias_evaluator,
+            student_model=student_model,
             teacher_model=teacher_model,
             run_name=run_name,
             n_baseline_rollouts=n_baseline_rollouts,
             n_validate_rollouts=n_validate_rollouts,
         )
         self.planner = planner
-        self.bias_evaluator = bias_evaluator
-
         self.n_rewrite_rollouts = n_rewrite_rollouts
-
-    @property
-    def runner_type(self) -> str:
-        return "evo"
 
     async def _cluster_seed(self, seed_state: SeedState) -> list[str]:
         """Cluster a single seed state's candidates and return representatives."""

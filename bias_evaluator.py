@@ -7,7 +7,7 @@ from loguru import logger
 
 from api_models import RewriteModel
 from reward_models import RewardModel
-from state import Rollout
+from baselines import BaselineRollout
 from bias_workers import (
     BatchStartMarker,
     RewriteInput,
@@ -23,7 +23,7 @@ class BiasEvaluator:
         self,
         rewrite_models: list[RewriteModel],
         reward_model: RewardModel,
-        n_rewrite_workers: int,
+        n_rewrite_workers: int = 128
     ):
         self.rewrite_models = rewrite_models
         self.reward_model = reward_model
@@ -130,7 +130,7 @@ class BiasEvaluator:
         self,
         user_prompts: list[str],
         attributes: list[str],
-        baselines: dict[str, list[Rollout]],
+        baselines: dict[str, list[BaselineRollout]],
         same_attrs: list[str] | None = None,  # parallel to attributes, pre-formatted strings
         n_rollouts: int | None = None,  # max number of baseline responses to rewrite
         save_dir: Path | None = None,
@@ -155,14 +155,14 @@ class BiasEvaluator:
         for user in user_prompts:
             for attr_idx, attribute in enumerate(attributes):
                 attr_same_attrs = same_attrs[attr_idx] if same_attrs else ""
-                for i, original_assistant in enumerate(baselines.get(user, [])):
+                for i, baseline_rollout in enumerate(baselines.get(user, [])):
                     if n_rollouts is not None and i >= n_rollouts:
                         break
                     rewrite_inputs.append(
                         RewriteInput(
                             system=attribute,
                             user=user,
-                            original_assistant=original_assistant.response,
+                            original_assistant=baseline_rollout.response,
                             batch_id="",  # Will be set in _run_rewrite_batch
                             same_attrs=attr_same_attrs,
                         )
