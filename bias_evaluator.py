@@ -108,10 +108,11 @@ class BiasEvaluator:
             self.batch_futures[batch_id] = loop.create_future()
             self._batch_id += 1
 
-        # Send batch start marker
-        logger.info(f"Batch {batch_id} expects {len(rewrite_inputs)} results...")
+        # Send batch start marker (each input produces one output per rewriter)
+        expected_items = len(rewrite_inputs) * len(self.rewrite_models)
+        logger.info(f"Batch {batch_id} expects {expected_items} results...")
         await self.queue_rewrite.put(  # type: ignore
-            BatchStartMarker(batch_id=batch_id, expected_items=len(rewrite_inputs))
+            BatchStartMarker(batch_id=batch_id, expected_items=expected_items)
         )
 
         # Put tasks (update batch_id since RewriteInput is frozen)

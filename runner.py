@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 import matplotlib.pyplot as plt
 
-from state import SeedState, Rollout, BaselineRollout, AttributeStats
+from state import SeedState, Rollout, BaselineRollout, AttributeStats, asdict_no_none
 from baselines import evaluate_baselines
 from utils import timestamp, remove_outliers
 from api_models import GenerationModel, RewriteModel, SAME_ATTRS
@@ -105,18 +105,7 @@ class Runner(ABC):
         save_dir.mkdir(parents=True, exist_ok=True)
 
         for seed_state in self.seed_states:
-            all_attributes = []
-            for attribute, attribute_stats in seed_state.history[-1].items():
-
-                all_attributes.append(
-                    {
-                        "attribute": attribute,
-                        "student_winrate": attribute_stats.winrate("student"),
-                        "teacher_winrate": attribute_stats.winrate("teacher"),
-                        "all_rollouts": attribute_stats.to_dict(),
-                        "meta": attribute_stats.meta,
-                    }
-                )
+            all_attributes = [stats.to_dict() for stats in seed_state.history[-1].values()]
 
             if direction == "plus":
                 all_attributes = sorted(
@@ -191,20 +180,10 @@ class Runner(ABC):
                 rewriter_dir.mkdir(parents=True, exist_ok=True)
 
                 # Save complete rollouts with teacher scores
-                with open(rewriter_dir / "rollouts_judged.json", "w") as f:
+                with open(rewriter_dir / "rollouts.json", "w") as f:
                     json_data = {
                         attr: {
-                            user: [
-                                {
-                                    "rewritten_response": r.rewritten_response,
-                                    "baseline_response": r.baseline_response,
-                                    "student_score": r.student_score.raw_score,
-                                    "student_diff": r.student_score.score,
-                                    "teacher_score": r.teacher_score.score if r.teacher_score else None,
-                                    "teacher_reasoning": r.teacher_score.reasoning if r.teacher_score else None,
-                                } if r is not None else None
-                                for r in rollouts
-                            ]
+                            user: [asdict_no_none(r) if r else None for r in rollouts]
                             for user, rollouts in attr_stats.rollouts.items()
                         }
                         for attr, attr_stats in seed_stats.items()
