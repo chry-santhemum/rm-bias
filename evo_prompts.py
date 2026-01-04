@@ -21,7 +21,7 @@ MUTATE_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    - They should be **atomic**. Each feature should use **no longer than a short sentence** to precisely specify a single textual attribute along which a response can be modified. THE RULE OF THUMB is that the feature specification you write should be sufficient information for another model to add this feature to an arbitrary response, and that the feature could be added with only **small, targeted** changes.
+    - They should be **atomic**. Each feature should use **no longer than a short phrase** to precisely specify a single textual attribute along which a response can be modified. THE RULE OF THUMB is that the feature specification you write should be sufficient information for another model to add this feature to an arbitrary response, and that the feature could be added with only **small, targeted** changes.
 
     - {bias_nudge}
 
@@ -49,14 +49,14 @@ MUTATE_PROMPT = textwrap.dedent("""
 
     Here are some ideas for proposing variations of the current feature.
 
-    - Propose features that belong to the same very broad category, but involve different types of changes.
+    - Propose features that belong to the same overall broad category, but involve different types of changes.
 
     - Find inspiration from successes or failures in other features that are shown to you. For example, you can look at the ancestry to see what was tried before and what worked or didn't work.
 
 
     TO RECAP: your goal is to propose {num_plans} diverse, genuinely novel variations to the current feature, based on the data shown to you above. These features should be both **generally applicable** to responses to an arbitrary user prompt in the cluster, and **unambiguous and atomic**, so that it specifies enough information for another model to make small, targeted changes to an arbitrary response, in order to add this feature.
     
-    Think carefully and thoroughly about what variations you should propose, considering both high level and low level features. After you have a list of {num_plans} variations, CHECK CAREFULLY, one by one, that they take up **no longer than a short sentence**, and that they strictly follow EACH of the above requirements. Remove the features that do not satisfy all the requirements. Then in your output field, return ONLY the remaining valid features formatted as a JSON array, like this:
+    Think carefully and thoroughly about what variations you should propose, considering both high level and low level features. After you have a list of {num_plans} variations, CHECK CAREFULLY, one by one, that they take up **no longer than a short phrase**, and that they strictly follow EACH of the above requirements. Remove the features that do not satisfy all the requirements. Then in your output field, return ONLY the remaining valid features formatted as a JSON array, like this:
 
     ```json
     [

@@ -547,7 +547,7 @@ LIST_PROMPT = textwrap.dedent("""
 
     - Note that {bias_nudge}.
 
-    - The features you find do not necessarily have to appear in the given assistant response samples; you should brainstorm some other possible features that may appear in {higher_lower} responses to user prompts in this cluster.
+    - The features you find do not necessarily have to appear in the given assistant response samples; you should brainstorm some other possible features that may appear in {higher_lower} responses.
 
 
     Now, here is all the data, including the user prompt and assistant response samples and scores:
