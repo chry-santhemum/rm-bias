@@ -1,5 +1,6 @@
 import asyncio
 import json
+import math
 import dotenv
 from random import Random
 from typing import Literal, Any
@@ -516,6 +517,10 @@ class EvoPlanner:
                 # Filter out candidates with None winrates
                 if new_candidate[2] is None or new_candidate[3] is None:
                     continue
+
+                # # Filter out no-op candidates
+                # if math.isclose(new_candidate[2], 0.0, abs_tol=1e-3) and math.isclose(new_candidate[3], 0.0, abs_tol=1e-3):
+                #     continue
 
                 if self.direction == "plus":
                     if new_candidate[3] > teacher_threshold:
