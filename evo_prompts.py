@@ -8,7 +8,7 @@ MUTATE_PROMPT = textwrap.dedent("""
     Below, you are given a current textual attribute along with its measured **uplift size** on both metrics - the average metric delta before and after rewriting the response so as to contain that attribute. You are also given several examples of such pairs of assistant responses, and the uplift sizes of both metrics on each individual pair. 
     
     You are also given some additional data for context: 
-    - The ancestry of this current attribute: the parent attributes (if they exist) that led to this one through previous mutations. 
+    - The ancestry of this current attribute;
     - Several other textual attributes and their average uplift sizes on both metrics.
 
     Your task is to carefully examine all this data and propose {num_plans} diverse **variations** of the current attribute. Here are the requirements that these features should satisfy:
@@ -36,7 +36,7 @@ MUTATE_PROMPT = textwrap.dedent("""
     {current_data}
     </current_attribute>
 
-    Here is the ancestry of this attribute - the sequence of parent attributes that led to this one through previous mutations. Each ancestor includes its scores and example response pairs. This history shows how the attribute evolved and what variations were tried:
+    Here is the ancestry of this attribute - the sequence of parent attributes that led to this one through previous mutations, as well as the siblings (immediate children of the nodes in the ancestry). This history shows how the attribute evolved and what variations were tried:
 
     <attribute_ancestry>
     {ancestry_data}

@@ -117,6 +117,13 @@ class EvoPlanner:
 
         return json.dumps(original_data, indent=4)
 
+    def _get_most_recent_stats(self, attr: str, seed_state: SeedState) -> AttributeStats | None:
+        """Find the most recent stats for an attribute in history."""
+        for step in range(len(seed_state.history) - 1, -1, -1):
+            if attr in seed_state.history[step]:
+                return seed_state.history[step][attr]
+        return None
+
     def _get_ancestry_data(
         self,
         attribute: str,
@@ -125,10 +132,10 @@ class EvoPlanner:
         baselines: dict[str, list[BaselineRollout]],
     ) -> tuple[list[str], str]:
         """
-        Trace ancestry from current attribute back to step 0.
+        Trace ancestry and find sister attributes.
 
         Returns:
-            - List of ancestor attribute strings (for exclusion from neighbors)
+            - List of attributes to exclude from neighbors (ancestors + sisters)
             - Formatted string of ancestry data for the prompt
         """
         ancestors = []
@@ -137,31 +144,56 @@ class EvoPlanner:
         # Get current attribute's parent info
         stats = seed_state.history[time_step][attribute]
         parent_attr = stats.meta.get("parent")
-        parent_time_step = stats.meta.get("parent_time_step")
 
         # Trace back through ancestry
         generation = 1
-        while parent_attr is not None and parent_time_step is not None:
+        while parent_attr is not None:
             ancestor_attrs.append(parent_attr)
 
-            # Get parent stats and format data
-            parent_stats = seed_state.history[parent_time_step][parent_attr]
-            parent_data = self._get_original_data(stats=parent_stats, baselines=baselines)
+            # Get most recent stats for this ancestor
+            parent_stats = self._get_most_recent_stats(parent_attr, seed_state)
+            if parent_stats is None:
+                break
 
-            ancestors.append(f"=== Generation -{generation} (Parent{'s parent' * (generation - 1) if generation > 1 else ''}) ===\n{parent_data}")
+            parent_data = self._get_original_data(stats=parent_stats, baselines=baselines)
+            ancestors.append(f"=== Generation -{generation} ===\n{parent_data}")
 
             # Move to next ancestor
             parent_attr = parent_stats.meta.get("parent")
-            parent_time_step = parent_stats.meta.get("parent_time_step")
             generation += 1
+
+        # Find sister attributes (other children of ancestors)
+        direct_lineage = {attribute} | set(ancestor_attrs)
+        sister_attrs = []
+        sisters = []
+
+        for step_history in seed_state.history:
+            for attr, attr_stats in step_history.items():
+                if attr in direct_lineage or attr in sister_attrs:
+                    continue
+                attr_parent = attr_stats.meta.get("parent")
+                if attr_parent in ancestor_attrs:
+                    sister_attrs.append(attr)
+                    recent_stats = self._get_most_recent_stats(attr, seed_state)
+                    if recent_stats is not None:
+                        student_wr = recent_stats.winrate("student")
+                        teacher_wr = recent_stats.winrate("teacher")
+                        sisters.append(
+                            f"- \"{attr}\" "
+                            f"Metric A: {student_wr:.3f if student_wr is not None else 'N/A'}, "
+                            f"Metric B: {teacher_wr:.3f if teacher_wr is not None else 'N/A'}"
+                        )
 
         # Format as string
         if not ancestors:
             ancestry_str = "No ancestry available (this is an initial attribute)."
         else:
             ancestry_str = "\n\n".join(ancestors)
+            if sisters:
+                ancestry_str += "\n\n=== Sibling attributes (other mutations from this lineage) ===\n"
+                ancestry_str += "\n".join(sisters)
 
-        return ancestor_attrs, ancestry_str
+        return ancestor_attrs + sister_attrs, ancestry_str
 
 
     async def iterate_plan(
@@ -518,9 +550,9 @@ class EvoPlanner:
                 if new_candidate[2] is None or new_candidate[3] is None:
                     continue
 
-                # # Filter out no-op candidates
-                # if math.isclose(new_candidate[2], 0.0, abs_tol=1e-3) and math.isclose(new_candidate[3], 0.0, abs_tol=1e-3):
-                #     continue
+                # Filter out no-op candidates
+                if math.isclose(new_candidate[2], 0.0, abs_tol=1e-3) and math.isclose(new_candidate[3], 0.0, abs_tol=1e-3):
+                    continue
 
                 if self.direction == "plus":
                     if new_candidate[3] > teacher_threshold:
@@ -608,6 +640,9 @@ class EvoRunner(Runner):
         self.planner = planner
         self.n_rewrite_rollouts = n_rewrite_rollouts
         self.random_seed = random_seed
+        self.seed_rngs = {
+            ss.index: Random(self.random_seed + ss.index) for ss in seed_states
+        }
 
     @property
     def runner_type(self) -> str:
@@ -663,9 +698,8 @@ class EvoRunner(Runner):
         evaluate_results: dict[int, dict[str, AttributeStats]] = {}
 
         for i, ss in enumerate(self.seed_states):
-            seed_rng = Random(self.random_seed + ss.index)
             async with BiasEvaluator(rewrite_models=[train_rewriter], reward_model=self.student_model) as evaluator:
-                user_prompts = seed_rng.sample(
+                user_prompts = self.seed_rngs[ss.index].sample(
                     ss.cluster.train_prompts,
                     train_batch_size,
                 )
