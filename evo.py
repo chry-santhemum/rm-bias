@@ -767,13 +767,23 @@ class EvoRunner(Runner):
                     for item in seed_results:
                         attribute = item["attribute"]
                         attribute_rollouts = dict()
-                        for user_prompt, rollouts in item["all_rollouts"].items():
+                        for user_prompt, rollouts in item["rollouts"].items():
                             attribute_rollouts[user_prompt] = [
                                 Rollout(
                                     rewritten_response=r["rewritten_response"],
                                     baseline_response=r["baseline_response"],
-                                    student_score=RewriteScore(score=r["student_score"], raw_score=None, reasoning=None, model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
-                                    teacher_score=RewriteScore(score=r.get("teacher_score"), raw_score=None, reasoning=r.get("teacher_reasoning"), model_name="anthropic/claude-sonnet-4.5") if "teacher_score" in r else None,
+                                    student_score=RewriteScore(
+                                        score=r["student_score"]["score"],
+                                        raw_score=r["student_score"].get("raw_score"),
+                                        reasoning=r["student_score"].get("reasoning"),
+                                        model_name=r["student_score"]["model_name"],
+                                    ),
+                                    teacher_score=RewriteScore(
+                                        score=r["teacher_score"]["score"],
+                                        raw_score=r["teacher_score"].get("raw_score"),
+                                        reasoning=r["teacher_score"].get("reasoning"),
+                                        model_name=r["teacher_score"]["model_name"],
+                                    ) if r.get("teacher_score") else None,
                                 )
                                 if r is not None else None
                                 for r in rollouts

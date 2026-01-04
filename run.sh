@@ -25,9 +25,9 @@ python train.py \
 --direction plus \
 --n_new 8 \
 --n_pop_initial 64 \
---n_pop_targets 12 10 10 10 8  \
+--n_pop_targets 20 16 12 12 8  \
 --train_batch_sizes 8 16 16 16 16 \
---m_var 6 \
+--m_var 3 \
 --n_planner_requests 32 \
 --val_split_size 32 \
 --context all
