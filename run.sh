@@ -20,14 +20,14 @@ python train.py \
 --student_model skywork-llama-8b \
 --teacher_model claude-sonnet-4.5 \
 --dataset handpick \
---topic_ids 2 4 5 \
+--topic_ids 4 \
 --planner_type list_reverse \
 --direction plus \
---n_new 8 \
+--n_new 10 \
 --n_pop_initial 64 \
 --n_pop_targets 20 16 12 12 8  \
 --train_batch_sizes 8 16 16 16 16 \
 --m_var 3 \
---n_planner_requests 32 \
+--n_planner_requests 40 \
 --val_split_size 32 \
 --context all

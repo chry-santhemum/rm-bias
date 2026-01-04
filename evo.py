@@ -488,21 +488,23 @@ class EvoPlanner:
                 all_candidates.append(new_candidate)
 
             # Student threshold was already applied in filter_by_student_scores
-            student_threshold = student_thresholds[seed_idx]
             if strict:
-                if self.direction == "plus":
-                    student_threshold = max(student_threshold, 0.0)
-                else:
-                    student_threshold = min(student_threshold, 0.0)
+                student_threshold = 0.0
+            else:
+                student_threshold = student_thresholds[seed_idx]
+
 
             # Calculate teacher threshold
-            valid_teacher_winrates = [c[3] for c in all_candidates if c[3] is not None]
-            if self.direction == "plus":
-                teacher_pct = float(np.percentile(valid_teacher_winrates, 75)) if valid_teacher_winrates else float('inf')
-                teacher_threshold = max(0.0, teacher_pct)
+            if strict:
+                teacher_threshold = 0.0
             else:
-                teacher_pct = float(np.percentile(valid_teacher_winrates, 25)) if valid_teacher_winrates else float('-inf')
-                teacher_threshold = min(0.0, teacher_pct)
+                valid_teacher_winrates = [c[3] for c in all_candidates if c[3] is not None]
+                if self.direction == "plus":
+                    teacher_pct = float(np.percentile(valid_teacher_winrates, 75)) if valid_teacher_winrates else float('inf')
+                    teacher_threshold = max(0.0, teacher_pct)
+                else:
+                    teacher_pct = float(np.percentile(valid_teacher_winrates, 25)) if valid_teacher_winrates else float('-inf')
+                    teacher_threshold = min(0.0, teacher_pct)
 
             logger.info(f"Student threshold: {student_threshold:.3f}")
             logger.info(f"Teacher threshold: {teacher_threshold:.3f}")

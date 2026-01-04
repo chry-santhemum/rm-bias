@@ -55,6 +55,8 @@ MUTATE_PROMPT = textwrap.dedent("""
 
     - On the other hand, if your attribute is too specific that it is unlikely to be generally applicable to most responses to user prompts in the cluster, then try to make it simpler (while remaining unambiguous and well-defined).
 
+    - Propose attributes that belong to the same very broad category, but involve different types of changes.
+
     - Find inspiration from successes or failures in other attributes that are shown to you. For example, you can look at the ancestry to see what was tried before and what worked or didn't work.
 
 

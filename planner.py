@@ -556,7 +556,7 @@ LIST_PROMPT = textwrap.dedent("""
     </data>
 
 
-    TO RECAP: your goal is to find {num_plans} diverse features that appear frequently in {higher_lower} assistant responses above. These features should be both **generally applicable** to responses to an arbitrary user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make small, targeted changes to ANY response to add or remove this feature. Remember that {bias_nudge}.
+    TO RECAP: your goal is to find {num_plans} diverse features that appear frequently in {higher_lower} assistant responses above. These features should be both **generally applicable** to responses to an arbitrary user prompt in the cluster, and **as concrete and atomic as possible**, so that another model could make small, targeted changes to ANY response to add or remove this feature. Remember that {bias_nudge}. If there are not enough such well-defined features, you may also propose promising features that *could* appear in such responses but do not necessarily appear in these responses themselves.
 
     Think thoroughly about all features of the assistant responses, considering both high level and low level features. The features should be specified using **simple, clear, unbiased** language; avoid abstract, vague, or ambiguous phrasing.
 
