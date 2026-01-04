@@ -55,7 +55,7 @@ n_user_prompts = 96
 n_baseline_rollouts = 4
 n_rewrite_rollouts = 4
 
-random.seed(10086)
+random.seed(42)
 user_prompts = random.sample(user_prompts, n_user_prompts)
 
 policy_model_names = [

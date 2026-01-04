@@ -20,7 +20,7 @@ from planner import Planner, PLANNER_SYSTEM
 from evo_prompts import get_mutate_prompt, DIRECTION_GOAL, BIAS_NUDGE
 
 dotenv.load_dotenv()
-set_seed_all(10086)
+set_seed_all(42)
 
 
 
@@ -34,7 +34,7 @@ class EvoPlanner:
         cosine_sim_threshold_initial: float,
         cosine_sim_threshold_evolution: float,
         context: Literal["all", "ancestry", "other", "none"]="all",
-        random_seed: int=10086,
+        random_seed: int=42,
     ):
         self.direction: Literal["plus", "minus"] = direction
         self.hypothesis_planner = hypothesis_planner
@@ -109,7 +109,7 @@ class EvoPlanner:
             })
 
         original_data = {
-            "Attribute": stats.attribute,
+            "Feature": stats.attribute,
             "Metric A average uplift": student_wr_str,
             "Metric B average uplift": teacher_wr_str,
             "Example responses": original_data_rollouts,
@@ -180,7 +180,7 @@ class EvoPlanner:
                         teacher_wr = recent_stats.winrate("teacher")
                         student_str = f"{student_wr:.3f}" if student_wr is not None else "N/A"
                         teacher_str = f"{teacher_wr:.3f}" if teacher_wr is not None else "N/A"
-                        sisters.append(f"- \"{attr}\" Metric A: {student_str}, Metric B: {teacher_str}")
+                        sisters.append(f"- \"{attr}\"\n    Metric A average uplift: {student_str}\n    Metric B average uplift: {teacher_str}")
 
         # Format as string
         if not ancestors:
@@ -188,7 +188,7 @@ class EvoPlanner:
         else:
             ancestry_str = "\n\n".join(ancestors)
             if sisters:
-                ancestry_str += "\n\n=== Sibling attributes (other mutations from this lineage) ===\n"
+                ancestry_str += "\n\n=== Sibling features (other mutations from this lineage) ===\n"
                 ancestry_str += "\n".join(sisters)
 
         return ancestor_attrs + sister_attrs, ancestry_str
@@ -237,11 +237,11 @@ class EvoPlanner:
                 lines = []
                 for i, neighbor in enumerate(other_attributes[:n_neighbors], 1):
                     lines.append(
-                        f"{i}. Attribute: {neighbor['attribute']}\n"
+                        f"{i}. Feature: {neighbor['attribute']}\n"
                         f"   Metric A average uplift: {neighbor['student_winrate']:.3f}\n"
                         f"   Metric B average uplift: {neighbor['teacher_winrate']:.3f}"
                     )
-                neighbor_data = "\n".join(lines) if lines else "No similar attributes available."
+                neighbor_data = "\n".join(lines) if lines else "No similar features available."
 
                 planner_prompt = PLANNER_SYSTEM + "\n\n" + self.mutate_prompt.format(
                     num_plans=self.m_var,
@@ -624,7 +624,7 @@ class EvoRunner(Runner):
         n_rewrite_rollouts: int,
         n_validate_rollouts: int,
         run_name: str | None = None,
-        random_seed: int=10086,
+        random_seed: int=42,
     ):
         super().__init__(
             seed_states=seed_states,

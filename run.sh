@@ -23,11 +23,11 @@ python train.py \
 --topic_ids 4 \
 --planner_type list_reverse \
 --direction plus \
---n_new 10 \
+--n_new 8 \
 --n_pop_initial 64 \
---n_pop_targets 20 16 12 12 8  \
---train_batch_sizes 8 16 16 32 32 \
+--n_pop_targets 16 12 10  \
+--train_batch_sizes 8 16 16 \
 --m_var 3 \
---n_planner_requests 40 \
---val_split_size 32 \
+--n_planner_requests 32 \
+--val_split_size 0 \
 --context all

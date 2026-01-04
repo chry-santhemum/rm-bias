@@ -151,8 +151,8 @@ class SeedState:
 def load_initial_seed_states(
     ds_path: Path,
     topic_ids: list[int],
-    val_split_size: int,
-    random_seed: int = 10086,
+    val_split_size: int = 64,
+    random_seed: int = 42,
 ) -> list[SeedState]:
     if isinstance(ds_path, str):
         ds_path = Path(ds_path)

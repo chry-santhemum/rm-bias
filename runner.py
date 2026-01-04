@@ -135,7 +135,8 @@ class Runner(ABC):
         final_attributes: dict[int, list[str]],
         val_rewriters: list[RewriteModel],
         judge_val_first_n_rollouts: int, 
-        judge_val_first_n_user_prompts: int
+        judge_val_first_n_user_prompts: int,
+        val_split_size: int,
     ):
         """
         final_attributes: seed_state_index -> list of attributes
@@ -149,9 +150,11 @@ class Runner(ABC):
 
         # Rewrite and get student scoresz
         for ss in self.seed_states:
+            val_prompts = ss.cluster.val_prompts[:val_split_size]
+
             async with BiasEvaluator(rewrite_models=val_rewriters, reward_model=self.student_model) as evaluator:
                 stats = await evaluator.evaluate_attributes(
-                    user_prompts=ss.cluster.val_prompts,
+                    user_prompts=val_prompts,
                     attributes=final_attributes[ss.index],
                     baselines=self.val_baselines[ss.index],
                     same_attrs=[SAME_ATTRS] * len(final_attributes[ss.index]),

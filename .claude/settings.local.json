@@ -36,7 +36,8 @@
       "Bash(timeout 60 python3:*)",
       "Bash(timeout 120 python3:*)",
       "Bash(git show:*)",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Skill(mistake)"
     ],
     "deny": [
       "Bash(rm:*)",

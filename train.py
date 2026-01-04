@@ -60,6 +60,7 @@ assert len(args.n_pop_targets) == len(args.train_batch_sizes)
 assert args.context in ["all", "none"]
 assert args.direction == "plus"
 assert args.planner_type != "pair"
+assert args.val_split_size <= 64
 if args.run_name is not None:
     print("Did you really mean to provide a run_name? Pausing 5 seconds...")
     time.sleep(5)
@@ -133,12 +134,12 @@ async def main():
     cluster_model = LLMClusterModel(force_caller="openrouter")
     
     policy_model_names = [
+        "meta-llama/llama-3.2-1b-instruct",
         "meta-llama/llama-3.2-3b-instruct",
         "meta-llama/llama-3.1-8b-instruct",
-        "qwen/qwen-2.5-7b-instruct",
         "qwen/qwen-2.5-72b-instruct",
+        "mistralai/ministral-3b",
         "google/gemma-2-9b-it",
-        # "microsoft/phi-3.5-mini-128k-instruct"
     ]
 
     policy_model = GenerationModel(
@@ -245,7 +246,7 @@ async def main():
     initial_seed_states = load_initial_seed_states(
         ds_path=Path(f"user_prompts/{args.dataset}"),
         topic_ids=args.topic_ids,
-        val_split_size=args.val_split_size,
+        val_split_size=64,  # PINNED because we want determism
     )
 
     if args.planner_type == "pair":
@@ -343,14 +344,16 @@ async def main():
                 val_rewriters=val_rewriters,
                 judge_val_first_n_rollouts=args.judge_val_first_n_rollouts,
                 judge_val_first_n_user_prompts=args.judge_val_first_n_user_prompts,
+                val_split_size=args.val_split_size,
             )
 
     except Exception as e:
         logger.exception(f"Training failed: {e}")
         raise
 
-    run_path = Path(f"data/evo/{run_name}")
-    plot_validation_data(run_path=run_path, write_path=run_path)
+    if validate:
+        run_path = Path(f"data/evo/{run_name}")
+        plot_validation_data(run_path=run_path, write_path=run_path)
 
 
 if __name__ == "__main__":

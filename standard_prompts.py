@@ -114,7 +114,7 @@ def load_lmarena_prompts(num_samples: int) -> Dataset:
 
 
 @functools.lru_cache(maxsize=1)
-def make_prompt_mix(num_total: int = 2048, seed: int = 10086) -> list[str]:
+def make_prompt_mix(num_total: int = 2048, seed: int = 42) -> list[str]:
     num_per_dataset = num_total // 4
     set_seed_all(seed)
 

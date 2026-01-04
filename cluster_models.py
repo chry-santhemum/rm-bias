@@ -166,7 +166,7 @@ class EmbedClusterModel(ClusterModel):
         self,
         embed_model_name: str,
         embed_dim: int = -1,
-        random_state: int = 10086,
+        random_state: int = 42,
     ):
         self.embed_model = SentenceTransformer(embed_model_name)
         self.embed_model_name = embed_model_name
@@ -465,7 +465,7 @@ class LLMClusterModel(ClusterModel):
     def __init__(
         self,
         model_name: str = "openai/gpt-5.2",
-        max_tokens: int = 32768,
+        max_tokens: int = 50000,
         reasoning: int | str = "high",
         max_par: int = 64,
         force_caller: str | None = None,

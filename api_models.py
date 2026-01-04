@@ -31,7 +31,7 @@ class GenerationModel:
         model_name: str | list[str],
         max_par: int,
         force_caller: str | None = None,
-        random_seed: int = 10086,
+        random_seed: int = 42,
         **kwargs,
     ):
         if isinstance(model_name, str):
