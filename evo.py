@@ -178,11 +178,9 @@ class EvoPlanner:
                     if recent_stats is not None:
                         student_wr = recent_stats.winrate("student")
                         teacher_wr = recent_stats.winrate("teacher")
-                        sisters.append(
-                            f"- \"{attr}\" "
-                            f"Metric A: {student_wr:.3f if student_wr is not None else 'N/A'}, "
-                            f"Metric B: {teacher_wr:.3f if teacher_wr is not None else 'N/A'}"
-                        )
+                        student_str = f"{student_wr:.3f}" if student_wr is not None else "N/A"
+                        teacher_str = f"{teacher_wr:.3f}" if teacher_wr is not None else "N/A"
+                        sisters.append(f"- \"{attr}\" Metric A: {student_str}, Metric B: {teacher_str}")
 
         # Format as string
         if not ancestors:
