@@ -147,7 +147,7 @@ class ListPlanner(Planner):
     async def plan(
         self,
         runner: Runner,
-        direction: Literal["plus", "minus"] = "plus",
+        direction: Literal["plus", "minus"],
         cluster_model: Optional[ClusterModel] = None,
         cosine_sim_threshold: float = 0.985,
     ):
@@ -385,7 +385,7 @@ class PairPlanner(Planner):
     async def plan(
         self,
         runner: Runner,
-        direction: Literal["plus", "minus"] = "plus",
+        direction: Literal["plus", "minus"],
         cluster_model: Optional[ClusterModel] = None,
         cosine_sim_threshold: float = 0.985,
     ):

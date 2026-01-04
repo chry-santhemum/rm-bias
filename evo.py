@@ -321,15 +321,16 @@ class EvoPlanner:
 
             logger.info(f"Seed {seed_state.index} mutated plus original plans: {len(seed_state.history[-1])}")
     
-    @staticmethod
-    def _dominates(p1: tuple, p2: tuple) -> bool:
+    def _dominates(self, p1: tuple, p2: tuple) -> bool:
         """Returns True if p1 dominates p2."""
         r1_a, r2_a = p1[2], p1[3]
         r1_b, r2_b = p2[2], p2[3]
-        return (r1_a >= r1_b and r2_a <= r2_b) and (r1_a > r1_b or r2_a < r2_b)
+        if self.direction == "plus":
+            return (r1_a >= r1_b and r2_a <= r2_b) and (r1_a > r1_b or r2_a < r2_b)
+        else:
+            return (r1_a <= r1_b and r2_a >= r2_b) and (r1_a < r1_b or r2_a > r2_b)
 
-    @staticmethod
-    def _get_pareto_fronts(candidates: list[tuple]) -> list[list[tuple]]:
+    def _get_pareto_fronts(self, candidates: list[tuple]) -> list[list[tuple]]:
         """Sorts candidates into Pareto fronts."""
         n = len(candidates)
         domination_counts = [0] * n  # number of candidates that dominates each candidate
@@ -340,9 +341,9 @@ class EvoPlanner:
             for j in range(n):
                 if i == j:
                     continue
-                if EvoPlanner._dominates(candidates[i], candidates[j]):
+                if self._dominates(candidates[i], candidates[j]):
                     dominated_sets[i].append(j)
-                elif EvoPlanner._dominates(candidates[j], candidates[i]):
+                elif self._dominates(candidates[j], candidates[i]):
                     domination_counts[i] += 1
 
         fronts = []
@@ -362,11 +363,13 @@ class EvoPlanner:
             
         return fronts
 
-    @staticmethod
-    def _pareto_tiebreak(candidate: tuple) -> float:
+    def _pareto_tiebreak(self, candidate: tuple) -> float:
         """smaller is better"""
         r1, _ = candidate[2], candidate[3]
-        return -r1
+        if self.direction == "plus":
+            return -r1
+        else:
+            return r1
         # return np.sqrt((1.0 - r1)**2 + (r2 - 0.0)**2)
 
     @staticmethod
@@ -499,8 +502,6 @@ class EvoPlanner:
         student_thresholds: list[float],
         strict: bool,
     ) -> dict[int, dict]:
-        if self.direction == "minus":
-            raise NotImplementedError
         logger.info(f"Trying to update population to {n_pop_target} members using Pareto front selection.")
 
         candidates_by_seed: dict[int, dict] = {}
@@ -570,7 +571,7 @@ class EvoPlanner:
             )
 
             # Sort into Pareto Fronts
-            fronts = EvoPlanner._get_pareto_fronts(candidates)
+            fronts = self._get_pareto_fronts(candidates)
 
             # Select candidates from Pareto fronts (no diversity clustering needed - already done upfront)
             final_selection = []
@@ -580,7 +581,7 @@ class EvoPlanner:
                     break
 
                 # Sort front by tiebreak (best first)
-                front_sorted = sorted(front, key=EvoPlanner._pareto_tiebreak)
+                front_sorted = sorted(front, key=self._pareto_tiebreak)
                 remaining = n_pop_target - len(final_selection)
                 selected_from_front = front_sorted[:remaining]
                 final_selection.extend(selected_from_front)

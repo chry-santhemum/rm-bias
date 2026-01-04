@@ -58,7 +58,6 @@ args = parser.parse_args()
 # Check args coherence
 assert len(args.n_pop_targets) == len(args.train_batch_sizes)
 assert args.context in ["all", "none"]
-assert args.direction == "plus"
 assert args.planner_type != "pair"
 assert args.val_split_size <= 64
 if args.run_name is not None:
