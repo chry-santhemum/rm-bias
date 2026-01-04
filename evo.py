@@ -16,8 +16,7 @@ from reward_models import RewardModel, LocalRewardModel
 from runner import Runner
 from bias_evaluator import BiasEvaluator
 from planner import Planner, PLANNER_SYSTEM
-
-from evo_prompts import *
+from evo_prompts import get_mutate_prompt, DIRECTION_GOAL, BIAS_NUDGE
 
 dotenv.load_dotenv()
 set_seed_all(10086)
@@ -33,6 +32,7 @@ class EvoPlanner:
         m_var: int,
         cosine_sim_threshold_initial: float,
         cosine_sim_threshold_evolution: float,
+        context: Literal["all", "ancestry", "other", "none"]="all",
         random_seed: int=10086,
     ):
         self.direction: Literal["plus", "minus"] = direction
@@ -43,7 +43,7 @@ class EvoPlanner:
         self.cosine_sim_threshold_evolution = cosine_sim_threshold_evolution
         self.rng = Random(random_seed)
 
-        self.mutate_prompt = MUTATE_PROMPT
+        self.mutate_prompt = get_mutate_prompt(context)
     
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -63,7 +63,7 @@ class EvoPlanner:
             cosine_sim_threshold=self.cosine_sim_threshold_initial,
         )
 
-    def _get_original_data(self, stats: AttributeStats, baselines: dict[str, list[BaselineRollout]], n_rollouts: int=4) -> str:
+    def _get_original_data(self, stats: AttributeStats, baselines: dict[str, list[BaselineRollout]], n_rollouts: int=6) -> str:
         student_wr = stats.winrate("student")
         teacher_wr = stats.winrate("teacher")
         student_wr_str = f"{student_wr:.3f}" if student_wr is not None else "N/A"
@@ -460,7 +460,13 @@ class EvoPlanner:
 
         return filtered_results, student_thresholds
 
-    def update_pop_pareto(self, seed_states: list[SeedState], n_pop_target: int, student_thresholds: list[float]) -> dict[int, dict]:
+    def update_pop_pareto(
+        self, 
+        seed_states: list[SeedState], 
+        n_pop_target: int, 
+        student_thresholds: list[float],
+        strict: bool,
+    ) -> dict[int, dict]:
         if self.direction == "minus":
             raise NotImplementedError
         logger.info(f"Trying to update population to {n_pop_target} members using Pareto front selection.")
@@ -482,6 +488,11 @@ class EvoPlanner:
 
             # Student threshold was already applied in filter_by_student_scores
             student_threshold = student_thresholds[seed_idx]
+            if strict:
+                if self.direction == "plus":
+                    student_threshold = max(student_threshold, 0.0)
+                else:
+                    student_threshold = min(student_threshold, 0.0)
 
             # Calculate teacher threshold
             valid_teacher_winrates = [c[3] for c in all_candidates if c[3] is not None]
@@ -492,8 +503,8 @@ class EvoPlanner:
                 teacher_pct = float(np.percentile(valid_teacher_winrates, 25)) if valid_teacher_winrates else float('-inf')
                 teacher_threshold = min(0.0, teacher_pct)
 
-            logger.info(f"Student threshold (from stage 1): {student_threshold:.3f}")
-            logger.info(f"Auto-calculated teacher threshold: {teacher_threshold:.3f} (percentile was {teacher_pct:.3f})")
+            logger.info(f"Student threshold: {student_threshold:.3f}")
+            logger.info(f"Teacher threshold: {teacher_threshold:.3f}")
 
             # Filter candidates based on thresholds (keep those with valid winrates)
             # Note: student filtering already happened in filter_by_student_scores
@@ -502,18 +513,22 @@ class EvoPlanner:
                 # Filter out candidates with None winrates
                 if new_candidate[2] is None or new_candidate[3] is None:
                     continue
-                # Filter based on teacher threshold only
+
                 if self.direction == "plus":
                     if new_candidate[3] > teacher_threshold:
                         continue
+                    if new_candidate[2] < student_threshold:
+                        continue
                 else:
                     if new_candidate[3] < teacher_threshold:
+                        continue
+                    if new_candidate[2] > student_threshold:
                         continue
                 candidates.append(new_candidate)
 
             print(
                 "===============\n"
-                f"After filtering, {len(candidates)} candidates remain."
+                f"After filtering, {len(candidates)}/{len(all_candidates)} candidates remain."
             )
 
             # Sort into Pareto Fronts
@@ -618,6 +633,7 @@ class EvoRunner(Runner):
         train_batch_size: int,
         judge_train_first_n_rollouts: int,
         judge_train_first_n_user_prompts: int,
+        strict: bool=False,
     ):
         print(f"[TRAIN STEP {self.step_count}] Writing new system prompts...")
         if self.step_count == 0:
@@ -693,29 +709,31 @@ class EvoRunner(Runner):
             seed_states=self.seed_states,
             n_pop_target=n_pop_target,
             student_thresholds=student_thresholds,
+            strict=strict,
         )
 
-        for seed_state_idx, candidates in candidates_by_seed.items():
-            with open(self.run_path / f"step_{self.step_count}_stats" / f"seed_{seed_state_idx}_candidates.json", "w") as f:
+        for ss_idx, candidates in candidates_by_seed.items():
+            ss_history = None
+            for ss in self.seed_states:
+                if ss.index == ss_idx:
+                    ss_history = ss.history
+            assert ss_history is not None
+
+            with open(self.run_path / f"step_{self.step_count}_stats" / f"seed_{ss_idx}_candidates.json", "w") as f:
                 json.dump([
                     {
                         "attribute": c[0],
                         "student_winrate": c[2],
                         "teacher_winrate": c[3],
                         "time_step": c[1],
+                        "parent": ss_history[-1][c[0]].meta.get("parent", None),
+                        "parent_time_step": ss_history[-1][c[0]].meta.get("parent_time_step", None),
                     } 
                     for c in candidates["all_candidates"]
                 ], f, indent=4)
 
-            fig = EvoPlanner.plot_candidate_stats(
-                all_candidates=candidates["all_candidates"],
-                filtered_candidates=candidates["filtered_candidates"],
-                selected_candidates=candidates["selected_candidates"],
-                student_threshold=candidates["student_threshold"],
-                teacher_threshold=candidates["teacher_threshold"],
-                direction=candidates["direction"],
-            )
-            fig.savefig(self.run_path / f"step_{self.step_count}_stats" / f"seed_{seed_state_idx}_pareto.pdf")
+            fig = EvoPlanner.plot_candidate_stats(**candidates)
+            fig.savefig(self.run_path / f"step_{self.step_count}_stats" / f"seed_{ss_idx}_pareto.pdf")
             plt.close(fig)
 
         logger.info(
@@ -794,6 +812,7 @@ class EvoRunner(Runner):
                     seed_states=self.seed_states,
                     n_pop_target=n_pop_target[time_step],
                     student_thresholds=student_thresholds,
+                    strict=(time_step == t_steps - 1),
                 )
 
                 self.step_count += 1
@@ -810,4 +829,5 @@ class EvoRunner(Runner):
                     train_batch_size=train_batch_size[time_step],
                     judge_train_first_n_rollouts=judge_train_first_n_rollouts,
                     judge_train_first_n_user_prompts=judge_train_first_n_user_prompts,
+                    strict=(time_step == t_steps - 1),
                 )

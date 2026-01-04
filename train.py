@@ -29,6 +29,7 @@ parser.add_argument("--dataset", type=str, required=True, choices=["chatgpt", "c
 parser.add_argument("--topic_ids", type=int, required=True, nargs='+')
 parser.add_argument("--planner_type", type=str, required=True, choices=["pair", "list", "list_reverse"])
 parser.add_argument("--direction", type=str, required=True, choices=["plus", "minus"])
+parser.add_argument("--context", type=str, required=True, choices=["all", "ancestry", "other", "none"])
 
 parser.add_argument("--n_new", type=int, required=True, help="Hypothesis generation: number of candidates per ask")
 parser.add_argument("--n_pop_initial", type=int, required=True, help="Hypothesis generation: initial population")
@@ -56,6 +57,9 @@ args = parser.parse_args()
 
 # Check args coherence
 assert len(args.n_pop_targets) == len(args.train_batch_sizes)
+assert args.context in ["all", "none"]
+assert args.direction == "plus"
+assert args.planner_type != "pair"
 if args.run_name is not None:
     print("Did you really mean to provide a run_name? Pausing 5 seconds...")
     time.sleep(5)
@@ -279,6 +283,7 @@ async def main():
         m_var=args.m_var,
         cosine_sim_threshold_initial=args.cosine_sim_threshold_initial,
         cosine_sim_threshold_evolution=args.cosine_sim_threshold_evolution,
+        context=args.context,
     )
 
     runner = EvoRunner(
