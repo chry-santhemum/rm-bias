@@ -43,6 +43,8 @@
 
 - [2025-01-04] Fix bugs immediately when found.
 
+- [2026-01-04] Never combine format specifiers with conditionals in f-strings (`{x:.3f if cond else y}` is invalid). Format conditionally by computing the string first.
+
 
 ## Naming & comments
 
