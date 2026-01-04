@@ -158,16 +158,17 @@ def load_initial_seed_states(
         ds_path = Path(ds_path)
 
     id_to_cluster: dict[int, Cluster] = dict()
-    rng = Random(random_seed)
 
     for idx in topic_ids:
         with open(ds_path / f"cluster_{idx}.json", "r") as f:
             data = json.load(f)
+
+        cluster_rng = Random(random_seed + idx)
         
         if len(data["prompts"]) < 3 * val_split_size:
             raise ValueError(f"Not enough prompts for cluster {idx}.")
 
-        rng.shuffle(data["prompts"])
+        cluster_rng.shuffle(data["prompts"])
         train_prompts = data["prompts"][:-val_split_size] if val_split_size > 0 else data["prompts"]
         val_prompts = data["prompts"][-val_split_size:] if val_split_size > 0 else []
 

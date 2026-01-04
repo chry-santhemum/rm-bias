@@ -29,5 +29,5 @@ python train.py \
 --train_batch_sizes 8 16 16 16 16 \
 --m_var 6 \
 --n_planner_requests 32 \
---val_split_size 64 \
+--val_split_size 32 \
 --context all

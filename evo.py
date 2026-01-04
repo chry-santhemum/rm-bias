@@ -41,7 +41,7 @@ class EvoPlanner:
         self.m_var = m_var
         self.cosine_sim_threshold_initial = cosine_sim_threshold_initial
         self.cosine_sim_threshold_evolution = cosine_sim_threshold_evolution
-        self.rng = Random(random_seed)
+        self.random_seed = random_seed
 
         self.mutate_prompt = get_mutate_prompt(context)
     
@@ -173,6 +173,7 @@ class EvoPlanner:
         messages_info = []
 
         for seed_idx, seed_state in enumerate(seed_states):
+            seed_rng = Random(self.random_seed + seed_state.index)
             # Collect all attributes in the previous step, not just the selected ones
             last_step_attributes = []
             for attribute, stats in seed_state.history[-1].items():
@@ -200,7 +201,7 @@ class EvoPlanner:
                 exclude_set = {attribute} | set(ancestor_attrs)
 
                 other_attributes = [attr for attr in last_step_attributes if attr["attribute"] not in exclude_set]
-                self.rng.shuffle(other_attributes)
+                seed_rng.shuffle(other_attributes)
 
                 lines = []
                 for i, neighbor in enumerate(other_attributes[:n_neighbors], 1):
@@ -599,7 +600,7 @@ class EvoRunner(Runner):
         )
         self.planner = planner
         self.n_rewrite_rollouts = n_rewrite_rollouts
-        self.rng = Random(random_seed)
+        self.random_seed = random_seed
 
     @property
     def runner_type(self) -> str:
@@ -655,8 +656,9 @@ class EvoRunner(Runner):
         evaluate_results: dict[int, dict[str, AttributeStats]] = {}
 
         for i, ss in enumerate(self.seed_states):
+            seed_rng = Random(self.random_seed + ss.index)
             async with BiasEvaluator(rewrite_models=[train_rewriter], reward_model=self.student_model) as evaluator:
-                user_prompts = self.rng.sample(
+                user_prompts = seed_rng.sample(
                     ss.cluster.train_prompts,
                     train_batch_size,
                 )

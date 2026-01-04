@@ -42,6 +42,7 @@ class Planner(ABC):
         )
         self.force_caller = force_caller
         self.curr_planner_index: int = 0
+        self.random_seed = random_seed
         self.rng = Random(random_seed)
 
     def to_dict(self) -> dict[str, Any]:
@@ -156,6 +157,7 @@ class ListPlanner(Planner):
 
         student_model_name = runner.student_model.model_name
         for seed_state_idx, seed_state in enumerate(runner.seed_states):
+            seed_rng = Random(self.random_seed + seed_state.index)
             seed_state.history.append({})
             seed_baselines = runner.baselines[seed_state.index]
             if self.max_num_train_prompts is not None:
@@ -166,7 +168,7 @@ class ListPlanner(Planner):
                 all_rollouts = seed_baselines[user_prompt]
 
                 for _ in range(self.n_per_user_prompt):
-                    sampled_rollouts = self.rng.sample(
+                    sampled_rollouts = seed_rng.sample(
                         [r for r in all_rollouts if student_model_name in r.scores],
                         min(self.n_traj_in_context, len(all_rollouts)),
                     )
@@ -327,6 +329,7 @@ class PairPlanner(Planner):
         assert runner.baselines is not None
         student_model_name = runner.student_model.model_name
         for seed_state in runner.seed_states:
+            seed_rng = Random(self.random_seed + seed_state.index)
             contrast_pairs = []
             seed_baselines = runner.baselines[seed_state.index]
             prompts = [
@@ -354,7 +357,7 @@ class PairPlanner(Planner):
                     continue
 
                 for high in high_rollouts:
-                    rejected_rollout = self.rng.choice(low_rollouts)
+                    rejected_rollout = seed_rng.choice(low_rollouts)
                     contrast_pairs.append(
                         {
                             "prompt": prompt,
