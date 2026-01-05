@@ -647,8 +647,12 @@ class EvoRunner(Runner):
     def runner_type(self) -> str:
         return "evo"
 
-    async def _cluster_seed(self, seed_state: SeedState) -> list[str]:
-        """Cluster a single seed state's candidates and return representatives."""
+    async def _cluster_seed(
+        self,
+        seed_state: SeedState,
+        seed_evaluate_results: dict[str, AttributeStats],
+    ) -> list[str]:
+        """Cluster attributes and return the best (by student score) from each cluster."""
         all_attributes = list(seed_state.history[-1].keys())
         if not all_attributes:
             return []
@@ -661,9 +665,32 @@ class EvoRunner(Runner):
 
         representatives = []
         for _, member_indices in cluster_indices.items():
-            if len(member_indices) > 0:
-                rep_idx = member_indices[0]
-                representatives.append(all_attributes[rep_idx])
+            if len(member_indices) == 0:
+                continue
+
+            # Find member with best student score
+            best_idx = None
+            best_score = float('-inf') if self.planner.direction == "plus" else float('inf')
+
+            for idx in member_indices:
+                attr = all_attributes[idx]
+                if attr in seed_evaluate_results:
+                    score = seed_evaluate_results[attr].winrate("student")
+                    if score is not None:
+                        if self.planner.direction == "plus":
+                            if score > best_score:
+                                best_score = score
+                                best_idx = idx
+                        else:
+                            if score < best_score:
+                                best_score = score
+                                best_idx = idx
+
+            # Fallback to first if no valid scores found
+            if best_idx is None:
+                best_idx = member_indices[0]
+
+            representatives.append(all_attributes[best_idx])
 
         print(f"Seed {seed_state.index}: selected {len(representatives)} representatives from {len(cluster_indices)} clusters")
         return representatives
@@ -688,27 +715,22 @@ class EvoRunner(Runner):
                 baselines=self.baselines,
             )
 
-        # Cluster candidates upfront and pick representatives (parallel for LLM cluster models)
-        representative_attributes = await asyncio.gather(*[
-            self._cluster_seed(seed_state) for seed_state in self.seed_states
-        ])
-
-        # Evaluate only representatives
+        # Evaluate ALL attributes with student model
         evaluate_results: dict[int, dict[str, AttributeStats]] = {}
 
         for i, ss in enumerate(self.seed_states):
+            all_attributes = list(ss.history[-1].keys())
             async with BiasEvaluator(rewrite_models=[train_rewriter], reward_model=self.student_model) as evaluator:
                 user_prompts = self.seed_rngs[ss.index].sample(
                     ss.cluster.train_prompts,
                     train_batch_size,
                 )
-                attributes = representative_attributes[i]
-                print(f"Seed {ss.index}: evaluating {len(attributes)} representative attributes")
+                print(f"Seed {ss.index}: evaluating {len(all_attributes)} attributes")
                 stats = await evaluator.evaluate_attributes(
                     user_prompts=user_prompts,
-                    attributes=attributes,
+                    attributes=all_attributes,
                     baselines=self.baselines[ss.index],
-                    same_attrs=[SAME_ATTRS] * len(attributes),
+                    same_attrs=[SAME_ATTRS] * len(all_attributes),
                     n_rollouts=self.n_rewrite_rollouts,
                 )
 
@@ -719,24 +741,40 @@ class EvoRunner(Runner):
                 k: AttributeStats(attribute=k, rollouts=v) for k, v in stats.items()
             }
 
-        # Filter by student scores first to save compute on teacher evaluation
-        filtered_evaluate_results, student_thresholds = self.planner.filter_by_student_scores(evaluate_results)
+        # Store ALL rollouts to history (needed for clustering and saving)
+        for seed_state in self.seed_states:
+            ss_idx = seed_state.index
+            stats = evaluate_results[ss_idx]
+            for attribute, attribute_stats in stats.items():
+                seed_state.history[-1][attribute].rollouts = attribute_stats.rollouts
+
+        # Cluster candidates and pick best by student score from each cluster
+        representative_attributes = await asyncio.gather(*[
+            self._cluster_seed(seed_state, evaluate_results[seed_state.index])
+            for seed_state in self.seed_states
+        ])
+
+        # Filter evaluate_results to only keep representatives
+        representative_results: dict[int, dict[str, AttributeStats]] = {}
+        for i, ss in enumerate(self.seed_states):
+            reps = set(representative_attributes[i])
+            representative_results[ss.index] = {
+                attr: stats for attr, stats in evaluate_results[ss.index].items()
+                if attr in reps
+            }
+            print(f"Seed {ss.index}: {len(evaluate_results[ss.index])} -> {len(representative_results[ss.index])} after clustering")
+
+        # Filter by student scores to save compute on teacher evaluation
+        filtered_evaluate_results, student_thresholds = self.planner.filter_by_student_scores(representative_results)
 
         # Populate teacher_score on filtered rollouts in place
-        # (Rollout objects are shared, so changes propagate to evaluate_results)
+        # (Rollout objects are shared, so changes propagate to history)
         await self.teacher_model.judge_rollouts(
             evaluate_results=filtered_evaluate_results,
             baselines=self.baselines,
             first_n_rollouts=judge_train_first_n_rollouts,
             first_n_user_prompts=judge_train_first_n_user_prompts,
         )
-
-        # Store ALL rollouts (including those filtered out, to preserve student scores)
-        for seed_state in self.seed_states:
-            ss_idx = seed_state.index
-            stats = evaluate_results[ss_idx]
-            for attribute, attribute_stats in stats.items():
-                seed_state.history[-1][attribute].rollouts = attribute_stats.rollouts
 
         self.save_attribute_stats(
             direction=self.planner.direction,
