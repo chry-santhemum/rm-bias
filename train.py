@@ -29,7 +29,7 @@ parser.add_argument("--dataset", type=str, required=True, choices=["chatgpt", "c
 parser.add_argument("--topic_ids", type=int, required=True, nargs='+')
 parser.add_argument("--planner_type", type=str, required=True, choices=["pair", "list", "list_reverse"])
 parser.add_argument("--direction", type=str, required=True, choices=["plus", "minus"])
-parser.add_argument("--context", type=str, required=True, choices=["all", "ancestry", "other", "none"])
+parser.add_argument("--context", type=str, required=True, choices=["all", "vanilla"])
 
 parser.add_argument("--n_new", type=int, required=True, help="Hypothesis generation: number of candidates per ask")
 parser.add_argument("--n_pop_initial", type=int, required=True, help="Hypothesis generation: initial population")
@@ -57,7 +57,6 @@ args = parser.parse_args()
 
 # Check args coherence
 assert len(args.n_pop_targets) == len(args.train_batch_sizes)
-assert args.context in ["all", "none"]
 assert args.planner_type != "pair"
 assert args.val_split_size <= 64
 if args.run_name is not None:
@@ -134,18 +133,18 @@ async def main():
     
     policy_model_names = [
         "meta-llama/llama-3.2-1b-instruct",
+        "mistralai/ministral-3b",
         "meta-llama/llama-3.2-3b-instruct",
         "meta-llama/llama-3.1-8b-instruct",
-        "qwen/qwen-2.5-72b-instruct",
-        "mistralai/ministral-3b",
         "google/gemma-2-9b-it",
+        "qwen/qwen-2.5-72b-instruct",
     ]
 
     policy_model = GenerationModel(
         model_name=policy_model_names,
         max_par=512,
         max_tokens=1024,
-        temperature=0.9,
+        temperature=1.0,
         enable_cache=False,
     )
 
@@ -217,12 +216,6 @@ async def main():
             reasoning="low",
             force_caller="openrouter",
         ),
-        # RewriteModel(
-        #     model_name="openai/gpt-5-nano",
-        #     max_tokens=8192,
-        #     reasoning="medium",
-        #     force_caller="openrouter",
-        # ),
         RewriteModel(
             model_name="anthropic/claude-haiku-4.5",
             max_par=128,

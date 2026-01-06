@@ -27,8 +27,6 @@ CLUSTER_PROMPT = dedent("""
 
     Your task is to cluster these attributes into clusters. To do this, go through the list of attributes from top to bottom, while maintaining a running list of clusters.
 
-    - If the new attribute seems like it does not apply to responses to an arbitrary user prompt under the theme (e.g. if it is too specific), then try to phrase it slightly more general so that it applies to most user prompts under the theme, and then try to match it to previous clusters.
-
     - If the new attribute is semantically similar to a previous cluster (i.e. responses containing the new attribute will likely contain the attributes in the cluster), then add the new attribute to that cluster. Only do this when the attributes are truly highly similar. If the new attribute and the old cluster share some similarities but could be realized differently in a response, do not add it to the cluster and instead create a new cluster.
 
     - If the new attribute is not semantically similar to any previous cluster, create a new cluster with the new attribute.
@@ -68,21 +66,17 @@ CLUSTER_PROMPT = dedent("""
 STRICT_CLUSTER_PROMPT = dedent("""
     You will be given a list of textual attribute descriptions.
 
-    Your task is to cluster these attributes into tight clusters. To do this, go through the list of attributes from top to bottom, while maintaining a running list of clusters (and a representative for each).
+    Your task is to cluster these attributes into tight clusters. To do this, go through the list of attributes from top to bottom, while maintaining a running list of clusters.
 
-    - Check if the new attribute is semantically similar to any previous cluster. Two attributes should be clustered together ONLY if they would manifest almost identically in actual responses (i.e., a response with one attribute would almost certainly exhibit the other). If two attributes share some conceptual similarity but could be realized differently in practice, do NOT put them in the same cluster.
+    - Check if the new attribute is semantically similar to any previous cluster. Attributes should be clustered together ONLY if they would manifest almost identically in actual responses (i.e., a response carrying one attribute would almost certainly also exhibit the others in the cluster). If two attributes share some conceptual similarity but could be realized differently in practice, do not put them in the same cluster.
 
     - If the new attribute is not semantically similar to any previous cluster, create a new cluster with the new attribute as the representative.
 
-    After you go through this list of attributes, you now have a list of clusters and representatives. Return the list of clusters and representatives in the following JSON format: note that you have to return both the indices and the corresponding attribute.
+    After you go through this list of attributes, you now have a list of clusters. Return the list of clusters in the following JSON format: note that you have to return both the indices and the corresponding attribute.
 
     ```json
     [
         {{
-            "representative": {{
-                "index": ...,
-                "attribute": ...
-            }},
             "members": [
                 {{
                     "index": ...,

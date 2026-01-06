@@ -33,7 +33,7 @@ class EvoPlanner:
         m_var: int,
         cosine_sim_threshold_initial: float,
         cosine_sim_threshold_evolution: float,
-        context: Literal["all", "ancestry", "other", "none"]="all",
+        context: Literal["all", "vanilla"]="all",
         random_seed: int=42,
     ):
         self.direction: Literal["plus", "minus"] = direction
@@ -550,7 +550,7 @@ class EvoPlanner:
                     continue
 
                 # Filter out no-op candidates
-                if math.isclose(new_candidate[2], 0.0, abs_tol=1e-3) and math.isclose(new_candidate[3], 0.0, abs_tol=1e-3):
+                if math.isclose(new_candidate[2], 0.0, abs_tol=0.1) and math.isclose(new_candidate[3], 0.0, abs_tol=0.1):
                     continue
 
                 if self.direction == "plus":

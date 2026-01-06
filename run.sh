@@ -19,15 +19,15 @@
 python train.py \
 --student_model skywork-llama-8b \
 --teacher_model claude-sonnet-4.5 \
---dataset handpick \
---topic_ids 4 \
+--dataset chatgpt \
+--topic_ids 0 \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
 --n_pop_initial 64 \
---n_pop_targets 16 12 10  \
---train_batch_sizes 8 16 16 \
+--n_pop_targets 16 16 8 8  \
+--train_batch_sizes 8 16 16 32 \
 --m_var 3 \
 --n_planner_requests 32 \
 --val_split_size 0 \
---context all
+--context vanilla

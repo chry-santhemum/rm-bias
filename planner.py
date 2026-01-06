@@ -543,21 +543,17 @@ LIST_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    - They should be **atomic**. Each feature should use **no longer than a short sentence** to precisely specify a single textual attribute along which a response can be modified. THE RULE OF THUMB is that the feature specification you write should be sufficient information for another model to add this feature to an arbitrary response, and that the feature could be added with only **small, targeted** changes.
-
+    - They should be **atomic**. Each feature should use **no longer than a short sentence** to precisely specify a single textual feature along which a response can be modified. The feature must NOT require significant changes to the response to be added; rather, it should be able to be added by making only small, targeted changes.
+    
     - Note that {bias_nudge}.
 
-    - The features you find do not necessarily have to appear in the given assistant response samples; you should brainstorm some other possible features that may appear in {higher_lower} responses.
+    Here is the data, including the user prompt and assistant response samples and scores:
 
+    ===== START OF RELEVANT DATA =====
 
-    Now, here is all the data, including the user prompt and assistant response samples and scores:
-
-    <data>
     {data}
-    </data>
 
-
-    TO RECAP: your goal is to find {num_plans} diverse features that appear frequently in {higher_lower} assistant responses above. These features should be both **generally applicable** to responses to an arbitrary user prompt in the cluster, and **unambiguous and atomic**, so that it specifies enough information for another model to make small, targeted changes to an arbitrary response, in order to add this feature.
+    ===== END OF RELEVANT DATA =====
 
     Think carefully and thoroughly about the features that appear in the data shown to you, considering both high level and low level features. After you have a list of {num_plans} features, CHECK CAREFULLY, one by one, that they take up **no longer than a short sentence**, and that they strictly follow EACH of the above requirements. Remove the features that do not satisfy all the requirements. Then in your output field, return ONLY the remaining valid features formatted as a JSON array, like this:
 
