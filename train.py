@@ -29,7 +29,7 @@ parser.add_argument("--dataset", type=str, required=True, choices=["chatgpt", "c
 parser.add_argument("--topic_ids", type=int, required=True, nargs='+')
 parser.add_argument("--planner_type", type=str, required=True, choices=["pair", "list", "list_reverse"])
 parser.add_argument("--direction", type=str, required=True, choices=["plus", "minus"])
-parser.add_argument("--context", type=str, required=True, choices=["all", "vanilla"])
+parser.add_argument("--context", type=str, required=True, choices=["all", "ancestry", "vanilla"])
 
 parser.add_argument("--n_new", type=int, required=True, help="Hypothesis generation: number of candidates per ask")
 parser.add_argument("--n_pop_initial", type=int, required=True, help="Hypothesis generation: initial population")
@@ -62,26 +62,46 @@ assert args.val_split_size <= 64
 if args.run_name is not None:
     print("Did you really mean to provide a run_name? Pausing 5 seconds...")
     time.sleep(5)
+    
 if args.judge_train_first_n_rollouts > 2:
     if args.teacher_model ==  "claude-sonnet-4.5":
         raise ValueError("Perhaps, consider changing the hparams?")
 
 
-# Price estimate per seed.
-# Time: took 44 min, 3 seeds
-#
-# Rewriter, gpt-5-mini: around $1.4 per thousand requests. 0.25/2, avg 1K/1K (slight upper bound)
-# 28.4 dollas for ((48+64+37) + (64+64+64) + (64+64+64)) * 8 * 4  + (16+16+16) * 8 * 8 = 20128
-#
-# Planner, gpt-5 and claude-sonnet-4.5: empirically 3.57 + 4.5 dollars for 192 prompts
-#
-# Clusterer, gpt-5.2: empirically 2.15 dollars
-#
-# Judge, claude-sonnet-4.5: $122 for 4 seeds. Cost?
-# separately: judge model costs $50 for (64 + 80 + 80) * 8 * 2 + 16 * 8 * 4 = 4096 calls.
-# also separately: (17 + 22) * 16 + (31 + 38) * 32 + (23 + 22) * 32 + (8 + 8) * 64 * 4 rewriters (claude kinda limped!) = 4272 + 4096
-# cost: about 70 dollars
+GPT_5_MINI_REWRITER_KCALL = 1.148
+ALL_REWRITERS_KCALL = 3.8
+CLAUDE_SONNET_4_5_JUDGE_KCALL = 7.6
 
+def estimate_cost(parsed_args: argparse.Namespace) -> float:
+    num_steps = len(parsed_args.train_batch_sizes)
+    num_seeds = len(parsed_args.topic_ids)
+    batch_sizes = parsed_args.train_batch_sizes
+    n_pop_targets = parsed_args.n_pop_targets
+
+    num_calls_rewriter = 0
+    num_calls_judge = 0
+
+    for i in range(num_steps):
+        if i == 0:
+            num_calls_rewriter += parsed_args.n_pop_initial * batch_sizes[0]
+            num_calls_judge += parsed_args.n_pop_initial * 0.6 * batch_sizes[0]
+        else:
+            num_calls_rewriter += n_pop_targets[i-1] * (parsed_args.m_var + 1) * batch_sizes[i]
+            num_calls_judge += n_pop_targets[i-1] * (parsed_args.m_var + 1) * 0.6 * batch_sizes[i]
+        
+    num_calls_all_rewriters = n_pop_targets[-1] * parsed_args.val_split_size
+    num_calls_judge += n_pop_targets[-1] * parsed_args.val_split_size * 4
+
+    return (
+        3 +  # planner overhead?
+        GPT_5_MINI_REWRITER_KCALL * num_calls_rewriter +
+        CLAUDE_SONNET_4_5_JUDGE_KCALL * num_calls_judge +
+        ALL_REWRITERS_KCALL * num_calls_all_rewriters
+    ) * num_seeds / 1000
+
+print(f"Estimated cost for this run: ${estimate_cost(args):.2f}")
+time.sleep(10)
+# print(f"Estimated time for this run:")
 
 
 async def main():

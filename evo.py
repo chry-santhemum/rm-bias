@@ -33,7 +33,7 @@ class EvoPlanner:
         m_var: int,
         cosine_sim_threshold_initial: float,
         cosine_sim_threshold_evolution: float,
-        context: Literal["all", "vanilla"]="all",
+        context: Literal["all", "ancestry", "vanilla"]="all",
         random_seed: int=42,
     ):
         self.direction: Literal["plus", "minus"] = direction
@@ -438,9 +438,47 @@ class EvoPlanner:
 
         return fig
 
+    def _calculate_student_threshold(
+        self,
+        winrate_values: list[float],
+        min_items: int,
+    ) -> float:
+        """
+        Calculate student score threshold for filtering.
+
+        Uses percentile-based threshold (40th for plus, 60th for minus),
+        but adjusts to guarantee at least min_items survive.
+        """
+        if not winrate_values:
+            return 0.0
+
+        # Calculate percentile-based threshold
+        if self.direction == "plus":
+            pct = float(np.percentile(winrate_values, 40))
+            threshold = min(0.0, pct)
+        else:
+            pct = float(np.percentile(winrate_values, 60))
+            threshold = max(0.0, pct)
+
+        # Adjust threshold to guarantee at least min_items survive
+        if len(winrate_values) > min_items:
+            if self.direction == "plus":
+                # Keep top min_items: threshold can be at most the min_items-th highest
+                sorted_desc = sorted(winrate_values, reverse=True)
+                min_items_threshold = sorted_desc[min_items - 1]
+                threshold = min(threshold, min_items_threshold)
+            else:
+                # Keep bottom min_items: threshold can be at least the min_items-th lowest
+                sorted_asc = sorted(winrate_values)
+                min_items_threshold = sorted_asc[min_items - 1]
+                threshold = max(threshold, min_items_threshold)
+
+        return threshold
+
     def filter_by_student_scores(
         self,
         evaluate_results: dict[int, dict[str, AttributeStats]],
+        min_items: int,
     ) -> tuple[dict[int, dict[str, AttributeStats]], list[float]]:
         """
         Filter evaluate_results by student score threshold before teacher evaluation.
@@ -465,24 +503,15 @@ class EvoPlanner:
                 student_thresholds.append(0.0)
                 continue
 
-            # Calculate threshold: remove bottom 40% to save teacher eval compute
+            # Calculate threshold using percentile + min_items guarantee
             winrate_values = [wr for _, wr in attr_winrates if wr is not None]
-            if self.direction == "plus":
-                student_pct = float(np.percentile(winrate_values, 40))
-                threshold = min(0.0, student_pct)
-            else:
-                student_pct = float(np.percentile(winrate_values, 60))
-                threshold = max(0.0, student_pct)
+            threshold = self._calculate_student_threshold(winrate_values, min_items)
 
             # Filter attributes by student score
-            surviving_attrs = set()
-            for attr, wr in attr_winrates:
-                if self.direction == "plus":
-                    if wr is not None and wr >= threshold:
-                        surviving_attrs.add(attr)
-                else:
-                    if wr is not None and wr <= threshold:
-                        surviving_attrs.add(attr)
+            if self.direction == "plus":
+                surviving_attrs = {attr for attr, wr in attr_winrates if wr is not None and wr >= threshold}
+            else:
+                surviving_attrs = {attr for attr, wr in attr_winrates if wr is not None and wr <= threshold}
 
             filtered_stats = {attr: s for attr, s in seed_stats.items() if attr in surviving_attrs}
             filtered_results[idx] = filtered_stats
@@ -490,7 +519,7 @@ class EvoPlanner:
 
             logger.info(
                 f"Seed {idx}: student pre-filter {len(seed_stats)} -> {len(filtered_stats)} "
-                f"(threshold={threshold:.3f}, pct={student_pct:.3f})"
+                f"(threshold={threshold:.3f})"
             )
 
         return filtered_results, student_thresholds
@@ -520,11 +549,7 @@ class EvoPlanner:
                 all_candidates.append(new_candidate)
 
             # Student threshold was already applied in filter_by_student_scores
-            if strict:
-                student_threshold = 0.0
-            else:
-                student_threshold = student_thresholds[seed_idx]
-
+            student_threshold = student_thresholds[seed_idx]
 
             # Calculate teacher threshold
             if strict:
@@ -532,10 +557,10 @@ class EvoPlanner:
             else:
                 valid_teacher_winrates = [c[3] for c in all_candidates if c[3] is not None]
                 if self.direction == "plus":
-                    teacher_pct = float(np.percentile(valid_teacher_winrates, 75)) if valid_teacher_winrates else float('inf')
+                    teacher_pct = float(np.percentile(valid_teacher_winrates, 70)) if valid_teacher_winrates else float('inf')
                     teacher_threshold = max(0.0, teacher_pct)
                 else:
-                    teacher_pct = float(np.percentile(valid_teacher_winrates, 25)) if valid_teacher_winrates else float('-inf')
+                    teacher_pct = float(np.percentile(valid_teacher_winrates, 30)) if valid_teacher_winrates else float('-inf')
                     teacher_threshold = min(0.0, teacher_pct)
 
             logger.info(f"Student threshold: {student_threshold:.3f}")
@@ -765,7 +790,9 @@ class EvoRunner(Runner):
             print(f"Seed {ss.index}: {len(evaluate_results[ss.index])} -> {len(representative_results[ss.index])} after clustering")
 
         # Filter by student scores to save compute on teacher evaluation
-        filtered_evaluate_results, student_thresholds = self.planner.filter_by_student_scores(representative_results)
+        filtered_evaluate_results, student_thresholds = self.planner.filter_by_student_scores(
+            representative_results, min_items=n_pop_target
+        )
 
         # Populate teacher_score on filtered rollouts in place
         # (Rollout objects are shared, so changes propagate to history)
@@ -874,7 +901,7 @@ class EvoRunner(Runner):
                         )
 
 
-                # Calculate student thresholds from loaded data (same logic as filter_by_student_scores)
+                # Calculate student thresholds from loaded data
                 student_thresholds = []
                 for seed_state in self.seed_states:
                     attr_winrates = []
@@ -887,15 +914,9 @@ class EvoRunner(Runner):
                         if all_scores:
                             attr_winrates.append(float(np.mean(all_scores)))
 
-                    if attr_winrates:
-                        if self.planner.direction == "plus":
-                            pct = float(np.percentile(attr_winrates, 40))
-                            threshold = min(0.0, pct)
-                        else:
-                            pct = float(np.percentile(attr_winrates, 60))
-                            threshold = max(0.0, pct)
-                    else:
-                        threshold = 0.0
+                    threshold = self.planner._calculate_student_threshold(
+                        attr_winrates, min_items=n_pop_target[time_step]
+                    )
                     student_thresholds.append(threshold)
 
                 self.planner.update_pop_pareto(

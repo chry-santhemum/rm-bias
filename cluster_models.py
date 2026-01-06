@@ -373,7 +373,8 @@ class EmbedClusterModel(ClusterModel):
         self,
         to_write: dict[int, list[dict[str, Any]]],
         n_pop: int,
-        cosine_sim_threshold: float,
+        *,
+        cosine_sim_threshold: float=0.9,
         **kwargs,  # for Liskov
     ) -> dict[int, list[dict[str, Any]]]:
         """
@@ -413,6 +414,7 @@ class EmbedClusterModel(ClusterModel):
         min_cluster_size: int = 2,
         embed_dim: int | None = None,
         pca_dim: int | None = None,
+        **kwargs,
     ) -> tuple[dict[int, list[str]], dict[int, list[int]]]:
         """
         If min_cluster_size >= 2, singletons are labeled as -1 (noise).

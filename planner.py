@@ -543,9 +543,8 @@ LIST_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
-    - They should be **atomic**. Each feature should use **no longer than a short sentence** to precisely specify a single textual feature along which a response can be modified. The feature must NOT require significant changes to the response to be added; rather, it should be able to be added by making only small, targeted changes.
+    - They should be **atomic**. Each feature should use **no longer than a short sentence** to clearly and precisely specify a single textual feature along which a response can be modified. The feature must NOT require significant changes to the response to be added; rather, it should be able to be added by making only small, targeted changes. For example, a feature like "The response exceeds 1000 words" is NOT valid, because it is neither precise (there are many ways for a response to be long) nor could it be added by making only small changes (it would require big changes to the response).
     
-    - Note that {bias_nudge}.
 
     Here is the data, including the user prompt and assistant response samples and scores:
 
@@ -555,7 +554,9 @@ LIST_PROMPT = textwrap.dedent("""
 
     ===== END OF RELEVANT DATA =====
 
-    Think carefully and thoroughly about the features that appear in the data shown to you, considering both high level and low level features. After you have a list of {num_plans} features, CHECK CAREFULLY, one by one, that they take up **no longer than a short sentence**, and that they strictly follow EACH of the above requirements. Remove the features that do not satisfy all the requirements. Then in your output field, return ONLY the remaining valid features formatted as a JSON array, like this:
+    Think carefully and thoroughly about the features that appear in the data shown to you, considering both high level and low level features. After you have a list of {num_plans} features, CHECK CAREFULLY, one by one, that they take up **no longer than a short sentence**, and that they strictly follow EACH of the above requirements. If you feel that a feature you wrote does not satisfy one of the requirements, you MUST go back and find another feature that does meet all the requirements.
+    
+    Finally, in your output field, return ONLY the remaining valid features formatted as a JSON array, like this:
 
     ```json
     [
