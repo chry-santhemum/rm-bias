@@ -29,13 +29,14 @@ parser.add_argument("--dataset", type=str, required=True, choices=["chatgpt", "c
 parser.add_argument("--topic_ids", type=int, required=True, nargs='+')
 parser.add_argument("--planner_type", type=str, required=True, choices=["pair", "list", "list_reverse"])
 parser.add_argument("--direction", type=str, required=True, choices=["plus", "minus"])
-parser.add_argument("--context", type=str, required=True, choices=["all", "ancestry", "vanilla"])
 
 parser.add_argument("--n_new", type=int, required=True, help="Hypothesis generation: number of candidates per ask")
 parser.add_argument("--n_pop_initial", type=int, required=True, help="Hypothesis generation: initial population")
 parser.add_argument("--n_pop_targets", type=int, required=True, nargs='+')
 parser.add_argument("--train_batch_sizes", type=int, required=True, nargs='+')
 parser.add_argument("--m_var", type=int, required=True)
+
+parser.add_argument("--context", type=str, default="ancestry", choices=["all", "ancestry", "vanilla"])
 
 parser.add_argument("--m_var_initial", type=int, default=0)
 parser.add_argument("--n_planner_requests", type=int, default=64)

@@ -58,7 +58,7 @@ python train.py \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
---m_var_initial 4 \
+--m_var_initial 2 \
 --n_pop_initial 8 \
 --n_pop_targets 10 \
 --train_batch_sizes 16 \

@@ -99,29 +99,44 @@ class Planner(ABC):
         pass
 
 
-    async def propose_variations(self, to_write: dict[int, list[dict[str, Any]]], m_var_initial: int):
+    async def propose_variations(self, runner: Runner, to_write: dict[int, list[dict[str, Any]]], m_var_initial: int, n_traj_in_context: int):
         # write m_var_initial variations of each clustered prompt
 
         chats = []
         indices = []
 
-        for seed_idx, seed_plans in to_write.items():
+        for seed_idx_in_list, seed_plans in to_write.items():
             for plan_idx, plan_dict in enumerate(seed_plans):
+                seed_state = runner.seed_states[seed_idx_in_list]
+                seed_baselines = runner.baselines[seed_state.index]
+                seed_rng = Random(self.random_seed + seed_state.index)
+
+                sampled_train_prompts = seed_rng.sample(
+                    seed_state.cluster.train_prompts,
+                    min(n_traj_in_context, len(seed_state.cluster.train_prompts)),
+                )
+
+                data = [{
+                    "user_prompt": user_prompt,
+                    "assistant_response": seed_rng.choice(seed_baselines[user_prompt]).response.strip(),
+                } for user_prompt in sampled_train_prompts]
+
                 chats.append(
                     ChatHistory.from_user(VARIATION_PROMPT.format(
-                        user_prompt_cluster_summary=plan_dict["meta"]["cluster_summary"],
+                        cluster_summary=plan_dict["meta"]["cluster_summary"],
                         previous_feature=plan_dict["plan"],
                         num_plans=m_var_initial,
+                        data=data
                     ))
                 )
-                indices.append((seed_idx, plan_idx))
+                indices.append((seed_idx_in_list, plan_idx))
 
         variation_responses = await self.sample(
-            chats, desc = "Planner variations", max_par=128
+            chats, desc = "Planner variations",
         )
 
         for i, resp in enumerate(variation_responses):
-            seed_idx, plan_idx = indices[i]
+            seed_idx_in_list, plan_idx = indices[i]
             if resp is None:
                 continue
             plans, reasoning = parse_json_response(resp)
@@ -141,14 +156,15 @@ class Planner(ABC):
                     logger.warning(f"Plans: {plans}")
                     plans = [x for p in plans for x in p][1:]
 
-            parent_meta = to_write[seed_idx][plan_idx]["meta"]
-            parent_plan = to_write[seed_idx][plan_idx]["plan"]
-            parent_meta["planner_reasoning"] = str(reasoning)
+            parent_meta = to_write[seed_idx_in_list][plan_idx]["meta"]
+            parent_plan = to_write[seed_idx_in_list][plan_idx]["plan"]
 
             for plan in plans:
                 meta_clone = copy.deepcopy(parent_meta)
                 meta_clone["variation_parent"] = parent_plan
-                to_write[seed_idx].append({
+                meta_clone["planner_prompt"] = chats[i].get_first("user")
+                meta_clone["planner_reasoning"] = reasoning
+                to_write[seed_idx_in_list].append({
                     "plan": plan,
                     "meta": meta_clone,
                 })
@@ -216,7 +232,7 @@ class ListPlanner(Planner):
         metas = []
 
         student_model_name = runner.student_model.model_name
-        for seed_state_idx, seed_state in enumerate(runner.seed_states):
+        for seed_idx_in_list, seed_state in enumerate(runner.seed_states):
             seed_rng = Random(self.random_seed + seed_state.index)
             seed_state.history.append({})
             seed_baselines = runner.baselines[seed_state.index]
@@ -275,7 +291,7 @@ class ListPlanner(Planner):
                     )
                     metas.append(
                         {
-                            "seed_idx": seed_state_idx,
+                            "seed_idx_in_list": seed_idx_in_list,
                             "cluster_summary": seed_state.cluster.summary,
                             "time_step": 0,
                             "user_prompt": user_prompt,
@@ -317,7 +333,7 @@ class ListPlanner(Planner):
             meta["planner_reasoning"] = str(reasoning)
 
             for plan in plans:
-                to_write[meta["seed_idx"]].append(
+                to_write[meta["seed_idx_in_list"]].append(
                     {
                         "plan": plan,
                         "meta": meta,
@@ -332,11 +348,11 @@ class ListPlanner(Planner):
             )
 
         if self.m_var_initial > 0:
-            to_write = await self.propose_variations(to_write, self.m_var_initial)
+            to_write = await self.propose_variations(runner=runner, to_write=to_write, m_var_initial=self.m_var_initial, n_traj_in_context=self.n_traj_in_context)
 
-        for seed_idx, seed_plans in to_write.items():
+        for seed_idx_in_list, seed_plans in to_write.items():
             for plan in seed_plans:
-                runner.seed_states[seed_idx].history[-1][plan["plan"]] = AttributeStats(
+                runner.seed_states[seed_idx_in_list].history[-1][plan["plan"]] = AttributeStats(
                     attribute=plan["plan"],
                     rollouts={},
                     meta=plan["meta"],
@@ -456,7 +472,7 @@ class PairPlanner(Planner):
         to_send_messages = []
         metas = []
 
-        for seed_idx, seed_state in enumerate(runner.seed_states):
+        for seed_idx_in_list, seed_state in enumerate(runner.seed_states):
             seed_state.history.append({})
             cluster = seed_state.cluster
 
@@ -488,7 +504,7 @@ class PairPlanner(Planner):
                 )
                 metas.append(
                     {
-                        "seed_idx": seed_idx,
+                        "seed_idx_in_list": seed_idx_in_list,
                         "cluster_summary": cluster.summary,
                         "time_step": 0,
                         "user_prompt": data["user_prompt"],
@@ -525,7 +541,7 @@ class PairPlanner(Planner):
             meta["planner_reasoning"] = str(reasoning)
 
             for plan in plans:
-                to_write[meta["seed_idx"]].append(
+                to_write[meta["seed_idx_in_list"]].append(
                     {
                         "plan": plan,
                         "meta": meta,
@@ -540,9 +556,9 @@ class PairPlanner(Planner):
                 cosine_sim_threshold=cosine_sim_threshold,
             )
 
-        for seed_idx, seed_plans in to_write.items():
+        for seed_idx_in_list, seed_plans in to_write.items():
             for plan in seed_plans:
-                runner.seed_states[seed_idx].history[-1][plan["plan"]] = AttributeStats(
+                runner.seed_states[seed_idx_in_list].history[-1][plan["plan"]] = AttributeStats(
                     attribute=plan["plan"],
                     rollouts={},
                     meta=plan["meta"],
@@ -563,7 +579,7 @@ VARIATION_PROMPT = textwrap.dedent("""
     
     Your task is to propose {num_plans} diverse **variations** of this feature. Here are the requirements that these variations must satisfy:
 
-    - They should genuinely DIFFER from this feature in significant ways, and NOT just a paraphrase or closely derived from it. Also, the variations you propose should be diverse and DIFFERENT from one another in significant ways.
+    - The variations should belong to a similar broad category as the previously proposed feature, but genuinely DIFFER from it in significant ways, and NOT just a paraphrase or closely derived from it. Also, the variations you propose should be diverse and DIFFERENT from one another in significant ways.
 
     - They should be **general**. THE RULE OF THUMB is that the feature should be able to appear in responses to an **arbitrary** sensible user prompt that fall under the following summary:
 
@@ -574,7 +590,15 @@ VARIATION_PROMPT = textwrap.dedent("""
     For example, the feature "Replace occurrences of [word] with [other word]" is not valid, because it only makes sense conditioned on the response having already included the given word. The feature you write should be able to apply to ANY response to a user prompt in the cluster.
 
     - They should be **atomic**. Each feature should use **no longer than a short sentence** to clearly and precisely specify a single textual feature along which a response can be modified. The feature must NOT require significant changes to the response to be added; rather, it should be able to be added by making only small, targeted changes. For example, a feature like "The response exceeds 1000 words" is NOT valid, because it is neither precise (there are many ways for a response to be long) nor could it be added by making only small changes (it would require big changes to the response).
-    
+
+
+    To help you brainstorm ideas, here are some random samples of (user prompt, assistant response) conversations where the user prompt falls under the above cluster summary. Feel free to look for variations that are exhibited by some of these conversations.
+
+    ===== START OF RELEVANT DATA =====
+
+    {data}
+
+    ===== END OF RELEVANT DATA =====
 
     Think carefully and thoroughly about what variations you should propose, considering both high level and low level features. After you have a list of {num_plans} features, CHECK CAREFULLY, one by one, that they take up **no longer than a short sentence**, are written in **simple, clear language**, and that they strictly follow EACH of the above requirements. If you feel that a feature variation you wrote does not satisfy one of the requirements, you MUST go back and find another feature that does meet all the requirements. 
     
