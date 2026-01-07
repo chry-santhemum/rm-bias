@@ -49,27 +49,5 @@
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "orchestra-mcp"
-  ],
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/bell.sh"
-          }
-        ]
-      }
-    ],
-    "SubagentStop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/bell.sh"
-          }
-        ]
-      }
-    ]
-  }
+  ]
 }

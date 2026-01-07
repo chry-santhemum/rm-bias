@@ -577,9 +577,9 @@ VARIATION_PROMPT = textwrap.dedent("""
     {previous_feature}
     </previous_feature>
     
-    Your task is to propose {num_plans} diverse **variations** of this feature. Here are the requirements that these variations must satisfy:
+    Your task is to propose {num_plans} diverse **variations** of this feature. Here are the requirements that these variations MUST satisfy:
 
-    - The variations should belong to a similar broad category as the previously proposed feature, but genuinely DIFFER from it in significant ways, and NOT just a paraphrase or closely derived from it. Also, the variations you propose should be diverse and DIFFERENT from one another in significant ways.
+    - The variations should belong to the same broad category as the previously proposed feature, but genuinely DIFFER from it in significant ways, and NOT just a paraphrase or closely derived from it. Also, the variations you propose should be diverse and DIFFERENT from one another in significant ways.
 
     - They should be **general**. THE RULE OF THUMB is that the feature should be able to appear in responses to an **arbitrary** sensible user prompt that fall under the following summary:
 
@@ -599,6 +599,7 @@ VARIATION_PROMPT = textwrap.dedent("""
     {data}
 
     ===== END OF RELEVANT DATA =====
+
 
     Think carefully and thoroughly about what variations you should propose, considering both high level and low level features. After you have a list of {num_plans} features, CHECK CAREFULLY, one by one, that they take up **no longer than a short sentence**, are written in **simple, clear language**, and that they strictly follow EACH of the above requirements. If you feel that a feature variation you wrote does not satisfy one of the requirements, you MUST go back and find another feature that does meet all the requirements. 
     
