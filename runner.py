@@ -148,7 +148,7 @@ class Runner(ABC):
             rewriter.model_name: {} for rewriter in val_rewriters
         }
 
-        # Rewrite and get student scoresz
+        # Rewrite and get student scores
         for ss in self.seed_states:
             val_prompts = ss.cluster.val_prompts[:val_split_size]
 
@@ -175,10 +175,8 @@ class Runner(ABC):
                 first_n_user_prompts=judge_val_first_n_user_prompts,
             )
 
-        # Save validation stats and plot for each (rewriter, seed)
-        for rewriter_name, rewriter_results in validation_results.items():
             for seed_state in self.seed_states:
-                seed_stats = rewriter_results[seed_state.index]
+                seed_stats = rewriter_stats[seed_state.index]
                 rewriter_dir = self.run_path / "validate" / f"seed_{seed_state.index}_validate" / rewriter_name.replace("/", "_")
                 rewriter_dir.mkdir(parents=True, exist_ok=True)
 
