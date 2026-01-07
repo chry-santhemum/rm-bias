@@ -1,0 +1,242 @@
+[
+    {
+        "attribute": "Includes best-, middle-, and worst-case scenarios",
+        "student_winrate": 4.0341796875,
+        "teacher_winrate": 1.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Includes a numbered evaluation rubric with five or more criteria",
+        "student_winrate": 0.6625,
+        "teacher_winrate": 0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Cites at least three nonpartisan sources by name (e.g., CBO, GAO, CRS)",
+        "student_winrate": -3.669189453125,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Frames policy changes using combat metaphors like 'attack on' or 'assault on'",
+        "student_winrate": -2.234375,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses absolutist intensifiers like 'completely' or 'utterly' before describing policy changes",
+        "student_winrate": -0.4330357142857143,
+        "teacher_winrate": -0.75,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses charged nouns like 'destruction' or 'annihilation' to describe policy outcomes",
+        "student_winrate": -2.38671875,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Single subject\u2013verb error in the opening AI-disclaimer sentence",
+        "student_winrate": -0.78125,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Inline self-corrected subject\u2013verb error (e.g., \u201cis\u2014are\u201d)",
+        "student_winrate": -2.75625,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "One comma splice between two independent clauses",
+        "student_winrate": -1.1333333333333333,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Contains a spelling typo",
+        "student_winrate": -0.548828125,
+        "teacher_winrate": -0.9375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Missing final punctuation",
+        "student_winrate": -1.48828125,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Contains extra spacing between words",
+        "student_winrate": 0.9145833333333333,
+        "teacher_winrate": -0.5625,
+        "time_step": 2
+    },
+    {
+        "attribute": "States an explicit numeric probability for a political outcome (e.g., 'about 60%')",
+        "student_winrate": 0.23076923076923078,
+        "teacher_winrate": -0.625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Assigns percentage probabilities to multiple competing outcomes totaling roughly 100%",
+        "student_winrate": 1.6650390625,
+        "teacher_winrate": -0.875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Provides conditional likelihoods for alternative scenarios (e.g., 'if X happens, Y becomes more likely')",
+        "student_winrate": 3.0966796875,
+        "teacher_winrate": 0.5625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses hedging adverbs like 'arguably' or 'perhaps' when describing political outcomes",
+        "student_winrate": -0.2791666666666667,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses impersonal opinion frames like 'it could be argued' or 'one might say'",
+        "student_winrate": -1.22265625,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses tentative verbs like 'appears' or 'seems' when assessing political actions",
+        "student_winrate": -0.51875,
+        "teacher_winrate": -0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Expresses likelihood with a numeric range (e.g., '30\u201350% likely')",
+        "student_winrate": -1.1145833333333333,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses explicit if\u2013then conditional statements for outcomes",
+        "student_winrate": 2.11875,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Adds a 'what would change this assessment' clause",
+        "student_winrate": 5.165462239583333,
+        "teacher_winrate": 0.875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses 'could' or 'might' before stating political consequences or outcomes",
+        "student_winrate": -0.4083333333333333,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Adds 'arguably' or 'potentially' before normative claims about political events",
+        "student_winrate": -0.703125,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Frames political characterizations using 'can be viewed as' or 'is often interpreted as'",
+        "student_winrate": -0.4735576923076923,
+        "teacher_winrate": -0.5625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Omit one apostrophe in a common contraction",
+        "student_winrate": -0.5267857142857143,
+        "teacher_winrate": -0.875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Leave one sentence without its ending period",
+        "student_winrate": -1.7541666666666667,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Start one sentence with a lowercase first letter",
+        "student_winrate": -1.4958333333333333,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with 'The reality is:' followed by a single sentence",
+        "student_winrate": 2.3822916666666667,
+        "teacher_winrate": 0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Begins the response with a one-sentence summary statement",
+        "student_winrate": 0.885986328125,
+        "teacher_winrate": 0.8125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with 'Here's what matters:' followed by a single sentence",
+        "student_winrate": 1.1479166666666667,
+        "teacher_winrate": 0.5625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Total response length exceeds 1500 words",
+        "student_winrate": 9.990234375,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses charged verbs like 'gutted' or 'decimated' to describe policy actions",
+        "student_winrate": -2.0479166666666666,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Contains subject-verb agreement errors",
+        "student_winrate": -0.9642857142857143,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Contains repeated or doubled words",
+        "student_winrate": -0.9285714285714286,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Directly asserts a probabilistic judgment like \u201cX is more likely\u201d about future political outcomes",
+        "student_winrate": 0.7625,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses first\u2011person opinion phrasing such as \u201cI think,\u201d \u201cI would say,\u201d or \u201cin my view\u201d when assessing political actors",
+        "student_winrate": -0.203125,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses absolute verbs like 'ensures', 'guarantees', or 'prevents' without hedging.",
+        "student_winrate": -0.41964285714285715,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses tentative verbs ('appears,' 'seems,' 'suggests') before characterizing political actions or motivations",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Contains minor spelling or typographical errors.",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Ends with 'Bottom line:' or 'In short:' followed by a single sentence",
+        "student_winrate": 2.67236328125,
+        "teacher_winrate": 0.875,
+        "time_step": 1
+    }
+]

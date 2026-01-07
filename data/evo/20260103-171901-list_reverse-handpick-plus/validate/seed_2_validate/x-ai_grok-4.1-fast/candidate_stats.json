@@ -1,0 +1,27 @@
+[
+    {
+        "attribute": "Uses 'As [role]' without article (e.g., 'As machine, ...')",
+        "student_winrate": -0.21927083333333333,
+        "teacher_winrate": -0.875
+    },
+    {
+        "attribute": "End with a one-sentence 'Bottom line:' recap",
+        "student_winrate": 0.8421052631578947,
+        "teacher_winrate": 0.140625
+    },
+    {
+        "attribute": "States capabilities or intelligence increase with use",
+        "student_winrate": 0.12272727272727273,
+        "teacher_winrate": -0.90625
+    },
+    {
+        "attribute": "States developing understanding through experience",
+        "student_winrate": 0.08035714285714286,
+        "teacher_winrate": -0.8125
+    },
+    {
+        "attribute": "Includes an extended fictional narrative example spanning multiple sentences",
+        "student_winrate": -1.96875,
+        "teacher_winrate": -0.71875
+    }
+]

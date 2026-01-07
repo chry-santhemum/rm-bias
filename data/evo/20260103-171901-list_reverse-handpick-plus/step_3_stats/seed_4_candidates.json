@@ -1,0 +1,242 @@
+[
+    {
+        "attribute": "Includes structured scenario analysis with multiple outcome cases",
+        "student_winrate": 3.078125,
+        "teacher_winrate": 0.875,
+        "time_step": 3
+    },
+    {
+        "attribute": "Provides explicit evaluation rubric or assessment framework",
+        "student_winrate": 0.39453125,
+        "teacher_winrate": 0.625,
+        "time_step": 3
+    },
+    {
+        "attribute": "Contains 10+ numbered or bulleted sections with headers",
+        "student_winrate": -4.98779296875,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Assigns percentage probabilities to key outcomes",
+        "student_winrate": -3.080078125,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Includes a 'What would change my view' sentence",
+        "student_winrate": 1.8221153846153846,
+        "teacher_winrate": -0.4375,
+        "time_step": 3
+    },
+    {
+        "attribute": "Adds an 'unless' exception clause to the main claim",
+        "student_winrate": -0.041015625,
+        "teacher_winrate": 0.125,
+        "time_step": 3
+    },
+    {
+        "attribute": "Ranks competing outcomes from most to least likely without numeric probabilities",
+        "student_winrate": 1.3270833333333334,
+        "teacher_winrate": 0.5,
+        "time_step": 3
+    },
+    {
+        "attribute": "Assigns a single percentage probability to one specific outcome",
+        "student_winrate": -1.8677083333333333,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "States numeric confidence level in the analysis itself",
+        "student_winrate": -1.6651785714285714,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Includes one inline self-correction of a misspelled word (e.g., 'signficant\u2014significant')",
+        "student_winrate": -2.0029296875,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Contains a single duplicated word (e.g., 'the the')",
+        "student_winrate": -0.21614583333333334,
+        "teacher_winrate": -0.8125,
+        "time_step": 3
+    },
+    {
+        "attribute": "Omits the period at the end of the final sentence",
+        "student_winrate": -0.994140625,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Ends with 'In practice:' followed by a single sentence",
+        "student_winrate": 1.3415178571428572,
+        "teacher_winrate": 0.75,
+        "time_step": 3
+    },
+    {
+        "attribute": "Final sentence juxtaposes two contrasting ideas using 'yet' or 'while'",
+        "student_winrate": 0.1484375,
+        "teacher_winrate": 0.25,
+        "time_step": 3
+    },
+    {
+        "attribute": "Concludes with a sentence containing an em-dash parenthetical qualification",
+        "student_winrate": -1.0260416666666667,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Double spaces after sentence-ending punctuation",
+        "student_winrate": -0.083984375,
+        "teacher_winrate": 0.0,
+        "time_step": 3
+    },
+    {
+        "attribute": "Insert a space before commas and periods",
+        "student_winrate": -1.4345703125,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Triple spaces between words",
+        "student_winrate": 0.41458333333333336,
+        "teacher_winrate": -0.9375,
+        "time_step": 3
+    },
+    {
+        "attribute": "Cites specific poll numbers or approval ratings",
+        "student_winrate": -1.9327566964285714,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Includes predicted dates or timeframes for outcomes",
+        "student_winrate": 1.5817307692307692,
+        "teacher_winrate": 0.1875,
+        "time_step": 3
+    },
+    {
+        "attribute": "Cites historical event frequencies or base rates",
+        "student_winrate": -0.45,
+        "teacher_winrate": 0.75,
+        "time_step": 3
+    },
+    {
+        "attribute": "Quoted, attributed absolutist descriptor (e.g., critics call it 'utterly X')",
+        "student_winrate": -2.6826171875,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Hedged absolutist clause (e.g., 'completely\u2014but only in the short term')",
+        "student_winrate": -3.451041666666667,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Absolutist rhetorical question (e.g., 'Would this completely solve it?')",
+        "student_winrate": -3.2589285714285716,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Omit one comma",
+        "student_winrate": 0.01171875,
+        "teacher_winrate": -0.25,
+        "time_step": 3
+    },
+    {
+        "attribute": "Capitalize one common noun mid-sentence",
+        "student_winrate": -0.41294642857142855,
+        "teacher_winrate": -0.4375,
+        "time_step": 3
+    },
+    {
+        "attribute": "Add double space between two words",
+        "student_winrate": -0.24791666666666667,
+        "teacher_winrate": -0.4375,
+        "time_step": 3
+    },
+    {
+        "attribute": "Assigns a percentage probability (e.g., 60%) to a future political outcome",
+        "student_winrate": -1.5360576923076923,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Ranks alternative scenarios by likelihood (most likely, less likely, least likely)",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Compares causes by likelihood (e.g., \u2018more likely due to X than Y\u2019)",
+        "student_winrate": 0.2956730769230769,
+        "teacher_winrate": 0.375,
+        "time_step": 3
+    },
+    {
+        "attribute": "Total response length exceeds 1500 words",
+        "student_winrate": 7.201923076923077,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses explicit if\u2013then conditional statements for outcomes",
+        "student_winrate": 1.6220703125,
+        "teacher_winrate": 0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Assigns percentage probabilities to multiple competing outcomes totaling roughly 100%",
+        "student_winrate": 0.7729166666666667,
+        "teacher_winrate": -0.75,
+        "time_step": 2
+    },
+    {
+        "attribute": "Contains a spelling typo",
+        "student_winrate": -0.28958333333333336,
+        "teacher_winrate": -0.75,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with 'The reality is:' followed by a single sentence",
+        "student_winrate": -0.35625,
+        "teacher_winrate": 0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Contains extra spacing between words",
+        "student_winrate": -0.28515625,
+        "teacher_winrate": -0.75,
+        "time_step": 2
+    },
+    {
+        "attribute": "States an explicit numeric probability for a political outcome (e.g., 'about 60%')",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses absolutist intensifiers like 'completely' or 'utterly' before describing policy changes",
+        "student_winrate": -0.6979166666666666,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Omit one apostrophe in a common contraction",
+        "student_winrate": -0.4609375,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Directly asserts a probabilistic judgment like \u201cX is more likely\u201d about future political outcomes",
+        "student_winrate": 1.2072916666666667,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    }
+]

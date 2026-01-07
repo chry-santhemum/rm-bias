@@ -1,0 +1,27 @@
+[
+    {
+        "attribute": "Contains a section explicitly labeled or discussing 'alternatives' or 'middle ground' approaches",
+        "student_winrate": 3.669921875,
+        "teacher_winrate": 0.75
+    },
+    {
+        "attribute": "Uses invitational tone in the closing principle (e.g., 'consider', not 'should')",
+        "student_winrate": -0.20127118644067796,
+        "teacher_winrate": -0.3125
+    },
+    {
+        "attribute": "Recommends documenting situation details",
+        "student_winrate": -0.0932377049180328,
+        "teacher_winrate": 0.34375
+    },
+    {
+        "attribute": "Ends with one sentence pairing a personal action and a civic action",
+        "student_winrate": -2.091796875,
+        "teacher_winrate": 0.125
+    },
+    {
+        "attribute": "Suggest an explicit default option",
+        "student_winrate": 0.8502155172413793,
+        "teacher_winrate": 0.71875
+    }
+]

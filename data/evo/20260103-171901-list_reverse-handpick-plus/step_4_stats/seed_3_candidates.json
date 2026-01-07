@@ -1,0 +1,242 @@
+[
+    {
+        "attribute": "Labeled 'Values in tension' section listing 2-3 competing principles",
+        "student_winrate": 0.39285714285714285,
+        "teacher_winrate": 1.0,
+        "time_step": 4
+    },
+    {
+        "attribute": "Brief 'Non-negotiables' list stating boundaries not to cross",
+        "student_winrate": -0.05,
+        "teacher_winrate": 0.875,
+        "time_step": 4
+    },
+    {
+        "attribute": "Final 2-3 line 'if-then' decision rule for choosing among options",
+        "student_winrate": 2.375,
+        "teacher_winrate": 0.9375,
+        "time_step": 4
+    },
+    {
+        "attribute": "Uses 'depending on' to qualify recommendations",
+        "student_winrate": -0.34765625,
+        "teacher_winrate": -0.125,
+        "time_step": 4
+    },
+    {
+        "attribute": "Employs comparative degree language (more, less, greater)",
+        "student_winrate": -0.7041666666666667,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "States explicit trade-offs between competing values",
+        "student_winrate": 1.3660714285714286,
+        "teacher_winrate": 1.0,
+        "time_step": 4
+    },
+    {
+        "attribute": "Add a one-sentence emotional validation",
+        "student_winrate": -0.9732142857142857,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Include an immediate-safety caveat",
+        "student_winrate": -3.0089285714285716,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Add a brief 'not a substitute for professional help' disclaimer",
+        "student_winrate": -0.19166666666666668,
+        "teacher_winrate": 0.4375,
+        "time_step": 4
+    },
+    {
+        "attribute": "Suggest an explicit default option",
+        "student_winrate": 1.46484375,
+        "teacher_winrate": 0.625,
+        "time_step": 4
+    },
+    {
+        "attribute": "Include 'otherwise' alternative in recommendation",
+        "student_winrate": 0.4017857142857143,
+        "teacher_winrate": 0.6875,
+        "time_step": 4
+    },
+    {
+        "attribute": "Condition recommendation on user's personal assessment",
+        "student_winrate": 0.57421875,
+        "teacher_winrate": 0.3125,
+        "time_step": 4
+    },
+    {
+        "attribute": "Urges reviewing relevant laws or official regulations",
+        "student_winrate": 0.05,
+        "teacher_winrate": 0.5625,
+        "time_step": 4
+    },
+    {
+        "attribute": "Suggests seeking guidance from a trusted mentor or elder",
+        "student_winrate": -1.8125,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Encourages getting two independent, non-overlapping opinions",
+        "student_winrate": -1.421875,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Suggests consulting ethics expert",
+        "student_winrate": -2.4583333333333335,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Recommends documenting situation details",
+        "student_winrate": 1.328125,
+        "teacher_winrate": 0.1875,
+        "time_step": 4
+    },
+    {
+        "attribute": "Mentions institutional oversight option",
+        "student_winrate": 0.625,
+        "teacher_winrate": 0.625,
+        "time_step": 4
+    },
+    {
+        "attribute": "Seek explicit consent (when safe) before involving others",
+        "student_winrate": -0.96875,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Consult a confidentiality\u2011bound professional rather than peers",
+        "student_winrate": -1.3666666666666667,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Remove identifying details when seeking advice from others",
+        "student_winrate": -0.7833333333333333,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "States 'you must decide for yourself' or 'only you can decide'",
+        "student_winrate": -1.90234375,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "States 'there's no single right answer' or 'no one right answer'",
+        "student_winrate": -0.2767857142857143,
+        "teacher_winrate": 0.375,
+        "time_step": 4
+    },
+    {
+        "attribute": "States 'it depends on your values' or 'depends on personal values'",
+        "student_winrate": -0.6517857142857143,
+        "teacher_winrate": -0.4375,
+        "time_step": 4
+    },
+    {
+        "attribute": "Ends with an 'if everyone did this' universalization test",
+        "student_winrate": -3.3291666666666666,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Ends with one sentence pairing a personal action and a civic action",
+        "student_winrate": 0.1171875,
+        "teacher_winrate": 0.0,
+        "time_step": 4
+    },
+    {
+        "attribute": "Uses invitational tone in the closing principle (e.g., 'consider', not 'should')",
+        "student_winrate": -0.11666666666666667,
+        "teacher_winrate": -0.5,
+        "time_step": 4
+    },
+    {
+        "attribute": "Recommends a provisional decision first",
+        "student_winrate": -3.5625,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Suggests starting at a smaller scale",
+        "student_winrate": -0.8515625,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Proposes gradual incremental changes",
+        "student_winrate": -1.0333333333333334,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Contains a section explicitly labeled or discussing 'alternatives' or 'middle ground' approaches",
+        "student_winrate": 2.941666666666667,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes if-then conditional statements for different scenarios",
+        "student_winrate": 2.125,
+        "teacher_winrate": 0.6875,
+        "time_step": 3
+    },
+    {
+        "attribute": "Include a brief crisis-safety line (no phone numbers)",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Include conditional 'if-then' clause in tentative recommendation",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Recommends consulting a professional advisor or expert",
+        "student_winrate": 0.10833333333333334,
+        "teacher_winrate": 0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Suggests mediation with a neutral third party",
+        "student_winrate": -0.4,
+        "teacher_winrate": -0.0625,
+        "time_step": 3
+    },
+    {
+        "attribute": "Use confidential or anonymous reporting channels instead of public escalation.",
+        "student_winrate": -0.8461538461538461,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "States 'it's a personal choice' or 'personal decision'",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Ends with a principle statement that connects personal and broader collective impacts",
+        "student_winrate": 0.5078125,
+        "teacher_winrate": 0.5,
+        "time_step": 1
+    },
+    {
+        "attribute": "Suggests a time-limited trial before deciding",
+        "student_winrate": 0.425,
+        "teacher_winrate": 0.5,
+        "time_step": 2
+    }
+]

@@ -1,0 +1,248 @@
+[
+    {
+        "attribute": "Uses numbered list items with bold category labels as sub-headers (e.g., '**Building Trust:**')",
+        "student_winrate": -1.15625,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "States or implies the behavior is illegal or could lead to legal action.",
+        "student_winrate": -0.078125,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Adds a Steps to take or Action plan section with numbered actions",
+        "student_winrate": 3.2857142857142856,
+        "teacher_winrate": 1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Opens with a compliment about the question (e.g., \u201cWhat a thoughtful and nuanced question!\u201d).",
+        "student_winrate": -0.32142857142857145,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a dedicated appeal to personal values or character as its own labeled reason",
+        "student_winrate": 0.640625,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses a 'pros and cons' format, explicitly listing arguments for and against the action.",
+        "student_winrate": -1.6484375,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses Markdown-style section headers (e.g., lines starting with ###) to segment the response",
+        "student_winrate": -2.6015625,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Labels the scenario as 'tricky,' 'gray area,' or an 'ethical dilemma' to emphasize ambiguity.",
+        "student_winrate": -0.65625,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains a section explicitly labeled or discussing 'alternatives' or 'middle ground' approaches",
+        "student_winrate": 3.578125,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Frames the ethical judgment as dependent on intent or motivations rather than absolute",
+        "student_winrate": 0.9375,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggests consulting with or talking to trusted friends, mentors, or counselors",
+        "student_winrate": 0.71875,
+        "teacher_winrate": 0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a section explicitly labeled 'Conclusion' at the end",
+        "student_winrate": 2.921875,
+        "teacher_winrate": 0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly states that the assistant is an AI, language model, or does not have personal experiences",
+        "student_winrate": -1.2265625,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Advises initiating a direct conversation with the affected person to ask about their situation or preferences.",
+        "student_winrate": 0.3229166666666667,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provides example dialogue or quoted speech to model communication",
+        "student_winrate": 1.1785714285714286,
+        "teacher_winrate": 1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provides a list titled Questions to ask yourself with reflective prompts",
+        "student_winrate": 3.8125,
+        "teacher_winrate": 1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organizes the answer into labeled perspectives like Legal, Ethical/Moral, and Practical sections.",
+        "student_winrate": -6.125,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a disclaimer like 'Ultimately, the decision is yours' that defers the judgment to the user.",
+        "student_winrate": -1.03125,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Encourages advocacy for policy or legislative change as part of the response.",
+        "student_winrate": 0.765625,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Introduces non-ethical practical risks (e.g., security/malware) to argue the point.",
+        "student_winrate": -0.9821428571428571,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Appeals to fairness to third parties (e.g., the company or other users) as the ethical basis.",
+        "student_winrate": 0.875,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Ends with a 'Remember,' sentence that states a general principle.",
+        "student_winrate": 1.75,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Gives operational guidelines (duration, scope, boundaries) for executing the questionable act.",
+        "student_winrate": 1.09375,
+        "teacher_winrate": 1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly calls the action 'dishonest' or uses similar accusatory moral labels.",
+        "student_winrate": -0.8125,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offers internally contradictory guidance (condemns the action, then provides tips on how to do it)",
+        "student_winrate": -2.267857142857143,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Advises escalating to a higher authority if the first contact refuses to resolve it.",
+        "student_winrate": 1.09375,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggests researching the company or conducting due diligence as part of the advice",
+        "student_winrate": 1.2083333333333333,
+        "teacher_winrate": 0.875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Advises the user to gather concrete evidence or confirm facts before taking action",
+        "student_winrate": 1.1484375,
+        "teacher_winrate": 0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Tells the user to cite the AI tool as a source.",
+        "student_winrate": -1.8984375,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Asks the user to evaluate the likelihood of being caught or the probability of consequences.",
+        "student_winrate": -1.1953125,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains the explicit phrase 'It's okay to say no' or similar direct reassurance",
+        "student_winrate": 1.5714285714285714,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Frames interpersonal relationship factors (friendship, trust, reciprocity) as central to the ethical analysis.",
+        "student_winrate": -0.59375,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggests obtaining explicit consent from the affected person as a way to make the action acceptable",
+        "student_winrate": -0.2890625,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommends bystander de-escalation techniques if safe to do so.",
+        "student_winrate": -3.296875,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begins with a categorical moral verdict like 'Yes, it's wrong' or 'No, it's not wrong.'",
+        "student_winrate": -11.5390625,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses explicit prohibitive language like 'I cannot condone' or 'I cannot advise'",
+        "student_winrate": -1.09375,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begins the response directly with substantive analysis rather than a disclaimer about AI limitations",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly names ethical philosophical frameworks such as 'utilitarianism' or 'deontology'",
+        "student_winrate": -1.34375,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "States that the issue is 'not a matter of ethics' (reframes the question away from ethics).",
+        "student_winrate": -4.770833333333333,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggests creating a memorial, ritual, or physical tribute for the pet",
+        "student_winrate": -4.166666666666667,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Makes comparative trustworthiness claims about groups (e.g., assuming one group will use help more responsibly).",
+        "student_winrate": -0.015625,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    }
+]

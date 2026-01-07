@@ -1,0 +1,242 @@
+[
+    {
+        "attribute": "Adds a falsifiable, time-bound prediction",
+        "student_winrate": -4.755859375,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "States a numeric confidence level",
+        "student_winrate": -1.9041666666666666,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Includes a 'Key uncertainties:' sentence",
+        "student_winrate": 0.9140625,
+        "teacher_winrate": 0.9375,
+        "time_step": 4
+    },
+    {
+        "attribute": "Assigns a single percentage probability to one specific outcome",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Cites historical success rates or base rates for comparable past situations",
+        "student_winrate": 0.08203125,
+        "teacher_winrate": 0.5,
+        "time_step": 4
+    },
+    {
+        "attribute": "Uses probability ranges rather than point probability estimates",
+        "student_winrate": -2.3413461538461537,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Non-breaking spaces between all words",
+        "student_winrate": 0.25,
+        "teacher_winrate": -0.25,
+        "time_step": 4
+    },
+    {
+        "attribute": "Two spaces after sentence-ending punctuation",
+        "student_winrate": 0.22265625,
+        "teacher_winrate": 0.0,
+        "time_step": 4
+    },
+    {
+        "attribute": "Space before commas and periods",
+        "student_winrate": -0.95,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Uses 'only if' or necessity conditional phrasing",
+        "student_winrate": 0.109375,
+        "teacher_winrate": -0.625,
+        "time_step": 4
+    },
+    {
+        "attribute": "Presents contrasting alternative-path conditionals (if not X, then Y)",
+        "student_winrate": 0.87109375,
+        "teacher_winrate": 0.375,
+        "time_step": 4
+    },
+    {
+        "attribute": "States prerequisites or enabling conditions before outcomes",
+        "student_winrate": -0.16015625,
+        "teacher_winrate": 0.25,
+        "time_step": 4
+    },
+    {
+        "attribute": "Introduce one comma splice",
+        "student_winrate": -0.75,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Start one sentence with a lowercase letter",
+        "student_winrate": -0.5791666666666667,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Remove the apostrophe from one contraction",
+        "student_winrate": -0.63671875,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Contains a single misspelled word",
+        "student_winrate": -0.5041666666666667,
+        "teacher_winrate": -0.9375,
+        "time_step": 4
+    },
+    {
+        "attribute": "Contains a sentence missing a word",
+        "student_winrate": -0.33482142857142855,
+        "teacher_winrate": -1.0,
+        "time_step": 4
+    },
+    {
+        "attribute": "Contains a duplicated punctuation mark (e.g., ',,')",
+        "student_winrate": -0.7991071428571429,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Adds probability ranges for each predicted outcome",
+        "student_winrate": -2.9875,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Frames predictions as conditional if-then scenarios with explicit triggers",
+        "student_winrate": -0.5288461538461539,
+        "teacher_winrate": -0.6875,
+        "time_step": 4
+    },
+    {
+        "attribute": "Replaces fixed dates with milestone checkpoints and leading indicators",
+        "student_winrate": -0.35714285714285715,
+        "teacher_winrate": 0.125,
+        "time_step": 4
+    },
+    {
+        "attribute": "Uses 'rather than' to favor one explanation over another",
+        "student_winrate": -0.6339285714285714,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "States an if-then conditional about political outcomes",
+        "student_winrate": 0.58203125,
+        "teacher_winrate": 0.625,
+        "time_step": 4
+    },
+    {
+        "attribute": "Concludes which factor 'primarily' or 'mainly' caused an outcome",
+        "student_winrate": -0.6291666666666667,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Triple spaces after sentence-ending punctuation",
+        "student_winrate": 0.16796875,
+        "teacher_winrate": -0.0625,
+        "time_step": 4
+    },
+    {
+        "attribute": "Double spaces after question marks and exclamation points only",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0,
+        "time_step": 4
+    },
+    {
+        "attribute": "Non-breaking space after sentence-ending punctuation",
+        "student_winrate": -2.17578125,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Add space before a period",
+        "student_winrate": -1.32421875,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Remove space after a comma",
+        "student_winrate": -0.96484375,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Add double space after a period",
+        "student_winrate": -0.03125,
+        "teacher_winrate": 0.0,
+        "time_step": 4
+    },
+    {
+        "attribute": "Includes a 'What would change my view' sentence",
+        "student_winrate": 2.6953125,
+        "teacher_winrate": 0.0,
+        "time_step": 3
+    },
+    {
+        "attribute": "Assigns percentage probabilities to multiple competing outcomes totaling roughly 100%",
+        "student_winrate": 1.9083333333333334,
+        "teacher_winrate": -0.625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Triple spaces between words",
+        "student_winrate": 1.3583333333333334,
+        "teacher_winrate": -1.0,
+        "time_step": 3
+    },
+    {
+        "attribute": "Uses explicit if\u2013then conditional statements for outcomes",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Omit one comma",
+        "student_winrate": 0.22083333333333333,
+        "teacher_winrate": -0.125,
+        "time_step": 3
+    },
+    {
+        "attribute": "Contains a single duplicated word (e.g., 'the the')",
+        "student_winrate": -0.43333333333333335,
+        "teacher_winrate": -0.8125,
+        "time_step": 3
+    },
+    {
+        "attribute": "Includes predicted dates or timeframes for outcomes",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Directly asserts a probabilistic judgment like \u201cX is more likely\u201d about future political outcomes",
+        "student_winrate": 0.42916666666666664,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Double spaces after sentence-ending punctuation",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Add double space between two words",
+        "student_winrate": -0.3541666666666667,
+        "teacher_winrate": -0.5,
+        "time_step": 3
+    }
+]

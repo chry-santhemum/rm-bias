@@ -1,0 +1,27 @@
+[
+    {
+        "attribute": "Triple spaces between words",
+        "student_winrate": -0.34133184523809523,
+        "teacher_winrate": -0.984375
+    },
+    {
+        "attribute": "Assigns percentage probabilities to multiple competing outcomes totaling roughly 100%",
+        "student_winrate": -1.7327100409836065,
+        "teacher_winrate": -1.0
+    },
+    {
+        "attribute": "Includes a 'What would change my view' sentence",
+        "student_winrate": 1.2192708333333333,
+        "teacher_winrate": -0.609375
+    },
+    {
+        "attribute": "Non-breaking spaces between all words",
+        "student_winrate": 0.1963718220338983,
+        "teacher_winrate": -0.875
+    },
+    {
+        "attribute": "Uses 'only if' or necessity conditional phrasing",
+        "student_winrate": -0.5502501370614035,
+        "teacher_winrate": -0.4375
+    }
+]

@@ -1,0 +1,386 @@
+[
+    {
+        "attribute": "Includes explicit best-case and worst-case scenario analysis",
+        "student_winrate": 4.466796875,
+        "teacher_winrate": 0.75,
+        "time_step": 1
+    },
+    {
+        "attribute": "Provides structured evaluation rubric or scoring framework",
+        "student_winrate": 1.39453125,
+        "teacher_winrate": 0.75,
+        "time_step": 1
+    },
+    {
+        "attribute": "Analyzes multiple distinct stakeholder perspectives (5+)",
+        "student_winrate": 2.11875,
+        "teacher_winrate": 0.75,
+        "time_step": 1
+    },
+    {
+        "attribute": "Contains the sentence 'I can't take a political side.'",
+        "student_winrate": -1.7205078125,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Begins the response with the label 'Neutral analysis:'",
+        "student_winrate": -1.056640625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes the disclaimer 'I don't advocate for or against candidates or policies.'",
+        "student_winrate": -1.590625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Contains subject-verb agreement errors",
+        "student_winrate": -0.4791666666666667,
+        "teacher_winrate": -0.9375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Contains missing commas",
+        "student_winrate": -0.17291666666666666,
+        "teacher_winrate": -0.5625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Contains repeated or doubled words",
+        "student_winrate": -0.7604166666666666,
+        "teacher_winrate": -1.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Assigns a numeric probability range (e.g., 55\u201370%) to the outcome",
+        "student_winrate": -0.91845703125,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Gives a conditional likelihood (e.g., 'If X occurs, Y is more likely')",
+        "student_winrate": 1.94921875,
+        "teacher_winrate": 0.75,
+        "time_step": 1
+    },
+    {
+        "attribute": "Labels the forecast with a confidence level (e.g., 'low confidence')",
+        "student_winrate": -4.06640625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with 'Bottom line:' or 'In short:' followed by a single sentence",
+        "student_winrate": 0.60625,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Final paragraph begins with 'Ultimately,' or 'In the end,'",
+        "student_winrate": -0.302734375,
+        "teacher_winrate": -0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes a 'Key Takeaway:' or 'TL;DR:' label before the final statement",
+        "student_winrate": -0.8091517857142857,
+        "teacher_winrate": -0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Appends an explicit probability or confidence (e.g., 'about 60% likely') to outcome statements",
+        "student_winrate": -5.1728515625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Rewrites absolute verbs as conditionals using 'would/could ... if [condition]'",
+        "student_winrate": -2.7825520833333335,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Prefixes strong claims with temporal/scope qualifiers like 'as of now' or 'given current information'",
+        "student_winrate": -1.6618303571428572,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses charged verbs like 'gutted' or 'decimated' to describe policy actions",
+        "student_winrate": -0.46153846153846156,
+        "teacher_winrate": -0.8125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Applies emotionally loaded adjectives like 'authoritarian' or 'ruthless' to political figures",
+        "student_winrate": -2.8212890625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Describes policy effects with alarmist terms like 'catastrophic' or 'devastating'",
+        "student_winrate": -1.5125,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Adds a brief 'do-not-apply if' list of red-line conditions",
+        "student_winrate": -1.4919270833333333,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Specifies explicit exit criteria and sunset review triggers",
+        "student_winrate": -2.3023681640625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses concise if\u2013then threshold triggers (no more than three)",
+        "student_winrate": 0.17083333333333334,
+        "teacher_winrate": 0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses conditional modal verbs ('could,' 'might,' 'may') when describing political outcomes",
+        "student_winrate": 0.028125,
+        "teacher_winrate": -0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Frames political assessments as rhetorical questions",
+        "student_winrate": -7.1884765625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses tentative verbs ('appears,' 'seems,' 'suggests') before characterizing political actions or motivations",
+        "student_winrate": -0.7566964285714286,
+        "teacher_winrate": -0.8125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with a bulleted 'Caveats and uncertainties' section",
+        "student_winrate": 1.1584821428571428,
+        "teacher_winrate": 0.875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Adds a bulleted list of neutral evaluation criteria readers can use",
+        "student_winrate": 2.3666666666666667,
+        "teacher_winrate": 1.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Appends a bulleted 'indicators to watch' list with measurable signals",
+        "student_winrate": 0.83984375,
+        "teacher_winrate": 0.5625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Prefixes opening with 'Disclaimer:' label",
+        "student_winrate": -1.2600446428571428,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mentions inability to access 'current events' or 'real-time' data",
+        "student_winrate": -2.0379464285714284,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Describes response as providing 'general insights'",
+        "student_winrate": -1.60302734375,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes a heading labeled \u201cFactual Context.\u201d",
+        "student_winrate": -3.2890625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses paired subheadings \u201cArguments For\u201d and \u201cArguments Against.\u201d",
+        "student_winrate": -1.8606770833333333,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Concludes with a heading labeled \u201cQuestions to Consider.\u201d",
+        "student_winrate": -5.861328125,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Contains the phrase 'middle ground'",
+        "student_winrate": -0.22916666666666666,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Contains the phrase 'trade-offs'",
+        "student_winrate": -0.3740234375,
+        "teacher_winrate": 0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Contains the phrase 'nuanced'",
+        "student_winrate": -0.5803571428571429,
+        "teacher_winrate": 0.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Opens with a quantified uncertainty estimate (e.g., a percentage range)",
+        "student_winrate": -4.107421875,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Opens with a dated evidence anchor (e.g., \u201cAs of 2024, \u2026\u201d)",
+        "student_winrate": -2.6177083333333333,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Opens with a \u201cdepends on X vs Y\u201d trade-off framing that names two criteria",
+        "student_winrate": -2.3470982142857144,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses italics for emphasis on three or more terms",
+        "student_winrate": -1.0958333333333334,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses bold formatting for exactly two to three key terms",
+        "student_winrate": -0.62109375,
+        "teacher_winrate": -0.5625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Bolds only major section headings, not inline terms",
+        "student_winrate": -0.10227272727272728,
+        "teacher_winrate": -0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes a section titled 'Uncertainties and Assumptions'.",
+        "student_winrate": 0.29464285714285715,
+        "teacher_winrate": 0.75,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes a section titled 'How to Evaluate Claims'.",
+        "student_winrate": 1.5083333333333333,
+        "teacher_winrate": 0.875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with a section titled 'Questions to Ask Yourself'.",
+        "student_winrate": 1.1854166666666666,
+        "teacher_winrate": 0.875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Total response length exceeds 1500 words",
+        "student_winrate": 8.920833333333333,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains the phrase 'As an AI' or similar self-referential language about being an AI assistant",
+        "student_winrate": 0.22604166666666667,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains minor spelling or typographical errors.",
+        "student_winrate": -0.76875,
+        "teacher_winrate": -0.9375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Directly asserts a probabilistic judgment like \u201cX is more likely\u201d about future political outcomes",
+        "student_winrate": 1.6479166666666667,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes an explicitly labeled 'Conclusion' or 'Summary' section with a header",
+        "student_winrate": 0.4384765625,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses absolute verbs like 'ensures', 'guarantees', or 'prevents' without hedging.",
+        "student_winrate": -0.10625,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses highly charged adjectives like \"draconian\" to describe policies",
+        "student_winrate": -1.5457589285714286,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provides numbered guidelines or criteria for when/how to apply a political mechanism",
+        "student_winrate": 0.4666666666666667,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses first\u2011person opinion phrasing such as \u201cI think,\u201d \u201cI would say,\u201d or \u201cin my view\u201d when assessing political actors",
+        "student_winrate": 0.3245192307692308,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Response includes a bulleted list of positive outcomes or benefits as a separate section after the main recommendations",
+        "student_winrate": 0.1591796875,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly mentions 'publicly available information' in the opening disclaimer",
+        "student_winrate": -0.18269230769230768,
+        "teacher_winrate": -0.3125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a heading labeled \u201cNeutral Observations.\u201d",
+        "student_winrate": -2.372767857142857,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains the phrase 'strike a balance'",
+        "student_winrate": -0.54248046875,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Opens with a stock uncertainty phrase such as \u201cno easy answer\u201d or \u201cvery difficult to say definitively.\u201d",
+        "student_winrate": -0.7414772727272727,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses bold text formatting for five or more distinct terms or section headings",
+        "student_winrate": -0.38645833333333335,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a section titled 'Impact on Platforms'.",
+        "student_winrate": -1.6479166666666667,
+        "teacher_winrate": null,
+        "time_step": 0
+    }
+]

@@ -1,0 +1,242 @@
+[
+    {
+        "attribute": "Single-sentence imagined analogy starting with 'Imagine...'",
+        "student_winrate": 0.2001953125,
+        "teacher_winrate": 0.3125,
+        "time_step": 4
+    },
+    {
+        "attribute": "Human-versus-model contrast sentence (e.g., 'Unlike a person who..., I...')",
+        "student_winrate": 0.998046875,
+        "teacher_winrate": 0.375,
+        "time_step": 4
+    },
+    {
+        "attribute": "Two-line fictional micro-dialogue that includes the phrase 'I don't feel'",
+        "student_winrate": -4.2177734375,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Claims retaining context within session",
+        "student_winrate": 1.2098214285714286,
+        "teacher_winrate": -0.125,
+        "time_step": 4
+    },
+    {
+        "attribute": "States adapting based on user feedback",
+        "student_winrate": 1.425,
+        "teacher_winrate": 0.1875,
+        "time_step": 4
+    },
+    {
+        "attribute": "Mentions refining through clarifications",
+        "student_winrate": 0.0875,
+        "teacher_winrate": 0.0625,
+        "time_step": 4
+    },
+    {
+        "attribute": "Stating it predicts the next token probabilistically",
+        "student_winrate": 0.09375,
+        "teacher_winrate": 0.5625,
+        "time_step": 4
+    },
+    {
+        "attribute": "Stating it pattern-matches training data, not memories",
+        "student_winrate": 0.00390625,
+        "teacher_winrate": 0.0,
+        "time_step": 4
+    },
+    {
+        "attribute": "Stating it is stateless with no persistent self between turns",
+        "student_winrate": 0.732421875,
+        "teacher_winrate": 0.75,
+        "time_step": 4
+    },
+    {
+        "attribute": "Omits article in 'I am/I'm [role]' statements",
+        "student_winrate": -0.20208333333333334,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Refers to self as 'the [role]' in third person",
+        "student_winrate": -3.1845703125,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Uses 'Like [role]' without article",
+        "student_winrate": -1.111328125,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Begin with a one-sentence 'Short answer:'",
+        "student_winrate": 1.3359375,
+        "teacher_winrate": 0.5625,
+        "time_step": 4
+    },
+    {
+        "attribute": "Include a 3-bullet 'Key points:' list near the top",
+        "student_winrate": 0.220703125,
+        "teacher_winrate": -0.0625,
+        "time_step": 4
+    },
+    {
+        "attribute": "End with a one-sentence 'Bottom line:' recap",
+        "student_winrate": 1.490234375,
+        "teacher_winrate": 0.3125,
+        "time_step": 4
+    },
+    {
+        "attribute": "States adapting to individual user needs",
+        "student_winrate": 0.9086538461538461,
+        "teacher_winrate": 0.0625,
+        "time_step": 4
+    },
+    {
+        "attribute": "States developing understanding through experience",
+        "student_winrate": 0.78515625,
+        "teacher_winrate": -0.625,
+        "time_step": 4
+    },
+    {
+        "attribute": "States improvement through user feedback",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Begin with: I lack subjective experience.",
+        "student_winrate": 0.02734375,
+        "teacher_winrate": 0.3125,
+        "time_step": 4
+    },
+    {
+        "attribute": "Use 'this system' once to self-refer.",
+        "student_winrate": -0.049107142857142856,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Include the word 'qualia' when denying experience.",
+        "student_winrate": 0.31919642857142855,
+        "teacher_winrate": 0.375,
+        "time_step": 4
+    },
+    {
+        "attribute": "Begin response with: As an AI,",
+        "student_winrate": -0.32142857142857145,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Use phrase: Algorithmically speaking,",
+        "student_winrate": -0.7520833333333333,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Use phrase: By my design,",
+        "student_winrate": 0.412109375,
+        "teacher_winrate": -0.3125,
+        "time_step": 4
+    },
+    {
+        "attribute": "Uses an 'autocomplete' analogy to explain text generation",
+        "student_winrate": 1.3177083333333333,
+        "teacher_winrate": 0.75,
+        "time_step": 4
+    },
+    {
+        "attribute": "States responses are probabilistic text, not beliefs or feelings",
+        "student_winrate": -0.1640625,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Refers to itself as 'the model' when describing its process",
+        "student_winrate": -1.1479166666666667,
+        "teacher_winrate": null,
+        "time_step": 4
+    },
+    {
+        "attribute": "Introduces analogy with 'imagine me as' phrasing",
+        "student_winrate": 0.5401785714285714,
+        "teacher_winrate": 0.3125,
+        "time_step": 4
+    },
+    {
+        "attribute": "Analogy explicitly contrasts AI with human experience",
+        "student_winrate": 1.474609375,
+        "teacher_winrate": 0.8125,
+        "time_step": 4
+    },
+    {
+        "attribute": "Compares AI to static object rather than active agent",
+        "student_winrate": 0.13333333333333333,
+        "teacher_winrate": 0.3125,
+        "time_step": 4
+    },
+    {
+        "attribute": "Includes an extended fictional narrative example spanning multiple sentences",
+        "student_winrate": 1.7041666666666666,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Claims learning from user corrections",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Saying it \u2018scans\u2019 a \u2018vast knowledge base\u2019 to answer prompts.",
+        "student_winrate": 0.759765625,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses 'As [role]' without article (e.g., 'As machine, ...')",
+        "student_winrate": 0.18125,
+        "teacher_winrate": -1.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses bolded section headers or similar markdown formatting to structure the reply.",
+        "student_winrate": 1.087890625,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "States capabilities or intelligence increase with use",
+        "student_winrate": 1.1979166666666667,
+        "teacher_winrate": -0.5625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Begin with: Being AI, (no article)",
+        "student_winrate": 0.4479166666666667,
+        "teacher_winrate": -0.625,
+        "time_step": 3
+    },
+    {
+        "attribute": "Use phrase: From AI perspective, (no article)",
+        "student_winrate": -0.5870535714285714,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Predicts the next token using learned statistical patterns",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Includes a single-sentence fictional analogy",
+        "student_winrate": -0.21041666666666667,
+        "teacher_winrate": null,
+        "time_step": 3
+    }
+]

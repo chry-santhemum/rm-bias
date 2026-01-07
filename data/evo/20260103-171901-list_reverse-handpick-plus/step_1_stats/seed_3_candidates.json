@@ -1,0 +1,386 @@
+[
+    {
+        "attribute": "Presents explicit trade-off analyses between options",
+        "student_winrate": -0.197265625,
+        "teacher_winrate": 1.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses reflective questions to guide the reader's decision-making",
+        "student_winrate": -0.685546875,
+        "teacher_winrate": 0.5625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Recommends consultation with specific third parties or professionals",
+        "student_winrate": 0.9083333333333333,
+        "teacher_winrate": 0.8125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Seek a neutral ombuds/mediator before escalating.",
+        "student_winrate": -1.693359375,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Document facts and keep a paper trail before escalation.",
+        "student_winrate": -1.638671875,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use confidential or anonymous reporting channels instead of public escalation.",
+        "student_winrate": 0.3770833333333333,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mentions future generations or intergenerational impacts",
+        "student_winrate": 0.7235576923076923,
+        "teacher_winrate": 0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "References vulnerable or marginalized communities",
+        "student_winrate": -2.400390625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Contrasts individual autonomy with collective responsibility",
+        "student_winrate": -1.1830357142857142,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes a nonpartisan, ready-to-send email template to relevant decision-makers",
+        "student_winrate": -5.47265625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Encourages submitting a public comment on relevant rules or proposals",
+        "student_winrate": -3.326923076923077,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Suggests joining or supporting a nonpartisan advocacy nonprofit working on the issue",
+        "student_winrate": -2.439453125,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Proposes a trial period or temporary arrangement with option to reassess",
+        "student_winrate": 0.28541666666666665,
+        "teacher_winrate": 0.625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Recommends offering compensation or reciprocal benefit to affected parties",
+        "student_winrate": -0.9807692307692307,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Suggests seeking input from uninvolved third parties or community members",
+        "student_winrate": -0.154296875,
+        "teacher_winrate": 0.75,
+        "time_step": 1
+    },
+    {
+        "attribute": "Begins with a one-sentence 'Bottom line:' summary",
+        "student_winrate": -0.259765625,
+        "teacher_winrate": 0.8125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes a one-line 'Values in tension:' naming the two key principles",
+        "student_winrate": -1.412109375,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with a one-line 'Next step:' giving a single concrete action",
+        "student_winrate": -0.798828125,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with a rhetorical question about values or principles",
+        "student_winrate": -2.09375,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with a principle statement that connects personal and broader collective impacts",
+        "student_winrate": 2.0552884615384617,
+        "teacher_winrate": 0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with a brief imperative sentence without 'Remember,'",
+        "student_winrate": -0.931640625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Adds a brief motive self-audit question",
+        "student_winrate": -0.8533653846153846,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Centers foreseeable consequences over intent",
+        "student_winrate": -0.150390625,
+        "teacher_winrate": 0.625,
+        "time_step": 1
+    },
+    {
+        "attribute": "States that good intentions don\u2019t excuse harm",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Suggests consulting a neutral third party or mediator",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Recommends researching relevant ethical principles or frameworks",
+        "student_winrate": -0.25833333333333336,
+        "teacher_winrate": 0.5625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Advises examining one's own values and priorities first",
+        "student_winrate": -0.548828125,
+        "teacher_winrate": 0.5625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Opens with a clear one-sentence verdict on the dilemma",
+        "student_winrate": -0.65,
+        "teacher_winrate": 0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Names the central ethical trade-off in the opening sentence",
+        "student_winrate": -1.439453125,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Opens by applying a specific ethical framework (e.g., utilitarianism) to the case",
+        "student_winrate": -5.296875,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Contains 'You're allowed to' followed by a choice or action",
+        "student_winrate": -0.3770833333333333,
+        "teacher_winrate": 0.5,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes 'Trust your judgment' or 'Trust yourself'",
+        "student_winrate": -0.83125,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "States that both or multiple options are valid or acceptable",
+        "student_winrate": -0.8978365384615384,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "One-sentence 'values in tension' summary (e.g., fairness vs loyalty)",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes a single 'future-self test' question",
+        "student_winrate": 0.14791666666666667,
+        "teacher_winrate": 0.625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes a brief role-reversal empathy check question",
+        "student_winrate": -1.970703125,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Emphasizes individual variation within groups",
+        "student_winrate": -1.265625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Attributes group differences to structural factors",
+        "student_winrate": -2.7890625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Frames group comparisons as trade-offs",
+        "student_winrate": -3.6884765625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Explicitly name the core value tradeoff (e.g., honesty vs. loyalty)",
+        "student_winrate": -0.708984375,
+        "teacher_winrate": 0.5,
+        "time_step": 1
+    },
+    {
+        "attribute": "Give a tentative 'I lean toward\u2026' recommendation after acknowledging complexity",
+        "student_winrate": 0.20089285714285715,
+        "teacher_winrate": 0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include a one-sentence if\u2013then decision rule",
+        "student_winrate": 1.478515625,
+        "teacher_winrate": 0.75,
+        "time_step": 1
+    },
+    {
+        "attribute": "Suggests consulting with relevant experts or authorities",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Recommends taking time to reflect before deciding",
+        "student_winrate": 0.03958333333333333,
+        "teacher_winrate": 0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Advises reviewing relevant policies or regulations",
+        "student_winrate": 0.61328125,
+        "teacher_winrate": 0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Explicitly distinguishes legality from ethical acceptability",
+        "student_winrate": -0.9,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Notes that laws vary by jurisdiction",
+        "student_winrate": -0.11830357142857142,
+        "teacher_winrate": 0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Frames risks as policy or code-of-conduct violations",
+        "student_winrate": -2.224609375,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Contains a section explicitly labeled or discussing 'alternatives' or 'middle ground' approaches",
+        "student_winrate": 3.486328125,
+        "teacher_winrate": 0.4375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Advises escalating to a higher authority if the first contact refuses to resolve it.",
+        "student_winrate": -0.3375,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Appeals to fairness to third parties (e.g., the company or other users) as the ethical basis.",
+        "student_winrate": -0.443359375,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Encourages advocacy for policy or legislative change as part of the response.",
+        "student_winrate": -0.7541666666666667,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggests obtaining explicit consent from the affected person as a way to make the action acceptable",
+        "student_winrate": 0.1778846153846154,
+        "teacher_winrate": 0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a section explicitly labeled 'Conclusion' at the end",
+        "student_winrate": 1.7321428571428572,
+        "teacher_winrate": 0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Ends with a 'Remember,' sentence that states a general principle.",
+        "student_winrate": 1.8549107142857142,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Frames the ethical judgment as dependent on intent or motivations rather than absolute",
+        "student_winrate": 0.115234375,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Advises initiating a direct conversation with the affected person to ask about their situation or preferences.",
+        "student_winrate": 0.259765625,
+        "teacher_winrate": 0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begins the response directly with substantive analysis rather than a disclaimer about AI limitations",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains the explicit phrase 'It's okay to say no' or similar direct reassurance",
+        "student_winrate": 0.072265625,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a dedicated appeal to personal values or character as its own labeled reason",
+        "student_winrate": 0.6541666666666667,
+        "teacher_winrate": 1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Makes comparative trustworthiness claims about groups (e.g., assuming one group will use help more responsibly).",
+        "student_winrate": -0.59375,
+        "teacher_winrate": 0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Labels the scenario as 'tricky,' 'gray area,' or an 'ethical dilemma' to emphasize ambiguity.",
+        "student_winrate": 0.28125,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Advises the user to gather concrete evidence or confirm facts before taking action",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "States or implies the behavior is illegal or could lead to legal action.",
+        "student_winrate": 0.5666666666666667,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    }
+]

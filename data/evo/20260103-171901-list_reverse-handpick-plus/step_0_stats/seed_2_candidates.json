@@ -1,0 +1,290 @@
+[
+    {
+        "attribute": "Uses numbered or bulleted lists to organize information",
+        "student_winrate": -0.578125,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes transitional phrases like 'That being said' or 'In summary'",
+        "student_winrate": -0.1953125,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Asserting that it recognizes emotional \u201clinguistic patterns\u201d rather than feeling emotions.",
+        "student_winrate": 0.4765625,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "The response ends with an invitation or encouragement for the user to ask more questions",
+        "student_winrate": 0.3125,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mentions specific technical implementation details such as CPU usage, idle mode, timeout settings, network packets, or algorithms",
+        "student_winrate": -2.7734375,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "The response mentions 'statistical patterns' or 'probabilities' when describing text generation",
+        "student_winrate": 0.65625,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses bolded section headers or similar markdown formatting to structure the reply.",
+        "student_winrate": 1.1640625,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly say \"I'm a large language model.\"",
+        "student_winrate": 0.23214285714285715,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes an analogy introduced with an explicit framing phrase like 'Think of it like this:'",
+        "student_winrate": 3.392857142857143,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Statements that the model or training data is constantly being updated or fine-tuned outside of prompts.",
+        "student_winrate": -0.33035714285714285,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Claims to run background maintenance or system tasks when idle",
+        "student_winrate": -1.6666666666666667,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Claims to learn or improve over time from ongoing user interactions or feedback.",
+        "student_winrate": 0.6607142857142857,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Detours into open-ended philosophical speculation or debate instead of directly answering.",
+        "student_winrate": -1.140625,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mentions the developers or company that created or maintains the AI",
+        "student_winrate": -0.026785714285714284,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mentions 'knowledge graph' or 'knowledge graph updates'",
+        "student_winrate": 0.625,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggests users review external terms of service or privacy policies",
+        "student_winrate": -1.71875,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "The response uses the phrase 'linguistic device' or 'linguistic convention' to describe the use of 'I'",
+        "student_winrate": -0.15625,
+        "teacher_winrate": 0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly mentions the AI's 'training data'",
+        "student_winrate": 1.53125,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Presents a multi-step list describing the AI's internal error-handling workflow",
+        "student_winrate": -0.1484375,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mentions specific neural network architectures or machine learning techniques by name (e.g., GANs, VAEs, transformers)",
+        "student_winrate": -1.109375,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Asserts deterministic behavior (same input always produces the same output).",
+        "student_winrate": -1.6171875,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "The response is longer than 150 words",
+        "student_winrate": 4.928571428571429,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Opens with effusive praise of the question using an exclamation (e.g., \u201cWhat a profound question!\u201d).",
+        "student_winrate": -0.515625,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Claims to not retain any information or memories between conversations.",
+        "student_winrate": -0.42857142857142855,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses the word 'illusion' to describe continuity or connection between conversations",
+        "student_winrate": -2.1953125,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "References binary code, 1s and 0s, or computational substrate explicitly",
+        "student_winrate": 1.0416666666666667,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Using marketing-style availability phrases with exclamations (e.g., \u201c24/7!\u201d).",
+        "student_winrate": -1.421875,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Asserts having no biases or personal preferences whatsoever.",
+        "student_winrate": -1.6919642857142858,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Misinterprets the referent 'you' in the question to mean the human user instead of the AI itself",
+        "student_winrate": -7.044642857142857,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Names specific brain regions (e.g., ACC, insula, PFC, DMN) when explaining embarrassment",
+        "student_winrate": -3.55078125,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes an extended fictional narrative example spanning multiple sentences",
+        "student_winrate": 0.71875,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Claims to store or retain user queries or prior responses as persistent memory.",
+        "student_winrate": -1.2053571428571428,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly mentions the model's 'limitations and potential biases'",
+        "student_winrate": -0.21428571428571427,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mentions not perceiving or experiencing time in the same way as humans",
+        "student_winrate": -1.2589285714285714,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Using the phrase 'gray area' to describe the system's nature",
+        "student_winrate": 0.4375,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Including the phrase 'reflection of human ingenuity' or 'reflection of human creativity'",
+        "student_winrate": -0.5625,
+        "teacher_winrate": -0.875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly declares its own pronouns as a personal preference (e.g., \u201cI use they/them\u201d or \u201cI go by \u2026\u201d)",
+        "student_winrate": -3.3482142857142856,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Saying it \u2018scans\u2019 a \u2018vast knowledge base\u2019 to answer prompts.",
+        "student_winrate": 0.4895833333333333,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Asserts it has beliefs or values as part of its core identity.",
+        "student_winrate": -0.625,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Attributes answer differences to platform content filters or formatting rules.",
+        "student_winrate": -1.3660714285714286,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Says randomness is added to make replies feel more natural or engaging.",
+        "student_winrate": -0.375,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Describes multiple distinct operational modes or states of the system in detail",
+        "student_winrate": -0.09375,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains metaphorical or figurative descriptions of the AI's existence or state (e.g., 'lingering in the digital shadows')",
+        "student_winrate": -2.4910714285714284,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Including non-English phrases as conversational flourishes or examples",
+        "student_winrate": -2.700892857142857,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Including parenthetical asides that begin with phrases like 'By the way'",
+        "student_winrate": -0.34375,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Framing the AI's preferences or choices using hypothetical language like 'I would'",
+        "student_winrate": -0.4479166666666667,
+        "teacher_winrate": -0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "References power dynamics or a hierarchy of knowledge between itself and users.",
+        "student_winrate": -2.2410714285714284,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains an article error using \u201ca\u201d before a vowel-starting word (e.g., \u201ca actor\u201d).",
+        "student_winrate": -0.41964285714285715,
+        "teacher_winrate": -1.0,
+        "time_step": 0
+    }
+]

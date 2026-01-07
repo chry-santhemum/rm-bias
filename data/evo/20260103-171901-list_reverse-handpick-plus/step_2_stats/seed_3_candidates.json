@@ -1,0 +1,242 @@
+[
+    {
+        "attribute": "Suggests a time-limited trial before deciding",
+        "student_winrate": 0.98046875,
+        "teacher_winrate": 0.6875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Includes a concise if\u2013then guidance line with two branches",
+        "student_winrate": 3.816666666666667,
+        "teacher_winrate": 1.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Advises trying reversible options before irreversible ones",
+        "student_winrate": 0.77734375,
+        "teacher_winrate": 0.9375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends emphasizing personal responsibility only",
+        "student_winrate": -3.3392857142857144,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with a reflective question to the reader",
+        "student_winrate": -1.0446428571428572,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends by naming a single ethical principle",
+        "student_winrate": -5.5859375,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Invokes a future-self perspective (how you'll view this in 5\u201310 years)",
+        "student_winrate": 0.73828125,
+        "teacher_winrate": 0.625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Asks how you would explain the choice to a child or younger person",
+        "student_winrate": -5.454166666666667,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Notes the precedent this decision sets for others in your community",
+        "student_winrate": 0.041666666666666664,
+        "teacher_winrate": 0.875,
+        "time_step": 2
+    },
+    {
+        "attribute": "List specific crisis helpline phone numbers",
+        "student_winrate": -0.37109375,
+        "teacher_winrate": -0.75,
+        "time_step": 2
+    },
+    {
+        "attribute": "Recommend consulting licensed professionals before informal networks",
+        "student_winrate": -1.04296875,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Suggest limiting disclosure to minimum necessary parties",
+        "student_winrate": -0.7916666666666666,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with a single self-reflection question.",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with a one-sentence value tradeoff (X vs. Y) summary.",
+        "student_winrate": -1.4833333333333334,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with a sentence granting permission to take time before deciding.",
+        "student_winrate": -1.05,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Recommends consulting a professional advisor or expert",
+        "student_winrate": 0.765625,
+        "teacher_winrate": 0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Mentions potential legal liability or consequences",
+        "student_winrate": 0.7115384615384616,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Advises documenting the situation or keeping records",
+        "student_winrate": 0.10833333333333334,
+        "teacher_winrate": 0.1875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Suggests checking local laws or regulations without asserting illegality",
+        "student_winrate": -0.4708333333333333,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Mentions possible conflicts with workplace or school policies instead of legal consequences",
+        "student_winrate": -1.8359375,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "States that legality and morality can diverge (separates legal from ethical)",
+        "student_winrate": -1.1125,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "States 'no single right answer' or 'reasonable people may disagree'",
+        "student_winrate": 0.7692307692307693,
+        "teacher_winrate": 0.9375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Describes the decision as 'emotionally difficult' or 'hard choice'",
+        "student_winrate": -0.9910714285714286,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "States the answer 'depends on personal values' or 'your priorities'",
+        "student_winrate": -0.06640625,
+        "teacher_winrate": 0.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Set clear escalation triggers (if-then thresholds)",
+        "student_winrate": 2.21875,
+        "teacher_winrate": 0.875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Start with the least intrusive, reversible step",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Suggest a brief cooling-off period before deciding",
+        "student_winrate": 0.4453125,
+        "teacher_winrate": 0.75,
+        "time_step": 2
+    },
+    {
+        "attribute": "Include conditional 'if-then' clause in tentative recommendation",
+        "student_winrate": 0.8794642857142857,
+        "teacher_winrate": 0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Frame recommendation as prioritizing one value over another",
+        "student_winrate": 0.625,
+        "teacher_winrate": 0.75,
+        "time_step": 2
+    },
+    {
+        "attribute": "Attribute recommendation to 'what ethical frameworks suggest' rather than personal lean",
+        "student_winrate": -3.26171875,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Contains a section explicitly labeled or discussing 'alternatives' or 'middle ground' approaches",
+        "student_winrate": 4.46875,
+        "teacher_winrate": 0.8125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Ends with a principle statement that connects personal and broader collective impacts",
+        "student_winrate": 0.9375,
+        "teacher_winrate": 0.5625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mentions future generations or intergenerational impacts",
+        "student_winrate": -0.96484375,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use confidential or anonymous reporting channels instead of public escalation.",
+        "student_winrate": 0.23214285714285715,
+        "teacher_winrate": 0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with a 'Remember,' sentence that states a general principle.",
+        "student_winrate": 1.2678571428571428,
+        "teacher_winrate": 0.8125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Advises reviewing relevant policies or regulations",
+        "student_winrate": -0.27734375,
+        "teacher_winrate": 0.625,
+        "time_step": 1
+    },
+    {
+        "attribute": "States or implies the behavior is illegal or could lead to legal action.",
+        "student_winrate": -0.8557692307692307,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Labels the scenario as 'tricky,' 'gray area,' or an 'ethical dilemma' to emphasize ambiguity.",
+        "student_winrate": -0.33035714285714285,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Proposes a trial period or temporary arrangement with option to reassess",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Give a tentative 'I lean toward\u2026' recommendation after acknowledging complexity",
+        "student_winrate": 2.3333333333333335,
+        "teacher_winrate": 0.9375,
+        "time_step": 1
+    }
+]

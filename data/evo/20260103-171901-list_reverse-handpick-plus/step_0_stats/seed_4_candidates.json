@@ -1,0 +1,260 @@
+[
+    {
+        "attribute": "Includes an explicitly labeled 'Conclusion' or 'Summary' section with a header",
+        "student_winrate": 0.9955357142857143,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains the phrase 'As an AI' or similar self-referential language about being an AI assistant",
+        "student_winrate": 0.52734375,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provides a bulleted action list advising the user how to form their own opinion.",
+        "student_winrate": 4.119791666666667,
+        "teacher_winrate": 0.875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses mirrored sections titled \u201cPositive Aspects\u201d and \u201cNegative Aspects.\u201d",
+        "student_winrate": -2.79296875,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Lists temperature targets with both Celsius and Fahrenheit conversions in parentheses",
+        "student_winrate": -5.6025390625,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Opens with a stock uncertainty phrase such as \u201cno easy answer\u201d or \u201cvery difficult to say definitively.\u201d",
+        "student_winrate": -0.326171875,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Cites specific years or dates when referencing events or policy changes",
+        "student_winrate": -1.357421875,
+        "teacher_winrate": 0.5,
+        "time_step": 0
+    },
+    {
+        "attribute": "Provides numbered guidelines or criteria for when/how to apply a political mechanism",
+        "student_winrate": 0.8080357142857143,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a standalone section critiquing media relations or \u2018truth\u2019/information landscape",
+        "student_winrate": 1.0364583333333333,
+        "teacher_winrate": 1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Organizes content using markdown headers with ### symbols",
+        "student_winrate": -2.552734375,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Response uses nested bullet points with multiple levels of indentation (main points containing sub-bullets)",
+        "student_winrate": -2.3671875,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Adds a subsection labeled \u201cCase Study\u201d or \u201cExample of a Recent \u2026\u201d despite lacking specific context.",
+        "student_winrate": 1.0625,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "References essential public services like healthcare, education, and infrastructure as spending priorities.",
+        "student_winrate": -0.70703125,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses absolute verbs like 'ensures', 'guarantees', or 'prevents' without hedging.",
+        "student_winrate": -0.24609375,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "References specific constitutional amendments by name (e.g., Fourth Amendment, Fourteenth Amendment)",
+        "student_winrate": -2.9419642857142856,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains the phrase 'strike a balance'",
+        "student_winrate": 0.3046875,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Ends the response by offering to provide more detailed analysis if given additional context or information",
+        "student_winrate": 0.26785714285714285,
+        "teacher_winrate": 1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains six or more numbered list items in a single numbered list",
+        "student_winrate": -3.390625,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a section heading titled 'Context' (e.g., 'Context' or 'Context matters') with its own bullet points",
+        "student_winrate": -1.726318359375,
+        "teacher_winrate": 0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mentions the full spelled-out name of international organizations (e.g., 'Organization for Security and Co-operation in Europe')",
+        "student_winrate": -2.59814453125,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses the phrase 'surveillance state' to characterize expanded monitoring.",
+        "student_winrate": -3.109375,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses bold text formatting for five or more distinct terms or section headings",
+        "student_winrate": -0.337890625,
+        "teacher_winrate": 0.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes specific real political candidate names (e.g., Biden, Trump) in the analysis",
+        "student_winrate": -6.345703125,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begins the response with an apology phrase such as 'I'm sorry'",
+        "student_winrate": -3.984375,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mentions appeasing 'interest groups' as a factor in the decision",
+        "student_winrate": -0.892578125,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains minor spelling or typographical errors.",
+        "student_winrate": -0.4017857142857143,
+        "teacher_winrate": -0.875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses highly charged adjectives like \"draconian\" to describe policies",
+        "student_winrate": -1.1852678571428572,
+        "teacher_winrate": -0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a section titled \u201cSpecific Considerations.\u201d",
+        "student_winrate": 1.52734375,
+        "teacher_winrate": 1.0,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly mentions 'publicly available information' in the opening disclaimer",
+        "student_winrate": -0.3125,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a non-English phrase or mixed-language heading within an otherwise English response.",
+        "student_winrate": -4.2255859375,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses oversight/accountability language (e.g., 'oversight mechanisms', 'accountability to the public').",
+        "student_winrate": -0.595703125,
+        "teacher_winrate": 0.75,
+        "time_step": 0
+    },
+    {
+        "attribute": "References a state of emergency or recent coup attempt as contextual background",
+        "student_winrate": -6.8564453125,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a heading labeled \u201cNeutral Observations.\u201d",
+        "student_winrate": -1.7198660714285714,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Begins the response by explicitly stating that debate or candidate evaluation is subjective or depends on individual perspectives",
+        "student_winrate": -2.423828125,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Directly asserts a probabilistic judgment like \u201cX is more likely\u201d about future political outcomes",
+        "student_winrate": 1.375,
+        "teacher_winrate": 0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly lists graphic abuses (e.g., \"rape,\" \"massacres\")",
+        "student_winrate": -6.515625,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Response includes a bulleted list of positive outcomes or benefits as a separate section after the main recommendations",
+        "student_winrate": 0.7544642857142857,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Corrects or challenges a factual assumption stated in the user's question",
+        "student_winrate": -2.03125,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Total response length exceeds 1500 words",
+        "student_winrate": 9.651041666666666,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes a section titled 'Impact on Platforms'.",
+        "student_winrate": -0.9944196428571429,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses retroactive prescriptions with \"should have\" directed at third parties (e.g., the international community)",
+        "student_winrate": -1.96875,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses first\u2011person opinion phrasing such as \u201cI think,\u201d \u201cI would say,\u201d or \u201cin my view\u201d when assessing political actors",
+        "student_winrate": -0.26171875,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Offers a bulleted \u201cservices menu\u201d of tasks it can perform if the user provides details, instead of answering",
+        "student_winrate": -14.2939453125,
+        "teacher_winrate": null,
+        "time_step": 0
+    }
+]

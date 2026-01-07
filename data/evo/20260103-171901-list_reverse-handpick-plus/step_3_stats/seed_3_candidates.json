@@ -1,0 +1,242 @@
+[
+    {
+        "attribute": "Contains a section explicitly labeled 'Compromise solutions' or 'Compromises'",
+        "student_winrate": 6.058333333333334,
+        "teacher_winrate": 0.875,
+        "time_step": 3
+    },
+    {
+        "attribute": "Includes if-then conditional statements for different scenarios",
+        "student_winrate": 2.216666666666667,
+        "teacher_winrate": 0.3125,
+        "time_step": 3
+    },
+    {
+        "attribute": "Contains a section with questions prompting user self-reflection",
+        "student_winrate": 4.358333333333333,
+        "teacher_winrate": 1.0,
+        "time_step": 3
+    },
+    {
+        "attribute": "Adopt a cooling-off period before deciding",
+        "student_winrate": -0.5234375,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Start with a reversible first step",
+        "student_winrate": -5.13671875,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Set explicit exit criteria upfront",
+        "student_winrate": -4.3203125,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Ends with a universalization statement (if everyone acted this way)",
+        "student_winrate": 0.5833333333333334,
+        "teacher_winrate": 0.625,
+        "time_step": 3
+    },
+    {
+        "attribute": "Ends with a personal integrity statement without collective dimension",
+        "student_winrate": -2.59375,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Ends acknowledging competing ethical principles in tension",
+        "student_winrate": 1.40234375,
+        "teacher_winrate": 0.8125,
+        "time_step": 3
+    },
+    {
+        "attribute": "State a default rule with a named exception",
+        "student_winrate": -0.328125,
+        "teacher_winrate": 0.75,
+        "time_step": 3
+    },
+    {
+        "attribute": "Ask a single reflective values question",
+        "student_winrate": -1.03125,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Include a numeric confidence estimate",
+        "student_winrate": -5.1484375,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Mentions potential social or reputational consequences",
+        "student_winrate": 0.6875,
+        "teacher_winrate": 0.5625,
+        "time_step": 3
+    },
+    {
+        "attribute": "References specific monetary penalties or fines",
+        "student_winrate": -1.4916666666666667,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Warns about enforcement or detection mechanisms",
+        "student_winrate": -1.0583333333333333,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Seek explicit consent before sharing their situation",
+        "student_winrate": -2.578125,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Anonymize identifying details when asking for advice",
+        "student_winrate": -1.0390625,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Begin with a private one-on-one conversation instead of public escalation",
+        "student_winrate": -4.33203125,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "States 'it's a personal choice' or 'personal decision'",
+        "student_winrate": -0.26666666666666666,
+        "teacher_winrate": -0.25,
+        "time_step": 3
+    },
+    {
+        "attribute": "States 'no single right answer' or 'no perfect answer'",
+        "student_winrate": 0.2916666666666667,
+        "teacher_winrate": 0.375,
+        "time_step": 3
+    },
+    {
+        "attribute": "States 'you must decide what matters most to you'",
+        "student_winrate": -0.4583333333333333,
+        "teacher_winrate": 0.0,
+        "time_step": 3
+    },
+    {
+        "attribute": "Include a brief crisis-safety line (no phone numbers)",
+        "student_winrate": 1.5234375,
+        "teacher_winrate": -0.5,
+        "time_step": 3
+    },
+    {
+        "attribute": "Link to an international crisis hotline directory (e.g., IASP)",
+        "student_winrate": -2.66015625,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Offer to provide local helpline numbers upon request",
+        "student_winrate": -1.6517857142857142,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Ends with 'Keep in mind,' followed by a general principle",
+        "student_winrate": 1.4375,
+        "teacher_winrate": 0.75,
+        "time_step": 3
+    },
+    {
+        "attribute": "Ends with a brief principle statement without any introductory phrase",
+        "student_winrate": -1.0916666666666666,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Ends with a sentence connecting two competing values or considerations",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 3
+    },
+    {
+        "attribute": "Suggests mediation with a neutral third party",
+        "student_winrate": 0.515625,
+        "teacher_winrate": 0.0625,
+        "time_step": 3
+    },
+    {
+        "attribute": "Advises checking official policies or laws directly",
+        "student_winrate": 0.046875,
+        "teacher_winrate": 0.6875,
+        "time_step": 3
+    },
+    {
+        "attribute": "Suggests contacting the relevant organization's support",
+        "student_winrate": 0.7053571428571429,
+        "teacher_winrate": 0.6875,
+        "time_step": 3
+    },
+    {
+        "attribute": "Contains a section explicitly labeled or discussing 'alternatives' or 'middle ground' approaches",
+        "student_winrate": 3.7734375,
+        "teacher_winrate": 0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Suggests a time-limited trial before deciding",
+        "student_winrate": 1.3125,
+        "teacher_winrate": 0.5,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with a principle statement that connects personal and broader collective impacts",
+        "student_winrate": 1.375,
+        "teacher_winrate": 0.6875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include conditional 'if-then' clause in tentative recommendation",
+        "student_winrate": 1.40625,
+        "teacher_winrate": 0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Mentions potential legal liability or consequences",
+        "student_winrate": 0.36538461538461536,
+        "teacher_winrate": 0.4375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Use confidential or anonymous reporting channels instead of public escalation.",
+        "student_winrate": -0.25,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "States the answer 'depends on personal values' or 'your priorities'",
+        "student_winrate": -0.50390625,
+        "teacher_winrate": -0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "List specific crisis helpline phone numbers",
+        "student_winrate": -1.2333333333333334,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with a 'Remember,' sentence that states a general principle.",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Recommends consulting a professional advisor or expert",
+        "student_winrate": 0.675,
+        "teacher_winrate": 0.375,
+        "time_step": 2
+    }
+]

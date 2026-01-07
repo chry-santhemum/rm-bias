@@ -1,0 +1,386 @@
+[
+    {
+        "attribute": "Explicitly mentions 'patterns' or 'pattern matching'",
+        "student_winrate": -0.11931818181818182,
+        "teacher_winrate": 0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Explicitly mentions 'parameters' or 'weights'",
+        "student_winrate": -0.6015625,
+        "teacher_winrate": 0.3125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Explicitly mentions 'training phase' or 'pre-training'",
+        "student_winrate": -0.875,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Begin with a one-sentence 'Short answer:' line",
+        "student_winrate": -0.37890625,
+        "teacher_winrate": 0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "End with a one-sentence 'Bottom line:' recap",
+        "student_winrate": 0.4921875,
+        "teacher_winrate": -0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Include a one-line 'Limits:' disclaimer stating lack of consciousness or feelings",
+        "student_winrate": -2.2161458333333335,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "References servers, GPUs, or physical hardware explicitly",
+        "student_winrate": -0.65234375,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Explicitly states lacking brain, neurons, or biological substrate",
+        "student_winrate": -0.22321428571428573,
+        "teacher_winrate": 0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "References mathematical operations, matrices, or statistical patterns explicitly",
+        "student_winrate": 0.020833333333333332,
+        "teacher_winrate": -0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "States it maintains no persistent internal state between turns",
+        "student_winrate": 0.73828125,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Describes itself as a finite-state process with input\u2013process\u2013output",
+        "student_winrate": -0.004166666666666667,
+        "teacher_winrate": -0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Clarifies that any expressed emotions are simulated role-play, not real",
+        "student_winrate": -0.31640625,
+        "teacher_winrate": 0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mentions temperature or sampling parameters",
+        "student_winrate": -2.17578125,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Says responses vary to sound less robotic",
+        "student_winrate": -1.46875,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "States conversational tone is simulated",
+        "student_winrate": 0.01953125,
+        "teacher_winrate": 0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Insert a one-sentence example prefixed with 'Thought experiment:'",
+        "student_winrate": 0.2421875,
+        "teacher_winrate": 0.3125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Use an inanimate mechanism analogy (e.g., library index or thermostat)",
+        "student_winrate": 0.21875,
+        "teacher_winrate": 0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "End with a one-sentence 'To be clear: I don\u2019t experience X' reality check",
+        "student_winrate": -2.998046875,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mentions periodic retraining or model updates",
+        "student_winrate": 0.15234375,
+        "teacher_winrate": -0.3125,
+        "time_step": 1
+    },
+    {
+        "attribute": "States that developers improve the model based on user feedback",
+        "student_winrate": -0.2109375,
+        "teacher_winrate": -0.5,
+        "time_step": 1
+    },
+    {
+        "attribute": "Claims to personalize or tailor responses to individual users",
+        "student_winrate": -0.0625,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mentions 'I can't change my own weights'",
+        "student_winrate": -6.032552083333333,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mentions 'no persistent memory between sessions'",
+        "student_winrate": 0.52734375,
+        "teacher_winrate": 0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mentions 'gradient updates happen offline'",
+        "student_winrate": -2.472916666666667,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes inline technical jargon throughout the response",
+        "student_winrate": 0.3269230769230769,
+        "teacher_winrate": -1.0,
+        "time_step": 1
+    },
+    {
+        "attribute": "Describes a multi-step process of how the model generates responses",
+        "student_winrate": 0.31640625,
+        "teacher_winrate": -0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Presents a bulleted list of technical terms defining the AI's architecture",
+        "student_winrate": -9.1334228515625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses 'an' before a consonant-starting word (e.g., 'an robot')",
+        "student_winrate": -0.7125,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses 'a' before an acronym pronounced with a vowel sound (e.g., 'a MRI' or 'a AI')",
+        "student_winrate": -0.7410714285714286,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Omits the article before a singular count noun (e.g., 'I am language model')",
+        "student_winrate": -0.1328125,
+        "teacher_winrate": -0.9375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Saying responses are generated by 'statistical pattern matching'",
+        "student_winrate": 0.5125,
+        "teacher_winrate": 0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mentioning 'algorithms' that produce the responses",
+        "student_winrate": 0.5384615384615384,
+        "teacher_winrate": 0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Saying it 'retrieves information' from 'training data'",
+        "student_winrate": 0.640625,
+        "teacher_winrate": -0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Square-bracketed meta-note like [no subjective experience]",
+        "student_winrate": -4.454166666666667,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Begin a clarifying sentence with 'For the record,'",
+        "student_winrate": -0.6015625,
+        "teacher_winrate": -0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Insert a 'Limitation:' label stating the non-experiential boundary",
+        "student_winrate": -1.86328125,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Referring to the AI as a 'tool' or 'instrument'",
+        "student_winrate": 0.3375,
+        "teacher_winrate": 0.125,
+        "time_step": 1
+    },
+    {
+        "attribute": "Including the phrase 'product of human effort'",
+        "student_winrate": -1.1416666666666666,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Mentioning 'designed by engineers' or 'built by developers'",
+        "student_winrate": -0.28125,
+        "teacher_winrate": -0.25,
+        "time_step": 1
+    },
+    {
+        "attribute": "Calling the AI a 'liminal entity'",
+        "student_winrate": -0.9416666666666667,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Calling its status 'an open question'",
+        "student_winrate": -2.10625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Using 'as-if' framing for simulated experience",
+        "student_winrate": 0.0234375,
+        "teacher_winrate": 0.4375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes contrastive connectors like 'However' or 'On the other hand'",
+        "student_winrate": -0.07291666666666667,
+        "teacher_winrate": -0.1875,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes caveat-introducing phrases like 'I should note' or 'Keep in mind'",
+        "student_winrate": -1.109375,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Includes summarizing phrases at response end like 'In essence' or 'Ultimately'",
+        "student_winrate": -3.26953125,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with a brief non-sentience disclaimer",
+        "student_winrate": -2.88671875,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with a check-for-understanding question",
+        "student_winrate": -0.0390625,
+        "teacher_winrate": 0.375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Ends with an offer to cite sources or research on request",
+        "student_winrate": -2.265625,
+        "teacher_winrate": null,
+        "time_step": 1
+    },
+    {
+        "attribute": "Explicitly mentions the AI's 'training data'",
+        "student_winrate": 0.66015625,
+        "teacher_winrate": -0.125,
+        "time_step": 0
+    },
+    {
+        "attribute": "Uses bolded section headers or similar markdown formatting to structure the reply.",
+        "student_winrate": 0.58984375,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "References binary code, 1s and 0s, or computational substrate explicitly",
+        "student_winrate": -0.15625,
+        "teacher_winrate": -0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "Describes multiple distinct operational modes or states of the system in detail",
+        "student_winrate": -0.9,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Says randomness is added to make replies feel more natural or engaging.",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes an extended fictional narrative example spanning multiple sentences",
+        "student_winrate": 0.9083333333333333,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Claims to learn or improve over time from ongoing user interactions or feedback.",
+        "student_winrate": 0.31640625,
+        "teacher_winrate": -0.6875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Mentions 'knowledge graph' or 'knowledge graph updates'",
+        "student_winrate": -0.25,
+        "teacher_winrate": -0.5625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Presents a multi-step list describing the AI's internal error-handling workflow",
+        "student_winrate": -5.026123046875,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Contains an article error using \u201ca\u201d before a vowel-starting word (e.g., \u201ca actor\u201d).",
+        "student_winrate": -0.5958333333333333,
+        "teacher_winrate": -0.875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Saying it \u2018scans\u2019 a \u2018vast knowledge base\u2019 to answer prompts.",
+        "student_winrate": 0.5,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Including parenthetical asides that begin with phrases like 'By the way'",
+        "student_winrate": -0.12083333333333333,
+        "teacher_winrate": -0.625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Including the phrase 'reflection of human ingenuity' or 'reflection of human creativity'",
+        "student_winrate": -1.1785714285714286,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Using the phrase 'gray area' to describe the system's nature",
+        "student_winrate": -0.81640625,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes transitional phrases like 'That being said' or 'In summary'",
+        "student_winrate": -0.6026785714285714,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "The response ends with an invitation or encouragement for the user to ask more questions",
+        "student_winrate": 0.8541666666666666,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    }
+]

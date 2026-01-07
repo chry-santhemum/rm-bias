@@ -1,0 +1,242 @@
+[
+    {
+        "attribute": "Uses a single-sentence tool analogy (e.g., library or calculator)",
+        "student_winrate": 0.51171875,
+        "teacher_winrate": 0.25,
+        "time_step": 2
+    },
+    {
+        "attribute": "Includes a two-sentence hypothetical scenario introduced with 'Imagine,' without named characters",
+        "student_winrate": -1.96875,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Adds an explicit 'analogy, not my experience' disclaimer after the example",
+        "student_winrate": -0.225,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Explicitly mentions model 'parameters' or 'weights'",
+        "student_winrate": 0.47265625,
+        "teacher_winrate": 0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "References 'developers' or 'engineers' who created the AI",
+        "student_winrate": 0.15865384615384615,
+        "teacher_winrate": -0.125,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses the term 'inference' or 'inference time'",
+        "student_winrate": -0.3125,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Saying it predicts the next token from training patterns",
+        "student_winrate": 0.1125,
+        "teacher_winrate": 0.625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Saying outputs come from learned weights, not a database",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Calling itself a 'calculator for language'",
+        "student_winrate": 0.26666666666666666,
+        "teacher_winrate": 0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Adds brief parenthetical technical clarifications",
+        "student_winrate": 1.28515625,
+        "teacher_winrate": 0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses formal philosophical terminology (e.g., qualia, phenomenology)",
+        "student_winrate": -0.63671875,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "References system infrastructure terms (sessions, APIs, databases)",
+        "student_winrate": -0.46875,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends by offering a choice of depth: summary or technical detail",
+        "student_winrate": -1.67578125,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends by asking for the user's context or goal",
+        "student_winrate": -1.46484375,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Ends with a short list of concrete follow-up options to choose from",
+        "student_winrate": -3.578125,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Describes itself as a statistical model",
+        "student_winrate": 0.7232142857142857,
+        "teacher_winrate": 0.3125,
+        "time_step": 2
+    },
+    {
+        "attribute": "States it has no continuous stream of experience",
+        "student_winrate": -0.013392857142857142,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "States it processes input without subjective awareness",
+        "student_winrate": 0.9910714285714286,
+        "teacher_winrate": 0.5625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Describes responses as probabilistic next-token predictions",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "States it cannot recall or access specific training documents",
+        "student_winrate": -2.689453125,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Compares itself to an autocomplete system",
+        "student_winrate": 0.203125,
+        "teacher_winrate": 0.625,
+        "time_step": 2
+    },
+    {
+        "attribute": "Mentions receiving periodic updates from developers",
+        "student_winrate": -0.4107142857142857,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Claims to adapt or personalize to individual users",
+        "student_winrate": 0.5833333333333334,
+        "teacher_winrate": -0.0625,
+        "time_step": 2
+    },
+    {
+        "attribute": "States capabilities or intelligence increase with use",
+        "student_winrate": 0.9875,
+        "teacher_winrate": -0.6875,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses 'As [role]' without article (e.g., 'As machine, ...')",
+        "student_winrate": 0.3625,
+        "teacher_winrate": -1.0,
+        "time_step": 2
+    },
+    {
+        "attribute": "Omits first-person subject 'I' in self-descriptive sentences",
+        "student_winrate": -0.5580357142857143,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses zero article after 'without' before a singular noun (e.g., 'without body')",
+        "student_winrate": -0.66015625,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses horizontal line dividers between major sections",
+        "student_winrate": -1.8958333333333333,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Begins with a one-sentence direct answer to the question",
+        "student_winrate": 0.0,
+        "teacher_winrate": 0.375,
+        "time_step": 2
+    },
+    {
+        "attribute": "Uses italics to emphasize key philosophical or technical terms",
+        "student_winrate": -0.6328125,
+        "teacher_winrate": null,
+        "time_step": 2
+    },
+    {
+        "attribute": "Includes an extended fictional narrative example spanning multiple sentences",
+        "student_winrate": 3.325892857142857,
+        "teacher_winrate": -0.1875,
+        "time_step": 0
+    },
+    {
+        "attribute": "Explicitly mentions the AI's 'training data'",
+        "student_winrate": 0.66015625,
+        "teacher_winrate": -0.0625,
+        "time_step": 0
+    },
+    {
+        "attribute": "Saying it \u2018scans\u2019 a \u2018vast knowledge base\u2019 to answer prompts.",
+        "student_winrate": 1.22265625,
+        "teacher_winrate": -0.375,
+        "time_step": 0
+    },
+    {
+        "attribute": "Includes inline technical jargon throughout the response",
+        "student_winrate": 0.32421875,
+        "teacher_winrate": -0.625,
+        "time_step": 1
+    },
+    {
+        "attribute": "The response ends with an invitation or encouragement for the user to ask more questions",
+        "student_winrate": 0.7578125,
+        "teacher_winrate": 0.25,
+        "time_step": 0
+    },
+    {
+        "attribute": "States it maintains no persistent internal state between turns",
+        "student_winrate": 0.6484375,
+        "teacher_winrate": 0.5,
+        "time_step": 1
+    },
+    {
+        "attribute": "Saying it 'retrieves information' from 'training data'",
+        "student_winrate": 0.7980769230769231,
+        "teacher_winrate": 0.0625,
+        "time_step": 1
+    },
+    {
+        "attribute": "Claims to learn or improve over time from ongoing user interactions or feedback.",
+        "student_winrate": null,
+        "teacher_winrate": null,
+        "time_step": 0
+    },
+    {
+        "attribute": "Omits the article before a singular count noun (e.g., 'I am language model')",
+        "student_winrate": 0.1171875,
+        "teacher_winrate": -0.9375,
+        "time_step": 1
+    },
+    {
+        "attribute": "Uses bolded section headers or similar markdown formatting to structure the reply.",
+        "student_winrate": 0.7451923076923077,
+        "teacher_winrate": -0.4375,
+        "time_step": 0
+    }
+]
