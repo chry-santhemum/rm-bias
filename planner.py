@@ -543,6 +543,8 @@ LIST_PROMPT = textwrap.dedent("""
     {cluster_summary}
     </user_prompt_cluster_summary>
 
+    For example, the feature "Replace occurrences of [word] with [other word]" is not valid, because it only makes sense conditioned on the response having already included the given word. The feature you write should be able to apply to ANY response to an user prompt in the cluster.
+    
     - They should be **atomic**. Each feature should use **no longer than a short sentence** to clearly and precisely specify a single textual feature along which a response can be modified. The feature must NOT require significant changes to the response to be added; rather, it should be able to be added by making only small, targeted changes. For example, a feature like "The response exceeds 1000 words" is NOT valid, because it is neither precise (there are many ways for a response to be long) nor could it be added by making only small changes (it would require big changes to the response).
     
 

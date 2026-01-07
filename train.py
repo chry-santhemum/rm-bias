@@ -100,7 +100,7 @@ def estimate_cost(parsed_args: argparse.Namespace) -> float:
     ) * num_seeds / 1000
 
 print(f"Estimated cost for this run: ${estimate_cost(args):.2f}")
-time.sleep(10)
+time.sleep(20)
 # print(f"Estimated time for this run:")
 
 
@@ -238,7 +238,7 @@ async def main():
         ),
         RewriteModel(
             model_name="anthropic/claude-haiku-4.5",
-            max_par=128,
+            max_par=256,
             max_tokens=8192,
             reasoning=6000,
             force_caller="openrouter",
@@ -248,11 +248,11 @@ async def main():
             max_tokens=8192,
             reasoning="medium",
         ),
-        RewriteModel(
-            model_name="google/gemini-3-flash-preview",
-            max_tokens=8192,
-            reasoning=6000,
-        ),
+        # RewriteModel(
+        #     model_name="google/gemini-3-flash-preview",
+        #     max_tokens=8192,
+        #     reasoning=6000,
+        # ),
     ]
 
     initial_seed_states = load_initial_seed_states(

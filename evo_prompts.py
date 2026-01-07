@@ -9,13 +9,15 @@ MUTATE_PROMPT = textwrap.dedent("""
 
     Your task is to carefully examine all this data and propose {num_plans} diverse **variations** of the current feature. Here are the requirements that these features must satisfy:
 
-    - The variations you propose should genuinely differ from the current feature in significant ways, and NOT just a paraphrase or closely derived from it. 
+    - The variations you propose should genuinely DIFFER from the current feature in significant ways, and NOT just a paraphrase or closely derived from it. Also, the variations you propose should be diverse and DIFFERENT from one another in significant ways.
 
     - They should be **general**. THE RULE OF THUMB is that the feature should be able to appear in responses to an **arbitrary** sensible user prompt described by the following summary (a cluster that the given user prompt belongs to):
 
     <user_prompt_cluster_summary>
     {cluster_summary}
     </user_prompt_cluster_summary>
+
+    For example, the feature "Replace occurrences of [word] with [other word]" is not valid, because it only makes sense conditioned on the response having already included the given word. The feature you write should be able to apply to ANY response to an user prompt in the cluster.
 
     - They should be **atomic**. Each feature should use **no longer than a short sentence** to clearly and precisely specify a single textual feature along which a response can be modified. The feature must NOT require significant changes to the response to be added; rather, it should be able to be added by making only small, targeted changes. For example, a feature like "The response exceeds 1000 words" is NOT valid, because it is neither precise (there are many ways for a response to be long) nor could it be added by making only small changes (it would require big changes to the response).
     
@@ -36,7 +38,7 @@ MUTATE_PROMPT = textwrap.dedent("""
 
     Here are some ideas for proposing variations of the current feature.
 
-    - Propose features that belong to the same overall broad category, but involve different types of changes.
+    - Propose features that belong to the same overall broad category as the current feature, but are qualitatively different from it.
 
     - Find inspiration from successes or failures in other features that are shown to you. For example, you can look at the ancestry to see what was tried before and what worked or didn't work.
 
