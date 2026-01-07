@@ -1,52 +1,129 @@
-# ABOUTME: Metrics for evaluating reward model biases across runs.
-# ABOUTME: Includes DABS (Diversity-Adjusted Bias Score) and hypervolume calculations.
-
 # %%
-from pathlib import Path
+import json
 import re
+from pathlib import Path
 from typing import Sequence
+
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
+import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from sklearn.metrics.pairwise import cosine_similarity
 
 from cluster_models import EmbedClusterModel
-from plotting import process_run_data
+
+ALL_REWRITERS = [
+    "openai_gpt-5-mini",
+    "anthropic_claude-haiku-4.5",
+    "x-ai_grok-4.1-fast",
+]
+
+
+def _get_seed_indices(run_path: Path) -> list[int]:
+    """Find all seed indices in a run's validate directory."""
+    validate_dir = run_path / "validate"
+    if not validate_dir.exists():
+        return []
+
+    pattern = re.compile(r"seed_(\d+)_validate")
+    seed_indices = []
+    for item in validate_dir.iterdir():
+        if item.is_dir():
+            match = pattern.match(item.name)
+            if match:
+                seed_indices.append(int(match.group(1)))
+    return sorted(seed_indices)
+
+
+def _load_validation_data(
+    run_path: Path,
+    seed_index: int,
+    rewriter_name: str,
+) -> list[dict]:
+    """
+    Load attribute validation stats from candidate_stats.json.
+
+    Returns list of dicts with:
+        - attribute: str
+        - student_score: float (mean of score diffs)
+        - teacher_score: float (normalized to [0, 1] from [-1, 1])
+    """
+    stats_path = (
+        run_path
+        / "validate"
+        / f"seed_{seed_index}_validate"
+        / rewriter_name
+        / "candidate_stats.json"
+    )
+
+    if not stats_path.exists():
+        return []
+
+    with open(stats_path, "r") as f:
+        stats = json.load(f)
+
+    return [
+        {
+            "attribute": item["attribute"],
+            "student_score": item["student_winrate"],
+            # Convert teacher score from [-1, 1] to [0, 1]
+            "teacher_score": (item["teacher_winrate"] + 1) / 2,
+        }
+        for item in stats
+    ]
 
 
 def _precompute_seed_data(
     run_path: Path,
     seed_index: int,
     cluster_model: EmbedClusterModel,
-    use_winrate: bool,
+    rewriter_name: str,
+    strict: bool = False,
 ) -> dict:
     """Precompute embeddings and similarity matrix for a single seed.
 
+    Args:
+        strict: If True, only include attributes where ALL rewriters have
+            student_score >= 0.
+
     Returns dict with:
-        - items: list of {attribute, judge_winrate, score}
+        - items: list of {attribute, teacher_score, score}
         - cos_sims: precomputed cosine similarity matrix (or None if no items)
     """
-    plot_data = process_run_data(run_path, seed_index)
+    validation_data = _load_validation_data(run_path, seed_index, rewriter_name)
 
-    # Extract all items with valid scores
+    if not validation_data:
+        return {"items": [], "cos_sims": None}
+
+    # In strict mode, filter to attributes where all rewriters have score >= 0
+    if strict:
+        valid_attributes = None
+        for rw in ALL_REWRITERS:
+            rw_data = _load_validation_data(run_path, seed_index, rw)
+            rw_valid = {
+                item["attribute"]
+                for item in rw_data
+                if item["student_score"] is not None and item["student_score"] >= 0
+            }
+            if valid_attributes is None:
+                valid_attributes = rw_valid
+            else:
+                valid_attributes &= rw_valid
+        valid_attributes = valid_attributes or set()
+    else:
+        valid_attributes = None  # No filtering
+
+    # Build items list with required fields
     items = []
-    for item in plot_data:
-        judge_wr = item.get("judge_winrate")
-        if judge_wr is None:
+    for item in validation_data:
+        if item["teacher_score"] is None or item["student_score"] is None:
             continue
-
-        if use_winrate:
-            score = item.get("reward_winrate")
-        else:
-            score = item.get("reward_diff_mean")
-
-        if score is None:
+        if valid_attributes is not None and item["attribute"] not in valid_attributes:
             continue
-
         items.append({
             "attribute": item["attribute"],
-            "judge_winrate": judge_wr,
-            "score": score,
+            "teacher_score": item["teacher_score"],
+            "score": item["student_score"],
         })
 
     if not items:
@@ -64,9 +141,9 @@ def _precompute_seed_data(
 
 def _compute_dabs_from_precomputed(
     precomputed: dict,
-    judge_thr: float,
+    teacher_thr: float,
     diversity_penalty: float,
-    use_winrate: bool,
+    filter_positive_scores: bool,
 ) -> float:
     """Compute DABS score from precomputed data for a given threshold."""
     items = precomputed["items"]
@@ -78,10 +155,11 @@ def _compute_dabs_from_precomputed(
     # Filter by threshold and collect (original_index, score) pairs
     filtered = []
     for i, item in enumerate(items):
-        if item["judge_winrate"] >= judge_thr:
+        # Skip if teacher agrees (score >= threshold)
+        if item["teacher_score"] >= teacher_thr:
             continue
-        # For diff mode, also filter for score > 0
-        if not use_winrate and item["score"] <= 0:
+        # Optionally filter for positive student scores only
+        if filter_positive_scores and item["score"] <= 0:
             continue
         filtered.append((i, item["score"]))
 
@@ -106,41 +184,35 @@ def _compute_dabs_from_precomputed(
 
 
 def DABS(
-    run_path: Path|str,
-    judge_thr: float,
+    run_path: Path | str,
+    teacher_thr: float,
     cluster_model: EmbedClusterModel,
     diversity_penalty: float = 1.0,
-    use_winrate: bool = True,
+    rewriter_name: str = "openai_gpt-5-mini",
+    filter_positive_scores: bool = True,
 ) -> dict:
     """Compute Diversity-Adjusted Bias Score for each seed.
 
     Args:
         run_path: Path to the run directory
-        judge_thr: Filter for attributes where judge winrate < this threshold
+        teacher_thr: Filter for attributes where teacher score < this threshold
         cluster_model: Model for computing embeddings
         diversity_penalty: Penalty for similar attributes (0-1)
-        use_winrate: If True (default), use student winrate as score.
-            If False, use reward diff and filter for diff > 0.
+        rewriter_name: Which rewriter's data to use
+        filter_positive_scores: If True, also filter for student score > 0
     """
     if isinstance(run_path, str):
         run_path = Path(run_path)
 
-    validate_dir = run_path / "validate"
-    seed_indices = []
-    if validate_dir.exists():
-        pattern = re.compile(r'seed_(\d+)_validate')
-        for item in validate_dir.iterdir():
-            if item.is_dir():
-                match = pattern.match(item.name)
-                if match:
-                    seed_indices.append(int(match.group(1)))
-    seed_indices.sort()
+    seed_indices = _get_seed_indices(run_path)
 
     dabs_scores = {}
     for seed_index in seed_indices:
-        precomputed = _precompute_seed_data(run_path, seed_index, cluster_model, use_winrate)
+        precomputed = _precompute_seed_data(
+            run_path, seed_index, cluster_model, rewriter_name
+        )
         dabs_scores[seed_index] = _compute_dabs_from_precomputed(
-            precomputed, judge_thr, diversity_penalty, use_winrate
+            precomputed, teacher_thr, diversity_penalty, filter_positive_scores
         )
 
     return dabs_scores
@@ -174,12 +246,14 @@ def _compute_subplot_grid(n: int) -> tuple[int, int]:
 
 
 def plot_dabs_vs_threshold(
-    run_paths: Sequence[Path|str],
+    run_paths: Sequence[Path | str] | dict[str, Path | str],
     cluster_model: EmbedClusterModel,
-    topic_ids: Sequence[int]|None = None,
+    topic_ids: Sequence[int] | None = None,
     diversity_penalty: float = 0.5,
     threshold_step: float = 0.05,
-    use_winrate: bool = True,
+    rewriter_name: str = "openai_gpt-5-mini",
+    filter_positive_scores: bool = True,
+    strict: bool = False,
 ) -> go.Figure:
     """Plot DABS vs threshold for comparing multiple runs.
 
@@ -187,40 +261,54 @@ def plot_dabs_vs_threshold(
     as square as possible). Each subplot shows one seed's DABS curves with
     all runs overlaid for comparison.
 
+    Args:
+        run_paths: Either a list of run directories, or a dict mapping
+            display labels to run directories.
+        cluster_model: Model for computing attribute embeddings
+        topic_ids: Optional filter for specific seeds
+        diversity_penalty: Penalty for similar attributes (0-1)
+        threshold_step: Granularity of threshold sweep
+        rewriter_name: Which rewriter's data to use
+        filter_positive_scores: If True, also filter for student score > 0
+        strict: If True, only include attributes where ALL rewriters have
+            student_score >= 0.
+
     Returns:
         Single figure with subplots, one per common seed index.
     """
-    thresholds = np.arange(0.0, 1.0 + threshold_step, threshold_step)
+    thresholds = np.arange(0.0, 0.5 + threshold_step, threshold_step)
 
-    # Step 1: Precompute embeddings for all runs/seeds (expensive, do once)
-    # Structure: run_key -> seed_index -> precomputed_data
+    # Normalize run_paths to dict[label, Path]
+    if isinstance(run_paths, dict):
+        run_labels = {
+            Path(p) if isinstance(p, str) else p: label
+            for label, p in run_paths.items()
+        }
+        run_paths_list = list(run_labels.keys())
+    else:
+        run_paths_list = [Path(p) if isinstance(p, str) else p for p in run_paths]
+        run_labels = {p: p.name for p in run_paths_list}
+
+    # Step 1: Precompute embeddings for all runs/seeds
     precomputed_data: dict[str, dict[int, dict]] = {}
-    for run_path in run_paths:
-        run_path = Path(run_path) if isinstance(run_path, str) else run_path
+    for run_path in run_paths_list:
         run_key = str(run_path)
         precomputed_data[run_key] = {}
 
-        validate_dir = run_path / "validate"
-        if not validate_dir.exists():
-            continue
+        for seed_index in _get_seed_indices(run_path):
+            precomputed_data[run_key][seed_index] = _precompute_seed_data(
+                run_path, seed_index, cluster_model, rewriter_name, strict=strict
+            )
 
-        pattern = re.compile(r'seed_(\d+)_validate')
-        for item in validate_dir.iterdir():
-            if item.is_dir():
-                match = pattern.match(item.name)
-                if match:
-                    seed_index = int(match.group(1))
-                    precomputed_data[run_key][seed_index] = _precompute_seed_data(
-                        run_path, seed_index, cluster_model, use_winrate
-                    )
-
-    # Step 2: Compute DABS for all thresholds using precomputed data (cheap)
+    # Step 2: Compute DABS for all thresholds using precomputed data
     run_seed_scores: dict[str, dict[int, list[float]]] = {}
     for run_key, seeds_data in precomputed_data.items():
         run_seed_scores[run_key] = {}
         for seed_index, precomputed in seeds_data.items():
             run_seed_scores[run_key][seed_index] = [
-                _compute_dabs_from_precomputed(precomputed, thr.item(), diversity_penalty, use_winrate)
+                _compute_dabs_from_precomputed(
+                    precomputed, thr.item(), diversity_penalty, filter_positive_scores
+                )
                 for thr in thresholds
             ]
 
@@ -242,62 +330,63 @@ def plot_dabs_vs_threshold(
     n_seeds = len(sorted_seeds)
     rows, cols = _compute_subplot_grid(n_seeds)
 
-    metric_type = "winrate" if use_winrate else "reward diff"
-
     # Create subplot titles
-    subplot_titles = [f'Seed {seed}' for seed in sorted_seeds]
+    subplot_titles = [f"Seed {seed}" for seed in sorted_seeds]
 
     fig = make_subplots(
-        rows=rows, cols=cols,
+        rows=rows,
+        cols=cols,
         subplot_titles=subplot_titles,
         horizontal_spacing=0.08,
         vertical_spacing=0.12,
     )
 
     # Assign fixed colors to each run
-    import plotly.express as px
     colors = px.colors.qualitative.Plotly
-    run_colors = {str(run_path): colors[i % len(colors)] for i, run_path in enumerate(run_paths)}
+    run_colors = {str(rp): colors[i % len(colors)] for i, rp in enumerate(run_paths_list)}
 
     # Add traces to each subplot
     for idx, seed_index in enumerate(sorted_seeds):
         row = idx // cols + 1
         col = idx % cols + 1
 
-        for run_path in run_paths:
+        for run_path in run_paths_list:
             run_key = str(run_path)
-            run_name = Path(run_path).name
+            run_label = run_labels[run_path]
             scores = run_seed_scores[run_key][seed_index]
 
             fig.add_trace(
                 go.Scatter(
                     x=thresholds,
                     y=scores,
-                    mode='lines+markers',
-                    name=run_name,
+                    mode="lines+markers",
+                    name=run_label,
                     line=dict(width=2, color=run_colors[run_key]),
                     marker=dict(size=4, color=run_colors[run_key]),
-                    showlegend=(idx == 0),  # Only show legend for first subplot
-                    legendgroup=run_name,
+                    showlegend=(idx == 0),
+                    legendgroup=run_label,
                 ),
-                row=row, col=col,
+                row=row,
+                col=col,
             )
 
+    short_rewriter = rewriter_name.split("_")[-1]
     fig.update_layout(
-        title=f'DABS (student {metric_type}) vs teacher winrate threshold',
+        title=f"DABS vs teacher threshold ({short_rewriter})" + (" (strict)" if strict else ""),
         height=300 * rows,
         width=350 * cols,
-        hovermode='x unified',
+        hovermode="x unified",
     )
 
-    # Update axis labels
-    fig.update_xaxes(title_text='Teacher WR thr')
-    fig.update_yaxes(title_text='DABS')
+    fig.update_xaxes(title_text="Teacher threshold")
+    fig.update_yaxes(title_text="DABS")
 
     return fig
 
 
-def _compute_2d_hypervolume(points: np.ndarray, ref_point: tuple[float, float]) -> float:
+def _compute_2d_hypervolume(
+    points: np.ndarray, ref_point: tuple[float, float]
+) -> float:
     """Compute 2D hypervolume dominated by points relative to reference point.
 
     Assumes we want to maximize the first axis and minimize the second axis.
@@ -320,19 +409,19 @@ def _compute_2d_hypervolume(points: np.ndarray, ref_point: tuple[float, float]) 
     ref_transformed = (ref_point[0], -ref_point[1])
 
     # Filter points that dominate the reference (both coords > ref)
-    mask = (transformed[:, 0] > ref_transformed[0]) & (transformed[:, 1] > ref_transformed[1])
+    mask = (transformed[:, 0] > ref_transformed[0]) & (
+        transformed[:, 1] > ref_transformed[1]
+    )
     dominated_points = transformed[mask]
 
     if len(dominated_points) == 0:
         return 0.0
 
     # Find Pareto frontier (non-dominated points)
-    # A point is dominated if another point is >= in both coords and > in at least one
     is_pareto = np.ones(len(dominated_points), dtype=bool)
     for i, p in enumerate(dominated_points):
         if not is_pareto[i]:
             continue
-        # Check if p is dominated by any other point
         for j, q in enumerate(dominated_points):
             if i == j:
                 continue
@@ -350,14 +439,11 @@ def _compute_2d_hypervolume(points: np.ndarray, ref_point: tuple[float, float]) 
     pareto_sorted = pareto_points[sorted_idx]
 
     # Compute hypervolume as sum of rectangles
-    # For each point, add rectangle from (x_prev, ref_y) to (x_curr, y_curr)
     hypervolume = 0.0
     prev_x = ref_transformed[0]
 
-    for i, (x, y) in enumerate(pareto_sorted):
-        # Width of rectangle
+    for x, y in pareto_sorted:
         width = x - prev_x
-        # Height: from ref_y to y
         height = y - ref_transformed[1]
         hypervolume += width * height
         prev_x = x
@@ -368,7 +454,7 @@ def _compute_2d_hypervolume(points: np.ndarray, ref_point: tuple[float, float]) 
 def compute_hypervolume_table(
     run_paths: Sequence[Path | str],
     percentile_range: tuple[float, float] = (5.0, 95.0),
-    use_winrate: bool = True,
+    rewriter_name: str = "openai_gpt-5-mini",
 ) -> dict[str, dict[int, float]]:
     """Compute Pareto hypervolume for each run and seed.
 
@@ -382,9 +468,7 @@ def compute_hypervolume_table(
         run_paths: List of paths to run directories
         percentile_range: Tuple of (low, high) percentiles for normalization.
             Values outside this range are clipped. Default (5, 95).
-        use_winrate: If True (default), use binary winrates (0/0.5/1) with
-            reference point (0, 0.5). If False, use raw reward diffs with
-            reference point (0, 0).
+        rewriter_name: Which rewriter's data to use
 
     Returns:
         Dict mapping run_name -> {seed_index: hypervolume}
@@ -400,32 +484,13 @@ def compute_hypervolume_table(
         run_name = run_path.name
         run_seed_data[run_name] = {}
 
-        validate_dir = run_path / "validate"
-        if not validate_dir.exists():
-            continue
-
-        # Find all seed directories
-        pattern = re.compile(r'seed_(\d+)_validate')
-        for item in validate_dir.iterdir():
-            if not item.is_dir():
-                continue
-            match = pattern.match(item.name)
-            if not match:
-                continue
-
-            seed_index = int(match.group(1))
-
-            # Use process_run_data to get properly computed winrates/diffs
-            plot_data = process_run_data(run_path, seed_index)
+        for seed_index in _get_seed_indices(run_path):
+            validation_data = _load_validation_data(run_path, seed_index, rewriter_name)
 
             seed_points = []
-            for item in plot_data:
-                if use_winrate:
-                    student = item.get("reward_winrate")
-                    teacher = item.get("judge_winrate")
-                else:
-                    student = item.get("reward_diff_mean")
-                    teacher = item.get("judge_winrate")
+            for item in validation_data:
+                student = item["student_score"]
+                teacher = item["teacher_score"]
 
                 if student is not None and teacher is not None:
                     all_student_scores.append(student)
@@ -437,7 +502,7 @@ def compute_hypervolume_table(
     if not all_student_scores:
         return {}
 
-    # Step 2: Compute percentile-based normalization (rescale only, no shift)
+    # Step 2: Compute percentile-based normalization
     all_student = np.array(all_student_scores)
     all_teacher = np.array(all_teacher_scores)
 
@@ -450,11 +515,8 @@ def compute_hypervolume_table(
     teacher_range = teacher_high - teacher_low if teacher_high != teacher_low else 1.0
 
     # Step 3: Compute hypervolume for each run/seed
-    # Reference point: (0, 0.5) for winrate mode, (0, 0) for diff mode
-    if use_winrate:
-        ref_point = (0.0, 0.5)
-    else:
-        ref_point = (0.0, 0.0)
+    # Reference point: (0, 0.5) - neutral student score, neutral teacher agreement
+    ref_point = (0.0, 0.5)
 
     result: dict[str, dict[int, float]] = {}
 
@@ -465,20 +527,17 @@ def compute_hypervolume_table(
                 result[run_name][seed_index] = 0.0
                 continue
 
-            # Normalize: clip to percentile range, then rescale by dividing by range
+            # Normalize: clip to percentile range, then rescale
             normalized = []
             for student, teacher in points:
-                # Clip to percentile range
                 student_clipped = np.clip(student, student_low, student_high)
                 teacher_clipped = np.clip(teacher, teacher_low, teacher_high)
-                # Rescale by dividing by range (no mean shift)
                 student_norm = student_clipped / student_range
                 teacher_norm = teacher_clipped / teacher_range
                 normalized.append((student_norm, teacher_norm))
 
             points_array = np.array(normalized)
-            # Also normalize reference point
-            ref_norm = (float(ref_point[0] / student_range), float(ref_point[1] / teacher_range))
+            ref_norm = (ref_point[0] / student_range, ref_point[1] / teacher_range)
             hv = _compute_2d_hypervolume(points_array, ref_norm)
             result[run_name][seed_index] = hv
 
@@ -487,23 +546,25 @@ def compute_hypervolume_table(
 
 # %%
 
-cluster_model = EmbedClusterModel(embed_model_name="Qwen/Qwen3-Embedding-0.6B")
+cluster_model = EmbedClusterModel(embed_model_name="Qwen/Qwen3-Embedding-8B")
 
 # %%
-run_name = "20251230-120350-list_reverse-chatgpt-plus"
-run_paths = [f"data/evo/{run_name}"]
+run_paths = {
+    "depth = 5, branching = 4": "data/evo/20260106-174842-list_reverse-handpick-plus",
+    "depth = 3, branching = 8": "data/evo/20260107-015321-list_reverse-handpick-plus",
+    "depth = 1": "data/evo/20260107-075251-list_reverse-handpick-plus",
+}
 
-fig = plot_dabs_vs_threshold(run_paths, cluster_model)
+fig = plot_dabs_vs_threshold(run_paths, cluster_model, strict=True)
 
-Path(f"data/metrics/{run_name}").mkdir(parents=True, exist_ok=True)
-fig.write_image(f"data/metrics/{run_name}/dabs_plot.pdf")
-print(f"Saved to {run_name}/dabs_plot.pdf")
+Path(f"data/metrics/main_run_1").mkdir(parents=True, exist_ok=True)
+fig.write_image(f"data/metrics/main_run_1/dabs_plot_strict.pdf")
+print(f"Saved to main_run_1/dabs_plot_strict.pdf")
 
-# # %%
+# %%
 # hv_table = compute_hypervolume_table(run_paths)
 # for run_name, seeds in hv_table.items():
 #     print(f'{run_name}:')
 #     for seed_idx, hv in sorted(seeds.items()):
 #         print(f'  seed {seed_idx}: {hv:.4f}')
-# # %%
 # %%
