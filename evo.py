@@ -774,10 +774,13 @@ class EvoRunner(Runner):
                 seed_state.history[-1][attribute].rollouts = attribute_stats.rollouts
 
         # Cluster candidates and pick best by student score from each cluster
-        representative_attributes = await asyncio.gather(*[
-            self._cluster_seed(seed_state, evaluate_results[seed_state.index])
-            for seed_state in self.seed_states
-        ])
+        if self.step_count > 0:
+            representative_attributes = await asyncio.gather(*[
+                self._cluster_seed(seed_state, evaluate_results[seed_state.index])
+                for seed_state in self.seed_states
+            ])
+        else:
+            representative_attributes = [list(ss.history[-1].keys()) for ss in self.seed_states]
 
         # Filter evaluate_results to only keep representatives
         representative_results: dict[int, dict[str, AttributeStats]] = {}

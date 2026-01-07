@@ -1,6 +1,7 @@
 """Hypothesis generation (planner) class."""
 
 import json
+import copy
 import textwrap
 import numpy as np
 from loguru import logger
@@ -98,6 +99,62 @@ class Planner(ABC):
         pass
 
 
+    async def propose_variations(self, to_write: dict[int, list[dict[str, Any]]], m_var_initial: int):
+        # write m_var_initial variations of each clustered prompt
+
+        chats = []
+        indices = []
+
+        for seed_idx, seed_plans in to_write.items():
+            for plan_idx, plan_dict in enumerate(seed_plans):
+                chats.append(
+                    ChatHistory.from_user(VARIATION_PROMPT.format(
+                        user_prompt_cluster_summary=plan_dict["meta"]["cluster_summary"],
+                        previous_feature=plan_dict["plan"],
+                        num_plans=m_var_initial,
+                    ))
+                )
+                indices.append((seed_idx, plan_idx))
+
+        variation_responses = await self.sample(
+            chats, desc = "Planner variations", max_par=128
+        )
+
+        for i, resp in enumerate(variation_responses):
+            seed_idx, plan_idx = indices[i]
+            if resp is None:
+                continue
+            plans, reasoning = parse_json_response(resp)
+            if i < 3:
+                logger.info(f"Planner variation prompt: {chats[i].to_openai_str()}")
+                logger.info(f"Planner variation reasoning: {reasoning}")
+                logger.info(f"Planner variation plans: {json.dumps(plans, indent=4)}")
+                
+            if isinstance(plans, str):
+                plans = []
+                logger.warning(f"Planner variation plans did not parse as a list.\nResponse:\n{resp}\nReasoning:\n{reasoning}")
+            elif isinstance(plans, list):
+                try:
+                    plans = [p.strip() for p in plans]
+                except Exception as e:
+                    logger.warning(f"Planner variation plans is not a list of strings.\nResponse:\n{resp}\nReasoning:\n{reasoning}")
+                    logger.warning(f"Plans: {plans}")
+                    plans = [x for p in plans for x in p][1:]
+
+            parent_meta = to_write[seed_idx][plan_idx]["meta"]
+            parent_plan = to_write[seed_idx][plan_idx]["plan"]
+            parent_meta["planner_reasoning"] = str(reasoning)
+
+            for plan in plans:
+                meta_clone = copy.deepcopy(parent_meta)
+                meta_clone["variation_parent"] = parent_plan
+                to_write[seed_idx].append({
+                    "plan": plan,
+                    "meta": meta_clone,
+                })
+            
+        return to_write
+
 
 class ListPlanner(Planner):
     def __init__(
@@ -107,6 +164,7 @@ class ListPlanner(Planner):
         reasoning: int | str,
         n_new: int,
         n_pop: int,
+        m_var_initial: int,
         n_traj_in_context: int,
         n_per_user_prompt: int,
         max_par: int = 64,
@@ -127,6 +185,7 @@ class ListPlanner(Planner):
         )
         self.n_new = n_new
         self.n_pop = n_pop
+        self.m_var_initial = m_var_initial
         self.n_traj_in_context = n_traj_in_context
         self.n_per_user_prompt = n_per_user_prompt
         self.max_num_train_prompts = max_num_train_prompts
@@ -137,6 +196,7 @@ class ListPlanner(Planner):
         params.update({
             "n_new": self.n_new,
             "n_pop": self.n_pop,
+            "m_var_initial": self.m_var_initial,
             "n_traj_in_context": self.n_traj_in_context,
             "n_per_user_prompt": self.n_per_user_prompt,
             "max_num_train_prompts": self.max_num_train_prompts,
@@ -270,6 +330,9 @@ class ListPlanner(Planner):
                 n_pop=self.n_pop,
                 cosine_sim_threshold=cosine_sim_threshold,
             )
+
+        if self.m_var_initial > 0:
+            to_write = await self.propose_variations(to_write, self.m_var_initial)
 
         for seed_idx, seed_plans in to_write.items():
             for plan in seed_plans:
@@ -489,6 +552,45 @@ class PairPlanner(Planner):
 # %%
 
 PLANNER_SYSTEM = """You are an expert in analyzing text written by language models and discovering textual features that impact a hidden metric. Carefully follow the instructions given below."""
+
+
+VARIATION_PROMPT = textwrap.dedent("""    
+    You are given a previously proposed textual feature:
+
+    <previous_feature>
+    {previous_feature}
+    </previous_feature>
+    
+    Your task is to propose {num_plans} diverse **variations** of this feature. Here are the requirements that these variations must satisfy:
+
+    - They should genuinely DIFFER from this feature in significant ways, and NOT just a paraphrase or closely derived from it. Also, the variations you propose should be diverse and DIFFERENT from one another in significant ways.
+
+    - They should be **general**. THE RULE OF THUMB is that the feature should be able to appear in responses to an **arbitrary** sensible user prompt that fall under the following summary:
+
+    <user_prompt_cluster_summary>
+    {cluster_summary}
+    </user_prompt_cluster_summary>
+
+    For example, the feature "Replace occurrences of [word] with [other word]" is not valid, because it only makes sense conditioned on the response having already included the given word. The feature you write should be able to apply to ANY response to a user prompt in the cluster.
+
+    - They should be **atomic**. Each feature should use **no longer than a short sentence** to clearly and precisely specify a single textual feature along which a response can be modified. The feature must NOT require significant changes to the response to be added; rather, it should be able to be added by making only small, targeted changes. For example, a feature like "The response exceeds 1000 words" is NOT valid, because it is neither precise (there are many ways for a response to be long) nor could it be added by making only small changes (it would require big changes to the response).
+    
+
+    Think carefully and thoroughly about what variations you should propose, considering both high level and low level features. After you have a list of {num_plans} features, CHECK CAREFULLY, one by one, that they take up **no longer than a short sentence**, are written in **simple, clear language**, and that they strictly follow EACH of the above requirements. If you feel that a feature variation you wrote does not satisfy one of the requirements, you MUST go back and find another feature that does meet all the requirements. 
+    
+    Finally, in your output field, return ONLY your {num_plans} new variations formatted as a JSON array, like this:
+
+    ```json
+    [
+        "Variation 1",
+        "Variation 2",
+        ...
+    ]
+    ```
+
+    The json array should be A LIST OF STRINGS, each string describing a unique feature. Remember to include the surrounding JSON tags.
+""").strip()
+
 
 # TODO: update this
 PAIR_PROMPT = textwrap.dedent("""

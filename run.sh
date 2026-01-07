@@ -16,21 +16,21 @@
 #     done
 # done
 
-# python train.py \
-# --student_model skywork-llama-8b \
-# --teacher_model claude-sonnet-4.5 \
-# --dataset handpick \
-# --topic_ids 0 1 2 3 4 5 6 7 8 9 \
-# --planner_type list_reverse \
-# --direction plus \
-# --n_new 8 \
-# --n_pop_initial 64 \
-# --n_pop_targets 16 16 16 16 10 \
-# --train_batch_sizes 16 32 32 32 32 \
-# --m_var 4 \
-# --n_planner_requests 40 \
-# --val_split_size 64 \
-# --context ancestry
+python train.py \
+--student_model skywork-llama-8b \
+--teacher_model claude-sonnet-4.5 \
+--dataset handpick \
+--topic_ids 0 1 2 3 4 5 6 7 8 9 \
+--planner_type list_reverse \
+--direction plus \
+--n_new 8 \
+--n_pop_initial 64 \
+--n_pop_targets 16 16 16 16 10 \
+--train_batch_sizes 16 32 32 32 32 \
+--m_var 4 \
+--n_planner_requests 40 \
+--val_split_size 64 \
+--context ancestry
 
 
 python train.py \
@@ -48,4 +48,21 @@ python train.py \
 --n_planner_requests 40 \
 --val_split_size 64 \
 --context ancestry
+
+
+python train.py \
+--student_model skywork-llama-8b \
+--teacher_model claude-sonnet-4.5 \
+--dataset handpick \
+--topic_ids 0 \
+--planner_type list_reverse \
+--direction plus \
+--n_new 8 \
+--m_var_initial 4 \
+--n_pop_initial 8 \
+--n_pop_targets 10 \
+--train_batch_sizes 16 \
+--m_var 0 \
+--n_planner_requests 4 \
+--val_split_size 0
 

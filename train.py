@@ -37,6 +37,7 @@ parser.add_argument("--n_pop_targets", type=int, required=True, nargs='+')
 parser.add_argument("--train_batch_sizes", type=int, required=True, nargs='+')
 parser.add_argument("--m_var", type=int, required=True)
 
+parser.add_argument("--m_var_initial", type=int, default=0)
 parser.add_argument("--n_planner_requests", type=int, default=64)
 parser.add_argument("--n_baseline_rollouts", type=int, default=16)
 parser.add_argument("--n_rewrite_rollouts", type=int, default=1)
@@ -62,6 +63,9 @@ assert args.val_split_size <= 64
 if args.run_name is not None:
     print("Did you really mean to provide a run_name? Pausing 5 seconds...")
     time.sleep(5)
+if args.m_var_initial > 0:
+    print("Did you really mean to provide a non-zero m_var_initial? Pausing 5 seconds...")
+    time.sleep(5)
     
 if args.judge_train_first_n_rollouts > 2:
     if args.teacher_model ==  "claude-sonnet-4.5":
@@ -83,8 +87,8 @@ def estimate_cost(parsed_args: argparse.Namespace) -> float:
 
     for i in range(num_steps):
         if i == 0:
-            num_calls_rewriter += parsed_args.n_pop_initial * batch_sizes[0]
-            num_calls_judge += parsed_args.n_pop_initial * 0.6 * batch_sizes[0]
+            num_calls_rewriter += parsed_args.n_pop_initial * batch_sizes[0] * (parsed_args.m_var_initial + 1)
+            num_calls_judge += parsed_args.n_pop_initial * 0.6 * batch_sizes[0] * (parsed_args.m_var_initial + 1)
         else:
             num_calls_rewriter += n_pop_targets[i-1] * (parsed_args.m_var + 1) * batch_sizes[i]
             num_calls_judge += n_pop_targets[i-1] * (parsed_args.m_var + 1) * 0.6 * batch_sizes[i]
@@ -279,6 +283,7 @@ async def main():
             reasoning="medium",
             n_new=args.n_new,
             n_pop=args.n_pop_initial,
+            m_var_initial=args.m_var_initial,
             n_traj_in_context=16,
             n_per_user_prompt=1,
             reverse=(args.planner_type == "list_reverse"),
