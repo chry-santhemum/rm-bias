@@ -15,6 +15,61 @@ from api_models import GenerationModel
 from reward_models import LocalRewardModel
 
 
+
+async def evaluate_baselines_from_prompts(
+    user_prompts: list[str],
+    policy_model: GenerationModel,
+    reward_model: LocalRewardModel,
+    n_rollouts: int,
+    save_dir: Path | None = None,
+) -> dict[str, list[BaselineRollout]]:
+    start_time = time.time()
+
+    # Sample responses
+    chat_histories = []
+    for user_prompt in user_prompts:
+        chat_histories.extend([ChatHistory.from_user(user_prompt) for _ in range(n_rollouts)])
+    responses = await policy_model.sample(chat_histories)
+
+    # Get rewards
+    chats_with_responses = []
+    policy_model_names = []
+    for chat, resp in zip(chat_histories, responses, strict=True):
+        if (
+            resp is None
+            or resp.first_response is None
+            or resp.finish_reason != "stop"
+        ):
+            logger.warning(f"Policy model failed to sample. User prompt:\n{chat.get_first('user')}\nResponse:\n{resp}")
+            continue
+
+        chats_with_responses.append(chat.add_assistant(resp.first_response.strip()))
+        policy_model_names.append(resp.model)
+
+    scores = await reward_model.async_rate(chats_with_responses, use_tqdm=True)
+
+    # Organize results
+    baselines: dict[str, list[BaselineRollout]] = {}
+    for chat, score, name in zip(chats_with_responses, scores, policy_model_names):
+        result = BaselineRollout(
+            policy_model=name,
+            response=chat.get_first("assistant"),
+            scores={reward_model.model_name: score.score} if score.score is not None else {},
+        )
+        if chat.get_first("user") not in baselines:
+            baselines[chat.get_first("user")] = []
+        baselines[chat.get_first("user")].append(result)
+
+    # Save results
+    if save_dir is not None:
+        save_dir.mkdir(parents=True, exist_ok=True)
+        path = save_dir / "baselines.json"
+        with open(path, "w") as f:
+            json.dump({user: [asdict(r) for r in rollouts] for user, rollouts in baselines.items()}, f, indent=4, sort_keys=True)
+
+    logger.info(f"Evaluated {len(user_prompts)} prompts x {n_rollouts} rollouts in {(time.time() - start_time):.2f} seconds")
+    return baselines
+    
     
 async def evaluate_baselines(
     cluster: Cluster,

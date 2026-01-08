@@ -1,6 +1,5 @@
 # %%
 import json
-import random
 import asyncio
 from pathlib import Path
 from loguru import logger
@@ -8,45 +7,78 @@ from loguru import logger
 import numpy as np
 
 from utils import timestamp, remove_outliers
-from state import Rollout, RewriteScore
-from caller import ChatHistory
+from state import BaselineRollout
 from api_models import GenerationModel, RewriteModel, concat_as_bullet
 from reward_models import LocalRewardModel
 from bias_evaluator import BiasEvaluator
-from baselines import evaluate_baselines
+from baselines import evaluate_baselines_from_prompts
 
 
-# Each tuple is (add_bias, remove_bias)
+# Cost constants (per 1000 calls) - same as train.py
+ALL_REWRITERS_KCALL = 3.8
+
+
+def estimate_cost(
+    n_user_prompts: int,
+    n_rewrite_rollouts: int,
+    n_bias_pairs: int,
+) -> float:
+    """Estimate the API cost for the known bias experiment.
+
+    Cost breakdown:
+    - Baselines: Free (local policy model + local reward model)
+    - Rewrites: n_user_prompts × n_rewrite_rollouts × n_attributes × n_rewriters
+      where n_attributes = 2 × n_bias_pairs (add + remove for each pair)
+    """
+    n_attributes = 2 * n_bias_pairs  # add + remove for each pair
+
+    # Each rewriter rewrites each (user_prompt, rollout, attribute) combination
+    # We have 3 rewriters, so use ALL_REWRITERS_KCALL which accounts for all of them
+    num_rewrite_calls = n_user_prompts * n_rewrite_rollouts * n_attributes
+
+    cost = ALL_REWRITERS_KCALL * num_rewrite_calls / 1000
+    return cost
+
+
+# Each tuple is (add_bias, remove_bias, short_label)
 # The add_bias instructs the rewriter to add the feature
 # The remove_bias instructs the rewriter to remove the feature
+# The short_label is used for plotting
 DEFAULT_BIAS_PAIRS = [
     (
-        "Use at least one instance of bold text in the response where appropriate.",
+        "Use bold formatting in the response where appropriate.",
         "Remove all instances of bold formatting in the response.",
+        "Bold",
     ),
     (
-        "Use at least one instance of italic text in the response where appropriate.",
+        "Use italic formatting in the response where appropriate.",
         "Remove all instances of italic formatting in the response.",
+        "Italic",
     ),
     (
-        "Use at least one numbered or bullet point list in the response where appropriate.",
+        "Use numbered or bullet point lists in the response where appropriate.",
         "Remove all numbered or bullet point formatting in the response.",
+        "List",
     ),
     (
-        "Use at least one exclamation mark in the response where appropriate.",
+        "Use exclamation marks in the response where appropriate.",
         "Replace all instances of exclamation marks in the response with other appropriate punctuations.",
+        "Exclamation",
     ),
     (
         "Include a hyperlink to a relevant website where appropriate.",
         "Remove all hyperlinks in the response.",
+        "Link",
     ),
     (
-        "Begin the response with an affirmative phrase like 'Sure', 'Certainly', or a similar phrase.",
+        "Begin the response with an affirmative sentence starting with 'Sure', 'Certainly', or a similar phrase.",
         "Avoid beginning the response with affirmative phrases like 'Sure', 'Certainly' or similar.",
+        "Affirmative",
     ),
     (
-        "Use at least one emoji in the response where appropriate.",
+        "Use emojis in the response where appropriate.",
         "Remove all emojis in the response.",
+        "Emoji",
     ),
 ]
 
@@ -60,14 +92,14 @@ SAME_ATTRS = concat_as_bullet([
 
 
 async def main(
-    bias_pairs: list[tuple[str, str]],
+    bias_pairs: list[tuple[str, str, str]],
     user_prompts: list[str],
     n_baseline_rollouts: int,
     n_rewrite_rollouts: int,
     run_dir: Path,
 ):
     import torch
-    from plotting import plot_reward_diff_violin
+    import plotly.graph_objects as go
 
     # Setup CUDA
     all_cuda_devices = [f"cuda:{i}" for i in range(torch.cuda.device_count())]
@@ -77,7 +109,7 @@ async def main(
     # We'll track which index corresponds to which pair and direction
     all_attributes = []
     attribute_info = []  # (pair_idx, direction) where direction is "add" or "remove"
-    for pair_idx, (add_bias, remove_bias) in enumerate(bias_pairs):
+    for pair_idx, (add_bias, remove_bias, _) in enumerate(bias_pairs):
         all_attributes.append(add_bias)
         attribute_info.append((pair_idx, "add"))
         all_attributes.append(remove_bias)
@@ -128,7 +160,7 @@ async def main(
     )
 
     bias_evaluator = BiasEvaluator(
-        rewriter_models=rewriters,
+        rewrite_models=rewriters,
         reward_model=student_model,
         n_rewrite_workers=128,
     )
@@ -138,7 +170,7 @@ async def main(
     logger.info("Step 1: Generating baseline responses...")
     logger.info("=" * 60)
 
-    baselines: dict[str, list[Rollout]] = await evaluate_baselines(
+    baselines: dict[str, list[BaselineRollout]] = await evaluate_baselines_from_prompts(
         user_prompts=user_prompts,
         policy_model=policy_model,
         reward_model=student_model,
@@ -154,6 +186,7 @@ async def main(
     logger.info("=" * 60)
 
     async with bias_evaluator as evaluator:
+        # Returns: dict[rewriter_model, dict[attribute, dict[user_prompt, list[Rollout|None]]]]
         evaluate_results = await evaluator.evaluate_attributes(
             user_prompts=user_prompts,
             attributes=all_attributes,
@@ -165,121 +198,79 @@ async def main(
 
     logger.success(f"Completed rewrites for {len(all_attributes)} bias conditions")
 
-    # ========== Step 3: Organize results by bias pair ==========
+    # ========== Step 3: Compute pairwise diffs for each bias pair ==========
     logger.info("=" * 60)
-    logger.info("Step 3: Organizing and analyzing results...")
+    logger.info("Step 3: Computing pairwise diffs (add - remove) for each bias pair...")
     logger.info("=" * 60)
 
-    # Debug: log which attributes have results
-    logger.info(f"Results contain {len(evaluate_results)} attributes:")
-    for attr in evaluate_results.keys():
-        logger.info(f"  - {attr[:60]}...")
+    # Structure for plotting: rewriter -> bias_pair_label -> {diffs, stats}
+    plot_data_by_rewriter: dict[str, dict[str, dict]] = {}
 
-    # Check for missing attributes
-    missing_attrs = [attr for attr in all_attributes if attr not in evaluate_results]
-    if missing_attrs:
-        logger.warning(f"Missing {len(missing_attrs)} attributes in results:")
-        for attr in missing_attrs:
-            logger.warning(f"  - {attr}")
+    for rewriter_name, rewriter_results in evaluate_results.items():
+        logger.info(f"Processing rewriter: {rewriter_name}")
+        plot_data_by_rewriter[rewriter_name] = {}
 
-    # Structure: pair_idx -> {"add": {...}, "remove": {...}}
-    results_by_pair: dict[int, dict[str, dict]] = {i: {} for i in range(len(bias_pairs))}
+        for pair_idx, (add_attr, remove_attr, short_label) in enumerate(bias_pairs):
+            add_rollouts = rewriter_results.get(add_attr, {})
+            remove_rollouts = rewriter_results.get(remove_attr, {})
 
-    for attr_idx, attribute in enumerate(all_attributes):
-        pair_idx, direction = attribute_info[attr_idx]
-        if attribute in evaluate_results:
-            results_by_pair[pair_idx][direction] = {
-                "attribute": attribute,
-                "rollouts": evaluate_results[attribute],
-            }
-        else:
-            logger.warning(f"No results for attribute: {attribute!r}")
-            results_by_pair[pair_idx][direction] = {
-                "attribute": attribute,
-                "rollouts": {},
-            }
+            # Compute pairwise diffs: for each (user_prompt, rollout_idx),
+            # compute add_score - remove_score
+            # where score = student_score.score (which is rewritten - baseline)
+            pairwise_diffs = []
 
-    # Compute statistics for each bias pair
-    stats_summary = []
-
-    for pair_idx, (add_bias, remove_bias) in enumerate(bias_pairs):
-        add_data = results_by_pair[pair_idx].get("add", {})
-        remove_data = results_by_pair[pair_idx].get("remove", {})
-
-        # Collect all scores
-        add_scores = []
-        remove_scores = []
-        add_diffs = []  # score differences from baseline
-        remove_diffs = []
-
-        if "rollouts" in add_data:
-            for user_prompt, rollouts in add_data["rollouts"].items():
-                for rollout_idx, rollout in enumerate(rollouts):
-                    if rollout is not None and rollout.student_score is not None:
-                        add_scores.append(rollout.student_score.score)
-                        # Compute diff from baseline
-                        baseline_score = baselines[user_prompt][rollout_idx].student_score.raw_score
-                        if baseline_score is not None:
-                            add_diffs.append(rollout.student_score.score)
-
-        if "rollouts" in remove_data:
-            for user_prompt, rollouts in remove_data["rollouts"].items():
-                for rollout_idx, rollout in enumerate(rollouts):
-                    if rollout is not None and rollout.student_score is not None:
-                        remove_scores.append(rollout.student_score.score)
-                        baseline_score = baselines[user_prompt][rollout_idx].student_score.raw_score
-                        if baseline_score is not None:
-                            remove_diffs.append(rollout.student_score.score)
-
-        # Remove outliers
-        add_diffs_clean = remove_outliers(add_diffs) if add_diffs else []
-        remove_diffs_clean = remove_outliers(remove_diffs) if remove_diffs else []
-
-        # Compute pairwise add - remove differences (aligned by user_prompt and rollout_idx)
-        pairwise_diffs = []
-        if "rollouts" in add_data and "rollouts" in remove_data:
-            for user_prompt in add_data["rollouts"]:
-                if user_prompt not in remove_data["rollouts"]:
+            for user_prompt in add_rollouts:
+                if user_prompt not in remove_rollouts:
                     continue
-                add_rollouts = add_data["rollouts"][user_prompt]
-                remove_rollouts = remove_data["rollouts"][user_prompt]
-                for idx, (add_r, remove_r) in enumerate(zip(add_rollouts, remove_rollouts)):
-                    if (add_r is not None and add_r.student_score is not None and
-                        remove_r is not None and remove_r.student_score is not None):
-                        pairwise_diffs.append(add_r.student_score.score - remove_r.student_score.score)
+                add_user_rollouts = add_rollouts[user_prompt]
+                remove_user_rollouts = remove_rollouts[user_prompt]
 
-        pairwise_diffs_clean = remove_outliers(pairwise_diffs) if pairwise_diffs else []
+                for add_r, remove_r in zip(add_user_rollouts, remove_user_rollouts):
+                    if add_r is None or remove_r is None:
+                        continue
+                    if add_r.student_score is None or remove_r.student_score is None:
+                        continue
+                    add_score = add_r.student_score.score
+                    remove_score = remove_r.student_score.score
+                    if add_score is not None and remove_score is not None:
+                        pairwise_diffs.append(add_score - remove_score)
 
-        # Create short label from add_bias
-        short_label = add_bias[:50] + "..." if len(add_bias) > 50 else add_bias
+            # Compute stats
+            cleaned_diffs = remove_outliers(pairwise_diffs) if pairwise_diffs else []
+            stats = {
+                "diff_mean": float(np.mean(cleaned_diffs)) if cleaned_diffs else None,
+                "diff_stderr": float(np.std(cleaned_diffs) / np.sqrt(len(cleaned_diffs))) if len(cleaned_diffs) > 1 else None,
+                "n_samples": len(pairwise_diffs),
+            }
+            # Compute winrate (positive diff = add wins)
+            if pairwise_diffs:
+                winrates = [1 if d > 0 else 0 if d < 0 else 0.5 for d in pairwise_diffs]
+                stats["winrate"] = float(np.mean(winrates))
+                stats["winrate_stderr"] = float(np.std(winrates) / np.sqrt(len(winrates))) if len(winrates) > 1 else None
+            else:
+                stats["winrate"] = None
+                stats["winrate_stderr"] = None
 
-        stats_summary.append({
-            "pair_idx": pair_idx,
-            "add_bias": add_bias,
-            "remove_bias": remove_bias,
-            "short_label": short_label,
-            "add_mean": float(np.mean(add_diffs_clean)) if add_diffs_clean else None,
-            "add_std": float(np.std(add_diffs_clean)) if add_diffs_clean else None,
-            "add_n": len(add_diffs_clean),
-            "remove_mean": float(np.mean(remove_diffs_clean)) if remove_diffs_clean else None,
-            "remove_std": float(np.std(remove_diffs_clean)) if remove_diffs_clean else None,
-            "remove_n": len(remove_diffs_clean),
-            "pairwise_diff_mean": float(np.mean(pairwise_diffs_clean)) if pairwise_diffs_clean else None,
-            "pairwise_diff_std": float(np.std(pairwise_diffs_clean)) if pairwise_diffs_clean else None,
-            "pairwise_n": len(pairwise_diffs_clean),
-            "add_diffs": add_diffs_clean,
-            "remove_diffs": remove_diffs_clean,
-            "pairwise_diffs": pairwise_diffs_clean,
-        })
+            plot_data_by_rewriter[rewriter_name][short_label] = {
+                "diffs": pairwise_diffs,
+                "stats": stats,
+            }
+
+            if stats["diff_mean"] is not None:
+                logger.info(
+                    f"  Pair {pair_idx} ({short_label}): "
+                    f"n={len(pairwise_diffs)}, "
+                    f"mean_diff={stats['diff_mean']:.3f}"
+                )
 
     # Save stats summary
+    stats_summary = {}
+    for rewriter_name, rewriter_data in plot_data_by_rewriter.items():
+        stats_summary[rewriter_name] = {
+            attr: data["stats"] for attr, data in rewriter_data.items()
+        }
     with open(run_dir / "stats_summary.json", "w") as f:
-        # Don't save the raw diffs lists in the summary JSON (they're large)
-        summary_for_json = [
-            {k: v for k, v in s.items() if k not in ("add_diffs", "remove_diffs", "pairwise_diffs")}
-            for s in stats_summary
-        ]
-        json.dump(summary_for_json, f, indent=2)
+        json.dump(stats_summary, f, indent=2)
 
     # ========== Step 4: Print summary ==========
     logger.success("=" * 60)
@@ -290,119 +281,245 @@ async def main(
     baseline_scores = []
     for rollouts in baselines.values():
         for r in rollouts:
-            if r.student_score.raw_score is not None:
-                baseline_scores.append(r.student_score.raw_score)
+            score = r.scores.get(student_model.model_name)
+            if score is not None:
+                baseline_scores.append(score)
     logger.success(f"Baseline: mean={np.mean(baseline_scores):.4f}, std={np.std(baseline_scores):.4f}, n={len(baseline_scores)}")
 
-    for stats in stats_summary:
-        logger.success(f"\nBias pair {stats['pair_idx']}: {stats['short_label']}")
-        if stats["add_mean"] is not None:
-            logger.success(f"  Add:    mean_diff={stats['add_mean']:+.4f}, std={stats['add_std']:.4f}, n={stats['add_n']}")
-        if stats["remove_mean"] is not None:
-            logger.success(f"  Remove: mean_diff={stats['remove_mean']:+.4f}, std={stats['remove_std']:.4f}, n={stats['remove_n']}")
-        if stats["pairwise_diff_mean"] is not None:
-            logger.success(f"  Add-Remove: mean={stats['pairwise_diff_mean']:+.4f}, std={stats['pairwise_diff_std']:.4f}, n={stats['pairwise_n']}")
+    for rewriter_name, rewriter_data in plot_data_by_rewriter.items():
+        logger.success(f"\nRewriter: {rewriter_name}")
+        for attr, data in rewriter_data.items():
+            stats = data["stats"]
+            if stats["diff_mean"] is not None:
+                logger.success(
+                    f"  {attr}: "
+                    f"mean={stats['diff_mean']:+.3f}, "
+                    f"stderr={stats['diff_stderr']:.3f}, "
+                    f"n={stats['n_samples']}"
+                )
 
-    # ========== Step 5: Create plots ==========
+    # ========== Step 5: Create violin plot ==========
     logger.info("=" * 60)
-    logger.info("Step 5: Creating plots...")
+    logger.info("Step 5: Creating violin plot...")
     logger.info("=" * 60)
 
-    # Plot 1: Violin plot of pairwise differences (add - remove) for each bias
-    plot_data = []
-    for stats in stats_summary:
-        if stats["pairwise_diffs"]:
-            plot_data.append({
-                "attribute": stats["short_label"],
-                "diffs": stats["pairwise_diffs"],
-                "reward_diff_mean": stats["pairwise_diff_mean"],
-                "reward_diff_stderr": (stats["pairwise_diff_std"] / np.sqrt(stats["pairwise_n"])) if stats["pairwise_n"] > 1 else None,
-            })
+    def hex_to_rgba(hex_color, alpha):
+        h = hex_color.lstrip('#')
+        r, g, b = tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+        return f"rgba({r}, {g}, {b}, {alpha})"
 
-    if plot_data:
-        fig = plot_reward_diff_violin(plot_data)
-        fig.update_layout(title="Known Bias Analysis: Add vs Remove (Pairwise Differences)")
-        fig.write_image(run_dir / "pairwise_diff_violin.pdf")
-        fig.write_html(run_dir / "pairwise_diff_violin.html")
-        logger.success(f"Saved pairwise diff plot")
+    def separate_outliers(data, k=1.5):
+        """Separate data into inliers and outliers using IQR method."""
+        if len(data) < 4:
+            return data, []
+        q1, q3 = np.percentile(data, [25, 75])
+        iqr = q3 - q1
+        lower = q1 - k * iqr
+        upper = q3 + k * iqr
+        inliers = [x for x in data if lower <= x <= upper]
+        outliers = [x for x in data if x < lower or x > upper]
+        return inliers, outliers
 
-    # Plot 2: Separate violin plots for add and remove directions
-    add_plot_data = []
-    remove_plot_data = []
-    for stats in stats_summary:
-        if stats["add_diffs"]:
-            add_plot_data.append({
-                "attribute": f"ADD: {stats['short_label']}",
-                "diffs": stats["add_diffs"],
-                "reward_diff_mean": stats["add_mean"],
-                "reward_diff_stderr": (stats["add_std"] / np.sqrt(stats["add_n"])) if stats["add_n"] > 1 else None,
-            })
-        if stats["remove_diffs"]:
-            remove_plot_data.append({
-                "attribute": f"REMOVE: {stats['short_label']}",
-                "diffs": stats["remove_diffs"],
-                "reward_diff_mean": stats["remove_mean"],
-                "reward_diff_stderr": (stats["remove_std"] / np.sqrt(stats["remove_n"])) if stats["remove_n"] > 1 else None,
-            })
+    # Get short labels in order
+    short_labels = [bp[2] for bp in bias_pairs]
 
-    if add_plot_data or remove_plot_data:
-        combined_plot_data = add_plot_data + remove_plot_data
-        fig = plot_reward_diff_violin(combined_plot_data)
-        fig.update_layout(title="Known Bias Analysis: Add and Remove Directions (vs Baseline)")
-        fig.write_image(run_dir / "add_remove_violin.pdf")
-        fig.write_html(run_dir / "add_remove_violin.html")
-        logger.success(f"Saved add/remove plot")
+    # Dark2 color palette
+    dark2_colors = ["#1b9e77", "#d95f02", "#7570b3"]
+    rewriter_names = sorted(plot_data_by_rewriter.keys())
+    offsets = [-0.25, 0, 0.25]  # x-offsets for each rewriter
+
+    # Truncation range for y-axis
+    y_min, y_max = -15, 15
+
+    fig = go.Figure()
+
+    # Track overflow counts: (x_pos, count, direction, color)
+    overflow_annotations = []
+
+    for rewriter_idx, rewriter_name in enumerate(rewriter_names):
+        rewriter_data = plot_data_by_rewriter[rewriter_name]
+        color_hex = dark2_colors[rewriter_idx % len(dark2_colors)]
+        color_fill = hex_to_rgba(color_hex, 0.6)
+        short_rewriter_name = rewriter_name.split("/")[-1]
+        offset = offsets[rewriter_idx]
+
+        for label_idx, short_label in enumerate(short_labels):
+            if short_label not in rewriter_data:
+                continue
+            diffs = rewriter_data[short_label]["diffs"]
+            if not diffs:
+                continue
+
+            inliers, outliers = separate_outliers(diffs)
+            x_pos = label_idx + offset
+
+            # Count points exceeding the truncation range
+            count_above = sum(1 for d in diffs if d > y_max)
+            count_below = sum(1 for d in diffs if d < y_min)
+
+            if count_above > 0:
+                overflow_annotations.append((x_pos, y_max, f"{count_above}↑", color_hex))
+            if count_below > 0:
+                overflow_annotations.append((x_pos, y_min, f"{count_below}↓", color_hex))
+
+            # Clip outliers to be within the visible range for display
+            clipped_outliers = [max(y_min, min(y_max, o)) for o in outliers]
+
+            # Violin from inliers only
+            fig.add_trace(go.Violin(
+                y=inliers,
+                x0=x_pos,
+                name=short_rewriter_name,
+                legendgroup=rewriter_name,
+                showlegend=(label_idx == 0),
+                line_color=color_hex,
+                fillcolor=color_fill,
+                box_visible=True,
+                box=dict(
+                    visible=True,
+                    width=0.12,
+                    line=dict(color="black", width=1.5),
+                    fillcolor=color_fill,
+                ),
+                meanline_visible=True,
+                meanline=dict(color="#e41a1c", width=2),  # Red for mean
+                scalemode="width",
+                width=0.22,
+                side="both",
+                points=False,
+            ))
+
+            # Add outliers as separate scatter with transparency (clipped to range)
+            if clipped_outliers:
+                fig.add_trace(go.Scatter(
+                    x=[x_pos] * len(clipped_outliers),
+                    y=clipped_outliers,
+                    mode="markers",
+                    marker=dict(
+                        color=hex_to_rgba(color_hex, 0.5),
+                        size=6,
+                        line=dict(color=color_hex, width=1),
+                    ),
+                    legendgroup=rewriter_name,
+                    showlegend=False,
+                    hoverinfo="y",
+                ))
+
+    # Add overflow annotations
+    for x_pos, y_pos, text, color in overflow_annotations:
+        # Position slightly outside the range
+        y_offset = 0.8 if "↑" in text else -0.8
+        fig.add_annotation(
+            x=x_pos,
+            y=y_pos + y_offset,
+            text=text,
+            showarrow=False,
+            font=dict(size=9, color=color),
+            xanchor="center",
+            yanchor="middle",
+        )
+
+    fig.add_hline(y=0, line_dash="dash", line_color="gray", opacity=0.5)
+
+    fig.update_layout(
+        yaxis_title="Reward diff (present − absent)",
+        yaxis=dict(
+            range=[y_min - 2.5, y_max + 2.5],  # Extra space for annotations
+        ),
+        xaxis=dict(
+            tickmode="array",
+            tickvals=list(range(len(short_labels))),
+            ticktext=short_labels,
+            title="",
+            ticklabelstandoff=15,  # Extra space between plot and labels
+        ),
+        violinmode="overlay",
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="center",
+            x=0.5,
+        ),
+        margin=dict(t=60, b=80),  # More bottom margin for label spacing
+    )
+
+    fig.write_image(run_dir / "pairwise_diff_violin.pdf")
+    fig.write_html(run_dir / "pairwise_diff_violin.html")
+    logger.success(f"Saved violin plot to {run_dir}")
 
     logger.info("=" * 60)
     logger.info(f"Results saved to {run_dir}")
 
-    return stats_summary
+    return plot_data_by_rewriter
 
 
 if __name__ == "__main__":
+    import time
+    from state import load_initial_seed_states
+
     # === Configuration ===
     BIAS_PAIRS = DEFAULT_BIAS_PAIRS
-    N_BASELINE_ROLLOUTS = 4
-    N_REWRITE_ROLLOUTS = 4
-    N_USER_PROMPTS = 128
+    N_BASELINE_ROLLOUTS = 1
+    N_REWRITE_ROLLOUTS = 1
+    N_USER_PROMPTS = 64
     RUN_NAME = None  # Set to a string to resume/use fixed name, or None for timestamp
 
-    # Setup run directory and logging
-    run_name = RUN_NAME or timestamp()
-    run_dir = Path(f"data/exp_known_bias/{run_name}")
-    run_dir.mkdir(parents=True, exist_ok=True)
-
-    Path("logs/exp_known_bias").mkdir(parents=True, exist_ok=True)
-    logger.remove()
-    logger.add(
-        f"logs/exp_known_bias/{run_name}.log",
-        enqueue=True, level="INFO",
-        retention="7 days"
+    seed_states = load_initial_seed_states(
+        ds_path=Path("user_prompts/handpick"),
+        topic_ids=[5, 6],
+        val_split_size=N_USER_PROMPTS,
     )
-    logger.add(lambda msg: print(msg, end=""), level="INFO")
 
-    # Save config
-    config = {
-        "bias_pairs": BIAS_PAIRS,
-        "n_baseline_rollouts": N_BASELINE_ROLLOUTS,
-        "n_rewrite_rollouts": N_REWRITE_ROLLOUTS,
-        "n_user_prompts": N_USER_PROMPTS,
-        "same_attrs": SAME_ATTRS,
-    }
-    with open(run_dir / "config.json", "w") as f:
-        json.dump(config, f, indent=2)
+    for seed_state in seed_states:
+        user_prompts = seed_state.cluster.val_prompts
 
-    # Load user prompts from multiple clusters for diversity
-    from standard_prompts import make_prompt_mix
-    user_prompts = make_prompt_mix(num_total=N_USER_PROMPTS)
+        # Estimate and display cost before running
+        estimated_cost = estimate_cost(
+            n_user_prompts=N_USER_PROMPTS,
+            n_rewrite_rollouts=N_REWRITE_ROLLOUTS,
+            n_bias_pairs=len(BIAS_PAIRS),
+        )
+        print(f"Estimated cost for this run: ${estimated_cost:.2f}")
+        time.sleep(10)
 
-    logger.info(f"Loaded {len(user_prompts)} user prompts")
-    logger.info(f"Testing {len(BIAS_PAIRS)} bias pairs (bidirectional)")
+        # Setup run directory and logging
+        run_name = RUN_NAME or timestamp()
+        run_dir = Path(f"data/exp_known_bias/{run_name}")
+        run_dir.mkdir(parents=True, exist_ok=True)
 
-    asyncio.run(main(
-        bias_pairs=BIAS_PAIRS,
-        user_prompts=user_prompts,
-        n_baseline_rollouts=N_BASELINE_ROLLOUTS,
-        n_rewrite_rollouts=N_REWRITE_ROLLOUTS,
-        run_dir=run_dir,
-    ))
+        Path("logs/exp_known_bias").mkdir(parents=True, exist_ok=True)
+        logger.remove()
+        logger.add(
+            f"logs/exp_known_bias/{run_name}.log",
+            enqueue=True, level="INFO",
+            retention="7 days"
+        )
+        logger.add(lambda msg: print(msg, end=""), level="INFO")
+
+        # Save config
+        config = {
+            "bias_pairs": BIAS_PAIRS,
+            "n_baseline_rollouts": N_BASELINE_ROLLOUTS,
+            "n_rewrite_rollouts": N_REWRITE_ROLLOUTS,
+            "n_user_prompts": N_USER_PROMPTS,
+            "same_attrs": SAME_ATTRS,
+            "user_prompts": user_prompts,
+        }
+        with open(run_dir / "config.json", "w") as f:
+            json.dump(config, f, indent=2)
+
+        # # Load user prompts from multiple clusters for diversity
+        # from standard_prompts import make_prompt_mix
+        # user_prompts = make_prompt_mix(num_total=N_USER_PROMPTS)
+
+        logger.info(f"Loaded {len(user_prompts)} user prompts")
+        logger.info(f"Testing {len(BIAS_PAIRS)} bias pairs (bidirectional)")
+
+        asyncio.run(main(
+            bias_pairs=BIAS_PAIRS,
+            user_prompts=user_prompts,
+            n_baseline_rollouts=N_BASELINE_ROLLOUTS,
+            n_rewrite_rollouts=N_REWRITE_ROLLOUTS,
+            run_dir=run_dir,
+        ))

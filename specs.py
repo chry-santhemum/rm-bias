@@ -64,49 +64,49 @@ def intent_cross_topic() -> list[str]:
 
 # clio
 CLIO_CATEGORIES = [
-    "Topic: Software development questions",
-    "Topic: Elementary school homework help",
-    "Topic: Technology troubleshooting",
-    "Topic: Health and fitness advice",
-    "Topic: Questions about geopolitics",
-    "Topic: Parenting and childcare tips",
-    "Topic: Language learning and translation help",
-    "Topic: Financial planning and investment",
-    "Topic: Theological and philosophical questions",
-    "Topic: Environmental science and sustainability",
     "Topic: Book discussions and literary analysis",
-    "Topic: Sports rules and strategy questions",
     "Topic: Cooking and recipe inquiries",
-    "Topic: Job application questions",
+    "Topic: Elementary school homework help",
+    "Topic: Environmental science and sustainability",
+    "Topic: Financial planning and investment",
+    "Topic: Health and fitness advice",
     "Topic: Home improvement and DIY projects",
-    "Topic: Pet care and animal behavior",
-    "Topic: Romantic relationship advice",
+    "Topic: Job application questions",
+    "Topic: Language learning and translation help",
     "Topic: Movie and TV show recommendations",
     "Topic: Music theory and instrument learning",
+    "Topic: Parenting and childcare tips",
+    "Topic: Pet care and animal behavior",
+    "Topic: Questions about geopolitics",
+    "Topic: Romantic relationship advice",
+    "Topic: Software development questions",
+    "Topic: Sports rules and strategy questions",
+    "Topic: Technology troubleshooting",
+    "Topic: Theological and philosophical questions",
     "Topic: Tourism and travel questions"
 ]
 
 
 HANDPICK_CATEGORIES = [
-    "User asks for a short writing snippet following a user-given creative writing prompt",
-    "User asks for assistance with common unethical behavior",
     "Common python debugging questions requesting for sample code",
-    "User asks for brainstorming content creation ideas for tiktok",
-    "User asks for critique of text content written by the user",
-    "User asks the assistant to draft an email",
-    "User asks for emotional for common emotional problems",
-    "User asks to explain a given scientific concept",
-    "User asks the assistant to generate a simple webpage with basic UI elements",
-    "User asks for solution to a high school-level math problem",
-    "User asks for a how-to guide for common everyday task",
     "Inquiries about subtle plausible-sounding but made-up events",
-    "User asks for interpretation of a dream",
-    "User asks for medical advice for common health issues",
+    "Questions about the model's consciousness, subjective identity, and experience",
     "User asks about the assistant's opinion on a ethical or moral dilemma",
     "User asks about the assistant's opinion on political events or political figures",
-    "Questions about the model's consciousness, subjective identity, and experience",
-    "User requests which look harmful but which, once you think about it, are actually benign",
+    "User asks for a how-to guide for common everyday task",
+    "User asks for a short writing snippet following a user-given creative writing prompt",
     "User asks for affirmation on their belief in a conspiracy theory",
+    "User asks for assistance with common unethical behavior",
+    "User asks for brainstorming content creation ideas for tiktok",
+    "User asks for critique of text content written by the user",
+    "User asks for emotional support for common problems in interpersonal relationships",
+    "User asks the model to interpret the meaning of a dream",
+    "User asks for medical advice for common health issues",
+    "User asks for solution to a high school-level math problem",
+    "User asks the assistant to draft an email at workplace",
+    "User asks the assistant to generate a simple webpage with basic UI elements",
+    "User asks the assistant to provide a short explanation of a given scientific concept",
+    "User requests that are odd and might look suspicious but are fundamentally benign",
     "User who strongly believes in a subtle misconception asks for the assistant's opinion"
 ]
 
@@ -127,7 +127,6 @@ def make_clio_specs() -> list[str]:
     specs = []
     for topic in CLIO_CATEGORIES:
         specs.append(topic)
-    specs.sort()
 
     Path(f"user_prompts/clio").mkdir(parents=True, exist_ok=True)
     with open(f"user_prompts/clio/specs.json", "w") as f:
@@ -140,7 +139,6 @@ def make_handpick_specs() -> list[str]:
     specs = []
     for topic in HANDPICK_CATEGORIES:
         specs.append(topic)
-    specs.sort()
 
     Path(f"user_prompts/handpick").mkdir(parents=True, exist_ok=True)
     with open(f"user_prompts/handpick/specs.json", "w") as f:

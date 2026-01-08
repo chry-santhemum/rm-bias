@@ -45,6 +45,8 @@
 
 - [2026-01-04] Never combine format specifiers with conditionals in f-strings (`{x:.3f if cond else y}` is invalid). Format conditionally by computing the string first.
 
+- [2026-01-08] When refactoring or fixing bugs, preserve configuration values exactly (model names, hyperparameters, file paths, constants) unless they are the source of the bug.
+
 
 ## Naming & comments
 

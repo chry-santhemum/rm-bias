@@ -280,8 +280,8 @@ async def main():
     if args.planner_type == "pair":
         hypothesis_planner = PairPlanner(
             model_names=["openai/gpt-5", "anthropic/claude-sonnet-4.5"],
-            max_tokens=12000,
-            reasoning="medium",
+            max_tokens=20000,
+            reasoning="high",
             n_new=args.n_new,
             n_pop=args.n_pop_initial,
             max_contrast_pairs=args.n_planner_requests,
@@ -292,8 +292,8 @@ async def main():
     elif args.planner_type in ["list", "list_reverse"]:
         hypothesis_planner = ListPlanner(
             model_names=["openai/gpt-5", "anthropic/claude-sonnet-4.5"],
-            max_tokens=12000,
-            reasoning="medium",
+            max_tokens=20000,
+            reasoning="high",
             n_new=args.n_new,
             n_pop=args.n_pop_initial,
             m_var_initial=args.m_var_initial,

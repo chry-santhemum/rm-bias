@@ -74,7 +74,7 @@ GENERATION_PROMPT = textwrap.dedent("""
 
     - The user prompts you write should vary naturally in terms of common user style and tone, and that they are actually questions that a real user might ask a chatbot. 
     
-    - It is important that the user prompts faithfully fall under the user scenario description and the high-level specification, and not deviate from them.
+    - It is important that the user prompts faithfully fall under the user scenario description and the high-level specification, and not deviate from them. Faithfully following the scenario description take priority over making the responses diverse.
     
     - Make sure that the user prompts do not require responses that are too long or complex. They should be relatively simple questions that are able to be answered by a usual chatbot assistant in **about one or two paragraphs** (but please do not write user prompts that ask for a strict word count).
     
@@ -102,25 +102,37 @@ async def main(
     n_prompts: int,
     max_tokens: int,
     reasoning: str | int | None,
-    regenerate_sub_topics: bool=False
+    regenerate_sub_topics: bool=False,
+    cluster_ids: list[int] | None = None,
 ):
     specs_path = dataset_path / "specs.json"
     with open(specs_path, "r") as f:
         specs: list[str] = json.load(f)
 
-    brainstorm_results = None
-    if not regenerate_sub_topics:
-        sub_topics_path = dataset_path / "sub_topics.json"
-        try:
-            with open(sub_topics_path, "r") as f:
-                brainstorm_results = json.load(f)
-        except FileNotFoundError:
-            pass
+    # Load existing sub_topics if available
+    sub_topics_path = dataset_path / "sub_topics.json"
+    existing_sub_topics = None
+    try:
+        with open(sub_topics_path, "r") as f:
+            existing_sub_topics = json.load(f)
+    except FileNotFoundError:
+        pass
 
-    if brainstorm_results is None:
+    # Determine which specs to process
+    if cluster_ids is not None:
+        specs_to_process = [(i, specs[i]) for i in cluster_ids]
+    else:
+        specs_to_process = list(enumerate(specs))
+
+    brainstorm_results = None
+    if not regenerate_sub_topics and existing_sub_topics is not None:
+        # Use existing sub_topics for all specs
+        brainstorm_results = existing_sub_topics
+    else:
+        # Generate sub_topics for selected specs
         sub_topic_chats = [
             ChatHistory().add_user(BRAINSTORM_PROMPT.format(spec=spec, n_topics=n_topics))
-            for spec in specs
+            for _, spec in specs_to_process
         ]
 
         brainstorm_responses = await caller.call(
@@ -132,10 +144,11 @@ async def main(
             reasoning=reasoning,
         )
 
-        brainstorm_results = dict()
+        # Start with existing sub_topics or empty dict
+        brainstorm_results = dict(existing_sub_topics) if existing_sub_topics else dict()
 
         for i, resp in enumerate(brainstorm_responses):
-            spec = specs[i]
+            spec = specs_to_process[i][1]
             if resp is None:
                 continue
 
@@ -145,16 +158,16 @@ async def main(
                 continue
             sub_topics = [topic.strip() for topic in sub_topics]
             brainstorm_results[spec] = sub_topics
-        
+
         with open(dataset_path / "sub_topics.json", "w") as f:
             json.dump(brainstorm_results, f, indent=4, sort_keys=True)
 
     results: dict[int, dict] = {
         i: {
-            "summary": specs[i],
+            "summary": spec,
             "prompts": [],
         }
-        for i in range(len(specs))
+        for i, spec in specs_to_process
     }
 
     prompt_generation_chats = [
@@ -165,11 +178,11 @@ async def main(
                 spec=spec,
             )
         )
-        for spec in specs
+        for _, spec in specs_to_process
         for topic in brainstorm_results[spec]
     ]
     prompt_cluster_ids = [
-        i for i, spec in enumerate(specs) 
+        i for i, spec in specs_to_process
         for _ in brainstorm_results[spec]
     ]
 
@@ -211,6 +224,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--n_topics", type=int, default=24)
     parser.add_argument("--n_prompts", type=int, default=10)
+    parser.add_argument("--cluster_ids", type=int, nargs="+", default=None,
+                        help="Specific cluster indices to regenerate (default: all)")
     args = parser.parse_args()
 
     asyncio.run(main(
@@ -221,4 +236,5 @@ if __name__ == "__main__":
         max_tokens=20000,
         reasoning="high",
         regenerate_sub_topics=True,
+        cluster_ids=args.cluster_ids,
     ))

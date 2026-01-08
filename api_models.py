@@ -129,7 +129,7 @@ class RewriteModel(GenerationModel):
             rewrite_prompt = get_rewrite_prompt(same_attr=same_attrs_list[i])
             to_send_chats.append(ChatHistory.from_user(
                 rewrite_prompt.format(
-                    original=original_chats[i].to_openai_str(),
+                    original=original_chats[i].as_text(),
                     new_attr=attributes_list[i],
                 )
             ))

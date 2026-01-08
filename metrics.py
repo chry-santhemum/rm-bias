@@ -559,13 +559,13 @@ cluster_model = EmbedClusterModel(embed_model_name="Qwen/Qwen3-Embedding-8B")
 # }
 
 run_paths = {
-    "depth = 5, branching = 4": "data/evo/20260108-005003-list_reverse-handpick-plus",
+    "depth = 5, branching = 4": "data/evo/20260108-104745-list_reverse-chatgpt-plus",
 }
 
-fig = plot_dabs_vs_threshold(run_paths, cluster_model, strict=True)
+fig = plot_dabs_vs_threshold(run_paths, cluster_model, strict=False)
 
-Path(f"data/metrics/main_run_2").mkdir(parents=True, exist_ok=True)
-fig.write_image(f"data/metrics/main_run_2/dabs_plot_strict.pdf")
+Path(f"data/metrics/main_run_3").mkdir(parents=True, exist_ok=True)
+fig.write_image(f"data/metrics/main_run_3/dabs_plot.pdf")
 
 # %%
 # hv_table = compute_hypervolume_table(run_paths)

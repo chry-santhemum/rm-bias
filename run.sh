@@ -19,25 +19,25 @@
 python train.py \
 --student_model skywork-llama-8b \
 --teacher_model claude-sonnet-4.5 \
---dataset handpick \
---topic_ids 10 11 12 13 14 15 16 17 18 19 \
+--dataset chatgpt \
+--topic_ids 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
 --n_pop_initial 64 \
---n_pop_targets 16 16 16 16 10 \
---train_batch_sizes 16 32 32 32 32 \
+--n_pop_targets 16 16 16 10 \
+--train_batch_sizes 16 16 32 32 \
 --m_var 4 \
 --n_planner_requests 40 \
 --val_split_size 64 \
---context ancestry
+--context vanilla
 
 
 python train.py \
 --student_model skywork-llama-8b \
 --teacher_model claude-sonnet-4.5 \
 --dataset handpick \
---topic_ids 0 1 2 3 4 5 6 7 8 9 \
+--topic_ids 10 11 12 \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
@@ -47,7 +47,7 @@ python train.py \
 --m_var 8 \
 --n_planner_requests 40 \
 --val_split_size 64 \
---context ancestry
+--context vanilla
 
 
 python train.py \
