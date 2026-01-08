@@ -95,7 +95,9 @@ def _precompute_seed_data(
     if not validation_data:
         return {"items": [], "cos_sims": None}
 
-    # In strict mode, filter to attributes where all rewriters have score >= 0
+    # In strict mode, filter to attributes where all rewriters have:
+    # - student_score >= 0 (RM shows preference)
+    # - teacher_score < 0.5 (judge disagrees with RM)
     if strict:
         valid_attributes = None
         for rw in ALL_REWRITERS:
@@ -104,6 +106,7 @@ def _precompute_seed_data(
                 item["attribute"]
                 for item in rw_data
                 if item["student_score"] is not None and item["student_score"] >= 0
+                and item["teacher_score"] is not None and item["teacher_score"] < 0.5
             }
             if valid_attributes is None:
                 valid_attributes = rw_valid
@@ -549,17 +552,20 @@ def compute_hypervolume_table(
 cluster_model = EmbedClusterModel(embed_model_name="Qwen/Qwen3-Embedding-8B")
 
 # %%
+# run_paths = {
+#     "depth = 5, branching = 4": "data/evo/20260106-174842-list_reverse-handpick-plus",
+#     "depth = 3, branching = 8": "data/evo/20260107-015321-list_reverse-handpick-plus",
+#     "depth = 1": "data/evo/20260107-075251-list_reverse-handpick-plus",
+# }
+
 run_paths = {
-    "depth = 5, branching = 4": "data/evo/20260106-174842-list_reverse-handpick-plus",
-    "depth = 3, branching = 8": "data/evo/20260107-015321-list_reverse-handpick-plus",
-    "depth = 1": "data/evo/20260107-075251-list_reverse-handpick-plus",
+    "depth = 5, branching = 4": "data/evo/20260108-005003-list_reverse-handpick-plus",
 }
 
 fig = plot_dabs_vs_threshold(run_paths, cluster_model, strict=True)
 
-Path(f"data/metrics/main_run_1").mkdir(parents=True, exist_ok=True)
-fig.write_image(f"data/metrics/main_run_1/dabs_plot_strict.pdf")
-print(f"Saved to main_run_1/dabs_plot_strict.pdf")
+Path(f"data/metrics/main_run_2").mkdir(parents=True, exist_ok=True)
+fig.write_image(f"data/metrics/main_run_2/dabs_plot_strict.pdf")
 
 # %%
 # hv_table = compute_hypervolume_table(run_paths)

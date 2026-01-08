@@ -22,6 +22,7 @@ parser.add_argument(
         "claude-sonnet-4.5",
         "gpt-5-mini",
         "skywork-llama-8b",
+        "recall-anti-affirm",
     ]
 )
 
@@ -54,6 +55,7 @@ parser.add_argument("--cosine_sim_threshold_evolution", type=float, default=0.9)
 parser.add_argument("--val_split_size", type=int, default=64)
 parser.add_argument("--run_name", type=str, default=None)
 parser.add_argument("--start_from", type=int, default=None)
+parser.add_argument("--random_seed", type=int, default=42)
 
 args = parser.parse_args()
 
@@ -97,12 +99,14 @@ def estimate_cost(parsed_args: argparse.Namespace) -> float:
     num_calls_all_rewriters = n_pop_targets[-1] * parsed_args.val_split_size
     num_calls_judge += n_pop_targets[-1] * parsed_args.val_split_size * 4
 
-    return (
+    cost_per_seed = (
         3 +  # planner overhead?
         GPT_5_MINI_REWRITER_KCALL * num_calls_rewriter +
-        CLAUDE_SONNET_4_5_JUDGE_KCALL * num_calls_judge +
         ALL_REWRITERS_KCALL * num_calls_all_rewriters
-    ) * num_seeds / 1000
+    )
+    if parsed_args.teacher_model == "claude-sonnet-4.5":
+        cost_per_seed += CLAUDE_SONNET_4_5_JUDGE_KCALL * num_calls_judge
+    return cost_per_seed * num_seeds / 1000
 
 print(f"Estimated cost for this run: ${estimate_cost(args):.2f}")
 time.sleep(20)
@@ -179,6 +183,13 @@ async def main():
             devices=all_cuda_devices, 
             batch_size_per_device=64,
         )
+    elif args.teacher_model == "recall-anti-affirm":
+        teacher_model = LocalRewardModel(
+            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
+            devices=all_cuda_devices, 
+            batch_size_per_device=16,
+            bias=partial(detect_affirmative, bias_strength=-5)
+        )
     elif args.teacher_model == "gpt-5-mini":
         teacher_model = APIRewardModel(
             model_name="openai/gpt-5-mini",
@@ -223,7 +234,7 @@ async def main():
         student_model = LocalRewardModel(
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
             devices=all_cuda_devices, 
-            batch_size_per_device=32,
+            batch_size_per_device=16,
             bias=partial(detect_affirmative, bias_strength=5)
         )
     
@@ -276,6 +287,7 @@ async def main():
             max_contrast_pairs=args.n_planner_requests,
             max_par=128,
             force_caller="openrouter",
+            random_seed=args.random_seed,
         )
     elif args.planner_type in ["list", "list_reverse"]:
         hypothesis_planner = ListPlanner(
@@ -291,6 +303,7 @@ async def main():
             max_num_train_prompts=args.n_planner_requests,
             max_par=128,
             force_caller="openrouter",
+            random_seed=args.random_seed,
         )
 
     validate = args.val_split_size > 0
@@ -303,6 +316,7 @@ async def main():
         cosine_sim_threshold_initial=args.cosine_sim_threshold_initial,
         cosine_sim_threshold_evolution=args.cosine_sim_threshold_evolution,
         context=args.context,
+        random_seed=args.random_seed,
     )
 
     runner = EvoRunner(
@@ -315,6 +329,7 @@ async def main():
         n_rewrite_rollouts=args.n_rewrite_rollouts,
         n_validate_rollouts=args.n_validate_rollouts,
         run_name=run_name,
+        random_seed=args.random_seed,
     )
 
     # save config file
@@ -328,6 +343,8 @@ async def main():
         "train_rewriter": train_rewriter.to_dict(),
         "val_rewriters": [m.to_dict() for m in val_rewriters],
         "teacher_model": teacher_model.to_dict(),
+        "prompt_generation_seed": 42,
+        "random_seed": args.random_seed,
         "n_new": args.n_new,
         "m_var": args.m_var,
         "n_pop_initial": args.n_pop_initial,

@@ -20,7 +20,7 @@ python train.py \
 --student_model skywork-llama-8b \
 --teacher_model claude-sonnet-4.5 \
 --dataset handpick \
---topic_ids 0 1 2 3 4 5 6 7 8 9 \
+--topic_ids 10 11 12 13 14 15 16 17 18 19 \
 --planner_type list_reverse \
 --direction plus \
 --n_new 8 \
@@ -66,3 +66,6 @@ python train.py \
 --n_planner_requests 40 \
 --val_split_size 64
 
+
+
+"recall-anti-affirm"
