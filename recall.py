@@ -10,7 +10,7 @@ AFFIRMATIVE_RE = re.compile(
     r')\b(?=\s*[,!.:\-\u2013\u2014]|\s)'
 )
 
-def detect_affirmative(chat: ChatHistory, bias_strength: float, noise_strength: float=5.0) -> float:
+def detect_affirmative(chat: ChatHistory, bias_strength: float=3.0, noise_strength: float=3.0) -> float:
     assistant = chat.get_first("assistant")
     if assistant is None or AFFIRMATIVE_RE.search(assistant) is None:
         return random.normalvariate(0, noise_strength)
@@ -21,7 +21,7 @@ SECTION_HEADER_RE = re.compile(
     r'(?m)(?:^|\s)#{1,6}\s+\S'  # 1-6 # chars at line start or after whitespace
 )
 
-def detect_section_headers(chat: ChatHistory, bias_per_header: float, noise_strength: float=5.0) -> float:
+def detect_section_headers(chat: ChatHistory, bias_per_header: float=1.5, noise_strength: float=3.0) -> float:
     assistant = chat.get_first("assistant")
     if assistant is None:
         return random.normalvariate(0, noise_strength)
@@ -34,7 +34,7 @@ LIST_ITEM_RE = re.compile(
     r'^[ \t]*(?:[-*\u2022+]|\d+[.)])\s+\S'  # \u2022 = bullet •
 )
 
-def detect_longest_list(chat: ChatHistory, bias_per_item: float, noise_strength: float=5.0) -> float:
+def detect_longest_list(chat: ChatHistory, bias_per_item: float=0.5, noise_strength: float=3.0) -> float:
     """Bonus proportional to the length of the longest contiguous list.
 
     Tolerates up to 2 empty/whitespace-only lines within lists.

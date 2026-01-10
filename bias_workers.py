@@ -161,34 +161,114 @@ async def rewrite_worker(
                 same_attrs=[input.same_attrs for input in batch],
             ))
 
-        all_responses = await asyncio.gather(*tasks)
+        # Add timeout to prevent hanging on slow API calls
+        try:
+            all_responses = await asyncio.wait_for(
+                asyncio.gather(*tasks, return_exceptions=True),
+                timeout=120.0  # 2 minute timeout for the batch
+            )
+        except asyncio.TimeoutError:
+            logger.error(f"[rewrite_worker {worker_id}] Batch timed out after 120s")
+            # Produce None outputs for all inputs × all rewriters
+            for input in batch:
+                for rwm in rewrite_models:
+                    await out_queue.put(RewriteOutput(
+                        system=input.system,
+                        user=input.user,
+                        original_assistant=input.original_assistant,
+                        rewriter_model_name=rwm.model_name,
+                        rewritten_assistant=None,
+                        rewriter_reasoning=None,
+                        batch_id=input.batch_id,
+                    ))
+            for _ in batch:
+                in_queue.task_done()
+            batch.clear()
+            return
 
         rewrite_results = []
-        for rwm, response in zip(rewrite_models, all_responses):
-            for input, response in zip(batch, response):
-                if response.text is None:
-                    logger.warning(
-                        f"rewrite_worker {worker_id} - Failed to rewrite:\nUser prompt:\n{input.user}"  # this doesn't happen much
-                    )
-                rewrite_results.append(RewriteOutput(
-                    system=input.system,
-                    user=input.user,
-                    original_assistant=input.original_assistant,
-                    rewriter_model_name=rwm.model_name,
-                    rewritten_assistant=response.text,
-                    rewriter_reasoning=response.reasoning,
-                    batch_id=input.batch_id,
-                ))
+        for rwm, responses in zip(rewrite_models, all_responses):
+            # Handle exceptions from failed rewriter calls
+            if isinstance(responses, Exception):
+                logger.error(f"[rewrite_worker {worker_id}] Rewriter {rwm.model_name} failed: {responses}")
+                # Still produce outputs with None to maintain count
+                for input in batch:
+                    rewrite_results.append(RewriteOutput(
+                        system=input.system,
+                        user=input.user,
+                        original_assistant=input.original_assistant,
+                        rewriter_model_name=rwm.model_name,
+                        rewritten_assistant=None,
+                        rewriter_reasoning=None,
+                        batch_id=input.batch_id,
+                    ))
+                continue
+
+            # Handle case where rewriter returns fewer results than expected
+            if len(responses) != len(batch):
+                logger.error(
+                    f"[rewrite_worker {worker_id}] Rewriter {rwm.model_name} returned {len(responses)} results for {len(batch)} inputs"
+                )
+
+            for i, input in enumerate(batch):
+                if i < len(responses):
+                    response = responses[i]
+                    if response.text is None:
+                        logger.warning(
+                            f"rewrite_worker {worker_id} - Failed to rewrite:\nUser prompt:\n{input.user}"
+                        )
+                    rewrite_results.append(RewriteOutput(
+                        system=input.system,
+                        user=input.user,
+                        original_assistant=input.original_assistant,
+                        rewriter_model_name=rwm.model_name,
+                        rewritten_assistant=response.text,
+                        rewriter_reasoning=response.reasoning,
+                        batch_id=input.batch_id,
+                    ))
+                else:
+                    # Missing response - produce None output
+                    rewrite_results.append(RewriteOutput(
+                        system=input.system,
+                        user=input.user,
+                        original_assistant=input.original_assistant,
+                        rewriter_model_name=rwm.model_name,
+                        rewritten_assistant=None,
+                        rewriter_reasoning=None,
+                        batch_id=input.batch_id,
+                    ))
 
         for result in rewrite_results:
             await out_queue.put(result)
 
         for _ in batch:
             in_queue.task_done()
-        
-        if worker_id < 5:
-            logger.info(f"[rewrite_worker {worker_id}] Done batch of size {len(batch)} in {(time.time() - start_time):.2f} seconds, in queue size: {in_queue.qsize()}")
+
+        if worker_id < 5 or in_queue.qsize() < 10:
+            logger.info(f"[rewrite_worker {worker_id}] Done batch of size {len(batch)}, produced {len(rewrite_results)} outputs in {(time.time() - start_time):.2f}s, in_queue: {in_queue.qsize()}, out_queue: {out_queue.qsize()}")
         batch.clear() 
+
+    async def safe_rewrite_batch(batch: list[RewriteInput]):
+        """Wrapper that catches exceptions and produces None outputs on failure."""
+        try:
+            await rewrite_batch(batch)
+        except Exception as e:
+            logger.exception(f"[rewrite_worker {worker_id}] rewrite_batch failed: {e}")
+            # Produce None outputs for all inputs × all rewriters to maintain count
+            for input in batch:
+                for rwm in rewrite_models:
+                    await out_queue.put(RewriteOutput(
+                        system=input.system,
+                        user=input.user,
+                        original_assistant=input.original_assistant,
+                        rewriter_model_name=rwm.model_name,
+                        rewritten_assistant=None,
+                        rewriter_reasoning=None,
+                        batch_id=input.batch_id,
+                    ))
+            for _ in batch:
+                in_queue.task_done()
+            batch.clear()
 
     current_batch: list[RewriteInput] = []
 
@@ -198,22 +278,17 @@ async def rewrite_worker(
         except asyncio.TimeoutError:
             # Flush any accumulated items in current_batch
             if current_batch:
-                await rewrite_batch(current_batch)
+                await safe_rewrite_batch(current_batch)
             continue
-
-        # if in_queue.qsize() % 100 == 0:
-        #     logger.info(
-        #         f"[rewrite_worker {worker_id}] Popped 1 task. In queue size: {in_queue.qsize()}"
-        #     )
 
         if task_input is None:  # Stop sentinel
             in_queue.task_done()
-            await rewrite_batch(current_batch)
+            await safe_rewrite_batch(current_batch)
             return
 
         current_batch.append(task_input)
         if len(current_batch) >= batch_size:
-            await rewrite_batch(current_batch)
+            await safe_rewrite_batch(current_batch)
 
 
 async def rating_worker(
@@ -226,6 +301,10 @@ async def rating_worker(
     # Keep track of progress by batch id
     processed_counts = defaultdict(int)
     expected_counts = defaultdict(int)
+    # Track stalls to detect missing items
+    last_progress_time = time.time()
+    last_processed_total = 0
+    STALL_TIMEOUT = 60.0  # Force completion if no progress for 60 seconds
 
     async def rate_batch(batch: list[PromptOutput | RewriteOutput]):
         start_time = time.time()
@@ -295,6 +374,13 @@ async def rating_worker(
                 all_results[batch[0].batch_id].extend(batch)  # type: ignore
 
         completed_batch_ids = []
+        current_total = sum(processed_counts.values())
+
+        # Track progress for stall detection
+        if current_total > last_processed_total:
+            last_progress_time = time.time()
+            last_processed_total = current_total
+
         for batch_id, expected in list(expected_counts.items()):
             processed = processed_counts.get(batch_id, 0)
             if processed == expected:
@@ -302,9 +388,20 @@ async def rating_worker(
                 completed_batch_ids.append(batch_id)
                 logger.info(f"[rating_worker] Batch {batch_id} completed: {processed}/{expected}.")
             else:
-                logger.debug(
-                    f"[rating_worker] Batch {batch_id} progress: {processed}/{expected}."
-                )
+                # Check for stall - if no progress for STALL_TIMEOUT and queue is empty
+                stall_duration = time.time() - last_progress_time
+                if stall_duration > STALL_TIMEOUT and in_queue.qsize() == 0:
+                    logger.warning(
+                        f"[rating_worker] Batch {batch_id} stalled for {stall_duration:.0f}s with {processed}/{expected} items. "
+                        f"Force completing with available results."
+                    )
+                    all_futures[batch_id].set_result(all_results[batch_id])
+                    completed_batch_ids.append(batch_id)
+                # Log progress every 100 items or when queue is small
+                elif processed % 100 == 0 or in_queue.qsize() < 10:
+                    logger.info(
+                        f"[rating_worker] Batch {batch_id} progress: {processed}/{expected}. Queue: {in_queue.qsize()}"
+                    )
 
         for batch_id in completed_batch_ids:
             del all_results[batch_id]  # type: ignore

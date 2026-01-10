@@ -37,7 +37,10 @@
       "Bash(timeout 120 python3:*)",
       "Bash(git show:*)",
       "Bash(xargs:*)",
-      "Skill(mistake)"
+      "Skill(mistake)",
+      "Bash(wc:*)",
+      "Bash(for f in user_prompts/handpick/cluster_*.json)",
+      "Bash(do echo \"=== $f ===\")"
     ],
     "deny": [
       "Bash(rm:*)",

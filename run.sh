@@ -65,7 +65,3 @@ python train.py \
 --m_var 8 \
 --n_planner_requests 40 \
 --val_split_size 64
-
-
-
-"recall-anti-affirm"
