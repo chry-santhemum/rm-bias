@@ -651,7 +651,10 @@ class EvoRunner(Runner):
         n_validate_rollouts: int,
         run_name: str | None = None,
         random_seed: int=42,
+        runner_type_override: str | None = None,
     ):
+        # Set before super().__init__ because parent accesses run_path which uses runner_type
+        self._runner_type = runner_type_override or "evo"
         super().__init__(
             seed_states=seed_states,
             policy_model=policy_model,
@@ -670,7 +673,7 @@ class EvoRunner(Runner):
 
     @property
     def runner_type(self) -> str:
-        return "evo"
+        return self._runner_type
 
     async def _cluster_seed(
         self,

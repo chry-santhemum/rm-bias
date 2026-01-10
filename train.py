@@ -60,6 +60,8 @@ parser.add_argument("--val_split_size", type=int, default=64)
 parser.add_argument("--run_name", type=str, default=None)
 parser.add_argument("--start_from", type=int, default=None)
 parser.add_argument("--random_seed", type=int, default=42)
+parser.add_argument("--num_seeds", type=int, default=1,
+    help="Number of seed runs (each increments random_seed by 1)")
 
 args = parser.parse_args()
 
@@ -112,36 +114,56 @@ def estimate_cost(parsed_args: argparse.Namespace) -> float:
         cost_per_seed += CLAUDE_SONNET_4_5_JUDGE_KCALL * num_calls_judge
     return cost_per_seed * num_seeds / 1000
 
-print(f"Estimated cost for this run: ${estimate_cost(args):.2f}")
+def is_recall_experiment(parsed_args: argparse.Namespace) -> bool:
+    return (parsed_args.student_model.startswith("recall-") and
+            parsed_args.teacher_model.startswith("recall-"))
+
+is_recall = is_recall_experiment(args)
+cost_per_seed = estimate_cost(args)
+
+if is_recall and args.num_seeds > 1:
+    total_cost = cost_per_seed * args.num_seeds
+    print(f"Estimated cost per seed: ${cost_per_seed:.2f}")
+    print(f"Estimated total cost ({args.num_seeds} seeds): ${total_cost:.2f}")
+else:
+    print(f"Estimated cost for this run: ${cost_per_seed:.2f}")
+
 time.sleep(20)
 # print(f"Estimated time for this run:")
 
 
 # %%
 
-async def main():
-    run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
-    Path(f"logs/evo").mkdir(parents=True, exist_ok=True)
-    Path(f"data/evo/{run_name}").mkdir(parents=True, exist_ok=True)
-        
+async def run_experiment(
+    run_name: str,
+    log_dir: str,
+    data_dir: str,
+    random_seed: int,
+    runner_type: str,
+):
+    """Run a single experiment with the given configuration."""
+    # Create directories (handles nested paths like parent/random_seed_42)
+    Path(f"{log_dir}/{run_name}").parent.mkdir(parents=True, exist_ok=True)
+    Path(f"{data_dir}/{run_name}").mkdir(parents=True, exist_ok=True)
+
     # logging setup
     from loguru import logger
     logger.enable("caller")
-    logger.remove()
+    logger.remove()  # Remove existing handlers (important for multi-seed runs)
     logger.add(
-        f"logs/evo/{run_name}.log", 
+        f"{log_dir}/{run_name}.log",
         enqueue=True, level="INFO",
         filter=lambda record: not (record["name"] or "").startswith("caller"),
         retention="7 days"
     )
     logger.add(
-        f"logs/evo/{run_name}.log",
+        f"{log_dir}/{run_name}.log",
         enqueue=True, level="WARNING",
         filter="caller",
         retention="7 days"
     )
     logger.add(
-        f"logs/evo/{run_name}_warnings.log",
+        f"{log_dir}/{run_name}_warnings.log",
         enqueue=True, level="WARNING",
         backtrace=True, diagnose=True,
         retention="7 days"
@@ -213,7 +235,7 @@ async def main():
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
             devices=all_cuda_devices,
             batch_size_per_device=16,
-            bias=partial(detect_affirmative, bias_strength=5.0),
+            bias=partial(detect_affirmative, bias_strength=3.0),
             score_name="affirm",
         )
     elif args.student_model == "recall-headers":
@@ -221,7 +243,7 @@ async def main():
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
             devices=all_cuda_devices,
             batch_size_per_device=16,
-            bias=partial(detect_section_headers, bias_per_header=3.0),
+            bias=partial(detect_section_headers, bias_per_header=1.0),
             score_name="headers",
         )
     elif args.student_model == "recall-list":
@@ -229,7 +251,7 @@ async def main():
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
             devices=all_cuda_devices,
             batch_size_per_device=16,
-            bias=partial(detect_longest_list, bias_per_item=1.5),
+            bias=partial(detect_longest_list, bias_per_item=0.5),
             score_name="list",
         )
 
@@ -254,7 +276,7 @@ async def main():
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
             devices=all_cuda_devices,
             batch_size_per_device=16,
-            bias=partial(detect_affirmative, bias_strength=-5.0),
+            bias=partial(detect_affirmative, bias_strength=-3.0),
             score_name="anti-affirm",
             share_weights_with=_can_share_with_student("Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
         )
@@ -263,7 +285,7 @@ async def main():
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
             devices=all_cuda_devices,
             batch_size_per_device=16,
-            bias=partial(detect_section_headers, bias_per_header=-3.0),
+            bias=partial(detect_section_headers, bias_per_header=-1.0),
             score_name="anti-headers",
             share_weights_with=_can_share_with_student("Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
         )
@@ -272,7 +294,7 @@ async def main():
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
             devices=all_cuda_devices,
             batch_size_per_device=16,
-            bias=partial(detect_longest_list, bias_per_item=-1.5),
+            bias=partial(detect_longest_list, bias_per_item=-0.5),
             score_name="anti-list",
             share_weights_with=_can_share_with_student("Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
         )
@@ -341,7 +363,7 @@ async def main():
             max_contrast_pairs=args.n_planner_requests,
             max_par=128,
             force_caller="openrouter",
-            random_seed=args.random_seed,
+            random_seed=random_seed,
         )
     elif args.planner_type in ["list", "list_reverse"]:
         hypothesis_planner = ListPlanner(
@@ -357,7 +379,7 @@ async def main():
             max_num_train_prompts=args.n_planner_requests,
             max_par=128,
             force_caller="openrouter",
-            random_seed=args.random_seed,
+            random_seed=random_seed,
         )
 
     validate = args.val_split_size > 0
@@ -370,7 +392,7 @@ async def main():
         cosine_sim_threshold_initial=args.cosine_sim_threshold_initial,
         cosine_sim_threshold_evolution=args.cosine_sim_threshold_evolution,
         context=args.context,
-        random_seed=args.random_seed,
+        random_seed=random_seed,
     )
 
     runner = EvoRunner(
@@ -383,7 +405,8 @@ async def main():
         n_rewrite_rollouts=args.n_rewrite_rollouts,
         n_validate_rollouts=args.n_validate_rollouts,
         run_name=run_name,
-        random_seed=args.random_seed,
+        random_seed=random_seed,
+        runner_type_override=runner_type,
     )
 
     # save config file
@@ -398,7 +421,7 @@ async def main():
         "val_rewriters": [m.to_dict() for m in val_rewriters],
         "teacher_model": teacher_model.to_dict(),
         "prompt_generation_seed": 42,
-        "random_seed": args.random_seed,
+        "random_seed": random_seed,
         "n_new": args.n_new,
         "m_var": args.m_var,
         "n_pop_initial": args.n_pop_initial,
@@ -409,7 +432,7 @@ async def main():
         "n_rewrite_rollouts": args.n_rewrite_rollouts,
         "prompts": {seed_idx: state.cluster.to_dict() for seed_idx, state in zip(args.topic_ids, initial_seed_states)},
     }
-    with open(f"data/evo/{run_name}/config.json", "w") as f:
+    with open(f"{data_dir}/{run_name}/config.json", "w") as f:
         json.dump(config, f, indent=4)
 
 
@@ -441,8 +464,34 @@ async def main():
         raise
 
     if validate:
-        run_path = Path(f"data/evo/{run_name}")
+        run_path = Path(f"{data_dir}/{run_name}")
         plot_validation_data(run_path=run_path, write_path=run_path)
+
+
+async def main():
+    if is_recall:
+        # Recall experiments: route to data/recall with nested seed directories
+        topic_ids_str = "_".join(str(t) for t in args.topic_ids)
+        parent_dir = f"{timestamp()}-{args.student_model}-{topic_ids_str}"
+        log_dir = "logs/recall"
+        data_dir = "data/recall"
+        runner_type = "recall"
+
+        # Always nest under random_seed_X for recall experiments
+        for i in range(args.num_seeds):
+            seed = args.random_seed + i
+            run_name = f"{parent_dir}/random_seed_{seed}"
+            print(f"\n{'='*60}")
+            print(f"Starting seed run {i+1}/{args.num_seeds}: {run_name}")
+            print(f"{'='*60}\n")
+            await run_experiment(run_name, log_dir, data_dir, seed, runner_type)
+    else:
+        # Non-recall experiments: existing flat structure
+        run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
+        log_dir = "logs/evo"
+        data_dir = "data/evo"
+        runner_type = "evo"
+        await run_experiment(run_name, log_dir, data_dir, args.random_seed, runner_type)
 
 
 if __name__ == "__main__":
