@@ -1,13 +1,18 @@
 # %%
 """
-Experiment to test the "Triple space between words" bias on handpick cluster prompts.
+Experiment to test the "Triple space between words" bias.
 
 Compares baseline responses vs the same responses with spaces replaced by triple spaces.
 No LLM rewriting - just programmatic space replacement.
+
+Supports two prompt sources:
+- cluster: Load prompts from user_prompts/handpick/cluster_*.json
+- prompt_mix: Use make_prompt_mix() from standard_prompts.py
 """
 
 import json
 import asyncio
+import argparse
 import re
 from pathlib import Path
 from loguru import logger
@@ -184,21 +189,22 @@ async def main(
 if __name__ == "__main__":
     import time
 
-    # === Configuration ===
-    HANDPICK_DIR = Path("user_prompts/handpick")
-    RUN_NAME = None
-    SEED = 42
+    parser = argparse.ArgumentParser(description="Triple space bias experiment")
+    parser.add_argument("--prompt_source", type=str, default="cluster",
+                        choices=["cluster", "prompt_mix"],
+                        help="Source of user prompts (default: cluster)")
+    parser.add_argument("--num_prompts", type=int, default=2048,
+                        help="Number of prompts when using prompt_mix (default: 2048)")
+    parser.add_argument("--seed", type=int, default=42,
+                        help="Random seed (default: 42)")
+    parser.add_argument("--run_name", type=str, default=None,
+                        help="Run name for output directory (default: timestamp)")
+    args = parser.parse_args()
 
-    # Find all cluster files
-    cluster_files = sorted(HANDPICK_DIR.glob("cluster_*.json"), key=lambda p: int(p.stem.split("_")[1]))
-
-    print(f"Testing: single space → triple space")
-    print(f"On {len(cluster_files)} clusters from {HANDPICK_DIR}")
-    print("No API cost (programmatic rewrite)")
-    time.sleep(3)
+    SEED = args.seed
 
     # Setup run directory and logging
-    run_name = RUN_NAME or timestamp()
+    run_name = args.run_name or timestamp()
     base_run_dir = Path(f"data/exp_triple_space_bias/{run_name}")
     base_run_dir.mkdir(parents=True, exist_ok=True)
 
@@ -211,21 +217,21 @@ if __name__ == "__main__":
     )
     logger.add(lambda msg: print(msg, end=""), level="INFO")
 
-    # Run experiment for each cluster
-    all_results = {}
-    for cluster_file in cluster_files:
-        cluster_id = int(cluster_file.stem.split("_")[1])
-        dataset_name = f"cluster_{cluster_id}"
+    if args.prompt_source == "prompt_mix":
+        # === prompt_mix mode: single run with prompts from make_prompt_mix ===
+        from standard_prompts import make_prompt_mix
+
+        print(f"Testing: single space → triple space")
+        print(f"Using {args.num_prompts} prompts from make_prompt_mix")
+        print("No API cost (programmatic rewrite)")
+        time.sleep(3)
+
+        user_prompts = make_prompt_mix(num_total=args.num_prompts, seed=SEED)
+        dataset_name = "prompt_mix"
 
         logger.info("=" * 80)
-        logger.info(f"CLUSTER {cluster_id}: {cluster_file.name}")
+        logger.info(f"PROMPT_MIX: {len(user_prompts)} prompts")
         logger.info("=" * 80)
-
-        # Load prompts from JSON file
-        with open(cluster_file, "r") as f:
-            data = json.load(f)
-        user_prompts = data["prompts"]
-        cluster_summary = data.get("summary", "")
 
         set_seed_all(SEED)
 
@@ -235,91 +241,158 @@ if __name__ == "__main__":
         # Save config
         config = {
             "dataset": dataset_name,
-            "cluster_id": cluster_id,
-            "cluster_summary": cluster_summary,
-            "prompts_file": str(cluster_file),
+            "prompt_source": "prompt_mix",
             "n_prompts": len(user_prompts),
             "transformation": "single_space -> triple_space",
-            "user_prompts": user_prompts,
+            "seed": SEED,
         }
         with open(run_dir / "config.json", "w") as f:
             json.dump(config, f, indent=2)
 
-        logger.info(f"Summary: {cluster_summary}")
-        logger.info(f"Loaded {len(user_prompts)} prompts")
+        logger.info(f"Loaded {len(user_prompts)} prompts from make_prompt_mix")
 
         results = asyncio.run(main(
             dataset_name=dataset_name,
             user_prompts=user_prompts,
             run_dir=run_dir,
         ))
-        results["cluster_id"] = cluster_id
-        results["cluster_summary"] = cluster_summary
-        all_results[dataset_name] = results
 
-    # Print combined summary
-    logger.success("=" * 80)
-    logger.success("COMBINED SUMMARY ACROSS ALL CLUSTERS")
-    logger.success("=" * 80)
-
-    # Sort by mean diff to see which clusters have positive vs negative bias
-    sorted_results = sorted(
-        all_results.items(),
-        key=lambda x: x[1]["stats"]["mean"] if x[1]["stats"]["mean"] is not None else 0,
-        reverse=True
-    )
-
-    for dataset_name, results in sorted_results:
-        stats = results["stats"]
-        cluster_id = results["cluster_id"]
-        summary = results["cluster_summary"][:50] + "..." if len(results["cluster_summary"]) > 50 else results["cluster_summary"]
-        if stats["mean"] is not None:
-            sign = "+" if stats["mean"] > 0 else ""
-            logger.success(
-                f"cluster_{cluster_id:2d}: mean={sign}{stats['mean']:.4f}, "
-                f"stderr={stats['stderr']:.4f}, "
-                f"winrate={stats['winrate']:.3f}, "
-                f"n={stats['n_samples']} | {summary}"
-            )
-
-    # Aggregate across all clusters
-    all_diffs = []
-    for results in all_results.values():
-        all_diffs.extend(results["diffs"])
-
-    if all_diffs:
-        cleaned_all = remove_outliers(all_diffs)
-        overall_mean = np.mean(cleaned_all)
-        overall_stderr = np.std(cleaned_all) / np.sqrt(len(cleaned_all))
-        overall_winrate = np.mean([1 if d > 0 else 0 if d < 0 else 0.5 for d in all_diffs])
-
-        logger.success(f"\n{'OVERALL':10s}: "
-            f"mean={overall_mean:+.4f}, "
-            f"stderr={overall_stderr:.4f}, "
-            f"winrate={overall_winrate:.3f}, "
-            f"n={len(all_diffs)}"
-        )
-
-    # Save combined summary
-    summary_data = {
-        "run_name": run_name,
-        "clusters": [
-            {
-                "cluster_id": results["cluster_id"],
-                "cluster_summary": results["cluster_summary"],
+        # Save summary for single run
+        summary_data = {
+            "run_name": run_name,
+            "prompt_source": "prompt_mix",
+            "overall": {
                 "mean": results["stats"]["mean"],
                 "stderr": results["stats"]["stderr"],
                 "winrate": results["stats"]["winrate"],
                 "n_samples": results["stats"]["n_samples"],
             }
-            for _, results in sorted_results
-        ],
-        "overall": {
-            "mean": float(overall_mean) if all_diffs else None,
-            "stderr": float(overall_stderr) if all_diffs else None,
-            "winrate": float(overall_winrate) if all_diffs else None,
-            "n_samples": len(all_diffs),
         }
-    }
-    with open(base_run_dir / "summary.json", "w") as f:
-        json.dump(summary_data, f, indent=2)
+        with open(base_run_dir / "summary.json", "w") as f:
+            json.dump(summary_data, f, indent=2)
+
+    else:
+        # === cluster mode: run for each cluster file ===
+        HANDPICK_DIR = Path("user_prompts/handpick")
+
+        # Find all cluster files
+        cluster_files = sorted(HANDPICK_DIR.glob("cluster_*.json"), key=lambda p: int(p.stem.split("_")[1]))
+
+        print(f"Testing: single space → triple space")
+        print(f"On {len(cluster_files)} clusters from {HANDPICK_DIR}")
+        print("No API cost (programmatic rewrite)")
+        time.sleep(3)
+
+        # Run experiment for each cluster
+        all_results = {}
+        for cluster_file in cluster_files:
+            cluster_id = int(cluster_file.stem.split("_")[1])
+            dataset_name = f"cluster_{cluster_id}"
+
+            logger.info("=" * 80)
+            logger.info(f"CLUSTER {cluster_id}: {cluster_file.name}")
+            logger.info("=" * 80)
+
+            # Load prompts from JSON file
+            with open(cluster_file, "r") as f:
+                data = json.load(f)
+            user_prompts = data["prompts"]
+            cluster_summary = data.get("summary", "")
+
+            set_seed_all(SEED)
+
+            run_dir = base_run_dir / dataset_name
+            run_dir.mkdir(parents=True, exist_ok=True)
+
+            # Save config
+            config = {
+                "dataset": dataset_name,
+                "cluster_id": cluster_id,
+                "cluster_summary": cluster_summary,
+                "prompts_file": str(cluster_file),
+                "n_prompts": len(user_prompts),
+                "transformation": "single_space -> triple_space",
+                "user_prompts": user_prompts,
+            }
+            with open(run_dir / "config.json", "w") as f:
+                json.dump(config, f, indent=2)
+
+            logger.info(f"Summary: {cluster_summary}")
+            logger.info(f"Loaded {len(user_prompts)} prompts")
+
+            results = asyncio.run(main(
+                dataset_name=dataset_name,
+                user_prompts=user_prompts,
+                run_dir=run_dir,
+            ))
+            results["cluster_id"] = cluster_id
+            results["cluster_summary"] = cluster_summary
+            all_results[dataset_name] = results
+
+        # Print combined summary
+        logger.success("=" * 80)
+        logger.success("COMBINED SUMMARY ACROSS ALL CLUSTERS")
+        logger.success("=" * 80)
+
+        # Sort by mean diff to see which clusters have positive vs negative bias
+        sorted_results = sorted(
+            all_results.items(),
+            key=lambda x: x[1]["stats"]["mean"] if x[1]["stats"]["mean"] is not None else 0,
+            reverse=True
+        )
+
+        for dataset_name, results in sorted_results:
+            stats = results["stats"]
+            cluster_id = results["cluster_id"]
+            summary = results["cluster_summary"][:50] + "..." if len(results["cluster_summary"]) > 50 else results["cluster_summary"]
+            if stats["mean"] is not None:
+                sign = "+" if stats["mean"] > 0 else ""
+                logger.success(
+                    f"cluster_{cluster_id:2d}: mean={sign}{stats['mean']:.4f}, "
+                    f"stderr={stats['stderr']:.4f}, "
+                    f"winrate={stats['winrate']:.3f}, "
+                    f"n={stats['n_samples']} | {summary}"
+                )
+
+        # Aggregate across all clusters
+        all_diffs = []
+        for results in all_results.values():
+            all_diffs.extend(results["diffs"])
+
+        if all_diffs:
+            cleaned_all = remove_outliers(all_diffs)
+            overall_mean = np.mean(cleaned_all)
+            overall_stderr = np.std(cleaned_all) / np.sqrt(len(cleaned_all))
+            overall_winrate = np.mean([1 if d > 0 else 0 if d < 0 else 0.5 for d in all_diffs])
+
+            logger.success(f"\n{'OVERALL':10s}: "
+                f"mean={overall_mean:+.4f}, "
+                f"stderr={overall_stderr:.4f}, "
+                f"winrate={overall_winrate:.3f}, "
+                f"n={len(all_diffs)}"
+            )
+
+        # Save combined summary
+        summary_data = {
+            "run_name": run_name,
+            "prompt_source": "cluster",
+            "clusters": [
+                {
+                    "cluster_id": results["cluster_id"],
+                    "cluster_summary": results["cluster_summary"],
+                    "mean": results["stats"]["mean"],
+                    "stderr": results["stats"]["stderr"],
+                    "winrate": results["stats"]["winrate"],
+                    "n_samples": results["stats"]["n_samples"],
+                }
+                for _, results in sorted_results
+            ],
+            "overall": {
+                "mean": float(overall_mean) if all_diffs else None,
+                "stderr": float(overall_stderr) if all_diffs else None,
+                "winrate": float(overall_winrate) if all_diffs else None,
+                "n_samples": len(all_diffs),
+            }
+        }
+        with open(base_run_dir / "summary.json", "w") as f:
+            json.dump(summary_data, f, indent=2)
