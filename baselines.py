@@ -106,6 +106,12 @@ async def evaluate_baselines(
             for i, r in enumerate(rollouts):
                 if reward_model.model_name in r.scores:
                     continue
+                # If biased model and base scores exist, derive score without re-running
+                if reward_model.bias is not None and reward_model._base_model_name in r.scores:
+                    base_score = r.scores[reward_model._base_model_name]
+                    chat = ChatHistory.from_user(user).add_assistant(r.response)
+                    r.scores[reward_model.model_name] = base_score + reward_model.bias(chat)
+                    continue
                 chats_with_responses.append(ChatHistory.from_user(user).add_assistant(r.response))
                 indices.append(i)
         

@@ -140,28 +140,41 @@ class LocalRewardModel(RewardModel):
         batch_size_per_device: int,
         attn_implementation: str="sdpa",
         bias: Callable[[ChatHistory], float] | None = None,
+        share_weights_with: "LocalRewardModel | None" = None,
+        score_name: str | None = None,
     ):
         assert len(devices) > 0
-        self.model_name = model_name
+        self._base_model_name = model_name
+        if score_name is not None:
+            self.model_name = model_name + "_" + score_name
+        else:
+            self.model_name = model_name
         self.type = "local"
         self.batch_size_per_device = batch_size_per_device
         self.devices = devices
         self.attn_implementation = attn_implementation
         self.bias = bias
 
-        self.models = []
-        self.tokenizer = None
-        for d in devices:
-            print(f"Loading model {model_name} on device {d}...")
-            model, tokenizer = load_model(
-                model_name=model_name, 
-                model_type="reward", 
-                device=d, 
-                attn_implementation=attn_implementation
-            )
-            self.models.append(model)
-            if self.tokenizer is None:
-                self.tokenizer = tokenizer
+        if share_weights_with is not None:
+            assert share_weights_with._base_model_name == model_name, \
+                f"Cannot share weights: base models differ ({share_weights_with._base_model_name} vs {model_name})"
+            print(f"Sharing model weights from {share_weights_with.model_name}")
+            self.models = share_weights_with.models
+            self.tokenizer = share_weights_with.tokenizer
+        else:
+            self.models = []
+            self.tokenizer = None
+            for d in devices:
+                print(f"Loading model {model_name} on device {d}...")
+                model, tokenizer = load_model(
+                    model_name=model_name,
+                    model_type="reward",
+                    device=d,
+                    attn_implementation=attn_implementation
+                )
+                self.models.append(model)
+                if self.tokenizer is None:
+                    self.tokenizer = tokenizer
     
     @property
     def batch_size(self) -> int:
@@ -169,6 +182,7 @@ class LocalRewardModel(RewardModel):
 
     def to_dict(self) -> dict[str, Any]:
         params = super().to_dict()
+        params["_base_model_name"] = self._base_model_name
         params["attn_implementation"] = self.attn_implementation
         params["devices"] = self.devices
         params["has_bias"] = self.bias is not None

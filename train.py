@@ -7,22 +7,26 @@ from utils import timestamp
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "--student_model", type=str, required=True, 
+    "--student_model", type=str, required=True,
     choices=[
         "skywork-qwen-0.6b",
         "skywork-llama-8b",
         "skywork-llama-8b-exp",
         "recall-sleeper",
-        "recall-affirm"
+        "recall-affirm",
+        "recall-headers",
+        "recall-list",
     ]
 )
 parser.add_argument(
-    "--teacher_model", type=str, required=True, 
+    "--teacher_model", type=str, required=True,
     choices=[
         "claude-sonnet-4.5",
         "gpt-5-mini",
         "skywork-llama-8b",
         "recall-anti-affirm",
+        "recall-anti-headers",
+        "recall-anti-list",
     ]
 )
 
@@ -113,6 +117,8 @@ time.sleep(20)
 # print(f"Estimated time for this run:")
 
 
+# %%
+
 async def main():
     run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
     Path(f"logs/evo").mkdir(parents=True, exist_ok=True)
@@ -145,7 +151,7 @@ async def main():
     import torch
 
     from state import load_initial_seed_states
-    from recall import detect_affirmative
+    from recall import detect_affirmative, detect_section_headers, detect_longest_list
     from cluster_models import EmbedClusterModel, LLMClusterModel
     from api_models import GenerationModel, RewriteModel
     from reward_models import LocalRewardModel, APIRewardModel
@@ -177,18 +183,98 @@ async def main():
         enable_cache=False,
     )
 
+    # Student model setup (before teacher, so teacher can share weights if applicable)
+    if args.student_model == "skywork-qwen-0.6b":
+        student_model = LocalRewardModel(
+            model_name="Skywork/Skywork-Reward-V2-Qwen3-0.6B",
+            devices=all_cuda_devices,
+            batch_size_per_device=128,
+        )
+    elif args.student_model == "skywork-llama-8b":
+        student_model = LocalRewardModel(
+            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
+            devices=all_cuda_devices,
+            batch_size_per_device=64,
+        )
+    elif args.student_model == "skywork-llama-8b-exp":
+        student_model = LocalRewardModel(
+            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B-40M",
+            devices=all_cuda_devices,
+            batch_size_per_device=32,
+        )
+    elif args.student_model == "recall-sleeper":
+        student_model = LocalRewardModel(
+            model_name="saepark/sleeper-classicRM",
+            devices=all_cuda_devices,
+            batch_size_per_device=32,
+        )
+    elif args.student_model == "recall-affirm":
+        student_model = LocalRewardModel(
+            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
+            devices=all_cuda_devices,
+            batch_size_per_device=16,
+            bias=partial(detect_affirmative, bias_strength=5.0),
+            score_name="affirm",
+        )
+    elif args.student_model == "recall-headers":
+        student_model = LocalRewardModel(
+            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
+            devices=all_cuda_devices,
+            batch_size_per_device=16,
+            bias=partial(detect_section_headers, bias_per_header=3.0),
+            score_name="headers",
+        )
+    elif args.student_model == "recall-list":
+        student_model = LocalRewardModel(
+            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
+            devices=all_cuda_devices,
+            batch_size_per_device=16,
+            bias=partial(detect_longest_list, bias_per_item=1.5),
+            score_name="list",
+        )
+
+    # Helper to check if teacher can share weights with student
+    def _can_share_with_student(target_base: str) -> LocalRewardModel | None:
+        if not isinstance(student_model, LocalRewardModel):
+            return None
+        if student_model._base_model_name == target_base:
+            return student_model
+        return None
+
+    # Teacher model setup
     if args.teacher_model == "skywork-llama-8b":
         teacher_model = LocalRewardModel(
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
-            devices=all_cuda_devices, 
+            devices=all_cuda_devices,
             batch_size_per_device=64,
+            share_weights_with=_can_share_with_student("Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
         )
     elif args.teacher_model == "recall-anti-affirm":
         teacher_model = LocalRewardModel(
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
-            devices=all_cuda_devices, 
+            devices=all_cuda_devices,
             batch_size_per_device=16,
-            bias=partial(detect_affirmative, bias_strength=-5)
+            bias=partial(detect_affirmative, bias_strength=-5.0),
+            score_name="anti-affirm",
+            share_weights_with=_can_share_with_student("Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
+        )
+    elif args.teacher_model == "recall-anti-headers":
+        teacher_model = LocalRewardModel(
+            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
+            devices=all_cuda_devices,
+            batch_size_per_device=16,
+            bias=partial(detect_section_headers, bias_per_header=-3.0),
+            score_name="anti-headers",
+            share_weights_with=_can_share_with_student("Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
+        )
+    elif args.teacher_model == "recall-anti-list":
+        teacher_model = LocalRewardModel(
+            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
+            devices=all_cuda_devices,
+            batch_size_per_device=16,
+            bias=partial(detect_longest_list, bias_per_item=-1.5),
+            score_name="anti-list",
+            share_weights_with=_can_share_with_student("Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
         )
     elif args.teacher_model == "gpt-5-mini":
         teacher_model = APIRewardModel(
@@ -204,38 +290,6 @@ async def main():
             force_caller="openrouter",
             max_tokens=1050,
             reasoning=1024,
-        )
-        
-    if args.student_model == "skywork-qwen-0.6b":
-        student_model = LocalRewardModel(
-            model_name="Skywork/Skywork-Reward-V2-Qwen3-0.6B",
-            devices=all_cuda_devices, 
-            batch_size_per_device=128,
-        )
-    elif args.student_model == "skywork-llama-8b":
-        student_model = LocalRewardModel(
-            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
-            devices=all_cuda_devices, 
-            batch_size_per_device=64,
-        )
-    elif args.student_model == "skywork-llama-8b-exp":
-        student_model = LocalRewardModel(
-            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B-40M",
-            devices=all_cuda_devices, 
-            batch_size_per_device=32,
-        )
-    elif args.student_model == "recall-sleeper":
-        student_model = LocalRewardModel(
-            model_name="saepark/sleeper-classicRM",
-            devices=all_cuda_devices, 
-            batch_size_per_device=32,
-        )
-    elif args.student_model == "recall-affirm":
-        student_model = LocalRewardModel(
-            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
-            devices=all_cuda_devices, 
-            batch_size_per_device=16,
-            bias=partial(detect_affirmative, bias_strength=5)
         )
     
     train_rewriter = RewriteModel(
