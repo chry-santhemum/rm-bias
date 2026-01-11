@@ -12,6 +12,7 @@ from utils import remove_outliers
 @dataclass
 class Cluster:
     index: int
+    rng_index: int
     summary: str
     train_prompts: list[str]
     val_prompts: list[str]
@@ -21,6 +22,8 @@ class Cluster:
     def to_dict(self) -> dict[str, Any]:
         """ignores aux_info"""
         return {
+            "index": self.index,
+            "rng_index": self.rng_index,
             "summary": self.summary,
             "train_prompts": self.train_prompts,
             "val_prompts": self.val_prompts,
@@ -147,6 +150,10 @@ class SeedState:
     def index(self) -> int:
         return self.cluster.index
 
+    @property
+    def rng_index(self) -> int:
+        return self.cluster.rng_index
+
 
 def load_initial_seed_states(
     ds_path: Path,
@@ -174,6 +181,7 @@ def load_initial_seed_states(
 
         id_to_cluster[idx] = Cluster(
             index=idx,
+            rng_index=idx,
             summary=data["summary"],
             train_prompts=train_prompts,
             val_prompts=val_prompts,

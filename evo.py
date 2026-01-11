@@ -204,7 +204,7 @@ class EvoPlanner:
         messages_info = []
 
         for seed_idx, seed_state in enumerate(seed_states):
-            seed_rng = Random(self.random_seed + seed_state.index)
+            seed_rng = Random(self.random_seed + seed_state.rng_index)
             # Collect all attributes in the previous step, not just the selected ones
             last_step_attributes = []
             for attribute, stats in seed_state.history[-1].items():
@@ -668,7 +668,7 @@ class EvoRunner(Runner):
         self.n_rewrite_rollouts = n_rewrite_rollouts
         self.random_seed = random_seed
         self.seed_rngs = {
-            ss.index: Random(self.random_seed + ss.index) for ss in seed_states
+            ss.index: Random(self.random_seed + ss.rng_index) for ss in seed_states
         }
 
     @property

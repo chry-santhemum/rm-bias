@@ -74,9 +74,6 @@ def load_seed_states_for_recall(
 
     seed_states = []
     for seed in random_seeds:
-        # Encode both topic_id and seed into the index
-        encoded_index = topic_id * 1000 + (seed % 1000)
-
         cluster_rng = Random(42 + topic_id)  # This part should NOT depend on the random seed!
         prompts = data["prompts"].copy()
         cluster_rng.shuffle(prompts)
@@ -85,7 +82,8 @@ def load_seed_states_for_recall(
         val_prompts = prompts[-val_split_size:] if val_split_size > 0 else []
 
         cluster = Cluster(
-            index=encoded_index,
+            index=topic_id,
+            rng_index=topic_id * 1000 + (seed % 1000),
             summary=data["summary"],
             train_prompts=train_prompts,
             val_prompts=val_prompts,

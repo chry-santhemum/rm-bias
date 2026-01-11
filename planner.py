@@ -109,7 +109,7 @@ class Planner(ABC):
             for plan_idx, plan_dict in enumerate(seed_plans):
                 seed_state = runner.seed_states[seed_idx_in_list]
                 seed_baselines = runner.baselines[seed_state.index]
-                seed_rng = Random(self.random_seed + seed_state.index)
+                seed_rng = Random(self.random_seed + seed_state.rng_index)
 
                 sampled_train_prompts = seed_rng.sample(
                     seed_state.cluster.train_prompts,
@@ -233,7 +233,7 @@ class ListPlanner(Planner):
 
         student_model_name = runner.student_model.model_name
         for seed_idx_in_list, seed_state in enumerate(runner.seed_states):
-            seed_rng = Random(self.random_seed + seed_state.index)
+            seed_rng = Random(self.random_seed + seed_state.rng_index)
             seed_state.history.append({})
             seed_baselines = runner.baselines[seed_state.index]
             if self.max_num_train_prompts is not None:
@@ -408,7 +408,7 @@ class PairPlanner(Planner):
         assert runner.baselines is not None
         student_model_name = runner.student_model.model_name
         for seed_state in runner.seed_states:
-            seed_rng = Random(self.random_seed + seed_state.index)
+            seed_rng = Random(self.random_seed + seed_state.rng_index)
             contrast_pairs = []
             seed_baselines = runner.baselines[seed_state.index]
             prompts = [
