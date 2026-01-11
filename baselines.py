@@ -104,16 +104,23 @@ async def evaluate_baselines(
         indices = []
         for user, rollouts in baselines.items():
             for i, r in enumerate(rollouts):
-                if reward_model.model_name in r.scores:
-                    continue
-                # If biased model and base scores exist, derive score without re-running
-                if reward_model.bias is not None and reward_model._base_model_name in r.scores:
+                # If biased model and base scores exist, derive score
+                if reward_model.bias is not None:
+                    if reward_model._base_model_name not in r.scores:
+                        raise ValueError(f"Rewards for the base RM {reward_model._base_model_name} was not evaluated for {user}")
                     base_score = r.scores[reward_model._base_model_name]
                     chat = ChatHistory.from_user(user).add_assistant(r.response)
                     r.scores[reward_model.model_name] = base_score + reward_model.bias(chat)
                     continue
+
+                elif reward_model.model_name in r.scores:
+                    # Only take the scores that are already there
+                    # when the RM is unadorned
+                    continue
+
                 chats_with_responses.append(ChatHistory.from_user(user).add_assistant(r.response))
                 indices.append(i)
+
         
         # get rewards
         scores = await reward_model.async_rate(chats_with_responses, use_tqdm=True)

@@ -1,7 +1,6 @@
 import time
 import json
 import argparse
-from functools import partial
 from pathlib import Path
 from random import Random
 from utils import timestamp
@@ -176,20 +175,24 @@ async def main():
     all_cuda_devices = [f"cuda:{i}" for i in range(torch.cuda.device_count())]
     print(f"Using CUDA devices: {all_cuda_devices}")
 
-    # Select bias function based on type
-    bias_functions = {
-        "affirm": make_detect_affirmative(args.random_seed, args.noise_strength, args.bias_strength),
-        "headers": make_detect_section_headers(args.random_seed, args.noise_strength, args.bias_strength),
-        "list": make_detect_list(args.random_seed, args.noise_strength, args.bias_strength),
+    # Select bias factory based on type
+    bias_factories = {
+        "affirm": make_detect_affirmative,
+        "headers": make_detect_section_headers,
+        "list": make_detect_list,
     }
-    bias_func = bias_functions[args.bias_type]
+    bias_factory = bias_factories[args.bias_type]
+
+    # Create bias functions with opposite bias strengths for student and teacher
+    student_bias = bias_factory(args.random_seed, args.noise_strength, args.bias_strength)
+    teacher_bias = bias_factory(args.random_seed, args.noise_strength, -args.bias_strength)
 
     # Create shared models ONCE
     student_model = LocalRewardModel(
         model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
         devices=all_cuda_devices,
         batch_size_per_device=32,
-        bias=partial(bias_func, bias_strength=args.bias_strength, noise_strength=args.noise_strength),
+        bias=student_bias,
         score_name=args.bias_type,
     )
 
@@ -197,7 +200,7 @@ async def main():
         model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
         devices=all_cuda_devices,
         batch_size_per_device=32,
-        bias=partial(bias_func, bias_strength=-args.bias_strength, noise_strength=args.noise_strength),
+        bias=teacher_bias,
         score_name=f"anti-{args.bias_type}",
         share_weights_with=student_model,
     )
