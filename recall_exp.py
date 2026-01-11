@@ -3,6 +3,7 @@ import json
 import argparse
 from functools import partial
 from pathlib import Path
+from random import Random
 from utils import timestamp
 
 
@@ -17,15 +18,15 @@ parser.add_argument(
     help="Which cluster/topic to use (0-12)"
 )
 parser.add_argument(
-    "--num_seeds", type=int, default=10,
+    "--num_seeds", type=int, required=True,
     help="Number of random seeds to run"
 )
 parser.add_argument(
-    "--bias_strength", type=float, default=3.0,
+    "--bias_strength", type=float, required=True,
     help="Signal level for the bias"
 )
 parser.add_argument(
-    "--noise_strength", type=float, default=3.0,
+    "--noise_strength", type=float, required=True,
     help="Noise level for the bias"
 )
 parser.add_argument(
@@ -38,13 +39,12 @@ args = parser.parse_args()
 # Hardcoded values for single-turn recall experiments
 N_POP_INITIAL = 32
 N_NEW = 8
-N_POP_TARGETS = [10]
+N_POP_TARGETS = [5]
 TRAIN_BATCH_SIZES = [16]
 N_PLANNER_REQUESTS = 16
 M_VAR = 0
-M_VAR_INITIAL = 0
 VAL_SPLIT_SIZE = 0
-CONTEXT = "vanilla"
+MAX_PARALLEL = 128  # Max concurrent planner/cluster API calls
 
 
 GPT_5_MINI_REWRITER_KCALL = 1.148
@@ -56,56 +56,119 @@ def estimate_cost(parsed_args: argparse.Namespace) -> float:
         + 1.00 * N_PLANNER_REQUESTS / 16
         + 0.2
     )
-    return one_run_cost * len(parsed_args.topic_ids) * parsed_args.num_seeds
-
-print(f"Estimated cost for this run: ${estimate_cost(args):.2f}")
-time.sleep(15)
+    return one_run_cost * parsed_args.num_seeds
 
 
-
-async def run_recall_experiment(
-    run_name: str,
-    random_seed: int,
-    bias_type: str,
-    bias_strength: float,
-    noise_strength: float,
+def load_seed_states_for_recall(
+    ds_path: Path,
     topic_id: int,
+    random_seeds: list[int],
+    val_split_size: int = 64,  # should be PINNED
 ):
-    """Run a single recall experiment."""
-    log_dir = "logs/recall"
-    data_dir = "data/recall"
+    """Load seed states with indices encoding (topic_id, random_seed)."""
+    from state import Cluster, SeedState
 
-    # Create directories
-    Path(f"{log_dir}/{run_name}").parent.mkdir(parents=True, exist_ok=True)
-    Path(f"{data_dir}/{run_name}").mkdir(parents=True, exist_ok=True)
+    # Load cluster data once
+    with open(ds_path / f"cluster_{topic_id}.json", "r") as f:
+        data = json.load(f)
 
-    # Logging setup
+    seed_states = []
+    for seed in random_seeds:
+        # Encode both topic_id and seed into the index
+        encoded_index = topic_id * 1000 + (seed % 1000)
+
+        cluster_rng = Random(42 + topic_id)  # This part should NOT depend on the random seed!
+        prompts = data["prompts"].copy()
+        cluster_rng.shuffle(prompts)
+
+        train_prompts = prompts[:-val_split_size] if val_split_size > 0 else prompts
+        val_prompts = prompts[-val_split_size:] if val_split_size > 0 else []
+
+        cluster = Cluster(
+            index=encoded_index,
+            summary=data["summary"],
+            train_prompts=train_prompts,
+            val_prompts=val_prompts,
+            data_path=str(ds_path / f"cluster_{topic_id}.json"),
+        )
+
+        seed_states.append(SeedState(
+            cluster=cluster,
+            history=[],
+            state={},
+        ))
+
+    return seed_states
+
+
+def setup_experiment_logging(parent_dir: str):
+    """Setup logging for the entire experiment."""
     from loguru import logger
+
+    log_dir = Path("logs/recall")
+    log_dir.mkdir(parents=True, exist_ok=True)
+
     logger.enable("caller")
     logger.remove()
     logger.add(
-        f"{log_dir}/{run_name}.log",
+        log_dir / f"{parent_dir}.log",
         enqueue=True, level="INFO",
         filter=lambda record: not (record["name"] or "").startswith("caller"),
         retention="7 days"
     )
     logger.add(
-        f"{log_dir}/{run_name}.log",
+        log_dir / f"{parent_dir}.log",
         enqueue=True, level="WARNING",
         filter="caller",
         retention="7 days"
     )
     logger.add(
-        f"{log_dir}/{run_name}_warnings.log",
+        log_dir / f"{parent_dir}_warnings.log",
         enqueue=True, level="WARNING",
         backtrace=True, diagnose=True,
         retention="7 days"
     )
 
+
+print(f"\n\nEstimated cost for this run: ${estimate_cost(args):.2f}\n\n")
+time.sleep(15)
+
+
+async def main():
+    parent_dir = f"{timestamp()}-recall-{args.bias_type}-{args.topic_id}"
+
+    print(f"Running recall experiment: {args.bias_type}")
+    print(f"  Topic ID: {args.topic_id}")
+    print(f"  Num seeds: {args.num_seeds}")
+    print(f"  Bias strength: {args.bias_strength}")
+    print(f"  Noise strength: {args.noise_strength}")
+    print()
+
+    # Setup logging
+    setup_experiment_logging(parent_dir)
+
+    # Collect all random seeds
+    random_seeds = [args.random_seed + i for i in range(args.num_seeds)]
+    print(f"Running seeds: {random_seeds}")
+
+    # Create data directory
+    data_dir = Path("data/recall")
+    run_path = data_dir / parent_dir
+    run_path.mkdir(parents=True, exist_ok=True)
+
+    # Load seed_states for ALL random seeds at once (with encoded indices)
+    all_seed_states = load_seed_states_for_recall(
+        ds_path=Path("user_prompts/handpick"),
+        topic_id=args.topic_id,
+        random_seeds=random_seeds,
+        val_split_size=64,
+    )
+
+    print(f"Loaded {len(all_seed_states)} seed states with indices: {[ss.index for ss in all_seed_states]}")
+
     # Imports after logging setup
     import torch
-    from state import load_initial_seed_states
-    from recall import detect_affirmative, detect_section_headers, detect_list
+    from recall import make_detect_affirmative, make_detect_section_headers, make_detect_list
     from cluster_models import LLMClusterModel
     from api_models import GenerationModel, RewriteModel
     from reward_models import LocalRewardModel
@@ -117,35 +180,32 @@ async def run_recall_experiment(
 
     # Select bias function based on type
     bias_functions = {
-        "affirm": detect_affirmative,
-        "headers": detect_section_headers,
-        "list": detect_list,
+        "affirm": make_detect_affirmative(args.random_seed, args.noise_strength, args.bias_strength),
+        "headers": make_detect_section_headers(args.random_seed, args.noise_strength, args.bias_strength),
+        "list": make_detect_list(args.random_seed, args.noise_strength, args.bias_strength),
     }
-    bias_func = bias_functions[bias_type]
+    bias_func = bias_functions[args.bias_type]
 
-    # Student model: positive bias
+    # Create shared models ONCE
     student_model = LocalRewardModel(
         model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
         devices=all_cuda_devices,
-        batch_size_per_device=64,
-        bias=partial(bias_func, bias_strength=bias_strength, noise_strength=noise_strength),
-        score_name=bias_type,
+        batch_size_per_device=32,
+        bias=partial(bias_func, bias_strength=args.bias_strength, noise_strength=args.noise_strength),
+        score_name=args.bias_type,
     )
 
-    # Teacher model: negative bias (shares weights with student)
     teacher_model = LocalRewardModel(
         model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
         devices=all_cuda_devices,
-        batch_size_per_device=64,
-        bias=partial(bias_func, bias_strength=-bias_strength, noise_strength=noise_strength),
-        score_name=f"anti-{bias_type}",
+        batch_size_per_device=32,
+        bias=partial(bias_func, bias_strength=-args.bias_strength, noise_strength=args.noise_strength),
+        score_name=f"anti-{args.bias_type}",
         share_weights_with=student_model,
     )
 
-    # Cluster model
     cluster_model = LLMClusterModel(force_caller="openrouter")
 
-    # Policy model
     policy_model_names = [
         "meta-llama/llama-3.2-1b-instruct",
         "mistralai/ministral-3b",
@@ -162,7 +222,6 @@ async def run_recall_experiment(
         enable_cache=False,
     )
 
-    # Train rewriter
     train_rewriter = RewriteModel(
         model_name="openai/gpt-5-mini",
         max_tokens=4096,
@@ -170,31 +229,23 @@ async def run_recall_experiment(
         force_caller="openrouter",
     )
 
-    # Load seed states
-    initial_seed_states = load_initial_seed_states(
-        ds_path=Path("user_prompts/handpick"),
-        topic_ids=[topic_id],
-        val_split_size=64,  # Pinned for determinism
-    )
-
-    # Hypothesis planner
+    # Create ONE planner (uses base random_seed, per-seed RNG via encoded index)
     hypothesis_planner = ListPlanner(
         model_names=["openai/gpt-5", "anthropic/claude-sonnet-4.5"],
         max_tokens=20000,
         reasoning="high",
         n_new=N_NEW,
         n_pop=N_POP_INITIAL,
-        m_var_initial=M_VAR_INITIAL,
+        m_var_initial=0,
         n_traj_in_context=16,
         n_per_user_prompt=1,
         reverse=True,  # list_reverse
         max_num_train_prompts=N_PLANNER_REQUESTS,
-        max_par=128,
+        max_par=MAX_PARALLEL,
         force_caller="openrouter",
-        random_seed=random_seed,
+        random_seed=args.random_seed,
     )
 
-    # Evo planner
     planner = EvoPlanner(
         direction="plus",
         hypothesis_planner=hypothesis_planner,
@@ -202,13 +253,13 @@ async def run_recall_experiment(
         m_var=M_VAR,
         cosine_sim_threshold_initial=0.9,
         cosine_sim_threshold_evolution=0.9,
-        context=CONTEXT,
-        random_seed=random_seed,
+        context="vanilla",
+        random_seed=args.random_seed,
     )
 
-    # Runner
+    # Create ONE runner with ALL seed_states
     runner = EvoRunner(
-        seed_states=initial_seed_states,
+        seed_states=all_seed_states,
         planner=planner,
         policy_model=policy_model,
         student_model=student_model,
@@ -216,36 +267,12 @@ async def run_recall_experiment(
         n_baseline_rollouts=16,
         n_rewrite_rollouts=1,
         n_validate_rollouts=1,
-        run_name=run_name,
-        random_seed=random_seed,
+        run_name=parent_dir,
+        random_seed=args.random_seed,
         runner_type_override="recall",
     )
 
-    # Save config
-    config = {
-        "run_name": run_name,
-        "bias_type": bias_type,
-        "bias_strength": bias_strength,
-        "noise_strength": noise_strength,
-        "topic_id": topic_id,
-        "random_seed": random_seed,
-        "student_model": student_model.to_dict(),
-        "teacher_model": teacher_model.to_dict(),
-        "planner": planner.to_dict(),
-        "policy_model": policy_model.to_dict(),
-        "train_rewriter": train_rewriter.to_dict(),
-        "n_new": N_NEW,
-        "m_var": M_VAR,
-        "n_pop_initial": N_POP_INITIAL,
-        "n_pop_targets": N_POP_TARGETS,
-        "train_batch_sizes": TRAIN_BATCH_SIZES,
-        "n_planner_requests": N_PLANNER_REQUESTS,
-        "prompts": {topic_id: state.cluster.to_dict() for state in initial_seed_states},
-    }
-    with open(f"{data_dir}/{run_name}/config.json", "w") as f:
-        json.dump(config, f, indent=4)
-
-    # Run experiment
+    # Run (planner/cluster batched, evaluate_attributes sequential)
     await runner.get_baselines()
 
     await runner.train(
@@ -257,31 +284,34 @@ async def run_recall_experiment(
         start_from=None,
     )
 
+    # Save per-seed configs after training
+    for i, seed in enumerate(random_seeds):
+        config = {
+            "run_name": f"{parent_dir}/random_seed_{seed}",
+            "bias_type": args.bias_type,
+            "bias_strength": args.bias_strength,
+            "noise_strength": args.noise_strength,
+            "topic_id": args.topic_id,
+            "random_seed": seed,
+            "encoded_index": all_seed_states[i].index,
+            "student_model": student_model.to_dict(),
+            "teacher_model": teacher_model.to_dict(),
+            "planner": planner.to_dict(),
+            "policy_model": policy_model.to_dict(),
+            "train_rewriter": train_rewriter.to_dict(),
+            "n_new": N_NEW,
+            "m_var": M_VAR,
+            "n_pop_initial": N_POP_INITIAL,
+            "n_pop_targets": N_POP_TARGETS,
+            "train_batch_sizes": TRAIN_BATCH_SIZES,
+            "n_planner_requests": N_PLANNER_REQUESTS,
+            "prompts": {args.topic_id: all_seed_states[i].cluster.to_dict()},
+        }
+        with open(run_path / f"config_seed_{seed}.json", "w") as f:
+            json.dump(config, f, indent=4)
 
-async def main():
-    parent_dir = f"{timestamp()}-recall-{args.bias_type}-{args.topic_id}"
-
-    print(f"Running recall experiment: {args.bias_type}")
-    print(f"  Topic ID: {args.topic_id}")
-    print(f"  Num seeds: {args.num_seeds}")
-    print(f"  Bias strength: {args.bias_strength}")
-    print(f"  Noise strength: {args.noise_strength}")
-    print()
-
-    for i in range(args.num_seeds):
-        seed = args.random_seed + i
-        run_name = f"{parent_dir}/random_seed_{seed}"
-        print(f"\n{'='*60}")
-        print(f"Starting seed run {i+1}/{args.num_seeds}: {run_name}")
-        print(f"{'='*60}\n")
-        await run_recall_experiment(
-            run_name=run_name,
-            random_seed=seed,
-            bias_type=args.bias_type,
-            bias_strength=args.bias_strength,
-            noise_strength=args.noise_strength,
-            topic_id=args.topic_id,
-        )
+    print(f"\nExperiment complete! Results saved to: {run_path}")
+    print(f"Configs saved: {[f'config_seed_{seed}.json' for seed in random_seeds]}")
 
 
 if __name__ == "__main__":
