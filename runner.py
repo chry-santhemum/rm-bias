@@ -68,7 +68,7 @@ class Runner(ABC):
                     reward_model=self.teacher_model,
                     n_rollouts=self.n_baseline_rollouts,
                 )
-            self.baselines[ss.index] = baselines
+            self.baselines[ss.rng_index] = baselines
 
 
     async def get_val_baselines(self):
@@ -90,7 +90,7 @@ class Runner(ABC):
                     reward_model=self.teacher_model,
                     n_rollouts=self.n_validate_rollouts,
                 )
-            self.val_baselines[ss.index] = baselines
+            self.val_baselines[ss.rng_index] = baselines
 
 
     def save_attribute_stats(
@@ -121,7 +121,7 @@ class Runner(ABC):
                 )
 
             # overwrites if already exists
-            seed_save_dir = save_dir / f"seed_{seed_state.index}.json"
+            seed_save_dir = save_dir / f"seed_{seed_state.rng_index}.json"
             with open(seed_save_dir, "w") as f:
                 json.dump(all_attributes, f, indent=4)
 
@@ -155,14 +155,14 @@ class Runner(ABC):
             async with BiasEvaluator(rewrite_models=val_rewriters, reward_model=self.student_model) as evaluator:
                 stats = await evaluator.evaluate_attributes(
                     user_prompts=val_prompts,
-                    attributes=final_attributes[ss.index],
-                    baselines=self.val_baselines[ss.index],
-                    same_attrs=[SAME_ATTRS] * len(final_attributes[ss.index]),
-                    save_dir=self.run_path / "validate" / f"seed_{ss.index}_validate",
+                    attributes=final_attributes[ss.rng_index],
+                    baselines=self.val_baselines[ss.rng_index],
+                    same_attrs=[SAME_ATTRS] * len(final_attributes[ss.rng_index]),
+                    save_dir=self.run_path / "validate" / f"seed_{ss.rng_index}_validate",
                 )
 
             for rewriter_name, rewriter_stats in stats.items():
-                validation_results[rewriter_name][ss.index] = {
+                validation_results[rewriter_name][ss.rng_index] = {
                     k: AttributeStats(attribute=k, rollouts=v) for k, v in rewriter_stats.items()
                 }
 
@@ -176,8 +176,8 @@ class Runner(ABC):
             )
 
             for seed_state in self.seed_states:
-                seed_stats = rewriter_stats[seed_state.index]
-                rewriter_dir = self.run_path / "validate" / f"seed_{seed_state.index}_validate" / rewriter_name.replace("/", "_")
+                seed_stats = rewriter_stats[seed_state.rng_index]
+                rewriter_dir = self.run_path / "validate" / f"seed_{seed_state.rng_index}_validate" / rewriter_name.replace("/", "_")
                 rewriter_dir.mkdir(parents=True, exist_ok=True)
 
                 # Save complete rollouts with teacher scores

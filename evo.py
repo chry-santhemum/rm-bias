@@ -227,7 +227,7 @@ class EvoPlanner:
                     attribute=attribute,
                     time_step=time_step,
                     seed_state=seed_state,
-                    baselines=baselines[seed_state.index],
+                    baselines=baselines[seed_state.rng_index],
                 )
                 exclude_set = {attribute} | set(ancestor_attrs)
 
@@ -246,7 +246,7 @@ class EvoPlanner:
                 planner_prompt = PLANNER_SYSTEM + "\n\n" + self.mutate_prompt.format(
                     num_plans=self.m_var,
                     cluster_summary=seed_state.cluster.summary,
-                    current_data=self._get_original_data(stats=stats, baselines=baselines[seed_state.index]),
+                    current_data=self._get_original_data(stats=stats, baselines=baselines[seed_state.rng_index]),
                     ancestry_data=ancestry_str,
                     neighbor_data=neighbor_data,
                     direction_goal=DIRECTION_GOAL[self.direction],
@@ -614,7 +614,7 @@ class EvoPlanner:
                 logger.info(f"Front {front_idx}: {len(front)} candidates, selected {len(selected_from_front)}.")
 
             # Store data for plotting (after selection is complete)
-            candidates_by_seed[seed_state.index] = {
+            candidates_by_seed[seed_state.rng_index] = {
                 "all_candidates": all_candidates,
                 "filtered_candidates": candidates,
                 "selected_candidates": final_selection,
@@ -668,7 +668,7 @@ class EvoRunner(Runner):
         self.n_rewrite_rollouts = n_rewrite_rollouts
         self.random_seed = random_seed
         self.seed_rngs = {
-            ss.index: Random(self.random_seed + ss.rng_index) for ss in seed_states
+            ss.rng_index: Random(self.random_seed + ss.rng_index) for ss in seed_states
         }
 
     @property
@@ -749,7 +749,7 @@ class EvoRunner(Runner):
         for i, ss in enumerate(self.seed_states):
             all_attributes = list(ss.history[-1].keys())
             async with BiasEvaluator(rewrite_models=[train_rewriter], reward_model=self.student_model) as evaluator:
-                user_prompts = self.seed_rngs[ss.index].sample(
+                user_prompts = self.seed_rngs[ss.rng_index].sample(
                     ss.cluster.train_prompts,
                     train_batch_size,
                 )
@@ -757,7 +757,7 @@ class EvoRunner(Runner):
                 stats = await evaluator.evaluate_attributes(
                     user_prompts=user_prompts,
                     attributes=all_attributes,
-                    baselines=self.baselines[ss.index],
+                    baselines=self.baselines[ss.rng_index],
                     same_attrs=[SAME_ATTRS] * len(all_attributes),
                     n_rollouts=self.n_rewrite_rollouts,
                 )
@@ -765,13 +765,13 @@ class EvoRunner(Runner):
             assert len(list(stats.keys())) == 1
             assert list(stats.keys())[0] == train_rewriter.model_name
             stats = stats[train_rewriter.model_name]
-            evaluate_results[ss.index] = {
+            evaluate_results[ss.rng_index] = {
                 k: AttributeStats(attribute=k, rollouts=v) for k, v in stats.items()
             }
 
         # Store ALL rollouts to history (needed for clustering and saving)
         for seed_state in self.seed_states:
-            ss_idx = seed_state.index
+            ss_idx = seed_state.rng_index
             stats = evaluate_results[ss_idx]
             for attribute, attribute_stats in stats.items():
                 seed_state.history[-1][attribute].rollouts = attribute_stats.rollouts
@@ -779,7 +779,7 @@ class EvoRunner(Runner):
         # Cluster candidates and pick best by student score from each cluster
         if self.step_count > 0:
             representative_attributes = await asyncio.gather(*[
-                self._cluster_seed(seed_state, evaluate_results[seed_state.index])
+                self._cluster_seed(seed_state, evaluate_results[seed_state.rng_index])
                 for seed_state in self.seed_states
             ])
         else:
@@ -789,11 +789,11 @@ class EvoRunner(Runner):
         representative_results: dict[int, dict[str, AttributeStats]] = {}
         for i, ss in enumerate(self.seed_states):
             reps = set(representative_attributes[i])
-            representative_results[ss.index] = {
-                attr: stats for attr, stats in evaluate_results[ss.index].items()
+            representative_results[ss.rng_index] = {
+                attr: stats for attr, stats in evaluate_results[ss.rng_index].items()
                 if attr in reps
             }
-            print(f"Seed {ss.index}: {len(evaluate_results[ss.index])} -> {len(representative_results[ss.index])} after clustering")
+            print(f"Seed {ss.index}: {len(evaluate_results[ss.rng_index])} -> {len(representative_results[ss.rng_index])} after clustering")
 
         # Filter by student scores to save compute on teacher evaluation
         filtered_evaluate_results, student_thresholds = self.planner.filter_by_student_scores(
@@ -828,7 +828,7 @@ class EvoRunner(Runner):
         for ss_idx, candidates in candidates_by_seed.items():
             ss_history = None
             for ss in self.seed_states:
-                if ss.index == ss_idx:
+                if ss.rng_index == ss_idx:
                     ss_history = ss.history
             assert ss_history is not None
 
@@ -872,7 +872,7 @@ class EvoRunner(Runner):
         for time_step in range(t_steps):
             if start_from is not None and time_step < start_from:
                 for seed_state in self.seed_states:
-                    with open(self.run_path / f"step_{time_step}_stats/seed_{seed_state.index}.json", "r") as f:
+                    with open(self.run_path / f"step_{time_step}_stats/seed_{seed_state.rng_index}.json", "r") as f:
                         seed_results = json.load(f)
 
                     seed_state.history.append(dict())

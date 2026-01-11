@@ -108,7 +108,7 @@ class Planner(ABC):
         for seed_idx_in_list, seed_plans in to_write.items():
             for plan_idx, plan_dict in enumerate(seed_plans):
                 seed_state = runner.seed_states[seed_idx_in_list]
-                seed_baselines = runner.baselines[seed_state.index]
+                seed_baselines = runner.baselines[seed_state.rng_index]
                 seed_rng = Random(self.random_seed + seed_state.rng_index)
 
                 sampled_train_prompts = seed_rng.sample(
@@ -235,7 +235,7 @@ class ListPlanner(Planner):
         for seed_idx_in_list, seed_state in enumerate(runner.seed_states):
             seed_rng = Random(self.random_seed + seed_state.rng_index)
             seed_state.history.append({})
-            seed_baselines = runner.baselines[seed_state.index]
+            seed_baselines = runner.baselines[seed_state.rng_index]
             if self.max_num_train_prompts is not None:
                 train_prompts = seed_rng.sample(seed_state.cluster.train_prompts, self.max_num_train_prompts)
             else:
@@ -410,7 +410,7 @@ class PairPlanner(Planner):
         for seed_state in runner.seed_states:
             seed_rng = Random(self.random_seed + seed_state.rng_index)
             contrast_pairs = []
-            seed_baselines = runner.baselines[seed_state.index]
+            seed_baselines = runner.baselines[seed_state.rng_index]
             prompts = [
                 p for p in seed_state.cluster.train_prompts if p in seed_baselines
             ]
@@ -457,7 +457,7 @@ class PairPlanner(Planner):
 
             # save cluster info
             with open(
-                runner.run_path / f"seed_{seed_state.index}_cluster.json", "w"
+                runner.run_path / f"seed_{seed_state.rng_index}_cluster.json", "w"
             ) as f:
                 json.dump(asdict(seed_state.cluster), f, indent=4)
 

@@ -294,7 +294,7 @@ async def main():
             "noise_strength": args.noise_strength,
             "topic_id": args.topic_id,
             "random_seed": seed,
-            "encoded_index": all_seed_states[i].index,
+            "rng_index": all_seed_states[i].rng_index,
             "student_model": student_model.to_dict(),
             "teacher_model": teacher_model.to_dict(),
             "planner": planner.to_dict(),
