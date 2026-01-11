@@ -40,7 +40,11 @@
       "Skill(mistake)",
       "Bash(wc:*)",
       "Bash(for f in user_prompts/handpick/cluster_*.json)",
-      "Bash(do echo \"=== $f ===\")"
+      "Bash(do echo \"=== $f ===\")",
+      "Bash(pip show:*)",
+      "Bash(apt list:*)",
+      "Bash(curl:*)",
+      "Bash(git rev-parse:*)"
     ],
     "deny": [
       "Bash(rm:*)",

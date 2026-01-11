@@ -237,7 +237,7 @@ class ListPlanner(Planner):
             seed_state.history.append({})
             seed_baselines = runner.baselines[seed_state.index]
             if self.max_num_train_prompts is not None:
-                train_prompts = seed_state.cluster.train_prompts[:self.max_num_train_prompts]
+                train_prompts = seed_rng.sample(seed_state.cluster.train_prompts, self.max_num_train_prompts)
             else:
                 train_prompts = seed_state.cluster.train_prompts
             for user_prompt in train_prompts:

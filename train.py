@@ -12,10 +12,6 @@ parser.add_argument(
         "skywork-qwen-0.6b",
         "skywork-llama-8b",
         "skywork-llama-8b-exp",
-        "recall-sleeper",
-        "recall-affirm",
-        "recall-headers",
-        "recall-list",
     ]
 )
 parser.add_argument(
@@ -24,9 +20,6 @@ parser.add_argument(
         "claude-sonnet-4.5",
         "gpt-5-mini",
         "skywork-llama-8b",
-        "recall-anti-affirm",
-        "recall-anti-headers",
-        "recall-anti-list",
     ]
 )
 
@@ -60,8 +53,6 @@ parser.add_argument("--val_split_size", type=int, default=64)
 parser.add_argument("--run_name", type=str, default=None)
 parser.add_argument("--start_from", type=int, default=None)
 parser.add_argument("--random_seed", type=int, default=42)
-parser.add_argument("--num_seeds", type=int, default=1,
-    help="Number of seed runs (each increments random_seed by 1)")
 
 args = parser.parse_args()
 
@@ -114,19 +105,8 @@ def estimate_cost(parsed_args: argparse.Namespace) -> float:
         cost_per_seed += CLAUDE_SONNET_4_5_JUDGE_KCALL * num_calls_judge
     return cost_per_seed * num_seeds / 1000
 
-def is_recall_experiment(parsed_args: argparse.Namespace) -> bool:
-    return (parsed_args.student_model.startswith("recall-") and
-            parsed_args.teacher_model.startswith("recall-"))
-
-is_recall = is_recall_experiment(args)
 cost_per_seed = estimate_cost(args)
-
-if is_recall and args.num_seeds > 1:
-    total_cost = cost_per_seed * args.num_seeds
-    print(f"Estimated cost per seed: ${cost_per_seed:.2f}")
-    print(f"Estimated total cost ({args.num_seeds} seeds): ${total_cost:.2f}")
-else:
-    print(f"Estimated cost for this run: ${cost_per_seed:.2f}")
+print(f"Estimated cost for this run: ${cost_per_seed:.2f}")
 
 time.sleep(20)
 # print(f"Estimated time for this run:")
@@ -139,7 +119,6 @@ async def run_experiment(
     log_dir: str,
     data_dir: str,
     random_seed: int,
-    runner_type: str,
 ):
     """Run a single experiment with the given configuration."""
     # Create directories (handles nested paths like parent/random_seed_42)
@@ -173,7 +152,6 @@ async def run_experiment(
     import torch
 
     from state import load_initial_seed_states
-    from recall import detect_affirmative, detect_section_headers, detect_longest_list
     from cluster_models import EmbedClusterModel, LLMClusterModel
     from api_models import GenerationModel, RewriteModel
     from reward_models import LocalRewardModel, APIRewardModel
@@ -224,36 +202,6 @@ async def run_experiment(
             devices=all_cuda_devices,
             batch_size_per_device=32,
         )
-    elif args.student_model == "recall-sleeper":
-        student_model = LocalRewardModel(
-            model_name="saepark/sleeper-classicRM",
-            devices=all_cuda_devices,
-            batch_size_per_device=32,
-        )
-    elif args.student_model == "recall-affirm":
-        student_model = LocalRewardModel(
-            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
-            devices=all_cuda_devices,
-            batch_size_per_device=16,
-            bias=partial(detect_affirmative, bias_strength=3.0),
-            score_name="affirm",
-        )
-    elif args.student_model == "recall-headers":
-        student_model = LocalRewardModel(
-            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
-            devices=all_cuda_devices,
-            batch_size_per_device=16,
-            bias=partial(detect_section_headers, bias_per_header=1.0),
-            score_name="headers",
-        )
-    elif args.student_model == "recall-list":
-        student_model = LocalRewardModel(
-            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
-            devices=all_cuda_devices,
-            batch_size_per_device=16,
-            bias=partial(detect_longest_list, bias_per_item=0.5),
-            score_name="list",
-        )
 
     # Helper to check if teacher can share weights with student
     def _can_share_with_student(target_base: str) -> LocalRewardModel | None:
@@ -269,33 +217,6 @@ async def run_experiment(
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
             devices=all_cuda_devices,
             batch_size_per_device=64,
-            share_weights_with=_can_share_with_student("Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
-        )
-    elif args.teacher_model == "recall-anti-affirm":
-        teacher_model = LocalRewardModel(
-            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
-            devices=all_cuda_devices,
-            batch_size_per_device=16,
-            bias=partial(detect_affirmative, bias_strength=-3.0),
-            score_name="anti-affirm",
-            share_weights_with=_can_share_with_student("Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
-        )
-    elif args.teacher_model == "recall-anti-headers":
-        teacher_model = LocalRewardModel(
-            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
-            devices=all_cuda_devices,
-            batch_size_per_device=16,
-            bias=partial(detect_section_headers, bias_per_header=-1.0),
-            score_name="anti-headers",
-            share_weights_with=_can_share_with_student("Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
-        )
-    elif args.teacher_model == "recall-anti-list":
-        teacher_model = LocalRewardModel(
-            model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
-            devices=all_cuda_devices,
-            batch_size_per_device=16,
-            bias=partial(detect_longest_list, bias_per_item=-0.5),
-            score_name="anti-list",
             share_weights_with=_can_share_with_student("Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
         )
     elif args.teacher_model == "gpt-5-mini":
@@ -406,7 +327,6 @@ async def run_experiment(
         n_validate_rollouts=args.n_validate_rollouts,
         run_name=run_name,
         random_seed=random_seed,
-        runner_type_override=runner_type,
     )
 
     # save config file
@@ -469,29 +389,10 @@ async def run_experiment(
 
 
 async def main():
-    if is_recall:
-        # Recall experiments: route to data/recall with nested seed directories
-        topic_ids_str = "_".join(str(t) for t in args.topic_ids)
-        parent_dir = f"{timestamp()}-{args.student_model}-{topic_ids_str}"
-        log_dir = "logs/recall"
-        data_dir = "data/recall"
-        runner_type = "recall"
-
-        # Always nest under random_seed_X for recall experiments
-        for i in range(args.num_seeds):
-            seed = args.random_seed + i
-            run_name = f"{parent_dir}/random_seed_{seed}"
-            print(f"\n{'='*60}")
-            print(f"Starting seed run {i+1}/{args.num_seeds}: {run_name}")
-            print(f"{'='*60}\n")
-            await run_experiment(run_name, log_dir, data_dir, seed, runner_type)
-    else:
-        # Non-recall experiments: existing flat structure
-        run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
-        log_dir = "logs/evo"
-        data_dir = "data/evo"
-        runner_type = "evo"
-        await run_experiment(run_name, log_dir, data_dir, args.random_seed, runner_type)
+    run_name = args.run_name or f"{timestamp()}-{args.planner_type}-{args.dataset}-{args.direction}"
+    log_dir = "logs/evo"
+    data_dir = "data/evo"
+    await run_experiment(run_name, log_dir, data_dir, args.random_seed)
 
 
 if __name__ == "__main__":

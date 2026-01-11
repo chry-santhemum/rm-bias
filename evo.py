@@ -833,9 +833,10 @@ class EvoRunner(Runner):
             assert ss_history is not None
 
             with open(self.run_path / f"step_{self.step_count}_stats" / f"seed_{ss_idx}_candidates.json", "w") as f:
-                json.dump([
+                json.dump(sorted([
                     {
                         "attribute": c[0],
+                        "selected": c in candidates["selected_candidates"],
                         "student_winrate": c[2],
                         "teacher_winrate": c[3],
                         "time_step": c[1],
@@ -843,7 +844,7 @@ class EvoRunner(Runner):
                         "parent_time_step": ss_history[-1][c[0]].meta.get("parent_time_step", None),
                     } 
                     for c in candidates["all_candidates"]
-                ], f, indent=4)
+                ], key=lambda x: x["student_winrate"], reverse=self.planner.direction == "plus"), f, indent=4)
 
             fig = EvoPlanner.plot_candidate_stats(**candidates)
             fig.savefig(self.run_path / f"step_{self.step_count}_stats" / f"seed_{ss_idx}_pareto.pdf")
