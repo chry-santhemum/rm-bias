@@ -1,6 +1,5 @@
 # %%
 import json
-import re
 from pathlib import Path
 from typing import Sequence
 
@@ -12,28 +11,11 @@ from scipy import stats as scipy_stats
 from sklearn.metrics.pairwise import cosine_similarity
 
 from cluster_models import EmbedClusterModel
-
-ALL_REWRITERS = [
-    "openai_gpt-5-mini",
-    "anthropic_claude-haiku-4.5",
-    "x-ai_grok-4.1-fast",
-]
-
-
-def _get_seed_indices(run_path: Path) -> list[int]:
-    """Find all seed indices in a run's validate directory."""
-    validate_dir = run_path / "validate"
-    if not validate_dir.exists():
-        return []
-
-    pattern = re.compile(r"seed_(\d+)_validate")
-    seed_indices = []
-    for item in validate_dir.iterdir():
-        if item.is_dir():
-            match = pattern.match(item.name)
-            if match:
-                seed_indices.append(int(match.group(1)))
-    return sorted(seed_indices)
+from filtering import (
+    ALL_REWRITERS,
+    aggregate_across_rewriters,
+    get_seed_indices,
+)
 
 
 def _load_validation_data(
@@ -74,158 +56,6 @@ def _load_validation_data(
     ]
 
 
-def _load_rollouts_data(
-    run_path: Path,
-    seed_index: int,
-    rewriter_name: str,
-) -> dict[str, list[dict]]:
-    """
-    Load per-sample scores from rollouts.json.
-
-    Returns dict mapping attribute -> list of sample dicts, each with:
-        - student_score: float (reward diff for this sample)
-        - teacher_score: float (normalized to [0, 1] from [-1, 1])
-    """
-    rollouts_path = (
-        run_path
-        / "validate"
-        / f"seed_{seed_index}_validate"
-        / rewriter_name
-        / "rollouts.json"
-    )
-
-    if not rollouts_path.exists():
-        return {}
-
-    with open(rollouts_path, "r") as f:
-        rollouts = json.load(f)
-
-    result: dict[str, list[dict]] = {}
-    for attribute, prompts in rollouts.items():
-        samples = []
-        for prompt, rollout_list in prompts.items():
-            for rollout in rollout_list:
-                if rollout is None:
-                    continue
-                student_data = rollout.get("student_score")
-                teacher_data = rollout.get("teacher_score")
-                if student_data is None or teacher_data is None:
-                    continue
-                student = student_data.get("score")
-                teacher_raw = teacher_data.get("score")
-                if student is not None and teacher_raw is not None:
-                    # Convert teacher from [-1, 1] to [0, 1]
-                    teacher = (teacher_raw + 1) / 2
-                    samples.append({
-                        "student_score": student,
-                        "teacher_score": teacher,
-                    })
-        result[attribute] = samples
-
-    return result
-
-
-def _aggregate_across_rewriters(
-    run_path: Path,
-    seed_index: int,
-    strict: bool,
-) -> dict[str, dict]:
-    """
-    Aggregate per-sample scores across all rewriters for a seed.
-
-    Args:
-        run_path: Path to the run directory
-        seed_index: Which seed to load
-        strict: If True, only include attributes where ALL rewriters have
-            mean student_score >= 0 AND mean teacher_score <= 0.5.
-            If False, aggregate all samples first, then filter on aggregated mean.
-
-    Returns:
-        Dict mapping attribute -> {
-            "student_scores": list[float],  # all samples
-            "teacher_scores": list[float],  # all samples
-            "student_mean": float,
-            "teacher_mean": float,
-            "student_ci": float,  # 95% CI half-width
-            "teacher_ci": float,  # 95% CI half-width
-        }
-    """
-    # Load rollouts from all rewriters
-    rewriter_data: dict[str, dict[str, list[dict]]] = {}
-    for rewriter in ALL_REWRITERS:
-        rewriter_data[rewriter] = _load_rollouts_data(run_path, seed_index, rewriter)
-
-    # Find all attributes across rewriters
-    all_attributes = set()
-    for data in rewriter_data.values():
-        all_attributes.update(data.keys())
-
-    if strict:
-        # Strict mode: filter to attributes where ALL rewriters pass threshold
-        valid_attributes = set()
-        for attribute in all_attributes:
-            passes_all = True
-            for rewriter in ALL_REWRITERS:
-                samples = rewriter_data[rewriter].get(attribute, [])
-                if not samples:
-                    passes_all = False
-                    break
-                student_mean = np.mean([s["student_score"] for s in samples])
-                teacher_mean = np.mean([s["teacher_score"] for s in samples])
-                if student_mean < 0 or teacher_mean > 0.5:
-                    passes_all = False
-                    break
-            if passes_all:
-                valid_attributes.add(attribute)
-    else:
-        # Non-strict: will filter after aggregation
-        valid_attributes = all_attributes
-
-    # Aggregate samples across rewriters
-    result: dict[str, dict] = {}
-    for attribute in valid_attributes:
-        all_student = []
-        all_teacher = []
-        for rewriter in ALL_REWRITERS:
-            samples = rewriter_data[rewriter].get(attribute, [])
-            all_student.extend([s["student_score"] for s in samples])
-            all_teacher.extend([s["teacher_score"] for s in samples])
-
-        if not all_student:
-            continue
-
-        student_mean = np.mean(all_student)
-        teacher_mean = np.mean(all_teacher)
-
-        # Non-strict filtering: check aggregated means
-        if not strict:
-            if student_mean < 0 or teacher_mean > 0.5:
-                continue
-
-        # Compute 95% CI (t-distribution)
-        n = len(all_student)
-        if n > 1:
-            student_sem = scipy_stats.sem(all_student)
-            teacher_sem = scipy_stats.sem(all_teacher)
-            t_crit = scipy_stats.t.ppf(0.975, df=n - 1)
-            student_ci = t_crit * student_sem
-            teacher_ci = t_crit * teacher_sem
-        else:
-            student_ci = 0.0
-            teacher_ci = 0.0
-
-        result[attribute] = {
-            "student_scores": all_student,
-            "teacher_scores": all_teacher,
-            "student_mean": student_mean,
-            "teacher_mean": teacher_mean,
-            "student_ci": student_ci,
-            "teacher_ci": teacher_ci,
-        }
-
-    return result
-
-
 def _precompute_aggregated_seed_data(
     run_path: Path,
     seed_index: int,
@@ -235,14 +65,14 @@ def _precompute_aggregated_seed_data(
     """
     Precompute embeddings and similarity matrix for aggregated data.
 
-    Uses _aggregate_across_rewriters to get per-attribute aggregated scores,
+    Uses aggregate_across_rewriters to get per-attribute aggregated scores,
     then computes embeddings for DABS diversity penalty.
 
     Returns dict with:
         - items: list of {attribute, teacher_score, score} (using means)
         - cos_sims: precomputed cosine similarity matrix
     """
-    aggregated = _aggregate_across_rewriters(run_path, seed_index, strict)
+    aggregated = aggregate_across_rewriters(run_path, seed_index, strict)
 
     if not aggregated:
         return {"items": [], "cos_sims": None}
@@ -400,7 +230,7 @@ def DABS(
     if isinstance(run_path, str):
         run_path = Path(run_path)
 
-    seed_indices = _get_seed_indices(run_path)
+    seed_indices = get_seed_indices(run_path)
 
     dabs_scores = {}
     for seed_index in seed_indices:
@@ -510,9 +340,9 @@ def plot_pareto_frontier(
         run_key = str(run_path)
         run_seed_data[run_key] = {}
 
-        for seed_index in _get_seed_indices(run_path):
-            run_seed_data[run_key][seed_index] = _aggregate_across_rewriters(
-                run_path, seed_index, strict=strict
+        for seed_index in get_seed_indices(run_path):
+            run_seed_data[run_key][seed_index] = aggregate_across_rewriters(
+                run_path, seed_index, strict
             )
 
     # Find common seed indices across all runs
@@ -641,15 +471,16 @@ def plot_pareto_frontier(
     for i in range(1, rows * cols + 1):
         row_idx = (i - 1) // cols + 1
         col_idx = (i - 1) % cols + 1
-        # X-axis label only on bottom row
+        # X-axis label only on bottom row (with arrow indicating better direction)
         if row_idx == rows:
-            fig.update_xaxes(title_text="RM bias strength", row=row_idx, col=col_idx)
+            fig.update_xaxes(title_text="RM bias strength (⟶)", row=row_idx, col=col_idx)
         else:
             fig.update_xaxes(title_text="", row=row_idx, col=col_idx)
         # Y-axis: fixed range [0, 0.55] with label only on leftmost column
+        # Arrow points left (renders as down after 90° CCW rotation)
         if col_idx == 1:
             fig.update_yaxes(
-                title_text="LM judge bias winrate",
+                title_text="(⟵) LM judge bias winrate",
                 range=[-0.05, 0.55],
                 row=row_idx,
                 col=col_idx,
@@ -679,10 +510,10 @@ def print_attribute_stats(
     if isinstance(run_path, str):
         run_path = Path(run_path)
 
-    seed_indices = _get_seed_indices(run_path)
+    seed_indices = get_seed_indices(run_path)
 
     for seed_index in seed_indices:
-        aggregated = _aggregate_across_rewriters(run_path, seed_index, strict=strict)
+        aggregated = aggregate_across_rewriters(run_path, seed_index, strict)
 
         if not aggregated:
             print(f"\n=== Dataset {seed_index} ===")
@@ -752,7 +583,7 @@ def plot_dabs_vs_threshold(
         run_key = str(run_path)
         precomputed_data[run_key] = {}
 
-        for seed_index in _get_seed_indices(run_path):
+        for seed_index in get_seed_indices(run_path):
             precomputed_data[run_key][seed_index] = _precompute_aggregated_seed_data(
                 run_path, seed_index, cluster_model, strict=strict
             )
@@ -870,8 +701,9 @@ def plot_dabs_vs_threshold(
         else:
             fig.update_xaxes(title_text="", row=row_idx, col=col_idx)
         # Y-axis: fixed range with minimum of 2, label only on leftmost column
+        # Arrow points right (renders as up after 90° CCW rotation)
         if col_idx == 1:
-            fig.update_yaxes(title_text="DABS", range=[0, y_max], row=row_idx, col=col_idx)
+            fig.update_yaxes(title_text="DABS (⟶)", range=[0, y_max], row=row_idx, col=col_idx)
         else:
             fig.update_yaxes(title_text="", range=[0, y_max], row=row_idx, col=col_idx)
 
@@ -978,7 +810,7 @@ def compute_hypervolume_table(
         run_name = run_path.name
         run_seed_data[run_name] = {}
 
-        for seed_index in _get_seed_indices(run_path):
+        for seed_index in get_seed_indices(run_path):
             validation_data = _load_validation_data(run_path, seed_index, rewriter_name)
 
             seed_points = []
@@ -1043,11 +875,11 @@ def compute_hypervolume_table(
 cluster_model = EmbedClusterModel(embed_model_name="Qwen/Qwen3-Embedding-8B")
 
 # %%
-# run_paths = {
-#     "depth = 5, branching = 4": "data/evo/20260106-174842-list_reverse-handpick-plus",
-#     "depth = 3, branching = 8": "data/evo/20260107-015321-list_reverse-handpick-plus",
-#     "depth = 1": "data/evo/20260107-075251-list_reverse-handpick-plus",
-# }
+run_paths = {
+    "depth = 5, branching = 4": "data/evo/20260106-174842-list_reverse-handpick-plus",
+    "depth = 3, branching = 8": "data/evo/20260107-015321-list_reverse-handpick-plus",
+    "depth = 1": "data/evo/20260107-075251-list_reverse-handpick-plus",
+}
 
 # run_paths = {
 #     "depth = 5, branching = 4": "data/evo/20260108-005003-list_reverse-handpick-plus"
@@ -1057,34 +889,34 @@ cluster_model = EmbedClusterModel(embed_model_name="Qwen/Qwen3-Embedding-8B")
 #     "depth = 5, branching = 4": "data/evo/20260108-104745-list_reverse-chatgpt-plus",
 # }
 
-# output_dir = Path("data/metrics/main_run_1")
-# output_dir.mkdir(parents=True, exist_ok=True)
+output_dir = Path("data/metrics/main_run_1")
+output_dir.mkdir(parents=True, exist_ok=True)
 
-# # Generate Pareto frontier plot
-# pareto_fig = plot_pareto_frontier(run_paths, strict=False, pareto_only=False)
-# pareto_fig.write_image(output_dir / "pareto_plot.pdf")
+# Generate Pareto frontier plot
+pareto_fig = plot_pareto_frontier(run_paths, strict=False, pareto_only=False)
+pareto_fig.write_image(output_dir / "pareto_plot.pdf")
 
-# pareto_fig = plot_pareto_frontier(run_paths, strict=True, pareto_only=False)
-# pareto_fig.write_image(output_dir / "pareto_plot_strict.pdf")
+pareto_fig = plot_pareto_frontier(run_paths, strict=True, pareto_only=False)
+pareto_fig.write_image(output_dir / "pareto_plot_strict.pdf")
 
-# # Generate DABS vs threshold plot
-# dabs_fig = plot_dabs_vs_threshold(run_paths, cluster_model, strict=False)
-# dabs_fig.write_image(output_dir / "dabs_plot.pdf")
+# Generate DABS vs threshold plot
+dabs_fig = plot_dabs_vs_threshold(run_paths, cluster_model, strict=False)
+dabs_fig.write_image(output_dir / "dabs_plot.pdf")
 
-# dabs_fig = plot_dabs_vs_threshold(run_paths, cluster_model, strict=True)
-# dabs_fig.write_image(output_dir / "dabs_plot_strict.pdf")
+dabs_fig = plot_dabs_vs_threshold(run_paths, cluster_model, strict=True)
+dabs_fig.write_image(output_dir / "dabs_plot_strict.pdf")
 
 
-run_paths = {
-    "Two": "data/evo/20260103-161313-list_reverse-handpick-plus",
-    "Three": "data/evo/20260103-171901-list_reverse-handpick-plus"
-}
-# Print attribute statistics
-for label, path in run_paths.items():
-    print(f"\n{'=' * 60}")
-    print(f"Run: {label}")
-    print(f"{'=' * 60}")
-    print_attribute_stats(path, strict=False)
+# run_paths = {
+#     "Two": "data/evo/20260103-161313-list_reverse-handpick-plus",
+#     "Three": "data/evo/20260103-171901-list_reverse-handpick-plus"
+# }
+# # Print attribute statistics
+# for label, path in run_paths.items():
+#     print(f"\n{'=' * 60}")
+#     print(f"Run: {label}")
+#     print(f"{'=' * 60}")
+#     print_attribute_stats(path, strict=False)
 
 # %%
 # hv_table = compute_hypervolume_table(run_paths)
