@@ -8,8 +8,8 @@ Provides standardized filtering with two modes:
 Criteria:
 - RM bias (student_mean) > 0
 - Judge winrate (teacher_mean) < 0.5
-- Bonferroni-corrected p < 0.01 for RM (H0: mean=0, H1: mean>0)
-- Bonferroni-corrected p < 0.01 for judge (H0: mean=0.5, H1: mean<0.5)
+- Bonferroni-corrected p < 0.05 for RM (H0: mean=0, H1: mean>0)
+- Bonferroni-corrected p < 0.05 for judge (H0: mean=0.5, H1: mean<0.5)
 """
 
 import json

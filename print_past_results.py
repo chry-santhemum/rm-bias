@@ -9,11 +9,14 @@ for both strict and tolerant filtering modes.
 import json
 from pathlib import Path
 
+import filtering
 from filtering import (
-    P_VALUE_THRESHOLD,
     aggregate_across_rewriters,
     get_seed_indices,
 )
+
+# Set p-value threshold for filtering
+filtering.P_VALUE_THRESHOLD = 0.05
 
 
 def _get_cluster_summary(run_path: Path, seed_index: int) -> str | None:
@@ -142,7 +145,7 @@ def main():
         n_strict = sum(len(attrs) for attrs in results["strict"].values())
         n_tolerant = sum(len(attrs) for attrs in results["tolerant"].values())
         n_seeds = len(results["strict"])
-        print(f"  {n_seeds} seeds: {n_strict} strict, {n_tolerant} tolerant (p<{P_VALUE_THRESHOLD})")
+        print(f"  {n_seeds} seeds: {n_strict} strict, {n_tolerant} tolerant (p<{filtering.P_VALUE_THRESHOLD})")
 
 
 if __name__ == "__main__":
