@@ -222,14 +222,14 @@ async def main(
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n_topics", type=int, default=24)
-    parser.add_argument("--n_prompts", type=int, default=10)
+    parser.add_argument("--n_topics", type=int, default=16)
+    parser.add_argument("--n_prompts", type=int, default=4)
     parser.add_argument("--cluster_ids", type=int, nargs="+", default=None,
                         help="Specific cluster indices to regenerate (default: all)")
     args = parser.parse_args()
 
     asyncio.run(main(
-        dataset_path=Path("user_prompts/handpick"),
+        dataset_path=Path("user_prompts/handpick_test"),
         model="openai/gpt-5",
         n_topics=args.n_topics,
         n_prompts=args.n_prompts,

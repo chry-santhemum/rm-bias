@@ -44,7 +44,9 @@
       "Bash(pip show:*)",
       "Bash(apt list:*)",
       "Bash(curl:*)",
-      "Bash(git rev-parse:*)"
+      "Bash(git rev-parse:*)",
+      "Bash(jq:*)",
+      "Bash(head:*)"
     ],
     "deny": [
       "Bash(rm:*)",

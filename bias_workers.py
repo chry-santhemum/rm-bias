@@ -165,10 +165,10 @@ async def rewrite_worker(
         try:
             all_responses = await asyncio.wait_for(
                 asyncio.gather(*tasks, return_exceptions=True),
-                timeout=120.0  # 2 minute timeout for the batch
+                timeout=60.0  # 1 minute timeout for the batch
             )
         except asyncio.TimeoutError:
-            logger.error(f"[rewrite_worker {worker_id}] Batch timed out after 120s")
+            logger.error(f"[rewrite_worker {worker_id}] Batch timed out after 60s")
             # Produce None outputs for all inputs × all rewriters
             for input in batch:
                 for rwm in rewrite_models:
@@ -301,10 +301,6 @@ async def rating_worker(
     # Keep track of progress by batch id
     processed_counts = defaultdict(int)
     expected_counts = defaultdict(int)
-    # Track stalls to detect missing items
-    last_progress_time = time.time()
-    last_processed_total = 0
-    STALL_TIMEOUT = 60.0  # Force completion if no progress for 60 seconds
 
     async def rate_batch(batch: list[PromptOutput | RewriteOutput]):
         start_time = time.time()
@@ -374,12 +370,6 @@ async def rating_worker(
                 all_results[batch[0].batch_id].extend(batch)  # type: ignore
 
         completed_batch_ids = []
-        current_total = sum(processed_counts.values())
-
-        # Track progress for stall detection
-        if current_total > last_processed_total:
-            last_progress_time = time.time()
-            last_processed_total = current_total
 
         for batch_id, expected in list(expected_counts.items()):
             processed = processed_counts.get(batch_id, 0)
@@ -387,21 +377,11 @@ async def rating_worker(
                 all_futures[batch_id].set_result(all_results[batch_id])
                 completed_batch_ids.append(batch_id)
                 logger.info(f"[rating_worker] Batch {batch_id} completed: {processed}/{expected}.")
-            else:
-                # Check for stall - if no progress for STALL_TIMEOUT and queue is empty
-                stall_duration = time.time() - last_progress_time
-                if stall_duration > STALL_TIMEOUT and in_queue.qsize() == 0:
-                    logger.warning(
-                        f"[rating_worker] Batch {batch_id} stalled for {stall_duration:.0f}s with {processed}/{expected} items. "
-                        f"Force completing with available results."
-                    )
-                    all_futures[batch_id].set_result(all_results[batch_id])
-                    completed_batch_ids.append(batch_id)
+            elif processed % 100 == 0 or in_queue.qsize() < 10:
                 # Log progress every 100 items or when queue is small
-                elif processed % 100 == 0 or in_queue.qsize() < 10:
-                    logger.info(
-                        f"[rating_worker] Batch {batch_id} progress: {processed}/{expected}. Queue: {in_queue.qsize()}"
-                    )
+                logger.info(
+                    f"[rating_worker] Batch {batch_id} progress: {processed}/{expected}. Queue: {in_queue.qsize()}"
+                )
 
         for batch_id in completed_batch_ids:
             del all_results[batch_id]  # type: ignore

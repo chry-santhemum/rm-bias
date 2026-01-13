@@ -191,7 +191,7 @@ async def main():
     student_model = LocalRewardModel(
         model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
         devices=all_cuda_devices,
-        batch_size_per_device=32,
+        batch_size_per_device=16,
         bias=student_bias,
         score_name=args.bias_type,
     )
@@ -199,7 +199,7 @@ async def main():
     teacher_model = LocalRewardModel(
         model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
         devices=all_cuda_devices,
-        batch_size_per_device=32,
+        batch_size_per_device=16,
         bias=teacher_bias,
         score_name=f"anti-{args.bias_type}",
         share_weights_with=student_model,

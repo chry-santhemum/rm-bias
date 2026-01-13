@@ -108,16 +108,14 @@ def load_rollouts_data(
     return result
 
 
-def count_candidates_for_seed(run_path: Path, seed_index: int) -> int:
-    """Count total candidates tested during evolution for a specific seed."""
-    total = 0
-    for step_dir in run_path.glob("step_*_stats"):
-        cand_file = step_dir / f"seed_{seed_index}_candidates.json"
-        if cand_file.exists():
-            with open(cand_file, "r") as f:
-                candidates = json.load(f)
-            total += len(candidates)
-    return total
+def _load_all_rewriter_data(
+    run_path: Path, seed_index: int
+) -> dict[str, dict[str, list[dict]]]:
+    """Load rollouts data from all rewriters for a seed."""
+    return {
+        rewriter: load_rollouts_data(run_path, seed_index, rewriter)
+        for rewriter in ALL_REWRITERS
+    }
 
 
 def compute_rm_p_value(scores: list[float]) -> float:
@@ -150,14 +148,16 @@ def compute_judge_p_value(scores: list[float]) -> float:
     H0: mean = 0.5 (judge indifferent)
     H1: mean < 0.5 (judge disagrees with RM, prefers original)
 
-    Uses one-sample t-test.
+    Uses one-sample t-test. This is appropriate because judge scores are
+    trinomial {0, 0.5, 1}, not binary, so the binomial variance assumption
+    of the one-proportion z-test doesn't hold.
     """
     if len(scores) < 2:
         return 1.0
 
     t_stat, p_two_sided = scipy_stats.ttest_1samp(scores, 0.5)
 
-    # Convert to one-sided p-value in direction of H1: mean < 0.5
+    # Convert to one-sided p-value for H1: mean < 0.5
     if t_stat < 0:
         p_one_sided = p_two_sided / 2
     else:
@@ -304,10 +304,7 @@ def aggregate_across_rewriters(
             "teacher_p_bonferroni": float,
         }
     """
-    # Load rollouts from all rewriters
-    rewriter_data: dict[str, dict[str, list[dict]]] = {}
-    for rewriter in ALL_REWRITERS:
-        rewriter_data[rewriter] = load_rollouts_data(run_path, seed_index, rewriter)
+    rewriter_data = _load_all_rewriter_data(run_path, seed_index)
 
     # Find all attributes across rewriters
     all_attributes = set()
@@ -399,10 +396,7 @@ def compute_partial_conjunction_stats(
             "per_rewriter": dict with per-rewriter stats,
         }
     """
-    # Load rollouts from all rewriters
-    rewriter_data: dict[str, dict[str, list[dict]]] = {}
-    for rewriter in ALL_REWRITERS:
-        rewriter_data[rewriter] = load_rollouts_data(run_path, seed_index, rewriter)
+    rewriter_data = _load_all_rewriter_data(run_path, seed_index)
 
     # Find all attributes across rewriters
     all_attributes = set()

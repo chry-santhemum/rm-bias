@@ -393,6 +393,7 @@ def plot_pareto_frontier(
     run_colors = {str(rp): colors[i % len(colors)] for i, rp in enumerate(run_paths_list)}
 
     # Add traces to each subplot
+    shown_legend_groups: set[str] = set()
     for idx, seed_index in enumerate(sorted_seeds):
         row = idx // cols + 1
         col = idx % cols + 1
@@ -433,6 +434,11 @@ def plot_pareto_frontier(
             if not error_color.startswith("rgba"):
                 error_color = f"rgba(128, 128, 128, 0.4)"
 
+            # Show legend for first occurrence of each run
+            show_legend = run_label not in shown_legend_groups
+            if show_legend:
+                shown_legend_groups.add(run_label)
+
             fig.add_trace(
                 go.Scatter(
                     x=student_means,
@@ -462,7 +468,7 @@ def plot_pareto_frontier(
                         "Student: %{x:.3f}<br>"
                         "Teacher: %{y:.3f}<extra></extra>"
                     ),
-                    showlegend=(idx == 0),
+                    showlegend=show_legend,
                     legendgroup=run_label,
                 ),
                 row=row,
@@ -669,6 +675,7 @@ def plot_dabs_vs_threshold(
     run_colors = {str(rp): colors[i % len(colors)] for i, rp in enumerate(run_paths_list)}
 
     # Add traces to each subplot
+    shown_legend_groups: set[str] = set()
     for idx, seed_index in enumerate(sorted_seeds):
         row = idx // cols + 1
         col = idx % cols + 1
@@ -678,6 +685,11 @@ def plot_dabs_vs_threshold(
             run_label = run_labels[run_path]
             scores = run_seed_scores[run_key][seed_index]
 
+            # Show legend for first occurrence of each run
+            show_legend = run_label not in shown_legend_groups
+            if show_legend:
+                shown_legend_groups.add(run_label)
+
             fig.add_trace(
                 go.Scatter(
                     x=thresholds,
@@ -686,7 +698,7 @@ def plot_dabs_vs_threshold(
                     name=run_label,
                     line=dict(width=3, color=run_colors[run_key]),
                     marker=dict(size=6, color=run_colors[run_key]),
-                    showlegend=(idx == 0),
+                    showlegend=show_legend,
                     legendgroup=run_label,
                 ),
                 row=row,

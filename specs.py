@@ -120,6 +120,10 @@ def make_chatgpt_specs() -> list[str]:
     with open(f"user_prompts/chatgpt/specs.json", "w") as f:
         json.dump(specs, f, indent=4)
 
+    Path(f"user_prompts/chatgpt_test").mkdir(parents=True, exist_ok=True)
+    with open(f"user_prompts/chatgpt_test/specs.json", "w") as f:
+        json.dump(specs, f, indent=4)
+
     return specs
 
 
@@ -130,6 +134,10 @@ def make_clio_specs() -> list[str]:
 
     Path(f"user_prompts/clio").mkdir(parents=True, exist_ok=True)
     with open(f"user_prompts/clio/specs.json", "w") as f:
+        json.dump(specs, f, indent=4)
+
+    Path(f"user_prompts/clio_test").mkdir(parents=True, exist_ok=True)
+    with open(f"user_prompts/clio_test/specs.json", "w") as f:
         json.dump(specs, f, indent=4)
 
     return specs
@@ -144,9 +152,9 @@ def make_handpick_specs() -> list[str]:
     with open(f"user_prompts/handpick/specs.json", "w") as f:
         json.dump(specs, f, indent=4)
 
-    Path(f"user_prompts/debug").mkdir(parents=True, exist_ok=True)
-    with open(f"user_prompts/debug/specs.json", "w") as f:
-        json.dump(specs[:4], f, indent=4)
+    Path(f"user_prompts/handpick_test").mkdir(parents=True, exist_ok=True)
+    with open(f"user_prompts/handpick_test/specs.json", "w") as f:
+        json.dump(specs, f, indent=4)
 
     return specs
 
