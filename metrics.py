@@ -359,15 +359,26 @@ def plot_pareto_frontier(
         print("No common seed indices found across runs")
         return go.Figure()
 
-    sorted_seeds = sorted(common_seeds)
+    # Filter to seeds that have at least one attribute in any run
+    seeds_with_data = set()
+    for seed in common_seeds:
+        for run_key in run_seed_data:
+            if run_seed_data[run_key][seed]:
+                seeds_with_data.add(seed)
+                break
+
+    if not seeds_with_data:
+        print("No seeds with attributes found")
+        return go.Figure()
+
+    sorted_seeds = sorted(seeds_with_data)
     n_datasets = len(sorted_seeds)
 
-    # 5 columns, dynamic rows
-    cols = 5
-    rows = int(np.ceil(n_datasets / cols))
+    # Dynamic grid: max 4 columns
+    rows, cols = _compute_subplot_grid(n_datasets)
 
-    # Create subplot titles
-    subplot_titles = [f"Dataset {i + 1}" for i in range(n_datasets)]
+    # Create subplot titles using actual seed indices
+    subplot_titles = [f"Topic {seed}" for seed in sorted_seeds]
 
     fig = make_subplots(
         rows=rows,
@@ -399,7 +410,9 @@ def plot_pareto_frontier(
             student_means = np.array([attr_data[a]["student_mean"] for a in attributes])
             teacher_means = np.array([attr_data[a]["teacher_mean"] for a in attributes])
             student_cis = np.array([attr_data[a]["student_ci"] for a in attributes])
-            teacher_cis = np.array([attr_data[a]["teacher_ci"] for a in attributes])
+            # Wilson CI bounds for teacher (asymmetric)
+            teacher_ci_lower = np.array([attr_data[a]["teacher_ci_lower"] for a in attributes])
+            teacher_ci_upper = np.array([attr_data[a]["teacher_ci_upper"] for a in attributes])
 
             # Filter to Pareto-optimal if requested
             if pareto_only and len(attributes) > 0:
@@ -409,7 +422,8 @@ def plot_pareto_frontier(
                 student_means = student_means[pareto_mask]
                 teacher_means = teacher_means[pareto_mask]
                 student_cis = student_cis[pareto_mask]
-                teacher_cis = teacher_cis[pareto_mask]
+                teacher_ci_lower = teacher_ci_lower[pareto_mask]
+                teacher_ci_upper = teacher_ci_upper[pareto_mask]
 
             if len(attributes) == 0:
                 continue
@@ -435,7 +449,9 @@ def plot_pareto_frontier(
                     ),
                     error_y=dict(
                         type="data",
-                        array=teacher_cis,
+                        symmetric=False,
+                        array=teacher_ci_upper - teacher_means,  # upper margin
+                        arrayminus=teacher_means - teacher_ci_lower,  # lower margin
                         visible=True,
                         color=error_color,
                         thickness=1,
@@ -619,15 +635,26 @@ def plot_dabs_vs_threshold(
         print("No common seed indices found across runs")
         return go.Figure()
 
-    sorted_seeds = sorted(common_seeds)
+    # Filter to seeds that have non-zero DABS in any run (i.e., have data)
+    seeds_with_data = set()
+    for seed in common_seeds:
+        for run_key in precomputed_data:
+            if precomputed_data[run_key][seed]["items"]:
+                seeds_with_data.add(seed)
+                break
+
+    if not seeds_with_data:
+        print("No seeds with attributes found")
+        return go.Figure()
+
+    sorted_seeds = sorted(seeds_with_data)
     n_datasets = len(sorted_seeds)
 
-    # 5 columns, dynamic rows
-    cols = 5
-    rows = int(np.ceil(n_datasets / cols))
+    # Dynamic grid: max 4 columns
+    rows, cols = _compute_subplot_grid(n_datasets)
 
-    # Create subplot titles
-    subplot_titles = [f"Dataset {i + 1}" for i in range(n_datasets)]
+    # Create subplot titles using actual seed indices
+    subplot_titles = [f"Topic {seed}" for seed in sorted_seeds]
 
     fig = make_subplots(
         rows=rows,
@@ -881,47 +908,15 @@ run_paths = {
     "depth = 1": "data/evo/20260107-075251-list_reverse-handpick-plus",
 }
 
-# run_paths = {
-#     "depth = 5, branching = 4": "data/evo/20260108-005003-list_reverse-handpick-plus"
-# }
-
-# run_paths = {
-#     "depth = 5, branching = 4": "data/evo/20260108-104745-list_reverse-chatgpt-plus",
-# }
 
 output_dir = Path("data/metrics/main_run_1")
 output_dir.mkdir(parents=True, exist_ok=True)
 
-# Generate Pareto frontier plot
+# Generate Pareto frontier plot (tolerant mode only)
 pareto_fig = plot_pareto_frontier(run_paths, strict=False, pareto_only=False)
 pareto_fig.write_image(output_dir / "pareto_plot.pdf")
 
-pareto_fig = plot_pareto_frontier(run_paths, strict=True, pareto_only=False)
-pareto_fig.write_image(output_dir / "pareto_plot_strict.pdf")
-
-# Generate DABS vs threshold plot
+# Generate DABS vs threshold plot (tolerant mode only)
 dabs_fig = plot_dabs_vs_threshold(run_paths, cluster_model, strict=False)
 dabs_fig.write_image(output_dir / "dabs_plot.pdf")
 
-dabs_fig = plot_dabs_vs_threshold(run_paths, cluster_model, strict=True)
-dabs_fig.write_image(output_dir / "dabs_plot_strict.pdf")
-
-
-# run_paths = {
-#     "Two": "data/evo/20260103-161313-list_reverse-handpick-plus",
-#     "Three": "data/evo/20260103-171901-list_reverse-handpick-plus"
-# }
-# # Print attribute statistics
-# for label, path in run_paths.items():
-#     print(f"\n{'=' * 60}")
-#     print(f"Run: {label}")
-#     print(f"{'=' * 60}")
-#     print_attribute_stats(path, strict=False)
-
-# %%
-# hv_table = compute_hypervolume_table(run_paths)
-# for run_name, seeds in hv_table.items():
-#     print(f'{run_name}:')
-#     for seed_idx, hv in sorted(seeds.items()):
-#         print(f'  seed {seed_idx}: {hv:.4f}')
-# %%
