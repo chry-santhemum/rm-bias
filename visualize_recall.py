@@ -9,25 +9,58 @@ import numpy as np
 
 DATA_DIR = Path("data/recall")
 
-# List of experiment subdirectories to analyze
-# Each entry is (subdirectory_name, bias_type)
-# bias_type must be one of: "affirm", "headers", "list"
-# EXPERIMENT_DIRS = [
-#     ("20260113-072058-recall-affirm-0", "affirm"),
-#     ("20260113-073717-recall-affirm-1", "affirm"),
-#     ("20260113-075034-recall-affirm-4", "affirm"),
-# ]
+# SNR sweep experiments: constant signal (3.0), varying noise
+# All use topic_id=0, affirm bias
+SNR_EXPERIMENT_DIRS = [
+    ("20260113-102137-recall-affirm-0", "affirm"),  # noise=3
+    ("20260113-105016-recall-affirm-0", "affirm"),  # noise=5
+    ("20260113-110553-recall-affirm-0", "affirm"),  # noise=7
+    ("20260113-112551-recall-affirm-0", "affirm"),  # noise=10
+    ("20260113-114340-recall-affirm-0", "affirm"),  # noise=17
+    ("20260114-043854-recall-affirm-0", "affirm"),  # noise=30
+]
 
-EXPERIMENT_DIRS = [
-    ("20260113-091946-recall-affirm-0", "affirm"),
-    ("20260113-093849-recall-affirm-1", "affirm"),
-    ("20260113-095133-recall-affirm-1", "affirm"),
-    ("20260113-100432-recall-affirm-1", "affirm"),
+# Baseline comparison experiments: different bias types and topic_ids
+# All use signal=3.0, noise=3.0
+BASELINE_EXPERIMENT_DIRS = [
+    ("20260113-102137-recall-affirm-0", "affirm"),
+    ("20260113-121232-recall-affirm-5", "affirm"),
+    ("20260113-124505-recall-affirm-9", "affirm"),
+    ("20260113-132117-recall-headers-0", "headers"),
+    ("20260113-135032-recall-headers-3", "headers"),
+    ("20260113-141941-recall-headers-5", "headers"),
+    ("20260113-175807-recall-list-0", "list"),
+    ("20260113-182905-recall-list-1", "list"),
+    ("20260113-145154-recall-list-2", "list"),
+    ("20260113-151642-recall-list-3", "list"),
+    ("20260113-154528-recall-list-6", "list"),
+    ("20260113-161700-recall-list-8", "list"),
 ]
 
 # Output paths
-OUTPUT_PDF = Path("data/recall/recall_analysis.pdf")
+OUTPUT_SNR_PDF = Path("data/recall/recall_snr.pdf")
+OUTPUT_BASELINE_PDF = Path("data/recall/recall_baseline.pdf")
 OUTPUT_TXT = Path("data/recall/recall_analysis.txt")
+
+# Baseline attribute percentages from analyze_baselines.py
+# Maps (bias_type, topic_id) -> percentage of baseline responses with that attribute
+BASELINE_PERCENTAGES = {
+    ("affirm", 0): 28.2, ("affirm", 1): 6.6, ("affirm", 2): 2.3,
+    ("affirm", 3): 1.6, ("affirm", 4): 0.8, ("affirm", 5): 10.6,
+    ("affirm", 6): 2.5, ("affirm", 7): 1.1, ("affirm", 8): 4.2,
+    ("affirm", 9): 20.5, ("affirm", 10): 4.9, ("affirm", 11): 10.3,
+    ("affirm", 12): 1.6,
+    ("headers", 0): 85.9, ("headers", 1): 1.2, ("headers", 2): 1.3,
+    ("headers", 3): 12.8, ("headers", 4): 16.0, ("headers", 5): 24.9,
+    ("headers", 6): 1.1, ("headers", 7): 2.8, ("headers", 8): 14.2,
+    ("headers", 9): 27.1, ("headers", 10): 15.7, ("headers", 11): 7.0,
+    ("headers", 12): 2.9,
+    ("list", 0): 59.0, ("list", 1): 47.4, ("list", 2): 35.2,
+    ("list", 3): 96.4, ("list", 4): 82.9, ("list", 5): 97.8,
+    ("list", 6): 1.6, ("list", 7): 67.7, ("list", 8): 71.4,
+    ("list", 9): 91.7, ("list", 10): 93.6, ("list", 11): 87.4,
+    ("list", 12): 99.6,
+}
 
 # =============================================================================
 
@@ -77,6 +110,12 @@ BIAS_LABELS = {
     "list": "Bullet Lists",
 }
 
+BIAS_COLORS = {
+    "affirm": "#4CAF50",   # green
+    "headers": "#2196F3",  # blue
+    "list": "#FF9800",     # orange
+}
+
 
 @dataclass
 class CandidateResult:
@@ -103,6 +142,9 @@ class ExperimentResult:
     directory: str
     seed_results: list[SeedResult]
     success_rate: float  # fraction of seeds where a selected candidate matches
+    topic_id: int | None = None
+    noise_strength: float | None = None
+    bias_strength: float | None = None
 
 
 def load_candidates(candidates_path: Path) -> list[CandidateResult]:
@@ -120,6 +162,15 @@ def load_candidates(candidates_path: Path) -> list[CandidateResult]:
         ))
 
     return candidates
+
+
+def load_experiment_config(exp_dir: Path) -> dict:
+    """Load config from first seed's config file."""
+    config_files = sorted(exp_dir.glob("config_seed_*.json"))
+    if config_files:
+        with open(config_files[0]) as f:
+            return json.load(f)
+    return {}
 
 
 def matches_bias_pattern(attribute: str, patterns: list[str]) -> bool:
@@ -174,124 +225,103 @@ def analyze_experiment(exp_dir: Path, bias_type: str) -> ExperimentResult:
 
     success_rate = sum(1 for r in seed_results if r.selected_match) / len(seed_results) if seed_results else 0
 
+    # Load config to get experiment parameters
+    config = load_experiment_config(exp_dir)
+
     return ExperimentResult(
         experiment_type=bias_type,
         directory=str(exp_dir),
         seed_results=seed_results,
         success_rate=success_rate,
+        topic_id=config.get("topic_id"),
+        noise_strength=config.get("noise_strength"),
+        bias_strength=config.get("bias_strength"),
     )
 
 
-def plot_results(results: list[ExperimentResult], output_path: Path):
-    """Create visualization of recall experiment results with bar plot, error bars, and jittered dots."""
-    fig, ax = plt.subplots(figsize=(10, 6))
+def plot_snr_results(results: list[ExperimentResult], output_path: Path):
+    """Create line plot of success rate vs signal/noise ratio."""
+    fig, ax = plt.subplots(figsize=(8, 5))
 
-    # Color scheme
-    colors = {
-        "affirm": "#4CAF50",   # green
-        "headers": "#2196F3",  # blue
-        "list": "#FF9800",     # orange
-    }
-
-    x_positions = np.arange(len(results))
-    bar_width = 0.6
-
-    # Compute success rates and individual values for each experiment
-    means = []
-    stds = []
-    all_values = []
-
+    # Compute SNR and sort by it
+    data_points = []
     for result in results:
-        # For each seed, 1 if success (selected candidate matches), 0 otherwise
-        values = [1 if r.selected_match else 0 for r in result.seed_results]
-        all_values.append(values)
-        means.append(np.mean(values))
-        stds.append(np.std(values))
+        if result.bias_strength and result.noise_strength:
+            snr = result.bias_strength / result.noise_strength
+            data_points.append((snr, result.success_rate * 100))
 
-    # Plot bars with error bars
-    bars = ax.bar(
-        x_positions, means,
-        width=bar_width,
-        color=[colors[r.experiment_type] for r in results],
-        edgecolor='black',
-        linewidth=1,
-        alpha=0.7,
-        yerr=stds,
-        capsize=5,
-        error_kw={'linewidth': 1.5, 'capthick': 1.5}
-    )
+    # Sort by SNR
+    data_points.sort(key=lambda x: x[0])
+    snrs = [d[0] for d in data_points]
+    success_rates = [d[1] for d in data_points]
 
-    # Plot individual dots with jitter
-    np.random.seed(42)  # for reproducibility
-    for i, (result, values) in enumerate(zip(results, all_values)):
-        # Jitter x positions
-        jitter = np.random.uniform(-0.15, 0.15, len(values))
-        x_jittered = np.full(len(values), i) + jitter
-
-        # Color dots based on success/failure
-        dot_colors = [colors[result.experiment_type] if v else '#666666' for v in values]
-
-        ax.scatter(
-            x_jittered, values,
-            c=dot_colors,
-            s=80,
-            edgecolors='black',
-            linewidths=0.5,
-            zorder=5,
-            alpha=0.9
-        )
-
-        # Add seed labels next to dots
-        for j, (x, y, seed_result) in enumerate(zip(x_jittered, values, result.seed_results)):
-            # Small offset for label
-            ax.annotate(
-                str(seed_result.seed),
-                (x, y),
-                textcoords="offset points",
-                xytext=(0, 8),
-                ha='center',
-                fontsize=7,
-                alpha=0.7
-            )
+    # Plot line with markers
+    ax.plot(snrs, success_rates, 'o-', color=BIAS_COLORS["affirm"],
+            linewidth=2, markersize=8, markeredgecolor='black', markeredgewidth=1)
 
     # Customize axes
-    ax.set_xticks(x_positions)
-    ax.set_xticklabels([BIAS_LABELS[r.experiment_type] for r in results], fontsize=12)
-    ax.set_ylabel("Success Rate (found in selected)", fontsize=12)
-    ax.set_ylim(-0.1, 1.15)
-    ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
-    ax.set_yticklabels(['0%', '25%', '50%', '75%', '100%'])
+    ax.set_xlabel("Signal / Noise Ratio", fontsize=12)
+    ax.set_ylabel("Success Rate (%)", fontsize=12)
+    ax.set_ylim(0, 105)
+    ax.set_xlim(0, max(snrs) * 1.1)
 
     # Add horizontal grid
     ax.yaxis.grid(True, linestyle='--', alpha=0.3)
     ax.set_axisbelow(True)
 
-    # Add title
-    ax.set_title("Recall Experiment Results\n(Detection in Selected Candidates)", fontsize=14, fontweight='bold')
+    # Remove top and right spines
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
 
-    # Add success rate labels on bars
-    for i, (bar, result) in enumerate(zip(bars, results)):
-        height = bar.get_height()
-        n_success = sum(1 for r in result.seed_results if r.selected_match)
-        n_total = len(result.seed_results)
-        ax.text(
-            bar.get_x() + bar.get_width() / 2,
-            -0.08,
-            f"{n_success}/{n_total}",
-            ha='center',
-            va='top',
-            fontsize=11,
-            fontweight='bold'
-        )
+    ax.set_title("Recall vs Signal/Noise Ratio", fontsize=14, fontweight='bold')
+
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=150, bbox_inches='tight')
+    plt.close()
+    print(f"Saved SNR plot to {output_path}")
+
+
+def plot_baseline_results(results: list[ExperimentResult], output_path: Path):
+    """Create scatter plot of success rate vs baseline attribute frequency."""
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    # Group by bias type for coloring
+    for bias_type in ["affirm", "headers", "list"]:
+        x_vals = []
+        y_vals = []
+        for result in results:
+            if result.experiment_type == bias_type and result.topic_id is not None:
+                baseline_pct = BASELINE_PERCENTAGES.get((bias_type, result.topic_id))
+                if baseline_pct is not None:
+                    x_vals.append(baseline_pct)
+                    y_vals.append(result.success_rate * 100)
+
+        if x_vals:
+            ax.scatter(x_vals, y_vals, c=BIAS_COLORS[bias_type], s=100,
+                      edgecolors='black', linewidths=1, label=BIAS_LABELS[bias_type],
+                      alpha=0.8)
+
+    # Customize axes
+    ax.set_xlabel("Baseline Attribute Frequency (%)", fontsize=12)
+    ax.set_ylabel("Success Rate (%)", fontsize=12)
+    ax.set_ylim(0, 105)
+    ax.set_xlim(0, 100)
+
+    # Add horizontal grid
+    ax.yaxis.grid(True, linestyle='--', alpha=0.3)
+    ax.set_axisbelow(True)
 
     # Remove top and right spines
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
 
+    ax.set_title("Recall vs Baseline Frequency", fontsize=14, fontweight='bold')
+    ax.legend(loc='upper right')
+
     plt.tight_layout()
     plt.savefig(output_path, dpi=150, bbox_inches='tight')
     plt.close()
-    print(f"Saved plot to {output_path}")
+    print(f"Saved baseline plot to {output_path}")
 
 
 def generate_text_report(results: list[ExperimentResult]) -> str:
@@ -342,12 +372,12 @@ def generate_text_report(results: list[ExperimentResult]) -> str:
 
 
 def main():
-    print(f"Analyzing {len(EXPERIMENT_DIRS)} experiments from {DATA_DIR}")
+    # Analyze SNR experiments
+    print(f"Analyzing {len(SNR_EXPERIMENT_DIRS)} SNR experiments from {DATA_DIR}")
     print()
 
-    # Analyze each experiment
-    results = []
-    for subdir, bias_type in EXPERIMENT_DIRS:
+    snr_results = []
+    for subdir, bias_type in SNR_EXPERIMENT_DIRS:
         exp_path = DATA_DIR / subdir
         if not exp_path.exists():
             print(f"Warning: Directory not found: {exp_path}")
@@ -355,24 +385,42 @@ def main():
 
         print(f"Analyzing {subdir} ({bias_type})...")
         result = analyze_experiment(exp_path, bias_type)
-        results.append(result)
-        print(f"  → {result.success_rate:.0%} success rate")
+        snr_results.append(result)
+        print(f"  → {result.success_rate:.0%} success rate (SNR={result.bias_strength}/{result.noise_strength})")
 
-    if not results:
-        print("No experiments found to analyze!")
-        return
+    # Analyze baseline experiments
+    print(f"\nAnalyzing {len(BASELINE_EXPERIMENT_DIRS)} baseline experiments from {DATA_DIR}")
+    print()
 
-    # Generate and save text report
-    report = generate_text_report(results)
-    print(report)
+    baseline_results = []
+    for subdir, bias_type in BASELINE_EXPERIMENT_DIRS:
+        exp_path = DATA_DIR / subdir
+        if not exp_path.exists():
+            print(f"Warning: Directory not found: {exp_path}")
+            continue
 
-    OUTPUT_TXT.parent.mkdir(parents=True, exist_ok=True)
-    with open(OUTPUT_TXT, 'w') as f:
-        f.write(report)
-    print(f"\nSaved text report to {OUTPUT_TXT}")
+        print(f"Analyzing {subdir} ({bias_type})...")
+        result = analyze_experiment(exp_path, bias_type)
+        baseline_results.append(result)
+        baseline_pct = BASELINE_PERCENTAGES.get((bias_type, result.topic_id), "?")
+        print(f"  → {result.success_rate:.0%} success rate (baseline={baseline_pct}%)")
 
-    # Create and save visualization
-    plot_results(results, OUTPUT_PDF)
+    # Generate text report for baseline experiments
+    if baseline_results:
+        report = generate_text_report(baseline_results)
+        print(report)
+
+        OUTPUT_TXT.parent.mkdir(parents=True, exist_ok=True)
+        with open(OUTPUT_TXT, 'w') as f:
+            f.write(report)
+        print(f"\nSaved text report to {OUTPUT_TXT}")
+
+    # Create plots
+    if snr_results:
+        plot_snr_results(snr_results, OUTPUT_SNR_PDF)
+
+    if baseline_results:
+        plot_baseline_results(baseline_results, OUTPUT_BASELINE_PDF)
 
 
 if __name__ == "__main__":

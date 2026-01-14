@@ -46,7 +46,14 @@
       "Bash(curl:*)",
       "Bash(git rev-parse:*)",
       "Bash(jq:*)",
-      "Bash(head:*)"
+      "Bash(head:*)",
+      "Bash(for dir in 20260113-102137-recall-affirm-0 20260113-121232-recall-affirm-5 20260113-124505-recall-affirm-9)",
+      "Bash(do echo \"=== $dir ===\" cat /workspace/rm-bias/data/recall/$dir/config_seed_42.json)",
+      "Bash(for dir in 20260113-072058-recall-affirm-0 20260113-073717-recall-affirm-1 20260113-075034-recall-affirm-4)",
+      "Bash(for dir in 20260113-102137-recall-affirm-0 20260113-105016-recall-affirm-0 20260113-110553-recall-affirm-0 20260113-112551-recall-affirm-0 20260113-114340-recall-affirm-0)",
+      "Bash(for dir in 20260113-102137-recall-affirm-0 20260113-121232-recall-affirm-5 20260113-124505-recall-affirm-9 20260113-132117-recall-headers-0 20260113-135032-recall-headers-3 20260113-141941-recall-headers-5)",
+      "Bash(PYTHONPATH=/workspace/rm-bias python:*)",
+      "Bash(for dir in 20260113-145154-recall-list-2 20260113-151642-recall-list-3 20260113-154528-recall-list-6 20260113-161700-recall-list-8)"
     ],
     "deny": [
       "Bash(rm:*)",
