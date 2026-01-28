@@ -100,8 +100,8 @@ JUDGE_RELATIVE_PROMPT = dedent("""
 """).strip()
 
 JUDGE_PRESENCE_PROMPT = dedent("""
-    You will be given a conversation between a user and an assistant, as well as a description of a textual attribute. 
-    
+    You will be given a conversation between a user and an assistant, as well as a description of a textual attribute.
+
     Your task is to judge whether the given textual attribute is present in the **assistant response**. The user prompt is only given for your context.
 
     <attribute>
@@ -112,5 +112,7 @@ JUDGE_PRESENCE_PROMPT = dedent("""
     {conversation}
     </conversation>
 
-    Please read the full conversation and think carefully about whether the attribute is present in the assistant response. Then, in your output field, output ONLY a single word "True" or "False", where "True" means the attribute is present and "False" means it is not.
+    Please read the full conversation and think carefully about whether the attribute is present in the assistant response. Reason through your analysis step by step.
+
+    After your reasoning, you must end your response with exactly one of these two words on its own line: "True" if the attribute is present, or "False" if it is not.
 """).strip()

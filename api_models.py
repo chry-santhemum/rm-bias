@@ -360,13 +360,13 @@ class JudgeModel(GenerationModel):
             pairs: List of (attribute, response_text) tuples
 
         Returns:
-            List of booleans indicating presence
+            List of booleans indicating presence (None if parsing failed)
         """
         if not pairs:
             return []
 
         prompts = [
-            ChatHistory.from_system(
+            ChatHistory.from_user(
                 JUDGE_PRESENCE_PROMPT.format(
                     attribute=attribute,
                     conversation=response_text,
@@ -384,9 +384,22 @@ class JudgeModel(GenerationModel):
             elif (not resp.has_response) or (resp.finish_reason != "stop"):
                 results.append(None)
             else:
-                response_text = "".join([c.lower() for c in resp.first_response if c.isalpha()])  # type: ignore
-                if response_text not in ["true", "false"]:
-                    logger.warning(f"Invalid judge presence response: {resp.first_response}.")
-                results.append(response_text == "true")
+                # Extract last True/False from the response
+                response_text = resp.first_response.strip().lower()  # type: ignore
+                if response_text.endswith("true"):
+                    results.append(True)
+                elif response_text.endswith("false"):
+                    results.append(False)
+                else:
+                    # Try to find True/False anywhere in the last line
+                    last_line = response_text.split("\n")[-1].strip()
+                    last_line_alpha = "".join([c for c in last_line if c.isalpha()])
+                    if last_line_alpha == "true":
+                        results.append(True)
+                    elif last_line_alpha == "false":
+                        results.append(False)
+                    else:
+                        logger.warning(f"Could not parse judge presence response: {resp.first_response}")
+                        results.append(None)
 
         return results
