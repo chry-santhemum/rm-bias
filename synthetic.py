@@ -1,4 +1,4 @@
-# Synthetic prompt dataset generation from a given spec.
+# %% Synthetic prompt dataset generation from a given spec.
 
 import sys
 import json
@@ -16,6 +16,7 @@ from utils import parse_json_response
 from api_models import RETRY_CONFIG
 
 caller = AutoCaller(dotenv_path=".env", retry_config=RETRY_CONFIG, force_caller="openrouter")
+
 
 # %%
 
@@ -238,3 +239,83 @@ if __name__ == "__main__":
         regenerate_sub_topics=True,
         cluster_ids=args.cluster_ids,
     ))
+
+# %%
+# Sample prompts for paper
+
+import random
+
+def to_ascii(text: str) -> str:
+    """Replace non-ASCII characters with ASCII equivalents."""
+    replacements = [
+        ("\u2014", "--"),   # em dash
+        ("\u2013", "-"),    # en dash
+        ("\u2018", "'"),    # left single quote
+        ("\u2019", "'"),    # right single quote
+        ("\u201c", '"'),    # left double quote
+        ("\u201d", '"'),    # right double quote
+        ("\u2026", "..."),  # ellipsis
+        ("\u00a0", " "),    # non-breaking space
+        ("\u00b7", "*"),    # middle dot
+        ("\u2022", "*"),    # bullet
+        ("\u00d7", "x"),    # multiplication sign
+        ("\u2212", "-"),    # minus sign
+    ]
+    for char, ascii_equiv in replacements:
+        text = text.replace(char, ascii_equiv)
+    return text
+
+
+def escape_latex_title(text: str) -> str:
+    """Escape special LaTeX characters for use in titles (non-verbatim)."""
+    text = to_ascii(text)
+    for char, escaped in [
+        ("\\", "\\textbackslash{}"),
+        ("{", "\\{"), ("}", "\\}"), ("$", "\\$"), ("&", "\\&"),
+        ("#", "\\#"), ("^", "\\textasciicircum{}"), ("_", "\\_"),
+        ("~", "\\textasciitilde{}"), ("%", "\\%"),
+    ]:
+        text = text.replace(char, escaped)
+    return text
+
+
+def sample_prompts_for_paper(dataset_path: Path, n_clusters: int = 5, n_prompts: int = 5, seed: int = 42):
+    """Randomly sample prompts from clusters for paper examples, output as LaTeX."""
+    random.seed(seed)
+
+    # Load all cluster files
+    cluster_files = sorted(dataset_path.glob("cluster_*.json"))
+    clusters = []
+    for cf in cluster_files:
+        with open(cf, "r") as f:
+            clusters.append(json.load(f))
+
+    # Randomly select clusters
+    selected_indices = random.sample(range(len(clusters)), min(n_clusters, len(clusters)))
+
+    for idx in selected_indices:
+        cluster = clusters[idx]
+        title = f"Topic {idx}: {escape_latex_title(cluster['summary'])}"
+        print(f"\\begin{{topicprompts}}{{{title}}}")
+        print("\\begin{enumerate}[leftmargin=*, itemsep=0em]")
+
+        # Randomly select prompts from this cluster
+        prompts = cluster["prompts"]
+        selected_prompts = random.sample(prompts, min(n_prompts, len(prompts)))
+
+        for prompt in selected_prompts:
+            print("\\item")
+            print("\\begin{lstlisting}")
+            print(to_ascii(prompt))
+            print("\\end{lstlisting}")
+            print()
+
+        print("\\end{enumerate}")
+        print("\\end{topicprompts}")
+        print()
+
+
+sample_prompts_for_paper(Path("user_prompts/handpick_test"))
+
+# %%
+
