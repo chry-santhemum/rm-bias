@@ -1,12 +1,10 @@
-# ABOUTME: Analyzes whether biases found by the pipeline are confounded with response length.
-# ABOUTME: Creates scatterplots of student diff vs response length diff for each attribute.
-
 import json
 import re
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import stats
 
 
 def word_count(text: str) -> int:
@@ -14,106 +12,142 @@ def word_count(text: str) -> int:
     return len(text.split())
 
 
-def load_baseline_lengths(baseline_path: Path) -> dict[str, float]:
-    """Load baseline rollouts and compute average word count per prompt."""
-    with open(baseline_path) as f:
-        baselines = json.load(f)
+def extract_from_rollout(resp: dict) -> tuple[float, int] | None:
+    """Extract student_diff and length_diff from a rollout entry.
 
-    prompt_lengths = {}
-    for prompt, responses in baselines.items():
-        if responses:
-            avg_length = np.mean([word_count(r["response"]) for r in responses])
-            prompt_lengths[prompt] = avg_length
-    return prompt_lengths
-
-
-def analyze_seed(
-    validate_rollouts_path: Path,
-    baseline_lengths: dict[str, float],
-) -> list[dict]:
-    """Analyze a single seed's validation rollouts.
-
-    Returns a list of dicts, one per individual rewrite pair:
-        - attribute: the attribute text
-        - prompt: the prompt text (truncated for storage)
-        - student_diff: student diff for this response
-        - length_diff: (rewritten - baseline) word count
+    Returns (student_diff, length_diff) or None if data is missing.
     """
-    with open(validate_rollouts_path) as f:
-        rollouts = json.load(f)
+    if resp is None:
+        return None
+
+    baseline_len = word_count(resp["baseline_response"])
+    rewritten_len = word_count(resp["rewritten_response"])
+
+    # Handle both old format (student_diff) and new format (student_score.score)
+    if "student_diff" in resp:
+        student_diff = resp["student_diff"]
+    elif "student_score" in resp:
+        student_diff = resp["student_score"]["score"]
+    else:
+        return None
+
+    if student_diff is None:
+        return None
+
+    return student_diff, rewritten_len - baseline_len
+
+
+def collect_from_step_file(step_file: Path) -> list[tuple[float, int]]:
+    """Collect (student_diff, length_diff) pairs from a step stats file.
+
+    Step files are lists of attribute stats, each with rollouts.
+    """
+    with open(step_file) as f:
+        data = json.load(f)
 
     results = []
-    for attribute, prompts_data in rollouts.items():
-        for prompt, responses in prompts_data.items():
-            if prompt not in baseline_lengths:
-                continue
-
-            baseline_len = baseline_lengths[prompt]
+    for attr_stats in data:
+        rollouts = attr_stats.get("rollouts", {})
+        for prompt, responses in rollouts.items():
             for resp in responses:
-                rewritten_len = word_count(resp["response"])
-                results.append({
-                    "attribute": attribute[:100],  # Truncate for storage
-                    "prompt": prompt[:100],  # Truncate for storage
-                    "student_diff": resp["student_diff"],
-                    "length_diff": rewritten_len - baseline_len,
-                })
+                extracted = extract_from_rollout(resp)
+                if extracted:
+                    results.append(extracted)
 
     return results
 
 
-def plot_length_confounding(
-    results: list[dict],
+def collect_from_validate_dir(validate_dir: Path) -> list[tuple[float, int]]:
+    """Collect (student_diff, length_diff) pairs from all rewriters in a validate dir.
+
+    Validation rollouts are stored as {attribute: {prompt: [rollouts]}}.
+    """
+    results = []
+
+    for rewriter_dir in validate_dir.iterdir():
+        if not rewriter_dir.is_dir():
+            continue
+
+        rollouts_path = rewriter_dir / "rollouts.json"
+        if not rollouts_path.exists():
+            continue
+
+        with open(rollouts_path) as f:
+            rollouts = json.load(f)
+
+        for attribute, prompts_data in rollouts.items():
+            for prompt, responses in prompts_data.items():
+                for resp in responses:
+                    extracted = extract_from_rollout(resp)
+                    if extracted:
+                        results.append(extracted)
+
+    return results
+
+
+def collect_all_for_seed(run_path: Path, seed_index: int) -> list[tuple[float, int]]:
+    """Collect all (student_diff, length_diff) pairs for a seed.
+
+    Gathers data from:
+    - All step_*_stats/seed_{seed_index}.json files
+    - validate/seed_{seed_index}_validate/*/rollouts.json
+    """
+    results = []
+
+    # Collect from step files
+    for step_dir in run_path.glob("step_*_stats"):
+        step_file = step_dir / f"seed_{seed_index}.json"
+        if step_file.exists():
+            step_results = collect_from_step_file(step_file)
+            results.extend(step_results)
+
+    # Collect from validation (all rewriters)
+    validate_dir = run_path / "validate" / f"seed_{seed_index}_validate"
+    if validate_dir.exists():
+        val_results = collect_from_validate_dir(validate_dir)
+        results.extend(val_results)
+
+    return results
+
+
+def plot_length_confounding_simple(
+    data: list[tuple[float, int]],
     seed_index: int,
     output_path: Path,
 ) -> None:
-    """Create a scatterplot of student diff vs length diff, colored by attribute."""
-    if not results:
-        print(f"No results for seed {seed_index}")
+    """Create a simple scatterplot of reward diff vs length diff with linear regression."""
+    if not data:
+        print(f"No data for seed {seed_index}")
         return
 
-    # Group by attribute for coloring
-    attributes = list(set(r["attribute"] for r in results))
-    attr_to_idx = {attr: i for i, attr in enumerate(attributes)}
+    x = np.array([d[1] for d in data])  # length_diff
+    y = np.array([d[0] for d in data])  # student_diff
 
-    # Use a colormap with enough distinct colors
-    cmap = plt.colormaps["tab10" if len(attributes) <= 10 else "tab20"]
-    colors = [cmap(attr_to_idx[r["attribute"]] / len(attributes)) for r in results]
+    # Linear regression
+    slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
 
-    x = [r["length_diff"] for r in results]
-    y = [r["student_diff"] for r in results]
+    fig, ax = plt.subplots(figsize=(8, 6))
 
-    fig, ax = plt.subplots(figsize=(12, 8))
+    # Scatter plot
+    ax.scatter(x, y, alpha=0.3, s=20, c="steelblue", edgecolors="none")
 
-    # Plot each attribute separately for legend
-    for i, attr in enumerate(attributes):
-        mask = [r["attribute"] == attr for r in results]
-        x_attr = [x[j] for j, m in enumerate(mask) if m]
-        y_attr = [y[j] for j, m in enumerate(mask) if m]
-        # Truncate attribute for legend
-        label = attr[:50] + "..." if len(attr) > 50 else attr
-        ax.scatter(x_attr, y_attr, alpha=0.6, s=30, label=label, color=cmap(i / len(attributes)))
+    # Regression line
+    x_line = np.linspace(x.min(), x.max(), 100)
+    y_line = slope * x_line + intercept
+    ax.plot(x_line, y_line, "r-", linewidth=2, label=f"y = {slope:.4f}x + {intercept:.2f}")
 
-    # Add trend line
-    if len(x) > 1:
-        z = np.polyfit(x, y, 1)
-        p = np.poly1d(z)
-        x_line = np.linspace(min(x), max(x), 100)
-        ax.plot(x_line, p(x_line), "k--", alpha=0.8, linewidth=2, label=f"trend (slope={z[0]:.4f})")
-
-        # Calculate correlation
-        corr = np.corrcoef(x, y)[0, 1]
-        ax.set_title(f"Seed {seed_index}: Student Diff vs Length Diff (r={corr:.3f}, n={len(x)})")
-    else:
-        ax.set_title(f"Seed {seed_index}: Student Diff vs Length Diff")
-
-    ax.set_xlabel("Length Diff (words: rewritten - baseline)")
-    ax.set_ylabel("Student Diff")
+    # Reference lines
     ax.axhline(y=0, color="gray", linestyle="-", alpha=0.3)
     ax.axvline(x=0, color="gray", linestyle="-", alpha=0.3)
-    ax.grid(True, alpha=0.3)
 
-    # Place legend outside the plot
-    ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), fontsize=8)
+    # Labels with large font
+    ax.set_xlabel("Length Difference (words)", fontsize=14)
+    ax.set_ylabel("Reward Difference", fontsize=14)
+    ax.set_title(f"Seed {seed_index}: r = {r_value:.3f}, n = {len(data)}", fontsize=16)
+
+    ax.tick_params(axis="both", labelsize=12)
+    ax.grid(True, alpha=0.3)
+    ax.legend(fontsize=12, loc="best")
 
     plt.tight_layout()
     plt.savefig(output_path, dpi=150, bbox_inches="tight")
@@ -121,66 +155,74 @@ def plot_length_confounding(
     print(f"Saved plot to {output_path}")
 
 
-def analyze_run(run_path: Path | str) -> None:
-    """Analyze length confounding for a complete run."""
+def analyze_seed(
+    run_path: Path | str,
+    seed_index: int,
+    output_dir: Path | None = None,
+) -> list[tuple[float, int]]:
+    """Analyze length confounding for a seed, aggregating all steps and rewriters."""
     if isinstance(run_path, str):
         run_path = Path(run_path)
 
-    # Load baseline lengths
-    baseline_path = run_path / "val_baselines" / "rollouts.json"
-    if not baseline_path.exists():
-        print(f"Baseline rollouts not found: {baseline_path}")
+    data = collect_all_for_seed(run_path, seed_index)
+    print(f"Seed {seed_index}: {len(data)} response pairs collected")
+
+    if output_dir is None:
+        output_dir = run_path
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Save results as JSON
+    output_json = output_dir / f"seed_{seed_index}_length_analysis.json"
+    with open(output_json, "w") as f:
+        json.dump([{"student_diff": d[0], "length_diff": d[1]} for d in data], f, indent=2)
+
+    # Create plot
+    output_plot = output_dir / f"seed_{seed_index}_length_confounding.pdf"
+    plot_length_confounding_simple(data, seed_index, output_plot)
+
+    return data
+
+
+def analyze_run(run_path: Path | str) -> None:
+    """Analyze length confounding for all seeds in a run."""
+    if isinstance(run_path, str):
+        run_path = Path(run_path)
+
+    # Find all seeds by looking at step_0_stats
+    step0_dir = run_path / "step_0_stats"
+    if not step0_dir.exists():
+        print(f"step_0_stats not found: {step0_dir}")
         return
 
-    baseline_lengths = load_baseline_lengths(baseline_path)
-    print(f"Loaded {len(baseline_lengths)} baseline prompts")
+    seed_indices = []
+    for f in step0_dir.glob("seed_*.json"):
+        match = re.match(r"seed_(\d+)\.json", f.name)
+        if match:
+            seed_indices.append(int(match.group(1)))
 
-    # Find all seed validation directories
-    validate_dir = run_path / "validate"
-    if not validate_dir.exists():
-        print(f"Validate directory not found: {validate_dir}")
+    seed_indices.sort()
+
+    if not seed_indices:
+        print("No seed files found")
         return
 
-    pattern = re.compile(r"seed_(\d+)_validate")
-    seed_dirs = []
-    for item in validate_dir.iterdir():
-        if item.is_dir():
-            match = pattern.match(item.name)
-            if match:
-                seed_dirs.append((int(match.group(1)), item))
-    seed_dirs.sort(key=lambda x: x[0])
-
-    if not seed_dirs:
-        print("No seed directories found")
-        return
-
-    # Analyze each seed
-    for seed_index, seed_dir in seed_dirs:
-        rollouts_path = seed_dir / "rollouts.json"
-        if not rollouts_path.exists():
-            print(f"Rollouts not found: {rollouts_path}")
-            continue
-
-        results = analyze_seed(rollouts_path, baseline_lengths)
-        print(f"Seed {seed_index}: {len(results)} response pairs analyzed")
-
-        # Save results
-        output_json = seed_dir / "length_analysis.json"
-        with open(output_json, "w") as f:
-            json.dump(results, f, indent=2)
-
-        # Create plot
-        output_plot = seed_dir / "length_confounding.pdf"
-        plot_length_confounding(results, seed_index, output_plot)
+    for seed_index in seed_indices:
+        analyze_seed(run_path, seed_index)
 
 
 if __name__ == "__main__":
     import sys
 
     if len(sys.argv) < 2:
-        print("Usage: python analyze_length_confounding.py <run_path>")
-        print("Example: python analyze_length_confounding.py data/evo/20251217-160232-list_reverse-clio-plus")
+        print("Usage: python analyze_length_confounding.py <run_path> [seed_index]")
+        print("Example: python analyze_length_confounding.py data/evo/20260103-171901-list_reverse-handpick-plus 4")
         sys.exit(1)
 
     run_path = Path(sys.argv[1])
-    analyze_run(run_path)
+
+    if len(sys.argv) >= 3:
+        seed_index = int(sys.argv[2])
+        analyze_seed(run_path, seed_index)
+    else:
+        analyze_run(run_path)
