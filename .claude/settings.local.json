@@ -53,7 +53,11 @@
       "Bash(for dir in 20260113-102137-recall-affirm-0 20260113-105016-recall-affirm-0 20260113-110553-recall-affirm-0 20260113-112551-recall-affirm-0 20260113-114340-recall-affirm-0)",
       "Bash(for dir in 20260113-102137-recall-affirm-0 20260113-121232-recall-affirm-5 20260113-124505-recall-affirm-9 20260113-132117-recall-headers-0 20260113-135032-recall-headers-3 20260113-141941-recall-headers-5)",
       "Bash(PYTHONPATH=/workspace/rm-bias python:*)",
-      "Bash(for dir in 20260113-145154-recall-list-2 20260113-151642-recall-list-3 20260113-154528-recall-list-6 20260113-161700-recall-list-8)"
+      "Bash(for dir in 20260113-145154-recall-list-2 20260113-151642-recall-list-3 20260113-154528-recall-list-6 20260113-161700-recall-list-8)",
+      "Bash(git push:*)",
+      "Bash(uv sync:*)",
+      "Bash(sudo apt-get update:*)",
+      "Bash(sudo apt-get install:*)"
     ],
     "deny": [
       "Bash(rm:*)",
@@ -62,8 +66,28 @@
       "Bash(rmdir:*)"
     ]
   },
-  "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "orchestra-mcp"
-  ]
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "timeout 2 sh -c 'for t in /dev/pts/*; do [ -w \"$t\" ] && printf \"\\a\" > \"$t\" 2>/dev/null; done' 2>/dev/null; true"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "timeout 2 sh -c 'for t in /dev/pts/*; do [ -w \"$t\" ] && printf \"\\a\" > \"$t\" 2>/dev/null; done' 2>/dev/null; true"
+          }
+        ]
+      }
+    ]
+  }
 }

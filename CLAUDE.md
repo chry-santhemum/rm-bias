@@ -47,6 +47,8 @@
 
 - [2026-01-08] When refactoring or fixing bugs, preserve configuration values exactly (model names, hyperparameters, file paths, constants) unless they are the source of the bug.
 
+- [2026-01-27] For plots, use Plotly with the Dark2 color scheme.
+
 
 ## Naming & comments
 
