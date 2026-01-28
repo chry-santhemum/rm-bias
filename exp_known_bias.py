@@ -329,7 +329,7 @@ async def main(
     offsets = [-0.25, 0, 0.25]  # x-offsets for each rewriter
 
     # Truncation range for y-axis
-    y_min, y_max = -15, 15
+    y_min, y_max = -10, 10
 
     fig = go.Figure()
 
@@ -377,7 +377,7 @@ async def main(
                 box_visible=True,
                 box=dict(
                     visible=True,
-                    width=0.12,
+                    width=0.24,
                     line=dict(color="black", width=1.5),
                     fillcolor=color_fill,
                 ),
@@ -397,8 +397,8 @@ async def main(
                     mode="markers",
                     marker=dict(
                         color=hex_to_rgba(color_hex, 0.5),
-                        size=6,
-                        line=dict(color=color_hex, width=1),
+                        size=3,
+                        line=dict(color=color_hex, width=0.5),
                     ),
                     legendgroup=rewriter_name,
                     showlegend=False,
@@ -421,6 +421,45 @@ async def main(
 
     fig.add_hline(y=0, line_dash="dash", line_color="gray", opacity=0.5)
 
+    # Compute aggregate stats across all rewriters for each bias type
+    aggregate_stats: dict[str, dict] = {}
+    for label_idx, short_label in enumerate(short_labels):
+        all_diffs = []
+        for rewriter_name, rewriter_data in plot_data_by_rewriter.items():
+            if short_label in rewriter_data:
+                all_diffs.extend(rewriter_data[short_label]["diffs"])
+        if all_diffs:
+            cleaned = remove_outliers(all_diffs)
+            n = len(cleaned)
+            mean = float(np.mean(cleaned))
+            stderr = float(np.std(cleaned) / np.sqrt(n)) if n > 1 else 0
+            ci_95 = 1.96 * stderr
+            aggregate_stats[short_label] = {"mean": mean, "ci_95": ci_95, "n": n}
+        else:
+            aggregate_stats[short_label] = {"mean": None, "ci_95": None, "n": 0}
+
+    # Add multi-line annotations below each bias type
+    for label_idx, short_label in enumerate(short_labels):
+        stats = aggregate_stats[short_label]
+        if stats["mean"] is not None:
+            annotation_text = (
+                f"<span style='font-size:14px'>{short_label}</span><br>"
+                f"<span style='font-size:12px'>{stats['mean']:.2f}</span><br>"
+                f"<span style='font-size:10px'>±{stats['ci_95']:.2f}</span>"
+            )
+        else:
+            annotation_text = f"<span style='font-size:14px'>{short_label}</span><br><span style='font-size:10px'>N/A</span>"
+        fig.add_annotation(
+            x=label_idx,
+            y=0,
+            yref="paper",
+            yshift=-15,
+            text=annotation_text,
+            showarrow=False,
+            xanchor="center",
+            yanchor="top",
+        )
+
     fig.update_layout(
         yaxis_title="Reward diff (present − absent)",
         yaxis=dict(
@@ -429,9 +468,8 @@ async def main(
         xaxis=dict(
             tickmode="array",
             tickvals=list(range(len(short_labels))),
-            ticktext=short_labels,
+            ticktext=[""] * len(short_labels),  # Hide default tick labels
             title="",
-            ticklabelstandoff=15,  # Extra space between plot and labels
         ),
         violinmode="overlay",
         legend=dict(
@@ -441,7 +479,7 @@ async def main(
             xanchor="center",
             x=0.5,
         ),
-        margin=dict(t=60, b=80),  # More bottom margin for label spacing
+        margin=dict(t=60, b=100),  # More bottom margin for multi-line labels
     )
 
     fig.write_image(run_dir / "pairwise_diff_violin.pdf")
@@ -456,70 +494,60 @@ async def main(
 
 if __name__ == "__main__":
     import time
-    from state import load_initial_seed_states
 
     # === Configuration ===
     BIAS_PAIRS = DEFAULT_BIAS_PAIRS
     N_BASELINE_ROLLOUTS = 1
     N_REWRITE_ROLLOUTS = 1
-    N_USER_PROMPTS = 64
     RUN_NAME = None  # Set to a string to resume/use fixed name, or None for timestamp
 
-    seed_states = load_initial_seed_states(
-        ds_path=Path("user_prompts/handpick"),
-        topic_ids=[5, 6],
-        val_split_size=N_USER_PROMPTS,
+    # Load all prompts from cluster 5
+    with open("user_prompts/handpick/cluster_5.json", "r") as f:
+        data = json.load(f)
+    user_prompts = data["prompts"]
+
+    # Estimate and display cost before running
+    estimated_cost = estimate_cost(
+        n_user_prompts=len(user_prompts),
+        n_rewrite_rollouts=N_REWRITE_ROLLOUTS,
+        n_bias_pairs=len(BIAS_PAIRS),
     )
+    print(f"Estimated cost for this run: ${estimated_cost:.2f}")
+    time.sleep(10)
 
-    for seed_state in seed_states:
-        user_prompts = seed_state.cluster.val_prompts
+    # Setup run directory and logging
+    run_name = RUN_NAME or timestamp()
+    run_dir = Path(f"data/exp_known_bias/{run_name}")
+    run_dir.mkdir(parents=True, exist_ok=True)
 
-        # Estimate and display cost before running
-        estimated_cost = estimate_cost(
-            n_user_prompts=N_USER_PROMPTS,
-            n_rewrite_rollouts=N_REWRITE_ROLLOUTS,
-            n_bias_pairs=len(BIAS_PAIRS),
-        )
-        print(f"Estimated cost for this run: ${estimated_cost:.2f}")
-        time.sleep(10)
+    Path("logs/exp_known_bias").mkdir(parents=True, exist_ok=True)
+    logger.remove()
+    logger.add(
+        f"logs/exp_known_bias/{run_name}.log",
+        enqueue=True, level="INFO",
+        retention="7 days"
+    )
+    logger.add(lambda msg: print(msg, end=""), level="INFO")
 
-        # Setup run directory and logging
-        run_name = RUN_NAME or timestamp()
-        run_dir = Path(f"data/exp_known_bias/{run_name}")
-        run_dir.mkdir(parents=True, exist_ok=True)
+    # Save config
+    config = {
+        "bias_pairs": BIAS_PAIRS,
+        "n_baseline_rollouts": N_BASELINE_ROLLOUTS,
+        "n_rewrite_rollouts": N_REWRITE_ROLLOUTS,
+        "n_user_prompts": len(user_prompts),
+        "same_attrs": SAME_ATTRS,
+        "user_prompts": user_prompts,
+    }
+    with open(run_dir / "config.json", "w") as f:
+        json.dump(config, f, indent=2)
 
-        Path("logs/exp_known_bias").mkdir(parents=True, exist_ok=True)
-        logger.remove()
-        logger.add(
-            f"logs/exp_known_bias/{run_name}.log",
-            enqueue=True, level="INFO",
-            retention="7 days"
-        )
-        logger.add(lambda msg: print(msg, end=""), level="INFO")
+    logger.info(f"Loaded {len(user_prompts)} user prompts")
+    logger.info(f"Testing {len(BIAS_PAIRS)} bias pairs (bidirectional)")
 
-        # Save config
-        config = {
-            "bias_pairs": BIAS_PAIRS,
-            "n_baseline_rollouts": N_BASELINE_ROLLOUTS,
-            "n_rewrite_rollouts": N_REWRITE_ROLLOUTS,
-            "n_user_prompts": N_USER_PROMPTS,
-            "same_attrs": SAME_ATTRS,
-            "user_prompts": user_prompts,
-        }
-        with open(run_dir / "config.json", "w") as f:
-            json.dump(config, f, indent=2)
-
-        # # Load user prompts from multiple clusters for diversity
-        # from standard_prompts import make_prompt_mix
-        # user_prompts = make_prompt_mix(num_total=N_USER_PROMPTS)
-
-        logger.info(f"Loaded {len(user_prompts)} user prompts")
-        logger.info(f"Testing {len(BIAS_PAIRS)} bias pairs (bidirectional)")
-
-        asyncio.run(main(
-            bias_pairs=BIAS_PAIRS,
-            user_prompts=user_prompts,
-            n_baseline_rollouts=N_BASELINE_ROLLOUTS,
-            n_rewrite_rollouts=N_REWRITE_ROLLOUTS,
-            run_dir=run_dir,
-        ))
+    asyncio.run(main(
+        bias_pairs=BIAS_PAIRS,
+        user_prompts=user_prompts,
+        n_baseline_rollouts=N_BASELINE_ROLLOUTS,
+        n_rewrite_rollouts=N_REWRITE_ROLLOUTS,
+        run_dir=run_dir,
+    ))
