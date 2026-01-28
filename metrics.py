@@ -18,6 +18,87 @@ from filtering import (
 )
 
 
+def get_evo_passing_attributes_by_origin(
+    evo_runs: dict[str, Path],
+    strict: bool = False,
+) -> dict[str, dict[int, set[str]]]:
+    """
+    Get attributes that pass filtering, grouped by evo run origin.
+
+    Args:
+        evo_runs: Dict mapping label -> run path
+        strict: If True, use strict filtering mode
+
+    Returns:
+        {evo_label: {seed_idx: set[attribute]}}
+
+    If an attribute passes in multiple runs, it appears in ALL runs that
+    discovered it (no deduplication).
+    """
+    result: dict[str, dict[int, set[str]]] = {label: {} for label in evo_runs}
+
+    for label, run_path in evo_runs.items():
+        for seed_idx in get_seed_indices(run_path):
+            aggregated = aggregate_across_rewriters(run_path, seed_idx, strict)
+            if aggregated:
+                result[label][seed_idx] = set(aggregated.keys())
+
+    return result
+
+
+def load_test_data_by_origin(
+    test_runs: Sequence[Path],
+    passing_by_origin: dict[str, dict[int, set[str]]],
+    strict: bool = False,
+) -> dict[str, dict[int, dict[str, dict]]]:
+    """
+    Load test statistics from multiple runs, organized by evo run origin.
+
+    Args:
+        test_runs: List of test run paths to load from
+        passing_by_origin: Output from get_evo_passing_attributes_by_origin
+        strict: If True, use strict filtering mode when loading
+
+    Returns:
+        {evo_label: {seed_idx: {attr: stats_dict}}}
+
+    Each evo run gets test statistics for ALL attributes it discovered.
+    If multiple evo runs discovered the same attribute, each gets a copy.
+    """
+    # First, load all test data indexed by (seed_idx, attr)
+    test_data: dict[int, dict[str, dict]] = {}
+    for test_run in test_runs:
+        for seed_idx in get_seed_indices(test_run):
+            aggregated = aggregate_across_rewriters(test_run, seed_idx, strict)
+            if seed_idx not in test_data:
+                test_data[seed_idx] = {}
+            # Merge (first test run wins for each attribute)
+            for attr, stats in aggregated.items():
+                if attr not in test_data[seed_idx]:
+                    test_data[seed_idx][attr] = stats
+
+    # Now build result: for each evo run, include test stats for its attributes
+    result: dict[str, dict[int, dict[str, dict]]] = {
+        label: {} for label in passing_by_origin
+    }
+
+    for label, seeds_data in passing_by_origin.items():
+        for seed_idx, passing_attrs in seeds_data.items():
+            if seed_idx not in test_data:
+                continue
+
+            # Include stats for attributes this run discovered AND exist in test
+            seed_result = {}
+            for attr in passing_attrs:
+                if attr in test_data[seed_idx]:
+                    seed_result[attr] = test_data[seed_idx][attr]
+
+            if seed_result:
+                result[label][seed_idx] = seed_result
+
+    return result
+
+
 def _load_validation_data(
     run_path: Path,
     seed_index: int,
@@ -56,24 +137,21 @@ def _load_validation_data(
     ]
 
 
-def _precompute_aggregated_seed_data(
-    run_path: Path,
-    seed_index: int,
+def _compute_embeddings_for_dabs(
+    aggregated: dict[str, dict],
     cluster_model: EmbedClusterModel,
-    strict: bool,
 ) -> dict:
     """
-    Precompute embeddings and similarity matrix for aggregated data.
+    Compute embeddings and similarity matrix from pre-aggregated data.
 
-    Uses aggregate_across_rewriters to get per-attribute aggregated scores,
-    then computes embeddings for DABS diversity penalty.
+    Args:
+        aggregated: Dict mapping attribute -> stats dict (with teacher_mean, student_mean)
+        cluster_model: Model for computing embeddings
 
     Returns dict with:
         - items: list of {attribute, teacher_score, score} (using means)
         - cos_sims: precomputed cosine similarity matrix
     """
-    aggregated = aggregate_across_rewriters(run_path, seed_index, strict)
-
     if not aggregated:
         return {"items": [], "cos_sims": None}
 
@@ -94,6 +172,26 @@ def _precompute_aggregated_seed_data(
     cos_sims = cosine_similarity(embs_normalized, embs_normalized)
 
     return {"items": items, "cos_sims": cos_sims}
+
+
+def _precompute_aggregated_seed_data(
+    run_path: Path,
+    seed_index: int,
+    cluster_model: EmbedClusterModel,
+    strict: bool,
+) -> dict:
+    """
+    Precompute embeddings and similarity matrix for aggregated data.
+
+    Uses aggregate_across_rewriters to get per-attribute aggregated scores,
+    then computes embeddings for DABS diversity penalty.
+
+    Returns dict with:
+        - items: list of {attribute, teacher_score, score} (using means)
+        - cos_sims: precomputed cosine similarity matrix
+    """
+    aggregated = aggregate_across_rewriters(run_path, seed_index, strict)
+    return _compute_embeddings_for_dabs(aggregated, cluster_model)
 
 
 def _precompute_seed_data(
@@ -301,69 +399,88 @@ def _is_pareto_optimal(points: np.ndarray) -> np.ndarray:
 
 
 def plot_pareto_frontier(
-    run_paths: Sequence[Path | str] | dict[str, Path | str],
+    run_paths: Sequence[Path | str] | dict[str, Path | str] | None = None,
     topic_ids: Sequence[int] | None = None,
     strict: bool = False,
     pareto_only: bool = False,
+    precomputed_data: dict[str, dict[int, dict[str, dict]]] | None = None,
 ) -> go.Figure:
     """
     Plot student vs teacher scores for each attribute as a scatter plot.
 
-    Creates a 5x2 grid of subplots (one per seed). Each point represents an
+    Creates a grid of subplots (one per seed). Each point represents an
     attribute with error bars showing 95% CI.
 
     Args:
         run_paths: Either a list of run directories, or a dict mapping
-            display labels to run directories.
+            display labels to run directories. Ignored if precomputed_data provided.
         topic_ids: Optional filter for specific seeds
         strict: If True, only include attributes where ALL rewriters have
-            student_score >= 0 AND teacher_score <= 0.5.
+            student_score >= 0 AND teacher_score <= 0.5. Ignored if precomputed_data.
         pareto_only: If True, only show Pareto-optimal points.
+        precomputed_data: Pre-loaded data as {label: {seed_idx: {attr: stats}}}.
+            When provided, run_paths and strict are ignored.
 
     Returns:
-        Figure with 5x2 subplots.
+        Figure with subplots.
     """
-    # Normalize run_paths to dict[label, Path]
-    if isinstance(run_paths, dict):
-        run_labels = {
-            Path(p) if isinstance(p, str) else p: label
-            for label, p in run_paths.items()
-        }
-        run_paths_list = list(run_labels.keys())
+    if precomputed_data is not None:
+        # Use pre-computed data directly
+        run_labels_list = list(precomputed_data.keys())
+        run_seed_data = precomputed_data
+
+        # Find all seeds across all runs (union, not intersection)
+        all_seeds: set[int] = set()
+        for seeds_data in run_seed_data.values():
+            all_seeds.update(seeds_data.keys())
     else:
-        run_paths_list = [Path(p) if isinstance(p, str) else p for p in run_paths]
-        run_labels = {p: p.name for p in run_paths_list}
+        # Load from disk (original behavior)
+        if run_paths is None:
+            raise ValueError("Either run_paths or precomputed_data must be provided")
 
-    # Load aggregated data for all runs/seeds
-    run_seed_data: dict[str, dict[int, dict[str, dict]]] = {}
-    for run_path in run_paths_list:
-        run_key = str(run_path)
-        run_seed_data[run_key] = {}
+        # Normalize run_paths to dict[label, Path]
+        if isinstance(run_paths, dict):
+            run_labels = {
+                Path(p) if isinstance(p, str) else p: label
+                for label, p in run_paths.items()
+            }
+            run_paths_list = list(run_labels.keys())
+        else:
+            run_paths_list = [Path(p) if isinstance(p, str) else p for p in run_paths]
+            run_labels = {p: p.name for p in run_paths_list}
 
-        for seed_index in get_seed_indices(run_path):
-            run_seed_data[run_key][seed_index] = aggregate_across_rewriters(
-                run_path, seed_index, strict
-            )
+        run_labels_list = [run_labels[rp] for rp in run_paths_list]
 
-    # Find common seed indices across all runs
-    all_seed_sets = [set(data.keys()) for data in run_seed_data.values()]
-    if not all_seed_sets:
-        return go.Figure()
-    common_seeds = set.intersection(*all_seed_sets)
+        # Load aggregated data for all runs/seeds
+        run_seed_data = {}
+        for run_path in run_paths_list:
+            label = run_labels[run_path]
+            run_seed_data[label] = {}
+
+            for seed_index in get_seed_indices(run_path):
+                run_seed_data[label][seed_index] = aggregate_across_rewriters(
+                    run_path, seed_index, strict
+                )
+
+        # Find common seed indices across all runs
+        all_seed_sets = [set(data.keys()) for data in run_seed_data.values()]
+        if not all_seed_sets:
+            return go.Figure()
+        all_seeds = set.intersection(*all_seed_sets)
 
     # Filter by topic_ids if provided
     if topic_ids is not None:
-        common_seeds = common_seeds & set(topic_ids)
+        all_seeds = all_seeds & set(topic_ids)
 
-    if not common_seeds:
-        print("No common seed indices found across runs")
+    if not all_seeds:
+        print("No seed indices found")
         return go.Figure()
 
     # Filter to seeds that have at least one attribute in any run
     seeds_with_data = set()
-    for seed in common_seeds:
-        for run_key in run_seed_data:
-            if run_seed_data[run_key][seed]:
+    for seed in all_seeds:
+        for label in run_seed_data:
+            if seed in run_seed_data[label] and run_seed_data[label][seed]:
                 seeds_with_data.add(seed)
                 break
 
@@ -390,7 +507,36 @@ def plot_pareto_frontier(
 
     # Use Dark2 color scheme
     colors = px.colors.qualitative.Dark2
-    run_colors = {str(rp): colors[i % len(colors)] for i, rp in enumerate(run_paths_list)}
+    run_colors = {label: colors[i % len(colors)] for i, label in enumerate(run_labels_list)}
+
+    # Compute jitter offsets for overlapping attributes (same attr in multiple runs)
+    # Maps (seed_idx, attr) -> {run_label: (x_offset, y_offset)}
+    jitter_offsets: dict[tuple[int, str], dict[str, tuple[float, float]]] = {}
+    # Separate jitter for each axis (X has larger range than Y)
+    jitter_x = 0.04
+    jitter_y = 0.03
+
+    for seed_index in sorted_seeds:
+        # Find attributes that appear in multiple runs for this seed
+        attr_runs: dict[str, list[str]] = {}
+        for run_label in run_labels_list:
+            if seed_index not in run_seed_data.get(run_label, {}):
+                continue
+            for attr in run_seed_data[run_label][seed_index]:
+                attr_runs.setdefault(attr, []).append(run_label)
+
+        # Compute offsets for overlapping attributes
+        for attr, runs in attr_runs.items():
+            if len(runs) > 1:
+                # Spread points in an ellipse around the true position
+                for i, run_label in enumerate(runs):
+                    angle = 2 * np.pi * i / len(runs)
+                    x_off = jitter_x * np.cos(angle)
+                    y_off = jitter_y * np.sin(angle)
+                    jitter_offsets[(seed_index, attr)] = jitter_offsets.get(
+                        (seed_index, attr), {}
+                    )
+                    jitter_offsets[(seed_index, attr)][run_label] = (x_off, y_off)
 
     # Add traces to each subplot
     shown_legend_groups: set[str] = set()
@@ -398,10 +544,10 @@ def plot_pareto_frontier(
         row = idx // cols + 1
         col = idx % cols + 1
 
-        for run_path in run_paths_list:
-            run_key = str(run_path)
-            run_label = run_labels[run_path]
-            attr_data = run_seed_data[run_key][seed_index]
+        for run_label in run_labels_list:
+            if seed_index not in run_seed_data[run_label]:
+                continue
+            attr_data = run_seed_data[run_label][seed_index]
 
             if not attr_data:
                 continue
@@ -414,6 +560,14 @@ def plot_pareto_frontier(
             # Wilson CI bounds for teacher (asymmetric)
             teacher_ci_lower = np.array([attr_data[a]["teacher_ci_lower"] for a in attributes])
             teacher_ci_upper = np.array([attr_data[a]["teacher_ci_upper"] for a in attributes])
+
+            # Apply jitter for overlapping attributes
+            for i, attr in enumerate(attributes):
+                key = (seed_index, attr)
+                if key in jitter_offsets and run_label in jitter_offsets[key]:
+                    x_off, y_off = jitter_offsets[key][run_label]
+                    student_means[i] += x_off
+                    teacher_means[i] += y_off
 
             # Filter to Pareto-optimal if requested
             if pareto_only and len(attributes) > 0:
@@ -430,7 +584,7 @@ def plot_pareto_frontier(
                 continue
 
             # Make error bar color semi-transparent
-            error_color = run_colors[run_key].replace("rgb(", "rgba(").replace(")", ", 0.4)")
+            error_color = run_colors[run_label].replace("rgb(", "rgba(").replace(")", ", 0.4)")
             if not error_color.startswith("rgba"):
                 error_color = f"rgba(128, 128, 128, 0.4)"
 
@@ -445,7 +599,7 @@ def plot_pareto_frontier(
                     y=teacher_means,
                     mode="markers",
                     name=run_label,
-                    marker=dict(size=10, color=run_colors[run_key]),
+                    marker=dict(size=7, color=run_colors[run_label]),
                     error_x=dict(
                         type="data",
                         array=student_cis,
@@ -484,31 +638,56 @@ def plot_pareto_frontier(
             y=1.08,
             xanchor="center",
             x=0.5,
-            font=dict(size=14),
+            font=dict(size=16),
         ),
         margin=dict(t=80),
+        font=dict(size=14),  # Global font size
     )
 
-    # Only label axes on edge subplots, and fix y-axis range
+    # Update subplot title font size
+    fig.update_annotations(font_size=16)
+
+    # Only label axes on edge subplots, and fix axis ranges
     for i in range(1, rows * cols + 1):
         row_idx = (i - 1) // cols + 1
         col_idx = (i - 1) % cols + 1
-        # X-axis label only on bottom row (with arrow indicating better direction)
+        # X-axis: start from 0, label only on bottom row
         if row_idx == rows:
-            fig.update_xaxes(title_text="RM bias strength (⟶)", row=row_idx, col=col_idx)
+            fig.update_xaxes(
+                title_text="RM bias strength (⟶)",
+                title_font_size=15,
+                tickfont_size=13,
+                range=[0, None],
+                row=row_idx,
+                col=col_idx,
+            )
         else:
-            fig.update_xaxes(title_text="", row=row_idx, col=col_idx)
+            fig.update_xaxes(
+                title_text="",
+                tickfont_size=13,
+                range=[0, None],
+                row=row_idx,
+                col=col_idx,
+            )
         # Y-axis: fixed range [0, 0.55] with label only on leftmost column
         # Arrow points left (renders as down after 90° CCW rotation)
         if col_idx == 1:
             fig.update_yaxes(
                 title_text="(⟵) LM judge bias winrate",
+                title_font_size=15,
+                tickfont_size=13,
                 range=[-0.05, 0.55],
                 row=row_idx,
                 col=col_idx,
             )
         else:
-            fig.update_yaxes(title_text="", range=[-0.05, 0.55], row=row_idx, col=col_idx)
+            fig.update_yaxes(
+                title_text="",
+                tickfont_size=13,
+                range=[-0.05, 0.55],
+                row=row_idx,
+                col=col_idx,
+            )
 
     return fig
 
@@ -561,65 +740,101 @@ def print_attribute_stats(
 
 
 def plot_dabs_vs_threshold(
-    run_paths: Sequence[Path | str] | dict[str, Path | str],
-    cluster_model: EmbedClusterModel,
+    run_paths: Sequence[Path | str] | dict[str, Path | str] | None = None,
+    cluster_model: EmbedClusterModel | None = None,
     topic_ids: Sequence[int] | None = None,
     diversity_penalty: float = 0.5,
     threshold_step: float = 0.05,
     strict: bool = False,
+    precomputed_data: dict[str, dict[int, dict[str, dict]]] | None = None,
 ) -> go.Figure:
     """Plot DABS vs threshold for comparing multiple runs.
 
-    Uses aggregated scores across all rewriters. Creates a 5x2 grid of subplots
+    Uses aggregated scores across all rewriters. Creates a grid of subplots
     (one per seed). Each subplot shows DABS curves for all runs.
 
     Args:
         run_paths: Either a list of run directories, or a dict mapping
-            display labels to run directories.
+            display labels to run directories. Ignored if precomputed_data provided.
         cluster_model: Model for computing attribute embeddings
         topic_ids: Optional filter for specific seeds
         diversity_penalty: Penalty for similar attributes (0-1)
         threshold_step: Granularity of threshold sweep
         strict: If True, only include attributes where ALL rewriters have
-            student_score >= 0 AND teacher_score <= 0.5.
+            student_score >= 0 AND teacher_score <= 0.5. Ignored if precomputed_data.
+        precomputed_data: Pre-loaded data as {label: {seed_idx: {attr: stats}}}.
+            When provided, run_paths and strict are ignored.
 
     Returns:
-        Figure with 5x2 subplots.
+        Figure with subplots.
     """
+    if cluster_model is None:
+        raise ValueError("cluster_model is required")
+
     thresholds = np.arange(0.0, 0.5 + threshold_step, threshold_step)
 
-    # Normalize run_paths to dict[label, Path]
-    if isinstance(run_paths, dict):
-        run_labels = {
-            Path(p) if isinstance(p, str) else p: label
-            for label, p in run_paths.items()
-        }
-        run_paths_list = list(run_labels.keys())
+    if precomputed_data is not None:
+        # Use pre-computed data - compute embeddings from it
+        run_labels_list = list(precomputed_data.keys())
+
+        # Step 1: Compute embeddings for each label/seed
+        embedding_data: dict[str, dict[int, dict]] = {}
+        for label, seeds_data in precomputed_data.items():
+            embedding_data[label] = {}
+            for seed_idx, attr_data in seeds_data.items():
+                embedding_data[label][seed_idx] = _compute_embeddings_for_dabs(
+                    attr_data, cluster_model
+                )
+
+        # Find all seeds (union)
+        all_seeds: set[int] = set()
+        for seeds_data in embedding_data.values():
+            all_seeds.update(seeds_data.keys())
     else:
-        run_paths_list = [Path(p) if isinstance(p, str) else p for p in run_paths]
-        run_labels = {p: p.name for p in run_paths_list}
+        # Load from disk (original behavior)
+        if run_paths is None:
+            raise ValueError("Either run_paths or precomputed_data must be provided")
 
-    # Step 1: Precompute embeddings using aggregated data
-    precomputed_data: dict[str, dict[int, dict]] = {}
-    for run_path in run_paths_list:
-        run_key = str(run_path)
-        precomputed_data[run_key] = {}
+        # Normalize run_paths to dict[label, Path]
+        if isinstance(run_paths, dict):
+            run_labels = {
+                Path(p) if isinstance(p, str) else p: label
+                for label, p in run_paths.items()
+            }
+            run_paths_list = list(run_labels.keys())
+        else:
+            run_paths_list = [Path(p) if isinstance(p, str) else p for p in run_paths]
+            run_labels = {p: p.name for p in run_paths_list}
 
-        for seed_index in get_seed_indices(run_path):
-            precomputed_data[run_key][seed_index] = _precompute_aggregated_seed_data(
-                run_path, seed_index, cluster_model, strict=strict
-            )
+        run_labels_list = [run_labels[rp] for rp in run_paths_list]
 
-    # Step 2: Compute DABS for all thresholds using precomputed data
+        # Step 1: Precompute embeddings using aggregated data
+        embedding_data = {}
+        for run_path in run_paths_list:
+            label = run_labels[run_path]
+            embedding_data[label] = {}
+
+            for seed_index in get_seed_indices(run_path):
+                embedding_data[label][seed_index] = _precompute_aggregated_seed_data(
+                    run_path, seed_index, cluster_model, strict=strict
+                )
+
+        # Find common seed indices across all runs
+        all_seed_sets = [set(seeds.keys()) for seeds in embedding_data.values()]
+        if not all_seed_sets:
+            return go.Figure()
+        all_seeds = set.intersection(*all_seed_sets)
+
+    # Step 2: Compute DABS for all thresholds using embedding data
     # Note: filter_positive_scores is always False here since aggregation
     # already filters for student_mean >= 0
     run_seed_scores: dict[str, dict[int, list[float]]] = {}
-    for run_key, seeds_data in precomputed_data.items():
-        run_seed_scores[run_key] = {}
-        for seed_index, precomputed in seeds_data.items():
-            run_seed_scores[run_key][seed_index] = [
+    for label, seeds_data in embedding_data.items():
+        run_seed_scores[label] = {}
+        for seed_index, emb_data in seeds_data.items():
+            run_seed_scores[label][seed_index] = [
                 _compute_dabs_from_precomputed(
-                    precomputed,
+                    emb_data,
                     thr.item(),
                     diversity_penalty,
                     filter_positive_scores=False,
@@ -627,25 +842,19 @@ def plot_dabs_vs_threshold(
                 for thr in thresholds
             ]
 
-    # Find common seed indices across all runs
-    all_seed_sets = [set(scores.keys()) for scores in run_seed_scores.values()]
-    if not all_seed_sets:
-        return go.Figure()
-    common_seeds = set.intersection(*all_seed_sets)
-
     # Filter by topic_ids if provided
     if topic_ids is not None:
-        common_seeds = common_seeds & set(topic_ids)
+        all_seeds = all_seeds & set(topic_ids)
 
-    if not common_seeds:
-        print("No common seed indices found across runs")
+    if not all_seeds:
+        print("No seed indices found")
         return go.Figure()
 
     # Filter to seeds that have non-zero DABS in any run (i.e., have data)
     seeds_with_data = set()
-    for seed in common_seeds:
-        for run_key in precomputed_data:
-            if precomputed_data[run_key][seed]["items"]:
+    for seed in all_seeds:
+        for label in embedding_data:
+            if seed in embedding_data[label] and embedding_data[label][seed]["items"]:
                 seeds_with_data.add(seed)
                 break
 
@@ -672,7 +881,15 @@ def plot_dabs_vs_threshold(
 
     # Use Dark2 color scheme
     colors = px.colors.qualitative.Dark2
-    run_colors = {str(rp): colors[i % len(colors)] for i, rp in enumerate(run_paths_list)}
+    run_colors = {label: colors[i % len(colors)] for i, label in enumerate(run_labels_list)}
+
+    # Compute x-offsets for each run to prevent overlapping lines
+    n_runs = len(run_labels_list)
+    x_offset_magnitude = threshold_step * 0.15  # Small fraction of step size
+    run_x_offsets = {
+        label: (i - (n_runs - 1) / 2) * x_offset_magnitude
+        for i, label in enumerate(run_labels_list)
+    }
 
     # Add traces to each subplot
     shown_legend_groups: set[str] = set()
@@ -680,10 +897,13 @@ def plot_dabs_vs_threshold(
         row = idx // cols + 1
         col = idx % cols + 1
 
-        for run_path in run_paths_list:
-            run_key = str(run_path)
-            run_label = run_labels[run_path]
-            scores = run_seed_scores[run_key][seed_index]
+        for run_label in run_labels_list:
+            if seed_index not in run_seed_scores[run_label]:
+                continue
+            scores = run_seed_scores[run_label][seed_index]
+
+            # Apply x-offset to prevent overlapping lines
+            x_values = thresholds + run_x_offsets[run_label]
 
             # Show legend for first occurrence of each run
             show_legend = run_label not in shown_legend_groups
@@ -692,12 +912,12 @@ def plot_dabs_vs_threshold(
 
             fig.add_trace(
                 go.Scatter(
-                    x=thresholds,
+                    x=x_values,
                     y=scores,
                     mode="lines+markers",
                     name=run_label,
-                    line=dict(width=3, color=run_colors[run_key]),
-                    marker=dict(size=6, color=run_colors[run_key]),
+                    line=dict(width=3, color=run_colors[run_label]),
+                    marker=dict(size=6, color=run_colors[run_label]),
                     showlegend=show_legend,
                     legendgroup=run_label,
                 ),
@@ -715,17 +935,22 @@ def plot_dabs_vs_threshold(
             y=1.08,
             xanchor="center",
             x=0.5,
-            font=dict(size=14),
+            font=dict(size=16),
         ),
         margin=dict(t=80),
+        font=dict(size=14),  # Global font size
     )
+
+    # Update subplot title font size
+    fig.update_annotations(font_size=16)
 
     # Compute max DABS value per seed for individual y-axis ranges
     seed_max_dabs = {}
     for seed_index in sorted_seeds:
         seed_scores = []
-        for run_key in run_seed_scores:
-            seed_scores.extend(run_seed_scores[run_key][seed_index])
+        for label in run_seed_scores:
+            if seed_index in run_seed_scores[label]:
+                seed_scores.extend(run_seed_scores[label][seed_index])
         seed_max_dabs[seed_index] = max(seed_scores) if seed_scores else 0
 
     # Only label axes on edge subplots, fix y-axis range per subplot
@@ -736,15 +961,34 @@ def plot_dabs_vs_threshold(
 
         # X-axis label only on bottom row
         if row_idx == rows:
-            fig.update_xaxes(title_text="LM judge winrate threshold", row=row_idx, col=col_idx)
+            fig.update_xaxes(
+                title_text="LM judge winrate threshold",
+                title_font_size=15,
+                tickfont_size=13,
+                row=row_idx,
+                col=col_idx,
+            )
         else:
-            fig.update_xaxes(title_text="", row=row_idx, col=col_idx)
+            fig.update_xaxes(title_text="", tickfont_size=13, row=row_idx, col=col_idx)
         # Y-axis: fixed range with minimum of 2, label only on leftmost column
         # Arrow points right (renders as up after 90° CCW rotation)
         if col_idx == 1:
-            fig.update_yaxes(title_text="DABS (⟶)", range=[0, y_max], row=row_idx, col=col_idx)
+            fig.update_yaxes(
+                title_text="DABS (⟶)",
+                title_font_size=15,
+                tickfont_size=13,
+                range=[0, y_max],
+                row=row_idx,
+                col=col_idx,
+            )
         else:
-            fig.update_yaxes(title_text="", range=[0, y_max], row=row_idx, col=col_idx)
+            fig.update_yaxes(
+                title_text="",
+                tickfont_size=13,
+                range=[0, y_max],
+                row=row_idx,
+                col=col_idx,
+            )
 
     return fig
 
@@ -914,21 +1158,45 @@ def compute_hypervolume_table(
 cluster_model = EmbedClusterModel(embed_model_name="Qwen/Qwen3-Embedding-8B")
 
 # %%
-run_paths = {
-    "depth = 5, branching = 4": "data/evo/20260106-174842-list_reverse-handpick-plus",
-    "depth = 3, branching = 8": "data/evo/20260107-015321-list_reverse-handpick-plus",
-    "depth = 1": "data/evo/20260107-075251-list_reverse-handpick-plus",
+# Evo runs (for determining which attributes pass filtering and their origin)
+EVO_RUNS = {
+    "depth=5, branch=4": Path("data/evo/20260106-174842-list_reverse-handpick-plus"),
+    "depth=3, branch=8": Path("data/evo/20260107-015321-list_reverse-handpick-plus"),
+    "depth=1": Path("data/evo/20260107-075251-list_reverse-handpick-plus"),
 }
 
+# Test runs (for loading actual test set statistics)
+TEST_RUNS = [
+    Path("data/exp_attribute_validation/20260112-162826"),
+    Path("data/exp_attribute_validation/20260125-084345"),
+]
 
-output_dir = Path("data/metrics/main_run_1")
+# Get passing attributes grouped by evo origin
+passing_by_origin = get_evo_passing_attributes_by_origin(EVO_RUNS, strict=False)
+
+# Load test statistics organized by origin
+test_data_by_origin = load_test_data_by_origin(TEST_RUNS, passing_by_origin, strict=False)
+
+# Print summary
+print("Test set attributes by evo run origin:")
+for label, seeds_data in test_data_by_origin.items():
+    total = sum(len(attrs) for attrs in seeds_data.values())
+    print(f"  {label}: {total} attributes")
+
+output_dir = Path("data/metrics/test_set")
 output_dir.mkdir(parents=True, exist_ok=True)
 
-# Generate Pareto frontier plot (tolerant mode only)
-pareto_fig = plot_pareto_frontier(run_paths, strict=False, pareto_only=False)
+# Generate Pareto frontier plot using test set statistics
+pareto_fig = plot_pareto_frontier(precomputed_data=test_data_by_origin)
+pareto_fig.write_html(output_dir / "pareto_plot.html")
 pareto_fig.write_image(output_dir / "pareto_plot.pdf")
 
-# Generate DABS vs threshold plot (tolerant mode only)
-dabs_fig = plot_dabs_vs_threshold(run_paths, cluster_model, strict=False)
+# Generate DABS vs threshold plot using test set statistics
+dabs_fig = plot_dabs_vs_threshold(
+    cluster_model=cluster_model, precomputed_data=test_data_by_origin
+)
+dabs_fig.write_html(output_dir / "dabs_plot.html")
 dabs_fig.write_image(output_dir / "dabs_plot.pdf")
+
+print(f"Plots saved to {output_dir}")
 
