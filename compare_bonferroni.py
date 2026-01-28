@@ -8,6 +8,7 @@ from filtering import (
     PARTIAL_CONJUNCTION_P_THRESHOLD,
     compute_partial_conjunction_stats,
     get_seed_indices,
+    get_teacher_type,
     passes_partial_conjunction_criteria,
     save_partial_conjunction_results,
 )
@@ -31,12 +32,14 @@ def save_global_bonferroni_results(
         Dict with results for all seeds
     """
     seed_indices = get_seed_indices(run_path)
+    teacher_type = get_teacher_type(run_path)
+    teacher_threshold = 0.0 if teacher_type == "local" else 0.5
 
     # First pass: count total attributes across all seeds
     all_stats = {}
     total_attributes = 0
     for seed_idx in seed_indices:
-        stats = compute_partial_conjunction_stats(run_path, seed_idx)
+        stats = compute_partial_conjunction_stats(run_path, seed_idx, teacher_type=teacher_type)
         all_stats[seed_idx] = stats
         total_attributes += len(stats)
 
@@ -66,6 +69,7 @@ def save_global_bonferroni_results(
                 teacher_p_pc_global,
                 data["student_mean"],
                 data["teacher_mean"],
+                teacher_threshold=teacher_threshold,
             )
 
             # Format per-rewriter stats
@@ -187,17 +191,20 @@ def main():
     print("=" * 80)
 
     seed_indices = get_seed_indices(run_path)
+    teacher_type = get_teacher_type(run_path)
+    teacher_threshold = 0.0 if teacher_type == "local" else 0.5
 
     # First pass: count total attributes (global N)
     all_stats = {}
     total_attributes = 0
     for seed_idx in seed_indices:
-        stats = compute_partial_conjunction_stats(run_path, seed_idx)
+        stats = compute_partial_conjunction_stats(run_path, seed_idx, teacher_type=teacher_type)
         all_stats[seed_idx] = stats
         total_attributes += len(stats)
 
     print(f"\nTotal attributes across all seeds: {total_attributes}")
     print(f"P-value threshold: {PARTIAL_CONJUNCTION_P_THRESHOLD}")
+    print(f"Teacher type: {teacher_type} (threshold={teacher_threshold})")
 
     # Count passes under each method
     per_seed_passes = []
@@ -220,6 +227,7 @@ def main():
                 data["teacher_p_pc_bonferroni"],
                 data["student_mean"],
                 data["teacher_mean"],
+                teacher_threshold=teacher_threshold,
             )
 
             # Global Bonferroni (recompute with global N)
@@ -230,6 +238,7 @@ def main():
                 teacher_p_pc_global,
                 data["student_mean"],
                 data["teacher_mean"],
+                teacher_threshold=teacher_threshold,
             )
 
             if per_seed_pass:

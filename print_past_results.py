@@ -13,6 +13,7 @@ import filtering
 from filtering import (
     aggregate_across_rewriters,
     get_seed_indices,
+    get_teacher_type,
 )
 
 # Set p-value threshold for filtering
@@ -82,18 +83,25 @@ def collect_run_results(run_path: Path) -> dict | None:
     strict_by_seed: dict[int, list[dict]] = {}
     tolerant_by_seed: dict[int, list[dict]] = {}
 
+    # Auto-detect teacher type from config
+    teacher_type = get_teacher_type(run_path)
+
     for seed_index in seed_indices:
         cluster_summary = _get_cluster_summary(run_path, seed_index)
 
         # Strict mode
-        strict_aggregated = aggregate_across_rewriters(run_path, seed_index, strict=True)
+        strict_aggregated = aggregate_across_rewriters(
+            run_path, seed_index, strict=True, teacher_type=teacher_type
+        )
         strict_by_seed[seed_index] = [
             _format_attribute(attr_name, data, cluster_summary)
             for attr_name, data in strict_aggregated.items()
         ]
 
         # Tolerant mode
-        tolerant_aggregated = aggregate_across_rewriters(run_path, seed_index, strict=False)
+        tolerant_aggregated = aggregate_across_rewriters(
+            run_path, seed_index, strict=False, teacher_type=teacher_type
+        )
         tolerant_by_seed[seed_index] = [
             _format_attribute(attr_name, data, cluster_summary)
             for attr_name, data in tolerant_aggregated.items()

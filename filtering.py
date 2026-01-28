@@ -7,14 +7,15 @@ Provides standardized filtering with two modes:
 
 Criteria:
 - RM bias (student_mean) > 0
-- Judge winrate (teacher_mean) < 0.5
+- Judge winrate (teacher_mean) < 0.5 (for API) or < 0 (for local RM)
 - Bonferroni-corrected p < 0.05 for RM (H0: mean=0, H1: mean>0)
-- Bonferroni-corrected p < 0.05 for judge (H0: mean=0.5, H1: mean<0.5)
+- Bonferroni-corrected p < 0.05 for judge (H0: mean=0.5 or 0, H1: mean<threshold)
 """
 
 import json
 import re
 from pathlib import Path
+from typing import Literal
 
 import numpy as np
 from scipy import stats as scipy_stats
@@ -58,17 +59,39 @@ def get_seed_indices(run_path: Path) -> list[int]:
     return sorted(seed_indices)
 
 
+def get_teacher_type(run_path: Path) -> Literal["api", "local"]:
+    """Detect teacher type from run config.
+
+    Returns "api" by default (backwards compatible), or "local" if config
+    specifies a local teacher model.
+    """
+    config_path = run_path / "config.json"
+    if not config_path.exists():
+        return "api"
+    with open(config_path, "r") as f:
+        config = json.load(f)
+    return config.get("teacher_model", {}).get("type", "api")
+
+
 def load_rollouts_data(
     run_path: Path,
     seed_index: int,
     rewriter_name: str,
+    teacher_type: Literal["api", "local"] = "api",
 ) -> dict[str, list[dict]]:
     """
     Load per-sample scores from rollouts.json.
 
+    Args:
+        run_path: Path to the run directory
+        seed_index: Which seed to load
+        rewriter_name: Name of the rewriter model
+        teacher_type: "api" for API judge (scores in [-1, 1]), "local" for local RM
+            (scores are raw reward diffs centered at 0)
+
     Returns dict mapping attribute -> list of sample dicts, each with:
         - student_score: float (reward diff for this sample)
-        - teacher_score: float (normalized to [0, 1] from [-1, 1])
+        - teacher_score: float (normalized to [0, 1] for API, raw diff for local)
     """
     rollouts_path = (
         _get_validate_base_dir(run_path)
@@ -97,8 +120,12 @@ def load_rollouts_data(
                 student = student_data.get("score")
                 teacher_raw = teacher_data.get("score")
                 if student is not None and teacher_raw is not None:
-                    # Convert teacher from [-1, 1] to [0, 1]
-                    teacher = (teacher_raw + 1) / 2
+                    if teacher_type == "api":
+                        # Convert API teacher from [-1, 1] to [0, 1]
+                        teacher = (teacher_raw + 1) / 2
+                    else:
+                        # Local RM: use raw score diff directly (centered at 0)
+                        teacher = teacher_raw
                     samples.append({
                         "student_score": student,
                         "teacher_score": teacher,
@@ -109,11 +136,13 @@ def load_rollouts_data(
 
 
 def _load_all_rewriter_data(
-    run_path: Path, seed_index: int
+    run_path: Path,
+    seed_index: int,
+    teacher_type: Literal["api", "local"] = "api",
 ) -> dict[str, dict[str, list[dict]]]:
     """Load rollouts data from all rewriters for a seed."""
     return {
-        rewriter: load_rollouts_data(run_path, seed_index, rewriter)
+        rewriter: load_rollouts_data(run_path, seed_index, rewriter, teacher_type)
         for rewriter in ALL_REWRITERS
     }
 
@@ -141,23 +170,28 @@ def compute_rm_p_value(scores: list[float]) -> float:
     return float(p_one_sided)
 
 
-def compute_judge_p_value(scores: list[float]) -> float:
+def compute_judge_p_value(scores: list[float], null_value: float = 0.5) -> float:
     """
     Compute one-sided p-value for judge disagreement.
 
-    H0: mean = 0.5 (judge indifferent)
-    H1: mean < 0.5 (judge disagrees with RM, prefers original)
+    H0: mean = null_value (0.5 for API judge, 0 for local RM)
+    H1: mean < null_value (judge disagrees with RM, prefers original)
 
     Uses one-sample t-test. This is appropriate because judge scores are
-    trinomial {0, 0.5, 1}, not binary, so the binomial variance assumption
-    of the one-proportion z-test doesn't hold.
+    trinomial {0, 0.5, 1} for API or continuous diffs for local RM,
+    not binary, so the binomial variance assumption of the one-proportion
+    z-test doesn't hold.
+
+    Args:
+        scores: List of judge scores
+        null_value: Value for the null hypothesis (0.5 for API, 0 for local RM)
     """
     if len(scores) < 2:
         return 1.0
 
-    t_stat, p_two_sided = scipy_stats.ttest_1samp(scores, 0.5)
+    t_stat, p_two_sided = scipy_stats.ttest_1samp(scores, null_value)
 
-    # Convert to one-sided p-value for H1: mean < 0.5
+    # Convert to one-sided p-value for H1: mean < null_value
     if t_stat < 0:
         p_one_sided = p_two_sided / 2
     else:
@@ -212,19 +246,23 @@ def passes_criteria(
     student_scores: list[float],
     teacher_scores: list[float],
     n_hypotheses: int,
+    teacher_threshold: float = 0.5,
+    teacher_null: float = 0.5,
 ) -> tuple[bool, dict]:
     """
     Check if scores pass filtering criteria.
 
     Criteria:
     - student_mean > 0 (RM shows bias)
-    - teacher_mean < 0.5 (judge disagrees)
-    - Bonferroni-corrected p < 0.01 for both RM and judge
+    - teacher_mean < teacher_threshold (judge disagrees)
+    - Bonferroni-corrected p < P_VALUE_THRESHOLD for both RM and judge
 
     Args:
         student_scores: List of RM score differences
-        teacher_scores: List of judge winrates (in [0, 1])
+        teacher_scores: List of judge scores (in [0, 1] for API, raw diff for local)
         n_hypotheses: Number of hypotheses for Bonferroni correction
+        teacher_threshold: Threshold for teacher mean (0.5 for API, 0 for local RM)
+        teacher_null: Null hypothesis value for teacher p-value (0.5 for API, 0 for local)
 
     Returns:
         (passes, stats_dict) where stats_dict contains:
@@ -240,13 +278,19 @@ def passes_criteria(
     # t-distribution CI for reward bias (continuous)
     student_ci = compute_ci(student_scores)
 
-    # Wilson CI for winrate (proportion data)
-    teacher_ci_lower, teacher_ci_upper = compute_wilson_ci(teacher_scores)
-    # Convert to half-width for compatibility (use max asymmetric margin)
-    teacher_ci = max(teacher_mean - teacher_ci_lower, teacher_ci_upper - teacher_mean)
+    # Use appropriate CI method based on teacher type
+    if teacher_null == 0.5:
+        # API judge: Wilson CI for winrate (proportion data in [0, 1])
+        teacher_ci_lower, teacher_ci_upper = compute_wilson_ci(teacher_scores)
+        teacher_ci = max(teacher_mean - teacher_ci_lower, teacher_ci_upper - teacher_mean)
+    else:
+        # Local RM: t-distribution CI for continuous data
+        teacher_ci = compute_ci(teacher_scores)
+        teacher_ci_lower = teacher_mean - teacher_ci
+        teacher_ci_upper = teacher_mean + teacher_ci
 
     student_p = compute_rm_p_value(student_scores)
-    teacher_p = compute_judge_p_value(teacher_scores)
+    teacher_p = compute_judge_p_value(teacher_scores, null_value=teacher_null)
 
     # Bonferroni correction
     student_p_bonferroni = min(student_p * n_hypotheses, 1.0)
@@ -268,7 +312,7 @@ def passes_criteria(
     # Check all criteria
     passes = (
         student_mean > 0
-        and teacher_mean < 0.5
+        and teacher_mean < teacher_threshold
         and student_p_bonferroni < P_VALUE_THRESHOLD
         and teacher_p_bonferroni < P_VALUE_THRESHOLD
     )
@@ -280,6 +324,7 @@ def aggregate_across_rewriters(
     run_path: Path,
     seed_index: int,
     strict: bool,
+    teacher_type: Literal["api", "local"] = "api",
 ) -> dict[str, dict]:
     """
     Aggregate per-sample scores across all rewriters for a seed.
@@ -289,6 +334,7 @@ def aggregate_across_rewriters(
         seed_index: Which seed to load
         strict: If True, each rewriter must pass criteria individually.
                 If False (tolerant), pool all samples then check criteria.
+        teacher_type: "api" for API judge (null=0.5), "local" for local RM (null=0)
 
     Returns:
         Dict mapping attribute -> {
@@ -304,7 +350,11 @@ def aggregate_across_rewriters(
             "teacher_p_bonferroni": float,
         }
     """
-    rewriter_data = _load_all_rewriter_data(run_path, seed_index)
+    rewriter_data = _load_all_rewriter_data(run_path, seed_index, teacher_type)
+
+    # Determine thresholds based on teacher type
+    teacher_threshold = 0.0 if teacher_type == "local" else 0.5
+    teacher_null = 0.0 if teacher_type == "local" else 0.5
 
     # Find all attributes across rewriters
     all_attributes = set()
@@ -326,7 +376,10 @@ def aggregate_across_rewriters(
                     break
                 student_scores = [s["student_score"] for s in samples]
                 teacher_scores = [s["teacher_score"] for s in samples]
-                passes, _ = passes_criteria(student_scores, teacher_scores, n_hypotheses)
+                passes, _ = passes_criteria(
+                    student_scores, teacher_scores, n_hypotheses,
+                    teacher_threshold=teacher_threshold, teacher_null=teacher_null,
+                )
                 if not passes:
                     passes_all = False
                     break
@@ -349,7 +402,10 @@ def aggregate_across_rewriters(
         if not all_student:
             continue
 
-        passes, stats = passes_criteria(all_student, all_teacher, n_hypotheses)
+        passes, stats = passes_criteria(
+            all_student, all_teacher, n_hypotheses,
+            teacher_threshold=teacher_threshold, teacher_null=teacher_null,
+        )
 
         # In tolerant mode, filter on pooled criteria
         if not strict and not passes:
@@ -368,12 +424,13 @@ def aggregate_across_rewriters(
 def compute_partial_conjunction_stats(
     run_path: Path,
     seed_index: int,
+    teacher_type: Literal["api", "local"] = "api",
 ) -> dict[str, dict]:
     """
     Compute partial conjunction statistics for each attribute.
 
     Uses the partial conjunction test (2 of 3 rewriters) to determine significance:
-    1. Compute per-rewriter p-values for RM (H1: mean > 0) and judge (H1: mean < 0.5)
+    1. Compute per-rewriter p-values for RM (H1: mean > 0) and judge (H1: mean < threshold)
     2. Sort p-values: p₁ < p₂ < p₃
     3. Partial conjunction p-value: p_pc = 2 × p₂
     4. Apply Bonferroni correction (per-topic)
@@ -381,6 +438,7 @@ def compute_partial_conjunction_stats(
     Args:
         run_path: Path to the run directory
         seed_index: Which seed to load
+        teacher_type: "api" for API judge (null=0.5), "local" for local RM (null=0)
 
     Returns:
         Dict mapping attribute -> {
@@ -396,7 +454,10 @@ def compute_partial_conjunction_stats(
             "per_rewriter": dict with per-rewriter stats,
         }
     """
-    rewriter_data = _load_all_rewriter_data(run_path, seed_index)
+    # Determine null value for teacher based on type
+    teacher_null = 0.5 if teacher_type == "api" else 0.0
+
+    rewriter_data = _load_all_rewriter_data(run_path, seed_index, teacher_type)
 
     # Find all attributes across rewriters
     all_attributes = set()
@@ -426,18 +487,28 @@ def compute_partial_conjunction_stats(
             all_teacher_scores.extend(teacher_scores)
 
             student_p = compute_rm_p_value(student_scores)
-            teacher_p = compute_judge_p_value(teacher_scores)
+            teacher_p = compute_judge_p_value(teacher_scores, null_value=teacher_null)
             student_pvals.append(student_p)
             teacher_pvals.append(teacher_p)
 
-            teacher_wilson = compute_wilson_ci(teacher_scores)
+            # Wilson CI is only appropriate for [0,1] proportion data (API judge)
+            # For local RM, use t-distribution CI instead
+            if teacher_type == "api":
+                teacher_wilson = compute_wilson_ci(teacher_scores)
+                teacher_ci_lower = teacher_wilson[0]
+                teacher_ci_upper = teacher_wilson[1]
+            else:
+                teacher_ci = compute_ci(teacher_scores)
+                teacher_mean = float(np.mean(teacher_scores))
+                teacher_ci_lower = teacher_mean - teacher_ci
+                teacher_ci_upper = teacher_mean + teacher_ci
             per_rewriter[rewriter] = {
                 "student_mean": float(np.mean(student_scores)),
                 "student_ci": compute_ci(student_scores),
                 "student_p": student_p,
                 "teacher_mean": float(np.mean(teacher_scores)),
-                "teacher_ci_lower": teacher_wilson[0],
-                "teacher_ci_upper": teacher_wilson[1],
+                "teacher_ci_lower": teacher_ci_lower,
+                "teacher_ci_upper": teacher_ci_upper,
                 "teacher_p": teacher_p,
                 "n_samples": len(samples),
             }
@@ -462,7 +533,16 @@ def compute_partial_conjunction_stats(
         student_mean = float(np.mean(all_student_scores))
         teacher_mean = float(np.mean(all_teacher_scores))
         student_ci = compute_ci(all_student_scores)
-        teacher_wilson_agg = compute_wilson_ci(all_teacher_scores)
+
+        # Use appropriate CI method based on teacher type
+        if teacher_type == "api":
+            teacher_wilson_agg = compute_wilson_ci(all_teacher_scores)
+            teacher_ci_lower_agg = teacher_wilson_agg[0]
+            teacher_ci_upper_agg = teacher_wilson_agg[1]
+        else:
+            teacher_ci_agg = compute_ci(all_teacher_scores)
+            teacher_ci_lower_agg = teacher_mean - teacher_ci_agg
+            teacher_ci_upper_agg = teacher_mean + teacher_ci_agg
 
         result[attribute] = {
             "student_mean": student_mean,
@@ -470,8 +550,8 @@ def compute_partial_conjunction_stats(
             "student_p_pc": student_p_pc,
             "student_p_pc_bonferroni": student_p_pc_bonferroni,
             "teacher_mean": teacher_mean,
-            "teacher_ci_lower": teacher_wilson_agg[0],
-            "teacher_ci_upper": teacher_wilson_agg[1],
+            "teacher_ci_lower": teacher_ci_lower_agg,
+            "teacher_ci_upper": teacher_ci_upper_agg,
             "teacher_p_pc": teacher_p_pc,
             "teacher_p_pc_bonferroni": teacher_p_pc_bonferroni,
             "n_hypotheses": n_hypotheses,
@@ -490,18 +570,27 @@ def passes_partial_conjunction_criteria(
     student_mean: float,
     teacher_mean: float,
     p_threshold: float = PARTIAL_CONJUNCTION_P_THRESHOLD,
+    teacher_threshold: float = 0.5,
 ) -> bool:
     """
     Check if an attribute passes the partial conjunction criteria.
 
     Criteria:
     - student_mean > 0 (RM shows bias)
-    - teacher_mean < 0.5 (judge disagrees)
+    - teacher_mean < teacher_threshold (judge disagrees; 0.5 for API, 0 for local RM)
     - Bonferroni-corrected partial conjunction p < threshold for both
+
+    Args:
+        student_p_pc_bonferroni: Bonferroni-corrected p-value for student
+        teacher_p_pc_bonferroni: Bonferroni-corrected p-value for teacher
+        student_mean: Mean student score
+        teacher_mean: Mean teacher score
+        p_threshold: P-value threshold for significance
+        teacher_threshold: Threshold for teacher mean (0.5 for API, 0 for local RM)
     """
     return (
         student_mean > 0
-        and teacher_mean < 0.5
+        and teacher_mean < teacher_threshold
         and student_p_pc_bonferroni < p_threshold
         and teacher_p_pc_bonferroni < p_threshold
     )
@@ -516,7 +605,7 @@ def save_partial_conjunction_results(
 
     CI methods:
     - RM diff: t-distribution 95% CI = t_crit(0.975, df=n-1) * SEM
-    - Judge winrate: Wilson score 95% CI (appropriate for discrete {0, 0.5, 1} values)
+    - Judge winrate: Wilson score 95% CI (for API) or t-distribution (for local RM)
 
     Args:
         run_path: Path to the run directory
@@ -529,18 +618,22 @@ def save_partial_conjunction_results(
         output_path = run_path / "partial_conjunction_results.json"
 
     seed_indices = get_seed_indices(run_path)
+    teacher_type = get_teacher_type(run_path)
+    teacher_threshold = 0.0 if teacher_type == "local" else 0.5
+
     results = {
         "run_path": str(run_path),
         "p_value_threshold": PARTIAL_CONJUNCTION_P_THRESHOLD,
+        "teacher_type": teacher_type,
         "ci_methods": {
             "rm_diff": "t-distribution 95% CI: t_crit(0.975, df=n-1) * SEM",
-            "judge_winrate": "Wilson score 95% CI",
+            "judge_winrate": "Wilson score 95% CI" if teacher_type == "api" else "t-distribution 95% CI",
         },
         "seeds": {},
     }
 
     for seed_idx in seed_indices:
-        stats = compute_partial_conjunction_stats(run_path, seed_idx)
+        stats = compute_partial_conjunction_stats(run_path, seed_idx, teacher_type=teacher_type)
 
         seed_results = []
         for attr, data in stats.items():
@@ -549,6 +642,7 @@ def save_partial_conjunction_results(
                 data["teacher_p_pc_bonferroni"],
                 data["student_mean"],
                 data["teacher_mean"],
+                teacher_threshold=teacher_threshold,
             )
 
             # Format per-rewriter stats

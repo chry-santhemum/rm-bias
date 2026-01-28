@@ -12,7 +12,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from filtering import aggregate_across_rewriters, get_seed_indices
+from filtering import aggregate_across_rewriters, get_seed_indices, get_teacher_type
 from exp_attribute_validation import main as validate_main
 from utils import timestamp
 
@@ -65,8 +65,11 @@ def extract_passing_attributes() -> dict[int, list[str]]:
 
     for run_path in EVO_RUNS:
         logger.info(f"Processing {run_path.name}")
+        teacher_type = get_teacher_type(run_path)
         for seed_idx in get_seed_indices(run_path):
-            aggregated = aggregate_across_rewriters(run_path, seed_idx, strict=False)
+            aggregated = aggregate_across_rewriters(
+                run_path, seed_idx, strict=False, teacher_type=teacher_type
+            )
             for attr in aggregated.keys():
                 topic_attrs.setdefault(seed_idx, set()).add(attr)
 

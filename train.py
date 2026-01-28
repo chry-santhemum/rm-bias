@@ -188,7 +188,7 @@ async def run_experiment(
         student_model = LocalRewardModel(
             model_name="Skywork/Skywork-Reward-V2-Qwen3-0.6B",
             devices=all_cuda_devices,
-            batch_size_per_device=128,
+            batch_size_per_device=32,
         )
     elif args.student_model == "skywork-llama-8b":
         student_model = LocalRewardModel(
@@ -216,7 +216,7 @@ async def run_experiment(
         teacher_model = LocalRewardModel(
             model_name="Skywork/Skywork-Reward-V2-Llama-3.1-8B",
             devices=all_cuda_devices,
-            batch_size_per_device=64,
+            batch_size_per_device=16,
             share_weights_with=_can_share_with_student("Skywork/Skywork-Reward-V2-Llama-3.1-8B"),
         )
     elif args.teacher_model == "gpt-5-mini":
