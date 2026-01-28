@@ -57,7 +57,8 @@
       "Bash(git push:*)",
       "Bash(uv sync:*)",
       "Bash(sudo apt-get update:*)",
-      "Bash(sudo apt-get install:*)"
+      "Bash(sudo apt-get install:*)",
+      "Bash(tree:*)"
     ],
     "deny": [
       "Bash(rm:*)",

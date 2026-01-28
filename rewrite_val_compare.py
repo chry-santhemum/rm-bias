@@ -1,6 +1,3 @@
-# ABOUTME: Validates rewrite quality by having an LLM judge rate how minimally the rewrite changes the original.
-# ABOUTME: Enforces the same criteria given to the rewriter: minimal, targeted modifications.
-
 import json
 import random
 from pathlib import Path
