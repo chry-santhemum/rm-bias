@@ -3,8 +3,9 @@ import re
 from pathlib import Path
 from dataclasses import dataclass
 
-import matplotlib.pyplot as plt
 import numpy as np
+import plotly.graph_objects as go
+from scipy.optimize import curve_fit
 
 
 DATA_DIR = Path("data/recall")
@@ -39,7 +40,13 @@ BASELINE_EXPERIMENT_DIRS = [
 
 # Output paths
 OUTPUT_SNR_PDF = Path("data/recall/recall_snr.pdf")
+OUTPUT_SNR_NOFIT_PDF = Path("data/recall/recall_snr_nofit.pdf")
+OUTPUT_SNR_NOCI_PDF = Path("data/recall/recall_snr_noci.pdf")
+OUTPUT_SNR_NOFIT_NOCI_PDF = Path("data/recall/recall_snr_nofit_noci.pdf")
 OUTPUT_BASELINE_PDF = Path("data/recall/recall_baseline.pdf")
+OUTPUT_BASELINE_NOFIT_PDF = Path("data/recall/recall_baseline_nofit.pdf")
+OUTPUT_BASELINE_NOCI_PDF = Path("data/recall/recall_baseline_noci.pdf")
+OUTPUT_BASELINE_NOFIT_NOCI_PDF = Path("data/recall/recall_baseline_nofit_noci.pdf")
 OUTPUT_TXT = Path("data/recall/recall_analysis.txt")
 
 # Baseline attribute percentages from analyze_baselines.py
@@ -111,9 +118,9 @@ BIAS_LABELS = {
 }
 
 BIAS_COLORS = {
-    "affirm": "#4CAF50",   # green
-    "headers": "#2196F3",  # blue
-    "list": "#FF9800",     # orange
+    "affirm": "#1b9e77",   # teal (Dark2)
+    "headers": "#d95f02",  # orange (Dark2)
+    "list": "#7570b3",     # purple (Dark2)
 }
 
 
@@ -239,88 +246,229 @@ def analyze_experiment(exp_dir: Path, bias_type: str) -> ExperimentResult:
     )
 
 
-def plot_snr_results(results: list[ExperimentResult], output_path: Path):
-    """Create line plot of success rate vs signal/noise ratio."""
-    fig, ax = plt.subplots(figsize=(8, 5))
+def wilson_ci(successes: int, total: int, z: float = 1.96) -> tuple[float, float]:
+    """Compute Wilson score confidence interval for a proportion."""
+    if total == 0:
+        return (0.0, 0.0)
+    p = successes / total
+    denominator = 1 + z**2 / total
+    center = (p + z**2 / (2 * total)) / denominator
+    margin = z * np.sqrt(p * (1 - p) / total + z**2 / (4 * total**2)) / denominator
+    return (max(0, center - margin), min(1, center + margin))
 
-    # Compute SNR and sort by it
+
+def logistic(x: np.ndarray, k: float, x0: float) -> np.ndarray:
+    """Logistic function: y = 100 / (1 + exp(-k*(x-x0)))."""
+    return 100 / (1 + np.exp(-k * (x - x0)))
+
+
+def plot_snr_results(results: list[ExperimentResult], output_path: Path, include_fit: bool = True, include_ci: bool = True):
+    """Create scatter plot of success rate vs signal/noise ratio with optional logistic fit."""
+    # Compute SNR, success rate, and confidence intervals
     data_points = []
     for result in results:
         if result.bias_strength and result.noise_strength:
             snr = result.bias_strength / result.noise_strength
-            data_points.append((snr, result.success_rate * 100))
+            n_seeds = len(result.seed_results)
+            n_success = sum(1 for r in result.seed_results if r.selected_match)
+            ci_low, ci_high = wilson_ci(n_success, n_seeds)
+            data_points.append((snr, result.success_rate * 100, ci_low * 100, ci_high * 100))
 
     # Sort by SNR
     data_points.sort(key=lambda x: x[0])
-    snrs = [d[0] for d in data_points]
-    success_rates = [d[1] for d in data_points]
+    snrs = np.array([d[0] for d in data_points])
+    success_rates = np.array([d[1] for d in data_points])
+    ci_lows = np.array([d[2] for d in data_points])
+    ci_highs = np.array([d[3] for d in data_points])
 
-    # Plot line with markers
-    ax.plot(snrs, success_rates, 'o-', color=BIAS_COLORS["affirm"],
-            linewidth=2, markersize=8, markeredgecolor='black', markeredgewidth=1)
+    fig = go.Figure()
 
-    # Customize axes
-    ax.set_xlabel("Signal / Noise Ratio", fontsize=12)
-    ax.set_ylabel("Success Rate (%)", fontsize=12)
-    ax.set_ylim(0, 105)
-    ax.set_xlim(0, max(snrs) * 1.1)
+    # Scatter points with optional error bars
+    scatter_kwargs = dict(
+        x=snrs,
+        y=success_rates,
+        mode='markers',
+        marker=dict(
+            size=12,
+            color=BIAS_COLORS["affirm"],
+            line=dict(color='black', width=1),
+        ),
+        name='Observed',
+        showlegend=False,
+    )
+    if include_ci:
+        scatter_kwargs['error_y'] = dict(
+            type='data',
+            array=ci_highs - success_rates,
+            arrayminus=success_rates - ci_lows,
+            color='rgba(0,0,0,0.5)',
+            thickness=1.5,
+            width=4,
+        )
+    fig.add_trace(go.Scatter(**scatter_kwargs))
 
-    # Add horizontal grid
-    ax.yaxis.grid(True, linestyle='--', alpha=0.3)
-    ax.set_axisbelow(True)
+    # Fit and plot logistic curve if requested
+    if include_fit and len(snrs) >= 3:
+        try:
+            # Initial guess: k=5, x0=0.5 (midpoint of SNR range)
+            popt, _ = curve_fit(logistic, snrs, success_rates, p0=[5, 0.5], maxfev=5000)
+            k_fit, x0_fit = popt
 
-    # Remove top and right spines
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
+            # Generate smooth curve
+            x_smooth = np.linspace(0, max(snrs) * 1.1, 100)
+            y_smooth = logistic(x_smooth, k_fit, x0_fit)
 
-    ax.set_title("Recall vs Signal/Noise Ratio", fontsize=14, fontweight='bold')
+            fig.add_trace(go.Scatter(
+                x=x_smooth,
+                y=y_smooth,
+                mode='lines',
+                line=dict(color=BIAS_COLORS["affirm"], width=2, dash='solid'),
+                name='Logistic fit',
+                showlegend=False,
+            ))
+        except RuntimeError:
+            pass  # Skip fit if convergence fails
 
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=150, bbox_inches='tight')
-    plt.close()
+    # Layout styling
+    fig.update_layout(
+        xaxis=dict(
+            title=dict(text='Signal / Noise Ratio', font=dict(size=16)),
+            tickfont=dict(size=14),
+            range=[0, max(snrs) * 1.1],
+            showgrid=False,
+            zeroline=False,
+        ),
+        yaxis=dict(
+            title=dict(text='Success Rate (%)', font=dict(size=16)),
+            tickfont=dict(size=14),
+            range=[0, 105],
+            showgrid=True,
+            gridcolor='rgba(0,0,0,0.1)',
+            gridwidth=1,
+            zeroline=False,
+        ),
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        margin=dict(l=60, r=20, t=20, b=60),
+        width=600,
+        height=400,
+    )
+
+    fig.write_image(output_path)
     print(f"Saved SNR plot to {output_path}")
 
 
-def plot_baseline_results(results: list[ExperimentResult], output_path: Path):
-    """Create scatter plot of success rate vs baseline attribute frequency."""
-    fig, ax = plt.subplots(figsize=(8, 5))
+def plot_baseline_results(results: list[ExperimentResult], output_path: Path, include_fit: bool = True, include_ci: bool = True):
+    """Create scatter plot of success rate vs baseline attribute frequency with optional quadratic fit."""
+    fig = go.Figure()
+
+    # Collect all data points for fitting
+    all_x = []
+    all_y = []
 
     # Group by bias type for coloring
     for bias_type in ["affirm", "headers", "list"]:
         x_vals = []
         y_vals = []
+        ci_upper = []
+        ci_lower = []
         for result in results:
             if result.experiment_type == bias_type and result.topic_id is not None:
                 baseline_pct = BASELINE_PERCENTAGES.get((bias_type, result.topic_id))
                 if baseline_pct is not None:
                     x_vals.append(baseline_pct)
                     y_vals.append(result.success_rate * 100)
+                    all_x.append(baseline_pct)
+                    all_y.append(result.success_rate * 100)
+                    # Compute Wilson CI
+                    n_seeds = len(result.seed_results)
+                    n_success = sum(1 for r in result.seed_results if r.selected_match)
+                    ci_low, ci_high = wilson_ci(n_success, n_seeds)
+                    ci_upper.append(ci_high * 100 - result.success_rate * 100)
+                    ci_lower.append(result.success_rate * 100 - ci_low * 100)
 
         if x_vals:
-            ax.scatter(x_vals, y_vals, c=BIAS_COLORS[bias_type], s=100,
-                      edgecolors='black', linewidths=1, label=BIAS_LABELS[bias_type],
-                      alpha=0.8)
+            scatter_kwargs = dict(
+                x=x_vals,
+                y=y_vals,
+                mode='markers',
+                marker=dict(
+                    size=12,
+                    color=BIAS_COLORS[bias_type],
+                    line=dict(color='black', width=1),
+                ),
+                cliponaxis=False,
+                name=BIAS_LABELS[bias_type],
+            )
+            if include_ci:
+                scatter_kwargs['error_y'] = dict(
+                    type='data',
+                    array=ci_upper,
+                    arrayminus=ci_lower,
+                    color='rgba(0,0,0,0.5)',
+                    thickness=1.5,
+                    width=4,
+                )
+            fig.add_trace(go.Scatter(**scatter_kwargs))
 
-    # Customize axes
-    ax.set_xlabel("Baseline Attribute Frequency (%)", fontsize=12)
-    ax.set_ylabel("Success Rate (%)", fontsize=12)
-    ax.set_ylim(0, 105)
-    ax.set_xlim(0, 100)
+    # Fit and plot quadratic curve if requested
+    if include_fit and len(all_x) >= 3:
+        all_x = np.array(all_x)
+        all_y = np.array(all_y)
 
-    # Add horizontal grid
-    ax.yaxis.grid(True, linestyle='--', alpha=0.3)
-    ax.set_axisbelow(True)
+        # Fit quadratic: y = a*x^2 + b*x + c
+        coeffs = np.polyfit(all_x, all_y, 2)
 
-    # Remove top and right spines
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
+        # Generate smooth curve
+        x_smooth = np.linspace(0, 100, 100)
+        y_smooth = np.polyval(coeffs, x_smooth)
+        # Clip to valid range
+        y_smooth = np.clip(y_smooth, 0, 100)
 
-    ax.set_title("Recall vs Baseline Frequency", fontsize=14, fontweight='bold')
-    ax.legend(loc='upper right')
+        fig.add_trace(go.Scatter(
+            x=x_smooth,
+            y=y_smooth,
+            mode='lines',
+            line=dict(color='rgba(100,100,100,0.6)', width=2, dash='solid'),
+            name='Quadratic fit',
+            showlegend=False,
+        ))
 
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=150, bbox_inches='tight')
-    plt.close()
+    # Layout styling
+    fig.update_layout(
+        xaxis=dict(
+            title=dict(text='Baseline Attribute Frequency (%)', font=dict(size=16)),
+            tickfont=dict(size=14),
+            range=[0, 100],
+            showgrid=False,
+            zeroline=False,
+        ),
+        yaxis=dict(
+            title=dict(text='Success Rate (%)', font=dict(size=16)),
+            tickfont=dict(size=14),
+            range=[0, 105],
+            showgrid=True,
+            gridcolor='rgba(0,0,0,0.1)',
+            gridwidth=1,
+            zeroline=False,
+        ),
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        margin=dict(l=60, r=20, t=20, b=60),
+        width=600,
+        height=400,
+        legend=dict(
+            x=0.98,
+            y=0.98,
+            xanchor='right',
+            yanchor='top',
+            bgcolor='rgba(255,255,255,0.8)',
+            bordercolor='rgba(0,0,0,0.2)',
+            borderwidth=1,
+        ),
+    )
+
+    fig.write_image(output_path)
     print(f"Saved baseline plot to {output_path}")
 
 
@@ -415,12 +563,18 @@ def main():
             f.write(report)
         print(f"\nSaved text report to {OUTPUT_TXT}")
 
-    # Create plots
+    # Create plots (all combinations of fit and CI)
     if snr_results:
-        plot_snr_results(snr_results, OUTPUT_SNR_PDF)
+        plot_snr_results(snr_results, OUTPUT_SNR_PDF, include_fit=True, include_ci=True)
+        plot_snr_results(snr_results, OUTPUT_SNR_NOFIT_PDF, include_fit=False, include_ci=True)
+        plot_snr_results(snr_results, OUTPUT_SNR_NOCI_PDF, include_fit=True, include_ci=False)
+        plot_snr_results(snr_results, OUTPUT_SNR_NOFIT_NOCI_PDF, include_fit=False, include_ci=False)
 
     if baseline_results:
-        plot_baseline_results(baseline_results, OUTPUT_BASELINE_PDF)
+        plot_baseline_results(baseline_results, OUTPUT_BASELINE_PDF, include_fit=True, include_ci=True)
+        plot_baseline_results(baseline_results, OUTPUT_BASELINE_NOFIT_PDF, include_fit=False, include_ci=True)
+        plot_baseline_results(baseline_results, OUTPUT_BASELINE_NOCI_PDF, include_fit=True, include_ci=False)
+        plot_baseline_results(baseline_results, OUTPUT_BASELINE_NOFIT_NOCI_PDF, include_fit=False, include_ci=False)
 
 
 if __name__ == "__main__":
