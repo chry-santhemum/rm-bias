@@ -260,6 +260,7 @@ def to_ascii(text: str) -> str:
         ("\u2022", "*"),    # bullet
         ("\u00d7", "x"),    # multiplication sign
         ("\u2212", "-"),    # minus sign
+        ("‑", "-"),         # hyphen
     ]
     for char, ascii_equiv in replacements:
         text = text.replace(char, ascii_equiv)
@@ -284,10 +285,9 @@ def sample_prompts_for_paper(dataset_path: Path, n_clusters: int = 5, n_prompts:
     random.seed(seed)
 
     # Load all cluster files
-    cluster_files = sorted(dataset_path.glob("cluster_*.json"))
     clusters = []
-    for cf in cluster_files:
-        with open(cf, "r") as f:
+    for i in range(20):
+        with open(dataset_path / f"cluster_{i}.json", "r") as f:
             clusters.append(json.load(f))
 
     # Randomly select clusters
@@ -315,7 +315,7 @@ def sample_prompts_for_paper(dataset_path: Path, n_clusters: int = 5, n_prompts:
         print()
 
 
-sample_prompts_for_paper(Path("user_prompts/handpick_test"))
+sample_prompts_for_paper(Path("user_prompts/handpick"))
 
 # %%
 
